@@ -1,0 +1,19 @@
+{
+ "$elec_version": 1,
+ "id": "microduck",
+ "title": "Microduck — does ce-elec's ladder apply to a Radxa Zero 3W host? (electronics/netlist.py is the netlist; this spec is the probe)",
+ "host": "radxa-zero-3w",
+ "gpio": [
+  {"label": "tof", "part": "microduck-tof-module",
+   "signals": {"SDA": "i2c", "SCL": "i2c"},
+   "nets": {"GND": "GND", "3V3": "J5_3V3"},
+   "note": "I2C3 on header pins 3/5 is fixed by Pollen's overlay (i2c3.dts); the solver is asked so its answer — that the RK3566 has no pin roster in cecad/data/controllers.json — is on the record."}
+ ],
+ "external": [["J5_3V3", "the HAT's Stemma J5 3.3 V (i2c3.dts:10); regulator CANNOT DETERMINE"]],
+ "custom_parts": [
+  {"name": "microduck-robot-hat-pcb", "why": "Pollen's Robot HAT is not published; no shelf board carries a TLV320AIC3104 + BMI088 + Stemma J5 + half-duplex Dynamixel transceiver + 2S-to-5V path on a Pi-Zero footprint — the PCB lane re-creates it (electronics/robot-hat/)"},
+  {"name": "microduck-imu-to-dxl", "why": "Pollen's imu_to_dxl v2 (LSM6DSV16X as Dynamixel Protocol 2 slave ID 200) has no published schematic or firmware"}
+ ],
+ "chip": {"required": false},
+ "notes": ["Written 2026-09-02 by the netlist lane. The authoritative netlist is electronics/netlist.py (cecad.netlist.Design, 118 findings); this spec exists to record what bin/elec can and cannot do for a host without a pin roster."]
+}

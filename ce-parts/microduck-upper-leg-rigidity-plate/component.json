@@ -3,13 +3,22 @@
   "kind": "part",
   "record": {
     "slug": "microduck-upper-leg-rigidity-plate",
-    "title": "microduck-upper-leg-rigidity-plate",
-    "verdict": "CANNOT DETERMINE",
-    "why": "created by `bin/triad new part` — nothing measured yet",
-    "sector": null,
-    "subsector": null,
-    "lifecycle": "unknown",
-    "origin": null,
-    "origin_why": null
+    "title": "Microduck thigh rigidity plate — the 'upper_leg_rigidity_plate' mesh of Pollen's MJCF: a 1 x 45 x 58 mm mint side plate that closes the open face of each thigh cup, with Ø19 windows on the hip-pitch and knee axes and four Ø2.2 screw holes",
+    "verdict": "PASS",
+    "why": "cad/part.py builds one valid solid (bin/cad, 2026-09-02) and ce-cad/bin/cad-refcheck grades it against Pollen's own published mesh reference/pollen-microduck-rl/assets/upper_leg_rigidity_plate.stl: p95 surface distance 0.008 mm both ways (mean 0.006 / 0.004, median 0.000), bbox delta [0.0, 0.003, 0.002] mm, 6/6 reference holes matched, 0 unmatched. Round 3 (out/refcheck/microduck-upper-leg-rigidity-plate/r3): r1 PASS 0.26/0.28 but bbox +0.50 y / +0.72 z from web discs standing outside the R11 outline; r2 FAIL 5.5 (the A1 arc walked the wrong way and the outline self-intersected); r3 clips each web disc to its window and walks the arc clockwise. The one extra feature in ours (hole Ø19.12 at z 13.6) is the detector reading W2's R11.5 arc bottom as a hole; the reference detector reads the same arc, matched.",
+    "sector": "structural",
+    "subsector": "plate",
+    "lifecycle": "prototype",
+    "origin": "generated",
+    "origin_why": "modelled by hand in cecad from measurements taken off Pollen Robotics' decimated visual mesh (CC BY-SA-NC sim asset) with cecad.meshslice (the x = 43 plane cut chained into closed loops, radii checked vertex by vertex) and cecad.meshfeatures; nobody has Pollen's CAD and no physical part has been measured. Admitted through the TRIAD.md door: evidence/ledger.jsonl + computed trust.json.",
+    "material": "PLA",
+    "process": "FDM",
+    "source_reference": "reference/pollen-microduck-rl/assets/upper_leg_rigidity_plate.stl (Onshape doc 804927696f06d877f3f1803e, exported by onshape-to-robot)",
+    "used_by": [
+      "assembly:microduck-leg-left",
+      "assembly:microduck-leg-right"
+    ],
+    "qty_per_robot": 2,
+    "why_this_folder_exists": "The 1 mm plate that stiffens each thigh: it closes the open side of the thigh cup (part:microduck-upper-leg-left / -right), its R12 bend nesting 0.45 mm inside the housing's inner bend, and its four M2-clearance holes putting screws through to the servos the housing's pins locate. One geometry serves both legs (the MJCF places the same mesh in both thigh bodies), so qty 2 per robot from one folder."
   }
 }

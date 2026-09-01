@@ -41,7 +41,9 @@ r1 PASS 0.26/0.28 mm but bbox +0.50 y / +0.72 z — the R11.5 web discs
 added back around the axes stood outside the R11 outline; r2 FAIL
 5.5 mm — the A1 arc walked counter-clockwise, the outline
 self-intersected and the prism lost everything past y 22 (the r1 discs
-had hidden it); r3: see `component.json` `why` for the PASS line.
+had hidden it); r3 **PASS** — p95 0.008/0.008 mm (mean 0.006/0.004, median 0.000),
+bbox delta [0.0, 0.003, 0.002] mm, 6/6 reference holes matched, 0
+unmatched (2026-09-02, evidence/refcheck/2026-09-01T18-48-27Z/).
 
 ## CANNOT DETERMINE (what would settle it)
 

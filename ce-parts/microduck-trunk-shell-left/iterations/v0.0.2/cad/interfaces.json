@@ -1,11 +1,59 @@
 {
- "$triad": 1,
- "kind": "interfaces",
- "generated_by": "cecad.meshshelve",
- "record": {
-  "ref": "part:microduck-trunk-shell-left@v0.0.1",
-  "frame": "the published mesh's own frame (mm after x1000); MJCF geom pos/quat place it",
-  "units": "mm"
- },
- "interfaces": []
+  "$triad": 1,
+  "kind": "interfaces",
+  "record": {
+    "slug": "microduck-trunk-shell-left",
+    "interfaces": [
+      {
+        "name": "neck_horn",
+        "frame": {
+          "origin_mm": [14.6, -22.0, 50.0],
+          "z_axis": [-1, 0, 0],
+          "x_axis": [0, 0, 1]
+        },
+        "accepts": ["connection:spline-xl330-horn"],
+        "role": "horn_face",
+        "what": "D17.0 x 1.0 raised disc on a D16.9 x 2.3 plate at the front-top corner, carrying the XL330 horn relief pocket and 4 x D2.2 on a D12 PCD (holes at y/z offsets (+6,0)(-6,0)(0,+6)(0,-6) from (-22,50)) - the neck-pitch joint axis (MJCF neck_pitch at world y=14.5) runs along -x through this face",
+        "source": "MEASURED off Pollen's left_shell.stl by cecad.meshfeatures.cylinders and meshslice.loops, 2026-09-02"
+      },
+      {
+        "name": "base_screw",
+        "frame": {
+          "origin_mm": [25.5, -9.5, 40.58],
+          "z_axis": [0, 0, -1],
+          "x_axis": [1, 0, 0]
+        },
+        "accepts": ["connection:threaded-m2"],
+        "role": "screw_boss",
+        "what": "D8 vertical boss at the front-outboard corner: D2.2 pilot z 40.58..42.5 tapped by an M2 driven from below, D5.06 driver-access bore continuing up through the top skin",
+        "source": "MEASURED: meshfeatures hole D2.2 axis z at (25.5,-9.5,41.53) len 1.94; bore D5.06 from y-spans at z=45; boss D8 from x-spans at z=45"
+      },
+      {
+        "name": "cross_screw",
+        "frame": {
+          "origin_mm": [0.05, 42.0, 52.5],
+          "z_axis": [-1, 0, 0],
+          "x_axis": [0, 0, 1]
+        },
+        "accepts": ["connection:threaded-m2"],
+        "role": "screw_boss",
+        "what": "the cross screw that closes the two shell halves: D2.2 clearance x 0..2, drafted D3.5..4.4 driver bore from the outboard wall; mates the right shell's D1.6 tapped boss at its x 0.3..5.0 (M2 self-tapping). The left half also carries the 1.0 mm lap strip (x -1.95..0.05, the inner half of the walls) that registers the halves",
+        "source": "MEASURED: meshfeatures holes D2.2 at (1.0,42,52.5) len 2.0 (left) and D1.6 at (-2.65,42,52.5) len 4.7 (right); bore taper from z@42 spans at x=2.5..27"
+      },
+      {
+        "name": "base_ledge",
+        "frame": {
+          "origin_mm": [24.0, 32.0, 18.15],
+          "z_axis": [0, 0, -1],
+          "x_axis": [1, 0, 0]
+        },
+        "accepts": [],
+        "role": "rest",
+        "what": "the 2.25 mm foot at the back-bottom (x 20..28.6, y 23..44, bottom z = 17.23 + 0.04x) that the shell stands on inside the trunk; the mating part is not identified (CANNOT DETERMINE which trunk part it rests on - needs the assembled MJCF clearance check)",
+        "source": "MEASURED off the z=19.2 plan cut and z-intervals, 2026-09-02"
+      }
+    ],
+    "frame": "Pollen's mesh frame for left_shell.stl: x = robot width (0 = midplane, +31.764 outboard), y = fore-aft (-30.5 beak side), z = up. MJCF geom: body trunk_base, pos (4, 0, -17.579) mm, quat (0.7071, 0, 0, 0.7071).",
+    "units": "mm"
+  }
 }

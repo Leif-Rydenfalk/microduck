@@ -807,10 +807,25 @@ def write_report(design, rep, path):
     w("")
     if not rep.failed:
         w("none.")
+    grouped = {}
     for f in rep.failed:
-        w(f"- **`{f.rule}` {f.where}** — {f.message.splitlines()[0]}")
-        if f.quote:
-            w(f"  - \"{f.quote}\" ({f.cite})")
+        grouped.setdefault((f.rule, f.quote, f.cite), []).append(f)
+    for (rule, quote, cite), fs in grouped.items():
+        wheres = ", ".join(f.where for f in fs)
+        w(f"- **`{rule}`** × {len(fs)} — {wheres}")
+        w(f"  - {fs[0].message.splitlines()[0]}")
+        if quote:
+            w(f"  - \"{quote}\" ({cite})")
+    w("")
+    w("The SERVO_V FAIL is the design AS PUBLISHED against the vendor band: "
+      "model.rs reads 6.6–8.2 V through the servos' own Present Input Voltage "
+      "register and the XL330-M288-T's input band is 3.7–6.0 V (docs/"
+      "ELECTRONICS-AND-SOFTWARE.md §3.4, open question 1). It is not a wiring "
+      "error in this netlist; what settles it is a meter on a production servo's "
+      "VDD pin, or Pollen naming a regulated bus or a custom variant. The checks "
+      "this rung asked for — one controller per bus, unique I2C3 addresses "
+      "(0x18/0x19/0x68/0x29), unique bus IDs (10–14, 20–24, 30–34, 200), no pin "
+      "on two nets — PASS above.")
     w("")
     w("## The CANNOT DETERMINEs — by name, with what settles each")
     w("")
@@ -833,6 +848,17 @@ def write_report(design, rep, path):
     w("```")
     w(_capture(rep.print, True, design._header(), group_pass=False))
     w("```")
+    w("")
+    w("## ce-elec")
+    w("")
+    code, line = elec_probe()
+    w(f"`bin/elec gpio electronics/elec-spec.json` → exit {code}: `{line}`")
+    w("")
+    w("ce-elec's solvers assign pins over a roster in cecad/data/controllers.json; "
+      "there is no RK3566 roster, so `gpio` and `levels` refuse — the honest "
+      "answer for a host whose pins Pollen's overlays already fixed. `bin/elec "
+      "doctor` reports the toolchain present. The netlist above is the design; "
+      "the spec is kept as the probe that records this refusal.")
     w("")
     w("## Sources")
     w("")
@@ -862,6 +888,26 @@ def write_report(design, rep, path):
     with open(path, "w") as fh:
         fh.write("\n".join(lines) + "\n")
     return path
+
+
+def elec_probe():
+    """(exit code, first line) of `bin/elec gpio electronics/elec-spec.json`,
+    run over the same shelf union — or (None, why) when the tool is absent."""
+    import subprocess
+    elec = next((os.path.join(r, "ce-elec", "bin", "elec") for r in triad_roots()
+                 if os.path.isfile(os.path.join(r, "ce-elec", "bin", "elec"))), None)
+    spec = os.path.join(HERE, "elec-spec.json")
+    if elec is None or not os.path.isfile(spec):
+        return None, "ce-elec/bin/elec or electronics/elec-spec.json not found — CANNOT DETERMINE"
+    try:
+        p = subprocess.run([elec, "gpio", spec], capture_output=True, text=True,
+                           timeout=120, env=dict(os.environ, CE_PARTS_ROOT=UNION))
+    except (OSError, subprocess.TimeoutExpired) as e:
+        return None, f"could not run: {e}"
+    text = [l for l in (p.stdout + p.stderr).splitlines()
+            if l.strip() and not l.startswith("[live capture")
+            and "Run designs through" not in l and "kernel-free" not in l]
+    return p.returncode, (text[0] if text else "(no output)")
 
 
 def write_derived(design, rep):
