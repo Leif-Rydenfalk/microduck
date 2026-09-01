@@ -32,7 +32,7 @@ def build(doc, params=None):
         rows = json.load(f)["record"]["rows"]
     a = Assembly("microduck")
     a.notes = getattr(a, "notes", [])
-    cache, missing = {}, []
+    cache, missing, fallback = {}, [], []
     for i, r in enumerate(rows):
         ref = r.get("part")
         if not ref:
@@ -46,12 +46,29 @@ def build(doc, params=None):
                 missing.append("%s: %s" % (ref, e))
         part = cache[ref]
         if part is None:
-            continue
+            # FALLBACK, and it is said so: the vendor's published mesh for this
+            # placement, loaded directly (Leif, 2026-09-01: "why not use the
+            # reference mesh directly?"). The picture stays complete; the note
+            # names every placement drawn from the fallback.
+            mf = r.get("mesh_file")
+            if mf and os.path.exists(mf):
+                try:
+                    from cecad.core import Part as _Part
+                    key = ("mesh", mf)
+                    if key not in cache:
+                        cache[key] = _Part.from_mesh(mf, name=r["mesh"], scale=1000.0, tol=0.05)
+                    part = cache[key]
+                    fallback.append("%s <- %s" % (ref, os.path.basename(mf)))
+                except Exception as e:  # noqa: BLE001
+                    missing.append("%s: mesh fallback failed: %s" % (ref, e))
+                    continue
+            else:
+                continue
         w, x, y, z = r["world_quat_wxyz"]
         rot = App.Rotation(App.Vector(0, 0, 1), 0)
         rot.Q = (x, y, z, w)
         label = "%s/%s#%d" % (r["body"], ref.split(":")[1], i)
         a.add(label, part, at=tuple(r["world_pos_mm"]), rot=rot, joint="clamped")
-    a.notes.append("placed %d of %d instances from placements.json; missing %d: %s"
-                   % (len(rows) - len(missing), len(rows), len(missing), "; ".join(missing)[:2000]))
+    a.notes.append("placed %d of %d instances from placements.json; %d from the VENDOR MESH fallback (%s); missing %d: %s"
+                   % (len(rows) - len(missing), len(rows), len(fallback), "; ".join(fallback)[:1500], len(missing), "; ".join(missing)[:1500]))
     return a
