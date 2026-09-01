@@ -18,6 +18,9 @@ open source the mechanics. … It should match the images exactly."*
 ```
 README.md            this page
 SPEC.md              THE specification we design against — every number sourced
+docs/                PARTS.md (every part, one sourced row each) · ELECTRONICS-AND-SOFTWARE.md
+                     (boards, bus, IMUs, pins, daemons, wiring diagram) · BOM.md (bought /
+                     printed / soft / fasteners, cost vs Pollen $399 and ODM v2 €398) · REBUILD-PROTOCOL.md
 research/            the dossiers: product page, code mining, images, lineage
 images/              reference photos + CATALOG.md (what each shows) + PROPORTIONS.md
 spec/                machine-readable spec: specs.json, kinematics.json, bom.json

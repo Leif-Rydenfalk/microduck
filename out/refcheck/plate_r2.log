@@ -1,0 +1,44 @@
+[live capture NOT installed: RuntimeError: cecad.livehook needs FreeCAD's geometry kernel, which this interpreter does not have (No module named 'FreeCAD').
+    Run designs through bin/cad — FreeCAD's interpreter ignores PYTHONPATH and `FreeCAD -c` hangs on stdin.
+    cecad.electrical and cecad.vision are kernel-free and work here.]
+# refcheck part:microduck-upper-leg-rigidity-plate vs upper_leg_rigidity_plate.stl
+
+**FAIL** — p95 surface distance 5.50 mm (tol 1.00) / bbox delta 11.00 mm (tol 1.50); 6 reference feature(s) have no match in ours
+
+| | ref->ours | ours->ref |
+|---|---|---|
+| mean mm | 1.718 | 1.159 |
+| p50 mm | 0.491 | 0.238 |
+| p95 mm | 5.498 | 4.649 |
+| max mm | 13.243 | 5.500 |
+| within 1.0 mm | 56.8% | 63.9% |
+
+bbox ours [1.0, 34.0, 58.06]  ref [1.0, 44.996, 58.058]  delta [0.0, -10.996, 0.002]
+volume ratio ours/ref 0.8604 (closed-mesh figure, see compare.json)
+
+## features
+
+reference: 6 holes, 0 bosses · ours: 6 holes, 0 bosses · matched 0 · unmatched reference 6 · extra ours 6
+- UNMATCHED hole Ø2.20 at [43.0, -0.5, 43.777] axis [1.0, 0.0, 0.0] len 1.00
+- UNMATCHED hole Ø2.20 at [43.0, 8.0, 22.5] axis [1.0, 0.0, 0.0] len 1.00
+- UNMATCHED hole Ø2.20 at [43.0, -0.5, 27.777] axis [1.0, 0.0, 0.0] len 1.00
+- UNMATCHED hole Ø2.20 at [43.0, -8.0, 22.5] axis [1.0, 0.0, 0.0] len 1.00
+- UNMATCHED hole Ø19.00 at [43.0, 0.0, 0.0] axis [-1.0, 0.0, -0.0] len 1.00
+- UNMATCHED hole Ø19.00 at [43.0, 22.0, 35.777] axis [1.0, 0.0, 0.0] len 1.00
+- extra in ours: hole Ø2.20 at [43.0, 8.0, 22.5]
+- extra in ours: hole Ø2.20 at [43.0, -0.5, 27.777]
+- extra in ours: hole Ø2.20 at [43.0, -8.0, 22.5]
+- extra in ours: hole Ø2.20 at [43.0, -0.5, 43.777]
+- extra in ours: hole Ø19.00 at [43.0, 0.0, 0.0]
+- extra in ours: hole Ø19.12 at [43.0, -0.0, 13.611]
+
+## renders
+
+- overlay_front.png
+- overlay_left.png
+- overlay_top.png
+- overlay_iso.png
+- ours_iso.png
+- ref_iso.png
+
+report: out/refcheck/microduck-upper-leg-rigidity-plate/r2/report.md

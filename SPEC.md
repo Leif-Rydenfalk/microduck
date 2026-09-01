@@ -71,6 +71,7 @@ neck_pitch 5.72 · yaw_roll_motion 48.6 · head (jaw_soft body) 188.8.
 ## 4. The parts — what each mesh is, measured
 
 Every mesh's bbox in its own file frame (mm), from `cad-mjcf meshes`. [M]
+**Quantities** are VISUAL placements (spec/mesh-placements.json); `measured.json`'s `placed` also counts collision copies of the same geom and over-counts leg / power_support / hip_l / sole (corrected 2026-09-01).
 Fasteners: the community hole analysis reads the whole robot as an **M2
 system** (Ø2.2 clearance ×77, Ø4.4 c'bore ×28, Ø1.6 tap ×20, Ø2.7/2.8 ×20)
 [C]; bearings 22×16×4 (×11) and 15×10×3 (×3) — named "seeed_bearing" [M].
@@ -80,7 +81,7 @@ system** (Ø2.2 clearance ×77, Ø4.4 c'bore ×28, Ø1.6 tap ×20, Ø2.7/2.8 ×2
 |---|---|---|
 | trunk_base | 57.0 × 36.0 × 1.0 (a 3 mm plate in the community export) | the chassis plate both hip-yaw servos hang from |
 | left_shell / right_shell | 33.7 × 80.9 × 41.7 / 31.8 × 80.9 × 41.7 | the two half-shells of the egg body, colourway part |
-| power_support ×2 | 54.5 × 17.0 × 83.5 | battery cradle halves (self-collision geom) |
+| power_support ×1 | 54.5 × 17.0 × 83.5 | battery cradle (the MJCF's second geom is its self-collision copy) |
 | np_f970 (named) | 38.6 × 20.6 × 70.8 | **an NP-F550** envelope (38.4 × 20.6 × 70.8), not F970; product spec says NP-F550 |
 | banana_pcb_locker | 53.5 × 3.8 × 6.6 | PCB retaining bar |
 | xl330 ×2 (hip yaw) | 29.0 × 20.0 × 34.0 | XL330 incl. horn; datasheet body 20.0 × 34.0 × 26.0 |
@@ -93,7 +94,7 @@ system** (Ø2.2 clearance ×77, Ø4.4 c'bore ×28, Ø1.6 tap ×20, Ø2.7/2.8 ×2
 | hip_l | 32.5 × 34.5 × 19.0 | hip-roll output bracket (used ×4 counting collision) |
 | upper_leg_left/right | 28.0 × 47.7 × 61.0 | thigh housing holding the hip-pitch and knee servos |
 | upper_leg_rigidity_plate | 1.0 × 45.0 × 58.1 | a 1 mm side plate stiffening the thigh (mint) |
-| leg ×2 per side | 8.0 × 20.0 × 58.0 | shin: two parallel plates 8 mm thick |
+| leg ×1 per side | 8.0 × 20.0 × 58.0 | shin plate 8 mm thick (the MJCF's second `leg` geom is the self-collision copy of the same one — 2 per robot) |
 | xl330 ×3 per leg | | hip roll, hip pitch, knee — plus ankle servo in the shin |
 | ankle_left/right | 39.5 × 36.5 × 25.5 | ankle bracket (yellow) |
 | foot_left/right | 40.1 × 54.0 × 16.9 | foot (yellow) |

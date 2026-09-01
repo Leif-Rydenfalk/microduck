@@ -36,8 +36,22 @@ meshview.render_stl('...<mesh>.stl', 'out/ref_<mesh>_iso.png', view='iso', scale
 
 For the fine structure (ribs, walls, steps) cut planes and list the
 material intervals — the shin's 1 mm rim walls and its 2.3/2.8 mm stepped
-plate were only visible that way. The snippet is in
-`ce-parts/microduck-shin/current/docs/` (sections.py). Read the renders
+plate were only visible that way. Since the thigh (2026-09-01) that is a
+cecad module, `cecad.meshslice` (kernel-free, FreeCAD's python):
+
+```python
+from cecad import meshslice
+T = meshslice.load('reference/pollen-microduck-rl/assets/<mesh>.stl', 1000)
+meshslice.intervals(T, 'x', 2.0, 0.0)     # material along x at (y,z)=(2,0): [(64.7, 68.0)]
+meshslice.segments(T, 'z', 20.0)          # the plane cut as (M,2,2) segments
+meshslice.render(T, 'out/measure/<mesh>_slices_z.png', 'z', [-10, 0, 10, 20, 30, 40])
+```
+
+`render` draws a sheet of cuts on a 1 mm grid — read it with the Read
+tool; `intervals` is the caliper: a 1 mm wall, a stepped boss, a
+counterbore floor and a drafted face all fall out as numbers with the
+probe line that produced them (the thigh's part.py quotes them by probe
+letter). Read the renders
 with the Read tool: a number you cannot see in the picture is a number to
 re-measure.
 

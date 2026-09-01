@@ -3,13 +3,21 @@
   "kind": "part",
   "record": {
     "slug": "microduck-power-support",
-    "title": "microduck-power-support",
-    "verdict": "CANNOT DETERMINE",
-    "why": "created by `bin/triad new part` — nothing measured yet",
-    "sector": null,
-    "subsector": null,
-    "lifecycle": "unknown",
-    "origin": null,
-    "origin_why": null
+    "title": "Microduck power support \u2014 the 'power_support' mesh of Pollen's MJCF: 54.5 x 17 x 83.5 mm NP-F550 battery cradle half; 2 mm ribbed plate with side rails and lips, sprung latch tongue, head shelf with two \u00d83.9 M2 screw pins for the banana PCB locker, and two flanges with \u00d82.5 holes that bolt to the trunk base",
+    "verdict": "PASS",
+    "why": "cad/part.py builds one valid solid (bin/cad part:microduck-power-support, 2026-09-01) and ce-cad/bin/cad-refcheck grades it against Pollen's own published mesh reference/pollen-microduck-rl/assets/power_support.stl: round 2 p95 surface distance 0.209 mm ref->ours / 0.226 mm ours->ref (max 0.722 / 0.997), bbox delta [-0.034, 0.0, -0.36] mm, 14/14 reference features matched (8 x \u00d81.6 + 4 x \u00d82.5 holes, 2 x \u00d83.875 pins). Round 1 was already PASS at p95 0.21/0.24 but 94/30000 samples sat 1..2.4 mm off where the x = \u00b12 ribs bridged the window; r2 cuts the window after the ribs. Both reports are ledger artifacts.",
+    "sector": "structural",
+    "subsector": "bracket",
+    "lifecycle": "prototype",
+    "origin": "generated",
+    "origin_why": "modelled by hand in cecad from measurements taken off Pollen Robotics' decimated visual mesh (CC BY-SA-NC sim asset) with cad-mjcf sections --at/--image, cad-mjcf probe and cecad.meshfeatures; nobody has Pollen's CAD and no physical part has been measured. Admitted through the TRIAD.md door: evidence/ledger.jsonl + computed trust.json.",
+    "material": "PLA",
+    "process": "FDM",
+    "source_reference": "reference/pollen-microduck-rl/assets/power_support.stl (Onshape doc 804927696f06d877f3f1803e, exported by onshape-to-robot); placed in body trunk_base at pos (4, 0, -17.521) mm, quat wxyz (0.707, 0, 0, 0.707) per spec/mesh-placements.json \u2014 the MJCF's second geom of this mesh (measured.json 'placed': 2) is the self_collision_only copy at the SAME pos/quat (robot_walk.xml lines 98-99), not a second part",
+    "used_by": [
+      "assembly:microduck-trunk"
+    ],
+    "qty_per_robot": 1,
+    "why_this_folder_exists": "The cradle the NP-F550 cell clips into and the bracket that ties the battery, the banana PCB (via the locker on its two screw pins) and the trunk base plate (via its lower flange) together. Nothing on the shelf is a printed NP-F550 cradle."
   }
 }
