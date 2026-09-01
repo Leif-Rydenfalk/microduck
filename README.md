@@ -21,6 +21,10 @@ SPEC.md              THE specification we design against — every number source
 docs/                PARTS.md (every part, one sourced row each) · ELECTRONICS-AND-SOFTWARE.md
                      (boards, bus, IMUs, pins, daemons, wiring diagram) · BOM.md (bought /
                      printed / soft / fasteners, cost vs Pollen $399 and ODM v2 €398) · REBUILD-PROTOCOL.md
+                     · PRODUCTION.md (GOAL rung 7: cost per robot at 1/10/100/1000, make/buy and
+                     print/mould with break-even, battery shipping + CE/FCC checklist, assembly
+                     labour, top-10 unknowns; built from the three lenses in docs/production/ —
+                     components.md, process.md, compliance-and-assembly.md)
 research/            the dossiers: product page, code mining, images, lineage
 images/              reference photos + CATALOG.md (what each shows) + PROPORTIONS.md
 spec/                machine-readable spec: specs.json, kinematics.json, bom.json
