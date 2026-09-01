@@ -1,0 +1,282 @@
+{
+  "$wire_version": 1,
+  "id": "microduck",
+  "title": "Microduck wiring — the Dynamixel daisy chain, the HAT harness, battery and camera",
+  "host": "radxa-zero-3w",
+  "host_power": {
+    "map": {
+      "5V": "V5_HAT",
+      "GND": "GND"
+    },
+    "note": "5 V arrives on 40-pin pins 2/4 from the HAT ([brief] §5.1; docs §9 'battery → banana contact PCB → HAT → 40-pin (5 V to Radxa)'); the HAT's regulator is CANNOT DETERMINE."
+  },
+  "nodes": [
+    {
+      "label": "battery",
+      "part": "np-f550",
+      "attach": "wire",
+      "map": {
+        "BAT+": "VBAT",
+        "BAT-": "GND"
+      },
+      "note": "NP-F550 pack in the trunk cradle (placements.json row 6, world (-36.0, 0, 116.1) mm); its contacts meet the banana contact PCB, which is a passive board with no electrical record — folded into the battery->HAT cable row (cables.json)."
+    },
+    {
+      "label": "hat",
+      "part": "microduck-robot-hat-pcb",
+      "attach": "wire",
+      "map": {
+        "GND": "GND",
+        "VBAT": "VBAT",
+        "UART2_TX": "hdr8_UART2_TX_M0",
+        "UART2_RX": "hdr10_UART2_RX_M0",
+        "I2C3_SDA": "hdr3_I2C3_SDA_M0",
+        "I2C3_SCL": "hdr5_I2C3_SCL_M0",
+        "I2S3_SCLK": "hdr12_I2S3_SCLK_M0",
+        "I2S3_LRCK": "hdr35_I2S3_LRCK_M0",
+        "I2S3_SDO": "hdr40_I2S3_SDO_M0",
+        "I2S3_SDI": "hdr38_I2S3_SDI_M0",
+        "MCLK": "hdr13_I2S3_MCLK_M0",
+        "V5_OUT": "V5_HAT",
+        "SERVO_V": "SERVO_V",
+        "DXL_DATA": "DXL_DATA",
+        "J5_3V3": "J5_3V3",
+        "SPK+": "SPK_P",
+        "SPK-": "SPK_N",
+        "MIC_IN": "MIC_IN",
+        "MICBIAS": "MICBIAS"
+      },
+      "note": "On the Radxa's 40-pin header (board-to-board, no cable). Pin identifiers hdrN_* are the 40-pin numbers from part:radxa-zero-3w header_40pin (UART2_M0 8/10 settled by the Radxa wiki; I2C3_M0 3/5 from i2c3.dts; I2S3 M0 pins are THIS FILE's assertion — the M1 mux is also on the header and the dts pinctrl was not read). HAT mesh placement origin world (60.0, 29.0, 262.6) mm, placements.json row 45."
+    },
+    {
+      "label": "imu200",
+      "part": "microduck-imu-to-dxl",
+      "attach": "wire",
+      "map": {
+        "GND": "GND",
+        "VDD": "SERVO_V",
+        "DATA": "DXL_DATA"
+      },
+      "note": "imu_to_dxl v2, bus ID 200, trunk_base; MJCF imu site world (-21, 0, 105.3) mm. The chain BRANCHES here (head string in, left leg out, right leg out) — needs >= 3 bus connectors on this board, which is CANNOT DETERMINE."
+    },
+    {
+      "label": "id34",
+      "part": "xl330-m288-t",
+      "attach": "wire",
+      "map": {
+        "GND": "GND",
+        "VDD": "SERVO_V",
+        "DATA": "DXL_DATA"
+      },
+      "note": "XL330 ID 34, joint mouth (JOINT_NAMES proto:239-255; docs §3.2), in body jaw_soft (head) = placements.json row 39. Two JST EH 3-pin sockets on the ±y side faces (XL,XC-330.pdf side views; cad/part.py pockets) — one in, one out, the daisy chain."
+    },
+    {
+      "label": "id33",
+      "part": "xl330-m288-t",
+      "attach": "wire",
+      "map": {
+        "GND": "GND",
+        "VDD": "SERVO_V",
+        "DATA": "DXL_DATA"
+      },
+      "note": "XL330 ID 33, joint head_roll (JOINT_NAMES proto:239-255; docs §3.2), in body jaw_soft (head) = placements.json row 43. Two JST EH 3-pin sockets on the ±y side faces (XL,XC-330.pdf side views; cad/part.py pockets) — one in, one out, the daisy chain."
+    },
+    {
+      "label": "id32",
+      "part": "xl330-m288-t",
+      "attach": "wire",
+      "map": {
+        "GND": "GND",
+        "VDD": "SERVO_V",
+        "DATA": "DXL_DATA"
+      },
+      "note": "XL330 ID 32, joint head_yaw (JOINT_NAMES proto:239-255; docs §3.2), in body yaw_roll_motion = placements.json row 34. Two JST EH 3-pin sockets on the ±y side faces (XL,XC-330.pdf side views; cad/part.py pockets) — one in, one out, the daisy chain."
+    },
+    {
+      "label": "id31",
+      "part": "xl330-m288-t",
+      "attach": "wire",
+      "map": {
+        "GND": "GND",
+        "VDD": "SERVO_V",
+        "DATA": "DXL_DATA"
+      },
+      "note": "XL330 ID 31, joint head_pitch (JOINT_NAMES proto:239-255; docs §3.2), in body neck = placements.json row 29. Two JST EH 3-pin sockets on the ±y side faces (XL,XC-330.pdf side views; cad/part.py pockets) — one in, one out, the daisy chain."
+    },
+    {
+      "label": "id30",
+      "part": "xl330-m288-t",
+      "attach": "wire",
+      "map": {
+        "GND": "GND",
+        "VDD": "SERVO_V",
+        "DATA": "DXL_DATA"
+      },
+      "note": "XL330 ID 30, joint neck_pitch (JOINT_NAMES proto:239-255; docs §3.2), in body neck = placements.json row 28. Two JST EH 3-pin sockets on the ±y side faces (XL,XC-330.pdf side views; cad/part.py pockets) — one in, one out, the daisy chain."
+    },
+    {
+      "label": "id20",
+      "part": "xl330-m288-t",
+      "attach": "wire",
+      "map": {
+        "GND": "GND",
+        "VDD": "SERVO_V",
+        "DATA": "DXL_DATA"
+      },
+      "note": "XL330 ID 20, joint left_hip_yaw (JOINT_NAMES proto:239-255; docs §3.2), in body trunk_base = placements.json row 4. Two JST EH 3-pin sockets on the ±y side faces (XL,XC-330.pdf side views; cad/part.py pockets) — one in, one out, the daisy chain."
+    },
+    {
+      "label": "id21",
+      "part": "xl330-m288-t",
+      "attach": "wire",
+      "map": {
+        "GND": "GND",
+        "VDD": "SERVO_V",
+        "DATA": "DXL_DATA"
+      },
+      "note": "XL330 ID 21, joint left_hip_roll (JOINT_NAMES proto:239-255; docs §3.2), in body yaw2roll = placements.json row 11. Two JST EH 3-pin sockets on the ±y side faces (XL,XC-330.pdf side views; cad/part.py pockets) — one in, one out, the daisy chain."
+    },
+    {
+      "label": "id22",
+      "part": "xl330-m288-t",
+      "attach": "wire",
+      "map": {
+        "GND": "GND",
+        "VDD": "SERVO_V",
+        "DATA": "DXL_DATA"
+      },
+      "note": "XL330 ID 22, joint left_hip_pitch (JOINT_NAMES proto:239-255; docs §3.2), in body upper_leg_left = placements.json row 20. Two JST EH 3-pin sockets on the ±y side faces (XL,XC-330.pdf side views; cad/part.py pockets) — one in, one out, the daisy chain."
+    },
+    {
+      "label": "id23",
+      "part": "xl330-m288-t",
+      "attach": "wire",
+      "map": {
+        "GND": "GND",
+        "VDD": "SERVO_V",
+        "DATA": "DXL_DATA"
+      },
+      "note": "XL330 ID 23, joint left_knee (JOINT_NAMES proto:239-255; docs §3.2), in body upper_leg_left = placements.json row 17. Two JST EH 3-pin sockets on the ±y side faces (XL,XC-330.pdf side views; cad/part.py pockets) — one in, one out, the daisy chain."
+    },
+    {
+      "label": "id24",
+      "part": "xl330-m288-t",
+      "attach": "wire",
+      "map": {
+        "GND": "GND",
+        "VDD": "SERVO_V",
+        "DATA": "DXL_DATA"
+      },
+      "note": "XL330 ID 24, joint left_ankle (JOINT_NAMES proto:239-255; docs §3.2), in body leg = placements.json row 22. Two JST EH 3-pin sockets on the ±y side faces (XL,XC-330.pdf side views; cad/part.py pockets) — one in, one out, the daisy chain."
+    },
+    {
+      "label": "id10",
+      "part": "xl330-m288-t",
+      "attach": "wire",
+      "map": {
+        "GND": "GND",
+        "VDD": "SERVO_V",
+        "DATA": "DXL_DATA"
+      },
+      "note": "XL330 ID 10, joint right_hip_yaw (JOINT_NAMES proto:239-255; docs §3.2), in body trunk_base = placements.json row 7. Two JST EH 3-pin sockets on the ±y side faces (XL,XC-330.pdf side views; cad/part.py pockets) — one in, one out, the daisy chain."
+    },
+    {
+      "label": "id11",
+      "part": "xl330-m288-t",
+      "attach": "wire",
+      "map": {
+        "GND": "GND",
+        "VDD": "SERVO_V",
+        "DATA": "DXL_DATA"
+      },
+      "note": "XL330 ID 11, joint right_hip_roll (JOINT_NAMES proto:239-255; docs §3.2), in body bearing_roll = placements.json row 54. Two JST EH 3-pin sockets on the ±y side faces (XL,XC-330.pdf side views; cad/part.py pockets) — one in, one out, the daisy chain."
+    },
+    {
+      "label": "id12",
+      "part": "xl330-m288-t",
+      "attach": "wire",
+      "map": {
+        "GND": "GND",
+        "VDD": "SERVO_V",
+        "DATA": "DXL_DATA"
+      },
+      "note": "XL330 ID 12, joint right_hip_pitch (JOINT_NAMES proto:239-255; docs §3.2), in body upper_leg_right = placements.json row 63. Two JST EH 3-pin sockets on the ±y side faces (XL,XC-330.pdf side views; cad/part.py pockets) — one in, one out, the daisy chain."
+    },
+    {
+      "label": "id13",
+      "part": "xl330-m288-t",
+      "attach": "wire",
+      "map": {
+        "GND": "GND",
+        "VDD": "SERVO_V",
+        "DATA": "DXL_DATA"
+      },
+      "note": "XL330 ID 13, joint right_knee (JOINT_NAMES proto:239-255; docs §3.2), in body upper_leg_right = placements.json row 59. Two JST EH 3-pin sockets on the ±y side faces (XL,XC-330.pdf side views; cad/part.py pockets) — one in, one out, the daisy chain."
+    },
+    {
+      "label": "id14",
+      "part": "xl330-m288-t",
+      "attach": "wire",
+      "map": {
+        "GND": "GND",
+        "VDD": "SERVO_V",
+        "DATA": "DXL_DATA"
+      },
+      "note": "XL330 ID 14, joint right_ankle (JOINT_NAMES proto:239-255; docs §3.2), in body leg_2 = placements.json row 64. Two JST EH 3-pin sockets on the ±y side faces (XL,XC-330.pdf side views; cad/part.py pockets) — one in, one out, the daisy chain."
+    },
+    {
+      "label": "tof",
+      "part": "microduck-tof-module",
+      "attach": "wire",
+      "map": {
+        "GND": "GND",
+        "3V3": "J5_3V3",
+        "SDA": "hdr3_I2C3_SDA_M0",
+        "SCL": "hdr5_I2C3_SCL_M0"
+      },
+      "note": "On the HAT's Stemma J5 (JST-SH 4-pin, 1 mm) — the same I2C3 nets as the codec (0x18) and the dormant BMI088 (0x19/0x68); ToF at 0x29. MJCF tof site world (81.4, 22.4, 249.1) mm."
+    },
+    {
+      "label": "speaker",
+      "part": "microduck-speaker",
+      "attach": "wire",
+      "map": {
+        "SPK+": "SPK_P",
+        "SPK-": "SPK_N"
+      },
+      "note": "35x25x7 box speaker, placements.json row 52, mesh origin world (-17.9, -16.8, 245.6) mm, in the head. Whether the codec drives it directly or through an amplifier on the HAT: CANNOT DETERMINE."
+    },
+    {
+      "label": "mic",
+      "part": "microduck-mic",
+      "attach": "wire",
+      "map": {
+        "GND": "GND",
+        "MIC": "MIC_IN",
+        "BIAS": "MICBIAS"
+      },
+      "note": "transducer, position and connector CANNOT DETERMINE; no mesh in the MJCF, so no length can be measured — the cable row carries null, not a guess."
+    },
+    {
+      "label": "camera",
+      "part": "microduck-camera-module",
+      "attach": "wire",
+      "map": {
+        "GND": "GND",
+        "VCC_3V3": "csi_J7_p22_VCC_3V3",
+        "CSI_CLK": "csi_J7_p8p9_CLK0",
+        "CSI_D0": "csi_J7_p2p3_D0",
+        "CSI_D1": "csi_J7_p5p6_D1",
+        "I2C2_SDA": "csi_J7_p21_I2C2_SDA_M1",
+        "I2C2_SCL": "csi_J7_p20_I2C2_SCL_M1",
+        "PDN": "csi_J7_p17_CAMERAB_PDN_L"
+      },
+      "note": "IMX219 board behind the M12 lens, upside down (rotation 180 in the encoder). Pin identifiers csi_J7_pN_* are the Radxa's 22-pin MIPI CSI table (part:radxa-zero-3w). Camera site world (81.4, 0, 251.1) and the Radxa at (68.1, 0, 251.05): SAME body jaw_soft — the ribbon crosses no joint."
+    }
+  ],
+  "segments": [],
+  "external": {
+    "csi_J7_p22_VCC_3V3": "VCC_3V3 on MIPI CSI pin 22 is the Radxa's own 3.3 V rail ([wiki] 22-pin table, part:radxa-zero-3w), i.e. the host sources it; a bare host cannot state a provision here, so it is asserted."
+  },
+  "order": []
+}

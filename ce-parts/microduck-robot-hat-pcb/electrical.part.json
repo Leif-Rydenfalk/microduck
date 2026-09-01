@@ -1,0 +1,182 @@
+{
+ "$parts_folder": 1,
+ "kind": "part",
+ "record": {
+  "slug": "microduck-robot-hat-pcb",
+  "kind": "module",
+  "chip": null,
+  "title": "Pollen RPI Robot HAT — the unpublished custom PCB on the Radxa's 40-pin header: battery in, 5 V to the Radxa, servo-bus power + half-duplex DATA out, TLV320AIC3104 codec, dormant BMI088, Stemma J5 for the ToF",
+  "attach": {
+   "how": "direct"
+  },
+  "requires": [
+   {
+    "need": "ground",
+    "name": "GND",
+    "direction": "input",
+    "quote": "6 | GND",
+    "cite": "part:radxa-zero-3w header_40pin (pins 6/9/14/... on the 40-pin the HAT sits on)"
+   },
+   {
+    "need": "supply",
+    "name": "VBAT",
+    "direction": "input",
+    "v_min": 6.6,
+    "v_max": 8.2,
+    "quote": "In-robot power comes from the battery via the HAT regardless",
+    "cite": "research/raw/deploy_audio_i2c3-pihat.dts:22 (via docs/ELECTRONICS-AND-SOFTWARE.md §9); the 6.6–8.2 V window is model.rs:99-128, the runtime's own, read through the servos",
+    "current_from": null,
+    "current_from_basis": "The HAT's own draw (regulators, codec, transceiver) is unpublished — CANNOT DETERMINE. Not zero."
+   },
+   {
+    "need": "signal",
+    "name": "UART2_TX",
+    "direction": "input",
+    "bus": "UART",
+    "quote": "The debug serial port of ZERO 3 uses UART2_M0 (40-pin GPIO Pin 8: TX, Pin 10: RX)",
+    "cite": "part:radxa-zero-3w buses_the_microduck_uses.servo_bus_uart2_m0 ([wiki]); /dev/ttyS2 = robotd.toml [bus]"
+   },
+   {
+    "need": "signal",
+    "name": "UART2_RX",
+    "direction": "output",
+    "bus": "UART",
+    "quote": "Pin 10: RX",
+    "cite": "part:radxa-zero-3w buses_the_microduck_uses.servo_bus_uart2_m0"
+   },
+   {
+    "need": "signal",
+    "name": "I2C3_SDA",
+    "direction": "bidirectional",
+    "bus": "I2C",
+    "quote": "pin 3 'I2C3_SDA_M0 | UART3_RX_M0 | GPIO1_A0'",
+    "cite": "part:radxa-zero-3w buses_the_microduck_uses.i2c3_m0_pins_3_5 ([brief] p.6); i2c3.dts GPIO1_A0 SDA"
+   },
+   {
+    "need": "signal",
+    "name": "I2C3_SCL",
+    "direction": "input",
+    "bus": "I2C",
+    "quote": "pin 5 'I2C3_SCL_M0 | UART3_TX_M0 | GPIO1_A1'",
+    "cite": "part:radxa-zero-3w buses_the_microduck_uses.i2c3_m0_pins_3_5; i2c3.dts GPIO1_A1 SCL"
+   },
+   {
+    "need": "signal",
+    "name": "I2S3_SCLK",
+    "direction": "input",
+    "bus": "I2S",
+    "quote": "I2S3_SCLK_M0 pin 12 (GPIO3_A3)",
+    "cite": "part:radxa-zero-3w buses_the_microduck_uses.i2s3_m0 — M0 vs M1 mux CANNOT DETERMINE (both on the header)"
+   },
+   {
+    "need": "signal",
+    "name": "I2S3_LRCK",
+    "direction": "input",
+    "bus": "I2S",
+    "quote": "I2S3_LRCK_M0 pin 35 (GPIO3_A4)",
+    "cite": "part:radxa-zero-3w buses_the_microduck_uses.i2s3_m0"
+   },
+   {
+    "need": "signal",
+    "name": "I2S3_SDO",
+    "direction": "input",
+    "bus": "I2S",
+    "quote": "I2S3_SDO_M0 pin 40 (GPIO3_A5)",
+    "cite": "part:radxa-zero-3w buses_the_microduck_uses.i2s3_m0 (SoC out -> codec DIN)"
+   },
+   {
+    "need": "signal",
+    "name": "I2S3_SDI",
+    "direction": "output",
+    "bus": "I2S",
+    "quote": "I2S3_SDI_M0 pin 38 (GPIO3_A6)",
+    "cite": "part:radxa-zero-3w buses_the_microduck_uses.i2s3_m0 (codec DOUT -> SoC in)"
+   },
+   {
+    "need": "signal",
+    "name": "MCLK",
+    "direction": "input",
+    "bus": "I2S",
+    "quote": "I2S3_MCLK_M0 pin 13 (GPIO3_A2)",
+    "cite": "part:radxa-zero-3w buses_the_microduck_uses.i2s3_m0 — 'a candidate origin for the overlay's 12 MHz fixed-clock (docs §7) — consistent, not proven'"
+   }
+  ],
+  "provides": [
+   {
+    "provision": "supply",
+    "name": "V5_OUT",
+    "direction": "output",
+    "nominal_v": 5.0,
+    "nominal_v_basis": "5 V is what the Radxa's 40-pin pins 2/4 accept ([brief] §5.1); that the HAT makes it from VBAT is the path docs §9 infers ('battery → banana contact PCB → HAT → 40-pin (5 V to Radxa)').",
+    "capacity_mA": null,
+    "capacity_basis": "the HAT's regulator is unpublished — CANNOT DETERMINE (docs §9 'regulators on the HAT: CANNOT DETERMINE').",
+    "quote": "In-robot power comes from the battery via the HAT regardless",
+    "cite": "i2c3.dts:22"
+   },
+   {
+    "provision": "supply",
+    "name": "SERVO_V",
+    "direction": "output",
+    "nominal_v": null,
+    "nominal_v_basis": "NULL ON PURPOSE. The servos read the pack (6.6–8.2 V) as their own supply (model.rs:99-113), which says the bus VDD is the pack passed through, not a regulated rail — an inference from code, and stock XL330s are rated 3.7–6.0 V (part:xl330-m288-t supplies[0]). Whether it is the raw pack, a regulated bus or a custom servo is docs §3.4 open question 1.",
+    "capacity_mA": null,
+    "capacity_basis": "no fuse, switch or regulator figure is published.",
+    "quote": "the runtime reads the pack voltage as the servos' own supply",
+    "cite": "docs/ELECTRONICS-AND-SOFTWARE.md §1, §3.4 (model.rs:99-113)"
+   },
+   {
+    "provision": "signal",
+    "name": "DXL_DATA",
+    "quote": "no direction GPIO anywhere in the code -> self-steering half-duplex circuit, assumed on the HAT",
+    "cite": "docs/ELECTRONICS-AND-SOFTWARE.md §3.1 ([C-elec], community inference); reference layout part:xl330-m288-t communication_circuit (74LVC2G241) — the fitted transceiver is CANNOT DETERMINE"
+   },
+   {
+    "provision": "supply",
+    "name": "J5_3V3",
+    "direction": "output",
+    "nominal_v": 3.3,
+    "nominal_v_basis": "the ToF's IOVDD/AVDD 3.3 V configuration (part:vl53l5cx supplies) on the HAT's 'Stemma J5' (i2c3.dts:10); whether J5's 3.3 V is the Radxa's pin-1 3.3 V passed through or a HAT regulator is CANNOT DETERMINE.",
+    "capacity_mA": null,
+    "capacity_basis": "unpublished.",
+    "quote": "Stemma J5",
+    "cite": "research/raw/deploy_audio_i2c3-pihat.dts:10"
+   },
+   {
+    "provision": "audio_output",
+    "name": "SPK+",
+    "quote": "line out [C-elec]",
+    "cite": "docs/ELECTRONICS-AND-SOFTWARE.md §7 — community; whether an amplifier sits between the codec (HPLOUT/LEFT_LOP, part:tlv320aic3104 pinout) and the speaker is CANNOT DETERMINE"
+   },
+   {
+    "provision": "audio_output",
+    "name": "SPK-",
+    "quote": "line out [C-elec]",
+    "cite": "docs/ELECTRONICS-AND-SOFTWARE.md §7"
+   },
+   {
+    "provision": "audio_input",
+    "name": "MIC_IN",
+    "quote": "codec input Mic3R (mono, [C-elec])",
+    "cite": "docs/ELECTRONICS-AND-SOFTWARE.md §7 — community; the codec's MIC2R/LINE2R is pin 16 (part:tlv320aic3104 pinout)"
+   },
+   {
+    "provision": "supply",
+    "name": "MICBIAS",
+    "direction": "output",
+    "nominal_v": null,
+    "nominal_v_basis": "the TLV320AIC3104 MICBIAS pin 15 (part:tlv320aic3104 pinout) — programmable 2.0 / 2.5 V / AVDD per TI; which is set, and whether the fitted mic uses it at all, is CANNOT DETERMINE.",
+    "capacity_mA": null,
+    "capacity_basis": "not transcribed.",
+    "quote": "15 | MICBIAS",
+    "cite": "part:tlv320aic3104 pinout"
+   }
+  ],
+  "uncertainties": [
+   "The PCB is not published (docs §11 open question 4). Connector types on the HAT (servo header, J5, battery input, speaker/mic) are CANNOT DETERMINE; every position used by the wiring lane is the HAT mesh's placement origin.",
+   "Transceiver, regulators, fusing, NFC reader, REC LED: CANNOT DETERMINE (docs §12 items 4, 8, 11).",
+   "I2S3 mux M0 (pins 12/13/35/38/40) vs M1 (19/21/23/24): the dts pinctrl was not read — the M0 pins are the wiring lane's assertion, stated as one."
+  ],
+  "note": "The one board every cable in the head lands on. Modelled as a part that NEEDS the Radxa's pins and the battery and PROVIDES the servo bus, the ToF's J5 rail, the Radxa's 5 V and the audio terminals — the regulator pattern in cecad.netlist.wire(): a provision named in the mapping joins the net as its source.",
+  "written": "2026-09-02, wiring lane (GOAL.md rung 5). Every figure names the document it came from; a figure with no document is null and says so."
+ }
+}

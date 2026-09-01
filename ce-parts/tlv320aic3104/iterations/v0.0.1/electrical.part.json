@@ -1,0 +1,122 @@
+{
+ "$parts_folder": 1,
+ "kind": "part",
+ "$from": "parts.json",
+ "record": {
+  "slug": "tlv320aic3104",
+  "kind": "chip",
+  "chip": "tlv320aic3104",
+  "pinout_ref": "part:tlv320aic3104",
+  "title": "TLV320AIC3104 codec reflowed onto the Robot HAT: I2C control at 0x18 on I2C3, I2S3 audio, three supply domains the HAT feeds from rails nobody has published",
+  "attach": {
+   "how": "direct"
+  },
+  "requires": [
+   {
+    "need": "ground",
+    "name": "GND",
+    "direction": "input",
+    "quote": "AVDD, DRVDD1/2(1) | Analog supply voltage | 2.7 | 3.3 | 3.6 | V",
+    "cite": "chips[tlv320aic3104].supplies[0].cite (§8.3 Recommended Operating Conditions, p.7) — the return for the supplies below; the sheet states no separate ground row"
+   },
+   {
+    "need": "supply",
+    "name": "AVDD",
+    "direction": "input",
+    "from": "chips[tlv320aic3104].supplies[0]",
+    "current_from": "chips[tlv320aic3104].current_mA",
+    "current_from_basis": "chips[tlv320aic3104].current_mA.typical is null with its reason: the sheet gives per-mode 'no signal' rows (4.9 mA IDRVDD+IAVDD playback to lineout, p.12) and no figure for current into a speaker load, so this need's draw is CANNOT DETERMINE by the record's own statement.",
+    "quote": "AVDD, DRVDD1/2(1) | Analog supply voltage | 2.7 | 3.3 | 3.6 | V",
+    "cite": "chips[tlv320aic3104].supplies[0].cite (§8.3 p.7; pins AVDD 25, DRVDD 18 and 24, Table 7-1 p.5)",
+    "note": "AVDD and DRVDD1/2 are ONE need here because the sheet gives them one row and one band; the pinout has them on three pins (25, 18, 24). Which HAT rail feeds them is CANNOT DETERMINE (chips[tlv320aic3104].unknowns[1])."
+   },
+   {
+    "need": "supply",
+    "name": "DVDD",
+    "direction": "input",
+    "from": "chips[tlv320aic3104].supplies[1]",
+    "current_from": null,
+    "current_from_basis": "the sheet's IDVDD rows (2.3 mA playback, 2.45 mA record, p.12 — chips[tlv320aic3104].current_mA.typical_basis) are per mode and the chip record records no single typical; carried as null rather than picked.",
+    "quote": "DVDD(1) | Digital core supply voltage | 1.525 | 1.8 | 1.95 | V",
+    "cite": "chips[tlv320aic3104].supplies[1].cite (§8.3 p.7; pin 32)",
+    "note": "A 1.8 V-class domain. The HAT must carry a regulator for it or take it from the Radxa — neither is published (chips[tlv320aic3104].unknowns[1])."
+   },
+   {
+    "need": "supply",
+    "name": "IOVDD",
+    "direction": "input",
+    "from": "chips[tlv320aic3104].supplies[2]",
+    "current_from": null,
+    "current_from_basis": "no IOVDD current row was transcribed into the chip record; null, not zero.",
+    "quote": "IOVDD(1) | Digital I/O supply voltage | 1.1 | 1.8 | 3.6 | V",
+    "cite": "chips[tlv320aic3104].supplies[2].cite (§8.3 p.7; pin 7)",
+    "note": "Sets the I2C/I2S thresholds. 3.3 V is inside the band, so the RK3566's 3.3 V I2C3/I2S3 needs no level shift IF the HAT feeds IOVDD 3.3 V — which rail it uses is CANNOT DETERMINE (supplies[2].cite)."
+   },
+   {
+    "need": "endpoint",
+    "bus": "I2C",
+    "role": "target",
+    "signals": [
+     "SDA",
+     "SCL"
+    ],
+    "direction": "bidirectional",
+    "address": "0x18",
+    "address_quote": "The TLV320AIC3104 responds to the I2C address of 001 1000.",
+    "address_cite": "chips[tlv320aic3104].i2c_address (§10.5.1 I2C Control Interface, p.45); 001 1000b = 0x18 is arithmetic, and it matches the overlay's `codec@18` / `reg = <0x18>` (research/raw/deploy_audio_aic3104-i2c3.dts)",
+    "address_selectable": false,
+    "address_basis": "FIXED — no address pins (chips[tlv320aic3104].i2c_address).",
+    "quote": "The TLV320AIC3104 supports the I2C control protocol using 7-bit addressing and is capable of both standard and fast modes.",
+    "cite": "chips[tlv320aic3104].i2c_address (§10.5.1 p.45); pins SCL 8, SDA 9 (chips[tlv320aic3104].pinout)"
+   },
+   {
+    "need": "endpoint",
+    "bus": "I2S",
+    "role": "target",
+    "signals": [
+     "MCLK",
+     "BCLK",
+     "WCLK",
+     "DIN",
+     "DOUT"
+    ],
+    "direction": "bidirectional",
+    "quote": "The device can accept an MCLK input from 512 kHz to 50 MHz, which can then be passed through either a programmable divider or a PLL to get the proper internal audio master clock required by the device. The BCLK input can also be used to generate the internal audio master clock.",
+    "cite": "chips[tlv320aic3104].mclk (§10.x Audio Clock Generation, p.26); pins MCLK 1, WCLK 3 (chips[tlv320aic3104].pinout — BCLK/DIN/DOUT pin numbers were not transcribed there and are not invented here)",
+    "note": "The codec is the I2S TARGET (slave): the overlay makes the RK3566's i2s3_2ch bit-clock and frame master (research/raw/deploy_audio_aic3104-i2c3.dts: 'simple-audio-card,bitclock-master = <&pihat_cpu_dai>', 'simple-audio-card,frame-master = <&pihat_cpu_dai>'), sysclk 12.288 MHz ('system-clock-frequency = <12288000>'), MCLK a 12 MHz 'fixed-clock' ('clock-frequency = <12000000>'). MCLK's origin on the HAT is CANNOT DETERMINE (docs/ELECTRONICS-AND-SOFTWARE.md §7)."
+   }
+  ],
+  "provides": [
+   {
+    "provision": "signal",
+    "name": "LEFT_LOP",
+    "quote": "27 | LEFT_LOP",
+    "cite": "chips[tlv320aic3104].pinout (Table 7-1 p.5–6)",
+    "basis": "Line output, left positive. Whether it reaches the speaker directly or through an amplifier on the HAT is CANNOT DETERMINE (docs/ELECTRONICS-AND-SOFTWARE.md §7); listed so a design can join it, never joined here by default."
+   },
+   {
+    "provision": "signal",
+    "name": "LEFT_LOM",
+    "quote": "28 | LEFT_LOM",
+    "cite": "chips[tlv320aic3104].pinout (Table 7-1 p.5–6)"
+   },
+   {
+    "provision": "supply",
+    "name": "MICBIAS",
+    "direction": "output",
+    "nominal_v": null,
+    "nominal_v_basis": "pin 15 MICBIAS (chips[tlv320aic3104].pinout). The programmed level is not transcribed in the chip record and the HAT's setting is unpublished — null, with this reason.",
+    "capacity_mA": null,
+    "capacity_basis": "not transcribed.",
+    "quote": "15 | MICBIAS",
+    "cite": "chips[tlv320aic3104].pinout (Table 7-1 p.5–6)"
+   }
+  ],
+  "uncertainties": [
+   "Which HAT rail feeds AVDD/DRVDD (2.7–3.6 V), DVDD (1.525–1.95 V) and IOVDD (1.1–3.6 V): CANNOT DETERMINE — three domains means the HAT carries at least one 1.8 V regulator or uses the Radxa's; neither is published (chips[tlv320aic3104].unknowns).",
+   "Which physical input the microphone uses: the community's 'Mic3R' is not a pin of this device (chips[tlv320aic3104].unknowns[0]); the HAT schematic settles it.",
+   "Speaker drive: line out vs an amplifier on the HAT is CANNOT DETERMINE (docs/ELECTRONICS-AND-SOFTWARE.md §7)."
+  ],
+  "note": "Written 2026-09-02 (netlist lane, GOAL.md rung 4) so the codec can sit on the I2C3 netlist beside the BMI088 (0x19/0x68) and the ToF (0x29) and the duplicate-address rule can be asked over all four. Every figure is the chip record's own quote; nothing was re-read from the PDF here. `$from: parts.json` is the shelf's marker for a record the design catalogue admits (cecad.netlist.Design._build_catalogue reads it), the same marker part:xl330-m288-t and part:aht20_soldered carry."
+ }
+}

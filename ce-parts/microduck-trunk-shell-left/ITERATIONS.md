@@ -4,3 +4,4 @@
 | iteration | date | why it exists |
 |---|---|---|
 | v0.0.1 | 2026-09-01 | mesh-backed: Pollen's published left_shell.stl loaded as-is |
+| v0.0.2 | 2026-09-02 | parametric rebuild from measurements off Pollen's left_shell.stl (cad-refcheck graded); replaces the v0.0.1 mesh loader |

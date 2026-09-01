@@ -2,6 +2,48 @@
  "$parts_folder": 1,
  "kind": "host",
  "record": {
+  "slug": "radxa-zero-3w",
+  "kind": "controller",
+  "title": "Radxa ZERO 3W as a bare host: 40-pin header + 22-pin MIPI CSI, no port standard; every pin identifier is the design file's assertion",
+  "controller": "RK3566",
+  "controller_quote": "Rockchip RK3566 SoC",
+  "controller_cite": "[brief] §3.1 p.3 (see host_note)",
+  "provides": [],
+  "provides_basis": "A bare host: pin identifiers come from the DESIGN FILE through .wire() and .declare_segment(), recorded as the user's assertion — the esp32s3_raw arrangement. The header_40pin and buses_the_microduck_uses blocks below are the vendor's pin→function table those identifiers are checked against by a reader, not by this loader.",
+  "ports": [],
+  "port_count": 0,
+  "adjacency_rule": "none",
+  "adjacency_rule_basis": "There is no connector standard on the 40-pin header, so there is no adjacency question. Stated, not absent.",
+  "bus_vocabulary": [
+   "UART",
+   "I2C",
+   "I2S",
+   "CSI",
+   "USB",
+   "GPIO"
+  ],
+  "requires": [
+   {
+    "need": "supply",
+    "name": "5V",
+    "direction": "input",
+    "v_min": null,
+    "v_typ": 5.0,
+    "v_max": null,
+    "quote": "5V Power from the GPIO PIN 2 & 4",
+    "cite": "[brief] §5.1 p.5 — power[1] below; the path docs/ELECTRONICS-AND-SOFTWARE.md §9 infers for the HAT",
+    "current_from": null,
+    "current_from_basis": "Board-level current draw is NOT stated in any fetched document (power[4], unknowns[1]) — a meter on the 5 V path settles it; nothing is defaulted here."
+   },
+   {
+    "need": "ground",
+    "name": "GND",
+    "direction": "input",
+    "quote": "6 | GND ... 9 | GND ... 14 | GND",
+    "cite": "[brief] §6.1.1 p.6 GPIO table / header_40pin below (pins 6, 9, 14, 20, 25, 30, 34, 39 are GND on the 40-pin)"
+   }
+  ],
+  "host_spec_note": "2026-09-02 (wiring lane): the keys from `slug` to `requires` were ADDED so cecad.netlist.load_hosts() can read this record as a HostSpec (it raised KeyError 'slug'); every documentary key that follows is the rung-4 record, unchanged.",
   "host": "radxa-zero-3w",
   "host_note": "The Microduck's compute board (device tree compatible 'radxa,zero-3w', 'rockchip,rk3566' — research/raw/deploy_audio_i2c3-pihat.dts:46; docs/ELECTRONICS-AND-SOFTWARE.md §2). Four vendor documents were fetched into docs/fetched/ on 2026-09-02 and every figure below names which one: [brief] = Radxa ZERO 3W Product Brief RAD-DOC-0084 Revision 1.10 2026-06-26 (9 pp); [sch1.12] = schematic 'Zero 3W' REV V1.12, dated 'Monday, November 25, 2024', 22 sheets; [sch1.11] = schematic V1.11, 2023-09-21, 22 sheets; [wiki] = docs.radxa.com/en/zero/zero3/hardware-design/hardware-interface (HTML, CC BY 4.0 per its footer); [product] = radxa.com/products/zeros/zero3w/ (HTML).",
   "manufacturer": "Radxa Computer (Shenzhen) Co., Ltd.",

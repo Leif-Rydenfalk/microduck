@@ -1,0 +1,88 @@
+{
+ "$parts_folder": 1,
+ "kind": "part",
+ "$from": "parts.json",
+ "record": {
+  "slug": "bmi088",
+  "kind": "chip",
+  "chip": "bmi088",
+  "title": "BMI088 on the Robot HAT — 'dormant', 'unused but still connected' on I2C3 at 0x19 (accelerometer) and 0x68 (gyroscope); two I2C targets in one package",
+  "attach": {
+   "how": "direct"
+  },
+  "requires": [
+   {
+    "need": "ground",
+    "name": "GND",
+    "direction": "input",
+    "quote": "Supply Voltage | VDD | Internal Domains | 2.4 | 3.6 | V",
+    "cite": "chips[bmi088].supplies[0].cite (Table 1 p.7) — the return for the two supplies; the sheet states no separate ground row"
+   },
+   {
+    "need": "supply",
+    "name": "VDD",
+    "direction": "input",
+    "from": "chips[bmi088].supplies[0]",
+    "current_from": "chips[bmi088].current_mA",
+    "current_from_basis": "chips[bmi088].current_mA.typical = 5.15 mA is a DERIVED SUM (gyro 5 mA + accel 0.15 mA, Tables 2 and 3 p.8) at VDD = VDDIO = 3.0 V, and it is the draw of a part the overlay calls dormant — whether it is ever configured out of suspend by shipped code is CANNOT DETERMINE (docs/ELECTRONICS-AND-SOFTWARE.md §4.2); the figure is attributed to VDD here because the sheet's condition ties the two rails together, not because it splits them.",
+    "quote": "Supply Voltage | VDD | Internal Domains | 2.4 | 3.6 | V",
+    "cite": "chips[bmi088].supplies[0].cite (Table 1: Electrical parameter specification, p.7)"
+   },
+   {
+    "need": "supply",
+    "name": "VDDIO",
+    "direction": "input",
+    "from": "chips[bmi088].supplies[1]",
+    "current_from": null,
+    "current_from_basis": "not broken out by rail in the chip record (its sum is on VDD above); null so the same 5.15 mA is not billed twice.",
+    "quote": "Supply Voltage | VDDIO | I/O Domain | 1.2 | 3.6 | V",
+    "cite": "chips[bmi088].supplies[1].cite (Table 1 p.7; §2.x p.14 'VDDIO is a separate power supply pin mainly used for the supply of the interface')",
+    "note": "Sets the I2C thresholds (chips[bmi088].logic.cite: VIL 0.3 VDDIO / VIH 0.7 VDDIO). The HAT's VDDIO rail is CANNOT DETERMINE (chips[bmi088].unknowns[1])."
+   },
+   {
+    "need": "endpoint",
+    "bus": "I2C",
+    "role": "target",
+    "signals": [
+     "SDA",
+     "SCL"
+    ],
+    "direction": "bidirectional",
+    "address": "0x19",
+    "address_quote": "Accelerometer: SDO1 pin pulled to ‘GND’: 0011000b (0x18) / SDO1 pin pulled to ‘VDDIO’: 0011001b (0x19)",
+    "address_cite": "chips[bmi088].i2c_address (§6.2 Inter-Integrated Circuit (I²C), p.48); the overlay's 0x19 (research/raw/deploy_audio_i2c3-pihat.dts:11 'dormant BMI088 0x19/0x68') means SDO1 = VDDIO on the HAT — INFERRED from this table, not read off a schematic",
+    "address_selectable": true,
+    "address_basis": "SDO1 strap: 0x18 or 0x19. 0x19 is recorded because the overlay says so; the strap itself is unpublished. NOTE the OTHER strap option, 0x18, is the codec's fixed address on the same bus — the HAT's designer had exactly one legal choice.",
+    "quote": "supports I²C standard mode and fast mode, only 7-bit address mode is supported.",
+    "cite": "chips[bmi088].i2c_address (§6.2 p.48)",
+    "function": "accelerometer I2C target"
+   },
+   {
+    "need": "endpoint",
+    "bus": "I2C",
+    "role": "target",
+    "signals": [
+     "SDA",
+     "SCL"
+    ],
+    "direction": "bidirectional",
+    "address": "0x68",
+    "address_quote": "Gyroscope: SDO2 pin pulled to ‘GND’: 1101000b (0x68) / SDO2 pin pulled to ‘VDDIO’: 1101001b (0x69)",
+    "address_cite": "chips[bmi088].i2c_address (§6.2 p.48); the overlay's 0x68 (i2c3.dts:11) means SDO2 = GND on the HAT — inferred, not read off a schematic",
+    "address_selectable": true,
+    "address_basis": "SDO2 strap: 0x68 or 0x69. 0x68 is recorded because the overlay says so.",
+    "quote": "supports I²C standard mode and fast mode, only 7-bit address mode is supported.",
+    "cite": "chips[bmi088].i2c_address (§6.2 p.48)",
+    "function": "gyroscope I2C target",
+    "note": "SECOND ADDRESS ON THE SAME TWO PINS. cecad.netlist groups bus devices per OWNER and reads one address per owner, so a design that wires this record once puts only 0x19 in front of the duplicate-address rule. electronics/netlist.py splits the package into two design-level views (accel, gyro) so both addresses are judged; that split is the design file's doing and is stated there."
+   }
+  ],
+  "provides": [],
+  "uncertainties": [
+   "Whether the production head IMU IS this BMI088 and whether any shipped code reads it: CANNOT DETERMINE (docs/ELECTRONICS-AND-SOFTWARE.md §4.2, open question 3; `i2cdetect -y 3` on a production HAT settles it).",
+   "The HAT's VDD / VDDIO rails and the SDO1/SDO2 straps: CANNOT DETERMINE — the addresses are the overlay's word, the straps are inferred from the datasheet table.",
+   "PS pin: I2C is selected by PS = VDDIO (chips[bmi088].interface); on the HAT that strap is likewise unpublished."
+  ],
+  "note": "Written 2026-09-02 (netlist lane, GOAL.md rung 4) so the dormant IMU sits on the I2C3 netlist with the codec (0x18) and the ToF (0x29). Every figure is the chip record's own quote; nothing was re-read from the PDF here. `$from: parts.json` is the shelf's admission marker (see part:tlv320aic3104 note)."
+ }
+}
