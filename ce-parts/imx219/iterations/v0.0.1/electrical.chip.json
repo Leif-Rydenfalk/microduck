@@ -1,0 +1,70 @@
+{
+ "$parts_folder": 1,
+ "kind": "chip",
+ "record": {
+  "part": "imx219",
+  "part_note": "Sony IMX219PQH5-C 8 Mpixel CMOS image sensor — the Microduck's camera die: kernel probe 'imx219 2-0010: Model ID 0x0219, Lot ID 0x5a8e73, Chip ID 0x0773' (research/raw/microduck_main_docs_project_media-bringup.md:312; docs/ELECTRONICS-AND-SOFTWARE.md §5). Everything here was read off datasheet.pdf IN THIS FOLDER. SONY DOES NOT PUBLISH THIS DOCUMENT: it was fetched from a mirror (opensourceinstruments.com) and is byte-identical to a second mirror (publiclab.org, same sha256) — the file's own pages identify it as Sony's ('Sony reserves the right to change products and specifications without prior notice', p.1; every page headed IMX219PQH5-C).",
+  "manufacturer": "Sony",
+  "description": "p.1 verbatim: 'The IMX219PQH5-C is a diagonal 4.60 mm (Type 1/4.0) CMOS active pixel type image sensor with a square pixel array and 8.08M effective pixels. This chip operates with three power supplies, analogue 2.8 V, digital 1.2 V, and IF 1.8 V, and has low power consumption.' Features p.1: 'CSI2 serial data output (selection of 4lane/2lane)', 'Max. 30 frame/s in all-pixel scan mode', '180 frame/s @720p with 2x2 analog (special) binning, 60 frame/s @1080p with V-crop', 'Data rate: Max. 755 Mbps/lane(@4lane), 912Mbps/Lane(@2lane)'.",
+  "fetched": true,
+  "datasheet_url": "https://www.opensourceinstruments.com/Electronics/Data/IMX219PQ.pdf",
+  "datasheet_rev": "NO DOCUMENT NUMBER OR REVISION IS PRINTED in the file (grep for 'Ver', 'Rev', 'Revision' finds only register names and Sony's licence notice). PDF metadata: title 'sony', CreationDate 2014-04-24. 96 pages. The rellimmot GitHub mirror names its copy 'IMX219PQH5_7.0.0_Datasheet' — a filename, not a header. Second mirror https://storage.googleapis.com/publiclab-production/public/system/images/photos/000/023/294/original/RASPBERRY_PI_CAMERA_V2_DATASHEET_IMX219PQH5_7.0.0_Datasheet_XXX.PDF fetched the same day: identical bytes (sha256 49250b153d55…). HTTP 200, 2237503 bytes, fetched 2026-09-02.",
+  "identity_vs_fitted": "The probe's Model ID 0x0219 identifies the IMX219 FAMILY; the '-PQH5-C' suffix (colour, this package) is what the Raspberry Pi Camera Module v2 carries and what the Radxa/rpi-camera-v2 overlay expects, but no fetched document names the sensor suffix on Pollen's M12 board. Suffix: INFERRED. The camera BOARD (M12-mount IMX219 carrier), its ribbon and its lens: CANNOT DETERMINE (docs/ELECTRONICS-AND-SOFTWARE.md open question 7).",
+  "package": "Device Structure p.2: 'Chip size : 5.095 mm (H) × 4.930 mm (V) (w/ Scribe)'; 'Unit cell size : 1.12 µm (H) × 1.12 µm (V)'; 'Number of active pixels : 3280 (H) × 2464 (V) approx. 8.08 M pixels'; 'Number of effective pixels : 3296 (H) × 2480 (V) approx. 8.17 M pixels'. Package outline: NOT transcribed (the sheet's package drawing was not read for this record).",
+  "used_by": [],
+  "absolute_max": "Table 41 Absolute Maximum Ratings, p.84, verbatim: 'Supply voltage (analogue) | VANA | -0.3 | | 3.3 | V'; 'Supply voltage (Core) | VDDL | -0.3 | | 2.0 | V'; 'Supply voltage (IF) | VDIG | -0.3 | | 3.3 | V'; 'Input voltage | VI | -0.3 | | 3.3 | V'; 'Operating temperature (function) | Topr | -20 | | 60 | ˚C | Junction temperature'.",
+  "supplies": [
+   {
+    "name": "VANA",
+    "rail": null,
+    "v_min": 2.6,
+    "v_typ": 2.8,
+    "v_max": 3.0,
+    "cite": "Table 42 Recommended Operating Conditions, p.84: 'Supply voltage (analogue) | VANA | 2.6 | 2.8 | 3.0 | V'."
+   },
+   {
+    "name": "VDDL",
+    "rail": null,
+    "v_min": 1.08,
+    "v_typ": 1.2,
+    "v_max": 1.3,
+    "cite": "Table 42 p.84: 'Supply voltage (Core) | VDDL | 1.08 | 1.2 | 1.3 | V'."
+   },
+   {
+    "name": "VDIG",
+    "rail": null,
+    "v_min": 1.62,
+    "v_typ": 1.8,
+    "v_max": 1.98,
+    "cite": "Table 42 p.84: 'Supply voltage (IF) | VDIG | 1.62 | 1.8 | 1.98 | V'. The Radxa CSI connector supplies VCC_3V3 (pin 22) — the camera board must regulate 2.8/1.2/1.8 V itself, as a Pi Camera v2 does. Board regulators: CANNOT DETERMINE."
+   }
+  ],
+  "current_mA": {
+   "rail": null,
+   "typical": null,
+   "typical_basis": "PER-RAIL ONLY. Table 45 Electrical Characteristics, p.86 (VANA = 3.0 V, VDDL = 1.3 V, VDIG = 1.98 V, Tj = 60 ˚C), verbatim: 'IVAVA_strm | 33 | 38 | mA | … CSI2 4 lanes, VANA current' and 'IVDDL_strm | 100 | 160 | mA | CSI2 4 lanes, VDDL current' for 'Current consumption (Full,30 frame/s)'; standby 'ISTB_ana | 50 | µA', 'ISTB_dig | 10 | µA', 'ISTB_Iddl | 50 | µA'. No VDIG streaming current is printed.",
+   "peak": null,
+   "sleep": null,
+   "cite": "Table 45 p.86."
+  },
+  "logic": {
+   "vih_min": null,
+   "vil_max": null,
+   "three_v3_tolerant": false,
+   "derived": true,
+   "cite": "Table 43 DC Characteristics p.85: SCL/SDA 'VIH | 0.7VDIG | VDIG + 0.5 | V', 'VIL | -0.5 | 0.3VDIG | V'; XCLR/INCK 'VIH | 0.65VDIG | VDIG + 0.3'. With VDIG = 1.8 V the I/O is 1.8 V logic; the RK3566 CSI-connector I2C2_M1 and the sensor talk through whatever the camera board does about it — not read anywhere."
+  },
+  "interface": "MIPI CSI-2 (4 or 2 lanes) + 2-wire serial (I2C) control",
+  "interface_max_hz": 1000000,
+  "i2c_address": "Fig. 10 Slave Address, p.18: bits '[7:1] | 0 0 1 0 0 0 0 | R/W' → 7-bit 0010000b = 0x10 (arithmetic; the figure shows the bits). Matches the probe's bus address '2-0010'. Table 8 p.23: 'SCL clock frequency ( INCK[fSCK] = 11.4 to 27 MHz) | fSCL | 0 | 1000 | kHz' (fast mode plus); p.24 '( INCK[fSCK] = 6 to 27 MHz) | fSCL | 0 | 400 | kHz'.",
+  "inck": "Table 44 Master Clock Square Waveform Input Characteristics, p.86: 'Frequency | fSCK | 6 | 18 | 27 | MHz'; 'Duty Cycle | fDUTY | 40 | 60 | %'. The Radxa CSI connector carries CIF_CLKOUT on pin 18; whether the board uses it or its own 24 MHz crystal (as the Pi Camera v2 does): CANNOT DETERMINE.",
+  "csi2": "§2-1 p.16 verbatim: 'IMX219PQH5-C has CSI-2 interface and the options are 4 lanes or 2lanes.' References 'MIPI Alliance Specification for Camera Serial Interface 2 (CSI-2) Version 1.01' and 'MIPI Alliance Specification for D-PHY Version 1.10.00'. Pollen's capture is pinned to 1920×1080@30 (media:313; the sensor's '60 frame/s @1080p with V-crop' is the ceiling, p.1).",
+  "unknowns": [
+   "The camera BOARD: M12-mount IMX219 carrier, its regulators (2.8/1.2/1.8 V from the connector's 3.3 V), crystal vs CIF_CLKOUT, lane count wired, ribbon length — CANNOT DETERMINE. A production teardown or Pollen naming the module settles it.",
+   "The sensor suffix -PQH5-C is inferred from the Pi-Camera-v2 overlay, not read off Pollen's part.",
+   "The M12 lens (part:microduck-m12-lens): focal length, FOV, aperture — CANNOT DETERMINE; press kit says FOV 'still being finalised'. No lens document was fetched because no lens part number exists to fetch.",
+   "No document number/revision printed in the datasheet; the version '7.0.0' is a mirror's filename.",
+   "Sony's p.1 notice, verbatim: 'this product is designed for use in cellular phone and tablet pc. When using this for another application, Sony does not guarantee the quality and reliability of product.' — a robot is not either."
+  ]
+ }
+}

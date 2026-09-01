@@ -4,3 +4,4 @@
 | iteration | date | why it exists |
 |---|---|---|
 | v0.0.1 | 2026-09-01 | created — nothing measured yet |
+| v0.0.1 | 2026-09-02 | Radxa product brief rev 1.10, schematics v1.11 + v1.12, wiki and product page fetched into current/docs/fetched/; header/bus map recorded in current/electrical.host.json; one `standard` ledger row |

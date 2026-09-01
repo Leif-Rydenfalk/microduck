@@ -1,15 +1,22 @@
 {
   "$triad": 1,
+  "$parts_folder": 2,
   "kind": "part",
   "record": {
     "slug": "microduck-speaker",
-    "title": "microduck-speaker",
+    "title": "Microduck head speaker — a 35 x 25 x 7 mm box speaker (Pollen's placeholder mesh); exact part CANNOT DETERMINE; representative: '3525' 8 Ω 2 W cavity speaker",
     "verdict": "CANNOT DETERMINE",
-    "why": "created by `bin/triad new part` — nothing measured yet",
-    "sector": null,
-    "subsector": null,
+    "why": "THE EXACT PART IS NOT IN ANY SOURCE. Pollen's MJCF carries a 12-triangle placeholder box 35.0 x 25.0 x 7.0 mm named `speaker` in the head (docs/PARTS.md row 38); the runtime only says the codec is a TLV320AIC3104 at I2C 0x18 driving ALSA `plughw:aic3104`, and the community teardown says 'line out' — driver, impedance and whether the codec's own output or an external amplifier drives it are all CANNOT DETERMINE (docs/ELECTRONICS-AND-SOFTWARE.md §7). WHAT THIS FOLDER CARRIES INSTEAD, said plainly: a REPRESENTATIVE. The '3525' cavity speaker is a commodity 35 x 25 mm 8 Ω 2 W box speaker whose envelope (35 x 25 x 6.8 mm) matches Pollen's placeholder to within 0.2 mm in height and exactly in plan. Its figures come from a reseller's spec table (ABRA Electronics SPK-3525-2W-GH, fetched 2026-09-02, docs/, sha256 in PROVENANCE.json) because NO MANUFACTURER PUBLISHES A DATASHEET FOR IT — the maker is anonymous. For contrast the nearest part WITH a manufacturer datasheet, Same Sky (CUI) CMS-35208N, is 35.5 x 20.5 x 8.0 mm (read off its rendered p.1) and DISCONTINUED — the wrong width. WHAT SETTLES IT: a teardown photo of the head, or Pollen naming the part.",
+    "sector": "actuator",
+    "subsector": "speaker",
+    "subsector_why": "SCHEMA.md's closed sector list has no audio/transducer value; a loudspeaker converts electrical drive into mechanical motion, which is the closest fit ('actuator'). The atech speaker module on the workshop shelf is sector atech_module, which does not apply here. Stated so the choice is visible.",
     "lifecycle": "unknown",
-    "origin": null,
-    "origin_why": null
+    "lifecycle_why": "anonymous commodity part; ABRA showed 'Availability: In stock' on 2026-09-02, a stock state, not a lifecycle.",
+    "origin": "vendor",
+    "origin_why": "the figures were read off a FETCHED reseller page (ABRA Electronics) that reproduces the maker's spec table verbatim, plus a second reseller page (thingbits.net, XHXDZ-3525-8R2W) and Same Sky's own CMS-35208N PDF for the contrast part — all saved under docs/ with sha256 in PROVENANCE.json. Not 'measured': no speaker has been on a bench here. Not 'standard': none applies. THE HONEST CAVEAT: for the 3525 the 'vendor' is a reseller, because the manufacturer is not named anywhere.",
+    "bbox_mm": [35.0, 25.0, 7.0],
+    "bbox_basis": "CITED: Pollen's `speaker` placeholder mesh 35.0 x 25.0 x 7.0 mm (docs/PARTS.md row 38, reference/pollen-microduck-simulator/assembled/measured.json). The representative's stated size is 'Size: 35mm x 25mm x 6.8mm.' (ABRA).",
+    "used_by": ["assembly:microduck"],
+    "used_by_why": "placed in the head (jaw_soft body) by the MJCF (docs/PARTS.md row 38)."
   }
 }

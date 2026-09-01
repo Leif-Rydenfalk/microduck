@@ -1,0 +1,57 @@
+{
+ "$parts_folder": 1,
+ "kind": "chip",
+ "record": {
+  "part": "fusb302",
+  "part_note": "onsemi FUSB302 programmable USB Type-C controller with PD — THE CHIP POLLEN'S OVERLAY NAMES AND DISABLES: research/raw/deploy_audio_i2c3-pihat.dts disables '/i2c@fe5c0000/fusb302@22' (docs/ELECTRONICS-AND-SOFTWARE.md §9). READ THIS FIRST: the Radxa ZERO 3W schematic (v1.11 2023-09-21 p.17 AND v1.12 2024-11-25 p.17, both fetched into part:radxa-zero-3w) fits U6 = 'ET7301B' next to J9 'USB_TYPEC_115H0' on I2C3_SCL_M1/SDA_M1 — NOT an FUSB302. The Linux node is named fusb302 because the ET7301B is register-compatible and its slave address is the same 0x22 (part:et7301b). This folder records onsemi's document because the software names it; part:et7301b records the fitted die. Everything here was read off datasheet.pdf IN THIS FOLDER.",
+  "manufacturer": "onsemi (Semiconductor Components Industries, LLC; Fairchild heritage — p.12 footer '© 2015 Semiconductor Components Industries, LLC. www.fairchildsemi.com')",
+  "description": "p.1 verbatim: 'The FUSB302 targets system designers looking to implement a DRP/SRC/SNK USB Type-C connector with low amount of programmability.' 'The FUSB302 integrates the physical layer of the USB BMC power delivery protocol to allow up to 100 W of power and role swap.'",
+  "fetched": true,
+  "datasheet_url": "https://files.pine64.org/doc/datasheet/pinecil/FUSB302-D.PDF",
+  "datasheet_rev": "p.1 header verbatim: 'FUSB302 — Programmable USB Type-C Controller w/PD', 'July 2017'; every page footer 'FUSB302 • Rev. 2 … www.onsemi.com'. 35 pages. MIRROR: onsemi's own URLs (https://www.onsemi.com/pdf/datasheet/fusb302b-d.pdf, /pub/Collateral/FUSB302B-D.PDF, /download/data-sheet/pdf/fusb302b-d.pdf) all answered HTTP 403 on 2026-09-02, and the Mouser/LCSC mirrors returned HTML challenge pages, so the FUSB302B document (the current 'B' variant) WAS NOT RETRIEVED. This is the onsemi FUSB302 (non-B) Rev. 2 document from the pine64 mirror, identified by its own header and footer. HTTP 200, 1323485 bytes.",
+  "identity_vs_fitted": "NOT THE FITTED PART. The Radxa ZERO 3W v1.11/v1.12 schematics fit an Etek ET7301B (see part:et7301b). The device-tree name is a driver-compatibility label. Which of FUSB302 / FUSB302B the Linux 'fcs,fusb302' binding was written for is irrelevant to the hardware here.",
+  "package": "p.1 ordering table verbatim: 'FUSB302MPX | 14-Lead MLP 2.5 mm x 2.5 mm, 0.5 mm Pitch'.",
+  "used_by": [],
+  "absolute_max": "p.12 Absolute Maximum Ratings, verbatim: 'VvDD | Supply Voltage from VDD | -0.5 | 6.0 | V'; 'VCC_HDDRP | CC pins when configured as Host, Device or Dual Role Port | -0.5 | 6.0 | V'; 'VVBUS | VBUS Supply Voltage | -0.5 | 28.0 | V'; 'ESD Human Body Model, ANSI/ESDA/JEDEC JS-001-2012 | All Pins | 4 | kV'.",
+  "supplies": [
+   {
+    "name": "VDD",
+    "rail": null,
+    "v_min": 2.8,
+    "v_typ": 3.3,
+    "v_max": 5.5,
+    "cite": "p.12 Recommended Operating Conditions: 'VVDD | VDD Supply Voltage | 2.8(3) | 3.3 | 5.5 | V'. Note 3: 'This is for functional operation only and not the lowest limit for all subsequent electrical specifications below. All electrical parameters have a minimum of 3.0 V operation.'"
+   },
+   {
+    "name": "VBUS",
+    "rail": null,
+    "v_min": 4.0,
+    "v_typ": 5.0,
+    "v_max": 21.0,
+    "cite": "p.12: 'VVBUS | VBUS Supply Voltage | 4.0 | 5.0 | 21.0 | V'."
+   }
+  ],
+  "current_mA": {
+   "rail": null,
+   "typical": null,
+   "peak": null,
+   "sleep": null,
+   "cite": "not transcribed — the part is not fitted; see part:et7301b for the fitted die."
+  },
+  "logic": {
+   "vih_min": null,
+   "vil_max": null,
+   "three_v3_tolerant": true,
+   "derived": true,
+   "cite": "VDD band 2.8–5.5 V includes 3.3 V (p.12)."
+  },
+  "interface": "I2C",
+  "interface_max_hz": 1000000,
+  "i2c_address": "p.18 Table 4 'I2CTM Slave Address', verbatim bits: 'Slave Address | 8 | 0 1 0 0 0 1 0 | R/W' → 7-bit 0100010b = 0x22 (arithmetic). p.11: 'traffic up to 1 MHz SCL operation'. Matches the overlay node 'fusb302@22'.",
+  "unknowns": [
+   "The FUSB302B (current variant, four address options B/B01/B10/B11 per onsemi's ordering — NOT read here) datasheet could not be fetched: onsemi 403, distributor mirrors served HTML. The address-option table is therefore CANNOT DETERMINE from this folder.",
+   "None of this describes the Microduck's fitted silicon — the ZERO 3W carries an ET7301B (part:et7301b). Retained because the software names 'fusb302'.",
+   "Behaviour of the DISABLED controller with the overlay applied (Rd on both CC lines at power-on so a charger still gives 5 V — docs/ELECTRONICS-AND-SOFTWARE.md §9) is a claim from Pollen's overlay comments, not verified against either datasheet here."
+  ]
+ }
+}

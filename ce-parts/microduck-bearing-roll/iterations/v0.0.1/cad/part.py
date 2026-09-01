@@ -19,8 +19,11 @@ horn side: it screws to the two ears of yaw2roll (2 x Ø2.2 at z 12.5),
 screws into the servo's two bottom through-holes (2 x Ø2.2 at z -22.5),
 locates in the servo's two top through-holes with 2 conical pegs
 (Ø1.8 -> Ø1.6 x 2 mm at z 7.5), and passes the Ø16 servo horn through a
-Ø19 window on the roll axis; the 22x16x4 bearing sits on the far face of
-that window (MJCF: bearing centre at mesh (17.5, -18.5, 0), 4 mm thick).
+Ø19 window on the roll axis. The 22x16x4 bearing sits flat on the BACK face
+(y -14.5): the MJCF puts its geom at mesh (17.5, -18.5, 0) with its axis
+along +y and the bearing mesh spans 0..4 along its axis (meshslice, 2026-09-02),
+so it occupies y -18.5..-14.5; the horn's Ø16 x 3 boss (y -16.5..-13.5) runs
+through the window into the bore, and hip_l's Ø16 x 1.95 boss fills the rest.
 """
 import math
 

@@ -1,0 +1,90 @@
+{
+  "$parts_folder": 1,
+  "kind": "part",
+  "record": {
+    "slug": "np-f550",
+    "part": "np-f550",
+    "kind": "part",
+    "title": "NP-F550-shape 2S Li-ion pack, 7.2 V, 2600 mAh (third-party in Sony's L-series shape; fitted maker unidentified)",
+    "manufacturer": "NOT ONE MANUFACTURER, AND NOT SONY. Sony's original NP-F550 is a 1500 mAh / 10.8 Wh pack; every 2600 mAh 'NP-F550' is a third-party pack in Sony's shape (Duracell, Patona, Dörr, Neewer, Jupio … all sell one). Pollen's press kit gives '2600 mAh' and no maker. The fetched sources here are Duracell (DR5) and Deity; nothing says either is what Pollen fits.",
+    "fetched": true,
+    "sources": [
+      {
+        "name": "duracell",
+        "local": "docs/duracell-dr5-np-f550-2600mah.html",
+        "url": "https://www.duracellcharge.info/en/product/replacement-sony-np-f330-np-f550-battery/",
+        "fetched": "2026-09-02",
+        "sha256": "239e06510b5ca2725702a86467d7c327fe4436bcd40693ab03f364e8c2afe49d",
+        "what": "Duracell Charge product page for SKU DR5, 'Replacement Sony NP-F330/NP-F550 Battery 7.2V 2600mAh' — the representative 2600 mAh pack in this shape. HTTP 200, text/html, 90337 bytes, curl with a browser User-Agent. 'Duracell is a registered trademark of Duracell Batteries BV … Distributed under license by PSA Parts Ltd' (page footer) — a licensee's page, which is the vendor of this SKU."
+      },
+      {
+        "name": "deity",
+        "local": "docs/deity-np-f550-3350mah-datasheet.pdf",
+        "url": "https://deitymic.com/wp-content/uploads/2025/02/NP-F550-Data-Sheet.pdf",
+        "fetched": "2026-09-02",
+        "sha256": "7ecf43ea887dc3dd102c5f4199edae9f3347f142ddddb9523edd609fc1bee1c5",
+        "what": "Deity Microphones' one-page 'NP-F550 Data Sheet' (PDF Title 'NP-F550 Data Sheet', created 2025-02-13). A 3350 mAh pack — NOT the 2600 mAh one — kept for what it states about cell type and protections in this shape. HTTP 200, application/pdf, 4033280 bytes."
+      }
+    ],
+    "datasheet_url": "https://www.duracellcharge.info/en/product/replacement-sony-np-f330-np-f550-battery/",
+    "datasheet_local": "docs/duracell-dr5-np-f550-2600mah.html",
+    "datasheet_rev": "Duracell DR5 product page as fetched 2026-09-02 (no revision, no date on the page). Sony's own NP-F550 specification page — the form-factor authority — was NOT fetchable: see unknowns.",
+    "package": "Sony InfoLITHIUM L-series (NP-F) pack shape. Duracell page verbatim 'Dimensions 70 × 38 × 20 mm'; Pollen's mesh 38.6 x 20.6 x 70.8 mm (component.json bbox_basis). Contact face: see pinout.",
+    "pinout": {
+      "verdict": "CANNOT DETERMINE",
+      "why": "NO VENDOR DOCUMENT FOUND for the NP-F contact layout. Sony does not publish the pack's terminal specification; neither fetched vendor page shows the contacts; every 'NP-F pinout' hit on 2026-09-02 was a forum thread (candlepowerforums 'Sony NP-F570 Pinout' — 403 to fetch; taperssection; eevblog on the different NP-BX1) or a dummy-battery product listing with no drawing. The community reading — a '+' terminal, a '−' terminal and a 'C' contact carrying the InfoLITHIUM data line and/or a thermistor, with a 'T' pin on some packs — is NOT recorded as fact here because no fetched document states it. WHAT SETTLES IT: a photograph and ohmmeter reading of a physical pack's contact face (measured origin), or a dummy-battery/plate vendor's dimensioned drawing. WHAT THE MICRODUCK NEEDS: only + and − (the runtime has 'no fuel gauge and no ADC', model.rs:99-105; the pack voltage is read through the servos), so the data contact, if any, is unused by design — but the banana contact PCB's geometry (part:microduck-banana-pcb-locker clamps it) depends on the contact pitch nobody has here.",
+      "cite": "search trail 2026-09-02, recorded in unknowns; docs/ELECTRONICS-AND-SOFTWARE.md §9 for what the robot reads."
+    },
+    "requires": [],
+    "requires_why": "a pack requires nothing from a design except a charger it is not connected to in the robot (charging is external; docs/ELECTRONICS-AND-SOFTWARE.md §9).",
+    "provides": [
+      {
+        "need": "supply",
+        "name": "BAT+",
+        "direction": "output",
+        "v_min": 6.6,
+        "v_max": 8.2,
+        "v_nominal": 7.2,
+        "v_range_cite": "THE ROBOT'S OWN WINDOW, not a vendor's: model.rs:99-128 maps 6.6 V (empty) … 8.2 V (full) under load as read through the servos' present_input_voltage (docs/ELECTRONICS-AND-SOFTWARE.md §9). The vendor nominal is the Duracell page's 'Volts 7.2' and the Deity sheet's '7.4V' — the two conventions for a 2S Li-ion nominal. A fresh 2S pack off the charger sits at 8.4 V (2 x 4.2 V); 8.2 V is what the runtime treats as full under load.",
+        "quote": "Weight 99 g Dimensions 70 × 38 × 20 mm Watt Hours 18.7 Volts 7.2 Capacity 2600 Colour Black",
+        "source": "duracell",
+        "cite": "docs/duracell-dr5-np-f550-2600mah.html 'Additional information' table, verbatim (whitespace collapsed).",
+        "note": "2S: the Deity sheet says its pack 'Uses LG high-capacity 18650 cells'; the Duracell page does not name the cell. Two 18650s side by side is the only way to fill a 70 x 38 x 20 mm shell, which is consistent with the mesh — an inference, stated as one."
+      },
+      {
+        "need": "ground",
+        "name": "BAT-",
+        "direction": "output",
+        "note": "the pack's negative terminal; whether the pack's own protection FETs sit in this leg (as an S-8252-class protector would put them) is CANNOT DETERMINE — the Deity sheet claims 'Over Charge Protection' and 'Short Circuit Protection'; the Duracell page claims nothing."
+      }
+    ],
+    "capacity": {
+      "mAh": 2600,
+      "Wh": 18.7,
+      "quote": "Replacement Sony NP-F330/NP-F550 Battery 7.2V 2600mAh SKU: DR5",
+      "source": "duracell",
+      "cite": "docs/duracell-dr5-np-f550-2600mah.html page heading and 'Additional information': 'Watt Hours 18.7', 'Capacity 2600'. 7.2 V x 2.6 Ah = 18.72 Wh, so the page's 18.7 Wh is the nominal-voltage product. PRESS KIT AGREEMENT: Pollen states 2600 mAh (docs/ELECTRONICS-AND-SOFTWARE.md §9) — the capacity matches this class of pack, which is the only reason Duracell's DR5 is the representative and not Deity's 3350 mAh.",
+      "runtime_h_claimed_by_pollen": 1.0,
+      "runtime_basis": "press kit '~1 h' (R1 §9) — 18.7 Wh / 1 h ≈ 19 W average, a number nobody here measured."
+    },
+    "mass_g": {
+      "g": 99,
+      "quote": "Weight 99 g",
+      "source": "duracell",
+      "cite": "docs/duracell-dr5-np-f550-2600mah.html 'Additional information' — Duracell's DR5, a shipping/product weight for THAT pack; the fitted pack's mass is CANNOT DETERMINE (docs/PARTS.md §6 lists it as such)."
+    },
+    "cell_type_evidence": {
+      "quote": "Uses LG high-capacity 18650 cells",
+      "source": "deity",
+      "cite": "docs/deity-np-f550-3350mah-datasheet.pdf p.1 Features; that sheet also states '7.4V 3350mAh (24.79Wh)' and 'Compatible with Sony L-Series Devices'. Evidence that NP-F550-shape packs are built from two 18650 cells — for Deity's pack; not proof for the fitted one.",
+      "deity_capacity_quote": "7.4V 3350mAh (24.79Wh)"
+    },
+    "unknowns": [
+      "SONY'S OWN SPECIFICATION (the form-factor authority) NOT FETCHED. Tried 2026-09-02, all refused: https://www.sony.com.au/electronics/support/camera-camcorder-accessories-batteries-chargers/np-f550/specifications (403 curl, 403 WebFetch); https://www.sony.co.uk/electronics/support/camera-camcorder-accessories-batteries-chargers/np-f550/specifications (403, 403); https://www.sony.com/electronics/support/camera-camcorder-accessories-batteries-chargers/np-f550/specifications (403); https://www.sony-asia.com/electronics/support/product/np-f550/manuals (403); https://www.sony.com.hk/... (404); https://www.sony.jp/handycam/products/NP-F550/spec.html (404); https://pro.sony/ue_US/products/camcorder-batteries/np-f550 (404); https://electronics.sony.com/imaging/imaging-accessories/all-batteries-chargers/p/npf550 (redirected to /not-found). A search-engine snippet quoting 'DC 7.2V / 1,500mAh / 10.8Wh / 38.4 x 20.6 x 70.8mm / Approx. 95g' for Sony's page was seen and is NOT recorded as a figure — an answer box is not a source (elec-datasheets skill). Manualslib/manualzz copies of Sony's leaflet exist and are not vendor hosts.",
+      "THE FITTED PACK'S MAKER, CELL, PROTECTION CIRCUIT AND CERTIFICATION MARKS (UN 38.3 transport test, IEC 62133-2 safety): CANNOT DETERMINE — a shipped unit's label settles it. Neither fetched page names a standard; no `standard` ledger row is written.",
+      "CONTACT PINOUT: CANNOT DETERMINE — see pinout.why.",
+      "INTERNAL RESISTANCE, MAX CONTINUOUS DISCHARGE, CHARGE RATE: stated by neither fetched page. The Microduck draws through 15 XL330 servos on the raw pack (docs/ELECTRONICS-AND-SOFTWARE.md §3.4) — the peak current those pull is not in any source here either.",
+      "WHETHER 2600 mAh IS THE PRESS KIT'S NOMINAL OR A MEASURED FIGURE: the press kit says 'provisional' about several specs (R1 §19)."
+    ]
+  }
+}

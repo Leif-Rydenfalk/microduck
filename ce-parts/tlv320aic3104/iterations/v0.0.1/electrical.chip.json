@@ -1,0 +1,101 @@
+{
+ "$parts_folder": 1,
+ "kind": "chip",
+ "record": {
+  "part": "tlv320aic3104",
+  "part_note": "TI TLV320AIC3104 low-power stereo audio codec — the codec Pollen's device-tree overlay puts on the Robot HAT: research/raw/deploy_audio_aic3104-i2c3.dts, node compatible = \"ti,tlv320aic3x\" at I2C address 0x18 on I2C3 (docs/ELECTRONICS-AND-SOFTWARE.md §7). Everything here was read off datasheet.pdf IN THIS FOLDER, fetched 2026-09-02 from TI's own server.",
+  "manufacturer": "Texas Instruments",
+  "description": "p.1 verbatim: 'TLV320AIC3104 Low-Power Stereo Audio Codec for Portable Audio and Telephony'. p.4 verbatim: 'support for all standard audio rates from a wide range of available MCLKs, varying from 512 kHz to 50 MHz' and 'a digital I/O supply of 1.1 V to 3.6 V. The device is available in a 5-mm × 5-mm 32-pin VQFN package.'",
+  "fetched": true,
+  "datasheet_url": "https://www.ti.com/lit/ds/symlink/tlv320aic3104.pdf",
+  "datasheet_rev": "p.1 header verbatim: 'SLAS510G – MARCH 2007 – REVISED FEBRUARY 2021'. PDF title: 'TLV320AIC3104 Low-Power Stereo Audio Codec for Portable Audio and Telephony datasheet (Rev. G)'. 103 pages. HTTP 200, 3189462 bytes, fetched 2026-09-02 with curl and a browser User-Agent.",
+  "identity_vs_fitted": "MATCH ON NAME ONLY. The overlay names the driver 'ti,tlv320aic3x' (a family driver) and the card 'aic3104'; the deploy file is named aic3104-i2c3.dts. The HAT is not published, so the package variant fitted is CANNOT DETERMINE — SLAS510G lists one package (VQFN-32 RHB), so there is nothing to get wrong on that axis unless a different family member is fitted.",
+  "package": "p.1 table: 'TLV320AIC3104 | VQFN (32) | 5.00 mm × 5.00 mm'. Outline RHB0032E, p.100–102 ('VQFN - 1 mm max height').",
+  "used_by": [
+   "microduck-robot-hat-pcb"
+  ],
+  "absolute_max": "§8.1 Absolute Maximum Ratings, p.7, verbatim rows: 'AVDD to AVSS, DRVDD to DRVSS | –0.3 | 3.9 | V'; 'AVDD to DRVSS | –0.3 | 3.9 | V'; 'IOVDD to DVSS | –0.3 | 3.9 | V'; 'DVDD to DVSS | –0.3 | 2.5 | V'; 'AVDD to DRVDD | –0.1 | 0.1 | V'; 'Digital input voltage to DVSS | –0.3 | IOVDD + 0.3 | V'; 'Analog input voltage to AVSS | –0.3 | AVDD + 0.3 | V'; 'Operating temperature | –40 | 85 | °C'.",
+  "supplies": [
+   {
+    "name": "AVDD, DRVDD1/2",
+    "rail": null,
+    "v_min": 2.7,
+    "v_typ": 3.3,
+    "v_max": 3.6,
+    "cite": "§8.3 Recommended Operating Conditions, p.7: 'AVDD, DRVDD1/2(1) | Analog supply voltage | 2.7 | 3.3 | 3.6 | V'. Pins AVDD 25, DRVDD 18 and 24 (Table 7-1 p.5)."
+   },
+   {
+    "name": "DVDD",
+    "rail": null,
+    "v_min": 1.525,
+    "v_typ": 1.8,
+    "v_max": 1.95,
+    "cite": "§8.3 p.7: 'DVDD(1) | Digital core supply voltage | 1.525 | 1.8 | 1.95 | V'. Pin 32."
+   },
+   {
+    "name": "IOVDD",
+    "rail": null,
+    "v_min": 1.1,
+    "v_typ": 1.8,
+    "v_max": 3.6,
+    "cite": "§8.3 p.7: 'IOVDD(1) | Digital I/O supply voltage | 1.1 | 1.8 | 3.6 | V'. Pin 7. 3.3 V I/O is inside the band, so a 3.3 V I2C3/I2S3 from the RK3566 needs no level shift IF the HAT feeds IOVDD 3.3 V — which rail the HAT uses is CANNOT DETERMINE."
+   }
+  ],
+  "current_mA": {
+   "rail": null,
+   "typical": null,
+   "typical_basis": "NOT A SINGLE NUMBER — the sheet gives per-mode rows, §8.x 'CURRENT CONSUMPTION – DRVDD = AVDD = IOVDD = 3.3 V, DVDD = 1.8 V', p.12, verbatim: 'IDRVDD + IAVDD | Stereo DAC playback to lineout, fS = 48 ksps, I2S slave, no signal | 4.9' mA and 'IDVDD | 2.3' mA; 'IDRVDD + IAVDD | Stereo ADC record, fS = 48 ksps, I2S slave, AGC off, no signal | 4.31(6)' mA and 'IDVDD | 2.45(6)' mA; 'IDRVDD + IAVDD | Stereo DAC playback to stereo single-ended headphone, fS = 48 ksps, I2S slave, no signal | 6.7' mA. All 'no signal' — the sheet gives no figure for current INTO a speaker load, so speaker-drive current is CANNOT DETERMINE.",
+   "peak": null,
+   "sleep": null,
+   "cite": "p.12, CURRENT CONSUMPTION block of the electrical characteristics, conditions 'At 25°C, AVDD = DRVDD = IOVDD = 3.3 V, DVDD = 1.8 V, fS = 48 kHz, 16-bit audio data'."
+  },
+  "logic": {
+   "vih_min": null,
+   "vil_max": null,
+   "three_v3_tolerant": true,
+   "derived": true,
+   "cite": "IOVDD band 1.1–3.6 V (§8.3 p.7) — 3.3 V I/O is inside the recommended band, which is what 'tolerant' means here; VIH/VIL are expressed relative to IOVDD in the digital-characteristics table and are left null rather than transcribed as absolute numbers ('When IOVDD < 1.6 V, minimum VIH is 1.1 V', footnote (5))."
+  },
+  "interface": "I2C (control) + I2S/left-justified/right-justified/DSP audio serial bus",
+  "i2c_address": "§10.5.1 I2C Control Interface, p.45, verbatim: 'The TLV320AIC3104 supports the I2C control protocol using 7-bit addressing and is capable of both standard and fast modes.' 'The TLV320AIC3104 responds to the I2C address of 001 1000.' 001 1000b = 0x18 is ARITHMETIC; the sheet prints the binary. FIXED — no address pins. Matches the overlay's 0x18.",
+  "mclk": "§10.x Audio Clock Generation, p.26, verbatim: 'The device can accept an MCLK input from 512 kHz to 50 MHz, which can then be passed through either a programmable divider or a PLL to get the proper internal audio master clock required by the device. The BCLK input can also be used to generate the internal audio master clock.' The overlay's 12 MHz MCLK is inside the band.",
+  "pinout": {
+   "$about": "Table 7-1 Pin Functions, p.5–6, pdftotext -layout read of the table (NOT a rendered-drawing read; the p.5 RHB bottom-view drawing was not rendered). Only the pins the Microduck's overlay/wiring is expected to touch are listed; the full 32-pin map is in the sheet.",
+   "VQFN-32 RHB": {
+    "1": "MCLK",
+    "3": "WCLK",
+    "7": "IOVDD",
+    "8": "SCL",
+    "9": "SDA",
+    "10": "MIC1LP/LINE1LP",
+    "11": "MIC1LM/LINE1LM",
+    "12": "MIC1RP/LINE1RP",
+    "13": "MIC1RM/LINE1RM",
+    "14": "MIC2L/LINE2L/MICDET",
+    "15": "MICBIAS",
+    "16": "MIC2R/LINE2R",
+    "18": "DRVDD",
+    "19": "HPLOUT",
+    "20": "HPLCOM",
+    "22": "HPRCOM",
+    "24": "DRVDD",
+    "25": "AVDD",
+    "27": "LEFT_LOP",
+    "28": "LEFT_LOM",
+    "29": "RIGHT_LOP",
+    "30": "RIGHT_LOM",
+    "31": "RESET",
+    "32": "DVDD"
+   },
+   "verdict": "PASS",
+   "verdict_why": "one reading (table text) — pin numbers and names copied verbatim from Table 7-1; BCLK/DIN/DOUT numbers were not transcribed and are absent, not guessed."
+  },
+  "unknowns": [
+   "THE COMMUNITY'S 'Mic3R' DOES NOT EXIST ON THIS CHIP. docs/ELECTRONICS-AND-SOFTWARE.md §7 carries '[C-elec] codec input Mic3R mono'. SLAS510G has ZERO occurrences of the string 'MIC3' in 103 pages (grep of the pdftotext output, 2026-09-02); its inputs are MIC1LP/LM, MIC1RP/RM (differential-capable) and MIC2L, MIC2R (single-ended), Table 7-1 p.5–6. 'Mic3R' is therefore either a name from a different family member's register map or an ALSA control label, not a pin of this device. Which physical input the microphone actually uses: CANNOT DETERMINE — the HAT schematic settles it.",
+   "Which HAT rail feeds AVDD/DRVDD (2.7–3.6 V), DVDD (1.525–1.95 V) and IOVDD (1.1–3.6 V): CANNOT DETERMINE. Three supply domains means the HAT carries at least one 1.8 V regulator or uses the RK3566's — neither is in any fetched document.",
+   "MCLK origin: the overlay's 12 MHz 'fixed-clock' node is consistent with the RK3566's I2S3_MCLK_M0 on 40-pin header pin 13 (part:radxa-zero-3w electrical.host.json) but no document says the HAT wires pin 13 to codec pin 1. CANNOT DETERMINE.",
+   "Speaker drive: the line outputs are specified into 'Stereo line output load resistance 10 kΩ' (§8.3 p.7) and the headphone drivers into 16 Ω; whether the speaker hangs on HPLOUT/HPRCOM directly or on an external amplifier: CANNOT DETERMINE.",
+   "Current figures are 'no signal' rows; no inrush figure is given anywhere in the sheet."
+  ]
+ }
+}

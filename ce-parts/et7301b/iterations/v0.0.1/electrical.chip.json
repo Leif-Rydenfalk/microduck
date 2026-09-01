@@ -1,0 +1,69 @@
+{
+ "$parts_folder": 1,
+ "kind": "chip",
+ "record": {
+  "part": "et7301b",
+  "part_note": "Etek Microelectronics ET7301B USB Type-C/PD controller — THE PART THE RADXA ZERO 3W ACTUALLY FITS as U6 (schematic v1.11 p.17 and v1.12 p.17, 'USB Port' page, next to J9 'USB_TYPEC_115H0'; both PDFs in part:radxa-zero-3w/iterations/v0.0.1/docs/fetched/). Pollen's overlay names it 'fusb302@22' (part:fusb302 explains). Everything here was read off datasheet.pdf IN THIS FOLDER, fetched 2026-09-02 from etekmicro.com.",
+  "manufacturer": "Etek Microelectronics",
+  "description": "p.1 verbatim: 'The ET7301B is a programmable USB Type-Control IC. It supports the USB Type-C connector application with Configuration Channel (CC) control logic detection and indication functions.' 'The ET7301B integrates the physical layer of the USB BMC PD (Power Delivery) protocol to allow up to 100W of power and role swap.' Features: 'Full Type-C Specification 1.1 support', 'USB Power Delivery(PD) Specification 2.0, Version 1.1 Support', 'Dead Battery Support (SNKMode Support when No Power Applied)', 'Supply Voltage:2.8V to 5.5V'.",
+  "fetched": true,
+  "datasheet_url": "https://www.etekmicro.com/wp-content/uploads/datasheets/ET7301BY_datasheet.pdf",
+  "datasheet_rev": "Every page footer verbatim: 'Rev 1.2'. No date printed on p.1 (none found by grep). Title block p.1: 'ET7301B'. 32 pages. HTTP 200, 1155578 bytes, fetched 2026-09-02 from the vendor's own site. NOTE the URL says ET7301BY (the QFN14 orderable); the document covers both packages (p.1 table).",
+  "identity_vs_fitted": "Schematic v1.12 p.17 reference U6 value 'ET7301B'; the symbol's pins run 1–14 plus an 'ePAD' (pin 15), which is the QFN14 shape → the orderable is ET7301BY (p.1: 'ET7301BY | QFN14 | 2.5mm×2.5mm'). PACKAGE INFERRED from the schematic pin count, not read off a BOM. Which ZERO 3W revision Pollen fits: CANNOT DETERMINE — both fetched revisions carry the same part.",
+  "package": "p.1 verbatim table: 'ET7301B | WLCSP | 1.22mm×1.2mm | Level 1'; 'ET7301BY | QFN14 | 2.5mm×2.5mm | Level 1'. Package drawings p.30 (WLCSP9) and p.31 ('QFN14(2.5*2.5)').",
+  "used_by": [
+   "radxa-zero-3w"
+  ],
+  "absolute_max": "p.4 Absolute Maximum Ratings, verbatim: 'VBUS | VBUS Voltage to GND | -0.3 | 28 | V'; 'VDD | Supply Voltage to GND | -0.3 | 6 | V'; 'VIN | Input Voltage | -0.3 | 6 | V'; 'TJ | Junction Temperature | +150 | °C'; 'PD | Power Dissipation | 400 | mW'; 'ESD/Electrostatic Discharge Capability | Human Body Model, JESD22-A114 | 4 | kV'; 'Charged Device Model,JESD22-C101 | 1 | kV'.",
+  "supplies": [
+   {
+    "name": "VDD",
+    "rail": null,
+    "v_min": 2.8,
+    "v_typ": null,
+    "v_max": 5.5,
+    "cite": "p.4 Recommended Operating Conditions: 'VDD | Power Supply Voltage To GND | GND=0V | 2.8 | 5.5 | V'. No typical column — v_typ null by observation. On the ZERO 3W, U6 pin VDD is on VCC_3V3 (schematic v1.12 p.17 net 'VCC_3V3' at the VDD pin, C208/C209 decoupling)."
+   },
+   {
+    "name": "VBUS",
+    "rail": null,
+    "v_min": 4.0,
+    "v_typ": null,
+    "v_max": 28.0,
+    "cite": "p.4: 'VBUS | VBUS Voltage To GND | GND=0V | 4.0 | 28 | V'."
+   },
+   {
+    "name": "VCONN",
+    "rail": null,
+    "v_min": 2.7,
+    "v_typ": null,
+    "v_max": 5.5,
+    "cite": "p.4: 'VCONN | VCONN Supply Voltage To GND | GND=0V | 2.7 | 5.5 | V'; 'IVCONN | VCONN Supply Current | 560 | mA'. Schematic v1.12 p.17: VCONN pins 12/13 on VCC_SYS."
+   }
+  ],
+  "current_mA": {
+   "rail": null,
+   "typical": null,
+   "peak": null,
+   "sleep": null,
+   "cite": "supply-current rows were not transcribed from the electrical-characteristics table (p.4–5); null rather than guessed."
+  },
+  "logic": {
+   "vih_min": null,
+   "vil_max": null,
+   "three_v3_tolerant": true,
+   "derived": true,
+   "cite": "VDD band 2.8–5.5 V (p.4) and the board runs it at VCC_3V3 (schematic)."
+  },
+  "interface": "I2C",
+  "interface_max_hz": null,
+  "i2c_address": "p.18 'I2C Interface', verbatim: 'The ET7301B includes a full I2C slave controller. The I2C slave fully complies with the I2C specification Version 6 requirements. This block is designed for fast mode.' Table 3. I2C Slave Address: 'Slave Address | 8 | 0 1 0 0 0 1 0 | R/W' → 7-bit 0100010b = 0x22 (arithmetic). Matches the device-tree node 'fusb302@22' on the RK3566 I2C3 controller (fe5c0000), M1 pin-mux GPIO3_B5/B6 — which the schematic shows as I2C3_SCL_M1/SDA_M1 at U6 SCL/SDA.",
+  "cc_resistances": "p.4: 'RDEVICE | Device Pull-down Resistance (VDD>3.0 V) | 4.59 | 5.10 | 5.61 | kΩ'; 'Device Pull-down Resistance (VDD=0V. CCx=2.2V) | 4.08 | 5.10 | 6.20 | kΩ' — the Rd that lets a dead/disabled controller still be seen as a sink by a Type-C source (Pollen's overlay relies on this behaviour; docs/ELECTRONICS-AND-SOFTWARE.md §9 — that Rd stays present with the I2C node disabled is consistent with 'Dead Battery Support', not proven here).",
+  "unknowns": [
+   "Register-level compatibility with the FUSB302 (why Linux's 'fcs,fusb302' driver runs it) is Etek's claim and the Radxa DT's practice; not verified register-by-register here.",
+   "Package = QFN14 is inferred from the schematic symbol's 15 pins (14 + ePAD), not read from a BOM.",
+   "No date on the datasheet; 'Rev 1.2' only.",
+   "Power path with the overlay applied (5 V still delivered with the controller disabled): Pollen's overlay comment, not measured."
+  ]
+ }
+}

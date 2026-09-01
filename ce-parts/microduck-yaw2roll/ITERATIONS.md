@@ -3,4 +3,4 @@
 
 | iteration | date | why it exists |
 |---|---|---|
-| v0.0.1 | 2026-09-01 | created — nothing measured yet |
+| v0.0.1 | 2026-09-01 | rebuilt from Pollen's published mesh with cecad.meshfeatures (cylinders + profile) and meshslice, graded by cad-refcheck against that mesh — r1 PASS 0.79/0.27 mm, r2 (2026-09-02, -x blend arc fixed) PASS 0.05/0.05 mm (see component.json why + evidence/ledger.jsonl) |

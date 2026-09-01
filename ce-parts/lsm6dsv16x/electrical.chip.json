@@ -1,0 +1,92 @@
+{
+ "$parts_folder": 1,
+ "kind": "chip",
+ "$from": "chips.json",
+ "record": {
+  "part": "LSM6DSV16X",
+  "part_note": "The control IMU of the Microduck, on Pollen's imu_to_dxl v2 board (DXL bus ID 200) - imu.rs:1-6 names the chip and its SFLP block. The BOARD (MCU, transceiver, schematic, firmware) is not in Pollen's repository; this record is the CHIP only. Sibling on the workshop shelf: ce-parts/LSM6DSOX (a different device, same LGA-14L body).",
+  "manufacturer": "STMicroelectronics",
+  "description": "Cover, p.1 verbatim: '6-axis inertial measurement unit (IMU) and AI sensor with embedded sensor fusion, Qvar for high-end applications'. Product summary p.1: 'Order code | LSM6DSV16X LSM6DSV16XTR', 'Temp. range [degC] | -40 to +85', 'Package | LGA-14L (2.5 x 3.0 x 0.83 mm)', 'Packing | Tray | Tape and reel'.",
+  "fetched": true,
+  "datasheet_url": "https://www.st.com/resource/en/datasheet/lsm6dsv16x.pdf",
+  "datasheet_rev": "DS13510 - Rev 4 - May 2023. 198 pages; p.1 footer reads verbatim 'DS13510 - Rev 4 - May 2023   www.st.com' and every later page 'DS13510 - Rev 4   page N/198'. pdfinfo: Author 'STMICROELECTRONICS', Creator 'C2 v20.4.0000 build 240 - c2_rendition_config : Techlit_Active', CreationDate 2023-05-26. Fetched 2026-09-02 from ST's own URL (HTTP 200, 5112242 bytes) - NOT a mirror. CURRENCY: the st.com product page fetched the same day links this same file and shows the status badge 'Active' ('Product is in volume production'); a web search for a Rev 5 / Rev 6 found none (only Rev 3 - March 2023 and Rev 4 - May 2023 exist in the index). Rev 4 is the current document as of the fetch date.",
+  "package": "Cover p.1: 'LGA-14L (2.5 x 3.0 x 0.83 mm) typ.' Section 19.1, Figure 33, p.175/198, verbatim title 'LGA-14L 2.5 x 3.0 x 0.86 mm package outline and mechanical data'; OUTER DIMENSIONS table: 'Length [L] | 2.50 | +/-0.1', 'Width [W] | 3.00 | +/-0.1', 'Height [H] | 0.86 | MAX'; bottom view: '14x 0.25+/-0.05' x '14x 0.475+/-0.05' pads on 0.5 pitch, 'General tolerance is +/-0.1mm unless otherwise specified'. NOTE the cover says 0.83 typ, the drawing 0.86 MAX - same package, two figures, both recorded.",
+  "used_by": [],
+  "used_by_kind": "module",
+  "rails": [],
+  "absolute_max": "Section 4.5, Table 9, p.19/198, verbatim: 'Vdd | Supply voltage | -0.3 to 4.8 | V'; 'TSTG | Storage temperature range | -40 to +125 | degC'; 'Sg | Acceleration g for 0.2 ms | 20,000 | g'; 'ESD | Electrostatic discharge protection (HBM) | 2 | kV'; 'Vin | Input voltage on any control pin (including CS, SCL/SPC, SDA/SDI/SDO, SDO/SA0) | -0.3 to Vdd_IO +0.3 | V'. 'Note: Supply voltage on any pin should never exceed 4.8 V.'",
+  "supplies": [
+   {
+    "name": "Vdd",
+    "rail": null,
+    "v_min": 1.71,
+    "v_typ": 1.8,
+    "v_max": 3.6,
+    "cite": "Section 4.3, Table 4 'Electrical characteristics', p.14/198, row verbatim: 'Vdd | Supply voltage | (blank) | 1.71 | 1.8 | 3.6 | V'. Cover p.1: 'Analog supply voltage: 1.71 V to 3.6 V'. Footnote 1: 'Typical specifications are not guaranteed.'"
+   },
+   {
+    "name": "Vdd_IO",
+    "rail": null,
+    "v_min": 1.08,
+    "v_typ": null,
+    "v_max": 3.6,
+    "cite": "Table 4, p.14/198, verbatim: 'Vdd_IO | Power supply for I/O | (blank) | 1.08 | (Typ. cell empty) | 3.6 | V'. Cover p.1: 'Independent IO supply (extended range: 1.08 V to 3.6 V)'. A separate rail; it sets the digital thresholds (logic.cite)."
+   }
+  ],
+  "current_mA": {
+   "rail": "3V3",
+   "rail_basis": "Table 4 attributes current to the DEVICE, not per rail. Which rail imu_to_dxl v2 feeds Vdd and Vdd_IO from is CANNOT DETERMINE (board not published); '3V3' is the only rail inside both supply bands that a DXL-bus MCU board would plausibly carry, and is named so a budget has a rail to put the figure on - it is not a vendor statement.",
+   "typical": 0.65,
+   "typical_basis": "Table 4, p.14/198, Typ. column, verbatim: 'IddHP | Gyroscope and accelerometer current consumption in high-performance mode | 0.65 | mA'. Cover p.1: 'Power consumption: 0.65 mA in combo high-performance mode'. Accelerometer alone: 'LA_IddHP | ... high-performance mode | 190 | uA', 'LA_IddNM | ... normal mode | 100 | uA'.",
+   "peak": null,
+   "peak_basis": "NOT SPECIFIED. Every current row of Table 4 fills only the Typ. column (Min./Max. empty) and footnote 1 reads 'Typical specifications are not guaranteed.' No inrush figure; only 'Ton | Turn-on time - gyroscope | 30 | ms'.",
+   "sleep": 0.0026,
+   "sleep_basis": "Table 4, p.14/198, verbatim: 'IddPD | Gyroscope and accelerometer current consumption during power-down | 2.6 | uA'.",
+   "excludes": null,
+   "caveats": [
+    "Table 4 states no characterisation voltage in its header (unlike the LSM6DSOX sheet); Table 5 (Qvar) and Table 7 (SPI timing) are '@ Vdd_IO = 1.8 V, T = 25 degC'. No current-vs-supply curve exists, so 0.65 mA cannot be derated to 3.3 V from this document.",
+    "The SFLP block's own current is not broken out; the figure is the combo sensor in high-performance mode."
+   ],
+   "cite": "Section 4.3, Table 4 'Electrical characteristics', p.14/198."
+  },
+  "logic": {
+   "vih_min": null,
+   "vil_max": null,
+   "three_v3_tolerant": true,
+   "derived": false,
+   "cite": "Table 4, p.14/198, verbatim: 'VIH | Digital high-level input voltage | (Min.) 0.7 * Vdd_IO | V'; 'VIL | Digital low-level input voltage | (Max.) 0.3 * Vdd_IO | V'; 'VOH | High-level output voltage | IOH = 4 mA(2) | (Min.) Vdd_IO - 0.2 | V'; 'VOL | Low-level output voltage | IOL = 4 mA(2) | (Max.) 0.2 | V'; footnote 2: '4 mA is the maximum driving capability'. Absolute volts are NOT printed and are left null here (the LSM6DSOX record chose to compute them; this one does not, because Vdd_IO on the imu_to_dxl board is unknown). Vdd_IO max 3.6 V, so 3.3 V I/O is inside the band."
+  },
+  "interface": "I2C / SPI (3- or 4-wire) / MIPI I3C v1.1 on the same pins; CS high selects I2C",
+  "interface_max_hz": 1000000,
+  "interface_cite": "Section 5.1, p.21/198, verbatim: 'The serial interfaces are mapped to the same pins. To select/exploit the I2C interface, the CS line must be tied high (that is, connected to Vdd_IO).' and 'The I2C interface is implemented with fast mode (400 kHz) I2C standards as well as with fast mode plus (1000 kHz).' Table 8 'I2C slave timing values', p.18/198: 'f(SCL) | SCL clock frequency | 0 | 400 | 0 | 1000 | kHz', 'CB | Capacitive load for each bus line | 400 | 550 | pF'; footnotes: '1. Data based on standard I2C protocol requirement, not tested in production. 2. Data for I2C fast mode and I2C fast mode plus have been validated by characterization, not tested in production.' SPI: 'compatible with SPI modes 0 and 3' (p.21).",
+  "i2c_address": "Section 5.1.1, p.22/198, verbatim: 'The slave address (SAD) associated to the LSM6DSV16X is 110101xb. The SDO/SA0 pin can be used to modify the less significant bit of the device address. If the SDO/SA0 pin is connected to the supply voltage, LSb is 1 (address 1101011b); else if the SDO/SA0 pin is connected to ground, the LSb value is 0 (address 1101010b).' = 0x6B / 0x6A 7-bit. Table 12: 'Read | 110101 | 0 | 1 | 11010101 (D5h)', 'Write | 110101 | 0 | 0 | 11010100 (D4h)'. Which the imu_to_dxl board straps: CANNOT DETERMINE.",
+  "who_am_i": "Section 9.13, p.64/198, verbatim: 'WHO_AM_I register (R). This is a read-only register. Its value is fixed at 70h.'",
+  "sensor": {
+   "gyro_full_scale": "Table 3 'Mechanical characteristics', p.12/198, 'G_FS | Angular rate measurement range | +/-125 / +/-250 / +/-500 / +/-1000 / +/-2000 / +/-4000 | dps'",
+   "gyro_sensitivity": "Table 3, p.12/198, 'G_So | Angular rate sensitivity(2)': 'FS = +/-125 dps | 4.375', 'FS = +/-250 dps | 8.75', 'FS = +/-500 dps | 17.50', 'FS = +/-1000 dps | 35', 'FS = +/-2000 dps | 70', 'FS = +/-4000 dps | 140' mdps/LSB. imu.rs:8-17 decodes +/-500 dps at 17.5 mdps/LSB - agrees with the +/-500 row.",
+   "accel_full_scale": "Table 3: 'LA_FS | Linear acceleration measurement range | +/-2 / +/-4 / +/-8 / +/-16 | g'; 'LA_So | Linear acceleration sensitivity | FS = +/-2 g | 0.061 ... FS = +/-16 g | 0.488 | mg/LSB'",
+   "gyro_noise": "Table 3: 'Rn | Rate noise density in high-performance mode(5) | 2.8 | mdps/sqrt(Hz)'; 'G_TyOff | Angular rate zero-rate level(4) | +/-1 | dps'; 'G_OffDr | Angular rate typical zero-rate level change vs. temperature(3) | +/-0.006 | dps/degC'",
+   "odr": "Table 20, p.33/198 'Accelerometer and gyroscope ODR selection in high-accuracy ODR mode', ODR_G_[3:0] rows: '0011 | 15 | 15.625 | 12.5', '0100 | 30 | 31.25 | 25', '0101 | 60 | 62.5 | 50', '0110 | 120 | 125 | 100', '0111 | 240 | 250 | 200', '1000 | 480 | 500 | 400', '1001 | 960 | 1000 | 800' ... (columns HAODR_SEL_[1:0] = 00 / 01 / 10). imu.rs expects '~100 Hz' - which column/row imu_to_dxl v2 configures: CANNOT DETERMINE.",
+   "operating_temperature": "Table 4, p.14/198: 'Top | Operating temperature range | -40 | +85 | degC'"
+  },
+  "sflp": {
+   "what": "Section 2.8 'Sensor fusion low power', p.8/198, verbatim: 'A sensor fusion low-power (SFLP) block is available in the LSM6DSV16X for generating the following data based on the accelerometer and gyroscope data processing: Game rotation vector, which provides a quaternion representing the attitude of the device; Gravity vector, which provides a three-dimensional vector representing the direction of gravity; Gyroscope bias, which provides a three-dimensional vector representing the gyroscope bias.'",
+   "enable": "p.8: 'The SFLP block is enabled by setting the SFLP_GAME_EN bit to 1 of the EMB_FUNC_EN_A (04h) embedded functions register.' 'The SFLP block can be reinitialized by setting the SFLP_GAME_INIT bit to 1 of the EMB_FUNC_INIT_A (66h)'.",
+   "odr": "Section 13.30 SFLP_ODR (5Eh), Table 324, p.139/198: 'SFLP_GAME_ODR_[2:0] | ODR configuration of the SFLP game algorithm: (000: 15 Hz; 001: 30 Hz; 010: 60 Hz; 011: 120 Hz (default); 100: 240 Hz; 101: 480 Hz)'",
+   "output_path": "p.3/198: 'The X, Y, Z quaternion components are stored in FIFO.' Section 6 FIFO, p.44/198: 'SFLP output data (quaternion, gyroscope bias, gravity vector)'. FIFO tag table p.110/198: '0x13 | SFLP game rotation vector', '0x16 | SFLP gyroscope bias', '0x17 | SFLP gravity vector'. EMB_FUNC_FIFO_EN_A, p.131/198: 'SFLP_GAME_FIFO_EN | Enables batching the game rotation vector (quaternion) values computed by the SFLP algorithm in the FIFO buffer. Default value: 0'.",
+   "accuracy": "Table 1 'Sensor fusion performance', p.8/198: Static accuracy 'heading / yaw | 0.5 deg. / 5 minutes', 'pitch | 1.5 deg.', 'roll | 1.5 deg.'; Low dynamic 'heading / yaw | 0.7 deg. / 5 minutes', 'pitch | 0.5 deg.', 'roll | 0.5 deg.'; High dynamic 'heading / yaw | 5.9 deg. / 5 minutes', 'pitch | 1.6 deg.', 'roll | 1.2 deg.'; 'Calibration time | 0.8 seconds(1)'; 'Orientation stabilization time | 0.7 seconds'.",
+   "number_format": "The datasheet states the half-precision format ONLY for the gyro-bias registers: Section 15.1.1, p.147/198, verbatim 'The value is expressed as half-precision floating-point format: SEEEEEFFFFFFFFFF (S: 1 sign bit; E: 5 exponent bits; F: 10 fraction bits).' It does NOT state the word format of the FIFO game-rotation-vector (tag 0x13) samples; imu.rs:8-17 decodes them as IEEE fp16 with w = sqrt(1 - x^2 - y^2 - z^2). The application note AN5763, named on the cover under 'Product resources', is where ST documents that and it was NOT fetched: CANNOT DETERMINE from DS13510 alone."
+  },
+  "application_circuit": "Section 7.1, Figure 28 'LSM6DSV16X electrical connections in mode 1', p.47/198: Vdd pin 8 and Vdd_IO pin 5 each decoupled with 'C1'/'C2' '100 nF' to GND (pins 6, 7); 'I2C configuration: Rpu Rpu ... SCL SDA ... Pull-up to be added Rpu=10kOhm' to Vdd_IO; CS pin 12 to Vdd_IO for I2C; pins 10, 11 'NC (1) Leave pin electrically unconnected and soldered to PCB'. Text verbatim: 'Power supply decoupling capacitors (C1, C2 = 100 nF ceramic) should be placed as near as possible to the supply pin of the device (common design practice).' Soldering: Section 18, p.174: 'The LGA package is compliant with the ECOPACK and RoHS standard.'; 'TN0018 (design and soldering)' named on the cover, not fetched.",
+  "unknowns": [
+   "The BOARD: imu_to_dxl v2's MCU, bus transceiver, schematic and firmware are not in Pollen's repository (docs/ELECTRONICS-AND-SOFTWARE.md §4.1); this record is the chip only.",
+   "SA0 strap (0x6A vs 0x6B), I2C vs SPI, ODR and HAODR mode, SFLP ODR, FS, and which rail feeds Vdd / Vdd_IO on imu_to_dxl v2: none published.",
+   "FIFO game-rotation-vector word format: not stated in DS13510 (only the gyro-bias registers are described as half-precision); AN5763 would settle it.",
+   "Peak / inrush current: not specified; all currents are Typ.-only and 'not guaranteed'.",
+   "Current at Vdd = 3.3 V: no current-vs-supply data.",
+   "VIH / VIL as volts: only 0.7 / 0.3 * Vdd_IO printed.",
+   "Package height: 0.83 mm typ (cover) vs 0.86 mm MAX (Figure 33) - both the vendor's; recorded, not reconciled.",
+   "400 kHz / 1 MHz I2C: 'not tested in production' (Table 8 footnotes)."
+  ]
+ }
+}

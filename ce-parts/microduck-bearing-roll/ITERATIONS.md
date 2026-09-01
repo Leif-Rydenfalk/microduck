@@ -3,4 +3,4 @@
 
 | iteration | date | why it exists |
 |---|---|---|
-| v0.0.1 | 2026-09-01 | created — nothing measured yet |
+| v0.0.1 | 2026-09-01 | rebuilt from Pollen's published mesh with cad-mjcf sections and cecad.meshfeatures, graded by cad-refcheck against that mesh — r1 PASS 0.002/0.002 mm, 5/5 features (see component.json why + evidence/ledger.jsonl) |

@@ -3,6 +3,191 @@
   "kind": "interfaces",
   "record": {
     "slug": "microduck-yaw2roll",
-    "interfaces": []
+    "frame": "Pollen's mesh frame for yaw2roll.stl: X across the leg 6..29 (centre 17.5), Y from the ear backs (-13.3) to the front face (12.5), Z from the lug tip (-5) to the ear tops (15.5). Hip-YAW axis = the line (17.5, -2, z); hip-ROLL axis = the line (17.5, y, 0). Same frame as bearing_roll.stl, hip_l.stl and the placed xl330/bearing geoms (spec/mesh-placements.json: geom pos (-17.5, -2, 12.5) quat (0, 1, 0, 0)), so the MJCF places it with no re-derivation. The body origin (= hip-yaw joint origin) is mesh (17.5, -2, 12.5).",
+    "units": "mm",
+    "interfaces": [
+      {
+        "name": "yaw_horn",
+        "frame": {
+          "origin_mm": [
+            17.5,
+            -2.0,
+            14.45
+          ],
+          "z_axis": [
+            0,
+            0,
+            1
+          ],
+          "x_axis": [
+            1,
+            0,
+            0
+          ]
+        },
+        "accepts": [
+          "connection:spline-xl330-horn"
+        ],
+        "role": "horn_face",
+        "what": "Top face of the Ø16.0 boss with 4 x Ø2.2 through holes on radius 6.0 at (±6, 0) and (0, ±6) — the XL330 horn's tapped pattern (xl330.stl: 4 x Ø1.6 on r 6.0 in each Ø16 boss face). Ø4.4 counterbores from the plate underside (z 9.5..11.5) take the screw heads, so the screws run +z through 2.95 mm of part into the horn. The trunk's hip-yaw XL330 horn (Ø16 x 3 boss) sits on this face.",
+        "source": "MEASURED off Pollen's mesh 2026-09-01/02: meshfeatures.cylinders boss Ø16 z 12.5..14.45; holes Ø2.2 at (17.5, 4) (17.5, -8) (23.5, -2) (11.5, -2); c'bores Ø4.4 centred z 10.5 len 2; xl330.stl horn pattern by the same tool"
+      },
+      {
+        "name": "yaw_bearing_seat",
+        "frame": {
+          "origin_mm": [
+            17.5,
+            -2.0,
+            12.5
+          ],
+          "z_axis": [
+            0,
+            0,
+            1
+          ],
+          "x_axis": [
+            1,
+            0,
+            0
+          ]
+        },
+        "accepts": [
+          "connection:press-fit-bearing-22x16x4"
+        ],
+        "role": "bearing_seat",
+        "what": "Ø16.0 x 1.95 boss (z 12.5..14.45) = the inner-race seat of the trunk's 22x16x4 hip-yaw bearing, with a Ø19.0 x 0.5 shoulder (z 12.0..12.5) as the inner race's thrust face (race OD 18.0, 0.5 mm radial clearance to the outer race ID 20.0). The MJCF puts that bearing at the hip-yaw joint origin with its axis +z; the bearing mesh spans 0..4 along its own axis, so it occupies z 12.5..16.5 here — the upper 2.05 mm of its bore rides the horn's Ø16 x 3 boss.",
+        "source": "MEASURED off Pollen's mesh 2026-09-01/02: meshfeatures.cylinders bosses Ø19 z 12..12.5 and Ø16 z 12.5..14.45; bearing placement spec/mesh-placements.json (seeed_bearing 22x16x4 in trunk_base at (6, 17.5, -5) = joint origin); bearing mesh by meshslice.intervals: inner race r 8..9, outer r 10..11, z 0..4"
+      },
+      {
+        "name": "roll_idler",
+        "frame": {
+          "origin_mm": [
+            17.5,
+            9.5,
+            0.0
+          ],
+          "z_axis": [
+            0,
+            -1,
+            0
+          ],
+          "x_axis": [
+            1,
+            0,
+            0
+          ]
+        },
+        "accepts": [
+          "connection:threaded-m2"
+        ],
+        "role": "axle_screw",
+        "what": "On the roll axis, on the inner face of the front block: a Ø5.0 x 1.8 stub (y 7.7..9.5) that enters the hip-roll XL330's rear at the axis, a Ø2.7 through hole (y 7.7..10.0) and a Ø5.5 x 2.5 counterbore from the front face (y 10.0..12.5) for the screw head. Ø2.7 is M2.5 close clearance or M2 loose; which screw and what it threads into on the XL330's rear is CANNOT DETERMINE from the sim mesh (its servo model is a solid Ø16 x 3 boss at both ends, overlapping this block) — Pollen's BOM or the XL330 idler drawing settles it.",
+        "source": "MEASURED off Pollen's mesh 2026-09-01/02: meshfeatures.cylinders boss Ø5 centre y 8.6 len 1.8; hole Ø2.7 centre y 8.85 len 2.3; c'bore Ø5.5 centre y 11.25 len 2.5; xl330 placement: its horn axis = this frame's y through (17.5, z 0), body y -13.5..9.5"
+      },
+      {
+        "name": "servo_screw_a",
+        "frame": {
+          "origin_mm": [
+            9.5,
+            9.5,
+            7.5
+          ],
+          "z_axis": [
+            0,
+            -1,
+            0
+          ],
+          "x_axis": [
+            1,
+            0,
+            0
+          ]
+        },
+        "accepts": [
+          "connection:threaded-m2"
+        ],
+        "role": "servo_screw",
+        "what": "Ø2.4 through (y 9.5..10.3) with Ø4.84 x 2.2 counterbore from the front face (y 10.3..12.5); lands on the hip-roll XL330's upper through-hole at its (y +8, z 7.5) — Ø2.0 x 23 in xl330.stl, 8 mm off the roll axis and 7.5 mm above it. The screw is short: bearing_roll's Ø1.8 peg enters the same hole from the far end.",
+        "source": "MEASURED off Pollen's mesh 2026-09-01/02: meshfeatures.cylinders holes Ø2.4 at (9.5, 9.9, 7.5) len 0.8, c'bores Ø4.84 centre y 11.4 len 2.2; xl330.stl through-holes Ø2.0 at (0, ±8, 7.5) and (0, ±8, -22.5) len 23"
+      },
+      {
+        "name": "servo_screw_b",
+        "frame": {
+          "origin_mm": [
+            25.5,
+            9.5,
+            7.5
+          ],
+          "z_axis": [
+            0,
+            -1,
+            0
+          ],
+          "x_axis": [
+            1,
+            0,
+            0
+          ]
+        },
+        "accepts": [
+          "connection:threaded-m2"
+        ],
+        "role": "servo_screw",
+        "what": "As servo_screw_a, 16.0 mm across at x 25.5 (the servo's other upper hole).",
+        "source": "MEASURED off Pollen's mesh 2026-09-01/02: same features at x 25.5"
+      },
+      {
+        "name": "ear_tap_a",
+        "frame": {
+          "origin_mm": [
+            8.5,
+            -13.3,
+            12.5
+          ],
+          "z_axis": [
+            0,
+            -1,
+            0
+          ],
+          "x_axis": [
+            1,
+            0,
+            0
+          ]
+        },
+        "accepts": [
+          "connection:threaded-m2"
+        ],
+        "role": "tapped_boss",
+        "what": "Ø2.05 x 4.0 blind hole along y (y -13.3..-9.3) in the 5 mm wide, r 2.5 semicircular-topped ear at the back of the plate; bearing_roll's Ø2.2 ear hole sits on the same (x, z). Ø2.05 modelled in a printed part reads as an M2 self-tapping hole (the part's clearance holes are 2.2 and 2.4); not big enough for an insert.",
+        "source": "MEASURED off Pollen's mesh 2026-09-01/02: meshfeatures.cylinders hole Ø2.05 axis y centre (8.5, -11.3, 12.5) len 4; ear outline by profile x-rays at z 12.2 and z-rays at y -12"
+      },
+      {
+        "name": "ear_tap_b",
+        "frame": {
+          "origin_mm": [
+            26.5,
+            -13.3,
+            12.5
+          ],
+          "z_axis": [
+            0,
+            -1,
+            0
+          ],
+          "x_axis": [
+            1,
+            0,
+            0
+          ]
+        },
+        "accepts": [
+          "connection:threaded-m2"
+        ],
+        "role": "tapped_boss",
+        "what": "As ear_tap_a, 18.0 mm across at x 26.5.",
+        "source": "MEASURED off Pollen's mesh 2026-09-01/02: same feature at x 26.5"
+      }
+    ]
   }
 }

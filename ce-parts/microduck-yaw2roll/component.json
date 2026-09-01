@@ -3,13 +3,22 @@
   "kind": "part",
   "record": {
     "slug": "microduck-yaw2roll",
-    "title": "microduck-yaw2roll",
-    "verdict": "CANNOT DETERMINE",
-    "why": "created by `bin/triad new part` — nothing measured yet",
-    "sector": null,
-    "subsector": null,
-    "lifecycle": "unknown",
-    "origin": null,
-    "origin_why": null
+    "title": "Microduck hip-yaw link — the 'yaw2roll' body of Pollen's MJCF: 23 x 25.8 x 20.5 mm PLA plate with the Ø16 yaw-bearing boss and XL330 horn pattern on top, two 1.4 mm walls and a front block that carry the hip-roll XL330, ears for the bearing_roll plate",
+    "verdict": "PASS",
+    "why": "cad/part.py builds one valid solid (bin/cad part:microduck-yaw2roll, 2026-09-02) and ce-cad/bin/cad-refcheck grades it against Pollen's own published mesh reference/pollen-microduck-rl/assets/yaw2roll.stl: p95 surface distance 0.05 mm both ways (mean 0.021 / 0.027, median 0.000), max 1.24 / 1.30, bbox delta [0.0, 0.0, 0.0] mm, 19/19 holes and bosses matched, 0 unmatched, volume ratio 1.0055. Two rounds: r1 (2026-09-01) PASSed at 0.79 / 0.27 mm with a 4.55 mm max — the -x blend arc of the front block swept the wrong way (out/refcheck/yaw2roll/r1/overlay_left.png); r2 fixed that one arc (out/refcheck/yaw2roll/r2). The evidence run is the ledger artifact.",
+    "sector": "structural",
+    "subsector": "bracket",
+    "lifecycle": "prototype",
+    "origin": "generated",
+    "origin_why": "modelled by hand in cecad from measurements taken off Pollen Robotics' decimated visual mesh (CC BY-SA-NC sim asset) with cad-mjcf sections, cecad.meshfeatures (cylinders + the ray-cast profile/intervals written for this part) and cecad.meshslice; nobody has Pollen's CAD and no physical part has been measured. Admitted through the TRIAD.md door: evidence/ledger.jsonl + computed trust.json.",
+    "material": "PLA",
+    "process": "FDM",
+    "source_reference": "reference/pollen-microduck-rl/assets/yaw2roll.stl (Onshape doc 804927696f06d877f3f1803e, exported by onshape-to-robot)",
+    "used_by": [
+      "assembly:microduck-leg-left",
+      "assembly:microduck-leg-right"
+    ],
+    "qty_per_robot": 2,
+    "why_this_folder_exists": "The link between the hip-yaw servo in the trunk and the hip-roll servo of each leg. The MJCF places the same yaw2roll.stl once per leg with the same geom quat (0, ±1, 0, 0 — one rotation, written with both signs), so the two legs use one identical print, not mirrors: the left/right mirroring is done by the parent body transforms (the right-leg body is named 'bearing_roll' in kin_robot_walk.xml, a name collision with the plate's mesh). Nothing on the shelf is a 23 mm XL330-cradle with a Ø16 bearing boss on its back."
   }
 }

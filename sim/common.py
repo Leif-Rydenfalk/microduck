@@ -1,0 +1,156 @@
+"""microduck/sim/common.py — shared constants and the scene wrapper.
+
+Everything here mirrors two references, nothing is invented:
+  * pollen-robotics/microduck_rl  scripts/infer_policy.py   (61-D obs, 50 Hz loop,
+    DEFAULT_POSE, action -> position target with action_scale)
+  * pollen-robotics/microduck-simulator  app/src/game/{constants,game}.js
+    (STAND keyframe injection, command vector slots, sit flag, timestep 0.005,
+    decimation 4)
+
+Run with FreeCAD's python: /Applications/FreeCAD.app/Contents/Resources/bin/python
+"""
+import os
+import re
+import xml.etree.ElementTree as ET
+
+import numpy as np
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.dirname(HERE)
+REF_DIR = os.path.join(ROOT, "reference", "pollen-microduck-rl")
+ASSETS_DIR = os.path.join(REF_DIR, "assets")
+OUT_DIR = os.path.join(ROOT, "out", "sim")
+POLICY_DIR = os.path.join(HERE, "policies")
+
+# constants.js / infer_policy.py
+JOINT_NAMES = [
+    "left_hip_yaw", "left_hip_roll", "left_hip_pitch", "left_knee", "left_ankle",
+    "neck_pitch", "head_pitch", "head_yaw", "head_roll",
+    "right_hip_yaw", "right_hip_roll", "right_hip_pitch", "right_knee", "right_ankle",
+]
+DEFAULT_POSE = np.array([
+    0.0, -0.08726646259971647, -0.457924, -0.004940, 0.452984,
+    0.3490658503988659, 0.3490658503988659, 0.0, 0.0,
+    0.0, 0.08726646259971647, 0.457924, 0.004940, -0.452984,
+], dtype=np.float32)
+NUM_JOINTS = 14
+OBS_SIZE = 61
+CMD_SIZE = 13
+ACTION_SCALE = 1.0
+TIMESTEP = 0.005
+DECIMATION = 4
+CTRL_DT = TIMESTEP * DECIMATION          # 50 Hz
+HEAD_ALPHA = 0.2                          # game.js EMA on the head command slots
+
+# scene.xml keyframes (Pollen), nq = 7 + 14
+KEYFRAMES = {
+    "INIT": ("0 0 0.12 1 0 0 0 " + " ".join(["0"] * 14), " ".join(["0"] * 14)),
+    "STAND": ("0 0 0.12 1 0 0 0 " + " ".join("%.10g" % v for v in DEFAULT_POSE),
+              " ".join("%.10g" % v for v in DEFAULT_POSE)),
+    "SIT": ("0 0 0.07 1 0 0 0 0 0 -0.5236 1.0472 0 0.5 1.6 0 0 0 0 0.5236 -1.0472 0",
+            "0 0 -0.5236 1.0472 0 0.5 1.6 0 0 0 0 0.5236 -1.0472 0"),
+    "FOLD": ("0 0 0.07 1 0 0 0 0 0 1.57 1.57 0 1 1 0 0 0 0 -1.57 -1.57 0",
+             "0 0 1.57 1.57 0 1 1 0 0 0 0 -1.57 -1.57 0"),
+}
+
+ROBOT_FILES = {
+    "walk": os.path.join(REF_DIR, "robot_walk.xml"),
+    "allcollisions": os.path.join(REF_DIR, "robot_allcollisions.xml"),
+    "ours": os.path.join(HERE, "microduck_ours.xml"),
+    "ours_allcollisions": os.path.join(HERE, "microduck_ours_allcollisions.xml"),
+}
+
+
+def robot_file(name):
+    if name in ROBOT_FILES:
+        return ROBOT_FILES[name]
+    if os.path.exists(name):
+        return os.path.abspath(name)
+    raise SystemExit("unknown robot %r (one of %s or a path)" % (name, ", ".join(ROBOT_FILES)))
+
+
+def scene_xml(robot_xml_path, out_path=None):
+    """Wrap a robot MJCF (robot_walk.xml, robot_allcollisions.xml or our swapped
+    variant) the way Pollen's scene.xml and the browser simulator do: timestep
+    0.005, a floor plane, a light, the INIT/STAND/SIT/FOLD keyframes. The robot
+    file is copied in verbatim (no <include>: MuJoCo resolves meshdir against
+    the MAIN file, so an include from another directory breaks the mesh paths).
+    Returns the XML text; writes it to out_path when given."""
+    tree = ET.parse(robot_xml_path)
+    root = tree.getroot()
+    comp = root.find("compiler")
+    meshdir = comp.get("meshdir", "assets") if comp is not None else "assets"
+    robot_dir = os.path.dirname(os.path.abspath(robot_xml_path))
+    if not os.path.isabs(meshdir):
+        meshdir = os.path.normpath(os.path.join(robot_dir, meshdir))
+    if out_path:
+        meshdir = os.path.relpath(meshdir, os.path.dirname(os.path.abspath(out_path)))
+    if comp is None:
+        comp = ET.SubElement(root, "compiler")
+    comp.set("meshdir", meshdir)
+    comp.set("angle", "radian")
+    comp.set("autolimits", "true")
+    if root.find("option") is None:
+        ET.SubElement(root, "option", timestep=str(TIMESTEP))
+    vis = ET.SubElement(root, "visual")
+    ET.SubElement(vis, "headlight", diffuse="0.7 0.7 0.7", ambient="0.35 0.35 0.35", specular="0.1 0.1 0.1")
+    ET.SubElement(vis, "rgba", haze="0.15 0.25 0.35 1")
+    ET.SubElement(vis, "quality", shadowsize="2048")
+    asset = root.find("asset")
+    if asset is None:
+        asset = ET.SubElement(root, "asset")
+    ET.SubElement(asset, "texture", type="skybox", builtin="gradient", rgb1="0.55 0.7 0.85",
+                  rgb2="0.15 0.2 0.3", width="256", height="1536")
+    ET.SubElement(asset, "texture", type="2d", name="groundplane", builtin="checker", mark="edge",
+                  rgb1="0.25 0.3 0.35", rgb2="0.15 0.2 0.25", markrgb="0.8 0.8 0.8",
+                  width="300", height="300")
+    ET.SubElement(asset, "material", name="groundplane", texture="groundplane", texuniform="true",
+                  texrepeat="5 5", reflectance="0.1")
+    wb = root.find("worldbody")
+    ET.SubElement(wb, "light", pos="0.4 -0.4 1.0", dir="-0.3 0.3 -1", directional="true",
+                  diffuse="0.8 0.8 0.8", castshadow="true")
+    ET.SubElement(wb, "geom", name="floor", size="0 0 0.05", pos="0 0 0", type="plane",
+                  material="groundplane")
+    kf = ET.SubElement(root, "keyframe")
+    for name, (qpos, ctrl) in KEYFRAMES.items():
+        ET.SubElement(kf, "key", name=name, qpos=qpos, ctrl=ctrl)
+    text = ET.tostring(root, encoding="unicode")
+    text = '<?xml version="1.0" ?>\n<!-- generated by sim/common.py scene_xml() from %s -->\n' % (
+        os.path.relpath(robot_xml_path, ROOT)) + text
+    if out_path:
+        os.makedirs(os.path.dirname(os.path.abspath(out_path)), exist_ok=True)
+        with open(out_path, "w") as f:
+            f.write(text)
+    return text
+
+
+def load_model(robot_name, scene_out=None):
+    """-> (mujoco.MjModel, scene_path). The scene file is written next to the
+    outputs so the exact model that ran is on disk."""
+    import mujoco
+    path = robot_file(robot_name)
+    if scene_out is None:
+        scene_out = os.path.join(OUT_DIR, "scene_%s.xml" % re.sub(r"[^A-Za-z0-9_]+", "_", robot_name))
+    scene_xml(path, scene_out)
+    model = mujoco.MjModel.from_xml_path(scene_out)
+    assert model.nu == NUM_JOINTS, model.nu
+    names = [mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_ACTUATOR, i) for i in range(model.nu)]
+    assert names == JOINT_NAMES, names
+    return model, scene_out
+
+
+def quat_rotate_inverse(quat, vec):
+    """infer_policy.py: rotate vec by the inverse of quat [w, x, y, z]."""
+    w = quat[0]
+    xyz = quat[1:4]
+    t = np.cross(xyz, vec) * 2
+    return vec - w * t + np.cross(xyz, t)
+
+
+def quat_to_roll_pitch(q):
+    """ZYX roll/pitch (rad) of a [w,x,y,z] quaternion."""
+    w, x, y, z = q
+    roll = np.arctan2(2 * (w * x + y * z), 1 - 2 * (x * x + y * y))
+    s = np.clip(2 * (w * y - z * x), -1, 1)
+    pitch = np.arcsin(s)
+    return roll, pitch

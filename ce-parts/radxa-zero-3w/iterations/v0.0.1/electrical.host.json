@@ -1,0 +1,84 @@
+{
+ "$parts_folder": 1,
+ "kind": "host",
+ "record": {
+  "host": "radxa-zero-3w",
+  "host_note": "The Microduck's compute board (device tree compatible 'radxa,zero-3w', 'rockchip,rk3566' — research/raw/deploy_audio_i2c3-pihat.dts:46; docs/ELECTRONICS-AND-SOFTWARE.md §2). Four vendor documents were fetched into docs/fetched/ on 2026-09-02 and every figure below names which one: [brief] = Radxa ZERO 3W Product Brief RAD-DOC-0084 Revision 1.10 2026-06-26 (9 pp); [sch1.12] = schematic 'Zero 3W' REV V1.12, dated 'Monday, November 25, 2024', 22 sheets; [sch1.11] = schematic V1.11, 2023-09-21, 22 sheets; [wiki] = docs.radxa.com/en/zero/zero3/hardware-design/hardware-interface (HTML, CC BY 4.0 per its footer); [product] = radxa.com/products/zeros/zero3w/ (HTML).",
+  "manufacturer": "Radxa Computer (Shenzhen) Co., Ltd.",
+  "soc": "[brief] §3.1 p.3 verbatim: 'Rockchip RK3566 SoC'; 'Quad‑core Arm® Cortex®‑A55 (ARMv8) 64‑bit @ 1.6GHz'; 'Arm Mali™‑G52‑2EE, OpenGL® ES1.1/2.0/3.2, Vulkan® 1.1, OpenCL™ 2.0'; '1GB / 2GB / 4GB / 8GB LPDDR4 RAM'; 'Optional Onboard eMMC Module 8GB / 16GB / 32GB / 64GB'. [product]: 'Quad-Core Arm® Cortex™-A55 Up to 1.6GHz'. (docs/ELECTRONICS-AND-SOFTWARE.md §2 noted a 1.6 vs 1.8 GHz conflict with CNX; the vendor says 1.6.)",
+  "radios": "[brief] §3.2 p.4: 'IEEE 802.11 a/b/g/n/ac/ax (WiFi 6) and BT 5.4 with BLE'; 'Onboard or External Antenna Configured by Software'.",
+  "identity_vs_fitted": "Pollen's SKU (RAM/eMMC/header) and board revision: CANNOT DETERMINE. Press kit says 1 GB / 32 GB — the brief's SKU table p.8 has NO 1 GB + 32 GB row ('1GB' pairs with 'N/A' or '8GB' eMMC: RS107‑D1E0H1W15 / D1E8H1W15). Either the press kit's storage figure, or the SKU table, or a custom build — a production teardown settles it. The two fetched schematic revisions (v1.11, v1.12) agree on every net named below.",
+  "power": [
+   {
+    "name": "5V in (USB-C OTG)",
+    "v_nom": 5.0,
+    "cite": "[brief] §5.1 p.5 verbatim: 'The Radxa ZERO 3W support DC +5V voltage: Power adapter with 5V/2A on the USB 2.0 OTG Type‑C power port'. [wiki] 'USB C': 'There are two USB TYPE-C ports, one is USB 2.0 OTG port and the other is USB3.0 HOST port. The power supply is USB 2.0 OTG port.' [sch1.12] sheet 22 'Power_DC IN': J2 USB_TYPEC_115H0, VBUS_1..4 → FB120/3A → VCC_SYS; CC1/CC2 through R9/R10 5.1k (the sink-side Rd on the OTG port itself)."
+   },
+   {
+    "name": "5V in (40-pin)",
+    "v_nom": 5.0,
+    "cite": "[brief] §5.1 p.5 verbatim: '5V Power from the GPIO PIN 2 & 4'. This is the path docs/ELECTRONICS-AND-SOFTWARE.md §9 infers for the HAT ('battery → banana contact PCB → HAT → 40-pin (5 V to Radxa)'); the HAT's regulator is CANNOT DETERMINE."
+   },
+   {
+    "name": "GPIO I/O",
+    "v_nom": 3.3,
+    "cite": "[wiki] 'GPIO voltage' table verbatim: 'All GPIOs | 3.3V | 3.63V' (Voltage | Maximum); 'SARADC_IN5 | 3.3V | 3.3V'."
+   },
+   {
+    "name": "USB3 host port current",
+    "v_nom": 5.0,
+    "cite": "[brief] §6.2 p.6: 'a USB 3.0 Host Type‑C interface, constrained to a maximum electrical current of 500mA in accordance with USB 3.0 specifications'. [sch1.12] sheet 17: SY6280AAC load switch feeding AO_5V_B on the host port."
+   },
+   {
+    "name": "PMIC",
+    "v_nom": null,
+    "cite": "[sch1.12] sheet 21 'Power_PMIC': 'RK817-5' (PMIC + codec, I2C0, BUCK1–4, LDO1–9); sheet 22: RK860-0 for VDD_CPU. Board-level current draw: NOT stated in any fetched document — CANNOT DETERMINE."
+   }
+  ],
+  "header_40pin": {
+   "$about": "Pin → function, read off [brief] §6.1.1 p.6 'GPIO Alternate Functions' table (text layer) and cross-checked against [wiki] '40 PIN GPIO' table. Only the pins the Microduck uses or a HAT designer must know are listed; both sources carry the full 40.",
+   "1": "+3.3V",
+   "2": "+5.0V",
+   "3": "GPIO1_A0 / UART3_RX_M0 / I2C3_SDA_M0",
+   "4": "+5.0V",
+   "5": "GPIO1_A1 / UART3_TX_M0 / I2C3_SCL_M0",
+   "6": "GND",
+   "7": "GPIO3_C4 / PWM14_M0",
+   "8": "GPIO0_D1 / UART2_TX_M0",
+   "9": "GND",
+   "10": "GPIO0_D0 / UART2_RX_M0",
+   "12": "GPIO3_A3 / I2S3_SCLK_M0",
+   "13": "GPIO3_A2 / I2S3_MCLK_M0",
+   "14": "GND",
+   "17": "+3.3V",
+   "27": "GPIO4_B2 / I2C4_SDA_M0 / I2S2_SDI_M1",
+   "28": "GPIO4_B3 / I2C4_SCL_M0 / I2S2_SDO_M1",
+   "35": "GPIO3_A4 / I2S3_LRCK_M0",
+   "38": "GPIO3_A6 / I2S3_SDI_M0",
+   "40": "GPIO3_A5 / I2S3_SDO_M0",
+   "pullups_note": "[wiki] tip verbatim: 'Pin 3, Pin 5, Pin 27, and Pin 28 add extra pull-up resistors for I2C device power supply, so they work abnormally when used as GPIOs.' — the board ALREADY pulls I2C3_M0 up; the HAT's R12/R13 10 kΩ (docs/ELECTRONICS-AND-SOFTWARE.md §11) are in parallel with them. The on-board value: not printed on the wiki; [sch1.12] sheet 20 'CONNECTOR' was not read for it — CANNOT DETERMINE.",
+   "verdict": "PASS",
+   "verdict_why": "two independent vendor pages agree on every listed pin (brief p.6 table and wiki table, both read 2026-09-02)."
+  },
+  "buses_the_microduck_uses": {
+   "servo_bus_uart2_m0": "SETTLES docs/ELECTRONICS-AND-SOFTWARE.md open question 10 (UART2 header pins). [wiki] 'Debug Serial Port' verbatim: 'The debug serial port of ZERO 3 uses UART2_M0 (40-pin GPIO Pin 8: TX, Pin 10: RX), with a default baud rate of 1500000n8.' and 'UART2_M0 is also the default U-Boot console. If you enable UART2_M0 as a normal serial port through the rsetup overlay, input on the serial port will interrupt the boot process and the device may fail to boot.' [sch1.12] sheet 6 'RK3566_OSC/PLL/PMUIO' (sheet numbers = PDF pages = the title block's 'Sheet N of 22'): UART2_TX_M0 / GPIO0_D1_u and UART2_RX_M0 / GPIO0_D0_u. So the Dynamixel bus (/dev/ttyS2, robotd.toml [bus]) is on header pins 8 (TX) / 10 (RX) at 3.3 V — and it is the U-Boot console, which is exactly why Pollen masks serial-getty@ttyS2 (rdesign:58-61). Whether U-Boot's console output at 1.5 Mbaud reaches the servos at boot: CANNOT DETERMINE (the wiki's warning is about INPUT interrupting boot).",
+   "i2c3_m0_pins_3_5": "[brief] p.6 table: pin 3 'I2C3_SDA_M0 | UART3_RX_M0 | GPIO1_A0', pin 5 'I2C3_SCL_M0 | UART3_TX_M0 | GPIO1_A1'. Agrees with Pollen's overlay (GPIO1_A0 SDA / GPIO1_A1 SCL, docs/ELECTRONICS-AND-SOFTWARE.md §11). [sch1.12] sheet 12 'RK3566_Audio Interface' shows the M0 alternates 'I2C3_SDA_M0 / UART3_RX_M0 / … / GPIO1_A0_u' and 'I2C3_SCL_M0 / UART3_TX_M0 / … / GPIO1_A1_u'; sheet 11 'RK3566_VO Interface_2' shows the M1 alternates 'I2C3_SCL_M1 … GPIO3_B5_d' and 'I2C3_SDA_M1 … GPIO3_B6_d', whose nets go to the Type-C controller U6 on sheet 17 — which is why the overlay re-muxes I2C3 to M0 and disables the 'fusb302@22' node (part:et7301b).",
+   "i2s3_m0": "[brief] p.6 / [wiki]: I2S3_SCLK_M0 pin 12 (GPIO3_A3), I2S3_MCLK_M0 pin 13 (GPIO3_A2), I2S3_LRCK_M0 pin 35 (GPIO3_A4), I2S3_SDI_M0 pin 38 (GPIO3_A6), I2S3_SDO_M0 pin 40 (GPIO3_A5). SETTLES the I2S half of open question 10 for the M0 mux; Pollen's aic.dts uses 'i2s3_2ch' — whether it selects the M0 pins (header) or M1 (pins 19/21/23/24, also on the header) was not read from the dts here: CANNOT DETERMINE which mux, both are on the 40-pin. MCLK: I2S3_MCLK_M0 on pin 13 is a candidate origin for the overlay's 12 MHz 'fixed-clock' (docs §7) — consistent, not proven.",
+   "mipi_csi": "[wiki] 'MIPI CSI' table, 22 pins: 1 GND, 2 MIPI_CSI_RX_D0N, 3 D0P, 4 GND, 5 D1N, 6 D1P, 7 GND, 8 CLK0N, 9 CLK0P, 10 GND, 11 D2N, 12 D2P, 13 GND, 14 D3N, 15 D3P, 16 GND, 17 CAMERAB_PDN_L, 18 CIF_CLKOUT, 19 GND, 20 I2C2_SCL_M1, 21 I2C2_SDA_M1, 22 VCC_3V3. [product]: '22-Pin MIPI CSI with 0.5mm Pitch'. [brief] §6.3 p.7: '1x4‑lane MIPI CSI'. [sch1.12] sheet 9 'RK3566_VI Interface': J7, 4 lanes (MIPI_CSI_RX_D0..D3, CLK0), I2C2_SCL_M1/SDA_M1, CAMERAB_PDN_L on the GPIO3_C6_d line. Pollen's probe 'imx219 2-0010' = I2C bus 2, address 0x10 (part:imx219) — matches I2C2.",
+   "usb_c_pd_controller": "[sch1.12] sheet 17 'USB Port': U6 'ET7301B' at J9 'USB_TYPEC_115H0' (the USB3 HOST port), VDD on VCC_3V3, SCL/SDA on I2C3_SCL_M1/I2C3_SDA_M1, INT# → TYPEC_INT (GPIO on sheet 9). [sch1.11] sheet 17: same part. The OTG/power port J2 (sheet 22) has NO controller — 5.1 kΩ Rd on CC1/CC2 (R9/R10), so it is a plain 5 V sink. Pollen's 'fusb302@22' node is this U6, disabled by the overlay."
+  },
+  "mechanical": "[brief] §4 p.5 'Mechanical Specification' is a raster drawing (no text layer) — the values cad/part.py already reads from it (65.0 × 30.0 mm, 4 × Ø2.8, 3.6 mm from the long edges, 54.7 mm along the length) are that agent's read of the picture, not text extracted here. [product]: '65×30 mm' is NOT on the product page text; the 65 × 30 figure in docs/ELECTRONICS-AND-SOFTWARE.md §2 traces to R2 §3.3 / the MJCF mesh. Board mass: not in any fetched document — CANNOT DETERMINE.",
+  "thermal": "[brief] §6.5 p.7 verbatim: 'The specified ambient operating temperature for optimal performance of the Radxa ZERO 3W ranges from 0°C to 50°C'; 'An internal thermal management governor is in place to regulate these parameters, ensuring that the CPU temperature does not exceed a threshold of 85°C.' (Pollen's media notes: flat-out 95 °C and throttling to 408 MHz — docs §2 — sits above the brief's 85 °C governor claim; recorded as a disagreement between vendor prose and Pollen's measurement.)",
+  "availability": "[brief] §8 p.8 verbatim: 'Radxa commits to ensuring the availability of the Radxa ZERO 3W model until a minimum date of September 2030'.",
+  "skus": "[brief] §7 p.8 table: RS107‑D1E0H1W15, RS107‑D1E0H0W15, RS107‑D1E8H1W15, RS107‑D1E8H0W15 (1GB); D2E0/D2E16 (2GB); D4E0/D4E32 (4GB); D8E0/D8E64 (8GB); H1 = pre-soldered header, H0 = empty.",
+  "unknowns": [
+   "Pollen's SKU and board revision (see identity_vs_fitted): the press kit's '1 GB / 32 GB' has no row in the brief's SKU table.",
+   "Board current draw (idle / policy running / video encoding): no fetched document states it. A meter on the 5 V path settles it.",
+   "Board mass: not in any fetched document.",
+   "Which I2S3 mux (M0 header pins 12/13/35/38/40 vs M1 pins 19/21/23/24) Pollen's aic.dts selects — read the dts pinctrl.",
+   "On-board I2C3_M0 pull-up value on pins 3/5 (the wiki says they exist).",
+   "Whether U-Boot console traffic on UART2_M0 at boot reaches the servo bus.",
+   "The FUSB302B document (onsemi 403) — irrelevant to this board, which fits an ET7301B."
+  ]
+ }
+}

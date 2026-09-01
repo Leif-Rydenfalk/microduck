@@ -3,6 +3,191 @@
   "kind": "interfaces",
   "record": {
     "slug": "microduck-bearing-roll",
-    "interfaces": []
+    "frame": "Pollen's mesh frame for bearing_roll.stl — the SAME frame as yaw2roll.stl, hip_l.stl and the placed xl330/bearing geoms (spec/mesh-placements.json: geom pos (-17.5, -2, 12.5), quat (0, -1, 0, 0) = the same rotation as yaw2roll's (0, 1, 0, 0)): X across the leg 6..29, Y = the plate's thickness (back face -14.5, front face -13.5, pegs to -11.5), Z = down the servo -24.5..15.5. Hip-ROLL axis = the line (17.5, y, 0). Kept so the MJCF places it with no re-derivation.",
+    "units": "mm",
+    "interfaces": [
+      {
+        "name": "roll_bearing_face",
+        "frame": {
+          "origin_mm": [
+            17.5,
+            -14.5,
+            0.0
+          ],
+          "z_axis": [
+            0,
+            -1,
+            0
+          ],
+          "x_axis": [
+            1,
+            0,
+            0
+          ]
+        },
+        "accepts": [
+          "connection:press-fit-bearing-22x16x4"
+        ],
+        "role": "bearing_face",
+        "what": "The back face (y -14.5) around the Ø19.0 window on the roll axis. The MJCF puts the 22x16x4 hip-roll bearing at mesh (17.5, -18.5, 0) with its axis along +y and the bearing mesh spanning 0..4 along that axis, so its near face IS this face (y -14.5). The window clears the inner race (OD 18.0) by 0.5 mm radially and lets the XL330 horn's Ø16 x 3 boss (y -16.5..-13.5) pass through into the bearing bore; the plate bears axially on the outer race (Ø20..22) and on nothing else. hip_l's Ø16 x 1.95 boss (y -18.5..-16.55) fills the other half of the bore and bolts to the horn face at y -16.5 with 4 x Ø2.4 on r 6. Not a radial seat: which part seats the outer race radially is CANNOT DETERMINE (hip_l.stl shows no Ø22 bore) — a physical unit settles it.",
+        "source": "MEASURED off Pollen's mesh 2026-09-01/02: meshfeatures.cylinders hole Ø19 axis y centre (17.5, -14, 0); spec/mesh-placements.json seeed_bearing 22x16x4 origin (17.5, -18.5, 0) with +z -> +y in this frame; bearing mesh meshslice.intervals inner race r 8..9, outer r 10..11, z 0..4; xl330 bosses Ø16 x 3 at ±14.5 on its axis; hip_l.stl boss Ø16 len 1.95 at y -17.525, holes Ø2.4 at (17.5±6, -18.0, 0) (17.5, -18.0, ±6)"
+      },
+      {
+        "name": "ear_screw_a",
+        "frame": {
+          "origin_mm": [
+            8.5,
+            -14.5,
+            12.5
+          ],
+          "z_axis": [
+            0,
+            1,
+            0
+          ],
+          "x_axis": [
+            1,
+            0,
+            0
+          ]
+        },
+        "accepts": [
+          "connection:threaded-m2"
+        ],
+        "role": "screw_clearance",
+        "what": "Ø2.2 clearance through the 1.0 mm plate; screw head on the back face (no counterbore — the plate is 1 mm), shank +y into yaw2roll's Ø2.05 x 4 ear hole at the same (x 8.5, z 12.5). M2 (2.2 = M2 close clearance).",
+        "source": "MEASURED off Pollen's mesh 2026-09-01/02: meshfeatures.cylinders hole Ø2.2 axis y centre (8.5, -14, 12.5) len 1; plate y -14.5..-13.5 by cad-mjcf sections --axis z"
+      },
+      {
+        "name": "ear_screw_b",
+        "frame": {
+          "origin_mm": [
+            26.5,
+            -14.5,
+            12.5
+          ],
+          "z_axis": [
+            0,
+            1,
+            0
+          ],
+          "x_axis": [
+            1,
+            0,
+            0
+          ]
+        },
+        "accepts": [
+          "connection:threaded-m2"
+        ],
+        "role": "screw_clearance",
+        "what": "As ear_screw_a, 18.0 mm across at x 26.5 (yaw2roll's other ear).",
+        "source": "MEASURED off Pollen's mesh 2026-09-01/02: same feature at x 26.5"
+      },
+      {
+        "name": "servo_screw_a",
+        "frame": {
+          "origin_mm": [
+            9.5,
+            -14.5,
+            -22.5
+          ],
+          "z_axis": [
+            0,
+            1,
+            0
+          ],
+          "x_axis": [
+            1,
+            0,
+            0
+          ]
+        },
+        "accepts": [
+          "connection:threaded-m2"
+        ],
+        "role": "servo_screw",
+        "what": "Ø2.2 clearance through the plate, head on the back face, shank +y into the hip-roll XL330's lower through-hole at its (y +8, z -22.5) — Ø2.0 x 23 in xl330.stl, 8 mm off the roll axis and 22.5 mm below it. With ear_screw_a/b and servo_screw_b it is the 4-screw pattern that clamps the servo between this plate and yaw2roll's front block.",
+        "source": "MEASURED off Pollen's mesh 2026-09-01/02: meshfeatures.cylinders hole Ø2.2 at (9.5, -14, -22.5); xl330.stl through-holes Ø2.0 at (0, ±8, -22.5) len 23; xl330 placement: its horn axis = this frame's y through (17.5, z 0), body y -13.5..9.5"
+      },
+      {
+        "name": "servo_screw_b",
+        "frame": {
+          "origin_mm": [
+            25.5,
+            -14.5,
+            -22.5
+          ],
+          "z_axis": [
+            0,
+            1,
+            0
+          ],
+          "x_axis": [
+            1,
+            0,
+            0
+          ]
+        },
+        "accepts": [
+          "connection:threaded-m2"
+        ],
+        "role": "servo_screw",
+        "what": "As servo_screw_a, 16.0 mm across at x 25.5.",
+        "source": "MEASURED off Pollen's mesh 2026-09-01/02: same feature at x 25.5"
+      },
+      {
+        "name": "peg_a",
+        "frame": {
+          "origin_mm": [
+            9.5,
+            -13.5,
+            7.5
+          ],
+          "z_axis": [
+            0,
+            1,
+            0
+          ],
+          "x_axis": [
+            1,
+            0,
+            0
+          ]
+        },
+        "accepts": [
+          "connection:threaded-m2"
+        ],
+        "role": "locating_pin",
+        "what": "Conical peg Ø1.8 at the base -> Ø1.6 at the tip, 2.0 tall (y -13.5..-11.5) on the front face, entering the XL330's upper through-hole at its (y +8, z 7.5) (Ø2.0 x 23). It locates the servo; yaw2roll's servo_screw_a comes into the same hole from the other end, so the peg is solid and the screw is short. 1.6 is the M2 minor diameter, as on the thigh's pins — declared threaded-m2 for the same reason (a Ø2 hole meant for an M2).",
+        "source": "MEASURED off Pollen's mesh 2026-09-01/02: cad-mjcf sections --axis y at y -13.44: two Ø1.79 discs at (9.5/25.5, z 7.5); at y -11.56: Ø1.60; nothing beyond -11.5"
+      },
+      {
+        "name": "peg_b",
+        "frame": {
+          "origin_mm": [
+            25.5,
+            -13.5,
+            7.5
+          ],
+          "z_axis": [
+            0,
+            1,
+            0
+          ],
+          "x_axis": [
+            1,
+            0,
+            0
+          ]
+        },
+        "accepts": [
+          "connection:threaded-m2"
+        ],
+        "role": "locating_pin",
+        "what": "As peg_a, 16.0 mm across at x 25.5.",
+        "source": "MEASURED off Pollen's mesh 2026-09-01/02: same feature at x 25.5"
+      }
+    ]
   }
 }

@@ -397,3 +397,27 @@ Duck detector `duck_detect.rknn` at 2 Hz, threshold 0.35, off by default
 10. **UART2 / I²S header pins** on the Radxa Zero 3W — the Radxa GPIO page (not fetched).
 11. **Mic / speaker / amplifier / REC LED** part numbers and GPIOs.
 12. **Charger and USB-C behaviour** with the pack fitted.
+
+## 13. Datasheets on the shelf (added 2026-09-02, GOAL.md rung 4)
+
+Each folder carries the vendor document byte for byte (`PROVENANCE.json`
+sha256), figures quoted verbatim with page in `electrical.<kind>.json`, and
+`docs/<slug>.md` with URL + fetch date. `tools/datasheet-quotes-check.py`
+re-finds every quote in its document (PASS on all six; a deliberately
+corrupted quote turns it FAIL — checked 2026-09-02).
+
+| part | what | document (fetched 2026-09-02) | verdict | still CANNOT DETERMINE |
+|---|---|---|---|---|
+| `ce-parts/np-f550` | the 2S pack, 7.2 V 2600 mAh in Sony's NP-F550 shape | Duracell DR5 page (`7.2V 2600mAh`, `Watt Hours 18.7`, `70 × 38 × 20 mm`, `99 g`); Deity NP-F550 sheet (`Uses LG high-capacity 18650 cells`); **Sony's own spec page: every Sony host 403/404** | CANNOT DETERMINE | fitted maker/cell/certs; contact pinout (no vendor drawing exists — only forums); Sony's figures |
+| `ce-parts/s-8252` | ABLIC 2-serial-cell protection IC (reference) | S8252_E.pdf `© ABLIC Inc., 2011-2019 Rev.4.0_00` | PASS (identity) | whether the HAT carries any protector; variant |
+| `ce-parts/mcp73213` | Microchip 2S linear charger with OVP (reference) | DS20002190D (the first hit, DS51849A, is the eval-board guide — discarded) | PASS (identity) | in-situ charging at all; 5 V USB cannot drive it (needs ≥ ~8.7 V) |
+| `ce-parts/microduck-speaker` | the 35×25×7 head speaker | representative "3525" 8 Ω 2 W box speaker — reseller spec table only (ABRA); nearest maker sheet (Same Sky CMS-35208N) is 35.5×20.5×8 and discontinued | CANNOT DETERMINE | exact part; amplifier vs codec output |
+| `ce-parts/st25r3916` | NFC reader-IC candidate (two single-ended antenna drives) | DS12484 Rev 8, May 2023; `standard` ledger row (ISO/IEC 14443/15693/18092, EMVCo 3.0 — vendor claim) | PASS (identity) | the fitted NFC IC |
+| `ce-parts/pn7150` | NFC controller candidate (NCI over I2C, one antenna path) | Rev. 4.2, 2 Feb 2024 — nxp.com gates plain curl with 404; browser headers get it | PASS (identity) | the fitted NFC IC; I2C address strap vs 0x18/0x19/0x29/0x68 on I2C3 |
+
+`bin/triad check` on all six says CANNOT DETERMINE: every interface frame is
+a named refusal (no geometry measured), and the pack and speaker grade
+themselves so. That is the record, not a defect to paper over. Tool gap
+(P11): `cecad/shelf.py` reads one `$CE_PARTS_ROOT`, so design-local
+`electrical.*.json` here is not seen by `cecad/electrical.py`'s loaders —
+the quote check is the consuming check that runs today.

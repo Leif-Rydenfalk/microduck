@@ -3,13 +3,22 @@
   "kind": "part",
   "record": {
     "slug": "microduck-bearing-roll",
-    "title": "microduck-bearing-roll",
-    "verdict": "CANNOT DETERMINE",
-    "why": "created by `bin/triad new part` — nothing measured yet",
-    "sector": null,
-    "subsector": null,
-    "lifecycle": "unknown",
-    "origin": null,
-    "origin_why": null
+    "title": "Microduck hip-roll bearing plate — the 'bearing_roll' mesh of Pollen's MJCF: 23 x 40 x 1 mm PLA plate with a Ø19 window on the roll axis, 4 x Ø2.2 screw holes and 2 conical locating pegs, closing the hip-roll XL330 on its horn side",
+    "verdict": "PASS",
+    "why": "cad/part.py builds one valid solid (bin/cad part:microduck-bearing-roll, 2026-09-02) and ce-cad/bin/cad-refcheck grades it against Pollen's own published mesh reference/pollen-microduck-rl/assets/bearing_roll.stl: p95 surface distance 0.002 mm both ways (mean 0.000, max 0.021 / 0.012), bbox delta [0.0, 0.0, 0.0] mm, 5/5 holes matched, 0 unmatched (one 'extra' Ø43.6 boss in ours is meshfeatures fitting the rounded plate edge as a cylinder — not a feature), volume ratio 0.9995. Round 1 of 1 (out/refcheck/bearing-roll/r1). The evidence run is the ledger artifact.",
+    "sector": "structural",
+    "subsector": "plate",
+    "lifecycle": "prototype",
+    "origin": "generated",
+    "origin_why": "modelled by hand in cecad from measurements taken off Pollen Robotics' decimated visual mesh (CC BY-SA-NC sim asset) with cad-mjcf sections, cecad.meshfeatures (cylinders + the ray-cast profile written for this group) and cecad.meshslice; nobody has Pollen's CAD and no physical part has been measured. Admitted through the TRIAD.md door: evidence/ledger.jsonl + computed trust.json.",
+    "material": "PLA",
+    "process": "FDM",
+    "source_reference": "reference/pollen-microduck-rl/assets/bearing_roll.stl (Onshape doc 804927696f06d877f3f1803e, exported by onshape-to-robot)",
+    "used_by": [
+      "assembly:microduck-leg-left",
+      "assembly:microduck-leg-right"
+    ],
+    "qty_per_robot": 2,
+    "why_this_folder_exists": "The plate that closes the hip-roll XL330 on its horn side in each leg: it screws to the yaw2roll ears and to the servo's lower through-holes, locates in the servo's upper through-holes with two pegs, and its back face is the thrust face the 22x16x4 hip-roll bearing runs on. The MJCF places the same bearing_roll.stl once per leg with one rotation (quat written (0, -1, 0, 0) both times), so it is one identical print x 2, not a mirror pair. Nothing on the shelf is a 1 mm XL330 face plate with a Ø19 bearing window."
   }
 }

@@ -8,7 +8,9 @@ has Pollen's CAD. Every number below was READ OFF Pollen's published mesh
 ray-cast `cecad.meshfeatures.profile` (added for this part: material
 intervals along a line, which is how the ears, the 1.4 mm walls and the
 lug outline were read), and the rebuild is graded against that mesh by
-`cad-refcheck` (see evidence/).
+`cad-refcheck` (see evidence/): r1 2026-09-01 p95 0.79/0.27 mm (the -x
+blend arc of the lug swept the wrong way, 4.55 mm max), r2 2026-09-02
+p95 0.05/0.05 mm, 19/19 features — out/refcheck/yaw2roll/r1, r2.
 
 FRAME — Pollen's mesh frame, kept on purpose: X across the leg 6..29
 (centre 17.5), Y from the ears (-13.3) to the front face (12.5), Z from the
@@ -19,7 +21,10 @@ transforms (kin_robot_walk.xml body yaw2roll pos 0.006 0.0175 -0.005
 quat 0 -0.707107 -0.707107 0; geom yaw2roll pos -17.5 -2 12.5 quat 0 1 0 0).
 
 WHAT IT IS. A 2.5 mm plate (z 9.5..12) with, on top, the Ø19 x 0.5 shoulder
-and Ø16 x 1.95 boss that seat the trunk's 22x16x4 yaw bearing, and the
+and Ø16 x 1.95 boss that seat the trunk's 22x16x4 yaw bearing (MJCF: the
+bearing geom sits at the hip-yaw joint origin = mesh (17.5, -2, 12.5), axis
++z, and the bearing mesh spans 0..4 along its axis, so it occupies z
+12.5..16.5 here — the last 2.05 mm of its bore rides the horn's Ø16 boss), and the
 4 x M2 (Ø2.2, Ø4.4 c'bore from below, on Ø12 PCD) that bolt the yaw servo
 horn to it; two ears (5 wide, semicircular top r2.5, Ø2.05 tap holes along
 y) at the back that the bearing_roll plate screws to; two 1.4 mm side walls
@@ -98,8 +103,10 @@ def _lug_outline(z_top=9.6, n=10):
         pts.append((z_c + BLEND_R * math.sin(a), XC + hw_c + BLEND_R * math.cos(a)))
     pts.append((z_top, X1))
     pts.append((z_top, X0))
+    # -x blend: the mirror of the +x one, 180 -> 240 deg (r1 swept 180 -> 120, i.e. UP,
+    # and left the -x flank 4.8 mm short at z 3.75: ref x 6.0, ours 10.77 — meshslice at y 11, r1 overlay_left)
     for i in range(n + 1):
-        a = math.radians(180 - 60 * i / n)
+        a = math.radians(180 + 60 * i / n)
         pts.append((z_c + BLEND_R * math.sin(a), XC - hw_c + BLEND_R * math.cos(a)))
     return pts
 

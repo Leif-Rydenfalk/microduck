@@ -1,0 +1,74 @@
+{
+ "$parts_folder": 1,
+ "kind": "chip",
+ "record": {
+  "part": "vl53l8cx",
+  "part_note": "ST VL53L8CX 8x8 multizone ToF — the OTHER generation Pollen's tofd supports (research/raw/tof_src_main.rs:83-85). Everything here was read off datasheet.pdf IN THIS FOLDER, fetched 2026-09-02 from st.com.",
+  "manufacturer": "STMicroelectronics",
+  "description": "p.1 verbatim: 'Low-power high-performance 8x8 multizone Time-of-Flight (ToF) sensor'. 'Ranging up to 400 cm, with enhanced performance under ambient light'; 'Requires 1.8 V core supply and 3.3 V AVDD supply'; 'Optional 1.2 V or 1.8 V IOVDD interface voltage levels'; 'I²C (up to 1 MHz) or SPI (up to 3 MHz) interface'.",
+  "fetched": true,
+  "datasheet_url": "https://www.st.com/resource/en/datasheet/vl53l8cx.pdf",
+  "datasheet_rev": "Footer verbatim: 'DS14161 - Rev 12 - July 2025' (p.1) and 'DS14161 - Rev 12' on every page; 45 pages. HTTP 200, 3587088 bytes, fetched 2026-09-02.",
+  "identity_vs_fitted": "Which generation ships is CANNOT DETERMINE (see part:vl53l5cx). This record is for the L8CX.",
+  "package": "Table 1 p.4: 'Package | Optical LGA16'; 'Size | 6.4 x 3.0 x 1.75 mm' (0.25 mm taller than the L5CX's 1.5).",
+  "used_by": [
+   "microduck-robot-hat-pcb"
+  ],
+  "absolute_max": "Table 11. Absolute maximum ratings, p.20, verbatim: 'AVDD | -0.5 | — | 3.47'; 'CORE_1V8 | -0.5 | — | 1.98'; 'IOVDD | -0.5 | — | 1.98' V.",
+  "supplies": [
+   {
+    "name": "AVDD",
+    "rail": null,
+    "v_min": 3.13,
+    "v_typ": 3.3,
+    "v_max": 3.47,
+    "cite": "Table 12. Recommended operating conditions, p.20: 'AVDD supply | 3.13 | 3.3 | 3.47'. Note: 'All three supplies are independent.'"
+   },
+   {
+    "name": "CORE_1V8",
+    "rail": null,
+    "v_min": 1.62,
+    "v_typ": 1.8,
+    "v_max": 1.98,
+    "cite": "Table 12 p.20: 'CORE_1V8 supply | 1.62 | 1.8 | 1.98'."
+   },
+   {
+    "name": "IOVDD",
+    "rail": null,
+    "v_min": 1.08,
+    "v_typ": 1.8,
+    "v_max": 1.98,
+    "cite": "Table 12 p.20: 'IOVDD supply with 1.2 V configuration | 1.08 | 1.2 | 1.32'; 'IOVDD supply with 1.8 V configuration | 1.62 | 1.8 | 1.98'. THERE IS NO 3.3 V IOVDD CONFIGURATION — abs max IOVDD is 1.98 V (Table 11). p.7 Note: 'All digital signals must be driven to the IOVDD level.'"
+   }
+  ],
+  "current_mA": {
+   "rail": null,
+   "typical": 93,
+   "typical_basis": "DERIVED SUM: 43 mA AVDD + 50 mA CORE_1V8 + 0.003 mA IOVDD. Table 14. Current consumption, p.21, verbatim: 'Active ranging | 43 | 50 | 50 | 80 | 0.003 | 0.006 | mA' (AVDD typ/max, CORE_1V8 typ/max, IOVDD typ/max). Table 15 p.21: 'Continuous mode (4x4 or 8x8 mode) | 215 | mW' at AVDD 3.3 V, IOVDD/CORE_1V8 1.8 V — 43×3.3 + 50×1.8 = 231.9 mW, within 8% of the printed 215 (typicals, not a contradiction claimed).",
+   "peak": 160,
+   "peak_basis": "DERIVED WORST CASE: (50+10) + (80+10) + (0.006+10). p.21 verbatim: 'CORE_1V8 peak current is the average value +10 mA.' 'AVDD peak current is the average current +10 mA.' 'IOVDD peak current is the average value +10 mA.'",
+   "sleep": 0.0555,
+   "sleep_basis": "DERIVED SUM: Table 14 'LP idle | 55 | 390 | 0.01 | 0.5 | 0.5 | 2 | µA' → 55 + 0.01 + 0.5 µA.",
+   "cite": "Table 14 p.21; preamble: 'Typical values quoted are for nominal voltage, process, and temperature (23°C).' 'Maximum values are quoted for the worst case conditions (process, voltage, and temperature), unless stated otherwise (85°C)'."
+  },
+  "logic": {
+   "vih_min": null,
+   "vil_max": null,
+   "three_v3_tolerant": false,
+   "derived": true,
+   "cite": "IOVDD abs max 1.98 V (Table 11 p.20) and no 3.3 V IOVDD configuration (Table 12 p.20) — a 3.3 V I²C bus would exceed the absolute maximum on SDA/SCL unless the carrier board level-shifts. NOT 3.3 V tolerant, by the sheet's own numbers."
+  },
+  "interface": "I2C or SPI",
+  "interface_max_hz": 1000000,
+  "i2c_address": "Table 1 p.4: 'I²C: 1 MHz serial bus, address: 0x52'; §5.x p.12 verbatim: 'VL53L8CX has a maximum speed of 1 Mbit/s/s and uses a device 8-bit address of 0x52.' 7-bit 0x29 is arithmetic.",
+  "fov": "Table 2. FoV angles, p.4: 'Detection volume | 45° | 45° | 65°'; 'Collector exclusion zone | 57.6° | 57.6° | 85.9°'.",
+  "ranging": "Table 1 p.4: 'Ranging | 2 to 400 cm per zone'; 'Sample rate | Up to 60 Hz'.",
+  "laser": "§ Laser safety, p.34, verbatim: 'Class 1 laser safety limits under all reasonably foreseeable conditions including single faults. This is in compliance with IEC 60825-1:2014.'",
+  "unknowns": [
+   "DESIGN CONSEQUENCE, STATED NOT HIDDEN: if the L8CX is what ships, then the HAT's I2C3 (a 3.3 V RK3566 bus with 10 kΩ pull-ups R12/R13, docs/ELECTRONICS-AND-SOFTWARE.md §11) cannot be wired straight to the sensor — IOVDD max is 1.98 V. Either the breakout carries a level shifter and regulators (ST's SATEL-VL53L8 and the Adafruit/SparkFun boards do — NOT verified here, no board page fetched) or the pull-ups go to 1.8 V. CANNOT DETERMINE which.",
+   "Which generation ships: CANNOT DETERMINE.",
+   "DERIVED, NOT PRINTED: the three current scalars, the 7-bit address.",
+   "No inrush figure anywhere in DS14161."
+  ]
+ }
+}

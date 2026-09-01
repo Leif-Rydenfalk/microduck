@@ -1,0 +1,63 @@
+{
+ "$parts_folder": 1,
+ "kind": "chip",
+ "record": {
+  "part": "bmi088",
+  "part_note": "Bosch Sensortec BMI088 6-axis IMU — the HAT's DORMANT second IMU: research/raw/deploy_audio_i2c3-pihat.dts lists it at I2C 0x19 (accelerometer) / 0x68 (gyroscope), 'unused but still connected' (docs/ELECTRONICS-AND-SOFTWARE.md §4.2). Everything here was read off datasheet.pdf IN THIS FOLDER, fetched 2026-09-02 from Bosch Sensortec's own server.",
+  "manufacturer": "Bosch Sensortec",
+  "description": "p.2 verbatim: 'BMI088 is an inertial measurement unit (IMU) for the detection of movements and rotations in 6 degrees of freedom (6DoF). It combines the functionality of two inertial sensors in one device: an advanced triaxial 16-bit gyroscope and a versatile, leading-edge triaxial 16-bit accelerometer.' 'are packed into one single LGA 3.0mm x 4.5mm x 0.95mm housing.'",
+  "fetched": true,
+  "datasheet_url": "https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bmi088-ds001.pdf",
+  "datasheet_rev": "p.1 verbatim: 'BMI088: Data Sheet | Document revision 1.9 | Document release date January 2024 | Document number BST-BMI088-DS000-19 | Technical reference code 0 273 141 365'. NOTE the URL says ds001 while the document numbers itself DS000-19 — recorded, not resolved. 62 pages. Every page footer: 'Document number: BST-BMI088-DS000-19', 'Revision_1.9_012024'. HTTP 200, 1368590 bytes, fetched 2026-09-02.",
+  "identity_vs_fitted": "The overlay names the chip and two addresses that exist only in this device's address table (0x19 accel with SDO1 high, 0x68 gyro with SDO2 low — p.48). A BMI088 has one package, so the package axis cannot be wrong. Whether the production HAT still carries it: CANNOT DETERMINE.",
+  "package": "p.2: 'LGA 3.0mm x 4.5mm x 0.95mm'. §8 Package, p.54: 'The sensor housing is a standard LGA package.'",
+  "used_by": [
+   "microduck-robot-hat-pcb"
+  ],
+  "absolute_max": "Table 7: Absolute maximum ratings, p.12, verbatim: 'Voltage at Supply Pin | VDD Pin | -0.3 | 4 | V'; 'VDDIO Pin | -0.3 | 4 | V'; 'Voltage at any Logic Pin | Non-Supply Pin | -0.3 | VDDIO+0.3 | V'; 'ESD | HBM, at any Pin | 2 kV'.",
+  "supplies": [
+   {
+    "name": "VDD",
+    "rail": null,
+    "v_min": 2.4,
+    "v_typ": null,
+    "v_max": 3.6,
+    "cite": "Table 1: Electrical parameter specification, p.7: 'Supply Voltage | VDD | Internal Domains | 2.4 | 3.6 | V'. No typical column in the table — v_typ null by observation."
+   },
+   {
+    "name": "VDDIO",
+    "rail": null,
+    "v_min": 1.2,
+    "v_typ": null,
+    "v_max": 3.6,
+    "cite": "Table 1, p.7: 'Supply Voltage | VDDIO | I/O Domain | 1.2 | 3.6 | V'. §2.x p.14: 'VDDIO is a separate power supply pin mainly used for the supply of the interface'."
+   }
+  ],
+  "current_mA": {
+   "rail": null,
+   "typical": 5.15,
+   "typical_basis": "DERIVED SUM, NOT PRINTED: gyro 5 mA + accel 0.15 mA. Table 3 p.8: 'Supply Current in Normal Mode | IDD | VDD = VDDIO = 3.0V, 25°C, ODR =1kHz | 5 | mA' (gyroscope); Table 2 p.8: 'Total Supply Current in Normal mode | IDD | VDD = VDDIO =3.0V, 25°C, gFS4g | 150 | µA' (accelerometer). The sheet never totals the two.",
+   "peak": null,
+   "sleep": 0.028,
+   "sleep_basis": "DERIVED SUM: gyro suspend 25 µA (Table 3) + accel suspend 3 µA (Table 2) = 28 µA. Gyro deep suspend is '<5' µA.",
+   "cite": "Tables 2 and 3, p.8."
+  },
+  "logic": {
+   "vih_min": null,
+   "vil_max": null,
+   "three_v3_tolerant": true,
+   "derived": true,
+   "cite": "Table 1 p.7: 'Voltage Input Low Level | VIL,a | SPI & I²C | 0.3VDDIO'; 'Voltage Input High Level | VIH,a | SPI & I²C | 0.7VDDIO'. Ratiometric to VDDIO (1.2–3.6 V), so a 3.3 V bus is fine with VDDIO = 3.3 V — the HAT's VDDIO rail is CANNOT DETERMINE."
+  },
+  "interface": "I2C or SPI (PS pin selects; p.44 'PS = ´VDDIO´ selects I²C')",
+  "interface_max_hz": null,
+  "i2c_address": "§6.2 Inter-Integrated Circuit (I²C), p.48, verbatim: 'The default I²C addresses are: Accelerometer: SDO1 pin pulled to ‘GND’: 0011000b (0x18) / SDO1 pin pulled to ‘VDDIO’: 0011001b (0x19) / Gyroscope: SDO2 pin pulled to ‘GND’: 1101000b (0x68) / SDO2 pin pulled to ‘VDDIO’: 1101001b (0x69)'. 'The I²C interface of the BMI088 is compatible with the I²C Specification UM10204 Rev. 03 (19 June 2007)'; 'supports I²C standard mode and fast mode, only 7-bit address mode is supported.' The overlay's 0x19 / 0x68 therefore means SDO1 = VDDIO and SDO2 = GND on the HAT — INFERRED from this table, not read off a schematic.",
+  "ranges": "Table 4: Accelerometer specifications, p.9: 'Acceleration Range | gFS3g ±3 | gFS6g ±6 | gFS12g ±12 | gFS24g ±24 | g'; 'Output Data Rate | ODR | 12.5 | 1600 | Hz'. Gyroscope range table p.39: '0x00 | ±2000 | 16.384 LSB/°/s'.",
+  "unknowns": [
+   "Whether the production Microduck head IMU IS this BMI088 or another part, and whether any shipped code reads it — docs/ELECTRONICS-AND-SOFTWARE.md §4.2 open question 3. `i2cdetect -y 3` on a production HAT settles it.",
+   "The HAT's VDD / VDDIO rails for this part: CANNOT DETERMINE.",
+   "The two typical current figures are sums of separate tables; the sheet never prints a combined number and gives no inrush figure.",
+   "Interface max clock: the I²C timing table (table 13, p.48ff) was not transcribed here; the sheet says 'standard mode and fast mode' (≤ 400 kHz by the I²C spec it cites, UM10204 — that ceiling is the spec's, not a number printed on p.48)."
+  ]
+ }
+}
