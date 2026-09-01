@@ -53,6 +53,16 @@ resolves every `part:` / `connection:` / `assembly:` ref against it first.
 5. **Evidence** — every check and comparison lands in the ledger; the machine
    is born T0 and earns its tier.
 
+## Simulated
+
+![walking, our parts in orange](out/sim/walk.gif)
+
+Pollen's MJCF driven by Pollen's published walking / sit-stand / stand policies
+in MuJoCo, with our rebuilt meshes swapped in for every PASSed part (orange).
+`out/sim/walk.mp4`, `sitstand.mp4`, `stand.mp4`, `walk_stock.mp4`; every number
+in `out/sim/report.md` is measured off the simulation. How to run it in three
+commands: `sim/README.md`.
+
 ## Status
 
 See `SPEC.md` §Status and `evidence/ledger.jsonl`. Nothing here is a claim

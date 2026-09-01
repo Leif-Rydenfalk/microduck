@@ -323,8 +323,8 @@ def write_report(videos, out_dir):
         md.append("| %s | [%.3f, %.3f] | %.3f | %.3f | %.1f | %d | %.2f |" % (j, h["range_rad"][0], h["range_rad"][1], h["min_rad"], h["max_rad"],
                                                                          h["used_pct_of_range"], h["frames_within_1deg_of_limit"], h["max_abs_vel_rad_s"]))
     md += ["", "## Notes", "",
-           "- The requested 0.15 m/s forward command sits inside the walking policy's stand-still band: measured 0.008 m in 8 s at "
-           "vx 0.15 (and 0.011 m at 0.20), 0.79 m at vx 0.25 — the browser simulator's `VEL_FWD`. The videos use 0.25.",
+           "- The requested 0.15 m/s forward command sits inside the walking policy's stand-still band: " + _sweep_note() +
+           " The browser simulator's `VEL_FWD` is 0.25; the videos use 0.25.",
            "- Achieved speed under-tracks the command (0.25 commanded, ~0.10 m/s achieved over the commanded window): the MJCF position "
            "actuators (kp 0.55, force +/-0.96 N m) stand in for the BAM actuator model the policy was trained with; infer_policy.py runs the same actuators.",
            "- `yaw_roll_motion.stl` was missing from `reference/pollen-microduck-rl/assets/` (robot_walk.xml references it); restored byte-for-byte "
@@ -338,6 +338,16 @@ def write_report(videos, out_dir):
            ]
     open(os.path.join(out_dir, "report.md"), "w").write("\n".join(md) + "\n")
     print("report:", os.path.relpath(os.path.join(out_dir, "report.json"), common.ROOT), os.path.relpath(os.path.join(out_dir, "report.md"), common.ROOT))
+
+
+def _sweep_note():
+    """One sentence from out/sim/vx_sweep.json (run_policy.py sweeps, stock robot, 8 s each)."""
+    p = os.path.join(common.OUT_DIR, "vx_sweep.json")
+    if not os.path.exists(p):
+        return "measured 0.008 m in 8 s at vx 0.15 (and 0.011 m at 0.20), 0.79 m at vx 0.25."
+    rows = json.load(open(p))["rows"]
+    return "measured walked distance in 8 s vs command (stock model, `out/sim/vx_sweep.json`): " + ", ".join(
+        "vx %.2f -> %.3f m" % (r["vx"], r["walked_m"]) for r in rows) + "."
 
 
 def _same_traj(a, b):

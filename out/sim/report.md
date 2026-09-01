@@ -1,20 +1,20 @@
 # microduck simulation report
 
-Generated 2026-09-02T00:24:16. Pollen's MJCF (`reference/pollen-microduck-rl/robot_walk.xml`, `robot_allcollisions.xml`) driven by Pollen's published ONNX policies in MuJoCo 3.12.0 at 50 Hz (timestep 0.005 s, decimation 4), the loop of `microduck_rl/scripts/infer_policy.py` and the browser simulator's `game.js`. Renderer: mujoco.Renderer (offscreen, MUJOCO_GL=glfw).
+Generated 2026-09-02T01:55:31. Pollen's MJCF (`reference/pollen-microduck-rl/robot_walk.xml`, `robot_allcollisions.xml`) driven by Pollen's published ONNX policies in MuJoCo 3.12.0 at 50 Hz (timestep 0.005 s, decimation 4), the loop of `microduck_rl/scripts/infer_policy.py` and the browser simulator's `game.js`. Renderer: mujoco.Renderer (offscreen, MUJOCO_GL=glfw).
 
 ## Swapped meshes (9) — OUR rebuilt parts drawn in orange
 
 | mesh | part | source | refcheck p95 mm (ref->ours, ours->ref) |
 |---|---|---|---|
 | banana_pcb_locker | part:microduck-banana-pcb-locker | `out/refcheck/microduck-banana-pcb-locker/verify/ours.stl` | [0.013, 0.0125] |
-| bearing_roll | part:microduck-bearing-roll | `ce-parts/microduck-bearing-roll/iterations/v0.0.1/evidence/refcheck/2026-09-01T16-15-38Z/ours.stl` | [0.0017, 0.0018] |
+| bearing_roll | part:microduck-bearing-roll | `out/refcheck/microduck-bearing-roll/verify/ours.stl` | [0.0014, 0.0017] |
 | leg | part:microduck-shin | `ce-parts/microduck-shin/iterations/v0.0.1/evidence/refcheck/2026-09-01T14-05-50Z/ours.stl` | [1.0, 1.0] |
 | power_support | part:microduck-power-support | `out/refcheck/microduck-power-support/verify/ours.stl` | [0.2133, 0.2281] |
 | trunk_base | part:microduck-trunk-base | `out/refcheck/microduck-trunk-base/verify/ours.stl` | [0.0005, 0.0008] |
 | upper_leg_left | part:microduck-upper-leg-left | `ce-parts/microduck-upper-leg-left/iterations/v0.0.1/evidence/refcheck/2026-09-01T14-56-45Z/ours.stl` | [0.2, 0.2] |
 | upper_leg_right | part:microduck-upper-leg-right | `ce-parts/microduck-upper-leg-right/iterations/v0.0.1/evidence/refcheck/2026-09-01T15-14-32Z/ours.stl` | [0.2, 0.2] |
 | upper_leg_rigidity_plate | part:microduck-upper-leg-rigidity-plate | `out/refcheck/microduck-upper-leg-rigidity-plate/r1/ours.stl` | [0.2562, 0.279] |
-| yaw2roll | part:microduck-yaw2roll | `ce-parts/microduck-yaw2roll/iterations/v0.0.1/evidence/refcheck/2026-09-01T16-15-15Z/ours.stl` | [0.05, 0.05] |
+| yaw2roll | part:microduck-yaw2roll | `out/refcheck/microduck-yaw2roll/verify/ours.stl` | [0.05, 0.05] |
 
 Only geoms of class `visual` are re-pointed. stock (only class=visual geoms re-pointed); stock (explicit <inertial> per body, asserted equal). Zero-pose world bbox of every re-pointed geom vs stock: ours worst 0.504 mm (tol 1.5, PASS), ours_allcollisions worst 0.504 mm (tol 1.5, PASS).
 
@@ -73,7 +73,9 @@ The swap changes only what is drawn: collision geoms, inertials and actuators ar
 
 ## Notes
 
-- The requested 0.15 m/s forward command sits inside the walking policy's stand-still band: measured 0.008 m in 8 s at vx 0.15 (and 0.011 m at 0.20), 0.79 m at vx 0.25 — the browser simulator's `VEL_FWD`. The videos use 0.25.
+- The requested 0.15 m/s forward command sits inside the walking policy's stand-still band: measured walked distance in 8 s vs command (stock model, `out/sim/vx_sweep.json`): vx 0.05 -> 0.003 m, vx 0.10 -> 0.007 m, vx 0.15 -> 0.008 m, vx 0.20 -> 0.011 m, vx 0.25 -> 0.792 m, vx 0.30 -> 0.940 m, vx 0.40 -> 1.281 m. The browser simulator's `VEL_FWD` is 0.25; the videos use 0.25.
 - Achieved speed under-tracks the command (0.25 commanded, ~0.10 m/s achieved over the commanded window): the MJCF position actuators (kp 0.55, force +/-0.96 N m) stand in for the BAM actuator model the policy was trained with; infer_policy.py runs the same actuators.
 - `yaw_roll_motion.stl` was missing from `reference/pollen-microduck-rl/assets/` (robot_walk.xml references it); restored byte-for-byte from the upstream microduck_rl clone (sha256 41149f07...3dc7). The other 46 assets are byte-identical to upstream.
 - Sit/stand and get-up runs use `robot_allcollisions.xml` (trunk/head/shell collision geoms), as infer_policy.py's scene.xml and game.js do; walking uses `robot_walk.xml`.
+- Limit hits in the get-up runs come from Pollen's start keyframes, not from the policy: SIT puts head_pitch at 1.6 rad (range max 1.571) and FOLD puts hip_pitch/knee at 1.57 rad (the limit); the walking runs touch no limit (0 frames within 1 deg).
+- The stand policy from FOLD/SIT and the sitstand policy end standing at trunk z 0.116 m with tilt < 6.3 deg; the 'fell (rule)' True on those rows is the commanded/starting ground contact (window column), never a tip-over.
