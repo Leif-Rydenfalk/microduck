@@ -544,9 +544,10 @@ def crosschecks(S, L, chain):
     # X12 servo datasheet rows agree across lanes
     st = [PEAKS["inputs"]["servo"]["stall_torque_Nm"], {k: v[0] for k, v in BAT["inputs"]["servo"]["published_rows"].items()}]
     rr = SERVO["inputs"]["servo"]["stall_rows_quote"]
-    ok = st[0] == st[1] and all(("%s [N.m] (at %s [V]" % (fmt(v), k)) in rr for k, v in st[0].items())
+    f3rows = {float(v): float(t) for t, v in re.findall(r"([0-9.]+) \[N\.m\] \(at ([0-9.]+) \[V\]", rr)}
+    ok = {float(k): float(v) for k, v in st[0].items()} == {float(k): float(v) for k, v in st[1].items()} == f3rows
     add("X12", "XL330-M288-T stall rows every lane quotes", json.dumps(st[0]), "F2 gait-peaks.json inputs.servo.stall_torque_Nm (ROBOTIS e-Manual)", json.dumps(st[1]) + " · F3 quotes the same three rows verbatim", "F2 battery-runtime.json inputs.servo.published_rows; F3 thermal-servo-xl330.json inputs.servo.stall_rows_quote",
-        "AGREE" if ok else "DIFFER", "one vendor table, three readers, same digits." if ok else "the three files do not quote the same rows.")
+        "AGREE" if ok else "DIFFER", "one vendor table, three readers, same digits (F3's rows parsed out of its verbatim quote: %s)." % json.dumps(f3rows) if ok else "the three files do not quote the same rows: F2 %s, F2 battery %s, F3 %s." % (json.dumps(st[0]), json.dumps(st[1]), json.dumps(f3rows)))
     # X13 skeptic recheck of F1
     SK = by.get("skeptic_f1_recheck")
     checks = SK.get("checks", []) if SK else []
