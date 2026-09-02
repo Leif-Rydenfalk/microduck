@@ -79,24 +79,32 @@ lateral 15 N. Linear elastic static, isotropic.
 | ankle-left | 2.021 PASS | **0.674 FAIL** | 8.717 PASS |
 | hip-bracket | 6.424 PASS | 2.140 PASS | 7.209 PASS |
 
-### THE ANKLE FAILS THE LANDING CASE AND NO FILAMENT FIXES IT
+### CORRECTED 2026-09-03 — THE LANDING LOAD WAS WRONG BY 2.77x
 
-Governing case: `microduck-ankle-left` / landing, **SF 0.674**. The material sweep says this
-is not a material problem — every candidate is below 1.0, i.e. predicted to yield:
+**The block that stood here was wrong and is retracted.** It said the ankle fails the
+landing case at SF 0.674 in every material and that no filament fixes it. That result came
+from a load case labelled "3x bodyweight on one leg" which applied **60 N**. The robot is
+737 g -> 7.230 N, so 3x bodyweight is **21.690 N**; 60 N is **8.30x bodyweight**.
 
-| PLA | PETG | ABS | NYLON | ASA |
-|---|---|---|---|---|
-| 0.674 | 0.648 | 0.534 | 0.971 | 0.587 |
+Re-SOLVED at the corrected basis (`sim/stress_corrected.py` -> `out/stress/corrected.json`,
+solve vs inverse-load prediction agreeing to -0.00% on the axial cases):
 
-Nylon is the best of them and still only 0.971. **Substituting filament does not clear this.**
-The routes that would are: thicken the section / add ribs at the ankle bracket, reduce the
-design landing load if 3x bodyweight on one leg is judged unrealistic for a 737 g desktop
-robot, or accept the ankle as a designed sacrificial part. This is a geometry decision and it
-belongs to a human.
+| part | landing @ 21.690 N | reading |
+|---|---|---|
+| microduck-shin | SF 6.925 | PASS |
+| **microduck-ankle-left** | **SF 1.864** | below the 2.0 target, **does not yield** |
+| microduck-hip-bracket | CANNOT DETERMINE | meshing |
+
+The ankle misses the design margin by 6.8 %. That is a reinforcement decision or an
+explicit acceptance of 1.86 — not a structural failure. The PLA/PETG/ABS/NYLON/ASA sweep
+that showed everything under 1.0 was measuring the 60 N case and says nothing about this one.
+
+Full statement, arithmetic and re-solved table: **`LOAD-BASIS-CORRECTION.html`**.
 
 ### HONEST LIMITS ON THAT NUMBER — do not quote SF 0.674 as converged
 
-- **Mesh convergence could NOT be established.** The convergence pass ran the governing case at
+- **Mesh convergence could NOT be established** (still true, and it applies to both the
+  retracted 0.674 and the corrected 1.864). The convergence pass ran the governing case at
   gmsh sizes 2.0 / 1.5 / 1.0 and all three returned CANNOT DETERMINE — the ankle only meshes at
   the auto size. So SF 0.674 rests on a single mesh. The direction is credible (five materials
   all below 1.0, and the ratio between them tracks yield strength) but the magnitude is not
