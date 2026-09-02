@@ -1,0 +1,31 @@
+# refcheck part:bearing-15x10x3 vs seeed_bearing__configuration_default.stl
+
+**PASS** — p95 surface distance 0.09 mm <= 1.00 both ways; bbox within 0.01 mm
+
+| | ref->ours | ours->ref |
+|---|---|---|
+| mean mm | 0.011 | 0.011 |
+| p50 mm | 0.003 | 0.003 |
+| p95 mm | 0.091 | 0.040 |
+| max mm | 0.198 | 0.397 |
+| within 1.0 mm | 100.0% | 100.0% |
+
+bbox ours [15.0, 14.995, 3.0]  ref [15.0, 15.0, 3.0]  delta [0.0, -0.005, -0.0]
+volume ratio ours/ref 0.9656 (closed-mesh figure, see compare.json)
+
+## features
+
+reference: 1 holes, 1 bosses · ours: 3 holes, 3 bosses · matched 2 · unmatched reference 0 · extra ours 4
+- extra in ours: hole Ø12.20 at [-0.0, -0.0, 1.5]
+- extra in ours: hole Ø13.50 at [0.0, -0.0, 1.5]
+- extra in ours: boss Ø11.50 at [-0.0, -0.0, 1.5]
+- extra in ours: boss Ø12.80 at [-0.0, -0.0, 1.5]
+
+## renders
+
+- overlay_front.png
+- overlay_left.png
+- overlay_top.png
+- overlay_iso.png
+- ours_iso.png
+- ref_iso.png

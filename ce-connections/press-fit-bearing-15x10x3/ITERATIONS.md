@@ -4,3 +4,4 @@
 | iteration | date | why it exists |
 |---|---|---|
 | v0.0.1 | 2026-09-01 | created — nothing measured yet |
+| v0.0.1 | 2026-09-02 | authored: ring 10/15/3 measured off the reference mesh, both seat kinds measured in their part folders, ISO 286 module with the IT7 table drift recorded, mate/compat contracts |
