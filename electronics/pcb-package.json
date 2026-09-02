@@ -794,5 +794,29 @@
         "the Pololu D30V30F5 buck module is 0.390 mm TALLER than the space above the board. It does not fit as placed. This reverses decision D1's own reasoning: the alternative D1 beat was 'a discrete buck IC', rejected because a module is one BOM line \u2014 and the module does not fit. Options: (a) fit a discrete regulator under 7.310 mm, (b) move U2 to the bottom side, where the nearest measured neighbour is the m12_lens_holder at 3.680 mm, which is worse. WHAT SETTLES IT: cecad.pcbview.board_assembly() with the real solids, which needs FreeCAD and has not been run."
       ]
     ]
+  },
+  "routing": {
+    "$note": "What the autorouter actually achieved on each board, and what was tried. A board with an open connection is not a board; these are stated, not smoothed over.",
+    "rows": [
+      [
+        "microduck_banana_contact",
+        "3 of 3",
+        "hand-laid, no router \u2014 three straight hops between two footprints",
+        "PASS (the DRC's remaining rows are footprint provenance, binding and current, not copper)"
+      ],
+      [
+        "microduck_imu_to_dxl",
+        "40 of 53",
+        "measured run to run on the same layout: 10 GND stub vias -> 43/53 and 7 FAIL (two 'hole-to-hole via GND / via GND' and a GND track 0.000 mm from U4.1); 9 stubs -> 45/53 and 5 FAIL; 0 stubs -> 40/53 and 3 FAIL, all of them 'unrouted'. The stubs bought routed connections and paid for them in fixed obstacles on a 40 x 22 mm board carrying 24 parts",
+        "FAIL \u2014 GND (8 open), V3V3 (5), IMU_INT1 (1). The version shipped is the 0-stub one: fewer rule violations and no clearance or hole-to-hole defects, only open connections"
+      ],
+      [
+        "microduck_robot_hat",
+        "see the DRC table in section 3.4",
+        "route first and pour last; HAT_3V3 and i2s3/DIN hand-laid as spines before the router; GND bonded pad-by-pad with stub vias because the QFN's thermal pad gives it a legitimate anchor",
+        "see section 3.4"
+      ]
+    ],
+    "what_would_fix_it": "More board or fewer parts per square millimetre. The imu_to_dxl outline is OUR choice (E8) and both fabs charge the same up to 100 x 100 mm, so widening it costs nothing at the fab \u2014 but the trunk cavity it has to live in is NOT measured (only the site's neighbours are, E11), so widening it would trade a routing failure for a fit risk. That trade needs the mechanical clearance study named in section 7."
   }
 }

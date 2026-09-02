@@ -589,27 +589,19 @@ def build(self_test=None, publish=True, verbose=True):
     # Stitching vias tie the two runs together along the horizontal lane.
     for x in (9.0, 13.0, 22.5, 26.5):
         b.via("SERVO_V", (x, 6.5), pad=1.0)
-    # Surface GND pads bond to the back plane through a stub + via; the
-    # through-hole header GND pins reach B.Cu through their own barrels, and
-    # GND itself is never routed — it is the pour, which is the width of the
-    # board.
-    for ref, pad, dx, dy in [
-            # U4's GND stub is NOT laid here. Twice now the DRC has caught a
-            # GND track or via 0.000 mm from U4.1 (VIN, on SERVO_V), which sits
-            # 0.950 mm above U4.2 with the board edge on the other side —
-            # there is no direction to leave in that the router does not then
-            # want. U4.2 reaches the plane the same way the LGA's pads do:
-            # through the router, and then the pour.
-            ("U3", "3", 0.0, -1.2),
-            ("C1", "2", 1.2, 0.0), ("C2", "2", 1.3, 0.0),
-            ("C3", "2", 1.2, 0.0), ("C4", "2", 1.2, 0.0),
-            ("C5", "2", 1.2, 0.0), ("C6", "2", 1.2, 0.0),
-            ("C7", "2", 0.0, 1.2), ("C8", "2", 1.2, 0.0),
-            ("TP5", "1", 0.0, -1.2)]:
-        c = b.component(ref)
-        x, y = c.pad_xy(c.fp.pad(pad))
-        b.track("GND", [(x, y), (x + dx, y + dy)], width=0.25)
-        b.via("GND", (x + dx, y + dy))
+    # GND IS NOT STUBBED AT ALL, and that is the third thing this board
+    # learned. Ten hand-laid stub vias were meant to bond every surface GND
+    # pad down to the pour; what they actually did was take ten fixed
+    # obstacles out of the routing lattice on a 40 x 22 mm board with 24
+    # parts, and the DRC charged for it twice — 'hole-to-hole via GND / via
+    # GND' where two stubs landed 0.45 mm apart, and a GND track 0.000 mm
+    # from U4.1 that had nowhere else to go. Measured, run to run:
+    #     with 10 stubs .... 43/53 routed, 7 FAIL
+    #     with 9 stubs ..... 45/53 routed, 5 FAIL
+    # so the stubs are gone. GND reaches the back layer the way every other
+    # net does: through the router, and then the pour unifies it. The
+    # through-hole connector pins reach B.Cu through their own barrels
+    # regardless.
     # Pass budgets: one pass makes at most ONE join per net, so a net with
     # 13 pads needs at least 12 passes. V3V3 has 13 (measured), so effort 8
     # left it in 9 islands on the first run — that is the number this budget
@@ -620,18 +612,18 @@ def build(self_test=None, publish=True, verbose=True):
     # the pass-through, so the router draws it at 0.400 mm and that is the
     # right width for it. Run 1 of this layout dropped this call entirely and
     # the DRC said 'unrouted SERVO_V'; the comb is not the whole net.
-    b.autoroute(nets=["SERVO_V"], width=0.4, effort=18, via_cost=2.0,
+    b.autoroute(nets=["SERVO_V"], width=0.4, effort=10, via_cost=2.0,
                 verbose=verbose)
-    b.autoroute(nets=["V3V3"], width=0.3, effort=30, via_cost=3.0,
+    b.autoroute(nets=["V3V3"], width=0.3, effort=16, via_cost=3.0,
                 verbose=verbose)
     signals = [n for n in b.net_names() if n not in ("GND", "SERVO_V", "V3V3")]
-    b.autoroute(nets=signals, effort=18, verbose=verbose)
+    b.autoroute(nets=signals, effort=14, verbose=verbose)
     # GND: the stubs above bond the surface pads down to B.Cu and the pour
     # unifies them, but the LGA's and the MCU's ground pads are too small and
     # too closely spaced to take a stub via, so the router finishes the net.
     # Run 1 of this layout left GND out of the router and the DRC said
     # 'unrouted GND'.
-    b.autoroute(nets=["GND"], effort=30, via_cost=3.0, verbose=verbose)
+    b.autoroute(nets=["GND"], effort=16, via_cost=3.0, verbose=verbose)
     b.pour("GND", "B.Cu")
 
     rep = check(b, verbose=verbose)

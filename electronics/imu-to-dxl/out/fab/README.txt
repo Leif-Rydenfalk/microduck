@@ -1,11 +1,11 @@
 Microduck imu_to_dxl v2 (reconstruction)
 ========================================
 
-34.0 x 24.0 mm, 812.49 mm2, 2 copper layers
+40.0 x 22.0 mm, 876.49 mm2, 2 copper layers
 stackup   JLCPCB 2-layer 1.6 mm, 1 oz — the commodity default
 finish    
 rules     JLCPCB 2-layer, standard process — tighter, and single-sourced
-parts     24   nets 17   tracks 83   vias 40   drills 51
+parts     24   nets 17   tracks 272   vias 27   drills 38
 
 READ THIS BEFORE ORDERING
 -------------------------
@@ -42,14 +42,10 @@ DRC RESULT
 ----------
 
    verdict: FAIL
-   36 pass, 7 fail, 3 cannot determine
+   36 pass, 3 fail, 3 cannot determine
 
-   [FAIL] clearance pad C4.1 / via GND
-   [FAIL] clearance pad C7.1 / via GND
-   [FAIL] clearance track GND on F.Cu / pad C4.1
-   [FAIL] clearance track GND on F.Cu / pad C7.1
-   [FAIL] hole-to-hole via GND / via GND
-   [FAIL] hole-to-hole via GND / via GND
+   [FAIL] unrouted GND
+   [FAIL] unrouted IMU_INT1
    [FAIL] unrouted V3V3
    [CANNOT DETERMINE] binding microduck_imu_to_dxl
    [CANNOT DETERMINE] current microduck_imu_to_dxl

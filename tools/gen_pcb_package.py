@@ -576,6 +576,17 @@ def main():
       'Every board in this package is under 100&nbsp;&times;&nbsp;100&nbsp;mm, so all three '
       'qualify for both offers as drawn.</p>')
 
+    rt = d.get("routing")
+    if rt:
+        A('<h3>5.9 What the router achieved</h3>')
+        A(f'<p class="lede">{esc(rt["$note"])}</p>')
+        A('<table class="tight"><thead><tr><th>Board</th><th>Routed</th>'
+          '<th>How, and what was tried</th><th>Verdict</th></tr></thead><tbody>')
+        for a_, b_, c_, v_ in rt["rows"]:
+            A(f'<tr><td><code>{esc(a_)}</code></td><td class="n">{esc(b_)}</td>'
+              f'<td>{esc(c_)}</td><td class="{verdict_class(v_)}">{esc(v_)}</td></tr>')
+        A('</tbody></table>')
+        A(f'<p><strong>What would fix it.</strong> {esc(rt["what_would_fix_it"])}</p>')
     A('<h3>6.1 Per board, at the published tiers</h3>')
     A('<table class="tight"><thead><tr><th>Board</th><th>Size (mm)</th>'
       '<th>Area (mm&sup2;)</th><th>Fits the &le;100&times;100 offer</th>'
