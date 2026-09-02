@@ -243,7 +243,7 @@ def unknown_sentence():
     computed len(UNKNOWN) drifts: until 2026-09-03 this sentence named the
     camera ribbon, which is line B8 and IS priced, and omitted the LED, the
     gamepad and the USB-C cable. There is nothing to keep in step now."""
-    names = [clip(l["item"], 46) for l in UNKNOWN]
+    names = [f'{l["id"]} {clip(l["item"], 52)}' for l in UNKNOWN]
     if not names:
         return "none"
     if len(names) == 1:
@@ -258,10 +258,6 @@ GEN = datetime.date.today().isoformat()
 
 
 # -------------------------------------------------------------- SOURCING ----
-def money(v, cur="$"):
-    return "&mdash;" if v is None else f"{cur}{v:,.4f}".rstrip("0").rstrip(".") if v < 1 else f"{cur}{v:,.2f}"
-
-
 def offer_rows(line):
     rows = []
     for off in line["offers"]:
