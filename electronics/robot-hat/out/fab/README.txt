@@ -1,11 +1,11 @@
 Microduck Robot HAT (reconstruction)
 ====================================
 
-65.0 x 30.0 mm, 1942.09 mm2, 2 copper layers
+65.0 x 30.0 mm, 1939.24 mm2, 2 copper layers
 stackup   JLCPCB 2-layer 1.6 mm, 1 oz — the commodity default
 finish    
 rules     JLCPCB 2-layer, standard process — tighter, and single-sourced
-parts     28   nets 21   tracks 843   vias 34   drills 98
+parts     28   nets 21   tracks 859   vias 33   drills 97
 
 READ THIS BEFORE ORDERING
 -------------------------
@@ -50,16 +50,14 @@ DRC RESULT
 ----------
 
    verdict: FAIL
-   44 pass, 10 fail, 3 cannot determine
+   44 pass, 8 fail, 3 cannot determine
 
-   [FAIL] clearance track i2s3/DIN on F.Cu / pad J1.38
-   [FAIL] clearance track i2s3/DIN on F.Cu / pad U1.3
-   [FAIL] clearance track i2s3/DIN on F.Cu / pad U1.2
    [FAIL] hole-to-hole via GND / via GND
    [FAIL] unrouted GND
    [FAIL] unrouted HAT_1V8
    [FAIL] unrouted HAT_3V3
-   [FAIL] unrouted i2s3/BCLK
+   [FAIL] unrouted SERVO_V
+   [FAIL] unrouted SPK_N
    [FAIL] unrouted i2s3/DOUT
    [FAIL] unrouted i2s3/WCLK
    [CANNOT DETERMINE] footprint J5

@@ -666,6 +666,13 @@
         "Decision D1 fitted a Pololu D30V30F5 buck module, 7.700 mm tall by the vendor's own drawing, and nothing checked it against the head.",
         "Transforming every mesh placed in body jaw_soft by its own quaternion and measuring bounding boxes against the HAT's. The compute board sits 7.310 mm above the HAT \u2014 that is the stack height and the ceiling for everything on the top face.",
         "OPEN, not fixed. U2 is 0.390 mm too tall and J1's generic 8.500 mm header model is 1.190 mm taller than the gap it has to span. J1's is a specification (the socket must mate at 7.310 mm); U2's is a collision, and it reverses D1's own reasoning \u2014 the alternative D1 beat was a discrete regulator. Recorded in section 3.7 with both options and with what settles it."
+      ],
+      [
+        "robot-hat",
+        "Silk text runs off the right edge (cosmetic, OPEN)",
+        "The second silk line, 'OUR RECONSTRUCTION - NOT POLLEN'S BOARD' at (32.500, 17.500) size 1.0, is longer than the board is wide from that anchor and the last characters fall outside the outline.",
+        "Reading the plotted top layer back as an image, which is the only thing that shows it \u2014 no DRC rule checks silk against the board edge on this profile (min_text_to_edge_mm is one of the rules the fab README lists as transcribed, not confirmed).",
+        "OPEN. The imu_to_dxl board had the same defect (two silk lines printed on the same y and overlapping) and it was fixed by moving the legend to B.Silk; the Robot HAT's fix is the same one-line change, but this board needs a re-route anyway for U2's height, and a 40-minute routing run to move a legend is the wrong order to do the work in."
       ]
     ]
   },
@@ -812,9 +819,9 @@
       ],
       [
         "microduck_robot_hat",
-        "see the DRC table in section 3.4",
+        "see the DRC table in section 3.4 \u2014 44 pass, 8 fail, 3 cannot determine",
         "route first and pour last; HAT_3V3 and i2s3/DIN hand-laid as spines before the router; GND bonded pad-by-pad with stub vias because the QFN's thermal pad gives it a legitimate anchor",
-        "see section 3.4"
+        "FAIL, improved from 10 fails to 8. The three 0.000 mm clearance rows the i2s3/DIN spine used to produce are gone (it now leaves pad 40, which is the pin that carries that net) and i2s3/BCLK now routes. What is left is one hole-to-hole via/via and seven open nets \u2014 GND, HAT_1V8, HAT_3V3, SERVO_V, SPK_N, i2s3/DOUT, i2s3/WCLK. Widening the power nets from 0.400 to 0.800 mm bought copper capacity and cost two routes"
       ]
     ],
     "what_would_fix_it": "More board or fewer parts per square millimetre. The imu_to_dxl outline is OUR choice (E8) and both fabs charge the same up to 100 x 100 mm, so widening it costs nothing at the fab \u2014 but the trunk cavity it has to live in is NOT measured (only the site's neighbours are, E11), so widening it would trade a routing failure for a fit risk. That trade needs the mechanical clearance study named in section 7."

@@ -45,8 +45,9 @@
 <tr><td><code>banana-contact</code></td><td><strong>The pocket was measured with the wrong ceiling</strong></td><td>The board was cut 45.800 x 5.100 mm from section outlines: floor at the rib top z 50.930 and ceiling at the head plate's top edge, read as z 56.080 from one section at x = 20.</td><td>RAY-CASTING the power_support solid on a 2 mm grid at y = 31.000, mid-gap, instead of reading section outlines. The map shows air everywhere above z = 51.000 except the two screw posts at x = +/-25 — the pocket is OPEN UPWARD, and the head plate is BEHIND the board, not above it. The plate's top edge is also curved (56.944 at x ~ +4, 55.51 at x +/-24), so no single number off one section was ever the ceiling.</td><td>The real ceiling is the locker bar's own silhouette, z 48.974..55.626, because a board taller than the retainer is a board the retainer does not cover. Pocket 46.292 x 4.696; board 45.800 x 4.600, entering with 0.246 mm per side in x and 0.048 in z. Contacts 2.400 mm square, tail holes 0.800 mm — the 5.100 mm board would have stood 0.404 mm proud of its own retainer.</td></tr>
 <tr><td><code>imu-to-dxl</code></td><td><strong>'Nothing measured constrains this outline' was too strong</strong></td><td>E8 said the outline is our choice and that nothing measured constrains it, then left the clearance question open without trying.</td><td>Transforming every mesh placed in body trunk_base into the body frame and measuring each bounding box against the MJCF `imu` site at (-21.000, 0.100, -14.700) mm.</td><td>The pack's bounding box is 0.524 mm above the site, and the site is inside its x and y ranges — so the board lies flat under the battery and its component side must face away from it. Decision E11. The outline itself is still ours; what is now measured is the ORIENTATION and the one neighbour that is close.</td></tr>
 <tr><td><code>robot-hat</code></td><td><strong>A part on the board is taller than the space above the board</strong></td><td>Decision D1 fitted a Pololu D30V30F5 buck module, 7.700 mm tall by the vendor's own drawing, and nothing checked it against the head.</td><td>Transforming every mesh placed in body jaw_soft by its own quaternion and measuring bounding boxes against the HAT's. The compute board sits 7.310 mm above the HAT — that is the stack height and the ceiling for everything on the top face.</td><td>OPEN, not fixed. U2 is 0.390 mm too tall and J1's generic 8.500 mm header model is 1.190 mm taller than the gap it has to span. J1's is a specification (the socket must mate at 7.310 mm); U2's is a collision, and it reverses D1's own reasoning — the alternative D1 beat was a discrete regulator. Recorded in section 3.7 with both options and with what settles it.</td></tr>
+<tr><td><code>robot-hat</code></td><td><strong>Silk text runs off the right edge (cosmetic, OPEN)</strong></td><td>The second silk line, 'OUR RECONSTRUCTION - NOT POLLEN'S BOARD' at (32.500, 17.500) size 1.0, is longer than the board is wide from that anchor and the last characters fall outside the outline.</td><td>Reading the plotted top layer back as an image, which is the only thing that shows it — no DRC rule checks silk against the board edge on this profile (min_text_to_edge_mm is one of the rules the fab README lists as transcribed, not confirmed).</td><td>OPEN. The imu_to_dxl board had the same defect (two silk lines printed on the same y and overlapping) and it was fixed by moving the legend to B.Silk; the Robot HAT's fix is the same one-line change, but this board needs a re-route anyway for U2's height, and a 40-minute routing run to move a legend is the wrong order to do the work in.</td></tr>
 </tbody></table>
-<p class="fig-cap">Table 1.1. 10 defects measured in this lane&rsquo;s own work and closed. Most were caught by the design-rule check or by a measurement; the ones that were not were caught by asking a question the check does not ask.</p>
+<p class="fig-cap">Table 1.1. 11 defects measured in this lane&rsquo;s own work and closed. Most were caught by the design-rule check or by a measurement; the ones that were not were caught by asking a question the check does not ask.</p>
 </section>
 <section id="s2"><h2><span class="n">2</span>What Pollen&rsquo;s own HAT mesh measures</h2>
 <p class="lede">One of the three boards is not entirely unpublished. <code>reference/pollen-microduck-rl/assets/elec_rpi_robot_hat_pcb.stl</code> is Pollen&rsquo;s geometry for the Robot HAT, and it was measured on 2026-09-02. Until then this project&rsquo;s HAT outline came from the Raspberry&nbsp;Pi Zero mechanical drawing <em>by analogy</em>. It no longer does.</p>
@@ -69,12 +70,12 @@
 <p class="lede">The board that sits on the Radxa Zero 3W's 40-pin header: battery in, 5 V out to the host, the servo bus behind a half-duplex buffer, the TLV320AIC3104 codec, the dormant BMI088, the Stemma J5 I2C port, speaker and mic.</p>
 <div class="statbar">
 <div class="stat"><b>65.0&times;30.0</b><span>mm outline</span></div>
-<div class="stat"><b>1942.09</b><span>mm&sup2;</span></div>
+<div class="stat"><b>1939.24</b><span>mm&sup2;</span></div>
 <div class="stat"><b>28</b><span>parts</span></div>
 <div class="stat"><b>21</b><span>nets</span></div>
-<div class="stat"><b>843</b><span>tracks</span></div>
-<div class="stat"><b>34</b><span>vias</span></div>
-<div class="stat"><b>98</b><span>drills</span></div>
+<div class="stat"><b>859</b><span>tracks</span></div>
+<div class="stat"><b>33</b><span>vias</span></div>
+<div class="stat"><b>97</b><span>drills</span></div>
 </div>
 <p><strong>Stack-up.</strong> JLCPCB 2-layer 1.6 mm, 1 oz — the commodity default · 2 layers · 1.6 mm · corner radius 3.500 mm.<br><strong>Surface finish.</strong> HASL (lead-free) — the fab default; no function on this board needs a flat gold surface<br><strong>Mounting.</strong> 4 x M2.5 clearance on the 58.000 x 23.000 pattern, 3.500 mm inset — measured dia 2.7000 in Pollen's mesh, and 'DRILLED TO 2.75 +/- 0.05mm' in RPI-ZERO-V1_2<br><strong>Geometry evidence.</strong> reference/pollen-microduck-rl/assets/elec_rpi_robot_hat_pcb.stl</p>
 <h3>3.1 Reconstruction decisions</h3>
@@ -253,16 +254,14 @@
 <div class="pcbfig"><img src="electronics/robot-hat/out/bottom.svg" alt="microduck_robot_hat bottom layer"></div>
 <p class="fig-cap">Robot HAT — bottom side, as plotted from the checked board. DRC findings are circled on the plot.</p>
 <h3>3.4 Design rule check</h3>
-<p>Verdict <span class="no">FAIL</span> — 44 pass, 10 fail, 3 cannot determine.</p>
+<p>Verdict <span class="no">FAIL</span> — 44 pass, 8 fail, 3 cannot determine.</p>
 <table class="tight"><thead><tr><th>Verdict</th><th>Finding</th></tr></thead><tbody>
-<tr><td class="no">FAIL</td><td>clearance track i2s3/DIN on F.Cu / pad J1.38</td></tr>
-<tr><td class="no">FAIL</td><td>clearance track i2s3/DIN on F.Cu / pad U1.3</td></tr>
-<tr><td class="no">FAIL</td><td>clearance track i2s3/DIN on F.Cu / pad U1.2</td></tr>
 <tr><td class="no">FAIL</td><td>hole-to-hole via GND / via GND</td></tr>
 <tr><td class="no">FAIL</td><td>unrouted GND</td></tr>
 <tr><td class="no">FAIL</td><td>unrouted HAT_1V8</td></tr>
 <tr><td class="no">FAIL</td><td>unrouted HAT_3V3</td></tr>
-<tr><td class="no">FAIL</td><td>unrouted i2s3/BCLK</td></tr>
+<tr><td class="no">FAIL</td><td>unrouted SERVO_V</td></tr>
+<tr><td class="no">FAIL</td><td>unrouted SPK_N</td></tr>
 <tr><td class="no">FAIL</td><td>unrouted i2s3/DOUT</td></tr>
 <tr><td class="no">FAIL</td><td>unrouted i2s3/WCLK</td></tr>
 <tr><td class="cd">CANNOT DETERMINE</td><td>footprint J5</td></tr>
@@ -318,22 +317,22 @@
 <h3>3.7 Files a fab receives</h3>
 <table class="tight"><thead><tr><th>File</th><th>Bytes</th></tr></thead><tbody>
 <tr><td><code><a href="electronics/robot-hat/out/fab/ORDER-NOTES.txt">ORDER-NOTES.txt</a></code></td><td class="n">7,346</td></tr>
-<tr><td><code><a href="electronics/robot-hat/out/fab/README.txt">README.txt</a></code></td><td class="n">5,709</td></tr>
-<tr><td><code><a href="electronics/robot-hat/out/fab/microduck_robot_hat-B.Cu.GBL">microduck_robot_hat-B.Cu.GBL</a></code></td><td class="n">45,488</td></tr>
+<tr><td><code><a href="electronics/robot-hat/out/fab/README.txt">README.txt</a></code></td><td class="n">5,568</td></tr>
+<tr><td><code><a href="electronics/robot-hat/out/fab/microduck_robot_hat-B.Cu.GBL">microduck_robot_hat-B.Cu.GBL</a></code></td><td class="n">42,444</td></tr>
 <tr><td><code><a href="electronics/robot-hat/out/fab/microduck_robot_hat-B.Mask.GBS">microduck_robot_hat-B.Mask.GBS</a></code></td><td class="n">2,179</td></tr>
 <tr><td><code><a href="electronics/robot-hat/out/fab/microduck_robot_hat-B.Paste.GBP">microduck_robot_hat-B.Paste.GBP</a></code></td><td class="n">285</td></tr>
 <tr><td><code><a href="electronics/robot-hat/out/fab/microduck_robot_hat-B.Silk.GBO">microduck_robot_hat-B.Silk.GBO</a></code></td><td class="n">285</td></tr>
-<tr><td><code><a href="electronics/robot-hat/out/fab/microduck_robot_hat-Edge.Cuts.GKO">microduck_robot_hat-Edge.Cuts.GKO</a></code></td><td class="n">1,076</td></tr>
-<tr><td><code><a href="electronics/robot-hat/out/fab/microduck_robot_hat-F.Cu.GTL">microduck_robot_hat-F.Cu.GTL</a></code></td><td class="n">67,558</td></tr>
+<tr><td><code><a href="electronics/robot-hat/out/fab/microduck_robot_hat-Edge.Cuts.GKO">microduck_robot_hat-Edge.Cuts.GKO</a></code></td><td class="n">1,080</td></tr>
+<tr><td><code><a href="electronics/robot-hat/out/fab/microduck_robot_hat-F.Cu.GTL">microduck_robot_hat-F.Cu.GTL</a></code></td><td class="n">68,485</td></tr>
 <tr><td><code><a href="electronics/robot-hat/out/fab/microduck_robot_hat-F.Mask.GTS">microduck_robot_hat-F.Mask.GTS</a></code></td><td class="n">4,921</td></tr>
 <tr><td><code><a href="electronics/robot-hat/out/fab/microduck_robot_hat-F.Paste.GTP">microduck_robot_hat-F.Paste.GTP</a></code></td><td class="n">2,999</td></tr>
 <tr><td><code><a href="electronics/robot-hat/out/fab/microduck_robot_hat-F.Silk.GTO">microduck_robot_hat-F.Silk.GTO</a></code></td><td class="n">10,931</td></tr>
 <tr><td><code><a href="electronics/robot-hat/out/fab/microduck_robot_hat-NPTH.drl">microduck_robot_hat-NPTH.drl</a></code></td><td class="n">208</td></tr>
-<tr><td><code><a href="electronics/robot-hat/out/fab/microduck_robot_hat-PTH.drl">microduck_robot_hat-PTH.drl</a></code></td><td class="n">1,574</td></tr>
+<tr><td><code><a href="electronics/robot-hat/out/fab/microduck_robot_hat-PTH.drl">microduck_robot_hat-PTH.drl</a></code></td><td class="n">1,558</td></tr>
 <tr><td><code><a href="electronics/robot-hat/out/fab/microduck_robot_hat-bom.csv">microduck_robot_hat-bom.csv</a></code></td><td class="n">2,020</td></tr>
-<tr><td><code><a href="electronics/robot-hat/out/fab/microduck_robot_hat-fab.zip">microduck_robot_hat-fab.zip</a></code></td><td class="n">31,812</td></tr>
+<tr><td><code><a href="electronics/robot-hat/out/fab/microduck_robot_hat-fab.zip">microduck_robot_hat-fab.zip</a></code></td><td class="n">31,215</td></tr>
 <tr><td><code><a href="electronics/robot-hat/out/fab/microduck_robot_hat-positions.csv">microduck_robot_hat-positions.csv</a></code></td><td class="n">1,365</td></tr>
-<tr><td><code><a href="electronics/robot-hat/out/fab/microduck_robot_hat.kicad_pcb">microduck_robot_hat.kicad_pcb</a></code></td><td class="n">200,085</td></tr>
+<tr><td><code><a href="electronics/robot-hat/out/fab/microduck_robot_hat.kicad_pcb">microduck_robot_hat.kicad_pcb</a></code></td><td class="n">202,765</td></tr>
 </tbody></table>
 <p class="fig-cap">Gerber X2 per layer with <code>.FileFunction</code> attributes, plated and unplated Excellon drill files kept apart (a fab that gets one file cannot tell a mounting hole from a via), pick-and-place, BOM, a <code>.kicad_pcb</code> for anyone who wants to open it, and a README that repeats the DRC verdict on its first page.</p>
 </section>
@@ -494,16 +493,16 @@
 <tr><td><code><a href="electronics/imu-to-dxl/out/fab/microduck_imu_to_dxl-B.Cu.GBL">microduck_imu_to_dxl-B.Cu.GBL</a></code></td><td class="n">15,652</td></tr>
 <tr><td><code><a href="electronics/imu-to-dxl/out/fab/microduck_imu_to_dxl-B.Mask.GBS">microduck_imu_to_dxl-B.Mask.GBS</a></code></td><td class="n">577</td></tr>
 <tr><td><code><a href="electronics/imu-to-dxl/out/fab/microduck_imu_to_dxl-B.Paste.GBP">microduck_imu_to_dxl-B.Paste.GBP</a></code></td><td class="n">286</td></tr>
-<tr><td><code><a href="electronics/imu-to-dxl/out/fab/microduck_imu_to_dxl-B.Silk.GBO">microduck_imu_to_dxl-B.Silk.GBO</a></code></td><td class="n">286</td></tr>
+<tr><td><code><a href="electronics/imu-to-dxl/out/fab/microduck_imu_to_dxl-B.Silk.GBO">microduck_imu_to_dxl-B.Silk.GBO</a></code></td><td class="n">13,115</td></tr>
 <tr><td><code><a href="electronics/imu-to-dxl/out/fab/microduck_imu_to_dxl-Edge.Cuts.GKO">microduck_imu_to_dxl-Edge.Cuts.GKO</a></code></td><td class="n">1,073</td></tr>
 <tr><td><code><a href="electronics/imu-to-dxl/out/fab/microduck_imu_to_dxl-F.Cu.GTL">microduck_imu_to_dxl-F.Cu.GTL</a></code></td><td class="n">23,412</td></tr>
 <tr><td><code><a href="electronics/imu-to-dxl/out/fab/microduck_imu_to_dxl-F.Mask.GTS">microduck_imu_to_dxl-F.Mask.GTS</a></code></td><td class="n">2,703</td></tr>
 <tr><td><code><a href="electronics/imu-to-dxl/out/fab/microduck_imu_to_dxl-F.Paste.GTP">microduck_imu_to_dxl-F.Paste.GTP</a></code></td><td class="n">2,272</td></tr>
-<tr><td><code><a href="electronics/imu-to-dxl/out/fab/microduck_imu_to_dxl-F.Silk.GTO">microduck_imu_to_dxl-F.Silk.GTO</a></code></td><td class="n">11,872</td></tr>
+<tr><td><code><a href="electronics/imu-to-dxl/out/fab/microduck_imu_to_dxl-F.Silk.GTO">microduck_imu_to_dxl-F.Silk.GTO</a></code></td><td class="n">6,178</td></tr>
 <tr><td><code><a href="electronics/imu-to-dxl/out/fab/microduck_imu_to_dxl-NPTH.drl">microduck_imu_to_dxl-NPTH.drl</a></code></td><td class="n">182</td></tr>
 <tr><td><code><a href="electronics/imu-to-dxl/out/fab/microduck_imu_to_dxl-PTH.drl">microduck_imu_to_dxl-PTH.drl</a></code></td><td class="n">673</td></tr>
 <tr><td><code><a href="electronics/imu-to-dxl/out/fab/microduck_imu_to_dxl-bom.csv">microduck_imu_to_dxl-bom.csv</a></code></td><td class="n">2,212</td></tr>
-<tr><td><code><a href="electronics/imu-to-dxl/out/fab/microduck_imu_to_dxl-fab.zip">microduck_imu_to_dxl-fab.zip</a></code></td><td class="n">22,957</td></tr>
+<tr><td><code><a href="electronics/imu-to-dxl/out/fab/microduck_imu_to_dxl-fab.zip">microduck_imu_to_dxl-fab.zip</a></code></td><td class="n">23,886</td></tr>
 <tr><td><code><a href="electronics/imu-to-dxl/out/fab/microduck_imu_to_dxl-positions.csv">microduck_imu_to_dxl-positions.csv</a></code></td><td class="n">1,181</td></tr>
 <tr><td><code><a href="electronics/imu-to-dxl/out/fab/microduck_imu_to_dxl.kicad_pcb">microduck_imu_to_dxl.kicad_pcb</a></code></td><td class="n">80,486</td></tr>
 </tbody></table>
@@ -598,12 +597,12 @@
 <table class="tight"><thead><tr><th>Board</th><th>Routed</th><th>How, and what was tried</th><th>Verdict</th></tr></thead><tbody>
 <tr><td><code>microduck_banana_contact</code></td><td class="n">3 of 3</td><td>hand-laid, no router — three straight hops between two footprints</td><td class="pass">PASS (the DRC's remaining rows are footprint provenance, binding and current, not copper)</td></tr>
 <tr><td><code>microduck_imu_to_dxl</code></td><td class="n">40 of 53</td><td>measured run to run on the same layout: 10 GND stub vias -&gt; 43/53 and 7 FAIL (two 'hole-to-hole via GND / via GND' and a GND track 0.000 mm from U4.1); 9 stubs -&gt; 45/53 and 5 FAIL; 0 stubs -&gt; 40/53 and 3 FAIL, all of them 'unrouted'. The stubs bought routed connections and paid for them in fixed obstacles on a 40 x 22 mm board carrying 24 parts</td><td class="no">FAIL — GND (8 open), V3V3 (5), IMU_INT1 (1). The version shipped is the 0-stub one: fewer rule violations and no clearance or hole-to-hole defects, only open connections</td></tr>
-<tr><td><code>microduck_robot_hat</code></td><td class="n">see the DRC table in section 3.4</td><td>route first and pour last; HAT_3V3 and i2s3/DIN hand-laid as spines before the router; GND bonded pad-by-pad with stub vias because the QFN's thermal pad gives it a legitimate anchor</td><td class="cd">see section 3.4</td></tr>
+<tr><td><code>microduck_robot_hat</code></td><td class="n">see the DRC table in section 3.4 — 44 pass, 8 fail, 3 cannot determine</td><td>route first and pour last; HAT_3V3 and i2s3/DIN hand-laid as spines before the router; GND bonded pad-by-pad with stub vias because the QFN's thermal pad gives it a legitimate anchor</td><td class="no">FAIL, improved from 10 fails to 8. The three 0.000 mm clearance rows the i2s3/DIN spine used to produce are gone (it now leaves pad 40, which is the pin that carries that net) and i2s3/BCLK now routes. What is left is one hole-to-hole via/via and seven open nets — GND, HAT_1V8, HAT_3V3, SERVO_V, SPK_N, i2s3/DOUT, i2s3/WCLK. Widening the power nets from 0.400 to 0.800 mm bought copper capacity and cost two routes</td></tr>
 </tbody></table>
 <p><strong>What would fix it.</strong> More board or fewer parts per square millimetre. The imu_to_dxl outline is OUR choice (E8) and both fabs charge the same up to 100 x 100 mm, so widening it costs nothing at the fab — but the trunk cavity it has to live in is NOT measured (only the site's neighbours are, E11), so widening it would trade a routing failure for a fit risk. That trade needs the mechanical clearance study named in section 7.</p>
 <h3>6.1 Per board, at the published tiers</h3>
 <table class="tight"><thead><tr><th>Board</th><th>Size (mm)</th><th>Area (mm&sup2;)</th><th>Fits the &le;100&times;100 offer</th><th>JLCPCB 5 pcs</th><th>PCBWay 10 pcs</th></tr></thead><tbody>
-<tr><td><code>microduck_robot_hat</code></td><td class="n">65.000 &times; 30.000</td><td class="n">1942.09</td><td class="pass">yes</td><td class="n">$2.00</td><td class="n">$5.00</td></tr>
+<tr><td><code>microduck_robot_hat</code></td><td class="n">65.000 &times; 30.000</td><td class="n">1939.24</td><td class="pass">yes</td><td class="n">$2.00</td><td class="n">$5.00</td></tr>
 <tr><td><code>microduck_imu_to_dxl</code></td><td class="n">40.000 &times; 22.000</td><td class="n">876.49</td><td class="pass">yes</td><td class="n">$2.00</td><td class="n">$5.00</td></tr>
 <tr><td><code>microduck_banana_contact</code></td><td class="n">45.800 &times; 4.600</td><td class="n">210.46</td><td class="pass">yes</td><td class="n">$2.00</td><td class="n">$5.00</td></tr>
 </tbody></table>

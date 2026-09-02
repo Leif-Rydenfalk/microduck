@@ -475,9 +475,16 @@ def build(self_test=None, publish=True, verbose=True):
     b.attach("V3V3", "TP4.1")
     b.attach("GND", "TP5.1")
 
-    b.text("microduck imu_to_dxl v2", (7.0, 8.0), size=1.1)
-    b.text("OUR RECONSTRUCTION - NOT POLLEN'S BOARD", (18.0, 8.0), size=0.9)
+    # F.Silk keeps only what a person needs while holding the board; the
+    # long legend goes on the back. The first plot of this board printed
+    # "microduck imu_to_dxl v2" and "OUR RECONSTRUCTION - NOT POLLEN'S BOARD"
+    # on the same line at y = 8.000 and they overlapped — looked at, moved.
     b.text("DXL ID 200", (22.5, 20.6), size=0.9)
+    b.text("microduck imu_to_dxl v2", (6.0, 8.6), size=1.0)
+    b.text("OUR RECONSTRUCTION - NOT POLLEN'S BOARD",
+           (6.0, 12.0), size=0.9, layer="B.Silk")
+    b.text("LSM6DSV16X on the DYNAMIXEL bus as slave ID 200",
+           (6.0, 10.4), size=0.7, layer="B.Silk")
 
     # -- land patterns read against documents --------------------------------
     b.confirm("U1", LGA_CITE)
