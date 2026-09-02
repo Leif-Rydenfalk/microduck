@@ -38,7 +38,9 @@
    "torque_constant_Nm_per_A": 0.354,
    "torque_constant_basis": "the 5.0 V stall row's own third figure, '0.354 [Nm/A]'. It is OUTPUT-shaft torque per INPUT current (E1 Current Limit(38) note: 'XL330 series measures curret at its input power source'), so no gear ratio or gearbox efficiency is applied on top of it.",
    "terminal_resistance_ohm": 3.401361,
-   "terminal_resistance_basis": "DERIVED, not published: at stall the back-EMF is zero and the full row voltage stands across the winding, so R = V / I_stall. The three published rows give {'3.7': 3.333333, '5.0': 3.401361, '6.0': 3.448276} ohm -- a spread of 3.39 % about their mean, which is the derivation's own consistency check. The 5.0 V row is used.",
+   "terminal_resistance_basis": "DERIVED, not published: at stall the back-EMF is zero and the full row voltage stands across the winding, so R = V / I_stall. The three published rows give {'3.7': 3.333333, '5.0': 3.401361, '6.0': 3.448276} ohm -- a spread of 3.3863 % about their mean, which is the derivation's own consistency check. The 5.0 V row is used.",
+   "terminal_resistance_spread_pct": 3.3863,
+   "terminal_resistance_spread_arithmetic": "(3.448276 - 3.333333) / 3.394323 = 0.033863 -> 3.3863 %. Stated to 4 dp because the 2-dp form (3.39 %) was quoted onward as 3.36 % and neither digit could be checked against the file.",
    "envelope_mm": [
     20.0,
     34.0,
@@ -1383,7 +1385,1057 @@
    "left_knee",
    "right_knee"
   ],
-  "joints_over_70C_at_best_cooling_30pct_blocked": [],
+  "joints_over_70C_at_best_cooling_30pct_blocked_per_ambient": {
+   "Ta20C": [],
+   "Ta25C": [],
+   "Ta35C": [
+    "left_knee"
+   ],
+   "why": "per AMBIENT, and every ambient in inputs.ambients_C is listed even when its list is empty. 'Best cooling' here means eps = 1 black-body radiation with 30 %% of the skin blocked by the printed mount. An empty list at one ambient is not an answer for the others.",
+   "any_ambient": [
+    "left_knee"
+   ]
+  },
+  "duty_cells_graded": {
+   "baseline_walk_vx0.25": {
+    "inputs": {
+     "command": {
+      "vx_m_s": 0.25,
+      "vy_m_s": 0.0,
+      "wz_rad_s": 0.0,
+      "warmup_s": 0.5
+     },
+     "slope": null,
+     "seconds": 12.0,
+     "fell": false,
+     "file": "out/sim-evidence/gait-torque-duty.json"
+    },
+    "per_joint": {
+     "head_pitch": {
+      "mean_tau_squared_Nm2": 0.00145368,
+      "rms_torque_Nm": 0.038127,
+      "peak_torque_Nm": 0.068777,
+      "duty_vs_baseline": 1.0,
+      "p_copper_W": 0.03946,
+      "case_temp_C_25C_eps1_free": 25.9869,
+      "case_temp_C_25C_eps0_block30": 27.992,
+      "grade": "PASS"
+     },
+     "head_roll": {
+      "mean_tau_squared_Nm2": 0.0015217,
+      "rms_torque_Nm": 0.039009,
+      "peak_torque_Nm": 0.081465,
+      "duty_vs_baseline": 1.0,
+      "p_copper_W": 0.0413,
+      "case_temp_C_25C_eps1_free": 26.0295,
+      "case_temp_C_25C_eps0_block30": 28.1062,
+      "grade": "PASS"
+     },
+     "head_yaw": {
+      "mean_tau_squared_Nm2": 0.00521699,
+      "rms_torque_Nm": 0.072229,
+      "peak_torque_Nm": 0.150517,
+      "duty_vs_baseline": 1.0,
+      "p_copper_W": 0.1416,
+      "case_temp_C_25C_eps1_free": 28.1784,
+      "case_temp_C_25C_eps0_block30": 33.5058,
+      "grade": "PASS"
+     },
+     "left_ankle": {
+      "mean_tau_squared_Nm2": 0.01191806,
+      "rms_torque_Nm": 0.10917,
+      "peak_torque_Nm": 0.201195,
+      "duty_vs_baseline": 1.0,
+      "p_copper_W": 0.32348,
+      "case_temp_C_25C_eps1_free": 31.6786,
+      "case_temp_C_25C_eps0_block30": 41.6976,
+      "grade": "PASS"
+     },
+     "left_hip_pitch": {
+      "mean_tau_squared_Nm2": 0.00815928,
+      "rms_torque_Nm": 0.090329,
+      "peak_torque_Nm": 0.183315,
+      "duty_vs_baseline": 1.0,
+      "p_copper_W": 0.22146,
+      "case_temp_C_25C_eps1_free": 29.7582,
+      "case_temp_C_25C_eps0_block30": 37.2545,
+      "grade": "PASS"
+     },
+     "left_hip_roll": {
+      "mean_tau_squared_Nm2": 0.00783981,
+      "rms_torque_Nm": 0.088543,
+      "peak_torque_Nm": 0.193775,
+      "duty_vs_baseline": 1.0,
+      "p_copper_W": 0.21279,
+      "case_temp_C_25C_eps1_free": 29.5904,
+      "case_temp_C_25C_eps0_block30": 36.8613,
+      "grade": "PASS"
+     },
+     "left_hip_yaw": {
+      "mean_tau_squared_Nm2": 0.00121523,
+      "rms_torque_Nm": 0.03486,
+      "peak_torque_Nm": 0.106109,
+      "duty_vs_baseline": 1.0,
+      "p_copper_W": 0.03298,
+      "case_temp_C_25C_eps1_free": 25.8361,
+      "case_temp_C_25C_eps0_block30": 27.5835,
+      "grade": "PASS"
+     },
+     "left_knee": {
+      "mean_tau_squared_Nm2": 0.06139675,
+      "rms_torque_Nm": 0.247784,
+      "peak_torque_Nm": 0.430447,
+      "duty_vs_baseline": 1.0,
+      "p_copper_W": 1.66645,
+      "case_temp_C_25C_eps1_free": 52.8544,
+      "case_temp_C_25C_eps0_block30": 88.9819,
+      "grade": "CANNOT DETERMINE"
+     },
+     "neck_pitch": {
+      "mean_tau_squared_Nm2": 0.000983,
+      "rms_torque_Nm": 0.031353,
+      "peak_torque_Nm": 0.091979,
+      "duty_vs_baseline": 1.0,
+      "p_copper_W": 0.02668,
+      "case_temp_C_25C_eps1_free": 25.6868,
+      "case_temp_C_25C_eps0_block30": 27.1711,
+      "grade": "PASS"
+     },
+     "right_ankle": {
+      "mean_tau_squared_Nm2": 0.00873349,
+      "rms_torque_Nm": 0.093453,
+      "peak_torque_Nm": 0.190165,
+      "duty_vs_baseline": 1.0,
+      "p_copper_W": 0.23705,
+      "case_temp_C_25C_eps1_free": 30.0577,
+      "case_temp_C_25C_eps0_block30": 37.9542,
+      "grade": "PASS"
+     },
+     "right_hip_pitch": {
+      "mean_tau_squared_Nm2": 0.01136216,
+      "rms_torque_Nm": 0.106593,
+      "peak_torque_Nm": 0.247622,
+      "duty_vs_baseline": 1.0,
+      "p_copper_W": 0.30839,
+      "case_temp_C_25C_eps1_free": 31.4001,
+      "case_temp_C_25C_eps0_block30": 41.0588,
+      "grade": "PASS"
+     },
+     "right_hip_roll": {
+      "mean_tau_squared_Nm2": 0.00575996,
+      "rms_torque_Nm": 0.075894,
+      "peak_torque_Nm": 0.15705,
+      "duty_vs_baseline": 1.0,
+      "p_copper_W": 0.15634,
+      "case_temp_C_25C_eps1_free": 28.4764,
+      "case_temp_C_25C_eps0_block30": 34.2219,
+      "grade": "PASS"
+     },
+     "right_hip_yaw": {
+      "mean_tau_squared_Nm2": 0.00051229,
+      "rms_torque_Nm": 0.022634,
+      "peak_torque_Nm": 0.070072,
+      "duty_vs_baseline": 1.0,
+      "p_copper_W": 0.0139,
+      "case_temp_C_25C_eps1_free": 25.374,
+      "case_temp_C_25C_eps0_block30": 26.2711,
+      "grade": "PASS"
+     },
+     "right_knee": {
+      "mean_tau_squared_Nm2": 0.04318446,
+      "rms_torque_Nm": 0.207809,
+      "peak_torque_Nm": 0.415415,
+      "duty_vs_baseline": 1.0,
+      "p_copper_W": 1.17212,
+      "case_temp_C_25C_eps1_free": 45.6355,
+      "case_temp_C_25C_eps0_block30": 72.8895,
+      "grade": "CANNOT DETERMINE"
+     }
+    },
+    "worst_joint": "left_knee",
+    "worst_p_copper_W": 1.66645,
+    "joints_FAIL_over_70C_even_at_best_cooling": [],
+    "joints_CANNOT_DETERMINE_band_straddles_70C": [
+     "left_knee",
+     "right_knee"
+    ],
+    "verdict": "CANNOT DETERMINE"
+   },
+   "endurance_60s_slope5_up": {
+    "inputs": {
+     "command": {
+      "vx_m_s": 0.25,
+      "vy_m_s": 0.0,
+      "wz_rad_s": 0.0,
+      "warmup_s": 0.5
+     },
+     "slope": {
+      "slope_deg": 5.0,
+      "slope_dir": "up",
+      "gravity_m_s2": [
+       -0.854998,
+       0.0,
+       -9.77267
+      ],
+      "basis": "sim/gait_sweep.py:77-81 SLOPE_DOWNHILL, G = 9.81 -- the floor stays flat and gravity is rotated"
+     },
+     "seconds": 60.0,
+     "fell": false,
+     "file": "out/sim-evidence/duty-cells/endurance_60s_slope5_up.json"
+    },
+    "per_joint": {
+     "head_pitch": {
+      "mean_tau_squared_Nm2": 0.00496868,
+      "rms_torque_Nm": 0.070489,
+      "peak_torque_Nm": 0.210313,
+      "duty_vs_baseline": 3.418,
+      "p_copper_W": 0.13486,
+      "case_temp_C_25C_eps1_free": 28.041,
+      "case_temp_C_25C_eps0_block30": 33.1737,
+      "grade": "PASS"
+     },
+     "head_roll": {
+      "mean_tau_squared_Nm2": 0.00361819,
+      "rms_torque_Nm": 0.060151,
+      "peak_torque_Nm": 0.27328,
+      "duty_vs_baseline": 2.3777,
+      "p_copper_W": 0.09821,
+      "case_temp_C_25C_eps1_free": 27.2792,
+      "case_temp_C_25C_eps0_block30": 31.3082,
+      "grade": "PASS"
+     },
+     "head_yaw": {
+      "mean_tau_squared_Nm2": 0.05023245,
+      "rms_torque_Nm": 0.224126,
+      "peak_torque_Nm": 0.499806,
+      "duty_vs_baseline": 9.6286,
+      "p_copper_W": 1.36342,
+      "case_temp_C_25C_eps1_free": 48.4867,
+      "case_temp_C_25C_eps0_block30": 79.2314,
+      "grade": "CANNOT DETERMINE"
+     },
+     "left_ankle": {
+      "mean_tau_squared_Nm2": 0.01082083,
+      "rms_torque_Nm": 0.104023,
+      "peak_torque_Nm": 0.3657,
+      "duty_vs_baseline": 0.9079,
+      "p_copper_W": 0.2937,
+      "case_temp_C_25C_eps1_free": 31.1272,
+      "case_temp_C_25C_eps0_block30": 40.4313,
+      "grade": "PASS"
+     },
+     "left_hip_pitch": {
+      "mean_tau_squared_Nm2": 0.06497177,
+      "rms_torque_Nm": 0.254896,
+      "peak_torque_Nm": 0.553314,
+      "duty_vs_baseline": 7.9629,
+      "p_copper_W": 1.76348,
+      "case_temp_C_25C_eps1_free": 54.2188,
+      "case_temp_C_25C_eps0_block30": 92.039,
+      "grade": "CANNOT DETERMINE"
+     },
+     "left_hip_roll": {
+      "mean_tau_squared_Nm2": 0.0077591,
+      "rms_torque_Nm": 0.088086,
+      "peak_torque_Nm": 0.239562,
+      "duty_vs_baseline": 0.9897,
+      "p_copper_W": 0.2106,
+      "case_temp_C_25C_eps1_free": 29.5479,
+      "case_temp_C_25C_eps0_block30": 36.7615,
+      "grade": "PASS"
+     },
+     "left_hip_yaw": {
+      "mean_tau_squared_Nm2": 0.01023549,
+      "rms_torque_Nm": 0.101171,
+      "peak_torque_Nm": 0.278832,
+      "duty_vs_baseline": 8.4227,
+      "p_copper_W": 0.27781,
+      "case_temp_C_25C_eps1_free": 30.8302,
+      "case_temp_C_25C_eps0_block30": 39.7463,
+      "grade": "PASS"
+     },
+     "left_knee": {
+      "mean_tau_squared_Nm2": 0.10256867,
+      "rms_torque_Nm": 0.320263,
+      "peak_torque_Nm": 0.571755,
+      "duty_vs_baseline": 1.6706,
+      "p_copper_W": 2.78395,
+      "case_temp_C_25C_eps1_free": 67.7662,
+      "case_temp_C_25C_eps0_block30": 122.8204,
+      "grade": "CANNOT DETERMINE"
+     },
+     "neck_pitch": {
+      "mean_tau_squared_Nm2": 0.00455128,
+      "rms_torque_Nm": 0.067463,
+      "peak_torque_Nm": 0.296802,
+      "duty_vs_baseline": 4.63,
+      "p_copper_W": 0.12353,
+      "case_temp_C_25C_eps1_free": 27.8083,
+      "case_temp_C_25C_eps0_block30": 32.6085,
+      "grade": "PASS"
+     },
+     "right_ankle": {
+      "mean_tau_squared_Nm2": 0.01766206,
+      "rms_torque_Nm": 0.132899,
+      "peak_torque_Nm": 0.614852,
+      "duty_vs_baseline": 2.0223,
+      "p_copper_W": 0.47939,
+      "case_temp_C_25C_eps1_free": 34.4673,
+      "case_temp_C_25C_eps0_block30": 48.0248,
+      "grade": "PASS"
+     },
+     "right_hip_pitch": {
+      "mean_tau_squared_Nm2": 0.09315436,
+      "rms_torque_Nm": 0.305212,
+      "peak_torque_Nm": 0.715278,
+      "duty_vs_baseline": 8.1986,
+      "p_copper_W": 2.52842,
+      "case_temp_C_25C_eps1_free": 64.4957,
+      "case_temp_C_25C_eps0_block30": 115.2968,
+      "grade": "CANNOT DETERMINE"
+     },
+     "right_hip_roll": {
+      "mean_tau_squared_Nm2": 0.00456726,
+      "rms_torque_Nm": 0.067581,
+      "peak_torque_Nm": 0.198137,
+      "duty_vs_baseline": 0.7929,
+      "p_copper_W": 0.12397,
+      "case_temp_C_25C_eps1_free": 27.8172,
+      "case_temp_C_25C_eps0_block30": 32.6303,
+      "grade": "PASS"
+     },
+     "right_hip_yaw": {
+      "mean_tau_squared_Nm2": 0.00446782,
+      "rms_torque_Nm": 0.066842,
+      "peak_torque_Nm": 0.156132,
+      "duty_vs_baseline": 8.7213,
+      "p_copper_W": 0.12127,
+      "case_temp_C_25C_eps1_free": 27.7614,
+      "case_temp_C_25C_eps0_block30": 32.4944,
+      "grade": "PASS"
+     },
+     "right_knee": {
+      "mean_tau_squared_Nm2": 0.10245742,
+      "rms_torque_Nm": 0.32009,
+      "peak_torque_Nm": 0.649844,
+      "duty_vs_baseline": 2.3726,
+      "p_copper_W": 2.78093,
+      "case_temp_C_25C_eps1_free": 67.7279,
+      "case_temp_C_25C_eps0_block30": 122.7321,
+      "grade": "CANNOT DETERMINE"
+     }
+    },
+    "worst_joint": "left_knee",
+    "worst_p_copper_W": 2.78395,
+    "joints_FAIL_over_70C_even_at_best_cooling": [],
+    "joints_CANNOT_DETERMINE_band_straddles_70C": [
+     "head_yaw",
+     "left_hip_pitch",
+     "left_knee",
+     "right_hip_pitch",
+     "right_knee"
+    ],
+    "verdict": "CANNOT DETERMINE"
+   },
+   "slope5_down": {
+    "inputs": {
+     "command": {
+      "vx_m_s": 0.25,
+      "vy_m_s": 0.0,
+      "wz_rad_s": 0.0,
+      "warmup_s": 0.5
+     },
+     "slope": {
+      "slope_deg": 5.0,
+      "slope_dir": "down",
+      "gravity_m_s2": [
+       0.854998,
+       0.0,
+       -9.77267
+      ],
+      "basis": "sim/gait_sweep.py:77-81 SLOPE_DOWNHILL, G = 9.81 -- the floor stays flat and gravity is rotated"
+     },
+     "seconds": 12.0,
+     "fell": false,
+     "file": "out/sim-evidence/duty-cells/slope5_down.json"
+    },
+    "per_joint": {
+     "head_pitch": {
+      "mean_tau_squared_Nm2": 0.00656822,
+      "rms_torque_Nm": 0.081045,
+      "peak_torque_Nm": 0.228043,
+      "duty_vs_baseline": 4.5183,
+      "p_copper_W": 0.17828,
+      "case_temp_C_25C_eps1_free": 28.9141,
+      "case_temp_C_25C_eps0_block30": 35.2655,
+      "grade": "PASS"
+     },
+     "head_roll": {
+      "mean_tau_squared_Nm2": 0.00456452,
+      "rms_torque_Nm": 0.067561,
+      "peak_torque_Nm": 0.159747,
+      "duty_vs_baseline": 2.9996,
+      "p_copper_W": 0.12389,
+      "case_temp_C_25C_eps1_free": 27.8157,
+      "case_temp_C_25C_eps0_block30": 32.6266,
+      "grade": "PASS"
+     },
+     "head_yaw": {
+      "mean_tau_squared_Nm2": 0.07269433,
+      "rms_torque_Nm": 0.269619,
+      "peak_torque_Nm": 0.569778,
+      "duty_vs_baseline": 13.9342,
+      "p_copper_W": 1.97309,
+      "case_temp_C_25C_eps1_free": 57.1159,
+      "case_temp_C_25C_eps0_block30": 98.5518,
+      "grade": "CANNOT DETERMINE"
+     },
+     "left_ankle": {
+      "mean_tau_squared_Nm2": 0.0139098,
+      "rms_torque_Nm": 0.11794,
+      "peak_torque_Nm": 0.345927,
+      "duty_vs_baseline": 1.1671,
+      "p_copper_W": 0.37754,
+      "case_temp_C_25C_eps1_free": 32.6628,
+      "case_temp_C_25C_eps0_block30": 43.9437,
+      "grade": "PASS"
+     },
+     "left_hip_pitch": {
+      "mean_tau_squared_Nm2": 0.0857413,
+      "rms_torque_Nm": 0.292816,
+      "peak_torque_Nm": 0.53425,
+      "duty_vs_baseline": 10.5084,
+      "p_copper_W": 2.32721,
+      "case_temp_C_25C_eps1_free": 61.868,
+      "case_temp_C_25C_eps0_block30": 109.3067,
+      "grade": "CANNOT DETERMINE"
+     },
+     "left_hip_roll": {
+      "mean_tau_squared_Nm2": 0.00792746,
+      "rms_torque_Nm": 0.089036,
+      "peak_torque_Nm": 0.201944,
+      "duty_vs_baseline": 1.0112,
+      "p_copper_W": 0.21517,
+      "case_temp_C_25C_eps1_free": 29.6365,
+      "case_temp_C_25C_eps0_block30": 36.9695,
+      "grade": "PASS"
+     },
+     "left_hip_yaw": {
+      "mean_tau_squared_Nm2": 0.01275856,
+      "rms_torque_Nm": 0.112954,
+      "peak_torque_Nm": 0.276703,
+      "duty_vs_baseline": 10.4989,
+      "p_copper_W": 0.3463,
+      "case_temp_C_25C_eps1_free": 32.0964,
+      "case_temp_C_25C_eps0_block30": 42.6532,
+      "grade": "PASS"
+     },
+     "left_knee": {
+      "mean_tau_squared_Nm2": 0.12472825,
+      "rms_torque_Nm": 0.353169,
+      "peak_torque_Nm": 0.589776,
+      "duty_vs_baseline": 2.0315,
+      "p_copper_W": 3.38541,
+      "case_temp_C_25C_eps1_free": 75.1948,
+      "case_temp_C_25C_eps0_block30": 140.1364,
+      "grade": "FAIL"
+     },
+     "neck_pitch": {
+      "mean_tau_squared_Nm2": 0.00559027,
+      "rms_torque_Nm": 0.074768,
+      "peak_torque_Nm": 0.222071,
+      "duty_vs_baseline": 5.6869,
+      "p_copper_W": 0.15173,
+      "case_temp_C_25C_eps1_free": 28.3836,
+      "case_temp_C_25C_eps0_block30": 33.9995,
+      "grade": "PASS"
+     },
+     "right_ankle": {
+      "mean_tau_squared_Nm2": 0.02183661,
+      "rms_torque_Nm": 0.147772,
+      "peak_torque_Nm": 0.397264,
+      "duty_vs_baseline": 2.5003,
+      "p_copper_W": 0.5927,
+      "case_temp_C_25C_eps1_free": 36.4116,
+      "case_temp_C_25C_eps0_block30": 52.3847,
+      "grade": "PASS"
+     },
+     "right_hip_pitch": {
+      "mean_tau_squared_Nm2": 0.13097375,
+      "rms_torque_Nm": 0.361903,
+      "peak_torque_Nm": 0.792425,
+      "duty_vs_baseline": 11.5272,
+      "p_copper_W": 3.55493,
+      "case_temp_C_25C_eps1_free": 77.2267,
+      "case_temp_C_25C_eps0_block30": 144.9384,
+      "grade": "FAIL"
+     },
+     "right_hip_roll": {
+      "mean_tau_squared_Nm2": 0.00484303,
+      "rms_torque_Nm": 0.069592,
+      "peak_torque_Nm": 0.19099,
+      "duty_vs_baseline": 0.8408,
+      "p_copper_W": 0.13145,
+      "case_temp_C_25C_eps1_free": 27.9712,
+      "case_temp_C_25C_eps0_block30": 33.0045,
+      "grade": "PASS"
+     },
+     "right_hip_yaw": {
+      "mean_tau_squared_Nm2": 0.0063587,
+      "rms_torque_Nm": 0.079741,
+      "peak_torque_Nm": 0.185797,
+      "duty_vs_baseline": 12.4123,
+      "p_copper_W": 0.17259,
+      "case_temp_C_25C_eps1_free": 28.8013,
+      "case_temp_C_25C_eps0_block30": 34.9973,
+      "grade": "PASS"
+     },
+     "right_knee": {
+      "mean_tau_squared_Nm2": 0.12336646,
+      "rms_torque_Nm": 0.351236,
+      "peak_torque_Nm": 0.697707,
+      "duty_vs_baseline": 2.8567,
+      "p_copper_W": 3.34845,
+      "case_temp_C_25C_eps1_free": 74.7484,
+      "case_temp_C_25C_eps0_block30": 139.0846,
+      "grade": "FAIL"
+     }
+    },
+    "worst_joint": "right_hip_pitch",
+    "worst_p_copper_W": 3.55493,
+    "joints_FAIL_over_70C_even_at_best_cooling": [
+     "left_knee",
+     "right_hip_pitch",
+     "right_knee"
+    ],
+    "joints_CANNOT_DETERMINE_band_straddles_70C": [
+     "head_yaw",
+     "left_hip_pitch"
+    ],
+    "verdict": "FAIL"
+   },
+   "slope5_side_left": {
+    "inputs": {
+     "command": {
+      "vx_m_s": 0.25,
+      "vy_m_s": 0.0,
+      "wz_rad_s": 0.0,
+      "warmup_s": 0.5
+     },
+     "slope": {
+      "slope_deg": 5.0,
+      "slope_dir": "side_left",
+      "gravity_m_s2": [
+       0.0,
+       0.854998,
+       -9.77267
+      ],
+      "basis": "sim/gait_sweep.py:77-81 SLOPE_DOWNHILL, G = 9.81 -- the floor stays flat and gravity is rotated"
+     },
+     "seconds": 12.0,
+     "fell": false,
+     "file": "out/sim-evidence/duty-cells/slope5_side_left.json"
+    },
+    "per_joint": {
+     "head_pitch": {
+      "mean_tau_squared_Nm2": 0.00580566,
+      "rms_torque_Nm": 0.076195,
+      "peak_torque_Nm": 0.220703,
+      "duty_vs_baseline": 3.9938,
+      "p_copper_W": 0.15758,
+      "case_temp_C_25C_eps1_free": 28.5013,
+      "case_temp_C_25C_eps0_block30": 34.2816,
+      "grade": "PASS"
+     },
+     "head_roll": {
+      "mean_tau_squared_Nm2": 0.00381317,
+      "rms_torque_Nm": 0.061751,
+      "peak_torque_Nm": 0.150173,
+      "duty_vs_baseline": 2.5059,
+      "p_copper_W": 0.1035,
+      "case_temp_C_25C_eps1_free": 27.3908,
+      "case_temp_C_25C_eps0_block30": 31.5846,
+      "grade": "PASS"
+     },
+     "head_yaw": {
+      "mean_tau_squared_Nm2": 0.0574587,
+      "rms_torque_Nm": 0.239705,
+      "peak_torque_Nm": 0.574958,
+      "duty_vs_baseline": 11.0138,
+      "p_copper_W": 1.55956,
+      "case_temp_C_25C_eps1_free": 51.333,
+      "case_temp_C_25C_eps0_block30": 85.5796,
+      "grade": "CANNOT DETERMINE"
+     },
+     "left_ankle": {
+      "mean_tau_squared_Nm2": 0.01396495,
+      "rms_torque_Nm": 0.118173,
+      "peak_torque_Nm": 0.353269,
+      "duty_vs_baseline": 1.1717,
+      "p_copper_W": 0.37904,
+      "case_temp_C_25C_eps1_free": 32.6898,
+      "case_temp_C_25C_eps0_block30": 44.005,
+      "grade": "PASS"
+     },
+     "left_hip_pitch": {
+      "mean_tau_squared_Nm2": 0.06941149,
+      "rms_torque_Nm": 0.263461,
+      "peak_torque_Nm": 0.569913,
+      "duty_vs_baseline": 8.5071,
+      "p_copper_W": 1.88399,
+      "case_temp_C_25C_eps1_free": 55.8924,
+      "case_temp_C_25C_eps0_block30": 95.7973,
+      "grade": "CANNOT DETERMINE"
+     },
+     "left_hip_roll": {
+      "mean_tau_squared_Nm2": 0.0074875,
+      "rms_torque_Nm": 0.08653,
+      "peak_torque_Nm": 0.218936,
+      "duty_vs_baseline": 0.9551,
+      "p_copper_W": 0.20323,
+      "case_temp_C_25C_eps1_free": 29.4044,
+      "case_temp_C_25C_eps0_block30": 36.4243,
+      "grade": "PASS"
+     },
+     "left_hip_yaw": {
+      "mean_tau_squared_Nm2": 0.00937183,
+      "rms_torque_Nm": 0.096808,
+      "peak_torque_Nm": 0.26324,
+      "duty_vs_baseline": 7.712,
+      "p_copper_W": 0.25437,
+      "case_temp_C_25C_eps1_free": 30.3879,
+      "case_temp_C_25C_eps0_block30": 38.7222,
+      "grade": "PASS"
+     },
+     "left_knee": {
+      "mean_tau_squared_Nm2": 0.11830855,
+      "rms_torque_Nm": 0.34396,
+      "peak_torque_Nm": 0.611492,
+      "duty_vs_baseline": 1.927,
+      "p_copper_W": 3.21116,
+      "case_temp_C_25C_eps1_free": 73.0792,
+      "case_temp_C_25C_eps0_block30": 135.1618,
+      "grade": "FAIL"
+     },
+     "neck_pitch": {
+      "mean_tau_squared_Nm2": 0.00514615,
+      "rms_torque_Nm": 0.071737,
+      "peak_torque_Nm": 0.193877,
+      "duty_vs_baseline": 5.2351,
+      "p_copper_W": 0.13968,
+      "case_temp_C_25C_eps1_free": 28.1393,
+      "case_temp_C_25C_eps0_block30": 33.4113,
+      "grade": "PASS"
+     },
+     "right_ankle": {
+      "mean_tau_squared_Nm2": 0.01643284,
+      "rms_torque_Nm": 0.128191,
+      "peak_torque_Nm": 0.385155,
+      "duty_vs_baseline": 1.8816,
+      "p_copper_W": 0.44602,
+      "case_temp_C_25C_eps1_free": 33.8827,
+      "case_temp_C_25C_eps0_block30": 46.707,
+      "grade": "PASS"
+     },
+     "right_hip_pitch": {
+      "mean_tau_squared_Nm2": 0.1042716,
+      "rms_torque_Nm": 0.322911,
+      "peak_torque_Nm": 0.802208,
+      "duty_vs_baseline": 9.1771,
+      "p_copper_W": 2.83017,
+      "case_temp_C_25C_eps1_free": 68.3501,
+      "case_temp_C_25C_eps0_block30": 124.1693,
+      "grade": "CANNOT DETERMINE"
+     },
+     "right_hip_roll": {
+      "mean_tau_squared_Nm2": 0.00581719,
+      "rms_torque_Nm": 0.076271,
+      "peak_torque_Nm": 0.256372,
+      "duty_vs_baseline": 1.0099,
+      "p_copper_W": 0.15789,
+      "case_temp_C_25C_eps1_free": 28.5076,
+      "case_temp_C_25C_eps0_block30": 34.2967,
+      "grade": "PASS"
+     },
+     "right_hip_yaw": {
+      "mean_tau_squared_Nm2": 0.0057352,
+      "rms_torque_Nm": 0.075731,
+      "peak_torque_Nm": 0.186551,
+      "duty_vs_baseline": 11.1952,
+      "p_copper_W": 0.15567,
+      "case_temp_C_25C_eps1_free": 28.4629,
+      "case_temp_C_25C_eps0_block30": 34.1895,
+      "grade": "PASS"
+     },
+     "right_knee": {
+      "mean_tau_squared_Nm2": 0.10420716,
+      "rms_torque_Nm": 0.322811,
+      "peak_torque_Nm": 0.689135,
+      "duty_vs_baseline": 2.4131,
+      "p_copper_W": 2.82842,
+      "case_temp_C_25C_eps1_free": 68.328,
+      "case_temp_C_25C_eps0_block30": 124.1183,
+      "grade": "CANNOT DETERMINE"
+     }
+    },
+    "worst_joint": "left_knee",
+    "worst_p_copper_W": 3.21116,
+    "joints_FAIL_over_70C_even_at_best_cooling": [
+     "left_knee"
+    ],
+    "joints_CANNOT_DETERMINE_band_straddles_70C": [
+     "head_yaw",
+     "left_hip_pitch",
+     "right_hip_pitch",
+     "right_knee"
+    ],
+    "verdict": "FAIL"
+   },
+   "vx_0.60": {
+    "inputs": {
+     "command": {
+      "vx_m_s": 0.6,
+      "vy_m_s": 0.0,
+      "wz_rad_s": 0.0,
+      "warmup_s": 0.5
+     },
+     "slope": null,
+     "seconds": 12.0,
+     "fell": false,
+     "file": "out/sim-evidence/duty-cells/vx_0.60.json"
+    },
+    "per_joint": {
+     "head_pitch": {
+      "mean_tau_squared_Nm2": 0.0038413,
+      "rms_torque_Nm": 0.061978,
+      "peak_torque_Nm": 0.147303,
+      "duty_vs_baseline": 2.6425,
+      "p_copper_W": 0.10426,
+      "case_temp_C_25C_eps1_free": 27.4069,
+      "case_temp_C_25C_eps0_block30": 31.6243,
+      "grade": "PASS"
+     },
+     "head_roll": {
+      "mean_tau_squared_Nm2": 0.00154087,
+      "rms_torque_Nm": 0.039254,
+      "peak_torque_Nm": 0.095067,
+      "duty_vs_baseline": 1.0126,
+      "p_copper_W": 0.04182,
+      "case_temp_C_25C_eps1_free": 26.0414,
+      "case_temp_C_25C_eps0_block30": 28.1382,
+      "grade": "PASS"
+     },
+     "head_yaw": {
+      "mean_tau_squared_Nm2": 0.0374415,
+      "rms_torque_Nm": 0.193498,
+      "peak_torque_Nm": 0.375485,
+      "duty_vs_baseline": 7.1768,
+      "p_copper_W": 1.01625,
+      "case_temp_C_25C_eps1_free": 43.2499,
+      "case_temp_C_25C_eps0_block30": 67.5916,
+      "grade": "PASS"
+     },
+     "left_ankle": {
+      "mean_tau_squared_Nm2": 0.03201833,
+      "rms_torque_Nm": 0.178937,
+      "peak_torque_Nm": 0.30422,
+      "duty_vs_baseline": 2.6865,
+      "p_copper_W": 0.86905,
+      "case_temp_C_25C_eps1_free": 40.9385,
+      "case_temp_C_25C_eps0_block30": 62.4609,
+      "grade": "PASS"
+     },
+     "left_hip_pitch": {
+      "mean_tau_squared_Nm2": 0.04359657,
+      "rms_torque_Nm": 0.208798,
+      "peak_torque_Nm": 0.42748,
+      "duty_vs_baseline": 5.3432,
+      "p_copper_W": 1.18331,
+      "case_temp_C_25C_eps1_free": 45.8044,
+      "case_temp_C_25C_eps0_block30": 73.2649,
+      "grade": "CANNOT DETERMINE"
+     },
+     "left_hip_roll": {
+      "mean_tau_squared_Nm2": 0.011829,
+      "rms_torque_Nm": 0.108761,
+      "peak_torque_Nm": 0.290822,
+      "duty_vs_baseline": 1.5088,
+      "p_copper_W": 0.32107,
+      "case_temp_C_25C_eps1_free": 31.6341,
+      "case_temp_C_25C_eps0_block30": 41.5956,
+      "grade": "PASS"
+     },
+     "left_hip_yaw": {
+      "mean_tau_squared_Nm2": 0.00587681,
+      "rms_torque_Nm": 0.07666,
+      "peak_torque_Nm": 0.196245,
+      "duty_vs_baseline": 4.836,
+      "p_copper_W": 0.15951,
+      "case_temp_C_25C_eps1_free": 28.5401,
+      "case_temp_C_25C_eps0_block30": 34.3744,
+      "grade": "PASS"
+     },
+     "left_knee": {
+      "mean_tau_squared_Nm2": 0.13984718,
+      "rms_torque_Nm": 0.373961,
+      "peak_torque_Nm": 0.661568,
+      "duty_vs_baseline": 2.2778,
+      "p_copper_W": 3.79577,
+      "case_temp_C_25C_eps1_free": 80.0704,
+      "case_temp_C_25C_eps0_block30": 151.7008,
+      "grade": "FAIL"
+     },
+     "neck_pitch": {
+      "mean_tau_squared_Nm2": 0.00287595,
+      "rms_torque_Nm": 0.053628,
+      "peak_torque_Nm": 0.161517,
+      "duty_vs_baseline": 2.9257,
+      "p_copper_W": 0.07806,
+      "case_temp_C_25C_eps1_free": 26.8481,
+      "case_temp_C_25C_eps0_block30": 30.229,
+      "grade": "PASS"
+     },
+     "right_ankle": {
+      "mean_tau_squared_Nm2": 0.02046148,
+      "rms_torque_Nm": 0.143044,
+      "peak_torque_Nm": 0.307646,
+      "duty_vs_baseline": 2.3429,
+      "p_copper_W": 0.55537,
+      "case_temp_C_25C_eps1_free": 35.7777,
+      "case_temp_C_25C_eps0_block30": 50.9666,
+      "grade": "PASS"
+     },
+     "right_hip_pitch": {
+      "mean_tau_squared_Nm2": 0.07243907,
+      "rms_torque_Nm": 0.269145,
+      "peak_torque_Nm": 0.551129,
+      "duty_vs_baseline": 6.3755,
+      "p_copper_W": 1.96616,
+      "case_temp_C_25C_eps1_free": 57.0212,
+      "case_temp_C_25C_eps0_block30": 98.3384,
+      "grade": "CANNOT DETERMINE"
+     },
+     "right_hip_roll": {
+      "mean_tau_squared_Nm2": 0.00890088,
+      "rms_torque_Nm": 0.094344,
+      "peak_torque_Nm": 0.216946,
+      "duty_vs_baseline": 1.5453,
+      "p_copper_W": 0.24159,
+      "case_temp_C_25C_eps1_free": 30.1446,
+      "case_temp_C_25C_eps0_block30": 38.1565,
+      "grade": "PASS"
+     },
+     "right_hip_yaw": {
+      "mean_tau_squared_Nm2": 0.00389895,
+      "rms_torque_Nm": 0.062442,
+      "peak_torque_Nm": 0.155073,
+      "duty_vs_baseline": 7.6108,
+      "p_copper_W": 0.10583,
+      "case_temp_C_25C_eps1_free": 27.4398,
+      "case_temp_C_25C_eps0_block30": 31.7054,
+      "grade": "PASS"
+     },
+     "right_knee": {
+      "mean_tau_squared_Nm2": 0.10210554,
+      "rms_torque_Nm": 0.31954,
+      "peak_torque_Nm": 0.644736,
+      "duty_vs_baseline": 2.3644,
+      "p_copper_W": 2.77138,
+      "case_temp_C_25C_eps1_free": 67.607,
+      "case_temp_C_25C_eps0_block30": 122.4529,
+      "grade": "CANNOT DETERMINE"
+     }
+    },
+    "worst_joint": "left_knee",
+    "worst_p_copper_W": 3.79577,
+    "joints_FAIL_over_70C_even_at_best_cooling": [
+     "left_knee"
+    ],
+    "joints_CANNOT_DETERMINE_band_straddles_70C": [
+     "left_hip_pitch",
+     "right_hip_pitch",
+     "right_knee"
+    ],
+    "verdict": "FAIL"
+   },
+   "vx_0.80": {
+    "inputs": {
+     "command": {
+      "vx_m_s": 0.8,
+      "vy_m_s": 0.0,
+      "wz_rad_s": 0.0,
+      "warmup_s": 0.5
+     },
+     "slope": null,
+     "seconds": 12.0,
+     "fell": false,
+     "file": "out/sim-evidence/duty-cells/vx_0.80.json"
+    },
+    "per_joint": {
+     "head_pitch": {
+      "mean_tau_squared_Nm2": 0.00465254,
+      "rms_torque_Nm": 0.06821,
+      "peak_torque_Nm": 0.170449,
+      "duty_vs_baseline": 3.2005,
+      "p_copper_W": 0.12628,
+      "case_temp_C_25C_eps1_free": 27.8649,
+      "case_temp_C_25C_eps0_block30": 32.7465,
+      "grade": "PASS"
+     },
+     "head_roll": {
+      "mean_tau_squared_Nm2": 0.0006905,
+      "rms_torque_Nm": 0.026277,
+      "peak_torque_Nm": 0.096483,
+      "duty_vs_baseline": 0.4538,
+      "p_copper_W": 0.01874,
+      "case_temp_C_25C_eps1_free": 25.4944,
+      "case_temp_C_25C_eps0_block30": 26.6247,
+      "grade": "PASS"
+     },
+     "head_yaw": {
+      "mean_tau_squared_Nm2": 0.05832316,
+      "rms_torque_Nm": 0.241502,
+      "peak_torque_Nm": 0.390092,
+      "duty_vs_baseline": 11.1795,
+      "p_copper_W": 1.58302,
+      "case_temp_C_25C_eps1_free": 51.6687,
+      "case_temp_C_25C_eps0_block30": 86.3297,
+      "grade": "CANNOT DETERMINE"
+     },
+     "left_ankle": {
+      "mean_tau_squared_Nm2": 0.0531854,
+      "rms_torque_Nm": 0.23062,
+      "peak_torque_Nm": 0.384445,
+      "duty_vs_baseline": 4.4626,
+      "p_copper_W": 1.44357,
+      "case_temp_C_25C_eps1_free": 49.6587,
+      "case_temp_C_25C_eps0_block30": 81.843,
+      "grade": "CANNOT DETERMINE"
+     },
+     "left_hip_pitch": {
+      "mean_tau_squared_Nm2": 0.06260359,
+      "rms_torque_Nm": 0.250207,
+      "peak_torque_Nm": 0.458158,
+      "duty_vs_baseline": 7.6727,
+      "p_copper_W": 1.6992,
+      "case_temp_C_25C_eps1_free": 53.3167,
+      "case_temp_C_25C_eps0_block30": 90.0171,
+      "grade": "CANNOT DETERMINE"
+     },
+     "left_hip_roll": {
+      "mean_tau_squared_Nm2": 0.01446488,
+      "rms_torque_Nm": 0.12027,
+      "peak_torque_Nm": 0.314878,
+      "duty_vs_baseline": 1.8451,
+      "p_copper_W": 0.39261,
+      "case_temp_C_25C_eps1_free": 32.9336,
+      "case_temp_C_25C_eps0_block30": 44.559,
+      "grade": "PASS"
+     },
+     "left_hip_yaw": {
+      "mean_tau_squared_Nm2": 0.00965164,
+      "rms_torque_Nm": 0.098243,
+      "peak_torque_Nm": 0.195793,
+      "duty_vs_baseline": 7.9422,
+      "p_copper_W": 0.26197,
+      "case_temp_C_25C_eps1_free": 30.5317,
+      "case_temp_C_25C_eps0_block30": 39.0558,
+      "grade": "PASS"
+     },
+     "left_knee": {
+      "mean_tau_squared_Nm2": 0.17672814,
+      "rms_torque_Nm": 0.42039,
+      "peak_torque_Nm": 0.769868,
+      "duty_vs_baseline": 2.8785,
+      "p_copper_W": 4.7968,
+      "case_temp_C_25C_eps1_free": 91.4006,
+      "case_temp_C_25C_eps0_block30": 179.1877,
+      "grade": "FAIL"
+     },
+     "neck_pitch": {
+      "mean_tau_squared_Nm2": 0.00305567,
+      "rms_torque_Nm": 0.055278,
+      "peak_torque_Nm": 0.149747,
+      "duty_vs_baseline": 3.1085,
+      "p_copper_W": 0.08294,
+      "case_temp_C_25C_eps1_free": 26.9534,
+      "case_temp_C_25C_eps0_block30": 30.4946,
+      "grade": "PASS"
+     },
+     "right_ankle": {
+      "mean_tau_squared_Nm2": 0.03236627,
+      "rms_torque_Nm": 0.179906,
+      "peak_torque_Nm": 0.348147,
+      "duty_vs_baseline": 3.706,
+      "p_copper_W": 0.87849,
+      "case_temp_C_25C_eps1_free": 41.0886,
+      "case_temp_C_25C_eps0_block30": 62.7942,
+      "grade": "PASS"
+     },
+     "right_hip_pitch": {
+      "mean_tau_squared_Nm2": 0.10819596,
+      "rms_torque_Nm": 0.328932,
+      "peak_torque_Nm": 0.606917,
+      "duty_vs_baseline": 9.5225,
+      "p_copper_W": 2.93668,
+      "case_temp_C_25C_eps1_free": 69.6871,
+      "case_temp_C_25C_eps0_block30": 127.2647,
+      "grade": "CANNOT DETERMINE"
+     },
+     "right_hip_roll": {
+      "mean_tau_squared_Nm2": 0.01151985,
+      "rms_torque_Nm": 0.107331,
+      "peak_torque_Nm": 0.194683,
+      "duty_vs_baseline": 2.0,
+      "p_copper_W": 0.31267,
+      "case_temp_C_25C_eps1_free": 31.4793,
+      "case_temp_C_25C_eps0_block30": 41.2406,
+      "grade": "PASS"
+     },
+     "right_hip_yaw": {
+      "mean_tau_squared_Nm2": 0.00644199,
+      "rms_torque_Nm": 0.080262,
+      "peak_torque_Nm": 0.184255,
+      "duty_vs_baseline": 12.5749,
+      "p_copper_W": 0.17485,
+      "case_temp_C_25C_eps1_free": 28.8462,
+      "case_temp_C_25C_eps0_block30": 35.1041,
+      "grade": "PASS"
+     },
+     "right_knee": {
+      "mean_tau_squared_Nm2": 0.13471417,
+      "rms_torque_Nm": 0.367034,
+      "peak_torque_Nm": 0.720905,
+      "duty_vs_baseline": 3.1195,
+      "p_copper_W": 3.65645,
+      "case_temp_C_25C_eps1_free": 78.4314,
+      "case_temp_C_25C_eps0_block30": 147.7973,
+      "grade": "FAIL"
+     }
+    },
+    "worst_joint": "left_knee",
+    "worst_p_copper_W": 4.7968,
+    "joints_FAIL_over_70C_even_at_best_cooling": [
+     "left_knee",
+     "right_knee"
+    ],
+    "joints_CANNOT_DETERMINE_band_straddles_70C": [
+     "head_yaw",
+     "left_ankle",
+     "left_hip_pitch",
+     "right_hip_pitch"
+    ],
+    "verdict": "FAIL"
+   }
+  },
+  "duty_cells_that_FAIL": [
+   "slope5_down",
+   "slope5_side_left",
+   "vx_0.60",
+   "vx_0.80"
+  ],
+  "worst_duty_cell": "vx_0.80",
+  "duty_cells_scope": "STEADY STATE at each cell's own measured mean(tau^2), held indefinitely. A cell is a COMMAND the robot can be given, not a proven continuous duty cycle -- how long a Microduck is actually walked at vx = 0.80 m/s or across a 5 deg side slope is a product decision nobody has made. time_to_limit_curve is the transient half of the answer and it is parametric in the unpublished capacitance. What these rows establish is that the 70 degC limit is a DUTY limit, not a margin: the baseline straddles it and the faster cells clear it at the best cooling physics allows.",
   "total_copper_W_15_servos_note": "sum over the 14 actuated joints; the 15th XL330 (jaw) is not an actuated joint in the published model and has no measured duty -- CANNOT DETERMINE",
   "total_copper_W": 4.594,
   "total_mech_W": 1.82539,
@@ -1469,8 +2521,8 @@
    }
   ]
  },
- "verdict": "CANNOT DETERMINE",
- "why": "2 of 14 joints STRADDLE the 70 degC Temperature Limit(31): left_knee, right_knee. Worst is left_knee, whose case sits between 52.85 degC (black-body radiation, free body -- the best cooling physics allows) and 88.98 degC (no radiation, 30 % of the skin blocked by its printed mount). The bracket contains the limit, so the verdict is not a pass. Two unmeasured quantities decide it: the case's emissivity and how much of the skin the printed mount covers -- and on top of both, the winding is hotter than the case by an unpublished amount, so even the lower bound is a lower bound. No other joint exceeds 41.70 degC at its own upper bound.",
+ "verdict": "FAIL",
+ "why": "SCOPE FIRST: this study grades 6 duty cells, not just the vx = 0.25 m/s baseline. 2 of 14 joints STRADDLE the 70 degC Temperature Limit(31): left_knee, right_knee. Worst is left_knee, whose case sits between 52.85 degC (black-body radiation, free body -- the best cooling physics allows) and 88.98 degC (no radiation, 30 % of the skin blocked by its printed mount). The bracket contains the limit, so the verdict is not a pass. Two unmeasured quantities decide it: the case's emissivity and how much of the skin the printed mount covers -- and on top of both, the winding is hotter than the case by an unpublished amount, so even the lower bound is a lower bound. No other joint exceeds 41.70 degC at its own upper bound. AND THE FASTER CELLS FAIL OUTRIGHT. 4 of 6 cells put at least one joint over the 70 degC Temperature Limit(31) at 25 degC in still air with the BEST cooling physics allows (eps = 1 black body, free body, no mount blockage): slope5_down, slope5_side_left, vx_0.60, vx_0.80. The worst is vx_0.80, where left_knee carries mean(tau^2) = 0.176728 N2m2 -- 2.8785x the baseline duty -- dissipating 4.7968 W in copper and settling at 91.40 degC even at best cooling (179.19 degC at worst). Copper loss goes as tau^2, which is why a 2.9x duty is a 2.9x heat load and not a small correction. Every temperature here is a LOWER BOUND on the winding, because the winding-to-case resistance is unpublished, and steady state assumes the cell is held indefinitely (see outputs.duty_cells_scope).",
  "cannot_determine": [
   {
    "what": "winding-to-case thermal resistance",
@@ -1493,6 +2545,11 @@
    "what_settles_it": "the Robot HAT schematic (lane D) naming the regulator."
   },
   {
+   "what": "how long the robot is actually held at the failing duty cells",
+   "why": "vx_0.60, vx_0.80, slope5_side_left, slope5_down and endurance_60s_slope5_up are COMMANDS the policy accepts, measured here for 12 s (60 s for the endurance cell). Whether a Microduck is ever walked at them long enough to reach steady state is a product decision, not a measurement. The steady-state numbers say what happens if it is; time_to_limit_curve says how fast, and it is parametric in the unpublished thermal capacitance.",
+   "what_settles_it": "a stated duty cycle for the product, plus the step test that gives R_th and C on one real servo."
+  },
+  {
    "what": "current at pack voltage above 6.0 V",
    "why": "the vendor states nothing above 6.0 V and the design runs the servos on the raw 6.6-8.2 V pack (docs/ELECTRONICS-AND-SOFTWARE.md 3.4). kT and R are taken at the 5.0 V row.",
    "what_settles_it": "a meter on a servo VDD pin and Present Current(126) logged at a known torque on the real pack."
@@ -1505,6 +2562,11 @@
  "looked_at": [
   "out/sim-evidence/gait-torque-duty.json",
   "out/sim-evidence/gait-peaks.json",
+  "out/sim-evidence/duty-cells/vx_0.60.json",
+  "out/sim-evidence/duty-cells/vx_0.80.json",
+  "out/sim-evidence/duty-cells/slope5_side_left.json",
+  "out/sim-evidence/duty-cells/slope5_down.json",
+  "out/sim-evidence/duty-cells/endurance_60s_slope5_up.json",
   "ce-parts/xl330-m288-t/electrical.chip.json",
   "ce-parts/xl330-m288-t/electrical.part.json",
   "ce-parts/xl330-m288-t/component.json",

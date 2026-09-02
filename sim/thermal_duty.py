@@ -51,17 +51,42 @@ def main():
     ap.add_argument("--warmup", type=float, default=0.5)
     ap.add_argument("--start", default="STAND")
     ap.add_argument("--out", default="out/sim-evidence/gait-torque-duty.json")
+    ap.add_argument("--cell", default="baseline_walk_vx0.25",
+                    help="the name this duty cell is recorded under; when it names a "
+                         "cell of lane F2's sweep (sim/gait_sweep.py) the two are "
+                         "directly comparable because the model mods are the same")
+    ap.add_argument("--slope-deg", type=float, default=0.0)
+    ap.add_argument("--slope-dir", default=None,
+                    choices=[None, "up", "down", "side_left", "side_right"])
     args = ap.parse_args()
 
     import mujoco
 
-    scene = os.path.join(REPO, "out/sim/scene_thermal_duty.xml")
+    scene = os.path.join(REPO, "out/sim/scene_thermal_duty_%s.xml" % args.cell)
     model, _ = common.load_model(args.robot, scene)
     data = mujoco.MjData(model)
     kid = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_KEY, args.start)
     assert kid >= 0, args.start
     mujoco.mj_resetDataKeyframe(model, data, kid)
     mujoco.mj_forward(model, data)
+
+    # slope EXACTLY as lane F2 does it (sim/gait_sweep.py:77-81): the floor stays
+    # flat and gravity is rotated, so the same policy sees the same contact model.
+    slope_rec = None
+    if args.slope_deg:
+        import math as _m
+        downhill = {"up": (-1.0, 0.0), "down": (1.0, 0.0),
+                    "side_left": (0.0, 1.0), "side_right": (0.0, -1.0)}
+        dx, dy = downhill[args.slope_dir]
+        th = _m.radians(args.slope_deg)
+        G = 9.81
+        model.opt.gravity[:] = [G * _m.sin(th) * dx, G * _m.sin(th) * dy,
+                                -G * _m.cos(th)]
+        slope_rec = {"slope_deg": args.slope_deg, "slope_dir": args.slope_dir,
+                     "gravity_m_s2": [round(float(v), 6) for v in model.opt.gravity],
+                     "basis": "sim/gait_sweep.py:77-81 SLOPE_DOWNHILL, G = 9.81 -- "
+                              "the floor stays flat and gravity is rotated"}
+        mujoco.mj_forward(model, data)
 
     pol = rp.Policy(os.path.join(common.POLICY_DIR, rp.POLICY_FILES[args.policy]))
     runner = rp.Runner(model, data)
@@ -130,6 +155,8 @@ def main():
                  "and the vertical ground reaction. The load basis for every "
                  "thermal number in lane F3."),
         "inputs": {
+            "cell": args.cell,
+            "slope": slope_rec,
             "robot": args.robot,
             "scene": os.path.relpath(scene, REPO),
             "policy_file": rp.POLICY_FILES[args.policy],

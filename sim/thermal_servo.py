@@ -206,6 +206,23 @@ def main():
     ambients = [20.0, 25.0, 35.0]
     blockages = [0.0, 0.30]                       # free body / 30 % of the skin blocked by the printed mount
 
+    # ---- the OTHER duty cells --------------------------------------------
+    # Scope limit the first version of this study did not state: it graded the
+    # vx = 0.25 m/s baseline ONLY, while lane F2's sweep records cells whose
+    # peak torques are 2.4-3.2x that.  Copper loss goes as tau^2, so those cells
+    # are not a footnote to the baseline -- they are a different thermal
+    # problem.  sim/thermal_duty.py was extended with --cell/--slope-deg/
+    # --slope-dir (the slope done exactly as sim/gait_sweep.py:77-81 does it,
+    # floor flat and gravity rotated) and re-run on them; the results are
+    # out/sim-evidence/duty-cells/*.json and every one is graded below.
+    cell_dir = os.path.join(REPO, "out/sim-evidence/duty-cells")
+    cells = {"baseline_walk_vx0.25": duty}
+    if os.path.isdir(cell_dir):
+        for fn in sorted(os.listdir(cell_dir)):
+            if fn.endswith(".json"):
+                c = json.load(open(os.path.join(cell_dir, fn)))
+                cells[c["inputs"].get("cell", fn[:-5])] = c
+
     rows = {}
     for name, j in sorted(joints.items()):
         i2 = j["mean_tau_squared_Nm2"] / (KT * KT)          # A^2, RMS-squared motor current
@@ -301,8 +318,69 @@ def main():
     unknown = sorted(n for n, r in rows.items()
                      if r["case_band_25C"]["grade"] == "CANNOT DETERMINE")
     over_at_best = fails
-    over_at_block = sorted(n for n, r in rows.items()
-                           if r["steady_state"]["Ta25C_block30%"]["over_limit_even_at_best_cooling"])
+    # ACROSS EVERY AMBIENT THIS STUDY CARRIES, not 25 degC only.  The first
+    # version read this off the Ta25C_block30% row alone and published an empty
+    # list while per_joint.left_knee.steady_state["Ta35C_block30%"] carried
+    # over_limit_even_at_best_cooling: true -- a field name that promised a
+    # check the data contradicted.  35 degC is one of this study's own
+    # inputs.ambients_C, so it is graded.
+    over_at_block = {}
+    for ta in ambients:
+        tag = "Ta%.0fC_block30%%" % ta
+        over_at_block["Ta%.0fC" % ta] = sorted(
+            n for n, r in rows.items()
+            if r["steady_state"][tag]["over_limit_even_at_best_cooling"])
+    over_at_block["why"] = (
+        "per AMBIENT, and every ambient in inputs.ambients_C is listed even when its "
+        "list is empty. 'Best cooling' here means eps = 1 black-body radiation with "
+        "30 % of the skin blocked by the printed mount. An empty list at one ambient "
+        "is not an answer for the others.")
+    over_at_block["any_ambient"] = sorted(
+        {n for ta in ambients
+         for n in over_at_block["Ta%.0fC" % ta]})
+
+    # ---- every duty cell, graded ------------------------------------------
+    cell_grades = {}
+    for cname, c in sorted(cells.items()):
+        cj = c["outputs"]["joints"]
+        per = {}
+        for name, j in sorted(cj.items()):
+            i2 = j["mean_tau_squared_Nm2"] / (KT * KT)
+            p = i2 * R_TERM
+            lo = solve_case_temp(p, AREA, L_CHAR, 25.0, 1.0, 0.0)["case_temp_C"]
+            hi = solve_case_temp(p, AREA, L_CHAR, 25.0, 0.0, 0.30)["case_temp_C"]
+            per[name] = {
+                "mean_tau_squared_Nm2": j["mean_tau_squared_Nm2"],
+                "rms_torque_Nm": j["rms_Nm"],
+                "peak_torque_Nm": j["peak_abs_Nm"],
+                "duty_vs_baseline": round(j["mean_tau_squared_Nm2"] /
+                                          joints[name]["mean_tau_squared_Nm2"], 4)
+                                    if joints[name]["mean_tau_squared_Nm2"] else None,
+                "p_copper_W": round(p, 5),
+                "case_temp_C_25C_eps1_free": round(lo, 4),
+                "case_temp_C_25C_eps0_block30": round(hi, 4),
+                "grade": ("FAIL" if lo > T_LIMIT_C else
+                          "CANNOT DETERMINE" if hi > T_LIMIT_C else "PASS"),
+            }
+        cf = sorted(n for n in per if per[n]["grade"] == "FAIL")
+        cu = sorted(n for n in per if per[n]["grade"] == "CANNOT DETERMINE")
+        cell_grades[cname] = {
+            "inputs": {"command": c["inputs"].get("command"),
+                       "slope": c["inputs"].get("slope"),
+                       "seconds": c["inputs"].get("seconds"),
+                       "fell": c["outputs"].get("fell"),
+                       "file": ("out/sim-evidence/gait-torque-duty.json"
+                                if cname == "baseline_walk_vx0.25" else
+                                "out/sim-evidence/duty-cells/%s.json" % cname)},
+            "per_joint": per,
+            "worst_joint": max(per, key=lambda n: per[n]["p_copper_W"]),
+            "worst_p_copper_W": max(v["p_copper_W"] for v in per.values()),
+            "joints_FAIL_over_70C_even_at_best_cooling": cf,
+            "joints_CANNOT_DETERMINE_band_straddles_70C": cu,
+            "verdict": "FAIL" if cf else ("CANNOT DETERMINE" if cu else "PASS"),
+        }
+    cells_failing = sorted(n for n, g in cell_grades.items() if g["verdict"] == "FAIL")
+    worst_cell = max(cell_grades, key=lambda n: cell_grades[n]["worst_p_copper_W"])
 
     if fails:
         verdict = "FAIL"
@@ -336,6 +414,31 @@ def main():
                "%.2f degC upper bound."
                % (max(rows, key=lambda n: rows[n]["case_band_25C"]["upper_bound_C"]),
                   max(r["case_band_25C"]["upper_bound_C"] for r in rows.values())))
+
+    # the higher-duty cells are part of the verdict, not a footnote
+    if cells_failing:
+        wg = cell_grades[worst_cell]
+        wj = wg["worst_joint"]
+        wp = wg["per_joint"][wj]
+        verdict = "FAIL"
+        why = (
+            "SCOPE FIRST: this study grades %d duty cells, not just the vx = 0.25 m/s "
+            "baseline. %s "
+            "AND THE FASTER CELLS FAIL OUTRIGHT. %d of %d cells put at least one joint "
+            "over the 70 degC Temperature Limit(31) at 25 degC in still air with the "
+            "BEST cooling physics allows (eps = 1 black body, free body, no mount "
+            "blockage): %s. The worst is %s, where %s carries mean(tau^2) = %.6f N2m2 "
+            "-- %.4fx the baseline duty -- dissipating %.4f W in copper and settling "
+            "at %.2f degC even at best cooling (%.2f degC at worst). Copper loss goes "
+            "as tau^2, which is why a 2.9x duty is a 2.9x heat load and not a small "
+            "correction. Every temperature here is a LOWER BOUND on the winding, "
+            "because the winding-to-case resistance is unpublished, and steady state "
+            "assumes the cell is held indefinitely (see outputs.duty_cells_scope)."
+            % (len(cell_grades), why, len(cells_failing), len(cell_grades),
+               ", ".join(cells_failing), worst_cell, wj,
+               wp["mean_tau_squared_Nm2"], wp["duty_vs_baseline"] or 0.0,
+               wp["p_copper_W"], wp["case_temp_C_25C_eps1_free"],
+               wp["case_temp_C_25C_eps0_block30"]))
 
     st_rows, st_ok = selftest()
     out = {
@@ -380,11 +483,20 @@ def main():
                                               "back-EMF is zero and the full row voltage "
                                               "stands across the winding, so R = V / "
                                               "I_stall. The three published rows give %s "
-                                              "ohm -- a spread of %.2f %% about their mean, "
+                                              "ohm -- a spread of %.4f %% about their mean, "
                                               "which is the derivation's own consistency "
                                               "check. The 5.0 V row is used."
                                               % (r_rows, 100.0 * (max(r_vals) - min(r_vals))
                                                  / (sum(r_vals) / len(r_vals)))),
+                "terminal_resistance_spread_pct": round(
+                    100.0 * (max(r_vals) - min(r_vals)) / (sum(r_vals) / len(r_vals)), 4),
+                "terminal_resistance_spread_arithmetic": (
+                    "(%.6f - %.6f) / %.6f = %.6f -> %.4f %%. Stated to 4 dp because "
+                    "the 2-dp form (3.39 %%) was quoted onward as 3.36 %% and neither "
+                    "digit could be checked against the file."
+                    % (max(r_vals), min(r_vals), sum(r_vals) / len(r_vals),
+                       (max(r_vals) - min(r_vals)) / (sum(r_vals) / len(r_vals)),
+                       100.0 * (max(r_vals) - min(r_vals)) / (sum(r_vals) / len(r_vals)))),
                 "envelope_mm": [20.0, 34.0, 26.0],
                 "envelope_quote": "E1 Specifications verbatim: 'Dimensions (W x H x D) | 20.0 x 34.0 x 26.0 [mm]'",
                 "surface_area_m2": round(AREA, 8),
@@ -463,7 +575,20 @@ def main():
             "worst_joint_p_copper_W": wr["p_copper_W"],
             "joints_FAIL_over_70C_even_at_best_cooling": fails,
             "joints_CANNOT_DETERMINE_band_straddles_70C": unknown,
-            "joints_over_70C_at_best_cooling_30pct_blocked": over_at_block,
+            "joints_over_70C_at_best_cooling_30pct_blocked_per_ambient": over_at_block,
+            "duty_cells_graded": cell_grades,
+            "duty_cells_that_FAIL": cells_failing,
+            "worst_duty_cell": worst_cell,
+            "duty_cells_scope": (
+                "STEADY STATE at each cell's own measured mean(tau^2), held "
+                "indefinitely. A cell is a COMMAND the robot can be given, not a "
+                "proven continuous duty cycle -- how long a Microduck is actually "
+                "walked at vx = 0.80 m/s or across a 5 deg side slope is a product "
+                "decision nobody has made. time_to_limit_curve is the transient half "
+                "of the answer and it is parametric in the unpublished capacitance. "
+                "What these rows establish is that the 70 degC limit is a DUTY limit, "
+                "not a margin: the baseline straddles it and the faster cells clear "
+                "it at the best cooling physics allows."),
             "total_copper_W_15_servos_note": ("sum over the 14 actuated joints; the "
                                               "15th XL330 (jaw) is not an actuated "
                                               "joint in the published model and has no "
@@ -506,6 +631,16 @@ def main():
                     "compute. The bus power lower bound above is what a regulator study "
                     "would start from.",
              "what_settles_it": "the Robot HAT schematic (lane D) naming the regulator."},
+            {"what": "how long the robot is actually held at the failing duty cells",
+             "why": "vx_0.60, vx_0.80, slope5_side_left, slope5_down and "
+                    "endurance_60s_slope5_up are COMMANDS the policy accepts, measured "
+                    "here for 12 s (60 s for the endurance cell). Whether a Microduck "
+                    "is ever walked at them long enough to reach steady state is a "
+                    "product decision, not a measurement. The steady-state numbers say "
+                    "what happens if it is; time_to_limit_curve says how fast, and it "
+                    "is parametric in the unpublished thermal capacitance.",
+             "what_settles_it": "a stated duty cycle for the product, plus the step "
+                                "test that gives R_th and C on one real servo."},
             {"what": "current at pack voltage above 6.0 V",
              "why": "the vendor states nothing above 6.0 V and the design runs the "
                     "servos on the raw 6.6-8.2 V pack "
@@ -519,6 +654,11 @@ def main():
         "looked_at": [
             "out/sim-evidence/gait-torque-duty.json",
             "out/sim-evidence/gait-peaks.json",
+            "out/sim-evidence/duty-cells/vx_0.60.json",
+            "out/sim-evidence/duty-cells/vx_0.80.json",
+            "out/sim-evidence/duty-cells/slope5_side_left.json",
+            "out/sim-evidence/duty-cells/slope5_down.json",
+            "out/sim-evidence/duty-cells/endurance_60s_slope5_up.json",
             "ce-parts/xl330-m288-t/electrical.chip.json",
             "ce-parts/xl330-m288-t/electrical.part.json",
             "ce-parts/xl330-m288-t/component.json",

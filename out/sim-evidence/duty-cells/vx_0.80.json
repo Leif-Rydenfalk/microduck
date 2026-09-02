@@ -1,0 +1,239 @@
+{
+ "study": "gait-torque-duty",
+ "what": "per-joint actuator torque of the XL330 joints under Pollen's own walking policy, recorded at the PHYSICS step (200 Hz), and the vertical ground reaction. The load basis for every thermal number in lane F3.",
+ "inputs": {
+  "cell": "vx_0.80",
+  "slope": null,
+  "robot": "sim/microduck_ours.xml",
+  "scene": "out/sim/scene_thermal_duty_vx_0.80.xml",
+  "policy_file": "BEST_alpha_walking.onnx",
+  "policy": "walking",
+  "command": {
+   "vx_m_s": 0.8,
+   "vy_m_s": 0.0,
+   "wz_rad_s": 0.0,
+   "warmup_s": 0.5
+  },
+  "seconds": 12.0,
+  "timestep_s": 0.005,
+  "decimation": 4,
+  "control_hz": 50.0,
+  "record_hz": 200.0,
+  "actuator_class": "chosen_actuator: kp 0.55, kv 0.0, forcerange -0.96..0.96 N.m, joint damping 0.053, frictionloss 0.0048, armature 0.0018 (sim/microduck_ours.xml:41-48)",
+  "model_mass_kg": 0.737243,
+  "gravity_m_s2": 9.81,
+  "weight_N": 7.23236
+ },
+ "method": "mj_step at 0.005 s; data.actuator_force read after every step; ground reaction from mj_contactForce on every contact touching geom 'floor', normal component projected onto world +z. Statistics taken over t >= warmup only (the commanded window). mean(tau^2) is reported because copper loss is I^2 R and I is proportional to torque -- the mean of the SQUARE is the only average that maps linearly onto heat.",
+ "outputs": {
+  "joints": {
+   "left_hip_yaw": {
+    "peak_abs_rad_s": 2.25962,
+    "rms_rad_s": 1.045123,
+    "mean_mech_power_W": 0.066593,
+    "mean_positive_mech_power_W": 0.073886,
+    "peak_mech_power_W": 0.4015,
+    "peak_abs_Nm": 0.195793,
+    "rms_Nm": 0.098243,
+    "mean_tau_squared_Nm2": 0.00965164,
+    "mean_abs_Nm": 0.086372,
+    "p95_abs_Nm": 0.168204,
+    "frac_time_above_half_stall_5V": 0.0
+   },
+   "left_hip_roll": {
+    "peak_abs_rad_s": 3.089143,
+    "rms_rad_s": 1.039538,
+    "mean_mech_power_W": 0.080276,
+    "mean_positive_mech_power_W": 0.087411,
+    "peak_mech_power_W": 0.764381,
+    "peak_abs_Nm": 0.314878,
+    "rms_Nm": 0.12027,
+    "mean_tau_squared_Nm2": 0.01446488,
+    "mean_abs_Nm": 0.107252,
+    "p95_abs_Nm": 0.208608,
+    "frac_time_above_half_stall_5V": 0.00348
+   },
+   "left_hip_pitch": {
+    "peak_abs_rad_s": 6.735034,
+    "rms_rad_s": 3.635597,
+    "mean_mech_power_W": 0.70659,
+    "mean_positive_mech_power_W": 0.741988,
+    "peak_mech_power_W": 2.710933,
+    "peak_abs_Nm": 0.458158,
+    "rms_Nm": 0.250207,
+    "mean_tau_squared_Nm2": 0.06260359,
+    "mean_abs_Nm": 0.22681,
+    "p95_abs_Nm": 0.400148,
+    "frac_time_above_half_stall_5V": 0.39635
+   },
+   "left_knee": {
+    "peak_abs_rad_s": 9.577414,
+    "rms_rad_s": 5.290966,
+    "mean_mech_power_W": 1.931031,
+    "mean_positive_mech_power_W": 1.958715,
+    "peak_mech_power_W": 6.123219,
+    "peak_abs_Nm": 0.769868,
+    "rms_Nm": 0.42039,
+    "mean_tau_squared_Nm2": 0.17672814,
+    "mean_abs_Nm": 0.385415,
+    "p95_abs_Nm": 0.67758,
+    "frac_time_above_half_stall_5V": 0.80052
+   },
+   "left_ankle": {
+    "peak_abs_rad_s": 6.316414,
+    "rms_rad_s": 3.270354,
+    "mean_mech_power_W": 0.497317,
+    "mean_positive_mech_power_W": 0.546926,
+    "peak_mech_power_W": 1.946864,
+    "peak_abs_Nm": 0.384445,
+    "rms_Nm": 0.23062,
+    "mean_tau_squared_Nm2": 0.0531854,
+    "mean_abs_Nm": 0.210123,
+    "p95_abs_Nm": 0.340501,
+    "frac_time_above_half_stall_5V": 0.33551
+   },
+   "neck_pitch": {
+    "peak_abs_rad_s": 1.693628,
+    "rms_rad_s": 0.659352,
+    "mean_mech_power_W": 0.016685,
+    "mean_positive_mech_power_W": 0.021521,
+    "peak_mech_power_W": 0.224961,
+    "peak_abs_Nm": 0.149747,
+    "rms_Nm": 0.055278,
+    "mean_tau_squared_Nm2": 0.00305567,
+    "mean_abs_Nm": 0.045223,
+    "p95_abs_Nm": 0.116434,
+    "frac_time_above_half_stall_5V": 0.0
+   },
+   "head_pitch": {
+    "peak_abs_rad_s": 1.945065,
+    "rms_rad_s": 0.642029,
+    "mean_mech_power_W": 0.025893,
+    "mean_positive_mech_power_W": 0.029761,
+    "peak_mech_power_W": 0.287974,
+    "peak_abs_Nm": 0.170449,
+    "rms_Nm": 0.06821,
+    "mean_tau_squared_Nm2": 0.00465254,
+    "mean_abs_Nm": 0.053908,
+    "p95_abs_Nm": 0.121964,
+    "frac_time_above_half_stall_5V": 0.0
+   },
+   "head_yaw": {
+    "peak_abs_rad_s": 6.072893,
+    "rms_rad_s": 3.530326,
+    "mean_mech_power_W": 0.69786,
+    "mean_positive_mech_power_W": 0.722886,
+    "peak_mech_power_W": 2.181715,
+    "peak_abs_Nm": 0.390092,
+    "rms_Nm": 0.241502,
+    "mean_tau_squared_Nm2": 0.05832316,
+    "mean_abs_Nm": 0.218655,
+    "p95_abs_Nm": 0.350029,
+    "frac_time_above_half_stall_5V": 0.42807
+   },
+   "head_roll": {
+    "peak_abs_rad_s": 1.25017,
+    "rms_rad_s": 0.247526,
+    "mean_mech_power_W": 0.005127,
+    "mean_positive_mech_power_W": 0.005253,
+    "peak_mech_power_W": 0.100974,
+    "peak_abs_Nm": 0.096483,
+    "rms_Nm": 0.026277,
+    "mean_tau_squared_Nm2": 0.0006905,
+    "mean_abs_Nm": 0.019739,
+    "p95_abs_Nm": 0.051912,
+    "frac_time_above_half_stall_5V": 0.0
+   },
+   "right_hip_yaw": {
+    "peak_abs_rad_s": 2.187143,
+    "rms_rad_s": 0.836184,
+    "mean_mech_power_W": 0.042009,
+    "mean_positive_mech_power_W": 0.047044,
+    "peak_mech_power_W": 0.330429,
+    "peak_abs_Nm": 0.184255,
+    "rms_Nm": 0.080262,
+    "mean_tau_squared_Nm2": 0.00644199,
+    "mean_abs_Nm": 0.069343,
+    "p95_abs_Nm": 0.151136,
+    "frac_time_above_half_stall_5V": 0.0
+   },
+   "right_hip_roll": {
+    "peak_abs_rad_s": 2.071867,
+    "rms_rad_s": 0.845286,
+    "mean_mech_power_W": 0.057838,
+    "mean_positive_mech_power_W": 0.063837,
+    "peak_mech_power_W": 0.28071,
+    "peak_abs_Nm": 0.194683,
+    "rms_Nm": 0.107331,
+    "mean_tau_squared_Nm2": 0.01151985,
+    "mean_abs_Nm": 0.09603,
+    "p95_abs_Nm": 0.171194,
+    "frac_time_above_half_stall_5V": 0.0
+   },
+   "right_hip_pitch": {
+    "peak_abs_rad_s": 9.064021,
+    "rms_rad_s": 4.915898,
+    "mean_mech_power_W": 1.305177,
+    "mean_positive_mech_power_W": 1.354267,
+    "peak_mech_power_W": 5.017352,
+    "peak_abs_Nm": 0.606917,
+    "rms_Nm": 0.328932,
+    "mean_tau_squared_Nm2": 0.10819596,
+    "mean_abs_Nm": 0.295077,
+    "p95_abs_Nm": 0.539688,
+    "frac_time_above_half_stall_5V": 0.65146
+   },
+   "right_knee": {
+    "peak_abs_rad_s": 8.920076,
+    "rms_rad_s": 4.765014,
+    "mean_mech_power_W": 1.555153,
+    "mean_positive_mech_power_W": 1.570342,
+    "peak_mech_power_W": 5.719104,
+    "peak_abs_Nm": 0.720905,
+    "rms_Nm": 0.367034,
+    "mean_tau_squared_Nm2": 0.13471417,
+    "mean_abs_Nm": 0.324823,
+    "p95_abs_Nm": 0.64203,
+    "frac_time_above_half_stall_5V": 0.54411
+   },
+   "right_ankle": {
+    "peak_abs_rad_s": 4.887362,
+    "rms_rad_s": 2.325481,
+    "mean_mech_power_W": 0.225265,
+    "mean_positive_mech_power_W": 0.265621,
+    "peak_mech_power_W": 1.259441,
+    "peak_abs_Nm": 0.348147,
+    "rms_Nm": 0.179906,
+    "mean_tau_squared_Nm2": 0.03236627,
+    "mean_abs_Nm": 0.158319,
+    "p95_abs_Nm": 0.288749,
+    "frac_time_above_half_stall_5V": 0.16515
+   }
+  },
+  "peak_joint": "left_knee",
+  "peak_abs_Nm": 0.769868,
+  "worst_rms_joint": "left_knee",
+  "worst_rms_Nm": 0.42039,
+  "grf_vertical_N": {
+   "peak": 35.30055,
+   "mean": 7.22632,
+   "peak_over_weight": 4.88092
+  },
+  "trunk_z_m": {
+   "min": 0.10715,
+   "max": 0.12395
+  },
+  "fell": false
+ },
+ "verdict": "PASS",
+ "why": "14 joints measured over 11.5 s of commanded walking at vx = 0.800 m/s; peak 0.7699 N.m at left_knee, worst RMS 0.4204 N.m at left_knee. The MJCF's own force limit is 0.96 N.m and the vendor's 5.0 V stall torque is 0.52 N.m (ce-parts/xl330-m288-t/electrical.chip.json current_mA.stall_basis) -- both are quoted in the servo thermal study, not asserted here.",
+ "script": "sim/thermal_duty.py",
+ "artifacts": [
+  "out/sim/scene_thermal_duty_vx_0.80.xml"
+ ],
+ "looked_at": [
+  "sim/run_policy.py",
+  "sim/common.py",
+  "sim/microduck_ours.xml"
+ ]
+}
