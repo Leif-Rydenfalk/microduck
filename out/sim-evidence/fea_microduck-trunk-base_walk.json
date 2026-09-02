@@ -1,0 +1,138 @@
+{
+ "study": "fea_microduck-trunk-base_walk",
+ "part": "part:microduck-trunk-base",
+ "mjcf_mesh": "trunk_base",
+ "case": "walk",
+ "generated": "2026-09-03T02:45:11",
+ "script": "sim/stress_all.py",
+ "inputs": {
+  "force_N_part_frame": [
+   -3.74456,
+   -1.43156,
+   17.64213
+  ],
+  "force_magnitude_N": 18.0919,
+  "force_source": "out/sim-evidence/loads_mujoco.json :: walk.body_transmitted_force_peaks.yaw2roll (step 747, t 3.740 s)",
+  "fixed": [
+   "screw_1",
+   "screw_2",
+   "screw_3",
+   "screw_4"
+  ],
+  "load": [
+   "hip_yaw_left"
+  ],
+  "require_sf": 2.0,
+  "mesh_size_requested_mm": null,
+  "why": "left stance: the stance leg's transmitted force through the left hip-yaw hole wall, plate held at its four screw holes; the swing leg's <= 3.5 N ignored",
+  "connectors_added": [
+   "screw_1..4 at (\u00b125.5|\u00b19.5, 20.5, 17.0) kind bore d2.3 (SCREW_XY, part.py)"
+  ],
+  "connectors_hardened": [
+   "hip_yaw_left: 9.500 mm off the skin -> kind bore, spec d19.000 (wall at r 9.500)"
+  ],
+  "connectors_available": [
+   "hip_yaw_left",
+   "hip_yaw_right",
+   "screw_1",
+   "screw_2",
+   "screw_3",
+   "screw_4"
+  ],
+  "material_props": {
+   "table": "ce-cad/cecad/fits.py MATERIALS['PLA']",
+   "yield_mpa": 50,
+   "youngs_gpa": 3.5,
+   "density": 1.24,
+   "tier": "class (no datasheet behind the row; the table's own comment says every polymer 'yield' is an ultimate)"
+  },
+  "tds": {
+   "file": "research/tds/prusament-pla-tds-2021-10-en.pdf",
+   "what": "Prusament PLA TDS v1.1 (16-02-2022), 3D-printed specimens, horizontal print direction",
+   "yield_mpa": 51.0,
+   "yield_tol": 3.0,
+   "modulus_gpa": 2.3,
+   "interlayer_mpa": 17.0,
+   "interlayer_tol": 3.0,
+   "method": "ISO 527-1 (tensile), interlayer adhesion Prusa Polymers method",
+   "sha256": "68c8298b9329a7b0e5f8d35cf4cb0172708184f7d4f95491643163e4f140b1b7"
+  }
+ },
+ "material": "PLA",
+ "mesh_attempts": [
+  {
+   "size": 1.0,
+   "ok": true,
+   "strategy": {
+    "strategy": "raw",
+    "size": 1.0,
+    "nodes": 33740,
+    "elements": 16680,
+    "eltype": "C3D10",
+    "gmsh_extra": []
+   }
+  }
+ ],
+ "outputs": {
+  "verdict_cecad": "FAIL",
+  "sf": 0.34398075515424403,
+  "max_von_mises_mpa": 145.3569691059593,
+  "max_displacement_mm": 16.15330012860241,
+  "yield_mpa_used": 50,
+  "mesh": {
+   "strategy": "raw",
+   "size": 1.0,
+   "nodes": 33740,
+   "elements": 16680,
+   "eltype": "C3D10",
+   "gmsh_extra": []
+  },
+  "assumptions": [
+   "held patch at 'screw_1': 80 node(s) over 32 boundary face(s), 7.1 mm^2 of skin (axial wall r=1.15 mm), reaching 1.25 mm from the connector",
+   "held patch at 'screw_2': 80 node(s) over 32 boundary face(s), 7.1 mm^2 of skin (axial wall r=1.15 mm), reaching 1.25 mm from the connector",
+   "held patch at 'screw_3': 80 node(s) over 32 boundary face(s), 7.1 mm^2 of skin (axial wall r=1.15 mm), reaching 1.25 mm from the connector",
+   "held patch at 'screw_4': 80 node(s) over 32 boundary face(s), 7.1 mm^2 of skin (axial wall r=1.15 mm), reaching 1.25 mm from the connector",
+   "loaded patch at 'hip_yaw_left': 600 node(s) over 240 boundary face(s), 59.7 mm^2 of skin (axial wall r=9.50 mm), reaching 9.55 mm from the connector",
+   "HELD AT 4 PLACES (screw_1, screw_2, screw_3, screw_4) \u2014 all of them rigid. A real bolt or pin is not rigid, so this under-states the deflection and concentrates stress at the patch edges"
+  ],
+  "notes": [
+   "nu = 0.36 [class] for PLA",
+   "PLA strength is the ALONG-LAYER printed figure; across layers the part is weaker than this check says, and orientation is not modelled",
+   "peak stress is the max NODAL von Mises \u2014 at a sharp re-entrant corner it rises with mesh refinement, so a borderline SF wants a fillet, not a finer argument",
+   "SF ~0.34 (APPROXIMATE, EITHER) \u2014 safety factor >= 2 asks for a measurement and this value is APPROXIMATE \u2014 SF = yield / peak von Mises, where the peak is CalculiX's solve on this mesh and the yield is fits.MATERIALS['PLA'].yield_mpa = 50 MPa \u2014 a handbook/datasheet class figure carrying no tier and no coupon pulled from this material on this process. An estimate on either side of a comparison proves nothing, so the gate stays OPEN. It closes when: a tensile coupon of this material, made by this process in this orientation, pulled to yield, plus a mesh convergence study on the peak",
+   "tier=class ACCEPTED BY THE CALLER (accept_class=True): the verdict below rests on a typical figure for the material class, not on the thing you will buy or the filament on the spool.",
+   "max deflection 16.1533 mm was MEASURED and not judged \u2014 the case states no max_deflection_mm, so nothing here says whether that is acceptable"
+  ],
+  "failure_load_N_linear": 6.2233,
+  "sf_vs_tds_yield": 0.3509,
+  "tds_yield_mpa": 51.0,
+  "sf_vs_tds_interlayer_across_layers": 0.117
+ },
+ "verdict": "CANNOT DETERMINE",
+ "why": "the 1 mm trunk-base plate cannot carry the stance leg's force on its own: held at its four edge screws and loaded at the left hip-yaw hole wall it reads SF 0.344 (< 2), and held at one hip hole and loaded at the other (the first run) it read a 35 mm cantilever. In the product the plate is clamped between the two trunk shells (part:microduck-trunk-shell-left/-right, both rebuilt) and the hip-yaw XL330 case, so the load path is shells + plate + servo case, not the plate alone; the share is unmeasured. What settles it: a two-body solve (shells + base, bolted) in cecad.stress/ce-struct, or a printed trunk loaded to 20 N at one hip on a bench",
+ "artifacts": [
+  "out/sim-evidence/fea/microduck-trunk-base_walk",
+  "out/sim-evidence/fea/microduck-trunk-base_walk.png",
+  "out/sim-evidence/fea/microduck-trunk-base_walk/report.json"
+ ],
+ "looked_at": [
+  {
+   "image": "out/sim-evidence/fea/microduck-trunk-base_walk.png",
+   "facts": {
+    "bytes": 127902,
+    "size": [
+     1240,
+     840
+    ],
+    "distinct_colors": 10687,
+    "foreground_frac": 0.1228
+   },
+   "check": "peak von Mises recomputed from the .frd agrees with the report to 0.5 % (cecad.feaimage)"
+  }
+ ],
+ "seconds": 74.2,
+ "rejudged_from": {
+  "verdict": "FAIL",
+  "why": "peak 145.4 MPa leaves SF 0.34 against 50 MPa yield; the case requires 2"
+ }
+}

@@ -1,0 +1,148 @@
+{
+ "study": "fea_microduck-foot-left_drop",
+ "part": "part:microduck-foot-left",
+ "mjcf_mesh": "foot_left",
+ "case": "drop",
+ "generated": "2026-09-02T23:24:43",
+ "script": "sim/stress_all.py",
+ "inputs": {
+  "force_N_part_frame": [
+   52.36594,
+   -5.49554,
+   -117.80922
+  ],
+  "force_magnitude_N": 127.3483,
+  "force_source": "out/sim-evidence/loads_mujoco.json :: drops[drop_foot_rollm10_default_contact_dt5ms].part_frames_at_peak.foot_left.peak_contact_force_N",
+  "fixed": [
+   "ground_1",
+   "ground_2",
+   "ground_3",
+   "ground_4",
+   "ground_5"
+  ],
+  "load": [
+   "cradle_b",
+   "cradle_h"
+  ],
+  "require_sf": 2.0,
+  "mesh_size_requested_mm": null,
+  "why": "0.250 m fall: the peak contact force through the cradle",
+  "connectors_added": [
+   "cradle_b/h (33.5|66.5, 22, -22.523) +z",
+   "ground_1..5 at x 52, y 5..25 on the measured cavity floor + 2.000"
+  ],
+  "connectors_hardened": [],
+  "connectors_available": [
+   "cradle_b",
+   "cradle_h",
+   "ground_1",
+   "ground_2",
+   "ground_3",
+   "ground_4",
+   "ground_5"
+  ],
+  "material_props": {
+   "table": "ce-cad/cecad/fits.py MATERIALS['PLA']",
+   "yield_mpa": 50,
+   "youngs_gpa": 3.5,
+   "density": 1.24,
+   "tier": "class (no datasheet behind the row; the table's own comment says every polymer 'yield' is an ultimate)"
+  },
+  "tds": {
+   "file": "research/tds/prusament-pla-tds-2021-10-en.pdf",
+   "what": "Prusament PLA TDS v1.1 (16-02-2022), 3D-printed specimens, horizontal print direction",
+   "yield_mpa": 51.0,
+   "yield_tol": 3.0,
+   "modulus_gpa": 2.3,
+   "interlayer_mpa": 17.0,
+   "interlayer_tol": 3.0,
+   "method": "ISO 527-1 (tensile), interlayer adhesion Prusa Polymers method",
+   "sha256": "68c8298b9329a7b0e5f8d35cf4cb0172708184f7d4f95491643163e4f140b1b7"
+  }
+ },
+ "material": "PLA",
+ "mesh_attempts": [
+  {
+   "size": 1.5,
+   "ok": true,
+   "strategy": {
+    "strategy": "raw",
+    "size": 1.5,
+    "nodes": 92102,
+    "elements": 47282,
+    "eltype": "C3D10",
+    "gmsh_extra": []
+   }
+  }
+ ],
+ "outputs": {
+  "verdict_cecad": "FAIL",
+  "sf": 1.0861295247357787,
+  "max_von_mises_mpa": 46.03502516162926,
+  "max_displacement_mm": 0.014303052522346968,
+  "yield_mpa_used": 50,
+  "mesh": {
+   "strategy": "raw",
+   "size": 1.5,
+   "nodes": 92102,
+   "elements": 47282,
+   "eltype": "C3D10",
+   "gmsh_extra": []
+  },
+  "assumptions": [
+   "held patch at 'ground_1': 418 node(s) over 181 boundary face(s), 51.0 mm^2 of skin (flat face), reaching 15.61 mm from the connector",
+   "no area_mm2 declared for 'ground_1' \u2014 the whole flat face at it was loaded, 51.0 mm^2",
+   "held patch at 'ground_2': 433 node(s) over 188 boundary face(s), 51.0 mm^2 of skin (flat face), reaching 15.61 mm from the connector",
+   "no area_mm2 declared for 'ground_2' \u2014 the whole flat face at it was loaded, 51.0 mm^2",
+   "held patch at 'ground_3': 351 node(s) over 146 boundary face(s), 53.6 mm^2 of skin (flat face), reaching 17.14 mm from the connector",
+   "no area_mm2 declared for 'ground_3' \u2014 the whole flat face at it was loaded, 53.6 mm^2",
+   "connector 'ground_3' sits 0.97 mm off the skin it loads \u2014 the patch is the nearest surface, not a contact that was measured",
+   "held patch at 'ground_4': 491 node(s) over 216 boundary face(s), 53.6 mm^2 of skin (flat face), reaching 17.06 mm from the connector",
+   "no area_mm2 declared for 'ground_4' \u2014 the whole flat face at it was loaded, 53.6 mm^2",
+   "held patch at 'ground_5': 632 node(s) over 285 boundary face(s), 182.8 mm^2 of skin (flat face), reaching 18.74 mm from the connector",
+   "no area_mm2 declared for 'ground_5' \u2014 the whole flat face at it was loaded, 182.8 mm^2",
+   "connector 'ground_5' sits 1.09 mm off the skin it loads \u2014 the patch is the nearest surface, not a contact that was measured",
+   "loaded patch at 'cradle_b': 164 node(s) over 65 boundary face(s), 10.8 mm^2 of skin (flat face), reaching 4.70 mm from the connector",
+   "no area_mm2 declared for 'cradle_b' \u2014 the whole flat face at it was loaded, 10.8 mm^2",
+   "loaded patch at 'cradle_h': 164 node(s) over 65 boundary face(s), 10.8 mm^2 of skin (flat face), reaching 4.70 mm from the connector",
+   "no area_mm2 declared for 'cradle_h' \u2014 the whole flat face at it was loaded, 10.8 mm^2",
+   "HELD AT 5 PLACES (ground_1, ground_2, ground_3, ground_4, ground_5) \u2014 all of them rigid. A real bolt or pin is not rigid, so this under-states the deflection and concentrates stress at the patch edges",
+   "the total force is shared across 2 load patches (cradle_b, cradle_h) BY FACE AREA \u2014 not by any statics this module did"
+  ],
+  "notes": [
+   "nu = 0.36 [class] for PLA",
+   "PLA strength is the ALONG-LAYER printed figure; across layers the part is weaker than this check says, and orientation is not modelled",
+   "peak stress is the max NODAL von Mises \u2014 at a sharp re-entrant corner it rises with mesh refinement, so a borderline SF wants a fillet, not a finer argument",
+   "SF ~1.09 (APPROXIMATE, EITHER) \u2014 safety factor >= 2 asks for a measurement and this value is APPROXIMATE \u2014 SF = yield / peak von Mises, where the peak is CalculiX's solve on this mesh and the yield is fits.MATERIALS['PLA'].yield_mpa = 50 MPa \u2014 a handbook/datasheet class figure carrying no tier and no coupon pulled from this material on this process. An estimate on either side of a comparison proves nothing, so the gate stays OPEN. It closes when: a tensile coupon of this material, made by this process in this orientation, pulled to yield, plus a mesh convergence study on the peak",
+   "tier=class ACCEPTED BY THE CALLER (accept_class=True): the verdict below rests on a typical figure for the material class, not on the thing you will buy or the filament on the spool.",
+   "max deflection 0.0143 mm was MEASURED and not judged \u2014 the case states no max_deflection_mm, so nothing here says whether that is acceptable"
+  ],
+  "failure_load_N_linear": 138.3167,
+  "sf_vs_tds_yield": 1.1079,
+  "tds_yield_mpa": 51.0,
+  "sf_vs_tds_interlayer_across_layers": 0.3693
+ },
+ "verdict": "FAIL",
+ "why": "peak 46.0 MPa leaves SF 1.09 against 50 MPa yield; the case requires 2",
+ "artifacts": [
+  "out/sim-evidence/fea/microduck-foot-left_drop",
+  "out/sim-evidence/fea/microduck-foot-left_drop.png",
+  "out/sim-evidence/fea/microduck-foot-left_drop/report.json"
+ ],
+ "looked_at": [
+  {
+   "image": "out/sim-evidence/fea/microduck-foot-left_drop.png",
+   "facts": {
+    "bytes": 70513,
+    "size": [
+     1240,
+     840
+    ],
+    "distinct_colors": 3013,
+    "foreground_frac": 0.1939
+   },
+   "check": "peak von Mises recomputed from the .frd agrees with the report to 0.5 % (cecad.feaimage)"
+  }
+ ],
+ "seconds": 450.6
+}

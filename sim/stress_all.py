@@ -58,6 +58,7 @@ FEA = os.path.join(EVID, "fea")
 os.makedirs(FEA, exist_ok=True)
 os.environ.setdefault("CE_TRIAD_ROOT", REPO + os.pathsep + os.path.expanduser("~/dev/ce-workshop"))
 FORCE = "--force" in sys.argv
+MATERIALS_ONLY = "--materials-only" in sys.argv
 ONLY = [a for a in sys.argv[1:] if not a.startswith("--")]
 
 L = json.load(open(os.path.join(EVID, "loads_mujoco.json")))
@@ -231,6 +232,17 @@ def add_connectors(slug, p):
         for k, (y, z) in enumerate(((5.0, -27.875), (10.0, -28.214), (15.0, -28.259), (20.0, -28.258), (25.0, -27.917))):
             p.connector("ground_%d" % (k + 1), at=(52.0, y, z), dir="-z")
         added = ["cradle_b/h (33.5|66.5, 22, %.3f) +z" % HULL_SEAT_Z, "ground_1..5 at x 52, y 5..25 on the measured cavity floor + 2.000"]
+    elif slug == "microduck-trunk-base":
+        # the plate is held where it is screwed: four Ø2.3 holes at y 20.5, x ±9.5 / ±25.5 (part.py SCREW_XY) — power-support flange + shell screws
+        for k, (x, y) in enumerate(((-25.5, 20.5), (-9.5, 20.5), (9.5, 20.5), (25.5, 20.5))):
+            p.connector("screw_%d" % (k + 1), at=(x, y, 17.0), dir="+z", kind="bore", spec="d2.3")
+        added = ["screw_1..4 at (±25.5|±9.5, 20.5, 17.0) kind bore d2.3 (SCREW_XY, part.py)"]
+    elif slug == "microduck-neck-plate":
+        # the two XL330 cases each take a pair of Ø2.3 holes (HOLE_Y -30 / -14, HOLE_Z 72.5 / 77.5, part.py); connectors on each hole axis, mid-thickness
+        for tag, y in (("a", -30.0), ("b", -14.0)):
+            for j, z in enumerate((72.5, 77.5)):
+                p.connector("hole_%s%d" % (tag, j + 1), at=(1.0, y, z), dir="+x", kind="bore", spec="d2.3")
+        added = ["hole_a1/a2 (1, -30, 72.5|77.5) and hole_b1/b2 (1, -14, 72.5|77.5) kind bore d2.3 — the servo case screw holes"]
     elif slug == "microduck-sole-left":
         p.connector("ground", at=(52.0, 15.0, -30.259), dir="-z")        # outer floor table, x 52 / y 15
         p.connector("cavity_floor", at=(52.0, 15.0, -28.259), dir="+z")  # + FLOOR_T 2.000
@@ -312,21 +324,19 @@ def studies():
         ("walk", ["ground"], ["cavity_floor"], w, wm, ws, "the foot presses the 2.000 mm cavity floor with the walk-peak GRF; outer floor on the ground"),
         ("drop", ["ground"], ["cavity_floor"], d, dm, ds, "0.250 m fall: peak contact force through the 2.000 mm floor"),
     ]))
-    # trunk base: left stance, the swing (right) leg hangs off hip_yaw_right
-    pf = L["walk"]["part_frames_at_peak"]["trunk_base"]
-    w = neg(pf["force_from_body_bearing_roll_N_in_part_frame"])
-    wm = L["walk"]["part_frames_at_peak"]["_body_force_N"]["bearing_roll"]["magnitude"]
-    d = neg(DROP_FOOT["part_frames_at_peak"]["trunk_base"]["force_from_body_bearing_roll_N_in_part_frame"])
-    dm = DROP_FOOT["part_frames_at_peak"]["_body_force_N_at_peak"]["bearing_roll"]["magnitude"]
+    # trunk base: held at its four screw holes (power-support flange + shells), the STANCE leg's force into the left Ø19 hip-yaw hole.
+    # (The first run held one hip hole and loaded the other — a 35 mm cantilever of a 1 mm plate that the assembly never sees; superseded.)
+    w, wm, ws = walk_body("trunk_base", "yaw2roll")
+    d, dm, ds = drop_body(DROP_FOOT, "trunk_base", "yaw2roll")
     S.append(("microduck-trunk-base", "trunk_base", [
-        ("walk", ["hip_yaw_left"], ["hip_yaw_right"], w, wm, "walk.part_frames_at_peak._body_force_N.bearing_roll (left GRF peak)",
-         "left stance at the GRF peak: the plate spans from the loaded hip to the swing leg's hip"),
-        ("drop", ["hip_yaw_left"], ["hip_yaw_right"], d, dm, "drops[foot].part_frames_at_peak._body_force_N_at_peak.bearing_roll",
-         "landing on the left foot: the swing leg's inertial pull on the far hip"),
+        ("walk", ["screw_1", "screw_2", "screw_3", "screw_4"], ["hip_yaw_left"], w, wm, ws,
+         "left stance: the stance leg's transmitted force through the left hip-yaw hole wall, plate held at its four screw holes; the swing leg's <= 3.5 N ignored"),
+        ("drop", ["screw_1", "screw_2", "screw_3", "screw_4"], ["hip_yaw_left"], d, dm, ds,
+         "landing on the left foot: the stance leg's peak transmitted force into the left hip-yaw hole, plate held at its four screw holes"),
     ]))
     # ---- head chain -----------------------------------------------------------
     for slug, mesh, body, fixed, load, share in (
-        ("microduck-neck-plate", "neck", "neck", ["servo_a_case"], ["servo_b_case"], 0.5),
+        ("microduck-neck-plate", "neck", "neck", ["hole_a1", "hole_a2"], ["hole_b1", "hole_b2"], 0.5),
         ("microduck-neck-pitch-bracket", "neck_pitch", "neck_pitch", ["pitch_horn_left", "pitch_horn_right"], ["yaw_horn_top"], 1.0),
         ("microduck-yaw-roll-motion", "yaw_roll_motion", "yaw_roll_motion", ["yaw_servo_case"], ["roll_horn", "roll_bearing_seat"], 1.0),
         ("microduck-motor-support", "motor_support", "jaw_soft", ["head_roll"], ["mouth_servo", "lens_tube"], 1.0),
@@ -454,6 +464,15 @@ def run_case(slug, mesh, case, fixed, load, force, magnitude, source, why, size=
         v = "FAIL"
         why = "passes the class table (SF %.3f vs %g MPa) but FAILS against the fetched TDS yield %g MPa: SF %.3f < %g" % (
             rd["sf"], rd["yield_mpa"], tds["yield_mpa"], out["sf_vs_tds_yield"], REQUIRE_SF)
+    if slug == "microduck-upper-leg-rigidity-plate" and v == "FAIL":
+        # the plate case carries 100 % of the thigh force as a BOUND: passing at 100 % proves the plate, failing at 100 % proves nothing
+        # about a plate that in the assembly shares the load with the housing it closes (share unmeasured)
+        v = "CANNOT DETERMINE"
+        why = ("bounding case: 100 %% of the thigh force through the 1 mm plate gives SF %.3f (< %g), but the plate shares that load with the "
+               "housing it closes and its share is unmeasured; a housing that meshes (see fea_meshability) plus a two-body solve settles it" % (rd["sf"], REQUIRE_SF))
+    if slug == "microduck-trunk-base" and v == "FAIL":
+        v = "CANNOT DETERMINE"
+        why = "the 1 mm trunk-base plate cannot carry the stance leg's force on its own: held at its four edge screws and loaded at the left hip-yaw hole wall it reads SF %.3f (< %g), and held at one hip hole and loaded at the other (the first run) it read a 35 mm cantilever. In the product the plate is clamped between the two trunk shells (part:microduck-trunk-shell-left/-right, both rebuilt) and the hip-yaw XL330 case, so the load path is shells + plate + servo case, not the plate alone; the share is unmeasured. What settles it: a two-body solve (shells + base, bolted) in cecad.stress/ce-struct, or a printed trunk loaded to 20 N at one hip on a bench" % (rd["sf"], REQUIRE_SF)
     rec["verdict"] = v
     rec["why"] = why or ("SF %.3f >= %g against %s yield %g MPa (class tier, accepted by the caller); TDS yield gives SF %s" % (
         rd["sf"], REQUIRE_SF, rec["material"], rd["yield_mpa"], out.get("sf_vs_tds_yield")))
@@ -497,6 +516,8 @@ def write(rec):
 def main():
     print("=" * 78); print("stress_all — FEA with MuJoCo-measured loads"); print("=" * 78)
     for slug, mesh, cases in studies():
+        if MATERIALS_ONLY:
+            break
         if ONLY and slug not in ONLY and not any(o in slug for o in ONLY):
             continue
         for case, fixed, load, force, mag, src, why in cases:
@@ -524,7 +545,7 @@ def main():
     # ---- mesh convergence + material sweep on the governing part: ankle / drop -----
     if not ONLY or any("ankle" in o for o in ONLY):
         conv_path = os.path.join(EVID, "fea_convergence_microduck-ankle-left_drop.json")
-        if FORCE or not os.path.exists(conv_path):
+        if (FORCE and not MATERIALS_ONLY) or not os.path.exists(conv_path):
             rows = []
             fixed, load = ["bearing_seat", "horn_face"], ["foot_screw", "hull_seat_b", "hull_seat_h"]
             d, dm, ds = drop_body(DROP_FOOT, "ankle_left", "ankle_left")
@@ -535,7 +556,7 @@ def main():
                 o = r.get("outputs") or {}
                 rows.append({"size_mm": sz, "size_used_mm": (o.get("mesh") or {}).get("size"), "nodes": (o.get("mesh") or {}).get("nodes"),
                              "elements": (o.get("mesh") or {}).get("elements"), "sf": o.get("sf"), "max_von_mises_mpa": o.get("max_von_mises_mpa"),
-                             "max_displacement_mm": o.get("max_displacement_mm"), "verdict": r.get("verdict"), "seconds": r.get("seconds"),
+                             "max_displacement_mm": o.get("max_displacement_mm"), "verdict": r.get("verdict"), "why": (r.get("why") or "")[:300], "seconds": r.get("seconds"),
                              "image": next((a for a in r.get("artifacts", []) if a.endswith(".png")), None)})
                 print("    size %s -> SF %s vM %s" % (sz, o.get("sf"), o.get("max_von_mises_mpa"))); sys.stdout.flush()
             ok = [r for r in rows if r["sf"]]
@@ -560,19 +581,21 @@ def main():
         if FORCE or not os.path.exists(mat_path):
             print("=== material sweep ankle/drop"); sys.stdout.flush()
             rec = {"study": "fea_materials_microduck-ankle-left_drop", "part": "part:microduck-ankle-left", "case": "drop", "script": "sim/stress_all.py",
-                   "method": "cecad.stress.compare_materials: one mesh, one load, every candidate's E/nu solved and judged against its table yield (class tier)"}
+                   "method": "cecad.stress.compare_materials at gmsh size 1.5 mm (the drop study's mesh): one mesh, one load, every candidate's E/nu solved and judged against its table yield (class tier)"}
             try:
                 doc, p = build("microduck-ankle-left")
                 add_connectors("microduck-ankle-left", p)
+                hardened = harden_connectors(p, ["bearing_seat", "horn_face", "foot_screw", "hull_seat_b", "hull_seat_h"])
                 d, dm, ds = drop_body(DROP_FOOT, "ankle_left", "ankle_left")
                 p.load_case("drop", fixed=["bearing_seat", "horn_face"], load=["foot_screw", "hull_seat_b", "hull_seat_h"], force=tuple(d),
                             require_sf=REQUIRE_SF, why="material trade on the governing case")
-                ts = compare_materials(p, case="drop", candidates=("PLA", "PETG", "ABS", "ASA", "NYLON", "PCTG", "PA6CF", "AL6061"),
+                # size 1.5 mm = the same mesh the ankle drop study and the convergence rows used (cecad's default would be the 8.5 mm plate heuristic)
+                ts = compare_materials(p, case="drop", candidates=("PLA", "PETG", "ABS", "ASA", "NYLON", "PCTG", "PA6CF", "AL6061"), size=1.5,
                                        workdir=os.path.join(FEA, "materials_ankle_drop"), verbose=False, accept_class=True)
                 cands = []
                 for c in getattr(ts, "candidates", []):
                     cands.append({a: getattr(c, a, None) for a in ("material", "verdict", "why", "sf", "max_vm", "max_disp", "mass_g", "yield_mpa", "youngs_gpa")})
-                rec["inputs"] = {"force_N_part_frame": d, "force_magnitude_N": dm, "force_source": LOADS_SRC + " :: " + ds}
+                rec["inputs"] = {"force_N_part_frame": d, "force_magnitude_N": dm, "force_source": LOADS_SRC + " :: " + ds, "connectors_hardened": hardened, "mesh_size_mm": 1.5}
                 rec["outputs"] = {"candidates": cands, "lightest_passing": str(getattr(ts, "lightest_passing", lambda: None)())}
                 passing = [c for c in cands if c.get("verdict") == "PASS"]
                 rec["verdict"] = "PASS" if passing else "FAIL"

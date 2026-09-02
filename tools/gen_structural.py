@@ -208,17 +208,16 @@ def sec_fea(feas):
          'datasheet (Prusament PLA 51 ± 3 MPa yield printed horizontal; NinjaFlex TPU 85A yield 4 MPa). The headline verdict is the more conservative. '
          '"Fails at" is the linear failure load: applied force × SF. Script: <code>sim/stress_all.py</code>.</p>',
          '<div class="tw"><table class="data"><caption>Table 4. Safety factors. Source: <code>out/sim-evidence/fea_&lt;part&gt;_&lt;case&gt;.json</code>.</caption>'
-         '<thead><tr><th>Part</th><th>Case</th><th class="n">|F| N</th><th>Mat.</th><th class="n">SF table</th><th class="n">SF TDS</th><th class="n">SF across layers</th>'
-         '<th class="n">σ<sub>vM</sub> MPa</th><th class="n">δ mm</th><th class="n">Fails at N</th><th class="n">Mesh mm / nodes</th><th>Verdict</th></tr></thead><tbody>']
+         '<thead><tr><th>Part</th><th>Case</th><th>Verdict</th><th class="n">|F| N</th><th>Mat.</th><th class="n">SF table</th><th class="n">SF TDS</th><th class="n">SF across layers</th>'
+         '<th class="n">σ<sub>vM</sub> MPa</th><th class="n">δ mm</th><th class="n">Fails at N</th></tr></thead><tbody>']
     for r in feas:
         o = r.get("outputs") or {}
         mesh = o.get("mesh") or {}
-        s.append('<tr><td><code>%s</code></td><td>%s</td><td class="n">%s</td><td>%s</td><td class="n">%s</td><td class="n">%s</td><td class="n">%s</td>'
-                 '<td class="n">%s</td><td class="n">%s</td><td class="n">%s</td><td class="n">%s</td><td>%s</td></tr>' % (
-                     esc(r["part"].replace("part:microduck-", "")), esc(r["case"]), f(r["inputs"].get("force_magnitude_N"), 3), esc(r.get("material", "—")),
+        s.append('<tr><td><code>%s</code></td><td>%s</td><td>%s</td><td class="n">%s</td><td>%s</td><td class="n">%s</td><td class="n">%s</td><td class="n">%s</td>'
+                 '<td class="n">%s</td><td class="n">%s</td><td class="n">%s</td></tr>' % (
+                     esc(r["part"].replace("part:microduck-", "")), esc(r["case"]), chip(r.get("verdict")), f(r["inputs"].get("force_magnitude_N"), 3), esc(r.get("material", "—")),
                      f(o.get("sf")), f(o.get("sf_vs_tds_yield")), f(o.get("sf_vs_tds_interlayer_across_layers")),
-                     f(o.get("max_von_mises_mpa")), f(o.get("max_displacement_mm"), 4), f(o.get("failure_load_N_linear"), 1),
-                     ("%s / %s" % (f(mesh.get("size"), 2), mesh.get("nodes"))) if mesh else "—", chip(r.get("verdict"))))
+                     f(o.get("max_von_mises_mpa")), f(o.get("max_displacement_mm"), 4), f(o.get("failure_load_N_linear"), 1)))
     s.append('</tbody></table></div>')
     s.append('<p class="note">Right-hand parts (ankle-right, foot-right, sole-right, upper-leg-right) are measured mirrors of the left (p95 0.000–0.002 mm, '
              'each part.py header) and inherit these verdicts. The hip bracket is one part used on both sides.</p>')
@@ -232,9 +231,10 @@ def sec_fea(feas):
         slug = r["part"].split(":", 1)[1]
         ref = REF_PHOTO.get(slug)
         o = r.get("outputs") or {}
-        s.append('<h4 style="margin-bottom:2px">%s — %s</h4><p class="paircap">|F| = %s N in the part frame %s · SF %s · σ<sub>vM</sub> %s MPa · δ %s mm · %s</p>' % (
+        mesh = o.get("mesh") or {}
+        s.append('<h4 style="margin-bottom:2px">%s — %s</h4><p class="paircap">|F| = %s N in the part frame %s · SF %s · σ<sub>vM</sub> %s MPa · δ %s mm · mesh %s mm, %s nodes (%s) · %s</p>' % (
             esc(slug), esc(r["case"]), f(r["inputs"].get("force_magnitude_N"), 3), esc(r["inputs"].get("force_N_part_frame")), f(o.get("sf")),
-            f(o.get("max_von_mises_mpa")), f(o.get("max_displacement_mm"), 4), chip(r.get("verdict"))))
+            f(o.get("max_von_mises_mpa")), f(o.get("max_displacement_mm"), 4), f(mesh.get("size"), 2), mesh.get("nodes", "—"), esc(mesh.get("strategy", "—")), chip(r.get("verdict"))))
         s.append('<div class="pair">')
         if ref and os.path.exists(os.path.join(REPO, ref[0])):
             s.append('<figure><span class="tag">Real · pollen-robotics.com</span><img src="%s" alt="%s real"><figcaption>%s</figcaption></figure>' % (esc(ref[0]), esc(slug), esc(ref[1])))
@@ -337,19 +337,27 @@ def sec_drop(D):
     s = ['<section id="drop"><h2><span class="n">6</span>Drop / impact — 0.250 m onto one foot and onto the head</h2>',
          '<p class="lede">Energy %s J (m %s kg × g × 0.250 m), impact speed %s m/s, momentum %s N·s. Three models, compared; the disagreement is the finding. %s %s</p>' % (
              f(o["energy_J"], 5), f(i["mass_kg"], 6), f(o["impact_speed_m_s"], 5), f(o["momentum_Ns"], 5), chip(D["verdict"]), esc(D["why"]))]
-    s.append('<div class="tw"><table class="data"><caption>Table 8. Peak contact force by model. A: rigid body on a linear spring, F = v√(Km). B: Hertz on the struck curvature with the bottoming-out check. C: MuJoCo.</caption>'
-             '<thead><tr><th>Model</th><th>Case</th><th class="n">K N/m or E* MPa</th><th class="n">δ mm</th><th class="n">F peak N</th><th>Note</th></tr></thead><tbody>')
+    s.append('<div class="tw"><table class="data"><caption>Table 8. Peak contact force by model. A: rigid body on a linear spring, F = v√(Km). B: Hertz on the struck curvature with the bottoming-out check. C: MuJoCo (solref, timestep).</caption>'
+             '<thead><tr><th>Model</th><th>Case</th><th class="n">K N/m · E* MPa · solref</th><th class="n">δ mm</th><th class="n">F peak N</th><th class="n">Impulse N·s</th></tr></thead><tbody>')
+    notes = []
     for k, v in o["model_A_rigid_spring"].items():
-        s.append('<tr><td>A rigid-spring</td><td><code>%s</code></td><td class="n">%s</td><td class="n">—</td><td class="n">%s</td><td>%s</td></tr>' % (
-            esc(k), f(v.get("K_N_per_m"), 0), f(v.get("F_peak_N"), 1), esc(v.get("why", "patch %s mm² assumed" % v["patch_mm2_ASSUMED"] if "patch_mm2_ASSUMED" in v else ""))))
+        s.append('<tr><td>A rigid-spring</td><td><code>%s</code></td><td class="n">%s</td><td class="n">—</td><td class="n">%s</td><td class="n">—</td></tr>' % (
+            esc(k), f(v.get("K_N_per_m"), 0), f(v.get("F_peak_N"), 1)))
+        if "patch_mm2_ASSUMED" in v:
+            notes.append("%s: first-contact patch %s mm² ASSUMED (through-thickness of the %s mm apex wall)" % (k, v["patch_mm2_ASSUMED"], f(i["head_shell"]["apex_wall_thickness_mm"], 3)))
+        if v.get("why"):
+            notes.append("%s: %s" % (k, v["why"]))
     for k, v in o["model_B_hertz"].items():
-        s.append('<tr><td>B Hertz</td><td><code>%s</code></td><td class="n">%s</td><td class="n">%s</td><td class="n">%s</td><td>%s</td></tr>' % (
-            esc(k), f(v.get("E_star_MPa"), 2), f(v.get("delta_mm"), 3), f(v.get("F_peak_N"), 1), esc(v.get("note") or v.get("why", ""))))
+        s.append('<tr><td>B Hertz</td><td><code>%s</code></td><td class="n">%s</td><td class="n">%s</td><td class="n">%s</td><td class="n">—</td></tr>' % (
+            esc(k), f(v.get("E_star_MPa"), 2), f(v.get("delta_mm"), 3), f(v.get("F_peak_N"), 1)))
+        notes.append("%s: %s" % (k, v.get("note") or v.get("why", "")))
     for k, v in o["model_C_mujoco"].items():
-        s.append('<tr><td>C MuJoCo</td><td><code>%s</code></td><td class="n">%s</td><td class="n">—</td><td class="n">%s</td><td>struck %s; Δt %s s; impulse %s N·s; knee τ %s N·m, saturated steps %d</td></tr>' % (
-            esc(k), esc(v["solref"] if isinstance(v["solref"], str) else "solref %s" % [round(x, 6) for x in v["solref"]]), f(v["peak_normal_force_N"], 2),
-            esc(v["struck"]), v["timestep_s"], f(v["impulse_Ns"], 4), f(v["peak_knee_torque_Nm"], 4), v["knee_saturated_steps"]))
+        s.append('<tr><td>C MuJoCo</td><td><code>%s</code></td><td class="n">%s</td><td class="n">—</td><td class="n">%s</td><td class="n">%s</td></tr>' % (
+            esc(k), esc("default 0.02 s / 1" if isinstance(v["solref"], str) else "%.3g s / %g" % (v["solref"][0], v["solref"][1])) + " · Δt %g s" % v["timestep_s"],
+            f(v["peak_normal_force_N"], 2), f(v["impulse_Ns"], 4)))
+        notes.append("%s: struck %s, peak knee torque %s N·m, saturated steps %d" % (k, v["struck"], f(v["peak_knee_torque_Nm"], 4), v["knee_saturated_steps"]))
     s.append('</tbody></table></div>')
+    s.append('<ul class="note">' + "".join('<li><code>%s</code> %s</li>' % (esc(n.split(":", 1)[0]), esc(n.split(":", 1)[1])) for n in notes) + '</ul>')
     s.append('<p class="note"><b>Cross-check A vs C:</b> same K, analytic %s N vs MuJoCo %s N (ratio %s) — %s. <b>Joint cap:</b> %s. <b>MuJoCo\'s default contact</b> is equivalent to %s N/m — %s. '
              '<b>Head shell measured:</b> apex wall %s mm; %s. <b>What settles it:</b> %s</p>' % (
                  f(o["cross_check_A_vs_C_stiff"]["analytic_F_N"], 0), f(o["cross_check_A_vs_C_stiff"]["mujoco_stiff_F_N"], 0), f(o["cross_check_A_vs_C_stiff"]["ratio"], 3),
@@ -369,12 +377,12 @@ def sec_fatigue(F):
          '<p>S-N basis: %s (<code>%s</code>, sha256 <code>%s…</code>). Design curve %s. Specimens: %s. Scatter: %s.</p>' % (
              esc(i["sn_curve"]["paper"]), esc(i["sn_curve"]["file"]), esc(i["sn_curve"]["sha256"][:16]), esc(i["sn_curve"]["design_curve"]), esc(i["sn_curve"]["specimens"]), esc(i["sn_curve"]["scatter"])),
          '<div class="tw"><table class="data"><caption>Table 9. Life by basis. Cycles per km %s (period %s s, stride %s m, %s cycles measured). σ<sub>max</sub> from the walk-peak FEA (%s N). Load ratio %s.</caption>'
-         '<thead><tr><th>UTS basis</th><th class="n">UTS MPa</th><th>Stress basis</th><th class="n">σ<sub>max</sub> MPa</th><th class="n">Design endurance MPa</th><th class="n">Margin</th><th class="n">N (P<sub>s</sub>≥90 %)</th><th class="n">Life km</th></tr></thead><tbody>' % (
+         '<thead><tr><th>UTS basis</th><th class="n">UTS MPa</th><th>Stress basis</th><th class="n">σ<sub>max</sub> MPa</th><th class="n">Design endurance MPa</th><th class="n">σ<sub>max</sub> / limit</th><th class="n">N (P<sub>s</sub>≥90 %%)</th><th class="n">Life km</th></tr></thead><tbody>' % (
              f(i["gait"]["cycles_per_km"], 1), i["gait"]["period_s_mean"], i["gait"]["stride_m_per_cycle"], i["gait"]["n_cycles_measured"], f(i["stress"]["force_N"], 4), esc(i["stress"]["load_ratio_R"]))]
     for c in o["curves"]:
         s.append('<tr><td>%s</td><td class="n">%s</td><td>%s</td><td class="n">%s</td><td class="n">%s</td><td class="n">%s</td><td class="n">%s</td><td class="n">%s</td></tr>' % (
             esc(c["uts_basis"]), f(c["uts_mpa"], 1), esc(c["stress_basis"]), f(c["sigma_max_mpa"], 4), f(c["design_endurance_sigma_max_2e6_mpa"], 3), f(1 / c["endurance_margin"] if c["endurance_margin"] else None, 3),
-            esc(c["cycles_to_failure_design_Ps90"]), esc(c["life_km_design_Ps90"])))
+            esc(str(c["cycles_to_failure_design_Ps90"]).replace("> 2e6 (below the design endurance limit)", "> 2·10⁶")), esc(str(c["life_km_design_Ps90"]).replace("infinite by the design curve", "∞ (design curve)"))))
     s.append('</tbody></table></div>')
     s.append('<p class="note">Table 1 of the paper (θ<sub>p</sub> = 0°, UTS 42.6 MPa): median endurance amplitude at 2·10⁶ cycles, R = −1: 10.4 MPa, R = 0: 6.1 MPa (σ<sub>max</sub> 12.2 MPa). '
              'Limits: %s. What settles it: %s</p>' % (esc("; ".join(F["limits"])), esc(F["what_settles_it"])))
@@ -414,9 +422,15 @@ def sec_open(feas, meshab, drop, fat, conv):
         s.append('<tr><td>Drop peak force</td><td>%s</td><td>use the MuJoCo default-contact peak as the stated lower bound and report each part\'s failure load beside it</td><td>%s</td></tr>' % (
             esc("bracket %s–%s N on the foot, %s–%s N on the head" % (f(drop["outputs"]["bracket_foot_N"]["lower_mujoco_default"], 0), f(drop["outputs"]["bracket_foot_N"]["upper_rigid_table"], 0),
                                                                     f(drop["outputs"]["bracket_head_N"]["lower_mujoco_default"], 0), f(drop["outputs"]["bracket_head_N"]["upper_rigid_table"], 0))), esc(drop["what_settles_it"])))
+    import re as _re
     for r in feas:
-        if r.get("verdict") == "CANNOT DETERMINE" and "meshability" not in r.get("why", ""):
-            s.append('<tr><td><code>%s</code> %s</td><td>%s</td><td>—</td><td>see the study JSON</td></tr>' % (esc(r["part"]), esc(r["case"]), esc(r.get("why", "")[:300])))
+        why = r.get("why", "")
+        if r.get("verdict") == "CANNOT DETERMINE" and not why.startswith("no tetrahedral mesh"):
+            m = _re.split(r"[Ww]hat settles it:|settles it", why, maxsplit=1)
+            evidence = m[0].strip().rstrip(";,. ")
+            settles = ("what settles it" + m[1]) if len(m) > 1 else "see the study JSON"
+            option = "state the bound and the unmeasured share; do not certify" if "bounding" in why else "model the assembly load path, not the part alone"
+            s.append('<tr><td><code>%s</code> %s</td><td>%s</td><td>%s</td><td>%s</td></tr>' % (esc(r["part"].replace("part:", "")), esc(r["case"]), esc(evidence), esc(option), esc(settles)))
     s.append('<tr><td>Fitted filament / print orientation</td><td>no brand published; no print_up declared</td><td>Prusament PLA + NinjaFlex 85A sheets as class representatives</td><td>coupons from the spool in the print orientation (ISO 527-1, 5 per orientation)</td></tr>')
     s.append('<tr><td>Battery mass</td><td>fitted pack CANNOT DETERMINE (part:np-f550); Duracell DR5 99 g used for the power-support load</td><td>99 g class figure</td><td>the label on a shipped pack</td></tr>')
     s.append('</tbody></table></div></section>')
@@ -429,7 +443,8 @@ def sec_method():
             '<li><b>FEA.</b> <code>sim/stress_all.py</code> over <code>cecad.stress</code>: gmsh C3D10 at a wall-aware size (clamp(thinnest bbox side / 3, 0.8, 1.5) mm — the plate heuristic alone put 8.5 mm elements on the ankle\'s 2.5 mm walls), CalculiX static, nodal von Mises peak. A peak at a re-entrant corner rises with refinement; §5 measures that on the governing case.</li>'
             '<li><b>Patches.</b> Held and loaded regions are boundary faces near the named connector (whole feature for axial kinds, four element faces otherwise) — cecad records each as an assumption and it is quoted under every figure. A connector that sits on an axis loads the nearest skin, not a contact that was measured.</li>'
             '<li><b>Pictures.</b> <code>cecad.feaimage</code> renders the .frd the verdict came from and refuses if the recomputed peak differs from the report by more than 0.5 %; every PNG is read back (size, colours, foreground fraction) and the facts are printed under it.</li>'
-            '<li><b>Not done.</b> No physical part has been loaded. No contact/nonlinear solve. No modal or buckling study (ce-struct offers both; the 1 mm plates would be the candidates). No thermal coupling (lane F3).</li>'
+            '<li><b>Buckling / modal.</b> <code>sim/struct_ce.py</code> through ce-struct (:8099): voxel hex mesh at 0.33–1.0 mm cells, CalculiX *BUCKLE (3 modes) and *FREQUENCY, on the three slender members; the load enters over an end face, which is an idealisation of screws.</li>'
+            '<li><b>Not done.</b> No physical part has been loaded. No contact/nonlinear solve. No two-body (assembly) solve — the trunk base and the rigidity plate need one. No thermal coupling (lane F3).</li>'
             '</ul></section>')
 
 

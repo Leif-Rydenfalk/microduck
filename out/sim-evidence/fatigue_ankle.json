@@ -26,8 +26,8 @@
     "eltype": "C3D10",
     "gmsh_extra": []
    },
-   "sigma_max_mesh_scaled_mpa": null,
-   "mesh_scaling": "convergence study not available",
+   "sigma_max_mesh_scaled_mpa": 1.2752,
+   "mesh_scaling": "peak scaled by the finest/first-mesh ratio 1.0221 of the drop-case convergence study (linear elasticity: the ratio is independent of the load level for the same load path)",
    "load_ratio_R": "~0 (pulsating: stance loads, swing unloads; the paper's R = 0 rows apply)"
   },
   "sn_curve": {
@@ -82,6 +82,22 @@
     "note": "median (P_s 50 %) R = 0 endurance in terms of sigma_max = 2 x 6.1 = 12.2 MPa (Table 1); the design curve (0.1 UTS = 4.26 MPa) is the P_s >= 90 % floor"
    },
    {
+    "uts_basis": "paper_theta0",
+    "uts_mpa": 42.6,
+    "uts_source": "Ezeh & Susmel 2019 Table 1, theta_p 0 deg",
+    "stress_basis": "fea_peak_mesh_scaled",
+    "sigma_max_mpa": 1.2752,
+    "design_endurance_sigma_max_2e6_mpa": 4.26,
+    "k": 5.5,
+    "cycles_to_failure_design_Ps90": "> 2e6 (below the design endurance limit)",
+    "cycles_numeric": 1520987942.9707024,
+    "life_km_design_Ps90": "infinite by the design curve",
+    "endurance_margin": 3.3407,
+    "median_R0_amplitude_2e6_mpa_theta0": 6.1,
+    "median_R0_sigma_max_2e6_mpa_theta0": 12.2,
+    "note": "median (P_s 50 %) R = 0 endurance in terms of sigma_max = 2 x 6.1 = 12.2 MPa (Table 1); the design curve (0.1 UTS = 4.26 MPa) is the P_s >= 90 % floor"
+   },
+   {
     "uts_basis": "prusament_tds",
     "uts_mpa": 51.0,
     "uts_source": "Prusament PLA TDS, printed horizontal, 51 +- 3 MPa yield (used as UTS: PLA's yield and UTS coincide within the TDS tolerance \u2014 brittle)",
@@ -96,13 +112,29 @@
     "median_R0_amplitude_2e6_mpa_theta0": 6.1,
     "median_R0_sigma_max_2e6_mpa_theta0": 12.2,
     "note": "median (P_s 50 %) R = 0 endurance in terms of sigma_max = 2 x 6.1 = 12.2 MPa (Table 1); the design curve (0.1 UTS = 5.10 MPa) is the P_s >= 90 % floor"
+   },
+   {
+    "uts_basis": "prusament_tds",
+    "uts_mpa": 51.0,
+    "uts_source": "Prusament PLA TDS, printed horizontal, 51 +- 3 MPa yield (used as UTS: PLA's yield and UTS coincide within the TDS tolerance \u2014 brittle)",
+    "stress_basis": "fea_peak_mesh_scaled",
+    "sigma_max_mpa": 1.2752,
+    "design_endurance_sigma_max_2e6_mpa": 5.1,
+    "k": 5.5,
+    "cycles_to_failure_design_Ps90": "> 2e6 (below the design endurance limit)",
+    "cycles_numeric": 4092690890.5656157,
+    "life_km_design_Ps90": "infinite by the design curve",
+    "endurance_margin": 3.9994,
+    "median_R0_amplitude_2e6_mpa_theta0": 6.1,
+    "median_R0_sigma_max_2e6_mpa_theta0": 12.2,
+    "note": "median (P_s 50 %) R = 0 endurance in terms of sigma_max = 2 x 6.1 = 12.2 MPa (Table 1); the design curve (0.1 UTS = 5.10 MPa) is the P_s >= 90 % floor"
    }
   ],
-  "worst_basis": "paper_theta0/fea_peak",
+  "worst_basis": "paper_theta0/fea_peak_mesh_scaled",
   "best_basis": "prusament_tds/fea_peak",
   "cycles_for_10_km": 224613,
   "cycles_for_100_km": 2246130,
-  "stress_headroom_to_design_endurance": 0.2929
+  "stress_headroom_to_design_endurance": 0.2993
  },
  "limits": [
   "isotropic linear FEA peak at a nodal point (mesh-sensitive at re-entrant corners \u2014 see the convergence study)",
@@ -112,10 +144,11 @@
  ],
  "what_settles_it": "a tensile-fatigue coupon set of THE filament on THE printer in the bracket's orientation (R = 0, 10 Hz, 4 stress levels x 2, run-out 2e6 per JSME as the paper did), and a walked-km log of one printed ankle",
  "verdict": "PASS",
- "why": "peak walk-cycle von Mises 1.248 MPa on the ankle (walk-peak force 22.0262 N) is 0.293x BELOW the P_s>=90 % design endurance limit 4.26 MPa (0.1 x UTS 42.6 MPa, Ezeh & Susmel 2019) even on the least favourable basis \u2014 infinite life by the design curve at 22461 cycles/km (period 0.405 s, stride 0.0445 m)",
+ "why": "peak walk-cycle von Mises 1.275 MPa on the ankle (walk-peak force 22.0262 N) is 29.9 % of the P_s>=90 % design endurance limit 4.26 MPa (0.1 x UTS 42.6 MPa, Ezeh & Susmel 2019) even on the least favourable basis \u2014 infinite life by the design curve at 22461 cycles/km (period 0.405 s, stride 0.0445 m)",
  "artifacts": [
   "out/sim-evidence/fea_microduck-ankle-left_walk.json",
-  "out/sim-evidence/loads_mujoco.json"
+  "out/sim-evidence/loads_mujoco.json",
+  "out/sim-evidence/fea_convergence_microduck-ankle-left_drop.json"
  ],
  "looked_at": []
 }

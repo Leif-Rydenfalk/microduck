@@ -1,0 +1,121 @@
+{
+ "study": "fea_materials_microduck-ankle-left_drop",
+ "part": "part:microduck-ankle-left",
+ "case": "drop",
+ "script": "sim/stress_all.py",
+ "method": "cecad.stress.compare_materials at gmsh size 1.5 mm (the drop study's mesh): one mesh, one load, every candidate's E/nu solved and judged against its table yield (class tier)",
+ "inputs": {
+  "force_N_part_frame": [
+   -51.101089,
+   5.549006,
+   111.820064
+  ],
+  "force_magnitude_N": 123.0436,
+  "force_source": "out/sim-evidence/loads_mujoco.json :: drops[drop_foot_rollm10_default_contact_dt5ms].part_frames_at_peak.ankle_left.force_from_body_ankle_left (t 0.230 s)",
+  "connectors_hardened": [
+   "bearing_seat: 7.000 mm off the skin -> kind bore, spec d14.000 (wall at r 7.000)",
+   "horn_face: 2.500 mm off the skin -> kind bore, spec d5.000 (wall at r 2.500)",
+   "foot_screw: 1.100 mm off the skin -> kind bore, spec d2.200 (wall at r 1.100)"
+  ],
+  "mesh_size_mm": 1.5
+ },
+ "outputs": {
+  "candidates": [
+   {
+    "material": "PLA",
+    "verdict": "PASS",
+    "why": "SF 8.03 on 50 MPa yield (requires 2)",
+    "sf": 8.027608766930541,
+    "max_vm": 6.228504832718466,
+    "max_disp": 0.024221608047467848,
+    "mass_g": 9.795453628744388,
+    "yield_mpa": 50,
+    "youngs_gpa": null
+   },
+   {
+    "material": "PETG",
+    "verdict": "PASS",
+    "why": "SF 7.95 on 51 MPa yield (requires 2)",
+    "sf": 7.947592599177689,
+    "max_vm": 6.417037532255591,
+    "max_disp": 0.03273125769948101,
+    "mass_g": 9.874449222524586,
+    "yield_mpa": 51,
+    "youngs_gpa": null
+   },
+   {
+    "material": "ABS",
+    "verdict": "PASS",
+    "why": "SF 6.39 on 40 MPa yield (requires 2)",
+    "sf": 6.388528901502975,
+    "max_vm": 6.26122235912395,
+    "max_disp": 0.03676949022787054,
+    "mass_g": 8.215541753140455,
+    "yield_mpa": 40,
+    "youngs_gpa": null
+   },
+   {
+    "material": "ASA",
+    "verdict": "PASS",
+    "why": "SF 7.03 on 44 MPa yield (requires 2)",
+    "sf": 7.027381791653274,
+    "max_vm": 6.26122235912395,
+    "max_disp": 0.04228491376205112,
+    "mass_g": 8.452528534481045,
+    "yield_mpa": 44,
+    "youngs_gpa": null
+   },
+   {
+    "material": "NYLON",
+    "verdict": "PASS",
+    "why": "SF 11.43 on 70 MPa yield (requires 2)",
+    "sf": 11.427593567603061,
+    "max_vm": 6.125524117207688,
+    "max_disp": 0.031612434588337554,
+    "mass_g": 9.005497690942422,
+    "yield_mpa": 70,
+    "youngs_gpa": null
+   },
+   {
+    "material": "PCTG",
+    "verdict": "PASS",
+    "why": "SF 7.88 on 48 MPa yield (requires 2)",
+    "sf": 7.883011106403832,
+    "max_vm": 6.089043812332927,
+    "max_disp": 0.045015684307600515,
+    "mass_g": 9.716458034964191,
+    "yield_mpa": 48,
+    "youngs_gpa": null
+   },
+   {
+    "material": "PA6CF",
+    "verdict": "PASS",
+    "why": "brittle: SF 16.23 on 100 MPa ultimate. tier=class ACCEPTED BY THE CALLER: PA6CF.ultimate_mpa = 100 [class] is typical of the PA6CF class and names no orderable material. A verdict resting on it is a verdict about a typical example, not about the thing you will buy.",
+    "sf": 8.602784503998237,
+    "max_vm": 6.160795958025878,
+    "max_disp": 0.03393181414515601,
+    "mass_g": 9.24248447228301,
+    "yield_mpa": 53,
+    "youngs_gpa": null
+   },
+   {
+    "material": "AL6061",
+    "verdict": "PASS",
+    "why": "SF 43.64 on 276 MPa yield (requires 2)",
+    "sf": 43.63695730438472,
+    "max_vm": 6.32491395022785,
+    "max_disp": 0.0012212556596695409,
+    "mass_g": 21.328810320653105,
+    "yield_mpa": 276,
+    "youngs_gpa": null
+   }
+  ],
+  "lightest_passing": "<cecad.stress.Candidate object at 0x12a6b37d0>"
+ },
+ "verdict": "PASS",
+ "why": "8 of 8 candidates reach SF 2 on the measured drop load: PLA, PETG, ABS, ASA, NYLON, PCTG, PA6CF, AL6061",
+ "artifacts": [
+  "out/sim-evidence/fea/materials_ankle_drop"
+ ],
+ "looked_at": []
+}

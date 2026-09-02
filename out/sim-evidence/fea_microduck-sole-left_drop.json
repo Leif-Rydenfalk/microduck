@@ -1,0 +1,124 @@
+{
+ "study": "fea_microduck-sole-left_drop",
+ "part": "part:microduck-sole-left",
+ "mjcf_mesh": "sole_left",
+ "case": "drop",
+ "generated": "2026-09-02T23:36:19",
+ "script": "sim/stress_all.py",
+ "inputs": {
+  "force_N_part_frame": [
+   52.36594,
+   -5.49554,
+   -117.80922
+  ],
+  "force_magnitude_N": 127.3483,
+  "force_source": "out/sim-evidence/loads_mujoco.json :: drops[drop_foot_rollm10_default_contact_dt5ms].part_frames_at_peak.sole_left.peak_contact_force_N",
+  "fixed": [
+   "ground"
+  ],
+  "load": [
+   "cavity_floor"
+  ],
+  "require_sf": 2.0,
+  "mesh_size_requested_mm": null,
+  "why": "0.250 m fall: peak contact force through the 2.000 mm floor",
+  "connectors_added": [
+   "ground (52, 15, -30.259) -z",
+   "cavity_floor (52, 15, -28.259) +z"
+  ],
+  "connectors_hardened": [],
+  "connectors_available": [
+   "cavity_floor",
+   "ground"
+  ],
+  "material_props": {
+   "table": "ce-cad/cecad/fits.py MATERIALS['TPU']",
+   "yield_mpa": 25,
+   "youngs_gpa": 0.026,
+   "density": 1.21,
+   "tier": "class (no datasheet behind the row; the table's own comment says every polymer 'yield' is an ultimate)"
+  },
+  "tds": {
+   "file": "research/tds/ninjaflex-tds.pdf",
+   "what": "NinjaTek NinjaFlex 85A TDS, ASTM D638 dogbone IV, 100 % fill",
+   "yield_mpa": 4.0,
+   "ultimate_mpa": 26.0,
+   "modulus_mpa": 12.0,
+   "method": "ASTM D638",
+   "sha256": "3caeb7e9e58b36cb8fbefe5d417829ce96a443da13510b1f7775940ad9039dc0"
+  }
+ },
+ "material": "TPU",
+ "mesh_attempts": [
+  {
+   "size": 1.5,
+   "ok": true,
+   "strategy": {
+    "strategy": "raw",
+    "size": 1.5,
+    "nodes": 58482,
+    "elements": 30514,
+    "eltype": "C3D10",
+    "gmsh_extra": []
+   }
+  }
+ ],
+ "outputs": {
+  "verdict_cecad": "PASS",
+  "sf": 131.97113742613845,
+  "max_von_mises_mpa": 0.1894353605461042,
+  "max_displacement_mm": 0.08694286080005706,
+  "yield_mpa_used": 25,
+  "mesh": {
+   "strategy": "raw",
+   "size": 1.5,
+   "nodes": 58482,
+   "elements": 30514,
+   "eltype": "C3D10",
+   "gmsh_extra": []
+  },
+  "assumptions": [
+   "held patch at 'ground': 4619 node(s) over 2250 boundary face(s), 1217.0 mm^2 of skin (flat face), reaching 24.52 mm from the connector",
+   "no area_mm2 declared for 'ground' \u2014 the whole flat face at it was loaded, 1217.0 mm^2",
+   "connector 'ground' sits 0.84 mm off the skin it loads \u2014 the patch is the nearest surface, not a contact that was measured",
+   "loaded patch at 'cavity_floor': 4615 node(s) over 2248 boundary face(s), 1217.0 mm^2 of skin (flat face), reaching 24.52 mm from the connector",
+   "no area_mm2 declared for 'cavity_floor' \u2014 the whole flat face at it was loaded, 1217.0 mm^2",
+   "connector 'cavity_floor' sits 0.84 mm off the skin it loads \u2014 the patch is the nearest surface, not a contact that was measured"
+  ],
+  "notes": [
+   "nu = 0.48 [class] for TPU",
+   "TPU strength is the ALONG-LAYER printed figure; across layers the part is weaker than this check says, and orientation is not modelled",
+   "peak stress is the max NODAL von Mises \u2014 at a sharp re-entrant corner it rises with mesh refinement, so a borderline SF wants a fillet, not a finer argument",
+   "SF ~131.97 (APPROXIMATE, EITHER) \u2014 safety factor >= 2 asks for a measurement and this value is APPROXIMATE \u2014 SF = yield / peak von Mises, where the peak is CalculiX's solve on this mesh and the yield is fits.MATERIALS['TPU'].yield_mpa = 25 MPa \u2014 a handbook/datasheet class figure carrying no tier and no coupon pulled from this material on this process. An estimate on either side of a comparison proves nothing, so the gate stays OPEN. It closes when: a tensile coupon of this material, made by this process in this orientation, pulled to yield, plus a mesh convergence study on the peak",
+   "tier=class ACCEPTED BY THE CALLER (accept_class=True): the verdict below rests on a typical figure for the material class, not on the thing you will buy or the filament on the spool.",
+   "max deflection 0.0869 mm was MEASURED and not judged \u2014 the case states no max_deflection_mm, so nothing here says whether that is acceptable"
+  ],
+  "failure_load_N_linear": 16806.3,
+  "sf_vs_tds_yield": 21.1154,
+  "tds_yield_mpa": 4.0,
+  "sf_vs_tds_ultimate": 137.25
+ },
+ "verdict": "PASS",
+ "why": "SF 131.971 >= 2 against TPU yield 25 MPa (class tier, accepted by the caller); TDS yield gives SF 21.1154",
+ "artifacts": [
+  "out/sim-evidence/fea/microduck-sole-left_drop",
+  "out/sim-evidence/fea/microduck-sole-left_drop.png",
+  "out/sim-evidence/fea/microduck-sole-left_drop/report.json"
+ ],
+ "looked_at": [
+  {
+   "image": "out/sim-evidence/fea/microduck-sole-left_drop.png",
+   "facts": {
+    "bytes": 132785,
+    "size": [
+     1240,
+     840
+    ],
+    "distinct_colors": 9739,
+    "foreground_frac": 0.1896
+   },
+   "check": "peak von Mises recomputed from the .frd agrees with the report to 0.5 % (cecad.feaimage)"
+  }
+ ],
+ "seconds": 244.8
+}

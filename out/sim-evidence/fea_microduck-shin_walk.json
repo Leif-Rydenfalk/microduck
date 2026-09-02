@@ -3,7 +3,7 @@
  "part": "part:microduck-shin",
  "mjcf_mesh": "leg",
  "case": "walk",
- "generated": "2026-09-02T22:55:26",
+ "generated": "2026-09-03T02:41:19",
  "script": "sim/stress_all.py",
  "inputs": {
   "force_N_part_frame": [
@@ -23,6 +23,10 @@
   "mesh_size_requested_mm": null,
   "why": "peak force body leg transmits during the measured walk",
   "connectors_added": [],
+  "connectors_hardened": [
+   "knee: 3.000 mm off the skin -> kind bore, spec d6.000 (wall at r 3.000)",
+   "ankle: 2.750 mm off the skin -> kind bore, spec d5.500 (wall at r 2.750)"
+  ],
   "connectors_available": [
    "ankle",
    "knee"
@@ -62,10 +66,10 @@
   }
  ],
  "outputs": {
-  "verdict_cecad": "FAIL",
-  "sf": 0.9528937921264873,
-  "max_von_mises_mpa": 52.47174492386974,
-  "max_displacement_mm": 1.4369365252790258,
+  "verdict_cecad": "PASS",
+  "sf": 3.591285891242847,
+  "max_von_mises_mpa": 13.922589711368357,
+  "max_displacement_mm": 0.692704381405149,
   "yield_mpa_used": 50,
   "mesh": {
    "strategy": "raw",
@@ -76,28 +80,24 @@
    "gmsh_extra": []
   },
   "assumptions": [
-   "held patch at 'knee': 45 node(s) over 14 boundary face(s), 12.6 mm^2 of skin (flat face), reaching 7.85 mm from the connector",
-   "no area_mm2 declared for 'knee' \u2014 the whole flat face at it was loaded, 12.6 mm^2",
-   "connector 'knee' sits 2.96 mm off the skin it loads \u2014 the patch is the nearest surface, not a contact that was measured",
-   "loaded patch at 'ankle': 60 node(s) over 12 boundary face(s), 9.0 mm^2 of skin (nearest skin), reaching 3.04 mm from the connector",
-   "no area_mm2 declared for 'ankle' \u2014 9.0 mm^2 of the nearest skin was loaded, which is four element faces of THIS mesh and not a stated contact patch",
-   "connector 'ankle' sits 2.69 mm off the skin it loads \u2014 the patch is the nearest surface, not a contact that was measured"
+   "held patch at 'knee': 346 node(s) over 160 boundary face(s), 135.7 mm^2 of skin (axial wall r=3.00 mm), reaching 7.85 mm from the connector",
+   "loaded patch at 'ankle': 188 node(s) over 82 boundary face(s), 59.8 mm^2 of skin (axial wall r=2.75 mm), reaching 4.44 mm from the connector"
   ],
   "notes": [
    "nu = 0.36 [class] for PLA",
    "PLA strength is the ALONG-LAYER printed figure; across layers the part is weaker than this check says, and orientation is not modelled",
    "peak stress is the max NODAL von Mises \u2014 at a sharp re-entrant corner it rises with mesh refinement, so a borderline SF wants a fillet, not a finer argument",
-   "SF ~0.95 (APPROXIMATE, EITHER) \u2014 safety factor >= 2 asks for a measurement and this value is APPROXIMATE \u2014 SF = yield / peak von Mises, where the peak is CalculiX's solve on this mesh and the yield is fits.MATERIALS['PLA'].yield_mpa = 50 MPa \u2014 a handbook/datasheet class figure carrying no tier and no coupon pulled from this material on this process. An estimate on either side of a comparison proves nothing, so the gate stays OPEN. It closes when: a tensile coupon of this material, made by this process in this orientation, pulled to yield, plus a mesh convergence study on the peak",
+   "SF ~3.59 (APPROXIMATE, EITHER) \u2014 safety factor >= 2 asks for a measurement and this value is APPROXIMATE \u2014 SF = yield / peak von Mises, where the peak is CalculiX's solve on this mesh and the yield is fits.MATERIALS['PLA'].yield_mpa = 50 MPa \u2014 a handbook/datasheet class figure carrying no tier and no coupon pulled from this material on this process. An estimate on either side of a comparison proves nothing, so the gate stays OPEN. It closes when: a tensile coupon of this material, made by this process in this orientation, pulled to yield, plus a mesh convergence study on the peak",
    "tier=class ACCEPTED BY THE CALLER (accept_class=True): the verdict below rests on a typical figure for the material class, not on the thing you will buy or the filament on the spool.",
-   "max deflection 1.4369 mm was MEASURED and not judged \u2014 the case states no max_deflection_mm, so nothing here says whether that is acceptable"
+   "max deflection 0.6927 mm was MEASURED and not judged \u2014 the case states no max_deflection_mm, so nothing here says whether that is acceptable"
   ],
-  "failure_load_N_linear": 20.1514,
-  "sf_vs_tds_yield": 0.972,
+  "failure_load_N_linear": 75.9471,
+  "sf_vs_tds_yield": 3.6631,
   "tds_yield_mpa": 51.0,
-  "sf_vs_tds_interlayer_across_layers": 0.324
+  "sf_vs_tds_interlayer_across_layers": 1.221
  },
- "verdict": "FAIL",
- "why": "peak 52.5 MPa leaves SF 0.95 against 50 MPa yield; the case requires 2",
+ "verdict": "PASS",
+ "why": "SF 3.591 >= 2 against PLA yield 50 MPa (class tier, accepted by the caller); TDS yield gives SF 3.6631",
  "artifacts": [
   "out/sim-evidence/fea/microduck-shin_walk",
   "out/sim-evidence/fea/microduck-shin_walk.png",
@@ -107,16 +107,16 @@
   {
    "image": "out/sim-evidence/fea/microduck-shin_walk.png",
    "facts": {
-    "bytes": 138899,
+    "bytes": 169772,
     "size": [
      1240,
      840
     ],
-    "distinct_colors": 9690,
-    "foreground_frac": 0.1628
+    "distinct_colors": 17115,
+    "foreground_frac": 0.1629
    },
    "check": "peak von Mises recomputed from the .frd agrees with the report to 0.5 % (cecad.feaimage)"
   }
  ],
- "seconds": 243.8
+ "seconds": 117.5
 }

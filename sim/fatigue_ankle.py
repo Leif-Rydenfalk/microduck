@@ -77,9 +77,9 @@ def main():
     infinite = worst["cycles_numeric"] > 2e6
     # a walk of 1 km is 22461 cycles; state the design life for 10 km and 100 km
     verdict = "PASS" if infinite else ("FAIL" if worst["cycles_numeric"] < g["cycles_per_km"] * 10 else "PASS")
-    why = ("peak walk-cycle von Mises %.3f MPa on the ankle (walk-peak force %.4f N) is %.3fx BELOW the P_s>=90 %% design endurance limit "
+    why = ("peak walk-cycle von Mises %.3f MPa on the ankle (walk-peak force %.4f N) is %.1f %% of the P_s>=90 %% design endurance limit "
            "%.2f MPa (0.1 x UTS %.1f MPa, Ezeh & Susmel 2019) even on the least favourable basis — infinite life by the design curve at %.0f cycles/km "
-           "(period %.3f s, stride %.4f m)" % (worst["sigma_max_mpa"], force_walk, 1 / worst["endurance_margin"] if worst["endurance_margin"] else 0,
+           "(period %.3f s, stride %.4f m)" % (worst["sigma_max_mpa"], force_walk, 100.0 / worst["endurance_margin"] if worst["endurance_margin"] else 0,
                                               worst["design_endurance_sigma_max_2e6_mpa"], worst["uts_mpa"], g["cycles_per_km"], g["period_s_mean"], g["stride_m_per_cycle"])
            if infinite else
            "peak walk-cycle von Mises %.3f MPa EXCEEDS the design endurance %.2f MPa: design life %s cycles = %s km at %.0f cycles/km" % (
