@@ -623,6 +623,9 @@ def main():
             A(f'<p><span class="cd">Why it exits {st["exit_code"]}:</span> '
               f'{esc(st["why_exit_1"])}</p>')
             A(f'<p>{esc(st["verdict"])}</p>')
+        cd_ = tc.get("concurrency_defect")
+        if cd_:
+            A(f'<p><span class="cd">Open, measured, not fixed:</span> {esc(cd_)}</p>')
     A('<h3>6.4 The fab rules these boards were checked against</h3>')
     for v in quotes["vendors"]:
         A(f'<p><strong>{esc(v["vendor"])}</strong> — <a href="{esc(v["spec_url"])}">'
