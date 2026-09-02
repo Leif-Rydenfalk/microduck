@@ -82,6 +82,12 @@ TOOLS = [
     ("sim/compare_render.py", "Photo-matched studio renders and joint close-ups."),
     ("sim/assembly_steps_mj.py", "Cumulative assembly-step renders."),
     ("sim/run_policy.py", "Runs Pollen's trained policies on our meshes."),
+    ("sim/gait_sweep.py", "The gait-robustness matrix: speed, mass, friction, slope and push, "
+                          "with per-joint torque and per-foot ground reaction at 200 Hz."),
+    ("sim/gait_evidence.py", "Aggregates the sweep into out/sim-evidence/gait-peaks.json and "
+                             "gait-robustness.json."),
+    ("sim/battery_runtime.py", "Integrates per-servo electrical power over the measured gait into "
+                               "hours on the pack."),
     ("electronics/gen_ee.py", "Generates the block diagram, schematics and layout."),
 ]
 
