@@ -80,14 +80,27 @@ def part_record(slug):
     return r if isinstance(r, dict) else {}
 
 
-def builder_source(slug):
-    """The text of the folder's cad/part.py, or "" — the thing that decides
-    what kind of document the part can carry."""
+def builder_path(slug):
+    """Absolute path of the folder's cad/part.py, or None.
+
+    `current/` is a SYMLINK to the selected iteration, so the file it resolves
+    to lives under `iterations/<version>/` — and every relative path inside
+    that builder (its `GEOMETRY = "geometry/jaw.stl"`) is relative to THAT
+    directory, not to the slug folder. Resolving the symlink is what makes
+    `mesh_geometry_of` find the mesh; joining the slug folder does not.
+    """
     for rel in ("current/cad/part.py", "cad/part.py"):
         p = os.path.join(ROOT, "ce-parts", slug, rel)
         if os.path.exists(p):
-            return open(p, encoding="utf-8").read()
-    return ""
+            return os.path.realpath(p)
+    return None
+
+
+def builder_source(slug):
+    """The text of the folder's cad/part.py, or "" — the thing that decides
+    what kind of document the part can carry."""
+    p = builder_path(slug)
+    return open(p, encoding="utf-8").read() if p else ""
 
 
 #: tokens that mean "this builder LOADS a published mesh" rather than
@@ -97,18 +110,32 @@ _MESH_TOKENS = ("meshshelve", "from_mesh", "Part.from_mesh")
 
 
 def mesh_geometry_of(slug):
-    """Absolute path of the mesh a loader-backed part prints, or None."""
-    src = builder_source(slug)
-    for line in src.splitlines():
+    """Absolute path of the mesh a loader-backed part prints, or None.
+
+    Resolved exactly the way the builder resolves it — `ROOT` in a
+    `meshshelve` loader is `os.path.dirname(os.path.dirname(part.py))`, i.e.
+    the ITERATION folder — so this finds the same bytes the part is built
+    from. Joining `ce-parts/<slug>/geometry/...` finds nothing: measured
+    2026-09-02, all four microduck mesh parts keep their STL under
+    `iterations/v0.0.1/geometry/`, and the print sheet was about to print
+    "CANNOT DETERMINE - file not on disk" beside a file that is on disk.
+    """
+    bp = builder_path(slug)
+    if bp is None:
+        return None
+    base = os.path.dirname(os.path.dirname(bp))       # the iteration folder
+    for line in builder_source(slug).splitlines():
         if line.strip().startswith("GEOMETRY"):
             rel = line.split("=", 1)[-1].strip().strip('"\'')
-            p = os.path.join(ROOT, "ce-parts", slug, rel)
-            return p if os.path.exists(p) else None
-    base = os.path.join(ROOT, "ce-parts", slug, "geometry")
-    if os.path.isdir(base):
-        for f in sorted(os.listdir(base)):
-            if f.lower().endswith((".stl", ".step", ".stp")):
-                return os.path.join(base, f)
+            p = os.path.join(base, rel)
+            if os.path.exists(p):
+                return p
+    for d in (os.path.join(base, "geometry"),
+              os.path.join(ROOT, "ce-parts", slug, "geometry")):
+        if os.path.isdir(d):
+            for f in sorted(os.listdir(d)):
+                if f.lower().endswith((".stl", ".step", ".stp")):
+                    return os.path.join(d, f)
     return None
 
 
