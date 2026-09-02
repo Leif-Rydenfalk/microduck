@@ -50,25 +50,20 @@ GENERAL_TOLERANCE = "CANNOT DETERMINE — SEE PRINT / DFM NOTES"
 
 #: appended to the measured print/DFM block on every parametric sheet
 TOLERANCE_DFM = (
-    "TOLERANCE BASIS (IN-HOUSE): CANNOT DETERMINE. Every Bambu machine on "
-    "this farm records tolerance_mm: null with the cite \"no coupon printed "
-    "and measured on this machine\" (ce-machines/bambu-h2s-*/capabilities.json, "
-    "ce-machines/bambu-h2d-*/capabilities.json, read 2026-09-02), and Bambu "
-    "Lab's own H2D Pro technical specification carries no dimensional-accuracy "
-    "line at all. Dimensions on this sheet are NOMINAL AS MODELLED.",
-    "TOLERANCE BASIS (OUTSOURCED): JLC3DP publishes +/-0.3 mm for FDM "
-    "(jlc3dp.com, ce-machines/farm-jlc3dp/capabilities.json) and Hubs "
-    "publishes +/-0.5% with a +/-0.5 mm floor (hubs.com/3d-printing/, "
-    "ce-machines/farm-hubs/capabilities.json). Quote whichever route makes "
-    "the part; do not apply both.",
-    "THE +/-0.2 mm IN cecad/machining.py PROCESSES['fdm'].tolerance_mm IS A "
-    "REPO PLANNING CONSTANT WITH NO VENDOR CITE and is deliberately not used "
-    "as this sheet's general tolerance. One printed and measured calibration "
-    "coupon on the machine that will make this part closes this note.",
-    "FITS: no bore on this part carries a declared ISO 286 class, because FDM "
-    "cannot be sized to one — H7/p6 at O3 is a 0.010 mm band against a "
-    "process nobody here has measured. Bearing and press-fit bores are "
-    "called out to REAM AFTER PRINTING in the note above.",
+    "TOLERANCE BASIS, IN-HOUSE: CANNOT DETERMINE. Every Bambu on this farm "
+    "records tolerance_mm: null, cite \"no coupon printed and measured on this "
+    "machine\" (ce-machines/bambu-h2s-*, bambu-h2d-*/capabilities.json, read "
+    "2026-09-02), and Bambu Lab's own H2D Pro spec sheet carries no "
+    "dimensional-accuracy line. DIMENSIONS HERE ARE NOMINAL AS MODELLED.",
+    "TOLERANCE BASIS, OUTSOURCED: JLC3DP +/-0.3 mm FDM (jlc3dp.com, "
+    "ce-machines/farm-jlc3dp); Hubs +/-0.5%, floor +/-0.5 mm "
+    "(hubs.com/3d-printing/, ce-machines/farm-hubs). Apply the route's "
+    "figure, not both. The +/-0.2 mm in cecad/machining.py fdm is a repo "
+    "planning constant with no vendor cite and is NOT used here. One printed "
+    "and measured coupon closes this note.",
+    "NO ISO 286 CLASS IS DECLARED ON ANY BORE: FDM cannot be sized to one "
+    "(H7/p6 at O3 is a 0.010 mm band). REAM bearing and press-fit bores after "
+    "printing.",
 )
 
 

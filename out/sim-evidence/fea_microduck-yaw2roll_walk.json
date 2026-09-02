@@ -1,0 +1,139 @@
+{
+ "study": "fea_microduck-yaw2roll_walk",
+ "part": "part:microduck-yaw2roll",
+ "mjcf_mesh": "yaw2roll",
+ "case": "walk",
+ "generated": "2026-09-02T23:11:01",
+ "script": "sim/stress_all.py",
+ "inputs": {
+  "force_N_part_frame": [
+   -3.82623,
+   -1.19627,
+   17.64213
+  ],
+  "force_magnitude_N": 18.0919,
+  "force_source": "out/sim-evidence/loads_mujoco.json :: walk.body_transmitted_force_peaks.yaw2roll (step 747, t 3.740 s)",
+  "fixed": [
+   "yaw_horn",
+   "yaw_bearing_seat"
+  ],
+  "load": [
+   "roll_idler",
+   "servo_screw_a",
+   "servo_screw_b"
+  ],
+  "require_sf": 2.0,
+  "mesh_size_requested_mm": null,
+  "why": "peak force body yaw2roll transmits during the measured walk",
+  "connectors_added": [],
+  "connectors_hardened": [
+   "yaw_bearing_seat: 1.950 mm off the skin -> kind bore, spec d3.900 (wall at r 1.950)",
+   "roll_idler: 1.350 mm off the skin -> kind bore, spec d2.700 (wall at r 1.350)",
+   "servo_screw_a: 1.200 mm off the skin -> kind bore, spec d2.400 (wall at r 1.200)",
+   "servo_screw_b: 1.200 mm off the skin -> kind bore, spec d2.400 (wall at r 1.200)"
+  ],
+  "connectors_available": [
+   "ear_tap_a",
+   "ear_tap_b",
+   "roll_idler",
+   "servo_screw_a",
+   "servo_screw_b",
+   "yaw_bearing_seat",
+   "yaw_horn"
+  ],
+  "material_props": {
+   "table": "ce-cad/cecad/fits.py MATERIALS['PLA']",
+   "yield_mpa": 50,
+   "youngs_gpa": 3.5,
+   "density": 1.24,
+   "tier": "class (no datasheet behind the row; the table's own comment says every polymer 'yield' is an ultimate)"
+  },
+  "tds": {
+   "file": "research/tds/prusament-pla-tds-2021-10-en.pdf",
+   "what": "Prusament PLA TDS v1.1 (16-02-2022), 3D-printed specimens, horizontal print direction",
+   "yield_mpa": 51.0,
+   "yield_tol": 3.0,
+   "modulus_gpa": 2.3,
+   "interlayer_mpa": 17.0,
+   "interlayer_tol": 3.0,
+   "method": "ISO 527-1 (tensile), interlayer adhesion Prusa Polymers method",
+   "sha256": "68c8298b9329a7b0e5f8d35cf4cb0172708184f7d4f95491643163e4f140b1b7"
+  }
+ },
+ "material": "PLA",
+ "mesh_attempts": [
+  {
+   "size": 1.5,
+   "ok": true,
+   "strategy": {
+    "strategy": "raw",
+    "size": 1.5,
+    "nodes": 19255,
+    "elements": 10217,
+    "eltype": "C3D10",
+    "gmsh_extra": []
+   }
+  }
+ ],
+ "outputs": {
+  "verdict_cecad": "PASS",
+  "sf": 12.138619013190636,
+  "max_von_mises_mpa": 4.119084711833088,
+  "max_displacement_mm": 0.019700500345140984,
+  "yield_mpa_used": 50,
+  "mesh": {
+   "strategy": "raw",
+   "size": 1.5,
+   "nodes": 19255,
+   "elements": 10217,
+   "eltype": "C3D10",
+   "gmsh_extra": []
+  },
+  "assumptions": [
+   "held patch at 'yaw_horn': 904 node(s) over 419 boundary face(s), 180.1 mm^2 of skin (flat face), reaching 8.00 mm from the connector",
+   "no area_mm2 declared for 'yaw_horn' \u2014 the whole flat face at it was loaded, 180.1 mm^2",
+   "held patch at 'yaw_bearing_seat': 31 node(s) over 10 boundary face(s), 6.8 mm^2 of skin (axial wall r=3.87 mm), reaching 5.86 mm from the connector",
+   "connector 'yaw_bearing_seat' declares d3.900 (r=1.95 mm) but no wall of the mesh sits at that radius about its axis within 4.50 mm; the nearest wall at r=3.87 mm was used",
+   "loaded patch at 'roll_idler': 82 node(s) over 34 boundary face(s), 19.0 mm^2 of skin (axial wall r=1.35 mm), reaching 2.25 mm from the connector",
+   "loaded patch at 'servo_screw_a': 85 node(s) over 33 boundary face(s), 9.2 mm^2 of skin (axial wall r=1.20 mm), reaching 1.92 mm from the connector",
+   "loaded patch at 'servo_screw_b': 85 node(s) over 33 boundary face(s), 9.2 mm^2 of skin (axial wall r=1.20 mm), reaching 1.92 mm from the connector",
+   "HELD AT 2 PLACES (yaw_horn, yaw_bearing_seat) \u2014 all of them rigid. A real bolt or pin is not rigid, so this under-states the deflection and concentrates stress at the patch edges",
+   "the total force is shared across 3 load patches (roll_idler, servo_screw_a, servo_screw_b) BY FACE AREA \u2014 not by any statics this module did"
+  ],
+  "notes": [
+   "nu = 0.36 [class] for PLA",
+   "PLA strength is the ALONG-LAYER printed figure; across layers the part is weaker than this check says, and orientation is not modelled",
+   "peak stress is the max NODAL von Mises \u2014 at a sharp re-entrant corner it rises with mesh refinement, so a borderline SF wants a fillet, not a finer argument",
+   "SF ~12.14 (APPROXIMATE, EITHER) \u2014 safety factor >= 2 asks for a measurement and this value is APPROXIMATE \u2014 SF = yield / peak von Mises, where the peak is CalculiX's solve on this mesh and the yield is fits.MATERIALS['PLA'].yield_mpa = 50 MPa \u2014 a handbook/datasheet class figure carrying no tier and no coupon pulled from this material on this process. An estimate on either side of a comparison proves nothing, so the gate stays OPEN. It closes when: a tensile coupon of this material, made by this process in this orientation, pulled to yield, plus a mesh convergence study on the peak",
+   "tier=class ACCEPTED BY THE CALLER (accept_class=True): the verdict below rests on a typical figure for the material class, not on the thing you will buy or the filament on the spool.",
+   "max deflection 0.0197 mm was MEASURED and not judged \u2014 the case states no max_deflection_mm, so nothing here says whether that is acceptable"
+  ],
+  "failure_load_N_linear": 219.6107,
+  "sf_vs_tds_yield": 12.3814,
+  "tds_yield_mpa": 51.0,
+  "sf_vs_tds_interlayer_across_layers": 4.1271
+ },
+ "verdict": "PASS",
+ "why": "SF 12.139 >= 2 against PLA yield 50 MPa (class tier, accepted by the caller); TDS yield gives SF 12.3814",
+ "artifacts": [
+  "out/sim-evidence/fea/microduck-yaw2roll_walk",
+  "out/sim-evidence/fea/microduck-yaw2roll_walk.png",
+  "out/sim-evidence/fea/microduck-yaw2roll_walk/report.json"
+ ],
+ "looked_at": [
+  {
+   "image": "out/sim-evidence/fea/microduck-yaw2roll_walk.png",
+   "facts": {
+    "bytes": 148310,
+    "size": [
+     1240,
+     840
+    ],
+    "distinct_colors": 8435,
+    "foreground_frac": 0.2001
+   },
+   "check": "peak von Mises recomputed from the .frd agrees with the report to 0.5 % (cecad.feaimage)"
+  }
+ ],
+ "seconds": 149.1
+}

@@ -18,7 +18,7 @@ a cached result can itself be empty.
 | script | what it produces | last run id | state at handover |
 |---|---|---|---|
 | `elec-verify.js` | Every electronic component: exact MPN, package, physical dimensions (mm), pinout, voltage, and real sourcing (>=2 distributors, price at 1/100/1000, MOQ, lead time), each cited. Plus the 3 custom PCBs and what must be done to make them fabricable. | `wf_969f3a4c-3d1` | **COMPLETED** 2026-09-02 21:25 — 15/15 agents, 0 errors, 891k tokens. Results rescued to `out/verify/electronics_verify.json` (+ `.journal.jsonl`). Do NOT relaunch; write it into a document. |
-| `manufacturing.js` | DFM over 5 part groups, process/break-even economics, assembly line with jigs + torque, QA/EOL test plan, 3 sourcing agents, consolidated execution plan. | `wf_7f8b1690-71f` | launched 2026-09-02 ~21:12, died with the launching session — **relaunch** |
+| `manufacturing.js` | DFM over 5 part groups, process/break-even economics, assembly line with jigs + torque, QA/EOL test plan, 3 sourcing agents, consolidated execution plan. | `wf_7f8b1690-71f` | **STOPPED DELIBERATELY** 2026-09-02 23:08 — its DFM agents were shelling out to `tools/draw_part.py` and racing lane B on `out/drawings/`. 11 completed agent results rescued to `out/verify/manufacturing_partial.json`. **Relaunch in your own session**, but see the warning below. |
 | `drawings-mfg-grade.js` | Manufacturing-grade dimensioned drawings. | `wf_e0ce4a43-34e` | earlier run |
 | `simulate.js` | Simulation lane. | `wf_e980841f-3aa` | earlier run |
 
@@ -110,3 +110,24 @@ belongs to a human.
   printed part these are **upper bounds** unless the part is oriented with the load in-plane.
   No fatigue, no creep, no impact dynamics — a real landing is a dynamic event and this is a
   static surrogate.
+
+
+## WARNING before you relaunch `manufacturing.js`
+
+Its DFM agents shell out to `ce-cad/bin/cad tools/draw_part.py <slug>` to look at a part. That
+is why a `draw_part.py microduck-power-support` kept reappearing from a session that had already
+killed it once — each agent's Bash wrapper exits and leaves the kernel process orphaned to PPID 1,
+so killing the wrapper does not stop the draw.
+
+Two writers on `out/drawings/<slug>/` interleave: `_search` rewrites the same stem on every
+attempt, so the SVG on disk can come from one process and `result.json` (with its verify verdict)
+from the other. One measured instance: `out/drawings/microduck-trunk-base/result.json` said
+"A1, 5:1" while the SVG beside it said "SCALE 1:1 A2".
+
+Before relaunching, either:
+- add to the DFM agent prompt: **"Do NOT run tools/draw_part.py or write anything under
+  out/drawings/ — read out/verify/mech_dims.json for dimensions instead"**, or
+- run it only when no drawings lane is active.
+
+The dimensional data those agents actually need is already measured and committed in
+`out/verify/mech_dims.json` (all 47 meshes, mm to 4 dp). They do not need to draw anything.

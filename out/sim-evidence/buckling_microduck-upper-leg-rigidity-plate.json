@@ -1,11 +1,11 @@
 {
  "study": "buckling_microduck-upper-leg-rigidity-plate",
  "part": "part:microduck-upper-leg-rigidity-plate",
- "generated": "2026-09-02T23:04:50",
+ "generated": "2026-09-02T23:06:21",
  "script": "sim/struct_ce.py",
  "inputs": {
   "mesh": "sim/meshes_ours/upper_leg_rigidity_plate.stl",
-  "cell_mm": 0.5,
+  "cell_mm": 0.33,
   "long_axis": "z",
   "held_face": "z=min",
   "loaded_face": "z=max",
@@ -20,14 +20,51 @@
  "looked_at": [],
  "outputs": {
   "buckle": {
-   "error": "0.5 mm cells give only 2 across x on a part that is 1.0 x 45.5 x 58.8 mm. A section fewer than 3 cells thick cannot bend, so the answer would be stiff by an unbounded factor. Use cell <= 0.33 mm (or pass allowThin: true if this really is a pure tension member).",
-   "_seconds": 0.4
+   "study": "buckle",
+   "ms": 162105,
+   "cells": 21597,
+   "nodes": 32164,
+   "interfaces": [],
+   "factors": [
+    1.000246,
+    1.000266,
+    1.001148
+   ],
+   "critical": 1.000246,
+   "_seconds": 164.05
   },
   "frequency": {
-   "error": "0.5 mm cells give only 2 across x on a part that is 1.0 x 45.5 x 58.8 mm. A section fewer than 3 cells thick cannot bend, so the answer would be stiff by an unbounded factor. Use cell <= 0.33 mm (or pass allowThin: true if this really is a pure tension member).",
-   "_seconds": 0.34
-  }
+   "study": "frequency",
+   "ms": 134153,
+   "cells": 21597,
+   "nodes": 32164,
+   "interfaces": [],
+   "modes": [
+    {
+     "mode": 1,
+     "eigenvalue": 36334.5,
+     "rad_s": 190.6161,
+     "hz": 30.3375
+    },
+    {
+     "mode": 2,
+     "eigenvalue": 484386.5,
+     "rad_s": 695.9788,
+     "hz": 110.7685
+    },
+    {
+     "mode": 3,
+     "eigenvalue": 626584.7,
+     "rad_s": 791.571,
+     "hz": 125.9824
+    }
+   ],
+   "first_Hz": 30.3375,
+   "_seconds": 138.95
+  },
+  "critical_load_N": 109.5257,
+  "first_mode_hz": null
  },
- "verdict": "CANNOT DETERMINE",
- "why": "buckle solve refused: 0.5 mm cells give only 2 across x on a part that is 1.0 x 45.5 x 58.8 mm. A section fewer than 3 cells thick cannot bend, so the answer would be stiff by an unbounded factor. Use cell <= 0.33 mm (or pass allowThin: true if this really is a pure tension member)."
+ "verdict": "FAIL",
+ "why": "buckling load factor 1.0002 on the 109.4988 N landing load (critical 109.53 N); ce-struct rule factor >= 2"
 }

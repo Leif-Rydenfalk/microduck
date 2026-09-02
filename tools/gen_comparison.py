@@ -8,267 +8,40 @@ import json, os, html
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
 DIMS = json.load(open(os.path.join(REPO, "out", "verify", "mech_dims.json")))
+HEAD_PATH = os.path.join(REPO, "out", "head", "head.json")
+HEAD = json.load(open(HEAD_PATH)) if os.path.exists(HEAD_PATH) else None   # tools/head_verdict.py (lane A)
 
-BODY_PAIRS = [
-    ("Left profile", "cream colourway, standing",
-     "images/store/store_microduck-cream-standing-profile-left.jpg",
-     "out/compare/ours-prof-left.png", "azimuth 270°, elevation −8°"),
-    ("Right profile", "graphite colourway, standing",
-     "images/store/store_microduck-graphite-standing-profile-right-02.jpg",
-     "out/compare/ours-prof-right.png", "azimuth 90°, elevation −8°"),
-    ("Three-quarter front-left", "sky colourway, standing",
-     "images/store/store_microduck-sky-standing-three-quarter-left-02.jpg",
-     "out/compare/ours-iso-fl.png", "azimuth 225°, elevation −10°"),
-    ("Three-quarter back-right", "graphite colourway, standing",
-     "images/store/store_microduck-graphite-standing-back-three-quarter-right-02.jpg",
-     "out/compare/ours-iso-br.png", "azimuth 45°, elevation −12°"),
-]
-JOINT_PAIRS = [
-    ("Neck — 2× XL330 pitch/roll stack", "out/compare/ref-joint-neck.png",
-     "out/compare/ours-joint-neck.png",
-     "Two XL330-M288-T in series above the trunk; the beak assembly hangs off the upper horn."),
-    ("Hip — yaw / roll / pitch cluster", "out/compare/ref-joint-hip.png",
-     "out/compare/ours-joint-hip.png",
-     "Three orthogonal hinges inside one bracket group; 22×16×4 bearing opposes each servo horn."),
-    ("Knee", "out/compare/ref-joint-knee.png", "out/compare/ours-joint-knee.png",
-     "Triangular thigh plate carries the knee servo; the shin bolts to the output horn."),
-    ("Ankle + foot", "out/compare/ref-joint-ankle.png", "out/compare/ours-joint-ankle.png",
-     "Ankle servo drives the foot plate; sole is a separate compliant pad."),
-]
 
-def dim_rows():
-    parts = sorted(DIMS["parts"], key=lambda p: (not p["rebuilt"], p["mesh"]))
-    out = []
-    for p in parts:
-        r = p["ref_mm"]
-        if p["rebuilt"]:
-            o, d = p["our_mm"], p["delta_mm"]
-            v = p["dim_verdict"]
-            cls = "pass" if v == "PASS" else "cd"
-            out.append(
-                f'<tr><td><code>{html.escape(p["mesh"])}</code></td>'
-                f'<td class="n">{r["x"]:.3f}</td><td class="n">{r["y"]:.3f}</td><td class="n">{r["z"]:.3f}</td>'
-                f'<td class="n">{o["x"]:.3f}</td><td class="n">{o["y"]:.3f}</td><td class="n">{o["z"]:.3f}</td>'
-                f'<td class="n">{p["max_delta_mm"]:.4f}</td>'
-                f'<td><span class="chip {cls}">{v}</span></td></tr>')
-        else:
-            out.append(
-                f'<tr><td><code>{html.escape(p["mesh"])}</code></td>'
-                f'<td class="n">{r["x"]:.3f}</td><td class="n">{r["y"]:.3f}</td><td class="n">{r["z"]:.3f}</td>'
-                f'<td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td>'
-                f'<td class="n dash">—</td><td><span class="chip ref">reference</span></td></tr>')
-    return "\n".join(out)
+def _pm(v, u, nd=2):
+    if v is None: return "CANNOT DETERMINE"
+    return ("%+." + str(nd) + "f&nbsp;±&nbsp;%." + str(nd) + "f") % (v, u)
 
-def pair_block(title, sub, real, ours, cam, note=None):
-    return f"""
-  <h3>{html.escape(title)}</h3>
-  <p class="paircap">{html.escape(sub)} · our camera: <code>{html.escape(cam)}</code></p>
-  <div class="pair">
-    <figure><span class="tag">Real · pollen-robotics.com</span>
-      <img src="{real}" alt="{html.escape(title)} official"></figure>
-    <figure><span class="tag ours">Ours · CAD render</span>
-      <img src="{ours}" alt="{html.escape(title)} ours"></figure>
-  </div>
-  {'<p class="note">' + html.escape(note) + '</p>' if note else ''}"""
 
-n_reb = sum(1 for p in DIMS["parts"] if p["rebuilt"])
-n_pass = sum(1 for p in DIMS["parts"] if p.get("dim_verdict") == "PASS")
-worst = max((p["max_delta_mm"] for p in DIMS["parts"] if p["rebuilt"]), default=0)
-
-body = "\n".join(pair_block(t, s, r, o, c) for t, s, r, o, c in BODY_PAIRS)
-joints = "\n".join(pair_block(t, "real robot, same joint (cropped from the profile photograph)",
-                              r, o, "left profile, matched", n) for t, r, o, n in JOINT_PAIRS)
-
-HTML = f"""<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Reference Match</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opt_sz,wght@8..60,400;8..60,600;8..60,700&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="tools/doc.css">
-<style>
-  .pair{{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:10px 0 4px}}
-  .pair figure{{margin:0;padding:8px}}
-  .pair figure img{{width:100%;aspect-ratio:1/1;object-fit:contain;background:#fff}}
-  .tag{{font-family:var(--sans);font-size:10.5px;font-weight:600;letter-spacing:.07em;
-       text-transform:uppercase;display:inline-block;padding:2px 8px;margin-bottom:6px;
-       border:1px solid var(--hair);color:var(--ink-2)}}
-  .tag.ours{{color:var(--accent);border-color:var(--accent)}}
-  .paircap{{font-family:var(--sans);font-size:12.5px;color:var(--ink-2);margin:0 0 2px}}
-  .note{{font-size:13.5px;color:var(--ink-2);margin:2px 0 18px;max-width:44em}}
-  .verdict{{border-left:3px solid var(--accent);padding:2px 0 2px 18px;margin:14px 0;font-size:15.5px}}
-  .verdict b{{color:var(--accent)}}
-  .verdict.warn{{border-left-color:var(--no)}} .verdict.warn b{{color:var(--no)}}
-  td.dash{{color:#b3aea4}}
-  .chip.ref{{color:var(--ink-2);font-weight:400;text-transform:none;letter-spacing:0}}
-  table.data td code{{font-size:12px}}
-  .statbar{{display:flex;flex-wrap:wrap;gap:0;border-bottom:1px solid var(--hair);margin:8px 0 2px}}
-  .stat{{padding:12px 26px 12px 0;margin-right:22px}}
-  .stat b{{display:block;font-weight:700;font-size:22px;font-variant-numeric:tabular-nums}}
-  .stat span{{font-family:var(--sans);font-size:12px;color:var(--ink-2)}}
-  @media(max-width:640px){{.pair{{grid-template-columns:1fr}}}}
-</style>
-</head>
-<body>
-<div class="wrap">
-<p class="backlink"><a href="RELEASE.html">← Release dossier</a></p>
-
-<header class="hero">
-  <p class="eyebrow">Microduck reverse-engineering · reference conformance</p>
-  <h1>Reference match: our CAD against the real Microduck</h1>
-  <p class="sub">Every render of ours sits beside the real product photograph shot from the same
-  camera angle. Below the visual check is the measured dimension table for all
-  {DIMS['count']} mechanical parts, at full precision.</p>
-  <div class="rev">
-    <span>MD-CMP-001 · Rev B</span><span>{DIMS['generated']}</span>
-    <span>renderer: MuJoCo 3.12 offscreen, 1400²</span><span>pose: STAND, head levelled</span>
-  </div>
-</header>
-
-<div class="statbar">
-  <div class="stat"><b>{DIMS['count']}</b><span>parts measured</span></div>
-  <div class="stat"><b>{n_reb}</b><span>re-modelled parametrically</span></div>
-  <div class="stat"><b>{n_pass}/{n_reb}</b><span>dimensional PASS</span></div>
-  <div class="stat"><b>{worst:.4f} mm</b><span>worst bbox deviation</span></div>
-  <div class="stat"><b>8</b><span>photo-matched viewpoints</span></div>
-</div>
-
-<nav class="toc">
-  <a href="#answer">1 Verdict</a><a href="#body">2 Whole robot</a><a href="#joints">3 Joints</a>
-  <a href="#dims">4 Measured dimensions</a><a href="#findings">5 Findings</a><a href="#head">5.1 Head</a><a href="#method">6 Method</a>
-</nav>
-
-<section id="answer">
-  <h2><span class="n">1</span>Verdict — is it the same?</h2>
-  <div class="verdict">
-    <b>Geometry — yes, and it is measured.</b> The renders are driven by the meshes Pollen
-    published, in Pollen's own kinematic tree. The {n_reb} load-bearing links we re-modelled
-    parametrically reproduce the reference bounding box to a worst case of
-    <b>{worst:.4f}&nbsp;mm</b> — {n_pass} of {n_reb} inside 1&nbsp;mm, six of them exact to
-    the fourth decimal. The full table is in §4.
-  </div>
-  <div class="verdict warn">
-    <b>The head — CANNOT DETERMINE, and the first eyeball answer was wrong.</b> By eye the
-    simulation head looks too long and flat against the product photographs, so we measured it
-    (§5.1). Head <em>length</em> as a fraction of robot height agrees to
-    <b>3.76&nbsp;%</b> (product 0.4233, ours 0.4392) — the head is <em>not</em> markedly longer,
-    which is the opposite of the visual impression. Head <em>aspect ratio</em> differs by
-    <b>+69&nbsp;%</b> (product 1.206, ours 2.042), but that measurement is confounded: in the
-    reference photograph the beak is <em>open</em> and the head is <em>tilted</em>, both of which
-    inflate the product's apparent head height. We therefore cannot yet conclude a geometry
-    mismatch. §5.1 states exactly what would settle it.
-  </div>
-  <div class="verdict">
-    <b>Colour is schematic, not product paint.</b> The yellow beak and teal soles are the
-    material colours inside the simulation model. Pollen's own simulator renders these same
-    colours. Nothing was repainted to flatter the comparison.
-  </div>
-</section>
-
-<section id="body">
-  <h2><span class="n">2</span>Whole robot — real beside ours</h2>
-  <p class="lede">Four viewpoints for which an official photograph exists. Our camera azimuth
-  and elevation were set to match each photograph; the pose is the model's STAND keyframe with
-  the head levelled.</p>
-{body}
-</section>
-
-<section id="joints">
-  <h2><span class="n">3</span>Joints — real beside ours</h2>
-  <p class="lede">The same posed robot with the camera pushed in on each joint, against the
-  corresponding region of the profile photograph. Posing costs milliseconds — the kinematics are
-  already in the model, so no CAD-kernel rebuild is involved.</p>
-{joints}
-</section>
-
-<section id="dims">
-  <h2><span class="n">4</span>Measured dimensions — all {DIMS['count']} parts</h2>
-  <p class="lede">Axis-aligned bounding box of every mesh in its own file frame, in millimetres
-  to three decimal places. Reference meshes are Pollen's, converted from metres. For the
-  re-modelled parts the table also gives our geometry and the worst-axis deviation to four
-  decimals. Values are nominal geometry, not toleranced manufacturing dimensions — see §6.</p>
-  <div class="tw"><table class="data">
-    <caption>Table 1. Bounding-box dimensions and rebuild deviation. Source:
-      <code>out/verify/mech_dims.json</code>, generated by <code>sim/mech_dims.py</code>.</caption>
-    <thead><tr>
-      <th rowspan="2">Mesh</th><th colspan="3">Reference (mm)</th>
-      <th colspan="3">Ours (mm)</th><th rowspan="2">Δ max<br>(mm)</th><th rowspan="2">Verdict</th></tr>
-      <tr><th class="n">X</th><th class="n">Y</th><th class="n">Z</th>
-          <th class="n">X</th><th class="n">Y</th><th class="n">Z</th></tr></thead>
-    <tbody>
-{dim_rows()}
-    </tbody>
-  </table></div>
-</section>
-
-<section id="findings">
-  <h2><span class="n">5</span>Findings that affect manufacturing</h2>
-  <div class="tw"><table class="data">
-    <thead><tr><th>#</th><th>Finding</th><th>Evidence</th><th>Consequence</th><th>Action</th></tr></thead>
-    <tbody>
-      <tr><td class="n">1</td><td><b>Head conformance unresolved.</b> Length ratio agrees to
-        3.76&nbsp;%; aspect ratio differs by 69&nbsp;% but the measurement is confounded by an
-        open beak and a tilted head in the reference photograph.</td>
-        <td>§5.1, <code>out/verify/head_analysis.json</code> + annotated silhouettes</td>
-        <td>Head tooling cannot be committed on present evidence — neither confirmed nor refuted.</td>
-        <td>Re-shoot the comparison with the beak closed and head levelled, <em>or</em> scale a
-        product photograph against the XL330 servo visible in frame (20.000&nbsp;×&nbsp;34.000&nbsp;mm)
-        and measure the head shell directly in mm.</td></tr>
-      <tr><td class="n">2</td><td><b>Battery mesh is an NP-F970, not the NP-F550 class cell the
-        documentation calls out.</b></td>
-        <td><code>np_f970</code> 38.600&nbsp;×&nbsp;20.600&nbsp;×&nbsp;70.800&nbsp;mm in Table 1</td>
-        <td>Battery bay volume and mass budget may be sized for the wrong cell.</td>
-        <td>Confirm the shipping cell, then re-check <code>power_support</code> cavity against it.</td></tr>
-      <tr><td class="n">3</td><td><b>Compute placeholder is a Raspberry&nbsp;Pi Zero 2&nbsp;W mesh</b>
-        while the documented host is a Radxa Zero 3W.</td>
-        <td><code>pcb__raspberry_pi_zero_2_w</code> 65.000&nbsp;×&nbsp;1.600&nbsp;×&nbsp;30.000&nbsp;mm</td>
-        <td>Both are 65×30&nbsp;mm so the envelope holds, but connector positions differ.</td>
-        <td>Verify mounting-hole and connector positions against the real Radxa Zero 3W.</td></tr>
-      <tr><td class="n">4</td><td><b>Two ankle variants ship in the asset set</b>
-        (<code>ankle_left</code> 36.500&nbsp;mm vs <code>ankle_l_v1</code> 46.500&nbsp;mm in Y).</td>
-        <td>Table 1, rows 1–4</td>
-        <td>Building the wrong revision changes ankle geometry by 10&nbsp;mm.</td>
-        <td>Confirm which revision ships; the <code>_v1</code> parts appear superseded.</td></tr>
-    </tbody>
-  </table></div>
-</section>
-
-  <h3 id="head">5.1 Head conformance — the measurement that corrected the eyeball</h3>
-  <p>Both views are near-orthographic side views on white, so scale-free silhouette ratios can be
-  compared without camera calibration. The red box is the head band, ended where the silhouette
-  pinches at the neck; the blue box is the whole robot. Generated by
-  <code>tools/head_analysis.py</code>.</p>
-  <div class="pair">
-    <figure><span class="tag">Real · measured silhouette</span>
-      <img src="out/verify/head-product-photo.png" alt="product head measurement"></figure>
-    <figure><span class="tag ours">Ours · measured silhouette</span>
-      <img src="out/verify/head-our-render.png" alt="our head measurement"></figure>
-  </div>
-  <div class="tw"><table class="data">
-    <caption>Table 2. Scale-free head ratios. Source: <code>out/verify/head_analysis.json</code>.</caption>
-    <thead><tr><th>Ratio</th><th class="n">Product photo</th><th class="n">Our render</th>
-      <th class="n">Difference</th><th>Reading</th></tr></thead>
-    <tbody>
-      <tr><td>head length / total height</td><td class="n">0.4233</td><td class="n">0.4392</td>
-        <td class="n">+3.76 %</td><td>Agrees. The head is <b>not</b> markedly longer.</td></tr>
-      <tr><td>head height / total height</td><td class="n">0.3511</td><td class="n">0.2151</td>
-        <td class="n">−38.7 %</td><td>Confounded — the open beak adds height to the product.</td></tr>
-      <tr><td>head aspect (length / height)</td><td class="n">1.2059</td><td class="n">2.0422</td>
-        <td class="n">+69.4 %</td><td>Confounded by beak state and head tilt.</td></tr>
-    </tbody>
-  </table></div>
-  <p><b>Why this is not yet a finding.</b> In the reference photograph the beak is open and hangs
-  well below the head shell, and the head is pitched forward; our render has the beak closed and
-  the head levelled. Both differences inflate the product's measured head height and therefore
-  depress its aspect ratio. The honest verdict is <b>CANNOT DETERMINE</b>.</p>
-  <p><b>What would settle it.</b> Either (a) re-render with the beak posed open at the same angle
-  as the photograph — note the jaw is <em>not</em> an actuated joint in the published model, so
-  this requires posing the <code>jaw_soft</code> body by hand; or (b) photogrammetric scaling: the
-  XL330-M288-T servo is visible in the same frame with a known 20.000&nbsp;×&nbsp;34.000&nbsp;mm
-  body face, giving mm-per-pixel, after which the head shell can be measured directly in
-  millimetres and compared with the mesh's 91.751&nbsp;×&nbsp;122.688&nbsp;×&nbsp;46.339&nbsp;mm.
-  Option (b) is the stronger evidence and is the recommended next step.</p>
+def head_verdict_block():
+    """§1 head verdict + §5 finding-1 row + §5.1, all from out/head/head.json so this page and
+    HEAD-RECONSTRUCTION.html cannot disagree."""
+    if HEAD is None:
+        return None
+    C = HEAD["combined"]; V = HEAD["verdict"]; FV = HEAD["front_view"]["comparison"]
+    cls = {"PASS": "", "FAIL": " warn", "CANNOT DETERMINE": " cd"}[V["head"]]
+    v1 = f"""  <div class="verdict{cls}">
+    <b>The head — {html.escape(V["head"])}, measured in millimetres.</b> Lane A scaled {C["n_photos"]} product photographs by the
+    XL330-M288-T case in the same frame (20.000 mm), posed our model to each with a perspective camera and compared the head shell
+    against the mesh: product/mesh size ratio <b>{_pm(C["product_over_mesh"], C["product_over_mesh_unc"], 4)}</b>, head-length deviation
+    <b>{_pm(C["head_length_dev_mm"], C["head_length_dev_unc_mm"])}&nbsp;mm</b> on 122.690&nbsp;mm; along the head's own axes
+    {_pm(C["dev_major_mm"], C["dev_major_unc_mm"])} / {_pm(C["dev_minor_mm"], C["dev_minor_unc_mm"])}&nbsp;mm. The eye bezel is
+    <b>{html.escape(V["eye_bezel"])}</b>: it is the <code>noenoeil</code> mesh (Ø30.000&nbsp;×&nbsp;7.5&nbsp;mm ring proud of the face), the product ring
+    reads {_pm(C["eye_dev_mm"], C["eye_dev_unc_mm"])}&nbsp;mm against it in the profiles and {C["eye_front_view_dev_mm"]:+.2f}&nbsp;mm in the true front view.
+    Full evidence, every overlay real-beside-ours: <a href="HEAD-RECONSTRUCTION.html">HEAD-RECONSTRUCTION.html</a>.
+  </div>"""
+    row = f"""      <tr><td class="n">1</td><td><b>Head conformance — {html.escape(V["head"])}.</b> Product/mesh size ratio
+        {_pm(C["product_over_mesh"], C["product_over_mesh_unc"], 4)} over {C["n_photos"]} servo-scaled photographs; head length
+        {_pm(C["head_length_dev_mm"], C["head_length_dev_unc_mm"])}&nbsp;mm; eye bezel {html.escape(V["eye_bezel"])}
+        ({_pm(C["eye_dev_mm"], C["eye_dev_unc_mm"])}&nbsp;mm profile, {C["eye_front_view_dev_mm"]:+.2f}&nbsp;mm front view).</td>
+        <td><a href="HEAD-RECONSTRUCTION.html">HEAD-RECONSTRUCTION.html</a>, <code>out/head/head.json</code></td>
+        <td>{"Head tooling can be cut from the published meshes." if V["head"] == "PASS" else ("The head must be re-modelled from the photographs before tooling." if V["head"] == "FAIL" else "Tooling waits on one calliper reading of a product head (or one purpose-shot photograph); the 1.5 mm rule cannot be decided from the store photographs alone.")}</td>
+        <td>{html.escape("; ".join(V["what_would_settle"])) if V["what_would_settle"] else "None — closed."}</td></tr>"""
+    sub = f"""{HEAD_SUB}
 </section>
 
 <section id="method">

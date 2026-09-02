@@ -1,11 +1,11 @@
 {
  "study": "buckling_microduck-neck-plate",
  "part": "part:microduck-neck-plate",
- "generated": "2026-09-02T23:04:51",
+ "generated": "2026-09-02T23:11:24",
  "script": "sim/struct_ce.py",
  "inputs": {
-  "mesh": "sim/meshes_ours/neck.stl",
-  "cell_mm": 0.5,
+  "mesh": "out/sim-evidence/fea/microduck-neck-plate_ours.stl",
+  "cell_mm": 0.4,
   "long_axis": "y",
   "held_face": "y=min",
   "loaded_face": "y=max",
@@ -18,6 +18,53 @@
  "method": "axial compression over the whole end face, the other end fixed xyz; buckling eigenvalue = load factor on the applied force; first natural frequency with the same support",
  "artifacts": [],
  "looked_at": [],
- "verdict": "CANNOT DETERMINE",
- "why": "no rebuilt mesh at sim/meshes_ours/neck.stl"
+ "outputs": {
+  "buckle": {
+   "study": "buckle",
+   "ms": 69613,
+   "cells": 6340,
+   "nodes": 8346,
+   "interfaces": [],
+   "factors": [
+    4.802649,
+    38.89365,
+    84.43847
+   ],
+   "critical": 4.802649,
+   "_seconds": 71.86
+  },
+  "frequency": {
+   "study": "frequency",
+   "ms": 49693,
+   "cells": 6340,
+   "nodes": 8346,
+   "interfaces": [],
+   "modes": [
+    {
+     "mode": 1,
+     "eigenvalue": 55319130,
+     "rad_s": 7437.683,
+     "hz": 1183.744
+    },
+    {
+     "mode": 2,
+     "eigenvalue": 756063500,
+     "rad_s": 27496.61,
+     "hz": 4376.221
+    },
+    {
+     "mode": 3,
+     "eigenvalue": 870743600,
+     "rad_s": 29508.37,
+     "hz": 4696.402
+    }
+   ],
+   "first_Hz": 1183.744,
+   "_seconds": 50.54
+  },
+  "critical_load_N": 117.3787,
+  "first_mode_hz": null
+ },
+ "verdict": "PASS",
+ "why": "buckling load factor 4.8026 on the 24.4404 N landing load (critical 117.38 N); ce-struct rule factor >= 2"
 }

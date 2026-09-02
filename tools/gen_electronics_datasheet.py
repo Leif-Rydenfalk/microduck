@@ -125,12 +125,15 @@ def current_str(c, sh):
     return '<span class="cd">CD</span>'
 
 
-def verdict_chip(sh):
+def verdict_chip(sh, short=False):
     if not sh or "component" not in sh:
-        return '<span class="chip rail">NO FOLDER</span>'
+        return '<span class="chip rail">%s</span>' % ("NO FOLDER" if not short else "NONE")
     v = (sh["component"].get("verdict") or "").upper()
     cls = {"PASS": "pass", "FAIL": "rail"}.get(v, "cd")
-    return '<span class="chip %s">%s</span>' % (cls, E(v or "\u2014"))
+    label = v or "\u2014"
+    if short and label == "CANNOT DETERMINE":
+        label = "CD"
+    return '<span class="chip %s">%s</span>' % (cls, E(label))
 
 
 def qty_str(c):
@@ -176,17 +179,18 @@ def roster_table(comps, shelves):
             mass_str(c),
             supply_str(sh),
             current_str(c, sh),
-            verdict_chip(sh),
+            verdict_chip(sh, short=True),
         ])
-    return table(["component", "manufacturer", "qty", "envelope L×W×H mm", "mass",
-                  "supply min/typ/max V", "current", "folder verdict"],
+    return table(["component", "maker", "qty", "envelope mm", "mass",
+                  "supply V min/typ/max", "current mA", "verdict"],
                  rows,
                  "Table 1. The roster. Every electronic line in the machine. "
                  "<b>CD</b> is CANNOT DETERMINE and is a real answer — it means "
                  "nobody published the number and this document will not invent one. "
                  "Envelope, mass and quantity come from <code>electronics/components.json</code>; "
                  "manufacturer, supply and current are read live out of "
-                 "<code>ce-parts/&lt;slug&gt;/electrical.*.json</code>.")
+                 "<code>ce-parts/&lt;slug&gt;/electrical.*.json</code>.",
+                 cls="data roster")
 
 
 def detail_block(c, sh):
@@ -302,6 +306,8 @@ def build(out_path):
       ".openlist ul{margin:4px 0 0;padding-left:18px;font-size:13px}\n"
       ".openlist li{margin:3px 0}\n"
       "table.data td{font-size:12.5px}\n"
+      "table.roster th,table.roster td{padding:5px 7px;font-size:11.5px;line-height:1.4}\n"
+      "table.roster .mono{font-size:11px}\n"
       "figure svg,figure img{width:100%;height:auto}\n"
       ".gen{font-family:var(--mono);font-size:11px;color:var(--ink-2);border:1px solid var(--hair);"
       "background:var(--figbg);padding:9px 13px;margin:14px 0}\n"

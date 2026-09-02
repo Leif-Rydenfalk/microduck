@@ -1,0 +1,124 @@
+{
+ "study": "fea_microduck-hip-bracket_walk",
+ "part": "part:microduck-hip-bracket",
+ "mjcf_mesh": "hip_l",
+ "case": "walk",
+ "generated": "2026-09-02T23:06:01",
+ "script": "sim/stress_all.py",
+ "inputs": {
+  "force_N_part_frame": [
+   -6.01759,
+   -1.18907,
+   17.81399
+  ],
+  "force_magnitude_N": 18.8405,
+  "force_source": "out/sim-evidence/loads_mujoco.json :: walk.body_transmitted_force_peaks.hip_l (step 747, t 3.740 s)",
+  "fixed": [
+   "roll_boss"
+  ],
+  "load": [
+   "pitch_boss"
+  ],
+  "require_sf": 2.0,
+  "mesh_size_requested_mm": null,
+  "why": "peak force body hip_l transmits during the measured walk",
+  "connectors_added": [],
+  "connectors_hardened": [
+   "roll_boss: 1.950 mm off the skin -> kind bore, spec d3.900 (wall at r 1.950)",
+   "pitch_boss: 1.950 mm off the skin -> kind bore, spec d3.900 (wall at r 1.950)"
+  ],
+  "connectors_available": [
+   "pitch_boss",
+   "roll_boss"
+  ],
+  "material_props": {
+   "table": "ce-cad/cecad/fits.py MATERIALS['PLA']",
+   "yield_mpa": 50,
+   "youngs_gpa": 3.5,
+   "density": 1.24,
+   "tier": "class (no datasheet behind the row; the table's own comment says every polymer 'yield' is an ultimate)"
+  },
+  "tds": {
+   "file": "research/tds/prusament-pla-tds-2021-10-en.pdf",
+   "what": "Prusament PLA TDS v1.1 (16-02-2022), 3D-printed specimens, horizontal print direction",
+   "yield_mpa": 51.0,
+   "yield_tol": 3.0,
+   "modulus_gpa": 2.3,
+   "interlayer_mpa": 17.0,
+   "interlayer_tol": 3.0,
+   "method": "ISO 527-1 (tensile), interlayer adhesion Prusa Polymers method",
+   "sha256": "68c8298b9329a7b0e5f8d35cf4cb0172708184f7d4f95491643163e4f140b1b7"
+  }
+ },
+ "material": "PLA",
+ "mesh_attempts": [
+  {
+   "size": 1.5,
+   "ok": true,
+   "strategy": {
+    "strategy": "raw",
+    "size": 1.5,
+    "nodes": 24856,
+    "elements": 13409,
+    "eltype": "C3D10",
+    "gmsh_extra": []
+   }
+  }
+ ],
+ "outputs": {
+  "verdict_cecad": "PASS",
+  "sf": 3.786261166840919,
+  "max_von_mises_mpa": 13.205639494149763,
+  "max_displacement_mm": 0.2739656267917747,
+  "yield_mpa_used": 50,
+  "mesh": {
+   "strategy": "raw",
+   "size": 1.5,
+   "nodes": 24856,
+   "elements": 13409,
+   "eltype": "C3D10",
+   "gmsh_extra": []
+  },
+  "assumptions": [
+   "held patch at 'roll_boss': 142 node(s) over 58 boundary face(s), 36.6 mm^2 of skin (axial wall r=2.94 mm), reaching 3.58 mm from the connector",
+   "connector 'roll_boss' declares d3.900 (r=1.95 mm) but no wall of the mesh sits at that radius about its axis within 4.50 mm; the nearest wall at r=2.94 mm was used",
+   "loaded patch at 'pitch_boss': 142 node(s) over 58 boundary face(s), 36.6 mm^2 of skin (axial wall r=2.94 mm), reaching 3.58 mm from the connector",
+   "connector 'pitch_boss' declares d3.900 (r=1.95 mm) but no wall of the mesh sits at that radius about its axis within 4.50 mm; the nearest wall at r=2.94 mm was used"
+  ],
+  "notes": [
+   "nu = 0.36 [class] for PLA",
+   "PLA strength is the ALONG-LAYER printed figure; across layers the part is weaker than this check says, and orientation is not modelled",
+   "peak stress is the max NODAL von Mises \u2014 at a sharp re-entrant corner it rises with mesh refinement, so a borderline SF wants a fillet, not a finer argument",
+   "SF ~3.79 (APPROXIMATE, EITHER) \u2014 safety factor >= 2 asks for a measurement and this value is APPROXIMATE \u2014 SF = yield / peak von Mises, where the peak is CalculiX's solve on this mesh and the yield is fits.MATERIALS['PLA'].yield_mpa = 50 MPa \u2014 a handbook/datasheet class figure carrying no tier and no coupon pulled from this material on this process. An estimate on either side of a comparison proves nothing, so the gate stays OPEN. It closes when: a tensile coupon of this material, made by this process in this orientation, pulled to yield, plus a mesh convergence study on the peak",
+   "tier=class ACCEPTED BY THE CALLER (accept_class=True): the verdict below rests on a typical figure for the material class, not on the thing you will buy or the filament on the spool.",
+   "max deflection 0.2740 mm was MEASURED and not judged \u2014 the case states no max_deflection_mm, so nothing here says whether that is acceptable"
+  ],
+  "failure_load_N_linear": 71.3351,
+  "sf_vs_tds_yield": 3.862,
+  "tds_yield_mpa": 51.0,
+  "sf_vs_tds_interlayer_across_layers": 1.2873
+ },
+ "verdict": "PASS",
+ "why": "SF 3.786 >= 2 against PLA yield 50 MPa (class tier, accepted by the caller); TDS yield gives SF 3.862",
+ "artifacts": [
+  "out/sim-evidence/fea/microduck-hip-bracket_walk",
+  "out/sim-evidence/fea/microduck-hip-bracket_walk.png",
+  "out/sim-evidence/fea/microduck-hip-bracket_walk/report.json"
+ ],
+ "looked_at": [
+  {
+   "image": "out/sim-evidence/fea/microduck-hip-bracket_walk.png",
+   "facts": {
+    "bytes": 194130,
+    "size": [
+     1240,
+     840
+    ],
+    "distinct_colors": 16966,
+    "foreground_frac": 0.2234
+   },
+   "check": "peak von Mises recomputed from the .frd agrees with the report to 0.5 % (cecad.feaimage)"
+  }
+ ],
+ "seconds": 126.2
+}

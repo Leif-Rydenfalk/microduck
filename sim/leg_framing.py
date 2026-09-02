@@ -85,12 +85,12 @@ def main():
                          "PARTIAL servo only" if servo else
                          "PARTIAL bearing only" if bear else "FAIL neither in the foreground"),
                 all_in_frustum=len(inside))
-    p = os.path.join(OUT, "legs.json")
-    j = json.load(open(p)); j["framing_check"] = res
-    json.dump(j, open(p, "w"), indent=1)
     n_both = sum(1 for v in res["cameras"].values() if v["verdict"] == "PASS both")
     n_none = sum(1 for v in res["cameras"].values() if v["verdict"].startswith("FAIL"))
     res["summary"] = dict(cameras=len(res["cameras"]), both=n_both, neither=n_none)
+    p = os.path.join(OUT, "legs.json")
+    j = json.load(open(p)); j["framing_check"] = res
+    json.dump(j, open(p, "w"), indent=1)
     for k, v in res["cameras"].items():
         print("%-32s %-14s servo %-38s bearing %s" % (
             k, v["verdict"],

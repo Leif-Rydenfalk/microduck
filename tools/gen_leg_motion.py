@@ -13,7 +13,10 @@ import html, json, os, time
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 M = os.path.join(ROOT, "out", "motion")
 J = json.load(open(os.path.join(M, "legs.json")))
-V = json.load(open(os.path.join(M, "legs_videos.json")))
+try:
+    V = json.load(open(os.path.join(M, "legs_videos.json")))
+except Exception:
+    V = []   # the render has not landed yet; the page still builds
 try:
     C = json.load(open(os.path.join(M, "legs_compare.json")))
 except Exception:
