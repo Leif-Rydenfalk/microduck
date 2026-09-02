@@ -606,6 +606,33 @@
  ],
  "registers": [
   {
+   "addr": 0,
+   "size": 2,
+   "name": "Model Number",
+   "area": "EEPROM",
+   "initial": "1,200",
+   "write": "verify = 1200",
+   "means": "the model this firmware belongs to",
+   "why": "proves the fitted servo IS an XL330-M288-T before any of the bands below are applied to it. Every current, torque and voltage figure in this document is that model's; a visually identical XL330-M077-T or XC330 would pass every other read-back in SV-01 and be wrong",
+   "src": [
+    "E1",
+    "XLPART"
+   ]
+  },
+  {
+   "addr": 6,
+   "size": 1,
+   "name": "Firmware Version",
+   "area": "EEPROM",
+   "initial": "-",
+   "write": "read and record",
+   "means": "the servo's own firmware revision",
+   "why": "recorded per servo, not gated: ROBOTIS publishes no minimum version for this robot and no changelog that maps a version to a behaviour. It is recorded because a batch that mixes versions is a fact worth having BEFORE a fleet exists, not after a fault",
+   "src": [
+    "E1"
+   ]
+  },
+  {
    "addr": 8,
    "size": 1,
    "name": "Baud Rate",
@@ -852,33 +879,6 @@
    "src": [
     "E1",
     "BUS"
-   ]
-  },
-  {
-   "addr": 0,
-   "size": 2,
-   "name": "Model Number",
-   "area": "EEPROM",
-   "initial": "1,200",
-   "write": "verify = 1200",
-   "means": "the model this firmware belongs to",
-   "why": "proves the fitted servo IS an XL330-M288-T before any of the bands below are applied to it. Every current, torque and voltage figure in this document is that model's; a visually identical XL330-M077-T or XC330 would pass every other read-back in SV-01 and be wrong",
-   "src": [
-    "E1",
-    "XLPART"
-   ]
-  },
-  {
-   "addr": 6,
-   "size": 1,
-   "name": "Firmware Version",
-   "area": "EEPROM",
-   "initial": "-",
-   "write": "read and record",
-   "means": "the servo's own firmware revision",
-   "why": "recorded per servo, not gated: ROBOTIS publishes no minimum version for this robot and no changelog that maps a version to a behaviour. It is recorded because a batch that mixes versions is a fact worth having BEFORE a fleet exists, not after a fault",
-   "src": [
-    "E1"
    ]
   }
  ],
