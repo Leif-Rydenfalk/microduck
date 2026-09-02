@@ -1,0 +1,71 @@
+{
+ "study": "fea_nlgeom_microduck-upper-leg-rigidity-plate_drop",
+ "part": "part:microduck-upper-leg-rigidity-plate",
+ "case": "drop",
+ "generated": "2026-09-03T04:10:42",
+ "script": "sim/fea_nlgeom.py",
+ "inputs": {
+  "linear_study": "out/sim-evidence/fea_microduck-upper-leg-rigidity-plate_drop.json",
+  "deck": "out/sim-evidence/fea/microduck-upper-leg-rigidity-plate_drop/microduck-upper-leg-rigidity-plate_drop_nlgeom.inp",
+  "same_as_linear": "mesh, held node set, nodal loads, E/nu \u2014 only the *STEP line differs",
+  "step": "*STEP, NLGEOM, INC=400 / *STATIC 0.05, 1, 1e-06, 0.1 (initial, total, min, max increment)",
+  "force_magnitude_N": 109.4988,
+  "force_N_part_frame": [
+   -46.67,
+   -90.35177,
+   -40.75523
+  ],
+  "force_source": "out/sim-evidence/loads_mujoco.json :: drops[drop_foot_rollm10_default_contact_dt5ms].part_frames_at_peak.upper_leg_rigidity_plate.force_from_body_upper_leg_left (t 0.230 s)",
+  "material": "PLA",
+  "yield_mpa_used": 50,
+  "require_sf": 2.0,
+  "regime_rule": {
+   "plate_if_thin_over_mid_le": 0.15,
+   "plate_w_over_t_le": 0.5,
+   "member_d_over_L_le": 0.1,
+   "basis": "small-deflection plate theory (Timoshenko & Woinowsky-Krieger, Theory of Plates and Shells: w small against t; t/2 customary) and small rotation (delta/L 0.1 ~ 0.15 rad tip slope)"
+  },
+  "bbox_sorted_mm": [
+   1.0,
+   44.9992,
+   58.0596
+  ],
+  "linear": {
+   "max_von_mises_mpa": 368.11183994346067,
+   "max_displacement_mm": 20.541167901029993,
+   "sf": 0.13582828525069893,
+   "plate": true,
+   "d_over_t": 20.5412,
+   "d_over_L": 0.3538,
+   "in_small_deflection_regime": false
+  }
+ },
+ "method": "CalculiX *STATIC with NLGEOM (updated Lagrangian, load ramped in increments, materially linear-elastic) on the identical deck; the last converged increment reduced to peak nodal von Mises and |u|",
+ "artifacts": [
+  "out/sim-evidence/fea/microduck-upper-leg-rigidity-plate_drop",
+  "out/sim-evidence/fea/microduck-upper-leg-rigidity-plate_drop/microduck-upper-leg-rigidity-plate_drop_nlgeom.inp",
+  "out/sim-evidence/fea/microduck-upper-leg-rigidity-plate_drop/microduck-upper-leg-rigidity-plate_drop_nlgeom.frd"
+ ],
+ "looked_at": [],
+ "outputs": {
+  "ccx_returncode": 0,
+  "load_fraction_reached": 1.0,
+  "increments": 12,
+  "seconds": 91.2,
+  "ccx_tail": " convergence; the increment size is increased to 3.750000e-02\n\n the increment size exceeds the remainder of the step and is decreased to 0.000000e+00\n\n Using up to 2 cpu(s) for the stress calculation.\n\n\n Job finished",
+  "max_von_mises_mpa": 818.7192346516294,
+  "max_displacement_mm": 21.35405568008335,
+  "stress_nodes": 33271,
+  "frd_blocks": {
+   "STRESS": 12,
+   "DISP": 12
+  },
+  "sf": 0.061070997093741586,
+  "ratio_nonlinear_over_linear_vm": 2.2241045948899085,
+  "ratio_nonlinear_over_linear_disp": 1.0395735910913124,
+  "nonlinear_d_over_t": 21.3541,
+  "nonlinear_d_over_L": 0.3678
+ },
+ "verdict": "FAIL",
+ "why": "geometrically nonlinear peak 818.719 MPa (linear 368.112, ratio 2.224) and |u| 21.3541 mm (linear 20.5412) at the full 109.4988 N; SF 0.061 against 50 MPa, the case requires 2; 12 increments"
+}

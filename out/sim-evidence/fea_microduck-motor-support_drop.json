@@ -119,14 +119,24 @@
     "rule": "plate if t/mid <= 0.15; valid while d/t <= 0.5 (plate) and d/L <= 0.1"
    },
    "load_share": null,
-   "nonlinear_study": null,
+   "nonlinear_study": "out/sim-evidence/fea_nlgeom_microduck-motor-support_drop.json",
+   "nonlinear": {
+    "max_von_mises_mpa": 173.17981108899502,
+    "max_displacement_mm": 6.4916737393448845,
+    "sf_table": 0.28871725685337307,
+    "sf_tds": 0.2944916019904405,
+    "sf_governing": 0.288717,
+    "ratio_vm_nonlinear_over_linear": 0.9469015196671765,
+    "increments": 12,
+    "verdict": "FAIL"
+   },
    "sf_used": 0.273387,
    "model": "linear",
    "verdict": "FAIL"
   }
  },
  "verdict": "FAIL",
- "why": "SF 0.273 (table, linear model) on |F| 32.8599 N: peak von Mises 182.891 MPa vs table yield 50 MPa (SF 0.273) and TDS yield 51 MPa (SF 0.279); the case requires 2; delta 7.1129 mm inside the small-deflection regime (d/t 0.378, d/L 0.0968)",
+ "why": "SF 0.273 (table, linear model) on |F| 32.8599 N: peak von Mises 182.891 MPa vs table yield 50 MPa (SF 0.273) and TDS yield 51 MPa (SF 0.279); the case requires 2; delta 7.1129 mm inside the small-deflection regime (d/t 0.378, d/L 0.0968); geometrically nonlinear re-solve (sim/fea_nlgeom.py, 12 increments): peak 173.180 MPa (0.947x the linear), delta 6.4917 mm, SF 0.289 \u2014 the linear stays the more conservative and carries the verdict",
  "artifacts": [
   "out/sim-evidence/fea/microduck-motor-support_drop",
   "out/sim-evidence/fea/microduck-motor-support_drop.png",
@@ -152,6 +162,11 @@
   {
    "verdict": "FAIL",
    "why": "peak 182.9 MPa leaves SF 0.27 against 50 MPa yield; the case requires 2",
+   "generator": "sim/fea_rejudge.py 2026-09-03"
+  },
+  {
+   "verdict": "FAIL",
+   "why": "SF 0.273 (table, linear model) on |F| 32.8599 N: peak von Mises 182.891 MPa vs table yield 50 MPa (SF 0.273) and TDS yield 51 MPa (SF 0.279); the case requires 2; delta 7.1129 mm inside the small-deflection regime (d/t 0.378, d/L 0.0968)",
    "generator": "sim/fea_rejudge.py 2026-09-03"
   }
  ]

@@ -1,0 +1,71 @@
+{
+ "study": "fea_nlgeom_microduck-trunk-base_walk",
+ "part": "part:microduck-trunk-base",
+ "case": "walk",
+ "generated": "2026-09-03T04:09:10",
+ "script": "sim/fea_nlgeom.py",
+ "inputs": {
+  "linear_study": "out/sim-evidence/fea_microduck-trunk-base_walk.json",
+  "deck": "out/sim-evidence/fea/microduck-trunk-base_walk/microduck-trunk-base_walk_nlgeom.inp",
+  "same_as_linear": "mesh, held node set, nodal loads, E/nu \u2014 only the *STEP line differs",
+  "step": "*STEP, NLGEOM, INC=400 / *STATIC 0.05, 1, 1e-06, 0.1 (initial, total, min, max increment)",
+  "force_magnitude_N": 18.0919,
+  "force_N_part_frame": [
+   -3.74456,
+   -1.43156,
+   17.64213
+  ],
+  "force_source": "out/sim-evidence/loads_mujoco.json :: walk.body_transmitted_force_peaks.yaw2roll (step 747, t 3.740 s)",
+  "material": "PLA",
+  "yield_mpa_used": 50,
+  "require_sf": 2.0,
+  "regime_rule": {
+   "plate_if_thin_over_mid_le": 0.15,
+   "plate_w_over_t_le": 0.5,
+   "member_d_over_L_le": 0.1,
+   "basis": "small-deflection plate theory (Timoshenko & Woinowsky-Krieger, Theory of Plates and Shells: w small against t; t/2 customary) and small rotation (delta/L 0.1 ~ 0.15 rad tip slope)"
+  },
+  "bbox_sorted_mm": [
+   3.0,
+   36.0,
+   57.0
+  ],
+  "linear": {
+   "max_von_mises_mpa": 145.3569691059593,
+   "max_displacement_mm": 16.15330012860241,
+   "sf": 0.34398075515424403,
+   "plate": true,
+   "d_over_t": 5.3844,
+   "d_over_L": 0.2834,
+   "in_small_deflection_regime": false
+  }
+ },
+ "method": "CalculiX *STATIC with NLGEOM (updated Lagrangian, load ramped in increments, materially linear-elastic) on the identical deck; the last converged increment reduced to peak nodal von Mises and |u|",
+ "artifacts": [
+  "out/sim-evidence/fea/microduck-trunk-base_walk",
+  "out/sim-evidence/fea/microduck-trunk-base_walk/microduck-trunk-base_walk_nlgeom.inp",
+  "out/sim-evidence/fea/microduck-trunk-base_walk/microduck-trunk-base_walk_nlgeom.frd"
+ ],
+ "looked_at": [],
+ "outputs": {
+  "ccx_returncode": 0,
+  "load_fraction_reached": 1.0,
+  "increments": 12,
+  "seconds": 97.1,
+  "ccx_tail": " convergence; the increment size is increased to 3.750000e-02\n\n the increment size exceeds the remainder of the step and is decreased to 0.000000e+00\n\n Using up to 2 cpu(s) for the stress calculation.\n\n\n Job finished",
+  "max_von_mises_mpa": 156.8354604291188,
+  "max_displacement_mm": 13.112378471003076,
+  "stress_nodes": 33740,
+  "frd_blocks": {
+   "STRESS": 12,
+   "DISP": 12
+  },
+  "sf": 0.31880545294536444,
+  "ratio_nonlinear_over_linear_vm": 1.0789676022674368,
+  "ratio_nonlinear_over_linear_disp": 0.8117461055394607,
+  "nonlinear_d_over_t": 4.3708,
+  "nonlinear_d_over_L": 0.23
+ },
+ "verdict": "FAIL",
+ "why": "geometrically nonlinear peak 156.835 MPa (linear 145.357, ratio 1.079) and |u| 13.1124 mm (linear 16.1533) at the full 18.0919 N; SF 0.319 against 50 MPa, the case requires 2; 12 increments"
+}
