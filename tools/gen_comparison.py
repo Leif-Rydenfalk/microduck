@@ -177,23 +177,19 @@ def ankle_row():
     n_rol = sum(1 for m in ANKLE["mjcf_inventory"] if m["roller_kit"])
     reads = "; ".join("%s \u2192 %s" % (html.escape(r["reading"]), html.escape(r["supports"]))
                       for r in ANKLE["readings"])
-    return """      <tr><td class="n">4</td><td><b>SETTLED %s \u2014 the two ankles are not two revisions.</b>
-        <code>ankle_left</code> (Y&nbsp;36.5000&nbsp;mm) and <code>ankle_l_v1</code>
-        (Y&nbsp;46.4981&nbsp;mm) belong to two <em>locomotion variants</em>, not to a revision
-        history: %s The product in the box uses <b>%s</b>.</td>
-        <td><code>out/laneT/ankle-revision.json</code> (%s), verdict %s. %d MJCF model(s) carry
-        <code>ankle_left</code> with a foot and a sole and no roller kit; %d carry
-        <code>ankle_l_v1</code> with <code>rim</code>/<code>tire</code>/<code>roller_blade</code>
-        and no foot. Three independent readings, all agreeing: %s.</td>
-        <td>None, now that it is answered \u2014 but the old action was wrong and would have caused
-        one: treating <code>_v1</code> as superseded would have deleted the roller variant's ankle.</td>
+    return """      <tr><td class="n">4</td>
+        <td><b>SETTLED %s \u2014 the two ankles are two locomotion VARIANTS, not two
+        revisions.</b> The product in the box uses <b>ankle_left</b> / <b>ankle_right</b>.</td>
+        <td>%d MJCF model(s) carry <code>ankle_left</code> with a foot and a sole and no roller
+        kit; %d carry <code>ankle_l_v1</code> with <code>rim</code>/<code>tire</code>/<code>roller_blade</code>
+        and no foot. Three independent readings, all agreeing: %s. Verdict %s in
+        <code>out/laneT/ankle-revision.json</code> (%s), which states it plainly: \u201c%s\u201d</td>
+        <td>None now \u2014 but the superseded reading would have caused one: treating
+        <code>_v1</code> as an older revision deletes the roller variant's ankle.</td>
         <td>Build <code>ankle_left</code>/<code>ankle_right</code>. Still open, and it does not
         change this answer: %s</td></tr>
-""" % (html.escape(ANKLE["date"]),
-       html.escape(ANKLE["not_a_revision_history"]),
-       html.escape(ANKLE["answer"]),
-       html.escape(ANKLE["date"]), _chip(ANKLE["verdict"]),
-       n_leg, n_rol, reads,
+""" % (html.escape(ANKLE["date"]), n_leg, n_rol, reads, _chip(ANKLE["verdict"]),
+       html.escape(ANKLE["date"]), html.escape(ANKLE["not_a_revision_history"]),
        html.escape(ANKLE["still_open"]))
 
 
@@ -273,7 +269,7 @@ HTML = f"""<!doctype html>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="tools/doc.css">
 <style>
-  .chip.no{color:var(--no)}
+  .chip.no{{color:var(--no)}}
   .pair{{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:10px 0 4px}}
   .pair figure{{margin:0;padding:8px}}
   .pair figure img{{width:100%;aspect-ratio:1/1;object-fit:contain;background:#fff}}
@@ -289,6 +285,22 @@ HTML = f"""<!doctype html>
   td.dash{{color:#b3aea4}}
   .chip.ref{{color:var(--ink-2);font-weight:400;text-transform:none;letter-spacing:0}}
   table.data td code{{font-size:12px}}
+  /* §5 has 5 columns of prose. Without stated widths the browser gives the widest
+     cell the space and squeezes the Finding column to two words a line (MEASURED on
+     the 2026-09-03 render). Stated here so every row reads. */
+  #findings table.data{{table-layout:fixed;font-size:13px}}
+  #findings th:nth-child(1),#findings td:nth-child(1){{width:26px}}
+  #findings th:nth-child(2),#findings td:nth-child(2){{width:23%}}
+  #findings th:nth-child(3),#findings td:nth-child(3){{width:29%}}
+  #findings th:nth-child(4),#findings td:nth-child(4){{width:20%}}
+  #findings td{{word-break:normal;overflow-wrap:break-word}}
+  /* Table 1 is 11 columns wide. MEASURED with tools/tablefit.py 2026-09-03: at the
+     inherited size it was 876.0 px inside an 840.0 px sheet, +36.0 px over, so the
+     Verdict column sat outside any printed page while the screen showed a scrollbar
+     that looked like a design choice. Tightened here and re-measured. */
+  #dims table.data{{font-size:13px}}
+  #dims table.data th,#dims table.data td{{padding-left:4px;padding-right:4px}}
+  #dims table.data td code{{font-size:11.5px}}
   .statbar{{display:flex;flex-wrap:wrap;gap:0;border-bottom:1px solid var(--hair);margin:8px 0 2px}}
   .stat{{padding:12px 26px 12px 0;margin-right:22px}}
   .stat b{{display:block;font-weight:700;font-size:22px;font-variant-numeric:tabular-nums}}

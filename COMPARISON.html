@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="tools/doc.css">
 <style>
+  .chip.no{color:var(--no)}
   .pair{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:10px 0 4px}
   .pair figure{margin:0;padding:8px}
   .pair figure img{width:100%;aspect-ratio:1/1;object-fit:contain;background:#fff}
@@ -22,6 +23,22 @@
   td.dash{color:#b3aea4}
   .chip.ref{color:var(--ink-2);font-weight:400;text-transform:none;letter-spacing:0}
   table.data td code{font-size:12px}
+  /* §5 has 5 columns of prose. Without stated widths the browser gives the widest
+     cell the space and squeezes the Finding column to two words a line (MEASURED on
+     the 2026-09-03 render). Stated here so every row reads. */
+  #findings table.data{table-layout:fixed;font-size:13px}
+  #findings th:nth-child(1),#findings td:nth-child(1){width:26px}
+  #findings th:nth-child(2),#findings td:nth-child(2){width:23%}
+  #findings th:nth-child(3),#findings td:nth-child(3){width:29%}
+  #findings th:nth-child(4),#findings td:nth-child(4){width:20%}
+  #findings td{word-break:normal;overflow-wrap:break-word}
+  /* Table 1 is 11 columns wide. MEASURED with tools/tablefit.py 2026-09-03: at the
+     inherited size it was 876.0 px inside an 840.0 px sheet, +36.0 px over, so the
+     Verdict column sat outside any printed page while the screen showed a scrollbar
+     that looked like a design choice. Tightened here and re-measured. */
+  #dims table.data{font-size:13px}
+  #dims table.data th,#dims table.data td{padding-left:4px;padding-right:4px}
+  #dims table.data td code{font-size:11.5px}
   .statbar{display:flex;flex-wrap:wrap;gap:0;border-bottom:1px solid var(--hair);margin:8px 0 2px}
   .stat{padding:12px 26px 12px 0;margin-right:22px}
   .stat b{display:block;font-weight:700;font-size:22px;font-variant-numeric:tabular-nums}
@@ -67,14 +84,18 @@
     <b>0.7193&nbsp;mm</b> — 9 of 9 inside 1&nbsp;mm, six of them exact to
     the fourth decimal. The full table is in §4.
   </div>
-  <div class="verdict cd">
-    <b>The head — CANNOT DETERMINE, measured in millimetres.</b> Lane A scaled 2 product photographs by the
+  <div class="verdict warn">
+    <b>The head — FAIL, measured in millimetres.</b> Lane A scaled 2 product photographs by the
     XL330-M288-T case in the same frame (20.000 mm), posed our model to each with a perspective camera and compared the head shell
-    against the mesh: product/mesh size ratio <b>+1.0064&nbsp;±&nbsp;0.0431</b>, head-length deviation
-    <b>+0.79&nbsp;±&nbsp;5.29&nbsp;mm</b> on 122.690&nbsp;mm; along the head's own axes
-    -0.44&nbsp;±&nbsp;4.75 / +0.27&nbsp;±&nbsp;2.79&nbsp;mm. The eye bezel is
-    <b>CANNOT DETERMINE</b>: it is the <code>noenoeil</code> mesh (Ø30.000&nbsp;×&nbsp;7.5&nbsp;mm ring proud of the face); the product ring
-    reads -0.02&nbsp;±&nbsp;0.32&nbsp;mm against it in the profiles and +1.16&nbsp;mm in the true front view.
+    against the mesh: product/mesh size ratio <b>+1.0061&nbsp;±&nbsp;0.0640</b>, head-length deviation
+    <b>+0.75&nbsp;±&nbsp;7.85&nbsp;mm</b> on 122.690&nbsp;mm; along the head's own axes
+    +1.13&nbsp;±&nbsp;7.73 / +0.32&nbsp;±&nbsp;5.28&nbsp;mm (<span class="chip cd">CANNOT DETERMINE</span> on the length).
+    The true front view grades the pair (ring OD, head width) <b>FAIL</b>: ring OD / beak width
+    0.3521 in the photograph against 0.3226 on the mesh (+9.1&nbsp;%,
+    +2.70&nbsp;±&nbsp;0.76&nbsp;mm at the mesh width, the same verdict at every camera distance); which member is off is CANNOT DETERMINE
+    from a ratio — the profiles' ring/length agreement (+0.26&nbsp;±&nbsp;0.32&nbsp;mm) puts it on the width (implied
+    84.10&nbsp;mm). The eye bezel is <b>CANNOT DETERMINE</b>: it is the <code>noenoeil</code>
+    mesh (Ø30.000&nbsp;×&nbsp;7.5&nbsp;mm ring proud of the face), not a missing part.
     Full evidence, every overlay real-beside-ours: <a href="HEAD-RECONSTRUCTION.html">HEAD-RECONSTRUCTION.html</a>.
   </div>
   <div class="verdict">
@@ -249,13 +270,14 @@
   <div class="tw"><table class="data">
     <thead><tr><th>#</th><th>Finding</th><th>Evidence</th><th>Consequence</th><th>Action</th></tr></thead>
     <tbody>
-      <tr><td class="n">1</td><td><b>Head conformance — CANNOT DETERMINE.</b> Product/mesh size ratio
-        +1.0064&nbsp;±&nbsp;0.0431 over 2 servo-scaled photographs; head length
-        +0.79&nbsp;±&nbsp;5.29&nbsp;mm; eye bezel CANNOT DETERMINE
-        (-0.02&nbsp;±&nbsp;0.32&nbsp;mm profile, +1.16&nbsp;mm front view).</td>
+      <tr><td class="n">1</td><td><b>Head conformance — FAIL.</b> Product/mesh size ratio
+        +1.0061&nbsp;±&nbsp;0.0640 over 2 servo-scaled photographs; head length
+        +0.75&nbsp;±&nbsp;7.85&nbsp;mm (CANNOT DETERMINE); front view ring OD / head width
+        FAIL (+9.1&nbsp;%, +2.70&nbsp;±&nbsp;0.76&nbsp;mm, attribution CANNOT DETERMINE);
+        eye bezel CANNOT DETERMINE (+0.26&nbsp;±&nbsp;0.32&nbsp;mm at the head's length scale, profiles).</td>
         <td><a href="HEAD-RECONSTRUCTION.html">HEAD-RECONSTRUCTION.html</a>, <code>out/head/head.json</code></td>
-        <td>Tooling waits on one calliper reading of a product head (or one purpose-shot photograph); the 1.5 mm rule cannot be decided from the store photographs alone.</td>
-        <td>The camera distance of the store photographs: a 1 mm ruler in the frame, or the EXIF focal length + sensor (stripped from the published files), would fix D and remove the ±0.0105 the sensitivity runs put on r. A calliper on one product head: top_head_shell length (mesh 122.690 mm), width (91.760) and height (46.336) to 0.1 mm — a 0.1 mm reading beats every photograph here by an order of magnitude and settles the 1.5 mm rule outright. Or one more photograph taken for the purpose: pure profile, beak closed, head level, a ruler or the XL330 label face in the focal plane of the head, 4000+ px on the long side — the scale uncertainty then drops below 0.5 % (0.6 mm on the length). The eye ring: a calliper across the ring&#x27;s outer edge (mesh noenoeil 30.000 mm), or Pollen&#x27;s part drawing; the front-view photograph already puts it at +1.16 mm (implied) and the profiles at -0.02 ± 0.32 mm.</td></tr>
+        <td>Head tooling must NOT be cut from the published meshes. a FAIL under the rule calls for a re-model, but the front view fixes a RATIO, not a dimension: re-modelling the width to the implied 84.10 mm (or the ring to 32.31 mm) would be a plausible default written into tooling — refused; the calliper reading above is the prerequisite, and the parametric head is prepared to take it (ce-parts/microduck-eye-ring carries the ring; the shells stay Pollen&#x27;s mesh until measured)</td>
+        <td>A calliper on one product head: top_head_shell length (mesh 122.690 mm), WIDTH across the beak and across the shell rim (mesh 91.763 / 91.760) and height (46.336) to 0.1 mm, and the eye ring&#x27;s outer diameter (mesh 30.000) — a 0.1 mm reading beats every photograph here by an order of magnitude, settles the 1.5 mm rule outright and attributes the front-view ring/width excess to the ring or to the width. Or one photograph taken for the purpose: a true front view with a ruler in the plane of the face (fixes the ring/width pair in mm), and one pure profile, beak closed, head level, the XL330 label face in the focal plane of the head, 4000+ px on the long side (the length to 0.6 mm). The camera distance of the store photographs (EXIF focal length + sensor, stripped from the published files, or a ruler in the frame) would remove the D term from every servo-scaled ratio (photos[].size.D_note). A cleaner pure-profile frame from Pollen&#x27;s video (the README frame&#x27;s neck servo is merged with its horn bracket and cables at 4x, out/head/profile_frame_servo_zoom.png).</td></tr>
       <tr><td class="n">2</td><td><b>Battery mesh is an NP-F970, not the NP-F550 class cell the
         documentation calls out.</b></td>
         <td><code>np_f970</code> 38.600&nbsp;×&nbsp;20.600&nbsp;×&nbsp;70.800&nbsp;mm in Table 1</td>
@@ -266,16 +288,15 @@
         <td><code>pcb__raspberry_pi_zero_2_w</code> 65.000&nbsp;×&nbsp;1.600&nbsp;×&nbsp;30.000&nbsp;mm</td>
         <td>Both are 65×30&nbsp;mm so the envelope holds, but connector positions differ.</td>
         <td>Verify mounting-hole and connector positions against the real Radxa Zero 3W.</td></tr>
-      <tr><td class="n">4</td><td><b>SETTLED 2026-09-02 — the two ankles are not two revisions.</b>
-        <code>ankle_left</code> (Y&nbsp;36.5000&nbsp;mm) and <code>ankle_l_v1</code>
-        (Y&nbsp;46.4981&nbsp;mm) belong to two <em>locomotion variants</em>, not to a revision
-        history: the &#x27;v1&#x27; in ankle_l_v1 reads as an older revision and is not one: it is the ROLLER variant&#x27;s ankle. Nothing in this repo should treat ankle_left as superseding it or vice versa. The product in the box uses <b>ankle_left / ankle_right — part:microduck-ankle-left and part:microduck-ankle-right</b>.</td>
-        <td><code>out/laneT/ankle-revision.json</code> (2026-09-02), verdict <span class="chip pass">PASS</span>. 3 MJCF model(s) carry
-        <code>ankle_left</code> with a foot and a sole and no roller kit; 2 carry
-        <code>ankle_l_v1</code> with <code>rim</code>/<code>tire</code>/<code>roller_blade</code>
-        and no foot. Three independent readings, all agreeing: MJCF inventory → ankle_left; the vertical screw, measured on four meshes → ankle_left; the bearing pocket → ankle_left.</td>
-        <td>None, now that it is answered — but the old action was wrong and would have caused
-        one: treating <code>_v1</code> as superseded would have deleted the roller variant's ankle.</td>
+      <tr><td class="n">4</td>
+        <td><b>SETTLED 2026-09-02 — the two ankles are two locomotion VARIANTS, not two
+        revisions.</b> The product in the box uses <b>ankle_left</b> / <b>ankle_right</b>.</td>
+        <td>3 MJCF model(s) carry <code>ankle_left</code> with a foot and a sole and no roller
+        kit; 2 carry <code>ankle_l_v1</code> with <code>rim</code>/<code>tire</code>/<code>roller_blade</code>
+        and no foot. Three independent readings, all agreeing: MJCF inventory → ankle_left; the vertical screw, measured on four meshes → ankle_left; the bearing pocket → ankle_left. Verdict <span class="chip pass">PASS</span> in
+        <code>out/laneT/ankle-revision.json</code> (2026-09-02), which states it plainly: “the &#x27;v1&#x27; in ankle_l_v1 reads as an older revision and is not one: it is the ROLLER variant&#x27;s ankle. Nothing in this repo should treat ankle_left as superseding it or vice versa.”</td>
+        <td>None now — but the superseded reading would have caused one: treating
+        <code>_v1</code> as an older revision deletes the roller variant's ankle.</td>
         <td>Build <code>ankle_left</code>/<code>ankle_right</code>. Still open, and it does not
         change this answer: whether Pollen sells the roller kit separately, and whether ankle_l_v1 is a purchasable spare, is not in any file here. What settles it: Pollen&#x27;s shop pages. It does not change the answer for the boxed product.</td></tr>
     </tbody>
@@ -290,14 +311,15 @@
     <caption>Table 2. Head against the product, mm (product − mesh) ± uncertainty. Source: <code>out/head/head.json</code>.</caption>
     <thead><tr><th>Quantity</th><th class="n">Value</th><th>Verdict at the 1.5 mm rule</th></tr></thead>
     <tbody>
-      <tr><td>size ratio product / mesh</td><td class="n">+1.0064&nbsp;±&nbsp;0.0431</td><td>—</td></tr>
-      <tr><td>head length deviation (122.690 mm mesh)</td><td class="n">+0.79&nbsp;±&nbsp;5.29 mm</td><td><span class="chip cd">CANNOT DETERMINE</span></td></tr>
-      <tr><td>head silhouette, major axis</td><td class="n">-0.44&nbsp;±&nbsp;4.75 mm</td><td><span class="chip cd">CANNOT DETERMINE</span></td></tr>
-      <tr><td>head silhouette, minor axis</td><td class="n">+0.27&nbsp;±&nbsp;2.79 mm</td><td><span class="chip cd">CANNOT DETERMINE</span></td></tr>
-      <tr><td>eye ring Ø (30.000 mm mesh), profile photographs</td><td class="n">-0.02&nbsp;±&nbsp;0.32 mm</td><td><span class="chip pass">PASS</span></td></tr>
-      <tr><td>eye ring Ø, true front view (ratio to head width)</td><td class="n">+1.16 mm</td><td><span class="chip cd">CANNOT DETERMINE</span></td></tr>
-      <tr><td>eye centre below shell top / off mid-line (front view)</td><td class="n">+0.93 / -2.13 mm</td><td>—</td></tr>
-      <tr><td>ToF window centre from the eye (front view vs MJCF site 22.4 mm)</td><td class="n">+0.13 mm</td><td>—</td></tr>
+      <tr><td>size ratio product / mesh</td><td class="n">+1.0061&nbsp;±&nbsp;0.0640</td><td>—</td></tr>
+      <tr><td>head length deviation (122.690 mm mesh)</td><td class="n">+0.75&nbsp;±&nbsp;7.85 mm</td><td><span class="chip cd">CANNOT DETERMINE</span></td></tr>
+      <tr><td>head silhouette, major axis</td><td class="n">+1.13&nbsp;±&nbsp;7.73 mm</td><td><span class="chip cd">CANNOT DETERMINE</span></td></tr>
+      <tr><td>head silhouette, minor axis</td><td class="n">+0.32&nbsp;±&nbsp;5.28 mm</td><td><span class="chip cd">CANNOT DETERMINE</span></td></tr>
+      <tr><td>eye ring Ø (30.000 mm mesh), profile photographs</td><td class="n">+0.26&nbsp;±&nbsp;0.32 mm</td><td><span class="chip pass">PASS</span></td></tr>
+      <tr><td>front view: ring OD / head width — the pair (which member: CANNOT DETERMINE)</td><td class="n">+2.70&nbsp;±&nbsp;0.76 mm at the mesh width</td><td><span class="chip no">FAIL</span></td></tr>
+      <tr><td>eye centre below shell top (front view)</td><td class="n">+2.34&nbsp;±&nbsp;5.52 mm</td><td><span class="chip cd">CANNOT DETERMINE</span></td></tr>
+      <tr><td>eye centre off the mid-line (front view)</td><td class="n">-0.16&nbsp;±&nbsp;0.50 mm</td><td><span class="chip pass">PASS</span></td></tr>
+      <tr><td>ToF window centre from the eye (front view vs MJCF site 22.4 mm)</td><td class="n">+1.25&nbsp;±&nbsp;0.53 mm</td><td><span class="chip cd">CANNOT DETERMINE</span></td></tr>
     </tbody>
   </table></div>
   <div class="pair">
@@ -306,8 +328,8 @@
     <figure><span class="tag ours">Profile fit: real | ours | overlay</span>
       <img src="out/head/cream-profile-left_pair.png" alt="profile fit" style="aspect-ratio:auto"></figure>
   </div>
-  <p><b>Verdict basis.</b> head: 2 photographs, each scaled by the XL330-M288-T case in the same frame (20.000 mm), posed and fitted with a perspective camera, size ratio product/mesh = k * W_render / W_photo; combined length deviation +0.791 ± 5.132 mm; per-axis -0.437 ± 4.752 / +0.267 ± 2.794. Eye bezel: profile ring diameter vs the noenoeil mesh 30.000 mm, and the true-front-view ratio eye OD / head width (photo 0.3353 vs mesh 0.3226).</p>
-  <p><b>What would settle the rest.</b> The camera distance of the store photographs: a 1 mm ruler in the frame, or the EXIF focal length + sensor (stripped from the published files), would fix D and remove the ±0.0105 the sensitivity runs put on r. A calliper on one product head: top_head_shell length (mesh 122.690 mm), width (91.760) and height (46.336) to 0.1 mm — a 0.1 mm reading beats every photograph here by an order of magnitude and settles the 1.5 mm rule outright. Or one more photograph taken for the purpose: pure profile, beak closed, head level, a ruler or the XL330 label face in the focal plane of the head, 4000+ px on the long side — the scale uncertainty then drops below 0.5 % (0.6 mm on the length). The eye ring: a calliper across the ring&#x27;s outer edge (mesh noenoeil 30.000 mm), or Pollen&#x27;s part drawing; the front-view photograph already puts it at +1.16 mm (implied) and the profiles at -0.02 ± 0.32 mm.</p>
+  <p><b>Verdict basis.</b> head: 2 photographs admitted (cream-profile-left, graphite-profile-right), each scaled by the XL330-M288-T case in the same frame (20.000 mm), posed and fitted with a perspective camera, size ratio product/mesh = k * W_render / W_photo; combined length deviation +0.748 ± 7.848 mm; per-axis +1.130 ± 7.734 / +0.320 ± 5.284. Front view: ring OD / beak width, photo 0.3521 vs mesh 0.3226 (FAIL). Eye bezel: profile ring diameter at the head&#x27;s length scale +0.26 ± 0.32 mm vs the noenoeil mesh 30.000 mm.</p>
+  <p><b>What would settle the rest.</b> A calliper on one product head: top_head_shell length (mesh 122.690 mm), WIDTH across the beak and across the shell rim (mesh 91.763 / 91.760) and height (46.336) to 0.1 mm, and the eye ring&#x27;s outer diameter (mesh 30.000) — a 0.1 mm reading beats every photograph here by an order of magnitude, settles the 1.5 mm rule outright and attributes the front-view ring/width excess to the ring or to the width. Or one photograph taken for the purpose: a true front view with a ruler in the plane of the face (fixes the ring/width pair in mm), and one pure profile, beak closed, head level, the XL330 label face in the focal plane of the head, 4000+ px on the long side (the length to 0.6 mm). The camera distance of the store photographs (EXIF focal length + sensor, stripped from the published files, or a ruler in the frame) would remove the D term from every servo-scaled ratio (photos[].size.D_note). A cleaner pure-profile frame from Pollen&#x27;s video (the README frame&#x27;s neck servo is merged with its horn bracket and cables at 4x, out/head/profile_frame_servo_zoom.png).</p>
 
 </section>
 
