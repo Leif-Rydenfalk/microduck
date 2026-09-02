@@ -88,23 +88,45 @@ def mesh_volume(V):
     return float(np.abs(np.einsum("ij,ij->i", a, np.cross(b, c)).sum()) / 6.0)
 
 
+LAYER = 0.2   # mm; a facet within one layer of the lowest point is ON THE BED
+
+
 def overhang(V, N, A, u):
-    """Overhang and height for one build-up direction u. All measured."""
+    """Overhang and height for one build-up direction u. All measured.
+
+    A facet that LIES ON THE BUILD PLATE is not an overhang, however steeply it
+    faces down: it is the first layer.  Facets whose highest vertex is within one
+    layer of the model's lowest point are therefore excluded from every overhang
+    count and reported separately as `bed_contact_area_mm2`.  Without that
+    exclusion a flat plate printed flat reads 38 % "unsupported", which is its
+    own footprint — measured on upper-leg-rigidity-plate before the fix.
+
+    What is still NOT modelled: a down-face that happens to land on material
+    printed below it in an earlier layer.  Resolving that needs a layer-by-layer
+    support simulation, which nothing here does, so these figures are an UPPER
+    BOUND on the unsupported area and are stated as one.
+    """
     u = np.asarray(u, dtype=np.float64)
     d = -(N @ u)                       # 1 = horizontal down-face, 0 = vertical wall
-    tot = float(A.sum())
-    out = {}
+    hv = V @ u                          # (n, 3) per-vertex height
+    hmin = float(hv.min())
+    on_bed = hv.max(axis=1) <= hmin + LAYER
+    live = ~on_bed
+    tot = float(A[live].sum())
+    out = {"bed_contact_area_mm2": round(float(A[on_bed].sum()), 4),
+           "bed_contact_facets": int(on_bed.sum())}
     for tag, beta in (("lt45", 45.0), ("lt30", 30.0), ("lt10", 10.0)):
-        m = d > math.cos(math.radians(beta))
+        m = live & (d > math.cos(math.radians(beta)))
         out["area_" + tag + "_mm2"] = round(float(A[m].sum()), 4)
         out["frac_" + tag] = round(float(A[m].sum() / tot), 6) if tot else None
-    m30 = d > math.cos(math.radians(30.0))
+    m30 = live & (d > math.cos(math.radians(30.0)))
     # XY-projected (i.e. footprint) area of the unsupported group = support proxy
     out["projected_lt30_mm2"] = round(float((A[m30] * d[m30]).sum()), 4)
-    h = V.reshape(-1, 3) @ u
+    h = hv.reshape(-1)
     out["height_mm"] = round(float(h.max() - h.min()), 4)
-    out["layers_at_0p2"] = int(math.ceil((h.max() - h.min()) / 0.2))
+    out["layers_at_0p2"] = int(math.ceil((h.max() - h.min()) / LAYER))
     out["total_area_mm2"] = round(tot, 4)
+    out["frac_basis"] = "fractions are of the surface area NOT on the build plate"
     return out
 
 
@@ -269,7 +291,10 @@ def main(solid_only=False):
               % (slug, len(V), best[0], best[1]["frac_lt30"],
                  rec["mesh_dfm"]["wall_rays"].get("p5_mm")), flush=True)
 
+    mesh_only = "--mesh-only" in sys.argv
     for slug, rec in res["parts"].items():
+        if mesh_only:
+            continue
         if rec["parametric"]:
             t0 = time.time()
             rec["solid_dfm"] = solid_dfm(slug)
@@ -282,11 +307,17 @@ def main(solid_only=False):
 
     outp = os.path.join(ROOT, "out/dfm/dfm.json")
     os.makedirs(os.path.dirname(outp), exist_ok=True)
-    if solid_only and os.path.exists(outp):
+    if os.path.exists(outp) and (solid_only or mesh_only):
         prev = json.load(open(outp))
         for slug, rec in res["parts"].items():
-            prev["parts"][slug]["solid_dfm"] = rec["solid_dfm"]
-        prev["generated_solid"] = res["generated"]
+            if solid_only:
+                prev["parts"][slug]["solid_dfm"] = rec["solid_dfm"]
+            else:
+                for k, v in rec.items():
+                    if k != "solid_dfm":
+                        prev["parts"][slug][k] = v
+        prev["$comment"] = res["$comment"]
+        prev["generated_solid" if solid_only else "generated"] = res["generated"]
         res = prev
     json.dump(res, open(outp, "w"), indent=1)
     print("wrote", outp, os.path.getsize(outp), "bytes")

@@ -136,6 +136,35 @@ if ROWS:
 # 2. THE DFM VERDICT, computed per part from the measured overhang and wall
 # ---------------------------------------------------------------------------
 TWO_PERIM = 0.80
+SLENDER_K = 5.0   # build height must not exceed K x the smaller in-plane bbox dimension
+
+
+def recommend_dir(m):
+    """Least unsupported area SUBJECT TO a slenderness cap.
+
+    This is the one place in this document where a RULE is applied on top of a
+    measurement, and it is stated rather than hidden: minimising overhang alone
+    always prefers standing a flat plate on edge (measured: the 1 mm
+    upper-leg-rigidity-plate reads 77 mm² unsupported at +Z against 748 mm² lying
+    flat — and +Z is 291 layers of a 1 mm wall, which is the exact failure
+    docs/DFM.md warns about). So a direction is admissible only when the build
+    height is at most SLENDER_K x the smaller of the two in-plane bbox
+    dimensions. If none is admissible, the least slender wins and the row says so.
+    """
+    bb = m["bbox_mm"]
+    axis_i = {"+X": 0, "-X": 0, "+Y": 1, "-Y": 1, "+Z": 2, "-Z": 2}
+    cand = []
+    for k, v in m["overhang_by_build_dir"].items():
+        i = axis_i[k]
+        inplane = sorted(bb[j] for j in range(3) if j != i)
+        slender = v["height_mm"] / max(inplane[0], 1e-9)
+        cand.append((k, v, slender, inplane[0]))
+    ok = [c for c in cand if c[2] <= SLENDER_K]
+    if ok:
+        c = min(ok, key=lambda c: (c[1]["area_lt30_mm2"], c[1]["height_mm"]))
+        return c[0], c[1], c[2], True
+    c = min(cand, key=lambda c: c[2])
+    return c[0], c[1], c[2], False
 
 
 def dfm_row(slug):
@@ -143,8 +172,8 @@ def dfm_row(slug):
         return None
     d = DFM["parts"][slug]
     m = d["mesh_dfm"]
-    best = m["best_build_dir"]
-    b = m["overhang_by_build_dir"][best]
+    minoh = m["best_build_dir"]
+    best, b, slender, admissible = recommend_dir(m)
     asm = m["overhang_by_build_dir"]["+Z"]
     w = m["wall_rays"] or {}
     sol = d.get("solid_dfm") or {}
@@ -181,7 +210,15 @@ def dfm_row(slug):
     if not findings:
         findings.append("no unsupported region above 5 %% of the surface in its best "
                         "build direction and no wall under the two-perimeter floor")
-    return dict(best=best, b=b, asmZ=asm, w=w, tw=tw,
+    if best != minoh:
+        mo = m["overhang_by_build_dir"][minoh]
+        findings.append("least-overhang direction is %s (%.0f mm² unsupported) but that is "
+                        "%d layers of a %s mm section — rejected by the slenderness cap; "
+                        "build %s instead (%.0f mm², %d layers)"
+                        % (minoh, mo["area_lt30_mm2"], mo["layers_at_0p2"],
+                           n(min(m["bbox_mm"])), best, b["area_lt30_mm2"], b["layers_at_0p2"]))
+    return dict(best=best, minoh=minoh, slender=slender, admissible=admissible,
+                b=b, asmZ=asm, w=w, tw=tw,
                 nholes=len(holes) if isinstance(holes, list) else None,
                 radii=(sol.get("radii_mm") if isinstance(sol.get("radii_mm"), list) else None),
                 parametric=d["parametric"], findings=findings, verdict=verdict,
@@ -350,6 +387,13 @@ been sliced for real %s, so the machine-hour term below is measured and not mode
 the break-even arithmetic can finally be done on this robot rather than on a vendor's
 example knob.</div>''' % (TOT.get("pieces", 0), src("SLICE")))
 
+A('''<div class="note"><b>These costs are for the files on disk.</b> Every gram and second below
+came from slicing the STLs in <code>out/print/stl/</code>. Twelve of those thirty are Pollen's
+vendor mesh for a part that has since been rebuilt parametrically %s — see §8, first row. Re-export
+and re-slice moves these numbers; the arithmetic and the conclusion do not depend on which of the
+two geometries is used, because the difference between a rebuild and the mesh it was graded to at
+p95 &le; 1 mm cannot move a $0.60 piece across a $0.50&ndash;5.00 band.</div>''' % src("STALESTL"))
+
 A('<h3>2.2 What one robot&rsquo;s printed parts cost</h3>')
 if TOT:
     A(tbl(["line", "value", "how"], [
@@ -480,8 +524,19 @@ for r in ROWS:
         td(n(f["tw"]) if f["tw"] is not None else '<span class="chip cd">mesh</span>', "num"),
         td(chip(f["verdict"])),
     ])
-A(tbl(["part", "best dir", "β&lt;45°", "β&lt;30°", "β&lt;10°", "unsup. mm²", "layers",
+A(tbl(["part", "build dir", "β&lt;45°", "β&lt;30°", "β&lt;10°", "unsup. mm²", "layers",
        "wall min", "wall p5", "wall med", "solid wall", "verdict"], rows, cls="data tight"))
+
+A('''<div class="verdict warn"><b>What §3 measured, and what it did not.</b> Every row below is
+read off the STL in <code>out/print/stl/</code> — <b>the file a shop would actually print</b>, and
+the same file ce-slice costed in §2. For 22 of the 30 slugs that file is Pollen&rsquo;s vendor mesh, and
+for 12 of those 22 <b>a PASSed parametric rebuild now exists in <code>ce-parts</code> that the STL
+predates</b> %s. So this table is exact about what is on disk and silent about what those twelve
+parts have since become. The companion review of the 20 parametric solids — exact thinnest wall,
+ray percentiles, every hole, elevated-vs-bed support area, per-part risks — is
+<code>docs/DFM.md</code> %s, which reached the same bed-contact correction from a separate tool.
+Read both: this section tells you what will come off the printer today, that one tells you what
+the design says.</div>''' % (src("STALESTL"), src("DFMMD")))
 
 A('<h3>3.1 The finding, part by part</h3>')
 rows = []
@@ -580,11 +635,16 @@ if D.get("profile"):
       'measurements are commensurable.</div>')
 
 A('<h3>4.2 Orientation per part — what the slicer used, and what the measurement says</h3>')
-A('''<p>Two independent answers to the same question. <b>Sliced</b> is the orientation rule that
-produced this part&rsquo;s grams and seconds. <b>Measured best</b> is the axis-aligned build direction
-with the least unsupported area, from §3. Where they disagree the disagreement is real and the
-row says by how much — ce-slice&rsquo;s auto-orient searches all rotations, not only the six axes, so
-it can legitimately beat this column.</p>''')
+A('''<p>Three answers to the same question, side by side. <b>Sliced</b> is the orientation rule
+that produced this part&rsquo;s grams and seconds. <b>Least overhang</b> is the axis-aligned direction
+with the smallest unsupported area, straight off the measurement in §3 with nothing added.
+<b>Recommended</b> is that same measurement after one stated constraint — see the note under the
+table, because on the flat plates the two differ by a factor that decides whether the part
+prints at all. <b>Slenderness</b> is the recommended build&rsquo;s height divided by the smaller
+in-plane bounding-box dimension. The last column is <b>+Z as modelled against the
+recommendation</b>: above 1 it is the penalty for printing the part in the orientation the STL
+happens to arrive in, and below 1 it means +Z would carry less overhang but was rejected by the
+constraint.</p>''')
 rows = []
 for r in ROWS:
     f = dfm_row(r["slug"])
@@ -596,13 +656,29 @@ for r in ROWS:
     rows.append([
         td('<code>%s</code>' % E(r["slug"]), "pn"),
         td(E(sl.get("orientation_rule") or "—"), "f"),
-        td("<b>%s</b>" % f["best"], "num"),
+        td("<b>%s</b>" % f["minoh"], "num"),
+        td(("<b>%s</b>" % f["best"]) + ("" if f["admissible"]
+           else ' <span class="chip cd">no admissible dir</span>'), "num"),
+        td("%.1f" % f["slender"], "num"),
         td("%.0f mm²" % bb, "num"),
+        td("%d" % f["b"]["layers_at_0p2"], "num"),
         td("%.0f mm²" % zz, "num"),
         td("%.2f×" % (zz / bb) if bb > 0 else "—", "num"),
     ])
-A(tbl(["part", "sliced orientation rule", "measured best", "unsup. at best",
-       "unsup. as modelled (+Z)", "penalty"], rows, cls="data tight"))
+A(tbl(["part", "sliced orientation rule", "least overhang", "recommended",
+       "slenderness", "unsup. at rec.", "layers", "unsup. at +Z", "+Z vs rec."],
+      rows, cls="data tight"))
+A('''<div class="note"><b>Why &ldquo;least overhang&rdquo; and &ldquo;recommended&rdquo; are different columns.</b>
+Minimising unsupported area, on its own, always wants a flat plate stood on edge — measured:
+the 1 mm upper-leg-rigidity-plate reads <b>77 mm²</b> unsupported built +Z against <b>748 mm²</b>
+lying flat, and +Z is <b>291 layers of a 1 mm wall</b>, which is precisely the failure
+<code>docs/DFM.md</code> warns about. So the recommended column applies one stated rule on top
+of the measurement: <b>build height ≤ %.0f × the smaller in-plane bounding-box dimension</b>, and
+among the directions that pass, the least unsupported area wins. That rule is an engineering
+choice, not a measurement, and it is the only one in this document — everything else in these
+tables is read off the geometry. ce-slice&rsquo;s own auto-orient searches all rotations rather than
+the six axes, so where the sliced rule differs from both columns it is not necessarily
+wrong.</div>''' % SLENDER_K)
 A("</section>")
 
 # ---- 5 -------------------------------------------------------------------
