@@ -783,15 +783,15 @@ def build(self_test=None, publish=True, verbose=True):
     # the longest signal joins on the board (J1's far row to the codec). One
     # pass makes at most ONE join per net, so a budget below the worst island
     # count cannot finish however long it runs.
-    b.autoroute(nets=signals, effort=20, verbose=verbose)
+    b.autoroute(nets=signals, effort=16, verbose=verbose)
     # The three rails were one call at effort 22, which HAT_3V3's 19 joins
     # then had to share with two other nets' passes; split so each gets its
     # own budget, HAT_3V3 the largest.
-    b.autoroute(nets=["HAT_3V3"], width=0.3, effort=26, via_cost=4.0,
+    b.autoroute(nets=["HAT_3V3"], width=0.3, effort=22, via_cost=4.0,
                 verbose=verbose)
     b.autoroute(nets=["J5_3V3", "HAT_1V8"], width=0.3, effort=10,
                 via_cost=4.0, verbose=verbose)
-    b.autoroute(nets=["GND"], effort=20, via_cost=3.0, verbose=verbose)
+    b.autoroute(nets=["GND"], effort=18, via_cost=3.0, verbose=verbose)
     b.pour("GND", "B.Cu")
 
     rep = check(b, verbose=verbose)
