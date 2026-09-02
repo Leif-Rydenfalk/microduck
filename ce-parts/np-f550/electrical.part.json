@@ -89,6 +89,24 @@
    "WHETHER 2600 mAh IS THE PRESS KIT'S NOMINAL OR A MEASURED FIGURE: the press kit says 'provisional' about several specs (R1 §19)."
   ],
   "attach": null,
-  "provides_loader_note": "2026-09-02 (wiring lane): `provision` added beside `need` on both entries — cecad.netlist._provision reads pd['provision'] and raised KeyError, which took the whole design-local shelf out of every ce-wire design. Values unchanged."
+  "provides_loader_note": "2026-09-02 (wiring lane): `provision` added beside `need` on both entries — cecad.netlist._provision reads pd['provision'] and raised KeyError, which took the whole design-local shelf out of every ce-wire design. Values unchanged.",
+  "bay_measured": {
+   "$about": "MEASURED 2026-09-02 by tools/measure_battery_bay.py off Pollen's own meshes placed by Pollen's own MJCF transforms (spec/mesh-placements.json, body trunk_base), result iterations/v0.0.1/evidence/battery-bay.json: the pack mesh is 38.6085 (X) x 20.5681 (Y) x 70.8050 (Z) mm in its own frame, and the bay around it is 38.7310 x 21.1721 x 70.9231 mm — bounded on X by power_support both sides (0.0492 / 0.0733 mm), on Y by power_support (0.4948) and left_shell (0.1092), on Z by banana_pcb_locker (0.0145) and power_support (0.1036). Nothing is open.",
+   "bay_mm": {
+    "width": 38.731,
+    "depth": 21.1721,
+    "length": 70.9231
+   },
+   "pack_mm": {
+    "width": 38.6085,
+    "depth": 20.5681,
+    "length": 70.805
+   },
+   "tightest_clearance_mm": 0.0145,
+   "tightest_clearance_where": "banana_pcb_locker against the pack's terminal end — 0.0145 mm, i.e. the contact PCB's clamp bar is effectively touching the pack. That is a designed contact face, not a fit error, but it means a bought pack has ~0 slack at the terminal end: a pack 0.1 mm longer than Pollen's model does not go in.",
+   "accepts": "a published NP-F550 body (70.80 x 38.50 x 21.00 mm, nextbatteries.com spec table, fetched 2026-09-02) with 0.1231 mm on the tightest axis",
+   "refuses": "a published NP-F970 body (70.85 x 38.40 x 58.56 mm, same vendor, same table, fetched 2026-09-02) by 19.829 mm in its best orientation — which is what CLOSES COMPARISON.html finding 2",
+   "caveat": "This is the bay in Pollen's SIMULATION meshes. Printed parts carry process tolerance the MJCF does not model and no physical trunk has been measured here. A printed trunk and a real pack settle the true fit; given 0.1231 mm on the tightest axis, that check is not optional."
+  }
  }
 }

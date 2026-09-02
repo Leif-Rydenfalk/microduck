@@ -5,3 +5,4 @@
 |---|---|---|
 | v0.0.1 | 2026-09-01 | created — nothing measured yet |
 | v0.0.1 | 2026-09-02 | Radxa product brief rev 1.10, schematics v1.11 + v1.12, wiki and product page fetched into current/docs/fetched/; header/bus map recorded in current/electrical.host.json; one `standard` ledger row |
+| v0.0.1 | 2026-09-02 | lane C: §4's raster MEASURED (tools/measure_radxa_drawing.py, 4/4 negative controls) — mount-hole and 40-pin-header frames written into cad/interfaces.json; part.py's RADXA_LONG_SPAN corrected 54.7 -> 57.8429; SKU narrowed to two options |

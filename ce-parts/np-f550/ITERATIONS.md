@@ -4,3 +4,4 @@
 | iteration | date | why it exists |
 |---|---|---|
 | v0.0.1 | 2026-09-01 | created — nothing measured yet |
+| v0.0.1 | 2026-09-02 | lane C: finding 2 closed by measurement — bay 38.7310 x 21.1721 x 70.9231 mm accepts an NP-F550 body and refuses an NP-F970 by 19.829 mm (tools/measure_battery_bay.py) |

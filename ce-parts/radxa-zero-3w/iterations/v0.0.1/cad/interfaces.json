@@ -3,6 +3,54 @@
   "kind": "interfaces",
   "record": {
     "slug": "radxa-zero-3w",
-    "interfaces": []
+    "frame": "cad/part.py's frame, which is Pollen's mesh frame for pcb__raspberry_pi_zero_2_w.stl so the MJCF geom pos/quat place the board with no re-derivation: the board lies in the x-z plane, THICKNESS ALONG Y (y -0.8 .. +0.8), X the 65.0 mm length (-32.5 .. +32.5), Z the 30.0 mm width (-15.0 .. +15.0). +Y is the component side that carries the 40-pin header, and the header sits on the -Z half (cad/part.py HDR_Z = (-10.23, -12.77), i.e. centre Z = -11.50).",
+    "measurement_basis": "Radxa publishes NO DXF and NO STEP for this board; §4 Mechanical Specification of the Product Brief (RAD-DOC-0084 Rev 1.10, 2026-06-26) is a RASTER drawing with no text layer, so every position below is a MEASUREMENT OF A PICTURE. Made 2026-09-02 by tools/measure_radxa_drawing.py; result in evidence/radxa-zero-3w-mechanical.json. Input: the copy in docs/fetched/radxa_zero_3w_product_brief.pdf, sha256 edfb01374bbc6ee4062adf50d5d7241de64b64c8e87d186b3577bbb8761ddead, page 6, embedded image 2480 x 1754 px composited with its SMask, nothing rescaled. Scale from the outline's own printed callouts 30.0 and 65.0 mm, edges located sub-pixel by ink-weighted centroid; the two axes agree to 0.0288 %, one pixel is 0.05321 mm. FOUR NEGATIVE CONTROLS pass on the same pixels: the 40-pin header body measures 5.1001 x 50.8187 mm where a 2x20 2.54 mm header is 5.08 x 50.80 (+0.020, +0.019), and its centre measures 3.3355 mm from one long edge and 32.4343 mm from one end where Radxa prints '3. 3' and '32. 4' (+0.036, +0.034). A wrong scale fails all four.",
+    "drawing_frame_D": "Where a number is quoted 'from the left/top edge' it is in the drawing's own component-side view: origin at that view's top-left board corner, +X across the 30.0 mm width, +Y along the 65.0 mm length. D maps to part.py's frame as X_D -> -Z, Y_D -> X (sign not resolved; the board is symmetric to 0.066 mm about mid-length), Z_D -> +Y.",
+    "interfaces": [
+      {
+        "name": "mount_holes",
+        "frame": {"origin_mm": [0.0, 0.0, 0.0], "z_axis": [0.0, 1.0, 0.0], "x_axis": [1.0, 0.0, 0.0]},
+        "verdict": "PASS",
+        "role": "fastener_pattern",
+        "accepts": ["connection:threaded-m2"],
+        "what": "4 x through-holes on a rectangular pattern, centres at X = +/-28.9215 mm, Z = +/-11.4331 mm, drilled along Y through the 1.6 mm board. MEASURED diameter 2.8140 mm (sd 0.0125 over the four); Radxa prints '4 X Ø2. 8'. MEASURED pitch 57.8429 mm along X by 22.8662 mm along Z. MEASURED edge inset 3.5727 mm (sd 0.0396 over the eight edge distances); Radxa prints '3. 6' once. A nominal 3.600 mm inset reconstructs the two measured pitches to 57.800 / 22.800, i.e. within 0.043 and 0.066 mm (0.8 and 1.2 px) — the competing Raspberry-Pi-Zero nominal 58.000 / 23.000 is 0.157 and 0.134 mm out (3.0 and 2.5 px), so 3.6 is the better-supported nominal by a factor of 2 to 4. A Ø2.814 hole is a clearance hole for M2.5 (0.314 mm diametral clearance) and loose for M2.",
+        "source": "MEASURED 2026-09-02, tools/measure_radxa_drawing.py --check (4/4 negative controls PASS); result evidence/radxa-zero-3w-mechanical.json",
+        "uncertainty_mm": 0.0396,
+        "uncertainty_basis": "1 sigma of the eight measured edge insets, 0.0396 mm = 0.74 px on a raster whose pixel is 0.05321 mm. Radxa dimensions no hole position except the single '3. 6', so 3 dp cannot be had from this document. A calipered production board, or a Radxa DXF/STEP, settles it.",
+        "vs_the_pi_zero_2w_stand_in": "FINDING 3, mechanical half. Pollen's MJCF carries a Raspberry Pi Zero 2 W mesh whose drill measures 58.0 x 23.0 mm / Ø2.70 (cad/part.py MESH_MOUNT_*). The Radxa's measured pattern is 0.157 mm shorter along X, 0.134 mm narrower along Z, 0.114 mm larger in the hole. An M2.5 screw absorbs all three, so the printed head parts fit either board and the 'two disagreeing drill patterns' in this folder's earlier verdict do not in fact disagree by anything a shop can hold. What genuinely differs between the boards is the CONNECTORS (2 x USB-C + micro-HDMI + 22-pin MIPI CSI here; micro-USB x2 + mini-HDMI on a Pi Zero 2 W) — a shell-cutout problem, not a mounting one, and it is the connector_edge_features interface's CANNOT DETERMINE."
+      },
+      {
+        "name": "header_40pin",
+        "frame": {"origin_mm": [0.0, 0.8, -11.6645], "z_axis": [0.0, 1.0, 0.0], "x_axis": [1.0, 0.0, 0.0]},
+        "verdict": "PASS",
+        "role": "board_to_board",
+        "accepts": [],
+        "what": "2x20 GPIO header on 2.54 mm pitch. Body rectangle MEASURED 5.1001 mm across the width by 50.8187 mm along the length (nominal 5.08 x 50.80). Its centreline sits 3.3355 mm from one long board edge — Radxa prints '3. 3' — which places it at Z = -(15.0 - 3.3355) = -11.6645 in this frame, against the stand-in mesh's -11.50; and 32.4343 mm from one end — Radxa prints '32. 4' — i.e. 0.0657 mm off mid-length, taken as X = 0. Origin is the body centre on the component-side face (Y = +0.8, the top of the 1.6 mm board).",
+        "source": "MEASURED 2026-09-02, tools/measure_radxa_drawing.py; these four numbers are the tool's own negative controls",
+        "pin_map": "electrical.host.json record.header_40pin — verdict PASS, two independent vendor pages (brief §6.1.1 p.6 and the Radxa wiki) agree on every listed pin",
+        "cannot_determine": "WHICH CORNER IS PIN 1, and the header insulator height above the PCB. Neither is dimensioned in §4, neither is on the wiki. A calipered board settles both. A HAT laid out with pin 1 at the wrong end is a scrapped board, so this is not a cosmetic gap."
+      },
+      {
+        "name": "board_envelope",
+        "frame": {"origin_mm": [0.0, 0.0, 0.0], "z_axis": [0.0, 1.0, 0.0], "x_axis": [1.0, 0.0, 0.0]},
+        "verdict": "PASS",
+        "role": "envelope",
+        "accepts": [],
+        "what": "65.000 x 30.000 mm PCB outline, R3.0 corners, centred on the origin, thickness 1.6 mm along Y. 65.0 and 30.0 are Radxa's own printed callouts ('65. 0', '30. 0', §4 p.5). R3.0 and 1.6 are MEASURED off Pollen's Pi-Zero-2-W stand-in mesh (cad/part.py CORNER_R, T) and are NOT stated by Radxa anywhere in RAD-DOC-0084.",
+        "source": "printed callouts (Radxa §4 p.5) + mesh measurement (cad/part.py)",
+        "cannot_determine": "PCB THICKNESS, CORNER RADIUS and BOARD MASS are in no fetched Radxa document. The 1.6 mm / R3.0 carried here are the stand-in mesh's. A calipered board and a scale settle all three; the mass matters because the whole robot is 780 g and the compute board's share is currently unmeasured."
+      },
+      {
+        "name": "connector_edge_features",
+        "frame": null,
+        "verdict": "CANNOT DETERMINE",
+        "role": "keep_out",
+        "accepts": [],
+        "what": "§4's component-side view carries five more callouts that dimension connector/feature lines and label none of them: '12. 5', '41. 5', '54. 7' and '14. 4' along the length, '15. 5' across the width. The sweep found feature lines at 54.5186 and 54.8379 mm from the top edge (bracketing the printed 54.7) and vertical lines 4.9425 and 20.4285 mm from the left edge (15.486 mm apart — the printed 15.5). The p.3 photo names the ports (USB 2.0 OTG Type-C, USB 3.0 Host Type-C, micro-HDMI, MIPI CSI, micro-SD, maskrom button, antenna connector) but is not dimensioned, so no callout could be attached to a named connector.",
+        "why": "This is exactly the interface a head-shell cutout needs, and it is the one Radxa leaves unlabelled. NOTE: '54. 7' was previously read as the mounting-hole pitch along the length and written into cad/part.py as RADXA_LONG_SPAN; it is not — the hole pitch measures 57.8429 mm. Corrected 2026-09-02.",
+        "what_settles_it": "a Radxa DXF or STEP for the ZERO 3W (none published as of 2026-09-02), or a calipered production board",
+        "source": "tools/measure_radxa_drawing.py feature-line sweep, 2026-09-02"
+      }
+    ]
   }
 }

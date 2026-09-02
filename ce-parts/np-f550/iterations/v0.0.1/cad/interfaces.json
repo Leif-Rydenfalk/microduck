@@ -1,23 +1,45 @@
 {
-  "$triad": 1,
-  "kind": "interfaces",
-  "record": {
-    "slug": "np-f550",
-    "interfaces": [
-      {
-        "name": "contact_face",
-        "frame": null,
-        "verdict": "CANNOT DETERMINE",
-        "why": "the end face carrying the +, − (and any data) contacts that the banana contact PCB (clamped by part:microduck-banana-pcb-locker) mates to. No vendor drawing of the NP-F contact face was found (electrical.part.json pinout.why); Pollen's mesh is a box with no contact features. Frame and contact pitch are unmeasured — a physical pack or a plate vendor's drawing settles it.",
-        "accepts": []
-      },
-      {
-        "name": "cradle_envelope",
-        "frame": {"origin_mm": [0.0, 0.0, 0.0], "z_axis": [0.0, 0.0, 1.0], "x_axis": [1.0, 0.0, 0.0]},
-        "verdict": "PASS",
-        "why": "MEASURED off cad/part.py (graded PASS, out/refcheck/np-f550/r2: p95 0.80/0.60 mm, bbox delta [-0.11,-0.08,-0.11], 6/6 features): the pack is modelled in Pollen's mesh frame with the bbox centre at the origin — z the 70.7 mm length (terminal end at z=-35.35), x the 38.5 mm width, y the 20.5 mm height (+y the grooved top). The 38.5 x 20.5 x 70.7 mm envelope seats in part:microduck-power-support; the assembly places it by Pollen's MJCF transform, no re-derivation. Contact layout and the NP-F latch/eject mechanics that a real cradle also needs are the contact_face interface's CANNOT DETERMINE, not this envelope's.",
-        "accepts": []
-      }
-    ]
-  }
+ "$triad": 1,
+ "kind": "interfaces",
+ "record": {
+  "slug": "np-f550",
+  "interfaces": [
+   {
+    "name": "contact_face",
+    "frame": null,
+    "verdict": "CANNOT DETERMINE",
+    "why": "the end face carrying the +, − (and any data) contacts that the banana contact PCB (clamped by part:microduck-banana-pcb-locker) mates to. No vendor drawing of the NP-F contact face was found (electrical.part.json pinout.why); Pollen's mesh is a box with no contact features. Frame and contact pitch are unmeasured — a physical pack or a plate vendor's drawing settles it.",
+    "accepts": []
+   },
+   {
+    "name": "cradle_envelope",
+    "frame": {
+     "origin_mm": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "z_axis": [
+      0.0,
+      0.0,
+      1.0
+     ],
+     "x_axis": [
+      1.0,
+      0.0,
+      0.0
+     ]
+    },
+    "verdict": "PASS",
+    "why": "MEASURED off cad/part.py (graded PASS, out/refcheck/np-f550/r2: p95 0.80/0.60 mm, bbox delta [-0.11,-0.08,-0.11], 6/6 features): the pack is modelled in Pollen's mesh frame with the bbox centre at the origin — z the 70.7 mm length (terminal end at z=-35.35), x the 38.5 mm width, y the 20.5 mm height (+y the grooved top). The 38.5 x 20.5 x 70.7 mm envelope seats in part:microduck-power-support; the assembly places it by Pollen's MJCF transform, no re-derivation. Contact layout and the NP-F latch/eject mechanics that a real cradle also needs are the contact_face interface's CANNOT DETERMINE, not this envelope's. ADDED 2026-09-02 (lane C): the seat is now MEASURED rather than asserted — bay 38.7310 x 21.1721 x 70.9231 mm around a 38.6085 x 20.5681 x 70.8050 mm pack, bounded on all six faces (tools/measure_battery_bay.py, evidence/battery-bay.json). That is also what closes COMPARISON.html finding 2: an NP-F970 body is 58.56 mm on its third axis and the bay is 21.1721.",
+    "accepts": [],
+    "bay_measured_mm": {
+     "width": 38.731,
+     "depth": 21.1721,
+     "length": 70.9231
+    },
+    "bay_basis": "MEASURED 2026-09-02 by tools/measure_battery_bay.py off Pollen's own meshes placed by Pollen's own MJCF transforms (spec/mesh-placements.json, body trunk_base), result iterations/v0.0.1/evidence/battery-bay.json: the pack mesh is 38.6085 (X) x 20.5681 (Y) x 70.8050 (Z) mm in its own frame, and the bay around it is 38.7310 x 21.1721 x 70.9231 mm — bounded on X by power_support both sides (0.0492 / 0.0733 mm), on Y by power_support (0.4948) and left_shell (0.1092), on Z by banana_pcb_locker (0.0145) and power_support (0.1036). Nothing is open."
+   }
+  ]
+ }
 }

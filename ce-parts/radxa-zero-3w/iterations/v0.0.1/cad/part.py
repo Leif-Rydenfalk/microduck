@@ -9,16 +9,33 @@ TWO SOURCES THAT DISAGREE, both kept:
     and measured as one on 2026-09-01 (cad-mjcf sections, meshfeatures,
     0.1 mm plane cuts): 65.0 x 30.0 x 1.6 mm, R3 corners, 4 x Ø2.7 on a
     58 x 23 pattern, 2 x 20 Ø1.0 header holes at 2.54 mm pitch.
-  * Radxa's own product brief (docs/fetched/radxa-zero3w-product-brief.pdf,
-    RAD-DOC-0084 rev 1.10, 2026-06-26, §4 Mechanical Specification): 65.0 x
-    30.0 mm, 4 x Ø2.8, hole centres 3.6 mm in from the long edges (22.8
-    apart) and 54.7 apart along the length — NOT the Pi Zero's 58 x 23.
-The Microduck runs a Radxa Zero 3W (SPEC.md §5, device tree radxa,zero-3w)
-but its simulator carries a Pi Zero 2 W stand-in. Which drill the PRINTED
-head parts actually fit is CANNOT DETERMINE from published material, so:
-the DEFAULT build is the mesh (it is what every neighbouring part in the
+  * Radxa's own product brief (docs/fetched/radxa_zero_3w_product_brief.pdf,
+    RAD-DOC-0084 rev 1.10, 2026-06-26, §4 Mechanical Specification), MEASURED
+    off its raster drawing on 2026-09-02 by tools/measure_radxa_drawing.py
+    (result: iterations/v0.0.1/evidence/radxa-zero-3w-mechanical.json): 65.0 x
+    30.0 mm, 4 x Ø2.814 (Radxa prints Ø2.8), edge inset 3.5727 mm (Radxa
+    prints 3.6), pitch 22.8662 across x 57.8429 along.
+
+CORRECTED 2026-09-02 (lane C): this file previously carried
+RADXA_LONG_SPAN = 54.7 as the hole pitch along the length. It is not. 54.7 is
+a CONNECTOR dimension on the same view (a feature line 54.68 mm from the top
+edge); the hole pitch measures 57.8429 mm, and Radxa's own printed 3.6 mm edge
+inset implies 65.0 - 2(3.6) = 57.8. The measurement carries four negative
+controls that a wrong scale would fail: the 40-pin header body comes out
+5.1001 x 50.8187 mm (a 2x20 2.54 mm header is 5.08 x 50.80) with its centre
+3.3355 mm from the right edge and 32.4343 mm from the top — and Radxa prints
+"3. 3" and "32. 4" for exactly those two.
+
+THE TWO PATTERNS BARELY DISAGREE. Pi Zero 2 W mesh 58.0 x 23.0 / Ø2.70 vs
+Radxa measured 57.8429 x 22.8662 / Ø2.814: 0.157 mm and 0.134 mm apart, and
+0.114 mm on the hole. The printed head parts fit either board; what actually
+differs between the two boards is the CONNECTORS (2 x USB-C + micro-HDMI +
+22-pin MIPI CSI here, micro-USB + mini-HDMI on a Pi Zero 2 W), which is a
+shell-cutout question and not a mounting one.
+
+The DEFAULT build is still the mesh (it is what every neighbouring part in the
 MJCF was measured against and what cad-refcheck grades), and
-`params={"holes": "radxa"}` builds the vendor drawing's pattern instead.
+`params={"holes": "radxa"}` builds the vendor drawing's measured pattern.
 
 FRAME — Pollen's mesh frame, kept so the MJCF geom pos/quat (body jaw_soft,
 pos (15.435, -0.011, -60.01) mm, quat (0.5, -0.5, -0.5, 0.5)) place it
@@ -35,11 +52,12 @@ MESH_MOUNT_X, MESH_MOUNT_Z = (-29.0, 29.0), (-11.5, 11.5)
 HDR_D, HDR_PITCH, HDR_N = 1.0, 2.54, 20   # 40 x Ø0.998, x -24.13 .. 24.13 step 2.54
 HDR_Z = (-10.23, -12.77)                 # the two header rows (mesh)
 # ---- drill: Radxa's brief, §4 drawing (mm) — the alternative pattern --------
-RADXA_MOUNT_D = 2.8                      # "4 x Ø2.8"
-RADXA_EDGE_IN = 3.6                      # "3.6" from the long edge to the hole centre
-RADXA_LONG_SPAN = 54.7                   # "54.7" between the hole rows along the length (read off the raster drawing)
-RADXA_MOUNT_X = (-RADXA_LONG_SPAN / 2, RADXA_LONG_SPAN / 2)
-RADXA_MOUNT_Z = (-(W / 2 - RADXA_EDGE_IN), W / 2 - RADXA_EDGE_IN)   # ±11.4
+RADXA_MOUNT_D = 2.814                    # MEASURED (Radxa prints "4 X Ø2. 8"); sd 0.0125 over the four
+RADXA_EDGE_IN = 3.5727                   # MEASURED (Radxa prints "3. 6"); sd 0.0396 over the eight edge insets
+RADXA_LONG_SPAN = 57.8429                # MEASURED pitch along the length. NOT 54.7 — see the header note above.
+RADXA_WIDE_SPAN = 22.8662                # MEASURED pitch across the width
+RADXA_MOUNT_X = (-RADXA_LONG_SPAN / 2, RADXA_LONG_SPAN / 2)         # ±28.9215
+RADXA_MOUNT_Z = (-RADXA_WIDE_SPAN / 2, RADXA_WIDE_SPAN / 2)         # ±11.4331
 
 MATERIAL = "FR4"
 
