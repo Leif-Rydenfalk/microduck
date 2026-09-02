@@ -644,9 +644,9 @@ def robustness(cells):
                                       "candidate geom pairs: the two shin `leg` meshes with each other and each "
                                       "with the trunk's `power_support`, plus the two soles with each other. "
                                       "Head, feet, hips, ankles, trunk shells and BOTH UPPER LEGS cannot "
-                                      "self-collide in that model. 30 of the cells in this matrix run on it, "
-                                      "so for them 'no self-collision' means only 'those four pairs did not "
-                                      "touch'.",
+                                      "self-collide in that model. %d of the %d cells in this matrix run on "
+                                      "it, so for them 'no self-collision' means only 'those four pairs did "
+                                      "not touch'." % (sum(1 for r in rows if r["robot"] == "ours"), len(rows)),
                 "microduck_ours_allcollisions.xml": "8 of 15 bodies, 40 candidate pairs (trunk_base, hip_l, "
                                                     "leg, ankle_left, jaw_soft, hip_l_2, leg_2, ankle_right). "
                                                     "yaw2roll, upper_leg_left, upper_leg_right, neck, "
@@ -702,9 +702,9 @@ def robustness(cells):
                "Under an external push %d joints are driven past their MJCF stop, worst %s by %.4f deg in cell "
                "%s — on the real robot that is a hard stop taking the load. "
                "SELF-COLLISION: %d cells report a self-contact (%s), but READ outputs.self_collision_scope "
-               "first — 30 of these cells run on sim/microduck_ours.xml, where only 4 geom pairs can touch at "
+               "first — %d of these cells run on sim/microduck_ours.xml, where only 4 geom pairs can touch at "
                "all. The question was re-asked on sim/microduck_ours_selfcontact.xml, where all 15 bodies can "
-               "self-collide over 2187 candidate pairs and which reproduces the reference walk to 5 dp: "
+               "self-collide over %d candidate pairs and which reproduces the reference walk to 5 dp: "
                "%d self-contacts in the 12 s reference walk. "
                "POSTURE: the sit-stand cells report fell=true by the trunk-height rule because the commanded "
                "sit puts the trunk on the floor on purpose; each row also carries "
@@ -715,6 +715,8 @@ def robustness(cells):
                   "" if not loco_beyond else " except " + ", ".join(loco_beyond),
                   len(beyond), worst_ovs["max_overshoot_joint"], worst_ovs["max_overshoot_beyond_limit_deg"],
                   worst_ovs["cell"], len(selfcol), ", ".join(selfcol) if selfcol else "none",
+                  sum(1 for r in rows if r["robot"] == "ours"),
+                  _census_statement(cells).get("candidate_geom_pairs", -1),
                   _census_statement(cells).get("self_contacts_max_per_frame", -1)),
         "known_limitations": KNOWN_LIMITATIONS,
         "script": "sim/gait_sweep.py + sim/gait_evidence.py + sim/collision_model.py",
