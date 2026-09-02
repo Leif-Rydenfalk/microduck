@@ -1,0 +1,96 @@
+<!doctype html><html lang=en><head><meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<title>Microduck — is the neck as dynamic?</title>
+<link rel=stylesheet href="tools/doc.css"></head><body><div class=wrap>
+<header class=top>
+<div class=eyebrow>Microduck · simulation evidence · head and neck</div>
+<h1>Is the neck of ours as dynamic?</h1>
+<p class=sub>Leif, 2026-09-02: <i>“is the neck of ours as dynamic? show me renders of the mechanics
+like our cad system walking, zoom in on joints as they move and the head kmvoing around.”</i>
+Answered by driving Pollen's four head command slots through the full MJCF joint range under
+Pollen's own stand policy and measuring what each joint did.</p>
+<div class=rev><span>generated 2026-09-02 23:00</span><span>sim/microduck_ours.xml</span><span>sim/policies/BEST_alpha_stand.onnx</span><span>51.4 s of simulation @ 50 Hz</span></div>
+</header>
+
+<div class=statbar>
+<div class=stat><b>PASS</b><span>verdict on “as dynamic”</span></div>
+<div class=stat><b>454.8°/s</b><span>peak head joint speed measured (75.8 rpm)</span></div>
+<div class=stat><b>618°/s</b><span>XL330-M288-T no-load speed @ 5.0 V</span></div>
+<div class=stat><b>289.4°</b><span>head_yaw travel reached, of 340° available</span></div>
+<div class=stat><b>17.02°</b><span>real robot's head-pitch travel visible on video</span></div>
+</div>
+
+<h2>1 · What the four head joints did</h2>
+<p class=lede>Every row is read off <span class=mono>out/motion/head_traj.npz</span> (qpos / qvel, 50 Hz).
+The command is the joint's own MJCF limit, ramped, held, reversed, held, then a 1 Hz sine at half range
+for the lag and the peak speed.</p>
+<div class=tablewrap><table class=data><thead><tr>
+<th>joint</th><th>MJCF range °</th><th>reached °</th><th>span °</th><th>&#37; rng</th>
+<th>peak °/s</th><th>lag ms</th><th>gain</th><th>&tau; peak N·m</th></tr></thead><tbody><tr><td class=mono>neck_pitch</td><td class=n>-90.00 … 60.00</td><td class=n>-23.05 … 27.35</td><td class=n>50.40</td><td class=n>33.6</td><td class=n>84.57</td><td class=n>140</td><td class=n>0.296</td><td class=n>0.1346</td></tr><tr><td class=mono>head_pitch</td><td class=n>-90.00 … 90.00</td><td class=n>-62.66 … 90.54</td><td class=n>153.20</td><td class=n>85.1</td><td class=n>255.51</td><td class=n>100</td><td class=n>1.015</td><td class=n>0.2914</td></tr><tr><td class=mono>head_yaw</td><td class=n>-170.00 … 170.00</td><td class=n>-149.57 … 139.85</td><td class=n>289.42</td><td class=n>85.1</td><td class=n>454.84</td><td class=n>100</td><td class=n>0.944</td><td class=n>0.4185</td></tr><tr><td class=mono>head_roll</td><td class=n>-25.00 … 25.00</td><td class=n>-24.79 … 25.17</td><td class=n>49.96</td><td class=n>99.9</td><td class=n>84.71</td><td class=n>80</td><td class=n>1.087</td><td class=n>0.0813</td></tr></tbody></table></div>
+<div class=note><b>neck_pitch is the odd one out, and it is not the mechanism.</b> The policy holds it
+near ±18° however hard it is commanded (gain 0.296). It is the joint that swings the head as a balance
+mass over the feet, so Pollen's stand policy refuses to give it away. The kinematic probe in §3 shows
+the joint itself is free across its whole −90…+60° range.</div>
+
+<h2>2 · Which slot moves which joint</h2>
+<p class=lede>Peak degrees moved by each head joint while one command slot is swept
+(each phase starts from rest, so what is left is real coupling the policy chose).</p>
+<div class=tablewrap><table class=data><thead><tr><th>cmd slot</th><th>intended joint</th>
+<th>neck_pitch °</th><th>head_pitch °</th><th>head_yaw °</th><th>head_roll °</th></tr></thead>
+<tbody><tr><td class=n>3</td><td class=mono>neck_pitch</td><td class=n>31.32</td><td class=n>20.46</td><td class=n>7.50</td><td class=n>4.57</td></tr><tr><td class=n>4</td><td class=mono>head_pitch</td><td class=n>37.03</td><td class=n>87.85</td><td class=n>7.39</td><td class=n>2.30</td></tr><tr><td class=n>5</td><td class=mono>head_yaw</td><td class=n>6.85</td><td class=n>10.83</td><td class=n>148.27</td><td class=n>10.87</td></tr><tr><td class=n>6</td><td class=mono>head_roll</td><td class=n>2.04</td><td class=n>3.03</td><td class=n>2.10</td><td class=n>26.61</td></tr></tbody></table></div>
+
+<h2>3 · The mechanism, with the policy taken out</h2>
+<p class=lede>Each head joint stepped through its MJCF range on the all-collisions model, counting
+contacts that are not the floor: does the head hit itself or the trunk anywhere in range?</p>
+<div class=tablewrap><table class=data><thead><tr><th>joint</th><th>MJCF range °</th>
+<th>self-collision-free °</th><th>steps with self-contact</th></tr></thead><tbody><tr><td class=mono>neck_pitch</td><td class=n>-90.00 … 60.00</td><td class=n>-90.00 … 60.00</td><td class=n>0 / 121</td></tr><tr><td class=mono>head_pitch</td><td class=n>-90.00 … 90.00</td><td class=n>-54.00 … 90.00</td><td class=n>24 / 121</td></tr><tr><td class=mono>head_yaw</td><td class=n>-170.00 … 170.00</td><td class=n>-170.00 … 170.00</td><td class=n>0 / 121</td></tr><tr><td class=mono>head_roll</td><td class=n>-25.00 … 25.00</td><td class=n>-25.00 … 25.00</td><td class=n>0 / 121</td></tr></tbody></table></div>
+
+<h2>4 · Our head beside the real one</h2>
+<figure><img src="out/motion/head_vs_real.png" alt="our head beside the real robot's">
+<figcaption>Top: the real Microduck in Pollen's own <span class=mono>gallery_chorale.mp4</span>,
+beak/trim band tracked frame by frame. Bottom: ours at the same camera, head_pitch posed to the ends
+of that same band and then to the MJCF limit.</figcaption></figure>
+<figure><img src="out/motion/head_real_video_overlay.png" alt="tracker overlay on the real video">
+<figcaption>The tracker on the real footage — the red line is the fitted principal axis of the accent
+band, and the number is the image-plane angle it reports.</figcaption></figure>
+<div class=note><b>Against the real robot: CANNOT DETERMINE for speed.</b><br>CANNOT DETERMINE for a like-for-like speed comparison. The only public footage in which one head can be tracked frame by frame is images/gallery_chorale.mp4 (CATALOG.md:98); sim/head_real_video.py measures 17.018 deg of head-pitch travel and 62.19 deg/s peak there, but that clip is a scripted &#x27;chorale&#x27; animation with a hand-held camera, so it bounds the real robot only from below. Ours exceeds that band on the same joint (153.20 deg travel, 255.5 deg/s), which settles &#x27;not stiff&#x27; but not &#x27;equal to the real thing&#x27;. What would settle it: a Dynamixel present-position / present-velocity log off a real unit, or footage of the head under a known command.</div>
+
+<h2>5 · The renders</h2>
+<figure>
+<video controls preload="metadata" style="width:100%;display:block;border:1px solid var(--hair);background:#fff"
+       src="out/motion/head_sweep_profile.mp4"></video>
+<figcaption><b>head_sweep_profile</b> — close-up, left profile, camera locked to the head: each head joint driven through its full MJCF range one at a time, then 1 Hz sines<br><span class="mono">profile-left az270 el-4 dist 0.23 m, lookat=body jaw_soft · out/motion/head_sweep_profile.mp4 · 34.4 s @ 25 fps · 860 frames</span><br>
+contact sheet: <a href="out/motion/head_sweep_profile_sheet.png">out/motion/head_sweep_profile_sheet.png</a> · gif: <a href="out/motion/head_sweep_profile.gif">out/motion/head_sweep_profile.gif</a></figcaption>
+</figure>
+<figure><img src="out/motion/head_sweep_profile_sheet.png" alt="head_sweep_profile contact sheet"><figcaption>Eight frames of <span class="mono">out/motion/head_sweep_profile.mp4</span>, read back after encoding.</figcaption></figure><figure>
+<video controls preload="metadata" style="width:100%;display:block;border:1px solid var(--hair);background:#fff"
+       src="out/motion/head_sweep_3q.mp4"></video>
+<figcaption><b>head_sweep_3q</b> — same sweep from 3/4 front-left with both neck servos in frame (lookat = midpoint of body neck and body jaw_soft)<br><span class="mono">3/4 front-left az225 el-6 dist 0.27 m · out/motion/head_sweep_3q.mp4 · 34.4 s @ 25 fps · 860 frames</span><br>
+contact sheet: <a href="out/motion/head_sweep_3q_sheet.png">out/motion/head_sweep_3q_sheet.png</a> · gif: <a href="out/motion/head_sweep_3q.gif">out/motion/head_sweep_3q.gif</a></figcaption>
+</figure>
+<figure><img src="out/motion/head_sweep_3q_sheet.png" alt="head_sweep_3q contact sheet"><figcaption>Eight frames of <span class="mono">out/motion/head_sweep_3q.mp4</span>, read back after encoding.</figcaption></figure><figure>
+<video controls preload="metadata" style="width:100%;display:block;border:1px solid var(--hair);background:#fff"
+       src="out/motion/head_sweep_body.mp4"></video>
+<figcaption><b>head_sweep_body</b> — the same sweep, whole robot, so the legs&#x27; balancing response to the head is visible<br><span class="mono">3/4 az215 el-8 dist 0.46 m · out/motion/head_sweep_body.mp4 · 34.4 s @ 25 fps · 860 frames</span><br>
+contact sheet: <a href="out/motion/head_sweep_body_sheet.png">out/motion/head_sweep_body_sheet.png</a> · gif: <a href="out/motion/head_sweep_body.gif">out/motion/head_sweep_body.gif</a></figcaption>
+</figure>
+<figure><img src="out/motion/head_sweep_body_sheet.png" alt="head_sweep_body contact sheet"><figcaption>Eight frames of <span class="mono">out/motion/head_sweep_body.mp4</span>, read back after encoding.</figcaption></figure><figure>
+<video controls preload="metadata" style="width:100%;display:block;border:1px solid var(--hair);background:#fff"
+       src="out/motion/head_lookaround.mp4"></video>
+<figcaption><b>head_lookaround</b> — look-around while standing: nod, tilt, yaw/pitch figure-8, then all four head joints at once<br><span class="mono">3/4 front az200 el-6 dist 0.32 m, lookat tracks the head · out/motion/head_lookaround.mp4 · 16.0 s @ 25 fps · 400 frames</span><br>
+contact sheet: <a href="out/motion/head_lookaround_sheet.png">out/motion/head_lookaround_sheet.png</a> · gif: <a href="out/motion/head_lookaround.gif">out/motion/head_lookaround.gif</a></figcaption>
+</figure>
+<figure><img src="out/motion/head_lookaround_sheet.png" alt="head_lookaround contact sheet"><figcaption>Eight frames of <span class="mono">out/motion/head_lookaround.mp4</span>, read back after encoding.</figcaption></figure>
+
+<h2>6 · What “same as the real thing” rests on</h2>
+<div class=grid2>
+<div class=card><h3>It does rest on</h3><ul><li>The head mechanism we render is Pollen&#x27;s own: axes, joint ranges, damping, friction loss, armature, actuator kp and forcerange carry identical attribute values between reference/pollen-microduck-rl/robot_walk.xml and sim/microduck_ours.xml - only class=&#x27;visual&#x27; mesh references were re-pointed to our rebuilt parts (sim/swap_meshes.py; out/sim/swap_report.json). So range, gearing and inertia are not ours to be right or wrong about.</li><li>The motion is produced by Pollen&#x27;s own published BEST_alpha_stand ONNX policy at Pollen&#x27;s 50 Hz loop with the browser simulator&#x27;s EMA on the head slots.</li><li>Measured here: three of the four head joints reach 85-100 % of their MJCF range under command, at up to 454.8 deg/s (75.8 rpm), which is inside the XL330-M288-T&#x27;s 103 rpm no-load speed at 5.0 V.</li><li>The whole sweep stayed inside the real servo&#x27;s torque: peak head-joint actuator force 0.4185 N.m (head_yaw), under the XL330-M288-T&#x27;s 0.52 N.m stall at 5.0 V. Nothing in these videos asks more of the neck than the shipped servo can give.</li><li>The &#x27;stiff neck&#x27; Leif saw in the walk video was a ZERO head command, not the mechanics: sim/run_policy.py schedule() drives twist only and leaves cmd[3:7] at 0.</li></ul></div>
+<div class=card><h3>It does not rest on</h3><ul><li>It is not a claim that OUR head SHELL geometry matches the product - that is COMPARISON.html finding 1, still CANNOT DETERMINE (GOAL.md:105). Only the visual mesh changed; the head&#x27;s inertia in this sim is still Pollen&#x27;s.</li><li>It is not a claim about the real robot&#x27;s achievable head speed. Nothing public reports it, and no video shows the head driven to a limit.</li><li>It is not a general torque validation: the MJCF ceiling is 0.96 N.m per joint, ABOVE the XL330-M288-T datasheet stall of 0.52 N.m at 5.0 V / 0.60 N.m at 6.0 V, so a different motion could ask the sim for torque the real servo has not got. This sweep did not (peak 0.4185 N.m), but the model would let it.</li><li>neck_pitch is the exception on travel: the policy holds it near +-18 deg however hard it is commanded (gain 0.296, 50.4 deg reached of the 150.0 deg the joint has). That is the POLICY using the head as a balance mass, not a mechanical limit - the kinematic probe below shows the joint itself is free over its whole range.</li></ul></div>
+</div>
+
+<h2>7 · Sources</h2>
+<ul><li><span class=mono>neck_pitch</span> — MJCF reference/pollen-microduck-rl/robot_walk.xml:181 (== sim/microduck_ours.xml:180, identical attributes); measured sim/head_sweep.py -&gt; out/motion/head_traj.npz (qpos/qvel, 50 Hz, 2570 steps)</li><li><span class=mono>head_pitch</span> — MJCF reference/pollen-microduck-rl/robot_walk.xml:194 (== sim/microduck_ours.xml:193, identical attributes); measured sim/head_sweep.py -&gt; out/motion/head_traj.npz (qpos/qvel, 50 Hz, 2570 steps)</li><li><span class=mono>head_yaw</span> — MJCF reference/pollen-microduck-rl/robot_walk.xml:203 (== sim/microduck_ours.xml:202, identical attributes); measured sim/head_sweep.py -&gt; out/motion/head_traj.npz (qpos/qvel, 50 Hz, 2570 steps)</li><li><span class=mono>head_roll</span> — MJCF reference/pollen-microduck-rl/robot_walk.xml:216 (== sim/microduck_ours.xml:215, identical attributes); measured sim/head_sweep.py -&gt; out/motion/head_traj.npz (qpos/qvel, 50 Hz, 2570 steps)</li></ul>
+<div class=mono-block>50 Hz, timestep 0.005 x decimation 4; head command slots cmd[3:7] EMA alpha 0.2<br><br>servo: https://emanual.robotis.com/docs/en/dxl/x/xl330-m288/ (fetched 2026-09-02); identity + sourcing already verified in out/verify/electronics_verify.json components[4]</div>
+<p class=backlink><a href="INDEX.html">← repo index</a> · data: <a href="out/motion/head.json">out/motion/head.json</a>
+· <a href="out/motion/head_real_video.json">out/motion/head_real_video.json</a></p>
+</div></body></html>
