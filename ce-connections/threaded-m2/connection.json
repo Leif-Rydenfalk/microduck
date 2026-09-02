@@ -1,0 +1,55 @@
+{
+  "$triad": 1,
+  "kind": "connection",
+  "record": {
+    "slug": "threaded-m2",
+    "title": "M2 ISO metric threaded joint — 60 degree profile, 0.4 mm coarse pitch",
+    "joins": {
+      "a": "external ISO metric M2 thread (interface name: thread_ext) — a cap screw or stud",
+      "b": "internal ISO metric M2 thread (interface name: thread_int) — a tapped hole, or the Microduck's usual case: a self-tapped printed pilot (Ø1.55–1.65 measured on Pollen's meshes)"
+    },
+    "dof_left": [],
+    "dof_left_why": "A tightened threaded joint is a clamp, not a bearing: the preload closes all six degrees of freedom between the joined faces by friction at the interface. UNTIGHTENED the same pair leaves one helical DOF (rotation about z coupled to translation along z at 0.4 mm/turn) and mate() reports that when params['state'] == 'loose'. The default is the tightened joint because that is what an assembly means by 'screwed'. Same physics as connection:threaded-m3; only the pitch changes the coupling ratio.",
+    "detachable": true,
+    "standard": "ISO 68-1 (basic profile) / ISO 261 (general purpose coarse thread series) / ISO 262 (selected sizes) / ISO 898-1 (property classes)",
+    "standard_why": "ISO 68-1 fixes the 60 degree triangular basic profile and therefore H = 0.8660*P. ISO 261 fixes that the coarse pitch for a 2 mm nominal diameter is 0.4 mm — cross-checked against ce-cad/cecad/fasteners.py line 57, the M2 row (pitch 0.40) this workshop already drills against, and against ce-parts/screw-m2-iso4762 (its spec is read off the fasteners.eu ISO 4762 page, fetched 2026-08-19). None of the standards documents was FETCHED in this session: what WAS done is that the ISO 68-1 profile relations were used to DERIVE d2 = 1.740192, d3 = 1.509252, D1 = 1.566987 and As = 2.0732 mm2, and all four reproduce the published M2 table figures (1.740 / 1.509 / 1.567 / 2.07) to <= 0.0033 mm2 — an independent check, since none of the published figures was used to produce them. Run compat.py to reprint the derivation; the artifact is evidence/m2-thread-derivation.json.",
+    "adds_parts": [
+      "part:screw-m2-iso4762"
+    ],
+    "adds_parts_why": "screw-m2-iso4762 (hex socket head cap, ISO 4762, a length family with 10 sourced lengths) is the only M2 fastener family with a folder on any reachable shelf — checked 2026-09-02 by listing ce-parts/ (no nut-m2, no insert-m2 exists), and TRIAD.md makes a dangling ref a FAIL, never a warning. So mate() maps provider 'socket_head_cap' to this ref, maps 'tapped_hole'/'self_tapped_boss' to no part (the thread is cut into part B itself — the Microduck's usual case, Ø1.55–1.65 printed pilots measured on power_support / foot / trunk-shell meshes), and REFUSES any other provider by name instead of inventing a ref.",
+    "verdict": "PASS",
+    "why": "The GEOMETRY of the pair is PASS and it is derived, not recalled: from the ISO 68-1 basic profile with P = 0.4 mm, d2 = 1.740192 mm, d3 = 1.509252 mm, D1 = 1.566987 mm and As = 2.0732 mm2, and all four reproduce the published M2 figures (1.740, 1.509, 1.567, 2.07) that were not used to produce them — run `python3 compat.py` to watch the four PASS lines. The size is the robot's own: SPEC.md section 4's hole census reads the whole Microduck as an M2 system (Ø2.2 clearance x77, Ø4.4 c'bore x28, Ø1.6 tap x20 — exactly the fasteners.py M2 close-clearance / counterbore / tap-drill figures). The TORQUE of the pair is CANNOT DETERMINE and stays that way: no friction coefficient has been measured in this workshop (threaded-m3 records the identical refusal), and the PLA self-tapped case adds a second unmeasured number — pull-out of an M2 formed thread in a printed Ø1.6 pilot. compat() therefore returns PASS on fit and CANNOT DETERMINE on preload/engagement unless the caller supplies measured values; both refusals are ledger rows.",
+    "joint": {
+      "$joint": 1,
+      "default_state": "tight. params['state'] == 'loose' is the other case and mate() reports it.",
+      "axes": {
+        "tx": "locked",
+        "ty": "locked",
+        "tz": "locked",
+        "rx": "locked",
+        "ry": "locked",
+        "rz": "locked"
+      },
+      "axes_cannot_determine": {},
+      "limits": {},
+      "one_way": "",
+      "intermittent": false,
+      "engagement": {},
+      "couples": [],
+      "holds_by": "preload",
+      "removable": true,
+      "transmits": [
+        "axial",
+        "shear",
+        "moment"
+      ],
+      "driven": false,
+      "rating": {
+        "preload_N": null,
+        "tightening_torque_Nm": null,
+        "pla_pullout_N": null
+      },
+      "why": "holds_by: preload — record.dof_left_why is the citation: 'the preload closes all six degrees of freedom between the joined faces by friction at the interface'. Preload, not friction: friction is the mechanism, preload is the source. rating: all three numbers MISSING and refused rather than defaulted — no friction coefficient and no PLA pull-out has been measured in this workshop, and compat.py's preload check says so with the formula it would use. THE LOOSE STATE IS A COUPLING: mate() returns dof_left ['helical_about_z'] for params['state'] == 'loose', which maps to rz free plus a couples entry {of: tz, per: rz, mm_per_rev: 0.4} — the ISO 261 coarse pitch for nominal diameter 2 mm, stated in the modules as PITCH_MM and cross-checked against the cecad fasteners.py M2 row."
+    }
+  }
+}

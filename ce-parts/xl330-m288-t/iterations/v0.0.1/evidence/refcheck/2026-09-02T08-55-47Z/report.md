@@ -1,15 +1,12 @@
-[live capture NOT installed: RuntimeError: cecad.livehook needs FreeCAD's geometry kernel, which this interpreter does not have (No module named 'FreeCAD').
-    Run designs through bin/cad — FreeCAD's interpreter ignores PYTHONPATH and `FreeCAD -c` hangs on stdin.
-    cecad.electrical and cecad.vision are kernel-free and work here.]
 # refcheck part:xl330-m288-t vs xl330.stl
 
 **PASS** — p95 surface distance 0.05 mm <= 1.00 both ways; bbox within 0.00 mm
 
 | | ref->ours | ours->ref |
 |---|---|---|
-| mean mm | 0.025 | 0.018 |
+| mean mm | 0.023 | 0.019 |
 | p50 mm | 0.000 | 0.000 |
-| p95 mm | 0.050 | 0.006 |
+| p95 mm | 0.050 | 0.015 |
 | max mm | 0.990 | 0.990 |
 | within 1.0 mm | 100.0% | 100.0% |
 
@@ -28,5 +25,3 @@ reference: 12 holes, 2 bosses · ours: 12 holes, 2 bosses · matched 14 · unmat
 - overlay_iso.png
 - ours_iso.png
 - ref_iso.png
-
-report: out/refcheck/xl330-m288-t/r1/report.md

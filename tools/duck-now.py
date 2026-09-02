@@ -37,12 +37,19 @@ for i, p in enumerate(place):
                 key = ('ref', pth)
                 if key not in cache: cache[key] = mjcf.read_stl(pth)
                 ref[f'{mesh}#{i}'] = mjcf._xform_tris(cache[key], R, t); break
+# TRUE COLOURS (Leif, 2026-09-02: "only render our version and what we have"):
+# every placement painted its MJCF material colour; whose mesh it is stays in
+# duck-now.json, not in the picture.
+mats = {i: (p.get('material_rgba') or [0.7,0.7,0.7,1]) for i,p in enumerate(place)}
+def hexof(i):
+    r = mats.get(i) or [0.7,0.7,0.7,1]
+    return '#%02x%02x%02x' % tuple(int(255*c) for c in r[:3])
 groups = {}; colors = {}; alphas = {}
-for k, v in ref.items(): groups[k] = v; colors[k] = '#8c9298'
-for k, v in ours.items(): groups[k] = v; colors[k] = '#f28c28'
+for k, v in ref.items(): groups[k] = v; colors[k] = hexof(int(k.rsplit('#',1)[1]))
+for k, v in ours.items(): groups[k] = v; colors[k] = hexof(int(k.rsplit('#',1)[1]))
 out = root + '/out/render'
 os.makedirs(out, exist_ok=True)
-title = f'Microduck NOW — {len(passed)} parts rebuilt & PASS (orange), rest = Pollen reference (grey): ' + ', '.join(sorted(passed))
+title = f'Microduck — our build: {len(passed)} rebuilt parts + shelf meshes, true colours'
 for v in ('iso', 'left', 'front'):
     r = meshview.render_groups(groups, f'{out}/duck-now_{v}.png', view=v, colors=colors, size=(1200, 1200), title=title[:140])
     print(v, r['tris'])
