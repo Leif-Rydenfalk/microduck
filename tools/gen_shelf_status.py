@@ -288,7 +288,7 @@ def render(refs, totals, before, exit_code, root):
     A('</tbody></table></div></section>')
 
     A('<section id="method"><h2><span class="n">4</span>Method</h2>')
-    A('<div class="mono-block">export CE_TRIAD_ROOT="%s:%s"\n%s check --all\npython3 tools/gen_shelf_status.py</div>'
+    A('<pre class="code">export CE_TRIAD_ROOT="%s:%s"\n%s check --all\npython3 tools/gen_shelf_status.py</pre>'
       % (e(root), e(WORKSHOP), e(os.path.relpath(TRIAD, REPO))))
     A('<p>The checker is <code>bin/triad</code> in the ce-workshop root, shared by all three '
       'triad systems; its contract is <code>TRIAD.md</code>. This page parses its stdout and '
