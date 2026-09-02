@@ -505,7 +505,7 @@ def build(out_path):
     A('<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">')
     A('<meta name="viewport" content="width=device-width, initial-scale=1">')
     A("<title>Microduck Electronics Datasheet</title>")
-    A('<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opt_sz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">')
+    A('<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">')
     A('<link rel="stylesheet" href="tools/doc.css">')
     A("<style>\n"
       ".tiny{font-family:var(--sans);font-size:11px;color:var(--ink-2);letter-spacing:.03em}\n"

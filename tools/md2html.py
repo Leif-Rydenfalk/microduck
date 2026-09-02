@@ -108,7 +108,7 @@ def convert(md, title):
     return ('<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n'
             '<meta name="viewport" content="width=device-width, initial-scale=1">\n'
             '<title>%s</title>\n'
-            '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opt_sz,wght@8..60,400;8..60,600;8..60,700&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">\n'
+            '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">\n'
             '<style>\n%s\n</style>\n</head>\n<body>\n<div class="wrap"><p class="backlink"><a href="RELEASE.html">← Release dossier</a></p>\n%s\n</div>\n</body>\n</html>\n'
             % (html.escape(title), CSS, body))
 
