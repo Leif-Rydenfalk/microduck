@@ -65,21 +65,100 @@ def perturbation(r):
     return " · ".join(bits) or "—"
 
 
-def robustness_rows():
+def _slopey(k):
+    return k.startswith("slope5") or k.startswith("endurance_60s_slope")
+
+
+TRK = (ROB["outputs"]["heading_and_tracking"]["commanded_direction_tracking_ratio_moving_cells"]
+       if ROB else {})
+
+
+def downhill_rows():
+    d = ROB["outputs"]["heading_and_tracking"]["SLOPE_CELLS_ENDED_DOWNHILL"]["cells"]
+    out = []
+    for cell, v in d.items():
+        cls = ' class="cd"' if v["ended_downhill_of_its_start"] else ""
+        out.append(
+            "<tr%s><td><code>%s</code></td><td>%s</td><td class=\"n\">%.4f</td>"
+            "<td class=\"n\">%+.4f</td><td class=\"n\">%+.4f</td><td class=\"n\">%s</td>"
+            "<td class=\"n\">%.1f</td><td class=\"n\">%s</td><td class=\"n\">%s</td></tr>"
+            % (cls, E(cell), E(v["downhill_dir"].replace("_", " ")), v["walked_m_unsigned"],
+               v["forward_progress_m"], v["downhill_progress_m"],
+               ("%.1f%%" % (100.0 * v["fraction_of_displacement_along_the_fall_line"]))
+               if v["fraction_of_displacement_along_the_fall_line"] is not None else "—",
+               v["net_yaw_drift_deg"],
+               ("%.4f" % v["path_tracking_ratio_UNSIGNED"])
+               if v["path_tracking_ratio_UNSIGNED"] is not None else "—",
+               ("%.4f" % v["commanded_direction_tracking_ratio"])
+               if v["commanded_direction_tracking_ratio"] is not None else "—"))
+    return "\n".join(out)
+
+
+def selfcollision_block():
+    sc = ROB["outputs"]["self_collision_scope"]
+    c = sc["THE_CENSUS"]
+    rows = "".join(
+        "<tr><td><code>%s</code></td><td>%s</td></tr>" % (E(k), E(str(sc[k])))
+        for k in ("microduck_ours.xml", "microduck_ours_allcollisions.xml",
+                  "microduck_ours_selfcontact.xml") if k in sc)
+    return ("""<p>A self-collision count is only as large as the model&rsquo;s collision mask allows,
+  so here is what each model can even be asked. Measured on the compiled model by
+  <code>sim/collision_model.py</code> &rarr; <code>out/sim-evidence/collision-model-census.json</code>.</p>
+  <div class="tablewrap"><table class="data compact">
+  <thead><tr><th>Model</th><th>What can touch what</th></tr></thead><tbody>%s</tbody></table></div>
+  <p><b>The census.</b> %s Cell <code>%s</code> on <code>%s</code>: %d candidate geom pairs,
+  <b>%d</b> self-contacts. Validation that this is the same robot: %s. %s</p>
+  <p class="note"><b>What this still cannot see.</b> %s</p>"""
+            % (rows, E(c.get("statement", "")), E(c.get("cell", "—")), E(c.get("model", "—")),
+               c.get("candidate_geom_pairs", 0), c.get("self_contacts_max_per_frame", -1),
+               E(c.get("reproduction_check", "")), chip(c.get("verdict", "CANNOT DETERMINE")),
+               E(c.get("what_this_still_cannot_see", ""))))
+
+
+def outcome_chip(r):
+    if r["fell"]:
+        return '<span class="chip cd">fell @ %.2f s</span>' % r["first_fall_s"]
+    d = r.get("downhill_progress_m")
+    if d is not None and d > 0:
+        return '<span class="chip cd">upright, ended %.3f m DOWNHILL</span>' % d
+    return '<span class="chip pass">upright</span>'
+
+
+def robustness_rows_where():
+    """Table F2-1a — did it stay up, and did it go where it was told."""
     out = []
     for r in ROB["outputs"]["rows"]:
-        fell = ('<span class="chip cd">fell @ %.2f s</span>' % r["first_fall_s"]) if r["fell"] \
-            else '<span class="chip pass">upright</span>'
+        fwd = r.get("forward_progress_m")
+        trk = r.get("commanded_direction_tracking_ratio")
+        dh = r.get("downhill_progress_m")
+        cls = ' class="cd"' if (dh is not None and dh > 0) else ""
         out.append(
-            "<tr><td><code>%s</code></td><td>%s</td><td class=\"n\">%s</td>"
-            "<td class=\"n\">%.4f</td><td class=\"n\">%.4f</td><td class=\"n\">%.4f</td>"
-            "<td class=\"n\">%.4f</td><td><code>%s</code></td><td class=\"n\">%.2f</td>"
-            "<td class=\"n\">%.1f</td><td class=\"n\">%d</td>"
-            "<td class=\"n\">%.1f</td></tr>"
-            % (E(r["cell"]), perturbation(r), fell, r["walked_m"], r["path_length_m"] or 0.0,
-               r["mean_speed_m_s"], r["max_joint_torque_Nm"], E(r["max_joint_torque_joint"]),
-               r["grf_vertical_peak_N"], r["net_yaw_drift_deg"] or 0.0,
-               r["self_collisions_max"], r["max_range_utilisation_pct"]))
+            "<tr%s><td><code>%s</code></td><td>%s</td><td>%s</td>"
+            "<td class=\"n\">%.4f</td><td class=\"n\">%s</td><td class=\"n\">%s</td>"
+            "<td class=\"n\">%s</td><td class=\"n\">%.1f</td></tr>"
+            % (cls, E(r["cell"]), perturbation(r), outcome_chip(r), r["walked_m"],
+               ("%+.4f" % fwd) if fwd is not None else "—",
+               ("%+.4f" % dh) if dh is not None else "—",
+               ("%.3f" % trk) if trk is not None else "—",
+               r["net_yaw_drift_deg"] or 0.0))
+    return "\n".join(out)
+
+
+def robustness_rows_load():
+    """Table F2-1b — what the cell asked of the hardware, and how much of it is physical."""
+    out = []
+    for r in ROB["outputs"]["rows"]:
+        vf = r.get("physically_valid_fraction", 1.0)
+        flag = ' class="cd"' if vf < 0.999 else ""
+        out.append(
+            "<tr%s><td><code>%s</code></td><td class=\"n\">%.4f</td><td class=\"n\">%.4f</td>"
+            "<td><code>%s</code></td><td class=\"n\">%.2f</td><td class=\"n\">%.2f</td>"
+            "<td class=\"n\">%.1f%%</td><td class=\"n\">%d / %d</td><td class=\"n\">%.1f</td></tr>"
+            % (flag, E(r["cell"]), r["max_joint_torque_Nm"], r.get("max_joint_torque_PREFALL_Nm", 0.0),
+               E(r["max_joint_torque_joint"]), r["grf_vertical_peak_N"],
+               r.get("grf_vertical_peak_PREFALL_N", 0.0), 100.0 * vf,
+               r["self_collisions_max"], r.get("self_collision_candidate_geom_pairs", 0),
+               r["max_range_utilisation_pct"]))
     return "\n".join(out)
 
 
@@ -122,6 +201,30 @@ def runtime_rows():
         cells = "".join('<td class="n">%.2f</td>' % r["runtime_h"] for r in rows)
         out.append('<tr><td>%s</td><td class="n">%.3f</td>%s</tr>'
                    % (lbl, t[key]["servo_mean_W"], cells))
+    return "\n".join(out)
+
+
+def tier_rows():
+    t = PEAKS["outputs"]["ground_reaction_force_N"]["for_FEA_tiers"]
+    label = {"1_nominal_walking": "1 · nominal walking",
+             "2_worst_undisturbed_locomotion": "2 · worst undisturbed locomotion",
+             "3_worst_physically_valid_anywhere": "3 · abuse (external push), pre-fall",
+             "NOT_A_LOAD_post_fall": "NOT A LOAD · post-fall"}
+    out = []
+    for k, v in t.items():
+        cls = ' class="cd"' if k.startswith("NOT_A_LOAD") else ""
+        both = v.get("both_feet_N")
+        one = v.get("single_foot_N")
+        out.append(
+            "<tr%s><td>%s</td><td class=\"n\">%s</td><td class=\"n\">%s</td><td class=\"n\">%s</td>"
+            "<td><code>%s</code></td><td class=\"n\">%s</td><td>%s</td></tr>"
+            % (cls, E(label.get(k, k)),
+               ("%.4f" % both) if both is not None else "—",
+               ("%.4f" % one) if one is not None else "—",
+               ("%.3f" % v["body_weights"]) if "body_weights" in v else "—",
+               E(v.get("cell", "—")),
+               ("%.3f" % v["at_s"]) if v.get("at_s") is not None else "—",
+               E(v.get("use_for", v.get("why", "")))))
     return "\n".join(out)
 
 
@@ -180,17 +283,42 @@ def sections():
     <li><b>Push</b> — %s</li>
   </ul>
 
-  <p class="num">Table F2-1. The full sweep, ordered by family. Torque is
-  <code>data.actuator_force</code> (N·m, gear 1) recorded at every 200 Hz physics step; GRF is
-  <code>mj_contactForce</code> on every contact touching a foot geom, world +z. <b>Walked</b> is the
-  straight-line trunk displacement and <b>path</b> the integrated ground track — the gap is the
-  robot curving. Range utilisation is the widest joint's swept span as a percentage of its MJCF
+  <div class="note"><b>Read the sign.</b> <b>Walked</b> is the UNSIGNED straight-line trunk
+  displacement, so it says nothing about direction. <b>Forward</b> is each step of the ground track
+  projected onto the robot&rsquo;s own instantaneous heading and summed — negative means it ended
+  behind where it started, in its own frame. <b>Downhill</b> is the displacement projected onto the
+  fall line: positive means the robot finished <em>below</em> its start. <b>Tracking</b> is mean
+  forward speed divided by the commanded v<sub>x</sub>, and unlike a path-length ratio it cannot be
+  earned by sliding backwards. Every 5° slope cell is flagged for exactly that reason.</div>
+
+  <p class="num">Table F2-1a. The full sweep, ordered by family — did it stay upright, and did it go
+  where it was commanded.</p>
+  <div class="tablewrap">
+  <table class="data compact">
+    <thead><tr><th>Cell</th><th>Perturbation</th><th>Outcome</th><th>Walked (m)</th>
+    <th>Forward (m)</th><th>Downhill (m)</th><th>Tracking</th><th>Yaw drift (°)</th></tr></thead>
+    <tbody>
+%s
+    </tbody>
+  </table>
+  </div>
+
+  <p class="num">Table F2-1b. The same cells — what each asked of the hardware, and how much of the
+  record is physical. Torque is <code>data.actuator_force</code> (N·m, gear 1) recorded at every
+  200&nbsp;Hz physics step; GRF is <code>mj_contactForce</code> on every contact touching a foot
+  geom, world +z. <b>Pre-fall</b> is the same measurement restricted to the physically valid window
+  — before the first uncommanded fall and before any geom centre goes below the floor plane. In
+  <code>sim/microduck_ours.xml</code> only the two soles can touch the floor, so after a fall the
+  body passes <em>through</em> it and the solver reports reactions no physical robot can produce;
+  <b>Valid</b> is the fraction of frames that survives that test, and only the pre-fall columns are
+  design loads. <b>Self-coll.</b> is contacts&nbsp;/&nbsp;candidate geom pairs the model even
+  allows. Range utilisation is the widest joint&rsquo;s swept span as a percentage of its MJCF
   range.</p>
   <div class="tablewrap">
-  <table class="data">
-    <thead><tr><th>Cell</th><th>Perturbation</th><th>Outcome</th><th>Walked (m)</th><th>Path (m)</th>
-    <th>Mean speed (m/s)</th><th>Peak τ (N·m)</th><th>at joint</th><th>Peak GRF<sub>z</sub> (N)</th>
-    <th>Yaw drift (°)</th><th>Self-coll.</th><th>Max range use (%%)</th></tr></thead>
+  <table class="data compact">
+    <thead><tr><th>Cell</th><th>Peak τ (N·m)</th><th>Pre-fall τ</th><th>at joint</th>
+    <th>Peak GRF<sub>z</sub> (N)</th><th>Pre-fall GRF<sub>z</sub></th><th>Valid</th>
+    <th>Self-coll.</th><th>Max range use (%%)</th></tr></thead>
     <tbody>
 %s
     </tbody>
@@ -202,10 +330,29 @@ def sections():
 
   <h3>Heading and forward tracking</h3>
   <p>%s Worst net yaw drift: <code>%s</code>, <b>%.3f°</b> over the run
-  (<b>%.4f °/m</b> of ground track). The forward tracking ratio — mean path speed divided by
-  the commanded v<sub>x</sub> — is <b>%.3f</b> at the reference command and stays between
+  (<b>%.4f °/m</b> of ground track). The commanded-direction tracking ratio — mean FORWARD speed
+  divided by the commanded v<sub>x</sub> — is <b>%.3f</b> at the reference command and stays between
   <b>%.3f</b> and <b>%.3f</b> across every moving level-ground cell, so the policy delivers roughly
   half to two-thirds of what it is asked for, along a curving track.</p>
+
+  <h3>The slope cells ended downhill</h3>
+  <p class="num">Table F2-1c. Every 5° slope cell, with the sign restored. The robot did not slip:
+  <b>Forward</b> is positive in each, so it kept walking forward in its own frame while its heading
+  drifted far enough to point it down the hill.</p>
+  <div class="tablewrap">
+  <table class="data compact">
+    <thead><tr><th>Cell</th><th>Downhill dir.</th><th>Walked (m)</th><th>Forward (m)</th>
+    <th>Downhill (m)</th><th>Along fall line</th><th>Yaw drift (°)</th>
+    <th>Unsigned path ratio</th><th>Tracking</th></tr></thead>
+    <tbody>
+%s
+    </tbody>
+  </table>
+  </div>
+  <div class="note"><b>%s</b></div>
+
+  <h3>Self-collision — what was actually asked</h3>
+  %s
 </section>
 
 <section id="f2-peaks">
@@ -223,7 +370,7 @@ def sections():
     saturates its own ±0.96 N·m ceiling and the figure is the simulation's limit, not a measured
     actuator capability. Rows past the 6.0 V stall row are flagged.</p>
   <div class="tablewrap">
-  <table class="data">
+  <table class="data compact">
     <thead><tr><th>Joint</th><th>Baseline peak (N·m)</th><th>Locomotion peak (N·m)</th>
     <th>p99 (N·m)</th><th>Worst cell</th><th>%% of stall<br>5 V / 6 V</th>
     <th>Push peak (N·m)</th><th>Peak speed (rad/s)</th>
@@ -250,12 +397,25 @@ def sections():
   </table>
   </div>
 
-  <h3>Ground reaction</h3>
+  <h3>Ground reaction — and the number that is <em>not</em> a load</h3>
   <p>Static weight <b>%.4f N</b>. The measurement is validated against statics before it is used:
   in the standing cells the median summed vertical GRF is <b>7.2425 N</b> and <b>7.2289 N</b>
   against that 7.2324 N weight — 0.14 %% and 0.05 %%. Walking, one foot peaks at
-  <b>%.4f N</b> (<b>%.3f×</b> body weight, p99 %.4f N). The worst anywhere in the matrix is
-  <b>%.4f N</b> summed over both feet in <code>%s</code>. %s</p>
+  <b>%.4f N</b> (<b>%.3f×</b> body weight, p99 %.4f N).</p>
+
+  <div class="note"><b>%.4f N appears in this matrix and it is not a load.</b> %s</div>
+
+  <p class="num">Table F2-2c. The design loads, in tiers, all taken from the physically valid record.</p>
+  <div class="tablewrap">
+  <table class="data compact">
+    <thead><tr><th>Tier</th><th>Both feet (N)</th><th>One foot (N)</th><th>× body weight</th>
+    <th>Cell</th><th>at t (s)</th><th>Use for</th></tr></thead>
+    <tbody>
+%s
+    </tbody>
+  </table>
+  </div>
+  <p>%s</p>
 
   <h3>Joint travel past the MJCF stop</h3>
   <p>In the %d undisturbed locomotion cells no joint left its range at all. Under an external
@@ -313,6 +473,7 @@ def sections():
 
   <h3>What this model deliberately does not know</h3>
   <ul>
+    <li><b>The voltage the 17 mA standby current is billed at — an ASSUMPTION, flagged.</b> %s</li>
     <li><b>No-load current.</b> %s</li>
     <li><b>Compute + sensors.</b> %s</li>
     <li><b>Usable pack energy.</b> %s</li>
@@ -328,17 +489,19 @@ def sections():
         E(ROB["inputs"]["how_each_perturbation_is_applied"]["friction"]),
         E(ROB["inputs"]["how_each_perturbation_is_applied"]["slope"]),
         E(ROB["inputs"]["how_each_perturbation_is_applied"]["push"]),
-        robustness_rows(),
+        robustness_rows_where(),
+        robustness_rows_load(),
         E(ro["push_threshold"]["statement"]),
         E(ro["heading_and_tracking"]["finding"]),
         E(ro["heading_and_tracking"]["worst_net_yaw_drift"][0]),
         ro["heading_and_tracking"]["worst_net_yaw_drift"][1],
         ro["heading_and_tracking"]["worst_net_yaw_drift"][2],
-        ro["heading_and_tracking"]["forward_tracking_ratio_moving_cells"]["base_walk_vx0.25"],
-        min(v for k, v in ro["heading_and_tracking"]["forward_tracking_ratio_moving_cells"].items()
-            if not k.startswith("slope5") and not k.startswith("endurance_60s_slope")),
-        max(v for k, v in ro["heading_and_tracking"]["forward_tracking_ratio_moving_cells"].items()
-            if not k.startswith("slope5") and not k.startswith("endurance_60s_slope")),
+        TRK["base_walk_vx0.25"],
+        min(v for k, v in TRK.items() if not _slopey(k)),
+        max(v for k, v in TRK.items() if not _slopey(k)),
+        downhill_rows(),
+        E(ro["heading_and_tracking"]["SLOPE_CELLS_ENDED_DOWNHILL"]["finding"]),
+        selfcollision_block(),
         E(PEAKS["inputs"]["servo"]["stall_torque_Nm_quote"] + " ; No Load Speed "
           + PEAKS["inputs"]["servo"]["no_load_speed_rpm_quote"] + " ; "
           + PEAKS["inputs"]["servo"]["standby_current_mA_quote"]),
@@ -352,8 +515,9 @@ def sections():
         po["ground_reaction_force_N"]["walking_single_foot_peak_N"],
         po["ground_reaction_force_N"]["walking_single_foot_peak_body_weights"],
         po["ground_reaction_force_N"]["walking_single_foot_p99_N"],
-        po["ground_reaction_force_N"]["worst_any_peak_N"],
-        E(po["ground_reaction_force_N"]["worst_any_cell"]),
+        po["ground_reaction_force_N"]["worst_any_peak_N_INCLUDING_POST_FALL"],
+        E(po["ground_reaction_force_N"]["why_post_fall_numbers_are_not_loads"]),
+        tier_rows(),
         E(po["ground_reaction_force_N"]["for_FEA"]),
         len([r for r in ro["rows"] if r["push_N"] == 0.0 and r["policy"] == "walking"]),
         len(ro["joints_that_ever_left_their_MJCF_range"]),
@@ -373,6 +537,8 @@ def sections():
         walking["mechanical_output_power_W"]["mean"], walking["servo_motor_power_W"]["mean"],
         chip(BAT["verdict"]), E(BAT["why"]),
         E(pc["reading"]),
+        E([x for x in BAT["inputs"]["assumptions_flagged"]
+           if x["what"].startswith("the voltage")][0]["detail"]),
         E(BAT["inputs"]["servo"]["no_load_current"]["why"]),
         E(BAT["inputs"]["compute_and_sensors"]["why"]),
         E(BAT["inputs"]["pack"]["usable_fraction_note"]),

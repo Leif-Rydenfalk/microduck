@@ -25,8 +25,18 @@ directly against a joint torque in N.m):
 
     per frame, per joint:  I  = |tau| / kT
                            Vm = kE*|omega| + R*I
-                           P_motor = Vm * I                     [W]
+                           P_motor = min(Vm, V_pack) * I        [W]
                            P_servo = P_motor + V_pack * 0.017   [W]
+
+    The min() is the pack rail: the drive cannot put more than the pack voltage
+    across the winding, so a frame whose ideal Vm exceeds V_pack is a frame the
+    real servo could not have produced at all. Clamping is the CONSERVATIVE
+    reading (it under-counts power rather than inventing a rail that is not
+    there) and the count of clamped frames is published per mode as
+    frames_needing_more_than_pack_voltage — it is 0 in every mode of the
+    committed run, so the clamp changes no number in this file; it is a guard,
+    not a correction. (This line said "P_motor = Vm * I" until 2026-09-02; the
+    code always had the min(), and the JSON `method` string always carried it.)
 
 kE comes out at 0.4649 / 0.4636 / 0.4659 V.s/rad from the three independent
 rows (spread 0.50 %), which is the check that the model is the right shape.
@@ -78,6 +88,28 @@ SERVO_CITE = ("ROBOTIS e-Manual XL330-M288-T, Specifications table, verbatim: "
               "docs/fetched/robotis-emanual-xl330-m288.html. Quoted in ce-parts/xl330-m288-t/"
               "electrical.chip.json current_mA.stall_basis and controller.no_load_speed.")
 STANDBY_A = 0.017
+# ASSUMPTION, FLAGGED — not a published figure. ROBOTIS prints "Standby Current | 17 [mA]"
+# with NO voltage attached (verified verbatim in the local copy of the e-Manual page). This
+# model bills that current against the PACK rail, because the servo is fed the raw pack
+# (6.6-8.2 V, docs/ELECTRONICS-AND-SOFTWARE.md 3.4) and a constant-current standby load
+# therefore draws 17 mA x V_pack from the pack. If instead the 17 mA is a figure measured on
+# the 5.0 V "Recommended" row and the standby load is constant-POWER, the pack term is
+# 17 mA x 5.0 V and the whole standby number is 32.4 % smaller. ROBOTIS states neither, so
+# both are published side by side and the pack-rail figure is used because it is the
+# conservative one for runtime.
+STANDBY_V_BASIS = "pack rail"
+STANDBY_ALT_V = 5.0
+STANDBY_ASSUMPTION = (
+    "ROBOTIS publishes 'Standby Current | 17 [mA]' with NO voltage attached "
+    "(ce-parts/xl330-m288-t/iterations/v0.0.1/docs/fetched/robotis-emanual-xl330-m288.html, "
+    "Specifications table). This model bills it at the PACK voltage, i.e. 15 x 0.017 A x V_pack, "
+    "because the servos are fed the raw pack and a constant-current standby load draws that from "
+    "the pack. If the 17 mA is instead a constant-POWER figure measured on the 5.0 V row, the "
+    "pack term is 15 x 0.017 A x 5.0 V and the standby number is 32.4 % smaller. The pack-rail "
+    "reading is used because it is conservative for runtime; both are reported. WHAT SETTLES IT: "
+    "an ammeter on a powered XL330-M288-T with Torque Enable(64)=0, read at 5.0 V and at 7.4 V — "
+    "or a ROBOTIS statement of the test condition. This assumption is the WHOLE of the "
+    "'idle, torque off' mode and 1.887 W of every other mode.")
 N_SERVOS_TOTAL = 15
 N_SERVOS_SIMULATED = 14   # the MJCF has no mouth joint; ID 34 is standby-only here
 
@@ -189,6 +221,11 @@ def analyse(traj_path, label, k, v_pack, t_from=0.0):
                                 "p95": round(float(np.percentile(P_motor_total, 95)), 4),
                                 "peak": round(float(P_motor_total.max()), 4)},
         "servo_controller_standby_W": round(standby_total, 4),
+        "servo_controller_standby_W_ASSUMPTION": STANDBY_ASSUMPTION,
+        "servo_controller_standby_W_if_billed_at_the_5.0V_row": round(
+            N_SERVOS_TOTAL * STANDBY_A * STANDBY_ALT_V, 4),
+        "servo_total_power_W_mean_if_standby_billed_at_the_5.0V_row": round(
+            float(P_servos.mean()) - standby_total + N_SERVOS_TOTAL * STANDBY_A * STANDBY_ALT_V, 4),
         "servo_total_power_W": {"mean": round(float(P_servos.mean()), 4),
                                 "p95": round(float(np.percentile(P_servos, 95)), 4),
                                 "peak": round(float(P_servos.max()), 4)},
@@ -227,6 +264,10 @@ def main():
                                 "peak": round(idle_servo_W, 4)},
         "note": "Torque Enable(64)=0 leaves the controller awake on the bus (ROBOTIS e-Manual: there is no "
                 "sleep mode), so 15 x 17 mA is the floor. No mechanical power.",
+        "ASSUMPTION_standby_voltage": STANDBY_ASSUMPTION,
+        "servo_controller_standby_W_at_pack_rail": round(idle_servo_W, 4),
+        "servo_controller_standby_W_at_the_5.0V_row": round(N_SERVOS_TOTAL * STANDBY_A * STANDBY_ALT_V, 4),
+        "this_mode_is_entirely_that_assumption": True,
     }
 
     # sensitivity of the walking figure to which stall row the constants come from
@@ -289,18 +330,39 @@ def main():
                                                  "WHAT SETTLES IT: Present Current(126) read off an unloaded "
                                                  "servo turning at speed, or a bench ammeter."}},
             "compute_and_sensors": COMPUTE,
-            "torque_and_speed_source": "sim/gait_sweep.py, data.actuator_force and data.qvel at every 50 Hz "
-                                       "control frame of out/sim-sweep/base_walk_vx0.25_traj.npz and "
-                                       "stand_hold_traj.npz. The peak-torque table is out/sim-evidence/"
-                                       "gait-peaks.json.",
+            "torque_and_speed_source": "sim/gait_sweep.py, data.actuator_force and data.qvel recorded at every "
+                                       "200 Hz PHYSICS step (MuJoCo timestep 0.005 s) of "
+                                       "out/sim-sweep/base_walk_vx0.25_traj.npz and stand_hold_traj.npz, and "
+                                       "read back here off the arrays' `phys_time` axis — NOT at the 50 Hz "
+                                       "control frame. The peak-torque table is out/sim-evidence/"
+                                       "gait-peaks.json, which samples the same 200 Hz record.",
+            "assumptions_flagged": [
+                {"what": "the voltage the XL330-M288-T's 17 mA standby current is billed at",
+                 "used": "the pack rail (7.4 V) -> 15 x 0.017 x 7.4 = 1.887 W",
+                 "alternative": "the 5.0 V row -> 15 x 0.017 x 5.0 = 1.275 W, 32.4 % smaller",
+                 "why_this_one": "conservative for runtime, and the servos are fed the raw pack",
+                 "detail": STANDBY_ASSUMPTION},
+                {"what": "no-load current", "used": "zero (I = |tau|/kT)",
+                 "alternative": "none publishable — ROBOTIS states no no-load current",
+                 "why_this_one": "a missing value stays missing; every motor figure here is therefore a LOWER "
+                                 "bound", "detail": "see servo.no_load_current"},
+                {"what": "PWM-stage efficiency", "used": "1.00 (loss-free)",
+                 "alternative": "any real efficiency < 1 raises the draw and shortens the runtime",
+                 "why_this_one": "no vendor figure exists for the XL330's internal drive",
+                 "detail": "stated in method"},
+            ],
             "control_dt_s": CTRL_DT,
             "integration_dt_s": 0.005,
             "integration_rate_note": "power is integrated at the 200 Hz physics step (MuJoCo timestep 0.005 s), "
                                      "not at the 50 Hz control frame.",
         },
-        "method": "Per 50 Hz frame and per actuated joint: I = |tau|/kT ; Vm = kE*|omega| + R*I ; "
-                  "P_motor = min(Vm, V_pack)*I. Sum over the 14 simulated joints, add 15 x 17 mA x V_pack of "
-                  "controller standby, average over the mode's window, then add the swept compute+sensor draw "
+        "method": "Per 200 Hz PHYSICS frame and per actuated joint: I = |tau|/kT ; Vm = kE*|omega| + R*I ; "
+                  "P_motor = min(Vm, V_pack)*I — the min() is the pack rail, and "
+                  "frames_needing_more_than_pack_voltage reports how often it binds (0 in every mode of this "
+                  "run, so it changes no number here). Sum over the 14 simulated joints, add "
+                  "15 x 17 mA x V_pack of controller standby — SEE inputs.assumptions_flagged: ROBOTIS gives "
+                  "that 17 mA no voltage, and billing it at the 5.0 V row instead makes the standby term "
+                  "32.4 %% smaller — average over the mode's window, then add the swept compute+sensor draw "
                   "and divide the pack's 18.7 Wh by the total. Regeneration is not credited and the PWM stage is "
                   "taken as loss-free, both of which make the stated hours optimistic.",
         "outputs": {

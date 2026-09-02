@@ -106,12 +106,35 @@
    "ceiling_W": 10.0,
    "ceiling_cite": "Radxa 'Requires 5V/2A power adapter' \u2014 an adapter rating, so an upper bound on the 5 V rail."
   },
-  "torque_and_speed_source": "sim/gait_sweep.py, data.actuator_force and data.qvel at every 50 Hz control frame of out/sim-sweep/base_walk_vx0.25_traj.npz and stand_hold_traj.npz. The peak-torque table is out/sim-evidence/gait-peaks.json.",
+  "torque_and_speed_source": "sim/gait_sweep.py, data.actuator_force and data.qvel recorded at every 200 Hz PHYSICS step (MuJoCo timestep 0.005 s) of out/sim-sweep/base_walk_vx0.25_traj.npz and stand_hold_traj.npz, and read back here off the arrays' `phys_time` axis \u2014 NOT at the 50 Hz control frame. The peak-torque table is out/sim-evidence/gait-peaks.json, which samples the same 200 Hz record.",
+  "assumptions_flagged": [
+   {
+    "what": "the voltage the XL330-M288-T's 17 mA standby current is billed at",
+    "used": "the pack rail (7.4 V) -> 15 x 0.017 x 7.4 = 1.887 W",
+    "alternative": "the 5.0 V row -> 15 x 0.017 x 5.0 = 1.275 W, 32.4 % smaller",
+    "why_this_one": "conservative for runtime, and the servos are fed the raw pack",
+    "detail": "ROBOTIS publishes 'Standby Current | 17 [mA]' with NO voltage attached (ce-parts/xl330-m288-t/iterations/v0.0.1/docs/fetched/robotis-emanual-xl330-m288.html, Specifications table). This model bills it at the PACK voltage, i.e. 15 x 0.017 A x V_pack, because the servos are fed the raw pack and a constant-current standby load draws that from the pack. If the 17 mA is instead a constant-POWER figure measured on the 5.0 V row, the pack term is 15 x 0.017 A x 5.0 V and the standby number is 32.4 % smaller. The pack-rail reading is used because it is conservative for runtime; both are reported. WHAT SETTLES IT: an ammeter on a powered XL330-M288-T with Torque Enable(64)=0, read at 5.0 V and at 7.4 V \u2014 or a ROBOTIS statement of the test condition. This assumption is the WHOLE of the 'idle, torque off' mode and 1.887 W of every other mode."
+   },
+   {
+    "what": "no-load current",
+    "used": "zero (I = |tau|/kT)",
+    "alternative": "none publishable \u2014 ROBOTIS states no no-load current",
+    "why_this_one": "a missing value stays missing; every motor figure here is therefore a LOWER bound",
+    "detail": "see servo.no_load_current"
+   },
+   {
+    "what": "PWM-stage efficiency",
+    "used": "1.00 (loss-free)",
+    "alternative": "any real efficiency < 1 raises the draw and shortens the runtime",
+    "why_this_one": "no vendor figure exists for the XL330's internal drive",
+    "detail": "stated in method"
+   }
+  ],
   "control_dt_s": 0.02,
   "integration_dt_s": 0.005,
   "integration_rate_note": "power is integrated at the 200 Hz physics step (MuJoCo timestep 0.005 s), not at the 50 Hz control frame."
  },
- "method": "Per 50 Hz frame and per actuated joint: I = |tau|/kT ; Vm = kE*|omega| + R*I ; P_motor = min(Vm, V_pack)*I. Sum over the 14 simulated joints, add 15 x 17 mA x V_pack of controller standby, average over the mode's window, then add the swept compute+sensor draw and divide the pack's 18.7 Wh by the total. Regeneration is not credited and the PWM stage is taken as loss-free, both of which make the stated hours optimistic.",
+ "method": "Per 200 Hz PHYSICS frame and per actuated joint: I = |tau|/kT ; Vm = kE*|omega| + R*I ; P_motor = min(Vm, V_pack)*I \u2014 the min() is the pack rail, and frames_needing_more_than_pack_voltage reports how often it binds (0 in every mode of this run, so it changes no number here). Sum over the 14 simulated joints, add 15 x 17 mA x V_pack of controller standby \u2014 SEE inputs.assumptions_flagged: ROBOTIS gives that 17 mA no voltage, and billing it at the 5.0 V row instead makes the standby term 32.4 %% smaller \u2014 average over the mode's window, then add the swept compute+sensor draw and divide the pack's 18.7 Wh by the total. Regeneration is not credited and the PWM stage is taken as loss-free, both of which make the stated hours optimistic.",
  "outputs": {
   "modes": {
    "walking": {
@@ -130,6 +153,9 @@
      "peak": 13.3284
     },
     "servo_controller_standby_W": 1.887,
+    "servo_controller_standby_W_ASSUMPTION": "ROBOTIS publishes 'Standby Current | 17 [mA]' with NO voltage attached (ce-parts/xl330-m288-t/iterations/v0.0.1/docs/fetched/robotis-emanual-xl330-m288.html, Specifications table). This model bills it at the PACK voltage, i.e. 15 x 0.017 A x V_pack, because the servos are fed the raw pack and a constant-current standby load draws that from the pack. If the 17 mA is instead a constant-POWER figure measured on the 5.0 V row, the pack term is 15 x 0.017 A x 5.0 V and the standby number is 32.4 % smaller. The pack-rail reading is used because it is conservative for runtime; both are reported. WHAT SETTLES IT: an ammeter on a powered XL330-M288-T with Torque Enable(64)=0, read at 5.0 V and at 7.4 V \u2014 or a ROBOTIS statement of the test condition. This assumption is the WHOLE of the 'idle, torque off' mode and 1.887 W of every other mode.",
+    "servo_controller_standby_W_if_billed_at_the_5.0V_row": 1.275,
+    "servo_total_power_W_mean_if_standby_billed_at_the_5.0V_row": 8.3433,
     "servo_total_power_W": {
      "mean": 8.9553,
      "p95": 12.3582,
@@ -166,6 +192,9 @@
      "peak": 1.0136
     },
     "servo_controller_standby_W": 1.887,
+    "servo_controller_standby_W_ASSUMPTION": "ROBOTIS publishes 'Standby Current | 17 [mA]' with NO voltage attached (ce-parts/xl330-m288-t/iterations/v0.0.1/docs/fetched/robotis-emanual-xl330-m288.html, Specifications table). This model bills it at the PACK voltage, i.e. 15 x 0.017 A x V_pack, because the servos are fed the raw pack and a constant-current standby load draws that from the pack. If the 17 mA is instead a constant-POWER figure measured on the 5.0 V row, the pack term is 15 x 0.017 A x 5.0 V and the standby number is 32.4 % smaller. The pack-rail reading is used because it is conservative for runtime; both are reported. WHAT SETTLES IT: an ammeter on a powered XL330-M288-T with Torque Enable(64)=0, read at 5.0 V and at 7.4 V \u2014 or a ROBOTIS statement of the test condition. This assumption is the WHOLE of the 'idle, torque off' mode and 1.887 W of every other mode.",
+    "servo_controller_standby_W_if_billed_at_the_5.0V_row": 1.275,
+    "servo_total_power_W_mean_if_standby_billed_at_the_5.0V_row": 2.2181,
     "servo_total_power_W": {
      "mean": 2.8301,
      "p95": 2.8782,
@@ -202,7 +231,11 @@
      "p95": 1.887,
      "peak": 1.887
     },
-    "note": "Torque Enable(64)=0 leaves the controller awake on the bus (ROBOTIS e-Manual: there is no sleep mode), so 15 x 17 mA is the floor. No mechanical power."
+    "note": "Torque Enable(64)=0 leaves the controller awake on the bus (ROBOTIS e-Manual: there is no sleep mode), so 15 x 17 mA is the floor. No mechanical power.",
+    "ASSUMPTION_standby_voltage": "ROBOTIS publishes 'Standby Current | 17 [mA]' with NO voltage attached (ce-parts/xl330-m288-t/iterations/v0.0.1/docs/fetched/robotis-emanual-xl330-m288.html, Specifications table). This model bills it at the PACK voltage, i.e. 15 x 0.017 A x V_pack, because the servos are fed the raw pack and a constant-current standby load draws that from the pack. If the 17 mA is instead a constant-POWER figure measured on the 5.0 V row, the pack term is 15 x 0.017 A x 5.0 V and the standby number is 32.4 % smaller. The pack-rail reading is used because it is conservative for runtime; both are reported. WHAT SETTLES IT: an ammeter on a powered XL330-M288-T with Torque Enable(64)=0, read at 5.0 V and at 7.4 V \u2014 or a ROBOTIS statement of the test condition. This assumption is the WHOLE of the 'idle, torque off' mode and 1.887 W of every other mode.",
+    "servo_controller_standby_W_at_pack_rail": 1.887,
+    "servo_controller_standby_W_at_the_5.0V_row": 1.275,
+    "this_mode_is_entirely_that_assumption": true
    }
   },
   "runtime_table": {
