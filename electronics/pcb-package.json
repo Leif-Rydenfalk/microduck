@@ -169,20 +169,20 @@
       "what": "The passive strip that meets the NP-F pack's three terminals through the window in the power_support head plate and carries the pack out on a soldered three-wire tail.",
       "outline_mm": [
         45.8,
-        5.1
+        4.6
       ],
       "corner_r_mm": 0.5,
       "layers": 2,
       "thickness_mm": 1.6,
       "finish": "ENIG \u2014 a sliding spring contact on a HASL pad cold-flows and oxidises. JLCPCB publishes 'HASL (leaded / lead-free), ENIG, OSP' for this process, so it is an order option, not a special process. THE GERBERS DO NOT CARRY IT: it is an order-form field.",
       "mesh_evidence": "reference/pollen-microduck-rl/assets/power_support.stl + banana_pcb_locker.stl",
-      "mount": "none \u2014 the board is captured by the measured 45.860 x 5.150 mm pocket and clamped by the banana_pcb_locker bar",
+      "mount": "none \u2014 the board is captured by the measured 46.292 x 4.696 mm pocket (between the screw posts' inner faces, from the rib top to the locker bar's top) and clamped by the banana_pcb_locker bar",
       "decisions": [
         [
           "B1",
-          "Outline 45.800 x 5.100 mm",
-          "the pocket MEASURED in power_support.stl: clear width 45.860 (x -22.930..+22.930), clear height 5.150 (z 50.930..56.080)",
-          "54.041 x 6.672, the locker bar's own outline \u2014 8.2 mm wider than the pocket the board has to enter"
+          "Outline 45.800 x 4.600 mm \u2014 CORRECTED from 45.800 x 5.100",
+          "RAY-CASTING the power_support solid at y = 31.000 (mid-gap) instead of reading section outlines: above z = 51.000 the only material is the two screw posts, so the pocket is bounded in x by their inner faces (x +/-23.146, clear 46.292) and is OPEN UPWARD. What bounds the top is the locker bar's own silhouette (x +/-27.025, z 48.974..55.626) \u2014 a board taller than that is a board the retainer does not cover. Floor is the rib top at z 50.930, so 4.696 clear",
+          "45.800 x 5.100, which used the head plate's top edge (z 56.944 at x ~ +4, curved down to 55.51 at x +/-24) as the ceiling. The plate is BEHIND the board, not above it; it was the wrong constraint and the board would have stood 0.404 mm proud of its own retainer"
         ],
         [
           "B2",
@@ -198,13 +198,13 @@
         ],
         [
           "B4",
-          "Flat gold pads 2.600 x 2.600 mm, ENIG, no paste",
+          "Flat gold pads 2.400 x 2.400 mm, ENIG, no paste",
           "the pack's own springs land on them; the pocket is 5.150 mm tall",
           "spring fingers on the PCB \u2014 no through-hole spring contact fits a 5.100 mm strip"
         ],
         [
           "B5",
-          "Soldered three-wire tail on 0.900 mm holes, not a connector",
+          "Soldered three-wire tail on 0.800 mm holes, not a connector",
           "every vertical JST header confirmed in this project is deeper than this board is tall: B2B-XH-A body 5.75, B3B-EH-A housing 10.0, B2B-PH-K-S 4.5 mm",
           "a board-mounted connector \u2014 it does not fit, measured"
         ],
@@ -572,13 +572,13 @@
     "banana-contact": {
       "P1": [
         "(bare gold pads - no part)",
-        "3 x 2.600 x 2.600 mm, ENIG, mask-opened, no paste",
+        "3 x 2.400 x 2.400 mm, ENIG, mask-opened, no paste",
         "The NP-F pack's own spring contacts land here. PITCH 4.000 mm IS DERIVED FROM THE 12.000 mm WINDOW, NOT MEASURED OFF A PACK."
       ],
       "P2": [
         "(bare plated holes - no part)",
-        "3 x dia 0.900 mm plated, 1.500 mm pad, 4.000 mm pitch",
-        "Soldered three-wire tail, AWG24. Decision B5: no JST header fits a 5.100 mm strip."
+        "3 x dia 0.800 mm plated, 1.400 mm pad, 4.000 mm pitch",
+        "Soldered three-wire tail, AWG24 (0.511 mm conductor). Decision B5: no JST header fits a 4.600 mm strip."
       ]
     }
   },
@@ -633,6 +633,13 @@
         "Claiming SERVO_V with a hand-laid comb, the first run of that layout took SERVO_V out of the autoroute call altogether \u2014 and the comb only joins the three connector pins. U4.1 (VIN), U4.3 (ON/OFF) and C1.1 were left floating. The same rewrite also dropped GND from the router.",
         "The DRC, immediately: 'unrouted SERVO_V' and 'unrouted GND', 38 of 53 connections routed.",
         "SERVO_V is autorouted AFTER the comb at 0.400 mm \u2014 the LDO branch carries this board's own milliamps, not the pass-through, so that is the right width for it \u2014 and GND is back in the router at effort 16, because the LGA's and the MCU's ground pads are too small and too closely spaced to take a stub via."
+      ],
+      [
+        "banana-contact",
+        "The pocket was measured with the wrong ceiling",
+        "The board was cut 45.800 x 5.100 mm from section outlines: floor at the rib top z 50.930 and ceiling at the head plate's top edge, read as z 56.080 from one section at x = 20.",
+        "RAY-CASTING the power_support solid on a 2 mm grid at y = 31.000, mid-gap, instead of reading section outlines. The map shows air everywhere above z = 51.000 except the two screw posts at x = +/-25 \u2014 the pocket is OPEN UPWARD, and the head plate is BEHIND the board, not above it. The plate's top edge is also curved (56.944 at x ~ +4, 55.51 at x +/-24), so no single number off one section was ever the ceiling.",
+        "The real ceiling is the locker bar's own silhouette, z 48.974..55.626, because a board taller than the retainer is a board the retainer does not cover. Pocket 46.292 x 4.696; board 45.800 x 4.600, entering with 0.246 mm per side in x and 0.048 in z. Contacts 2.400 mm square, tail holes 0.800 mm \u2014 the 5.100 mm board would have stood 0.404 mm proud of its own retainer."
       ]
     ]
   },

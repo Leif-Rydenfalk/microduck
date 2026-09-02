@@ -24,7 +24,9 @@ here in mm; mesh frame = the Onshape assembly frame the MJCF places from)
 
   power_support.stl
     head plate .............. y 25.000 .. 27.000  (2.000 mm wall)
-    head top edge ........... z 56.080
+    head plate top edge ..... z 56.944 at x ~ +4, 55.51 at x +/-24 (CURVED,
+                              and BEHIND the board, not above it — not a
+                              constraint on the board's height)
     pocket floor (ledge) .... z 49.070 .. 50.930   (1.860 mm step)
     pocket clear width ...... x -22.930 .. +22.930 = 45.860
     locker key-tab slots .... 2.919 x 1.860 at x = +/-16.900, z 49.070..50.930
@@ -38,14 +40,32 @@ here in mm; mesh frame = the Onshape assembly frame the MJCF places from)
     key tabs ................ 2.470 x 2.300 x 1.970 at x = +/-16.900, y to 32.700
     its own window .......... 12.000 wide, centre x -4.000, floor z 52.117
 
-  => the space a board can occupy is x -22.930..+22.930 (45.860),
-     z 50.930..56.080 (5.150), y 27.000..35.000 (8.000).
+  ray-cast solid/air map of power_support at y = 31.000 (mid-gap), 2 mm grid:
+    z >= 56.0 ....... all air
+    z 51.0..55.5 .... air everywhere except x = +/-25 (the two screw posts)
+    z 49.5..50.5 .... solid x -15..+15, plus x +/-19, +/-21, +/-25;
+                      AIR at x +/-17 (the locker's tab slots) and +/-23
+    z <= 49.0 ....... all air
+
+  => the space a board can occupy is x -23.146..+23.146 (46.292, the posts'
+     inner faces), z 50.930 (rib top) .. 55.626 (locker bar top, because a
+     board above that is a board the retainer does not cover) = 4.696, and
+     y 27.000..35.000 (8.000).
 
 OUR DECISIONS
 
-  B1  Outline 45.800 x 5.100 mm, 1.6 mm FR-4. That is the measured pocket
-      (45.860 x 5.150) less 0.030 mm per side in x and 0.025 mm per side in
-      z — a slip fit into a printed pocket. 1.6 mm is one of JLCPCB's
+  B1  Outline 45.800 x 4.600 mm, 1.6 mm FR-4. CORRECTED 2026-09-02 from
+      45.800 x 5.100 after RAY-CASTING the power_support solid instead of
+      reading section outlines: at y = 31.000, mid-gap, the only material
+      above z = 51.000 is the two screw posts, so the pocket is bounded in x
+      by their inner faces at x = +/-23.146 (clear 46.292, not the 45.860 the
+      ledge outline suggested) and it is OPEN UPWARD — the head plate's top
+      edge is behind the board, not above it, and using it was the wrong
+      constraint. What actually bounds the top is the locker bar's own
+      silhouette (x +/-27.025, z 48.974..55.626), because a board taller than
+      that is a board the retainer does not cover. Floor is the rib top at
+      z = 50.930. So the usable pocket is 46.292 x 4.696 and this board is
+      45.800 x 4.600: 0.246 mm per side in x, 0.023 mm per side in z. 1.6 mm is one of JLCPCB's
       published thicknesses ('0.4/0.6/0.8/1.0/1.2/1.6/2.0 mm',
       jlcpcb.com/capabilities/pcb-capabilities re-read 2026-09-02) and the
       one their 2-layer default price covers.
@@ -71,7 +91,7 @@ OUR DECISIONS
       ALTERNATIVE IT BEAT: 3.500 mm (more margin to the window walls) —
       rejected because nothing supports it either and 4.000 is the value the
       window itself implies.
-  B4  Contact style: flat gold pads, 2.600 x 2.600 mm, mask-opened, NO paste.
+  B4  Contact style: flat gold pads, 2.400 x 2.400 mm, mask-opened, NO paste.
       The pack's own spring contacts land on them.
       Surface finish ENIG, not HASL — HASL is solder, and solder cold-flows
       and oxidises under a sliding spring contact. JLCPCB publishes 'HASL
@@ -81,7 +101,7 @@ OUR DECISIONS
       measurement: the pocket gives 8.000 mm in y and the contact block has
       to live in it, but the board itself is only 5.100 mm tall, and no
       through-hole spring contact we could confirm fits that strip.
-  B5  Harness: three 0.900 mm plated holes on 4.000 mm centres for a SOLDERED
+  B5  Harness: three 0.800 mm plated holes on 4.000 mm centres for a SOLDERED
       three-wire tail, not a connector. Measured reason: every vertical JST
       header this project has confirmed is deeper than this board is tall —
       B2B-XH-A body 5.75, B3B-EH-A housing 10.0, B2B-PH-K-S 4.5 mm — so none
@@ -125,27 +145,27 @@ from cecad.pcbview import plot, publish_pcb                         # noqa: E402
 # ---------------------------------------------------------------------------
 # PARAMETERS — the measured pocket, then the board that fits it
 # ---------------------------------------------------------------------------
-POCKET_W = 45.860        # x -22.930 .. +22.930, power_support.stl
-POCKET_H = 5.150         # z 50.930 .. 56.080, power_support.stl
+POCKET_W = 46.292        # between the two screw posts, x -23.146 .. +23.146
+POCKET_H = 4.696         # z 50.930 (rib top) .. 55.626 (locker bar top)
 POCKET_Y = 8.000         # y 27.000 .. 35.000, plate face to locker bar
-W, H = 45.800, 5.100     # B1
+W, H = 45.800, 4.600     # B1
 THICK = 1.6
 
 # mesh frame -> board frame (board origin = lower-left)
 MESH_X0 = -22.900        # board x = mesh x + 22.900
-MESH_Z0 = 50.955         # board y = mesh z - 50.955
+MESH_Z0 = 50.930         # board y = mesh z - 50.930 (the rib top)
 WINDOW_CENTRE = -4.000   # mesh x of the 12.000 mm window centre
 WINDOW_W = 12.000
 WINDOW_FLOOR = 52.117    # mesh z
 
-CONTACT = 2.600          # B4 pad size
+CONTACT = 2.400          # B4 pad size
 PITCH = 4.000            # B3 — DERIVED from WINDOW_W / 3, not measured
-TAIL_DRILL = 0.900       # B5
+TAIL_DRILL = 0.800       # B5
 TAIL_PITCH = 4.000
 
 CX = WINDOW_CENTRE - MESH_X0                     # 18.900 in board x
-CY = 3.550                                       # contact row, board y
-TAIL_Y = 1.050                                   # wire-tail row, board y
+CY = 3.200                                       # contact row, board y
+TAIL_Y = 1.000                                   # wire-tail row, board y
 
 
 def ipc2221_amps(width_mm, oz=1.0, dT=10.0, external=True):
@@ -181,7 +201,7 @@ def fp_contacts():
         why="B3/B4. Courtyard excess is 0.100 mm per side, not the 0.250 mm "
             "a placed component gets: nothing is placed here and nothing is "
             "reflowed here — these are bare landing areas for the pack's own "
-            "springs, and the board is only 5.100 mm tall. "
+            "springs, and the board is only 4.600 mm tall. "
             "Pitch 4.000 mm is DERIVED from the 12.000 mm window "
             "measured in power_support.stl (x -9.990..+1.990, centre "
             "-4.000), NOT from an NP-F550: Sony publishes no drawing of the "
@@ -189,13 +209,13 @@ def fp_contacts():
             "(candlepowerforums.com/threads/sony-np-f570-pinout.337813, "
             "fetched 2026-09-02) names the three terminals '+', 'C', '-' and "
             "gives no dimension. A caliper across a real pack settles it. "
-            "Pad 2.600 x 2.600 mm, mask opening 0.000 expansion so the gold "
+            "Pad 2.400 x 2.400 mm, mask opening 0.000 expansion so the gold "
             "area is exactly the drawn area.")
 
 
 def fp_tail():
     """Three plated holes for a soldered 3-wire tail (B5)."""
-    pads = [Pad(n, (i - 1) * TAIL_PITCH, 0.0, 1.5, 1.5,
+    pads = [Pad(n, (i - 1) * TAIL_PITCH, 0.0, 1.4, 1.4,
                 shape="rect" if i == 0 else "round",
                 layer="*.Cu", drill=TAIL_DRILL)
             for i, n in enumerate(("BAT+", "T", "BAT-"))]
@@ -203,10 +223,10 @@ def fp_tail():
         "wire-tail-3", pads, courtyard=(2 * TAIL_PITCH + 1.7, 1.7),
         height=0.0,
         why="B5. Courtyard excess 0.100 mm per side (bare holes, nothing "
-            "placed). 0.900 mm plated holes on 4.000 mm centres (the same pitch as "
-            "the contacts, so every run is a straight 2.500 mm hop and no two "
-            "nets ever cross) take AWG24 tinned leads. Pad 1.5 over the 0.9 "
-            "drill = 0.30 mm annular ring, above JLCPCB's 'Recommended "
+            "placed). 0.800 mm plated holes on 4.000 mm centres (the same pitch as "
+            "the contacts, so every run is a straight hop and no two nets "
+            "ever cross) take AWG24 tinned leads (0.511 mm conductor). Pad "
+            "1.400 over the 0.800 drill = 0.300 mm annular ring, above JLCPCB's 'Recommended "
             "0.25 mm or above' for 1 oz 2-layer. Not a connector: the "
             "measured pocket is 5.150 mm tall and every JST header confirmed "
             "in this project is deeper than that.")
@@ -292,12 +312,17 @@ def build(self_test=None, publish=True, verbose=True):
         "terminal. Decision B6 fits it anyway. The check is right to say it "
         "cannot verify a net the netlist does not model.")
     b.notes.append(
-        f"POCKET, MEASURED 2026-09-02 off Pollen's own meshes: clear width "
-        f"{POCKET_W:.3f} mm (power_support.stl, x -22.930..+22.930), clear "
-        f"height {POCKET_H:.3f} mm (z 50.930..56.080), clear depth "
-        f"{POCKET_Y:.3f} mm (y 27.000 plate face .. 35.000 locker bar). This "
-        f"board is {W:.3f} x {H:.3f} x {THICK} mm, so it enters the pocket "
-        f"with 0.030 mm per side in x and 0.025 mm per side in z.")
+        f"POCKET, MEASURED 2026-09-02 off Pollen's own meshes by RAY-CASTING "
+        f"the power_support solid at y = 31.000 (mid-gap), not by reading "
+        f"section outlines: clear width {POCKET_W:.3f} mm between the screw "
+        f"posts' inner faces (x -23.146..+23.146), clear height "
+        f"{POCKET_H:.3f} mm from the rib top z 50.930 to the locker bar's top "
+        f"z 55.626, clear depth {POCKET_Y:.3f} mm (y 27.000 plate face .. "
+        f"35.000 locker bar). This board is {W:.3f} x {H:.3f} x {THICK} mm, "
+        f"so it enters with {(POCKET_W - W) / 2:.3f} mm per side in x and "
+        f"{(POCKET_H - H) / 2:.3f} mm per side in z. The first cut of this "
+        f"board was 5.100 mm tall because it used the head plate's top edge "
+        f"as the ceiling; the plate is BEHIND the board, not above it.")
     b.notes.append(
         "CONTACT PITCH IS DERIVED, NOT MEASURED. 4.000 mm = the 12.000 mm "
         "window of the power_support head plate divided into three cells. "
@@ -315,8 +340,8 @@ def build(self_test=None, publish=True, verbose=True):
         "discharge current for the pack.")
     b.confirm("P2", "There is no bought part behind this footprint to check "
               "a land pattern against: it is three plated holes for soldered "
-              "wire. Drill 0.900 mm takes a stripped-and-tinned AWG24 lead "
-              "(0.511 mm conductor + insulation-free tinning); pad 1.500 mm "
+              "wire. Drill 0.800 mm takes a stripped-and-tinned AWG24 lead "
+              "(0.511 mm conductor); pad 1.400 mm "
               "gives a 0.300 mm annular ring against JLCPCB's 'Recommended "
               "0.25 mm or above; absolute minimum 0.18 mm' for 1 oz 2-layer "
               "(jlcpcb.com/capabilities/pcb-capabilities, re-read "

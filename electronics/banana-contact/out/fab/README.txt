@@ -1,7 +1,7 @@
 Microduck banana battery-contact PCB (reconstruction)
 =====================================================
 
-45.8 x 5.1 mm, 233.36 mm2, 2 copper layers
+45.8 x 4.6 mm, 210.46 mm2, 2 copper layers
 stackup   JLCPCB 2-layer 1.6 mm, 1 oz — the commodity default
 finish    ENIG — REQUIRED, not the default. A sliding spring contact on a HASL pad cold-flows and oxidises. JLCPCB publishes 'HASL (leaded / lead-free), ENIG, OSP' for this process (capabilities page, re-read 2026-09-02), so this is an order option.
 rules     JLCPCB 2-layer, standard process — tighter, and single-sourced
@@ -34,7 +34,7 @@ READ THIS BEFORE ORDERING
    outline is real; whether the orderable part conforms to it is unknown.
 
    P1     npf-contact-3  NP-F pack contacts
-          HAND-DRAWN, not computed: B3/B4. Courtyard excess is 0.100 mm per side, not the 0.250 mm a placed component gets: nothing is placed here and nothing is reflowed here — these are bare landing areas for the pack's own springs, and the board is only 5.100 mm tall. Pitch 4.000 mm is DERIVED from the 12.000 mm window measured in power_support.stl (x -9.990..+1.990, centre -4.000), NOT from an NP-F550: Sony publishes no drawing of the terminal block and the only public description found (candlepowerforums.com/threads/sony-np-f570-pinout.337813, fetched 2026-09-02) names the three terminals '+', 'C', '-' and gives no dimension. A caliper across a real pack settles it. Pad 2.600 x 2.600 mm, mask opening 0.000 expansion so the gold area is exactly the drawn area.
+          HAND-DRAWN, not computed: B3/B4. Courtyard excess is 0.100 mm per side, not the 0.250 mm a placed component gets: nothing is placed here and nothing is reflowed here — these are bare landing areas for the pack's own springs, and the board is only 4.600 mm tall. Pitch 4.000 mm is DERIVED from the 12.000 mm window measured in power_support.stl (x -9.990..+1.990, centre -4.000), NOT from an NP-F550: Sony publishes no drawing of the terminal block and the only public description found (candlepowerforums.com/threads/sony-np-f570-pinout.337813, fetched 2026-09-02) names the three terminals '+', 'C', '-' and gives no dimension. A caliper across a real pack settles it. Pad 2.400 x 2.400 mm, mask opening 0.000 expansion so the gold area is exactly the drawn area.
 
 3. PACKAGE DIMENSIONS ARE TRANSCRIBED, NOT MEASURED.
 
