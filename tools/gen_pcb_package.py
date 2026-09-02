@@ -235,6 +235,16 @@ def main():
         bom = read_bom(os.path.join(fabdir, f"{bd['name']}-bom.csv"))
         pos = read_bom(os.path.join(fabdir, f"{bd['name']}-positions.csv"))
         mod, b, rep = load_board(bd["slug"])
+        # A dropped pin is the failure mode that matters in a schematic: it
+        # looks finished and it is missing a connection. Every pad of every
+        # placed footprint must appear in the pin table, counted here, every
+        # run, not only under --self-test.
+        want = sum(len(c.fp.pads) for c in b.components.values())
+        got = len(pin_rows(b))
+        if want != got:
+            raise SystemExit(
+                f"{bd['slug']}: the pin table has {got} rows for {want} pads. "
+                f"A schematic that drops a pin is worse than no schematic.")
         built.append({"meta": bd, "verdict": verdict, "counts": counts,
                       "findings": findings, "header": header, "bom": bom,
                       "pos": pos, "board": b, "report": rep})
@@ -610,6 +620,18 @@ def self_test():
         else:
             ok = False
             print("FAILED")
+        # NEGATIVE CONTROL: the verdict must be READ, never decided here.
+        for claim in ("PASS", "FAIL", "CANNOT DETERMINE"):
+            open(p, "w").write(f"x\n\n   verdict: {claim}\n"
+                               f"   1 pass, 0 fail, 0 cannot determine\n")
+            v, c, f = read_fab_readme(p)
+            print(f"  README says {claim!r} -> parser says {v!r}", end=" ")
+            if v == claim:
+                print("OK")
+            else:
+                ok = False
+                print("FAILED: the document would not track the file")
+        open(p, "w").write("no drc block here at all\n")
         h = read_fab_header(p)
         print(f"  header from a README with no header -> {h}", end=" ")
         if h == {}:
