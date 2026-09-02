@@ -64,7 +64,22 @@ def _sheet_state(slug):
             why + " — no sheet has been generated for it yet")
 
 
+def _side(name):
+    """out/drawings/<name>.json, or {} — the optional side measurements the
+    index folds in. Absent is an ANSWER here: the row says the pass has not
+    been run rather than showing nothing."""
+    p = os.path.join(DRAWINGS, name + ".json")
+    if not os.path.exists(p):
+        return {}
+    try:
+        return json.load(open(p, encoding="utf-8"))
+    except Exception:                                         # noqa: BLE001
+        return {}
+
+
 def main():
+    feats = _side("features").get("parts", {})
+    ver = _side("verify").get("parts", {})
     rows, seen = [], set()
     for slug in sorted(os.listdir(DRAWINGS)) if os.path.isdir(DRAWINGS) else []:
         rj = os.path.join(DRAWINGS, slug, "result.json")
@@ -97,6 +112,8 @@ def main():
                 row[k] = rel(row[k])
         for t in row.get("tiles", []) or []:
             t["path"] = rel(t.get("path"))
+        row["features"] = feats.get(slug)
+        row["recheck"] = ver.get(slug)
         rows.append(row)
         seen.add(slug)
 
@@ -132,7 +149,13 @@ def main():
             "fail": sum(1 for r in rows if r.get("verdict") == "FAIL"),
             "cannot_determine": sum(1 for r in rows
                                     if r.get("verdict") == "CANNOT DETERMINE"),
+            "rechecked_pass": sum(1 for r in rows
+                                  if (r.get("recheck") or {}).get("verdict")
+                                  == "PASS"),
+            "rechecked": sum(1 for r in rows if r.get("recheck")),
         },
+        "features_generated": _side("features").get("generated"),
+        "recheck_generated": _side("verify").get("generated"),
     }
     out = os.path.join(DRAWINGS, "index.json")
     os.makedirs(DRAWINGS, exist_ok=True)

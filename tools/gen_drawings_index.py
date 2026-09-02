@@ -110,6 +110,18 @@ def sheet_card(r):
              or "not recorded"),
             ("verify_sheet", "%s (independent read-back: %s)"
              % (r.get("verified"), r.get("verify_sheet"))),
+            ("Re-checked after the run",
+             ("%s — the SVG on disk re-read against a freshly built solid on "
+              "%s; the sheet's own header says %s %s"
+              % ((r.get("recheck") or {}).get("verdict"),
+                 (r.get("recheck") or {}).get("svg_mtime"),
+                 ((r.get("recheck") or {}).get("svg_header") or {}).get("scale"),
+                 ((r.get("recheck") or {}).get("svg_header") or {}).get("size")))
+             if r.get("recheck") else
+             "not run — tools/verify_drawings.py has not been over this sheet"),
+            ("§A.6 feature census",
+             (r.get("features") or {}).get("A6_summary")
+             or "not run — tools/measure_features.py has not been over this part"),
         ]
         if r.get("warnings"):
             rows.append(("Warnings", "; ".join(r["warnings"])))
