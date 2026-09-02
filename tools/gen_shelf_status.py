@@ -22,6 +22,7 @@ the checker's own: 0 all PASS, 1 anything not PASS, 2 the checker itself broke.
 """
 import argparse
 import datetime
+import hashlib
 import html
 import json
 import os
@@ -334,6 +335,139 @@ def e(s):
 CHIP = {"PASS": "pass", "CANNOT DETERMINE": "cd", "FAIL": "rail"}
 
 
+SYSDIR = {"part": "ce-parts", "connection": "ce-connections", "assembly": "ce-assemblies"}
+
+
+def folder_of(ref):
+    """The repo-relative folder a ref lives in — a link a reader can follow.
+
+    Until 2026-09-03 this page linked to nothing but RELEASE.html and its
+    stylesheet: every ref it named was a dead string. A ref is a citation and a
+    citation that cannot be followed is decoration.
+    """
+    sysname, slug = ref.split(":", 1)
+    return "%s/%s/" % (SYSDIR.get(sysname, sysname), slug)
+
+
+VCOL = {"PASS": "#1c6b3c", "CANNOT DETERMINE": "#8a5a00", "FAIL": "#9a2b1e"}
+VKEY = {"PASS": "P", "CANNOT DETERMINE": "?", "FAIL": "F"}
+
+
+def svg_shelf_map(refs):
+    """Figure 1 — the whole shelf as one picture, drawn from the same `refs`
+    list the tables below are drawn from, so the two cannot disagree.
+
+    A page about a shelf that carries no picture of that shelf cannot be
+    audited from itself: a reader has to take the tables' word for the shape of
+    the problem. One cell per ref, coloured by verdict, grouped by system and
+    ordered worst-first, answers "how bad, and where" before any table is read.
+    """
+    order = {"assembly": 0, "connection": 1, "part": 2}
+    vrank = {"FAIL": 0, "CANNOT DETERMINE": 1, "PASS": 2}
+    groups = []
+    for sysname in ("assembly", "connection", "part"):
+        rs = sorted((r for r in refs if r["system"] == sysname),
+                    key=lambda r: (vrank[r["verdict"]], r["ref"]))
+        if rs:
+            groups.append((sysname, rs))
+    CELL, GAP, PER = 22, 4, 26
+    W, x0, lab = 812, 118, 13
+    y, rows = 34, []
+    for sysname, rs in groups:
+        n_rows = (len(rs) + PER - 1) // PER
+        rows.append((sysname, rs, y, n_rows))
+        y += n_rows * (CELL + GAP) + 26
+    H = y + 4
+    o = ['<svg viewBox="0 0 %d %d" width="100%%" role="img" '
+         'aria-label="every ref on the shelf, one cell per ref, coloured by verdict" '
+         'xmlns="http://www.w3.org/2000/svg" style="display:block;background:#fff">' % (W, H)]
+    o.append('<style>.lb{font:600 11px "Source Sans 3",sans-serif;fill:#565656}'
+             '.lg{font:11px "Source Sans 3",sans-serif;fill:#565656}'
+             '.ck{font:600 11px "IBM Plex Mono",monospace;fill:#fff}</style>')
+    lx = x0
+    for v in ("FAIL", "CANNOT DETERMINE", "PASS"):
+        n = sum(1 for r in refs if r["verdict"] == v)
+        o.append('<rect x="%d" y="8" width="12" height="12" fill="%s"/>' % (lx, VCOL[v]))
+        o.append('<text class="lg" x="%d" y="18">%s &#183; %d</text>'
+                 % (lx + 17, e(v), n))
+        lx += 34 + len(v) * 6.4 + len(str(n)) * 7
+    for sysname, rs, ytop, n_rows in rows:
+        o.append('<text class="lb" x="0" y="%d">%s &#183; %d</text>'
+                 % (ytop + 15, e(sysname), len(rs)))
+        for i, r in enumerate(rs):
+            cx = x0 + (i % PER) * (CELL + GAP)
+            cy = ytop + (i // PER) * (CELL + GAP)
+            o.append('<g><title>%s &#8212; %s</title>'
+                     '<rect x="%d" y="%d" width="%d" height="%d" fill="%s"/>'
+                     '<text class="ck" x="%d" y="%d" text-anchor="middle">%s</text></g>'
+                     % (e(r["ref"]), e(r["verdict"]), cx, cy, CELL, CELL,
+                        VCOL[r["verdict"]], cx + CELL // 2, cy + 15,
+                        VKEY[r["verdict"]]))
+    o.append('</svg>')
+    return "\n".join(o)
+
+
+def svg_class_bars(refs, by_class, classes):
+    """Figure 2 — how many REFS carry each defect class.
+
+    The statbar counts reason ROWS, which is a different number: one ref can
+    carry five rows of one class. This counts refs, so a reader can see that
+    the shelf has a few kinds of problem repeated, not sixty separate ones.
+    """
+    counts = []
+    for key, title, _lede, _fn in classes:
+        rs = {r["ref"] for r, _x in by_class.get(key, [])}
+        if rs:
+            counts.append((title, len(rs)))
+    counts.sort(key=lambda t: -t[1])
+    if not counts:
+        return ""
+    BAR, GAP, x0, W = 20, 8, 330, 812
+    mx = max(n for _t, n in counts)
+    H = len(counts) * (BAR + GAP) + 12
+    o = ['<svg viewBox="0 0 %d %d" width="100%%" role="img" '
+         'aria-label="refs carrying each defect class" '
+         'xmlns="http://www.w3.org/2000/svg" style="display:block;background:#fff">' % (W, H)]
+    o.append('<style>.bl{font:12px "Source Sans 3",sans-serif;fill:#1a1a1a}'
+             '.bn{font:600 12px "IBM Plex Mono",monospace;fill:#243b53}</style>')
+    for i, (title, n) in enumerate(counts):
+        y = i * (BAR + GAP) + 4
+        w = int(round((W - x0 - 46) * n / float(mx)))
+        o.append('<text class="bl" x="%d" y="%d" text-anchor="end">%s</text>'
+                 % (x0 - 10, y + 14, e(title)))
+        o.append('<rect x="%d" y="%d" width="%d" height="%d" fill="#243b53" opacity=".82"/>'
+                 % (x0, y, max(w, 2), BAR))
+        o.append('<text class="bn" x="%d" y="%d">%d</text>' % (x0 + max(w, 2) + 7, y + 14, n))
+    o.append('</svg>')
+    return "\n".join(o)
+
+
+def fingerprint(refs):
+    """A canonical digest of the WHOLE shelf reading: every ref, its verdict, and
+    every reason sentence the checker printed for it.
+
+    Why this exists: until 2026-09-03 `--verify` compared only totals['checked'],
+    ['pass'], ['not_pass'] and the SET of ref names. Those three totals are blind
+    to the one movement that matters most — a ref going CANNOT DETERMINE -> FAIL
+    keeps `not_pass` identical — and the committed page was materially wrong about
+    which folders FAIL while `--verify` printed CURRENT and exited 0. A staleness
+    detector that cannot see a verdict change is a decoration. This digest covers
+    the verdict and the reasons, so any of them moving makes the page stale.
+    """
+    rows = sorted(
+        [r["ref"], r["verdict"], sorted(trim(x["why"]) for x in r["reasons"])]
+        for r in refs)
+    blob = json.dumps(rows, ensure_ascii=False, sort_keys=True).encode("utf-8")
+    return hashlib.sha256(blob).hexdigest()
+
+
+def verdict_counts(refs):
+    c = {}
+    for r in refs:
+        c[r["verdict"]] = c.get(r["verdict"], 0) + 1
+    return c
+
+
 def render(refs, totals, before, exit_code, root, recovered_n=0, recoverable_n=0):
     now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
     by_class = {}
@@ -376,7 +510,9 @@ def render(refs, totals, before, exit_code, root, recovered_n=0, recoverable_n=0
       'this page reports the shelf, it does not argue with it.</p>')
     A('  <div class="rev"><span>MD-SHELF-001 · Rev A</span><span>%s</span>'
       '<span>generator: tools/gen_shelf_status.py</span>'
-      '<span>root: %s</span><span>checker exit: %d</span></div>' % (now, e(os.path.basename(root)), exit_code))
+      '<span>root: %s</span><span>checker exit: %d</span>'
+      '<span>digest %s</span></div>'
+      % (now, e(os.path.basename(root)), exit_code, fingerprint(refs)[:16]))
     A('</header>')
     A('<div class="statbar">')
     A('  <div class="stat"><b>%d</b><span>refs checked</span></div>' % totals["checked"])
@@ -395,10 +531,60 @@ def render(refs, totals, before, exit_code, root, recovered_n=0, recoverable_n=0
     A('  <div class="stat"><b>%d</b><span>distinct sentences</span></div>' % n_texts)
     A('  <div class="stat"><b>%d</b><span>defect classes</span></div>' % n_classes)
     A('</div>')
-    A('<nav class="toc"><a href="#counts">1 The count</a><a href="#classes">2 By defect class</a>'
-      '<a href="#refs">3 Every ref</a><a href="#method">4 Method</a></nav>')
+    A('<nav class="toc"><a href="#map">1 The shelf, drawn</a><a href="#counts">2 The count</a>'
+      '<a href="#classes">3 By defect class</a>'
+      '<a href="#refs">4 Every ref</a><a href="#method">5 Method</a></nav>')
 
-    A('<section id="counts"><h2><span class="n">1</span>The count</h2>')
+    A('<section id="map"><h2><span class="n">1</span>The shelf, drawn</h2>')
+    A('<p class="lede">One cell per ref, coloured by the verdict <code>bin/triad check --all</code> '
+      'gave it, grouped by system and ordered worst-first. Both figures are drawn from the same '
+      '<code>refs</code> list as every table below, in the same run of the same generator, so the '
+      'picture and the tables cannot disagree — and the page can be checked against its own '
+      'subject without leaving it. Hover a cell for its ref.</p>')
+    A('<figure><div class="dia">%s</div>' % svg_shelf_map(refs))
+    fails = sorted(r["ref"] for r in refs if r["verdict"] == "FAIL")
+    A('<figcaption><b>Figure 1.</b> %d refs: %d FAIL, %d CANNOT DETERMINE, %d PASS. '
+      'F = FAIL, ? = CANNOT DETERMINE, P = PASS. The FAIL block at the head of each row is, '
+      'in this run: %s. That list is read out of the same data as the cells, so it cannot drift '
+      'from the picture.</figcaption></figure>'
+      % (len(refs),
+         len(fails),
+         sum(1 for r in refs if r["verdict"] == "CANNOT DETERMINE"),
+         sum(1 for r in refs if r["verdict"] == "PASS"),
+         ", ".join("<code>%s</code>" % e(f) for f in fails) or "nothing"))
+    fail_refs = [r for r in refs if r["verdict"] == "FAIL"]
+    if fail_refs:
+        A('<div class="note"><b>Every FAIL on the shelf right now, and what closes each.</b> '
+          'A FAIL is not a coverage gap — it is a broken record, and TRIAD.md gives each kind '
+          'one remedy. Read out of this run, never typed:<ul>')
+        for r in sorted(fail_refs, key=lambda r: r["ref"]):
+            fr = [x for x in r["reasons"] if x["verdict"] == "FAIL"] or r["reasons"]
+            cls = {x["class"] for x in fr}
+            if cls == {"artifact_changed"}:
+                fix = ("the ledgered artifact was re-measured and no later row names it. "
+                       "APPEND a row for the new run — never edit the old one; the ledger is "
+                       "append-only and the last row&rsquo;s hash is the one checked. The "
+                       "artifact belongs to another lane, so that lane appends it.")
+            elif cls == {"dangling"}:
+                fix = ("a ref nothing on the shelf answers to. Create the folder, or correct "
+                       "the ref to one that resolves.")
+            else:
+                fix = "see the reason rows in &sect;4."
+            A('<li><code>%s</code> &mdash; %s. <em>%s</em><br><span class="trunc">%s</span></li>'
+              % (e(r["ref"]), e(", ".join(sorted(cls)) or "unclassified"), fix,
+                 e(trim(fr[0]["why"])[:220])))
+        A('</ul></div>')
+    bars = svg_class_bars(refs, by_class, CLASSES)
+    if bars:
+        A('<figure><div class="dia">%s</div>' % bars)
+        A('<figcaption><b>Figure 2.</b> How many <em>refs</em> carry each defect class — not '
+          'how many reason rows, which is the larger number in the bar above (%d rows across %d '
+          'refs), because one ref can carry five rows of one class. The shelf has a few kinds of '
+          'problem repeated, not %d separate ones.</figcaption></figure>'
+          % (n_rows, len({r["ref"] for r in refs if r["reasons"]}), n_rows))
+    A('</section>')
+
+    A('<section id="counts"><h2><span class="n">2</span>The count</h2>')
     A('<p class="lede">Three verdicts. CANNOT DETERMINE is not a pass, and a folder that '
       'grades itself CANNOT DETERMINE cannot be graded better by anything reading it.</p>')
     A('<div class="tablewrap"><table class="data"><thead><tr>'
@@ -444,7 +630,7 @@ def render(refs, totals, before, exit_code, root, recovered_n=0, recoverable_n=0
           % (len(only_sup), ", ".join("<code>%s</code>" % e(r["ref"]) for r in only_sup)))
     A('</section>')
 
-    A('<section id="classes"><h2><span class="n">2</span>By defect class</h2>')
+    A('<section id="classes"><h2><span class="n">3</span>By defect class</h2>')
     A('<p class="lede">A bare verdict is not a status. Every reason the checker gave, grouped by '
       'the kind of defect it is, so the shape of what is left is visible at a glance.</p>')
     for key, title, desc, _t in CLASSES + [("other", "Other", "reasons this page has no class for yet.", None)]:
@@ -461,7 +647,7 @@ def render(refs, totals, before, exit_code, root, recovered_n=0, recoverable_n=0
         A('</div>')
     A('</section>')
 
-    A('<section id="refs"><h2><span class="n">3</span>Every ref</h2>')
+    A('<section id="refs"><h2><span class="n">4</span>Every ref</h2>')
     A('<p class="lede">Assemblies first, then connections, then parts; within each, whatever is '
       'not PASS comes first. The reason column is the checker’s own words. Where a folder wrote a '
       'paragraph the cell is cut at the last whole word before %d characters and the cut is MARKED '
@@ -481,13 +667,15 @@ def render(refs, totals, before, exit_code, root, recovered_n=0, recoverable_n=0
       '<th>iteration</th><th>why it is not PASS</th></tr></thead><tbody>')
     for r in refs_sorted:
         why = why_cell(r["reasons"])
-        A('<tr%s><td><span class="chip %s">%s</span></td><td class="ref"><code>%s</code></td>'
+        A('<tr%s><td><span class="chip %s">%s</span></td>'
+          '<td class="ref"><a href="%s"><code>%s</code></a></td>'
           '<td class="mono" style="font-size:11.5px;color:var(--ink-2)">%s</td><td class="why">%s</td></tr>'
           % (' class="pass"' if r["verdict"] == "PASS" else "",
-             CHIP[r["verdict"]], e(r["verdict"]), e(r["ref"]), e(r["meta"]), why))
+             CHIP[r["verdict"]], e(r["verdict"]), e(folder_of(r["ref"])), e(r["ref"]),
+             e(r["meta"]), why))
     A('</tbody></table></div></section>')
 
-    A('<section id="method"><h2><span class="n">4</span>Method</h2>')
+    A('<section id="method"><h2><span class="n">5</span>Method</h2>')
     A('<pre class="code">export CE_TRIAD_ROOT="%s:%s"\n%s check --all\npython3 tools/gen_shelf_status.py            # regenerate this page\npython3 tools/gen_shelf_status.py --verify   # is it still true? exit 0 CURRENT / 1 STALE</pre>'
       % (e(root), e(WORKSHOP), e(os.path.relpath(TRIAD, REPO))))
     A('<p><b>Where a sentence was cut, and by whom.</b> <code>bin/triad</code> prints a folder\u2019s own <code>why</code> as <code>[:400]</code> (<code>bin/_triadlib.py:1482</code>) \u2014 400 characters, no marker, so its output cannot tell a folder that stopped there from one that was cut. That is where fragments like \u201c\u2026so the frame\u201d came from, not from this page. The whole sentence is on disk in the folder\u2019s own record, so this generator reads it back, checks the checker\u2019s text is a prefix of it, and prints the full sentence in section 2. Section 3\u2019s narrow column still cuts, at the last whole word before %d characters, and says so in the row with the number of characters dropped and the file that holds the rest. %d of the %d reason rows that quote a folder were recovered this way; where the prefix did not match, the checker\u2019s words stand and nothing is claimed about what follows them.</p>' % (TRUNC_AT, recovered_n, recoverable_n))
@@ -507,6 +695,30 @@ def render(refs, totals, before, exit_code, root, recovered_n=0, recoverable_n=0
       '<code>python3 tools/gen_shelf_status.py --verify</code> re-runs the checker and prints '
       'CURRENT or STALE with the difference, exit 0 or 1, writing nothing. '
       '<code>python3 tools/gen_shelf_status.py</code> then brings it up to date.</div>')
+    A('<h3>What <code>--verify</code> compares, and what it used to miss</h3>')
+    A('<p>It builds a SHA-256 digest over every ref name, its verdict, and every reason '
+      'sentence printed for it — sorted and canonically encoded — from a live run of the checker, '
+      'and compares it with the same digest recomputed from the committed '
+      '<code>out/laneT/shelf-status.json</code>. Recomputed, not read: a digest stored in the file '
+      'could be edited to certify a page that does not match it. This run’s digest is '
+      '<code>%s</code>, printed in the header above and in the JSON as '
+      '<code>fingerprint_sha256</code>. When it differs, <code>--verify</code> names every ref '
+      'whose verdict moved, in which direction, and every ref whose reasons changed.</p>'
+      % e(fingerprint(refs)))
+    A('<div class="note"><b>A measured defect in this generator, and the fix.</b> Until '
+      '2026-09-03 <code>--verify</code> compared only three totals — <code>checked</code>, '
+      '<code>pass</code>, <code>not_pass</code> — plus the set of ref names. Those are blind to '
+      'the movement that matters most: a ref going CANNOT DETERMINE &rarr; FAIL leaves '
+      '<code>not_pass</code> identical. Measured live: with the page written 2026-09-03 04:06 on '
+      'disk, <code>--verify</code> printed <code>CURRENT … checked 64 PASS 17 not-PASS 47</code> '
+      'and exited 0, while the live shelf held FAIL 5 against the page’s 3 and the two FAIL '
+      'sets had ZERO refs in common — the page named <code>part:microduck-neck-plate</code>, '
+      '<code>part:microduck-shin</code> and '
+      '<code>part:microduck-upper-leg-rigidity-plate</code>; the shelf named the five head '
+      'folders. The page was materially wrong about which folders FAIL and its only staleness '
+      'detector could not see it. A detector that cannot go red is a decoration. It now compares '
+      'the digest above and, on the same pair of files, printed STALE with all eight verdict '
+      'moves named.</div>')
     A('</section>')
     A('<footer><span>MD-SHELF-001 Rev A</span><span>%s</span>'
       '<span>generated by tools/gen_shelf_status.py</span>'
@@ -567,7 +779,12 @@ def main(argv=None):
            "$generated_by": "tools/gen_shelf_status.py (ce-designs/microduck lane T)",
            "date": datetime.datetime.now().strftime("%Y-%m-%d %H:%M"),
            "command": "bin/triad check --all", "checker_exit_code": code,
-           "totals": totals, "refs": refs}
+           "totals": totals, "refs": refs,
+           "fingerprint_sha256": fingerprint(refs),
+           "fingerprint_covers": "every ref name, its verdict, and every reason sentence "
+                                 "printed for it — sorted, canonically encoded, SHA-256. "
+                                 "--verify recomputes it from a live run and compares.",
+           "verdict_counts": verdict_counts(refs)}
     if a.verify:
         try:
             old = json.load(open(a.json, encoding="utf-8"))
@@ -575,22 +792,55 @@ def main(argv=None):
             print("CANNOT DETERMINE: %s cannot be read (%s)" % (a.json, exc), file=sys.stderr)
             return 2
         o, n = old.get("totals") or {}, totals
+        old_ref_list = old.get("refs", [])
+        # The digest is recomputed from the committed JSON's own refs rather than
+        # read out of it, so a file written before fingerprints existed still
+        # verifies, and so a hand-edited digest cannot certify a page.
+        old_fp, new_fp = fingerprint(old_ref_list), fingerprint(refs)
         keys = ("checked", "pass", "not_pass")
         diff = [(k, o.get(k), n.get(k)) for k in keys if o.get(k) != n.get(k)]
-        old_refs = {r["ref"] for r in old.get("refs", [])}
-        new_refs = {r["ref"] for r in refs}
-        added, gone = sorted(new_refs - old_refs), sorted(old_refs - new_refs)
-        if not diff and not added and not gone:
-            print("CURRENT  page written %s  checked %d  PASS %d  not-PASS %d"
-                  % (old.get("date"), n["checked"], n["pass"], n["not_pass"]))
+        oldv, newv = verdict_counts(old_ref_list), verdict_counts(refs)
+        vdiff = [(k, oldv.get(k, 0), newv.get(k, 0)) for k in VERDICTS
+                 if oldv.get(k, 0) != newv.get(k, 0)]
+        old_by = {r["ref"]: r for r in old_ref_list}
+        new_by = {r["ref"]: r for r in refs}
+        added = sorted(set(new_by) - set(old_by))
+        gone = sorted(set(old_by) - set(new_by))
+        moved, reworded = [], []
+        for ref in sorted(set(old_by) & set(new_by)):
+            ov_, nv_ = old_by[ref]["verdict"], new_by[ref]["verdict"]
+            if ov_ != nv_:
+                moved.append((ref, ov_, nv_))
+                continue
+            os_ = sorted(trim(x["why"]) for x in old_by[ref]["reasons"])
+            ns_ = sorted(trim(x["why"]) for x in new_by[ref]["reasons"])
+            if os_ != ns_:
+                reworded.append((ref, len(os_), len(ns_)))
+        if old_fp == new_fp:
+            print("CURRENT  page written %s  checked %d  PASS %d  not-PASS %d  "
+                  "digest %s" % (old.get("date"), n["checked"], n["pass"],
+                                 n["not_pass"], new_fp[:16]))
+            print("         the digest covers every ref, its verdict and every reason "
+                  "sentence — %d refs, %d reason rows." %
+                  (len(refs), sum(len(r["reasons"]) for r in refs)))
             return 0
         print("STALE    page written %s" % old.get("date"))
-        for k, ov, nv in diff:
-            print("  %-9s page %s  ->  now %s" % (k, ov, nv))
+        print("  digest    page %s  ->  now %s" % (old_fp[:16], new_fp[:16]))
+        for k, ov_, nv_ in diff:
+            print("  %-9s page %s  ->  now %s" % (k, ov_, nv_))
+        for k, ov_, nv_ in vdiff:
+            print("  %-17s page %s  ->  now %s" % (k, ov_, nv_))
         for ref in added:
             print("  NEW on the shelf, not on the page: %s" % ref)
         for ref in gone:
             print("  on the page, no longer on the shelf: %s" % ref)
+        for ref, ov_, nv_ in moved:
+            print("  VERDICT MOVED  %-52s page %s  ->  now %s" % (ref, ov_, nv_))
+        for ref, on_, nn_ in reworded:
+            print("  reasons changed %-51s page %d row(s)  ->  now %d" % (ref, on_, nn_))
+        if not (diff or vdiff or added or gone or moved or reworded):
+            print("  the totals and every verdict agree, but a reason SENTENCE differs — "
+                  "the checker's wording or a folder's own words changed.")
         print("  fix: python3 tools/gen_shelf_status.py")
         return 1
     os.makedirs(os.path.dirname(a.json), exist_ok=True)
