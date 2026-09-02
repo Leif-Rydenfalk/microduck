@@ -99,9 +99,16 @@ def dim_str(d):
     if st == "none":
         return '<span class="cd">CANNOT DETERMINE</span>' if d is not None else "—"
     v = [d.get("x"), d.get("y"), d.get("z")]
-    def f(x):
-        return "?" if x is None else ("%g" % x)
-    s = " × ".join(f(x) for x in v)
+    dp = d.get("dp") or [None, None, None]
+    def f(x, n):
+        if x is None:
+            return "?"
+        # `dp` is the SOURCE's own decimal count, per axis. Without it %g would
+        # print Radxa's '65. 0' as "65" while §1 printed "65.000" — the same
+        # number at three precisions in one document. check() proves every dp
+        # round-trips to the stored float, so no digit is invented or lost.
+        return ("%.*f" % (n, x)) if isinstance(n, int) else ("%g" % x)
+    s = " × ".join(f(x, n) for x, n in zip(v, dp))
     body = '<span class="mono">%s</span>' % E(s)
     if st == "partial":
         body += ' <span class="cd" title="one or more axes unpublished">partial</span>'
@@ -319,13 +326,19 @@ def roster_table(comps, shelves):
         mfr_cell = mfr.split(".")[0].split(",")[0].strip()
         cut = len(mfr_cell) < len(mfr.strip())
         if len(mfr_cell) > 30:
-            mfr_cell, cut = mfr_cell[:29].rstrip(), True
+            # cut on a WORD boundary — "onsemi (Semiconductor Compone…" and
+            # "CANNOT DETERMINE for the fitt…" were words broken in half.
+            head = mfr_cell[:30]
+            sp = head.rfind(" ")
+            mfr_cell, cut = (head[:sp] if sp > 8 else head).rstrip(), True
         if cut:
             mfr_cell += " …"
         rows.append([
             '<b>%s</b><br><span class="tiny">%s · %s</span>'
             % (E(c["name"]), E(c["row"]), E(c["slug"])),
-            E(mfr_cell) or "—",
+            (('<span class="cd">%s</span>' % E(mfr_cell))
+             if mfr_cell.upper().startswith(("CANNOT DETERMINE", "NOT ONE"))
+             else E(mfr_cell)) or "—",
             qty_str(c),
             dim_str(c.get("dimensions_mm")),
             mass_str(c),
@@ -374,6 +387,7 @@ def detail_block(c, sh):
     d = c.get("dimensions_mm") or {}
     kv.append(("envelope", dim_str(d) + (
         '<div class="src">%s</div>' % E(d.get("source")) if d.get("source") else "") + (
+        '<div class="src">%s</div>' % E(d.get("dp_why")) if d.get("dp_why") else "") + (
         '<div class="src cd">%s</div>' % E(d.get("z_why")) if d.get("z_why") else "") + (
         '<div class="src">%s</div>' % E(d.get("z_note")) if d.get("z_note") else "")))
     if c.get("mount_pattern"):
@@ -867,6 +881,34 @@ def check():
         seen.add(p)
         if not os.path.exists(os.path.join(REPO, p)):
             fails.append("cited path does not resolve: %s" % p)
+
+    # `dp` must not lose or invent a digit: formatting the stored float at the
+    # source's stated precision has to give the stored float back.
+    for c in C["components"]:
+        d = c.get("dimensions_mm") or {}
+        dp = d.get("dp")
+        if not dp:
+            if any(d.get(k) is not None for k in "xyz"):
+                cds.append("%s: dimensions but no `dp` — printed with %%g, so the source's "
+                           "own precision is not carried" % c["slug"])
+            continue
+        if not isinstance(dp, list) or len(dp) != 3:
+            fails.append("%s: dp must be a 3-list [x,y,z], got %r" % (c["slug"], dp))
+            continue
+        for ax, n in zip("xyz", dp):
+            v, has = d.get(ax), d.get(ax) is not None
+            if has and n is None:
+                cds.append("%s: %s = %g has no dp; printed with %%g"
+                           % (c["slug"], ax, v))
+            elif has and not isinstance(n, int):
+                fails.append("%s: dp[%s] is %r, not an integer" % (c["slug"], ax, n))
+            elif has and abs(float("%.*f" % (n, v)) - float(v)) > 5e-9:
+                fails.append("%s: %s = %r does NOT round-trip at %d dp (prints %.*f) — the "
+                             "stated source precision would drop a digit this file holds"
+                             % (c["slug"], ax, v, n, n, v))
+            elif (not has) and isinstance(n, int):
+                fails.append("%s: dp[%s] = %d but the axis is null — a precision for a "
+                             "dimension nobody published" % (c["slug"], ax, n))
 
     for c in C["components"]:
         sh = shelf(c["slug"])
