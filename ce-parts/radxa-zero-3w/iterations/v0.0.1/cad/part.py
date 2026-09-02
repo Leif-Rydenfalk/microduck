@@ -53,11 +53,23 @@ HDR_D, HDR_PITCH, HDR_N = 1.0, 2.54, 20   # 40 x Ø0.998, x -24.13 .. 24.13 step
 HDR_Z = (-10.23, -12.77)                 # the two header rows (mesh)
 # ---- drill: Radxa's brief, §4 drawing (mm) — the alternative pattern --------
 RADXA_MOUNT_D = 2.814                    # MEASURED (Radxa prints "4 X Ø2. 8"); sd 0.0125 over the four
-RADXA_EDGE_IN = 3.5727                   # MEASURED (Radxa prints "3. 6"); sd 0.0396 over the eight edge insets
-RADXA_LONG_SPAN = 57.8429                # MEASURED pitch along the length. NOT 54.7 — see the header note above.
-RADXA_WIDE_SPAN = 22.8662                # MEASURED pitch across the width
-RADXA_MOUNT_X = (-RADXA_LONG_SPAN / 2, RADXA_LONG_SPAN / 2)         # ±28.9215
-RADXA_MOUNT_Z = (-RADXA_WIDE_SPAN / 2, RADXA_WIDE_SPAN / 2)         # ±11.4331
+# The MEASUREMENT and the NOMINAL, kept apart on purpose (corrected 2026-09-03).
+RADXA_EDGE_IN_MEAS = 3.5727              # MEASURED, sd 0.0396 over the eight edge insets
+RADXA_LONG_SPAN_MEAS = 57.8429           # MEASURED pitch along the length. NOT 54.7 — see the header note above.
+RADXA_WIDE_SPAN_MEAS = 22.8662           # MEASURED pitch across the width
+# The NOMINAL is what the solid is built on. Radxa PRINTS one inset, "3. 6", on
+# an outline it prints as "65. 0" x "30. 0"; that nominal reconstructs the two
+# measured pitches to within 0.043 and 0.066 mm, where the competing
+# Raspberry-Pi-Zero nominal (58.0 x 23.0) is 0.157 and 0.134 mm out. Building on
+# half the raw measured pitch instead would cut the raster's own noise (1 sigma
+# 0.0396 mm) into the geometry as if it were design intent. cad/interfaces.json
+# `mount_holes.centres_mm` carries both figures and the 0.0215 / 0.0331 mm
+# difference between them.
+RADXA_EDGE_IN = 3.600                    # Radxa's printed callout "3. 6"
+RADXA_LONG_SPAN = L - 2 * RADXA_EDGE_IN  # 57.800
+RADXA_WIDE_SPAN = W - 2 * RADXA_EDGE_IN  # 22.800
+RADXA_MOUNT_X = (-RADXA_LONG_SPAN / 2, RADXA_LONG_SPAN / 2)         # ±28.900
+RADXA_MOUNT_Z = (-RADXA_WIDE_SPAN / 2, RADXA_WIDE_SPAN / 2)         # ±11.400
 
 MATERIAL = "FR4"
 

@@ -1,0 +1,265 @@
+{
+ "$about": "check_board_hole_interchange.py \u2014 does one printed mount accept BOTH boards?",
+ "made": "2026-09-03",
+ "made_by": "tools/check_board_hole_interchange.py (lane C, electronics verification)",
+ "question": "A printed head part carries four thread-forming posts on one drill pattern. Does a board drilled on the OTHER pattern still mount? The screw is fixed by the post, so all float lives in the board's hole.",
+ "rule": "hypot(pitch_long_mismatch, pitch_wide_mismatch) / 2 <= (board_hole_D - screw_d) / 2",
+ "screw_d_is": "the NOMINAL (maximum) major diameter \u2014 the conservative case; ISO 4762 6g bodies run under it",
+ "patterns": {
+  "radxa_measured": {
+   "pitch_long_mm": 57.8429,
+   "pitch_wide_mm": 22.8662,
+   "hole_d_mm": 2.814,
+   "hole_d_sd_mm": 0.0125,
+   "sigma_mm": 0.0396,
+   "source": "MEASURED off the RAD-DOC-0084 Rev 1.10 \u00a74 raster by tools/measure_radxa_drawing.py; out/measure/radxa-zero-3w-mechanical.json"
+  },
+  "radxa_nominal_3p6": {
+   "pitch_long_mm": 57.8,
+   "pitch_wide_mm": 22.8,
+   "hole_d_mm": 2.8,
+   "hole_d_sd_mm": null,
+   "sigma_mm": 0.0396,
+   "sigma_basis": "the SAME 0.0396 mm as radxa_measured: this nominal is a reconstruction anchored on the same raster ink, so it inherits that ink's uncertainty rather than being exact.",
+   "source": "RECONSTRUCTED from Radxa's own printed callouts: inset '3. 6', outline '65. 0' x '30. 0', hole '4 X \u00d82. 8' (RAD-DOC-0084 \u00a74). This is the drawing's intent; radxa_measured is the drawing's ink."
+  },
+  "pi_zero_2w_mesh": {
+   "pitch_long_mm": 58.0,
+   "pitch_wide_mm": 23.0,
+   "hole_d_mm": 2.7,
+   "hole_d_sd_mm": null,
+   "sigma_mm": null,
+   "sigma_basis": "UNKNOWN and not taken as zero. cecad.meshfeatures published no residual for this cylinder fit, and SPEC.md \u00a78 puts Pollen's mesh decimation floor at p95 surface distance 1.0 mm \u2014 so the error on this pattern is neither measured nor negligible.",
+   "source": "MEASURED off Pollen's stand-in mesh pcb__raspberry_pi_zero_2_w.stl by cecad.meshfeatures; carried in ce-parts/radxa-zero-3w/iterations/v0.0.1/cad/part.py as MESH_MOUNT_D / MESH_MOUNT_X / MESH_MOUNT_Z"
+  }
+ },
+ "screws": {
+  "M2": {
+   "d_mm": 2.0,
+   "cite": "cecad/fasteners.py line 57, M2 row"
+  },
+  "M2.5": {
+   "d_mm": 2.5,
+   "cite": "cecad/fasteners.py line 58, M2.5 row"
+  }
+ },
+ "cases": [
+  {
+   "posts_on": "pi_zero_2w_mesh",
+   "board_is": "radxa_measured",
+   "screw": "M2",
+   "screw_d_mm": 2.0,
+   "board_hole_d_mm": 2.814,
+   "pitch_mismatch_long_mm": 0.1571,
+   "pitch_mismatch_wide_mm": 0.1338,
+   "radial_offset_required_mm": 0.1032,
+   "radial_clearance_available_mm": 0.407,
+   "margin_mm": 0.3038,
+   "measurement_1sigma_mm": 0.0396,
+   "unquantified_uncertainty_in": [
+    "posts:pi_zero_2w_mesh"
+   ],
+   "verdict": "PASS",
+   "why": "fits with 0.3038 mm of radial margin (7.67 sigma). CAVEAT: posts:pi_zero_2w_mesh carries no stated positional uncertainty (see the pattern's sigma_basis), so this margin is an upper bound on the confidence, not a tolerance."
+  },
+  {
+   "posts_on": "pi_zero_2w_mesh",
+   "board_is": "radxa_measured",
+   "screw": "M2.5",
+   "screw_d_mm": 2.5,
+   "board_hole_d_mm": 2.814,
+   "pitch_mismatch_long_mm": 0.1571,
+   "pitch_mismatch_wide_mm": 0.1338,
+   "radial_offset_required_mm": 0.1032,
+   "radial_clearance_available_mm": 0.157,
+   "margin_mm": 0.0538,
+   "measurement_1sigma_mm": 0.0396,
+   "unquantified_uncertainty_in": [
+    "posts:pi_zero_2w_mesh"
+   ],
+   "verdict": "PASS",
+   "why": "fits with 0.0538 mm of radial margin (1.36 sigma). CAVEAT: posts:pi_zero_2w_mesh carries no stated positional uncertainty (see the pattern's sigma_basis), so this margin is an upper bound on the confidence, not a tolerance."
+  },
+  {
+   "posts_on": "pi_zero_2w_mesh",
+   "board_is": "radxa_nominal_3p6",
+   "screw": "M2",
+   "screw_d_mm": 2.0,
+   "board_hole_d_mm": 2.8,
+   "pitch_mismatch_long_mm": 0.2,
+   "pitch_mismatch_wide_mm": 0.2,
+   "radial_offset_required_mm": 0.1414,
+   "radial_clearance_available_mm": 0.4,
+   "margin_mm": 0.2586,
+   "measurement_1sigma_mm": 0.0396,
+   "unquantified_uncertainty_in": [
+    "posts:pi_zero_2w_mesh"
+   ],
+   "verdict": "PASS",
+   "why": "fits with 0.2586 mm of radial margin (6.53 sigma). CAVEAT: posts:pi_zero_2w_mesh carries no stated positional uncertainty (see the pattern's sigma_basis), so this margin is an upper bound on the confidence, not a tolerance."
+  },
+  {
+   "posts_on": "pi_zero_2w_mesh",
+   "board_is": "radxa_nominal_3p6",
+   "screw": "M2.5",
+   "screw_d_mm": 2.5,
+   "board_hole_d_mm": 2.8,
+   "pitch_mismatch_long_mm": 0.2,
+   "pitch_mismatch_wide_mm": 0.2,
+   "radial_offset_required_mm": 0.1414,
+   "radial_clearance_available_mm": 0.15,
+   "margin_mm": 0.0086,
+   "measurement_1sigma_mm": 0.0396,
+   "unquantified_uncertainty_in": [
+    "posts:pi_zero_2w_mesh"
+   ],
+   "verdict": "CANNOT DETERMINE",
+   "why": "it fits by 0.0086 mm of radius, which is INSIDE the 0.0396 mm 1 sigma of the raster measurement the pattern comes from. A calipered board settles it; this drawing cannot.. CAVEAT: posts:pi_zero_2w_mesh carries no stated positional uncertainty (see the pattern's sigma_basis), so this margin is an upper bound on the confidence, not a tolerance."
+  },
+  {
+   "posts_on": "radxa_measured",
+   "board_is": "pi_zero_2w_mesh",
+   "screw": "M2",
+   "screw_d_mm": 2.0,
+   "board_hole_d_mm": 2.7,
+   "pitch_mismatch_long_mm": 0.1571,
+   "pitch_mismatch_wide_mm": 0.1338,
+   "radial_offset_required_mm": 0.1032,
+   "radial_clearance_available_mm": 0.35,
+   "margin_mm": 0.2468,
+   "measurement_1sigma_mm": 0.0396,
+   "unquantified_uncertainty_in": [
+    "board:pi_zero_2w_mesh"
+   ],
+   "verdict": "PASS",
+   "why": "fits with 0.2468 mm of radial margin (6.23 sigma). CAVEAT: board:pi_zero_2w_mesh carries no stated positional uncertainty (see the pattern's sigma_basis), so this margin is an upper bound on the confidence, not a tolerance."
+  },
+  {
+   "posts_on": "radxa_measured",
+   "board_is": "pi_zero_2w_mesh",
+   "screw": "M2.5",
+   "screw_d_mm": 2.5,
+   "board_hole_d_mm": 2.7,
+   "pitch_mismatch_long_mm": 0.1571,
+   "pitch_mismatch_wide_mm": 0.1338,
+   "radial_offset_required_mm": 0.1032,
+   "radial_clearance_available_mm": 0.1,
+   "margin_mm": -0.0032,
+   "measurement_1sigma_mm": 0.0396,
+   "unquantified_uncertainty_in": [
+    "board:pi_zero_2w_mesh"
+   ],
+   "verdict": "FAIL",
+   "why": "the screw cannot enter the board hole: short by 0.0032 mm of radius. CAVEAT: board:pi_zero_2w_mesh carries no stated positional uncertainty (see the pattern's sigma_basis), so this margin is an upper bound on the confidence, not a tolerance."
+  },
+  {
+   "posts_on": "radxa_measured",
+   "board_is": "radxa_nominal_3p6",
+   "screw": "M2",
+   "screw_d_mm": 2.0,
+   "board_hole_d_mm": 2.8,
+   "pitch_mismatch_long_mm": 0.0429,
+   "pitch_mismatch_wide_mm": 0.0662,
+   "radial_offset_required_mm": 0.0394,
+   "radial_clearance_available_mm": 0.4,
+   "margin_mm": 0.3606,
+   "measurement_1sigma_mm": 0.056,
+   "unquantified_uncertainty_in": [],
+   "verdict": "PASS",
+   "why": "fits with 0.3606 mm of radial margin (6.44 sigma)"
+  },
+  {
+   "posts_on": "radxa_measured",
+   "board_is": "radxa_nominal_3p6",
+   "screw": "M2.5",
+   "screw_d_mm": 2.5,
+   "board_hole_d_mm": 2.8,
+   "pitch_mismatch_long_mm": 0.0429,
+   "pitch_mismatch_wide_mm": 0.0662,
+   "radial_offset_required_mm": 0.0394,
+   "radial_clearance_available_mm": 0.15,
+   "margin_mm": 0.1106,
+   "measurement_1sigma_mm": 0.056,
+   "unquantified_uncertainty_in": [],
+   "verdict": "PASS",
+   "why": "fits with 0.1106 mm of radial margin (1.97 sigma)"
+  },
+  {
+   "posts_on": "radxa_nominal_3p6",
+   "board_is": "pi_zero_2w_mesh",
+   "screw": "M2",
+   "screw_d_mm": 2.0,
+   "board_hole_d_mm": 2.7,
+   "pitch_mismatch_long_mm": 0.2,
+   "pitch_mismatch_wide_mm": 0.2,
+   "radial_offset_required_mm": 0.1414,
+   "radial_clearance_available_mm": 0.35,
+   "margin_mm": 0.2086,
+   "measurement_1sigma_mm": 0.0396,
+   "unquantified_uncertainty_in": [
+    "board:pi_zero_2w_mesh"
+   ],
+   "verdict": "PASS",
+   "why": "fits with 0.2086 mm of radial margin (5.27 sigma). CAVEAT: board:pi_zero_2w_mesh carries no stated positional uncertainty (see the pattern's sigma_basis), so this margin is an upper bound on the confidence, not a tolerance."
+  },
+  {
+   "posts_on": "radxa_nominal_3p6",
+   "board_is": "pi_zero_2w_mesh",
+   "screw": "M2.5",
+   "screw_d_mm": 2.5,
+   "board_hole_d_mm": 2.7,
+   "pitch_mismatch_long_mm": 0.2,
+   "pitch_mismatch_wide_mm": 0.2,
+   "radial_offset_required_mm": 0.1414,
+   "radial_clearance_available_mm": 0.1,
+   "margin_mm": -0.0414,
+   "measurement_1sigma_mm": 0.0396,
+   "unquantified_uncertainty_in": [
+    "board:pi_zero_2w_mesh"
+   ],
+   "verdict": "FAIL",
+   "why": "the screw cannot enter the board hole: short by 0.0414 mm of radius. CAVEAT: board:pi_zero_2w_mesh carries no stated positional uncertainty (see the pattern's sigma_basis), so this margin is an upper bound on the confidence, not a tolerance."
+  },
+  {
+   "posts_on": "radxa_nominal_3p6",
+   "board_is": "radxa_measured",
+   "screw": "M2",
+   "screw_d_mm": 2.0,
+   "board_hole_d_mm": 2.814,
+   "pitch_mismatch_long_mm": 0.0429,
+   "pitch_mismatch_wide_mm": 0.0662,
+   "radial_offset_required_mm": 0.0394,
+   "radial_clearance_available_mm": 0.407,
+   "margin_mm": 0.3676,
+   "measurement_1sigma_mm": 0.056,
+   "unquantified_uncertainty_in": [],
+   "verdict": "PASS",
+   "why": "fits with 0.3676 mm of radial margin (6.56 sigma)"
+  },
+  {
+   "posts_on": "radxa_nominal_3p6",
+   "board_is": "radxa_measured",
+   "screw": "M2.5",
+   "screw_d_mm": 2.5,
+   "board_hole_d_mm": 2.814,
+   "pitch_mismatch_long_mm": 0.0429,
+   "pitch_mismatch_wide_mm": 0.0662,
+   "radial_offset_required_mm": 0.0394,
+   "radial_clearance_available_mm": 0.157,
+   "margin_mm": 0.1176,
+   "measurement_1sigma_mm": 0.056,
+   "unquantified_uncertainty_in": [],
+   "verdict": "PASS",
+   "why": "fits with 0.1176 mm of radial margin (2.10 sigma)"
+  }
+ ],
+ "roll_up": {
+  "counts": {
+   "PASS": 9,
+   "CANNOT DETERMINE": 1,
+   "FAIL": 2
+  },
+  "worst": "FAIL",
+  "headline": "The two drill patterns are NOT unconditionally interchangeable, and which screw is fitted decides it. 9 PASS, 1 CANNOT DETERMINE, 2 FAIL over the twelve directions. On M2 (\u00d82.000 in a \u00d82.700-2.814 hole) all six directions PASS with 0.2086-0.3676 mm of radial margin. On M2.5 \u2014 the size SPEC.md \u00a74's \u00d82.7/2.8 x20 census and docs/BOM.md \u00a74's 'M2.5\u00d76 \u00d720' both name for these holes \u2014 a Pi-Zero-2-W board on Radxa-pattern posts FAILS in BOTH readings of the Radxa pattern: it needs 0.1032 mm (measured) or 0.1414 mm (nominal) of radial offset and a \u00d82.700 hole on a \u00d82.500 screw gives 0.1000 mm, so it is short by 0.0032 or 0.0414 mm of radius. The reverse direction \u2014 a Radxa board on Pi-Zero posts \u2014 fits by 0.0538 mm against the measured pattern but by only 0.0086 mm against the nominal one, which is INSIDE the drawing's own 0.0396 mm 1 sigma and is therefore CANNOT DETERMINE. THE CONSEQUENCE FOR THIS PROJECT: the printed head part must be drilled on the RADXA pattern (that is the board we specify), and if it is, a Pi Zero 2 W will not bolt into it on M2.5. Nothing here is a reason to change the Radxa record; it is a reason to stop calling the two patterns interchangeable. WHAT SETTLES IT: a calipered production board, or a Radxa DXF/STEP \u2014 neither published as of 2026-09-03."
+ }
+}

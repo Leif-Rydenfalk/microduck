@@ -9,19 +9,79 @@
     "interfaces": [
       {
         "name": "mount_holes",
-        "frame": {"origin_mm": [0.0, 0.0, 0.0], "z_axis": [0.0, 1.0, 0.0], "x_axis": [1.0, 0.0, 0.0]},
+        "frame": {
+          "origin_mm": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "z_axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "x_axis": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
         "verdict": "PASS",
         "role": "fastener_pattern",
-        "accepts": ["connection:threaded-m2"],
-        "what": "4 x through-holes on a rectangular pattern, centres at X = +/-28.9215 mm, Z = +/-11.4331 mm, drilled along Y through the 1.6 mm board. MEASURED diameter 2.8140 mm (sd 0.0125 over the four); Radxa prints '4 X Ø2. 8'. MEASURED pitch 57.8429 mm along X by 22.8662 mm along Z. MEASURED edge inset 3.5727 mm (sd 0.0396 over the eight edge distances); Radxa prints '3. 6' once. A nominal 3.600 mm inset reconstructs the two measured pitches to 57.800 / 22.800, i.e. within 0.043 and 0.066 mm (0.8 and 1.2 px) — the competing Raspberry-Pi-Zero nominal 58.000 / 23.000 is 0.157 and 0.134 mm out (3.0 and 2.5 px), so 3.6 is the better-supported nominal by a factor of 2 to 4. A Ø2.814 hole is a clearance hole for M2.5 (0.314 mm diametral clearance) and loose for M2.",
-        "source": "MEASURED 2026-09-02, tools/measure_radxa_drawing.py --check (4/4 negative controls PASS); result evidence/radxa-zero-3w-mechanical.json",
+        "accepts": [
+          "connection:threaded-m2.5"
+        ],
+        "what": "4 × through-holes on a rectangular pattern, drilled along Y through the 1.6 mm board. CENTRES AT X = ±28.900 mm, Z = ±11.400 mm — the NOMINAL, reconstructed from Radxa's own printed callouts (edge inset '3. 6' on the printed outline '65. 0' × '30. 0'), which is what this record's own text argues is the better-supported figure and is therefore what it now uses. MEASURED diameter 2.8140 mm (sd 0.0125 over the four); Radxa prints '4 X Ø2. 8'. MEASURED pitch 57.8429 mm along X by 22.8662 mm along Z, i.e. centres at ±28.9215 / ±11.4331 — 0.0215 and 0.0331 mm from the nominal above, both inside the 0.0396 mm 1 sigma. MEASURED edge inset 3.5727 mm (sd 0.0396 over the eight edge distances); Radxa prints '3. 6' once. A nominal 3.600 mm inset reconstructs the two measured pitches to 57.800 / 22.800, i.e. within 0.043 and 0.066 mm (0.8 and 1.2 px) — the competing Raspberry-Pi-Zero nominal 58.000 / 23.000 is 0.157 and 0.134 mm out (3.0 and 2.5 px), so 3.6 is the better-supported nominal by a factor of 2 to 4. A Ø2.814 hole is a clearance hole for M2.5 (0.314 mm diametral clearance) and loose for M2 (0.814 mm).",
+        "source": "MEASURED 2026-09-02, tools/measure_radxa_drawing.py --check (4/4 negative controls PASS); result evidence/radxa-zero-3w-mechanical.json and out/measure/radxa-zero-3w-mechanical.json. Interchange arithmetic 2026-09-03, tools/check_board_hole_interchange.py -> out/measure/board-mount-interchange.json",
         "uncertainty_mm": 0.0396,
-        "uncertainty_basis": "1 sigma of the eight measured edge insets, 0.0396 mm = 0.74 px on a raster whose pixel is 0.05321 mm. Radxa dimensions no hole position except the single '3. 6', so 3 dp cannot be had from this document. A calipered production board, or a Radxa DXF/STEP, settles it.",
-        "vs_the_pi_zero_2w_stand_in": "FINDING 3, mechanical half. Pollen's MJCF carries a Raspberry Pi Zero 2 W mesh whose drill measures 58.0 x 23.0 mm / Ø2.70 (cad/part.py MESH_MOUNT_*). The Radxa's measured pattern is 0.157 mm shorter along X, 0.134 mm narrower along Z, 0.114 mm larger in the hole. An M2.5 screw absorbs all three, so the printed head parts fit either board and the 'two disagreeing drill patterns' in this folder's earlier verdict do not in fact disagree by anything a shop can hold. What genuinely differs between the boards is the CONNECTORS (2 x USB-C + micro-HDMI + 22-pin MIPI CSI here; micro-USB x2 + mini-HDMI on a Pi Zero 2 W) — a shell-cutout problem, not a mounting one, and it is the connector_edge_features interface's CANNOT DETERMINE."
+        "uncertainty_basis": "1 sigma of the eight measured edge insets, 0.0396 mm = 0.74 px on a raster whose pixel is 0.05321 mm. Radxa dimensions no hole position except the single '3. 6', so 3 dp cannot be had from this document — the ±28.900 / ±11.400 above are 3 dp of a 2-significant-figure callout, not 3 dp of measurement, and they carry ±0.0396 mm. A calipered production board, or a Radxa DXF/STEP, settles it.",
+        "vs_the_pi_zero_2w_stand_in": "FINDING 3, mechanical half — CORRECTED 2026-09-03, and the earlier sentence here was too generous. Pollen's MJCF carries a Raspberry Pi Zero 2 W mesh whose drill measures 58.0 × 23.0 mm / Ø2.70 (cad/part.py MESH_MOUNT_*). The earlier text said 'an M2.5 screw absorbs all three [differences], so the printed head parts fit either board'. That was an adjective, not a check. tools/check_board_hole_interchange.py is the check — the screw is fixed by the printed post, so all float lives in the board's own hole and the test is hypot(Δpitch_long, Δpitch_wide)/2 <= (D_board_hole − d_screw)/2, with d_screw at its nominal maximum. Over the twelve directions (3 patterns × 2 boards × 2 screw sizes): 9 PASS, 1 CANNOT DETERMINE, 2 FAIL (out/measure/board-mount-interchange.json). ON M2 the claim holds everywhere — all six directions PASS with 0.2086 to 0.3676 mm of radial margin. ON M2.5, WHICH IS THE SIZE THESE HOLES ACTUALLY TAKE, it does not: a Pi Zero 2 W board on Radxa-pattern posts needs 0.1032 mm (measured pattern) or 0.1414 mm (nominal pattern) of radial offset and its Ø2.700 hole on a Ø2.500 screw gives only 0.1000 mm — short by 0.0032 mm and by 0.0414 mm of radius. FAIL, in both readings. The reverse direction, a Radxa board on Pi-Zero-pattern posts, fits by 0.0538 mm against the measured pattern but by only 0.0086 mm against the nominal one, which is inside the drawing's own 0.0396 mm 1 sigma: CANNOT DETERMINE. WHAT THIS MEANS FOR THE BUILD: nothing needs to change about the Radxa itself — the printed head part should be drilled on the RADXA pattern, because the Radxa is the specified board. What changes is the claim: the two patterns are not interchangeable, and a head printed for the Radxa will not take a Pi Zero 2 W on M2.5. It will on M2. AND THE BIGGER DIFFERENCE IS STILL NOT THE DRILL: what genuinely separates the boards is the CONNECTORS (2 × USB-C + micro-HDMI + 22-pin MIPI CSI here; micro-USB ×2 + mini-HDMI on a Pi Zero 2 W) — a shell-cutout problem, and it is the connector_edge_features interface's CANNOT DETERMINE.",
+        "accepts_why": "M2.5, not M2, and the two are no longer allowed to disagree between this field and the prose. THREE independent lines land on M2.5 for these four holes: (1) the measured hole itself — Ø2.8140 mm sits between ce-cad/cecad/fasteners.py's M2.5 close clearance (2.70) and its normal clearance (2.90), and gives 0.314 mm of diametral clearance on a Ø2.500 screw against 0.814 mm on a Ø2.000 one; (2) SPEC.md §4's hole census over Pollen's meshes, whose fourth population 'Ø2.7/2.8 ×20' is the only one of the four that is NOT an M2 figure; (3) docs/BOM.md §4, which buys 'M2.5×6 ×20' for exactly that population. connection:threaded-m2.5 was created in this repo on 2026-09-03 so this field could name a ref that resolves — before it existed the choice was a dangling ref or the M2 folder this hole is loose in. `bin/triad check connection:threaded-m2.5` PASSes (7 measured).",
+        "centres_mm": {
+          "x": [
+            -28.9,
+            28.9
+          ],
+          "z": [
+            -11.4,
+            11.4
+          ],
+          "basis": "NOMINAL from Radxa's printed '3. 6' edge inset on its printed 65.0 × 30.0 outline",
+          "measured_x": [
+            -28.9215,
+            28.9215
+          ],
+          "measured_z": [
+            -11.4331,
+            11.4331
+          ],
+          "measured_basis": "half the raster-measured pitch 57.8429 × 22.8662 mm",
+          "nominal_minus_measured_mm": {
+            "x": 0.0215,
+            "z": 0.0331
+          },
+          "why_nominal_is_the_record": "The record must use its own best-supported figure. This interface's text already argues that the 3.600 mm inset reconstructs the measured ink 2-4x better than the Pi-Zero nominal does; carrying the raw half-pitch instead would publish the raster's noise as a design dimension. Both are kept: the nominal is what a drawing or a mate() should use, the measured is the evidence for it, and they differ by less than the measurement's own 1 sigma (0.0396 mm)."
+        }
       },
       {
         "name": "header_40pin",
-        "frame": {"origin_mm": [0.0, 0.8, -11.6645], "z_axis": [0.0, 1.0, 0.0], "x_axis": [1.0, 0.0, 0.0]},
+        "frame": {
+          "origin_mm": [
+            0.0,
+            0.8,
+            -11.6645
+          ],
+          "z_axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "x_axis": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
         "verdict": "PASS",
         "role": "board_to_board",
         "accepts": [],
@@ -32,7 +92,23 @@
       },
       {
         "name": "board_envelope",
-        "frame": {"origin_mm": [0.0, 0.0, 0.0], "z_axis": [0.0, 1.0, 0.0], "x_axis": [1.0, 0.0, 0.0]},
+        "frame": {
+          "origin_mm": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "z_axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "x_axis": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
         "verdict": "PASS",
         "role": "envelope",
         "accepts": [],

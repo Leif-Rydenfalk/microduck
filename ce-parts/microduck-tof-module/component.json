@@ -5,11 +5,11 @@
   "slug": "microduck-tof-module",
   "title": "microduck-tof-module",
   "verdict": "CANNOT DETERMINE",
-  "why": "Which generation ships (L5CX vs L8CX) and which breakout: CANNOT DETERMINE (docs §6, open question 6).",
+  "why": "GENERATION: SETTLED, and it is not one of them. Pollen's driver crate says so in its own words — research/raw/tof_src_lib.rs:8-11 verbatim: 'Both generations, decided at runtime. The two are interchangeable on the board and differ only in firmware and a driver prefix, so which one is fitted is not a build-time choice: an ID read picks the driver before any firmware is uploaded ([`Generation`]). Ducks in the field have both.' A VL53L5CX (part:vl53l5cx, DS13754 Rev 13) and a VL53L8CX (part:vl53l8cx, DS14161 Rev 12) are both correct answers and the daemon probes 0x29 then 0x52 on /dev/i2c-pihat then /dev/i2c-3 (research/raw/tof_src_main.rs:80-90). Superseded the earlier framing 'which generation ships: CANNOT DETERMINE', which asked a question the source answers. STILL CANNOT DETERMINE, and this is the verdict: WHICH BREAKOUT BOARD carries the die, and therefore whether the module regulates and level-shifts on board. It has to, and nobody has published that it does: the socket is a 4-pin Stemma J5 (GND / 3V3 / SDA / SCL, deploy_audio_i2c3-pihat.dts:10) fed from the Radxa's 3.3 V rail, the L5CX permits a 3.3 V IOVDD configuration (DS13754 Rev 13 Table 12 p.17: 'IOVDD supply | 3.3 V configuration | 3.0 | 3.3 | 3.6') and the L8CX DOES NOT — its IOVDD absolute maximum is 1.98 V and there is no 3.3 V configuration (DS14161 Rev 12 Table 11 and Table 12, p.20). A bare L8CX die on that socket is destroyed. So a board that accepts both, as the driver says the robot's does, MUST carry a 1.8 V regulator and level translation, and the fitted breakout's part number, its regulator and its bus pull-ups are all unpublished. This is ELECTRONICS-DATASHEET.html §13 row E3 and it is the module's whole open question. WHAT SETTLES IT: a teardown photograph of the head's ToF board readable enough to name the breakout, or a meter on the Stemma J5 3V3 pin and on the die's IOVDD pin of a production robot.",
   "sector": "electronics",
   "subsector": null,
   "lifecycle": "unknown",
   "origin": "inferred",
-  "origin_why": "No vendor document describes this board; the record is what Pollen's published source and device tree let one say (docs/ELECTRONICS-AND-SOFTWARE.md)."
+  "origin_why": "No vendor document describes this board; the record is what Pollen's published source and device tree let one say (docs/ELECTRONICS-AND-SOFTWARE.md). Generation question closed 2026-09-03 from Pollen's own driver source (lane C); the breakout identity remains the open item."
  }
 }
