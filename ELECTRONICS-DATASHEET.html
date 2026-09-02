@@ -1,0 +1,863 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Microduck Electronics Datasheet</title>
+<style>
+:root{
+  --paper:#f7f6f2; --card:#ffffff; --ink:#1c2733; --ink-2:#5b6570; --line:#e4e0d6;
+  --wire:#2f6f8f; --wire-ink:#1c4a63; --live:#3c8c5a; --cd:#b07a12; --cd-bg:#f8efd6;
+  --pass-bg:#e3f0e6; --pass-ink:#2c6e33; --chip:#eceae2; --mono-bg:#f0eee6; --rail:#c0452e;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#161a1f; --card:#1f252c; --ink:#e6e9ec; --ink-2:#9aa2ab; --line:#333a42;
+    --wire:#6bb6d6; --wire-ink:#9cd0e6; --live:#69c088; --cd:#e0b455; --cd-bg:#3a3115;
+    --pass-bg:#22331f; --pass-ink:#8ecb8f; --chip:#2a3038; --mono-bg:#1c2127; --rail:#e07a63;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#161a1f; --card:#1f252c; --ink:#e6e9ec; --ink-2:#9aa2ab; --line:#333a42;
+  --wire:#6bb6d6; --wire-ink:#9cd0e6; --live:#69c088; --cd:#e0b455; --cd-bg:#3a3115;
+  --pass-bg:#22331f; --pass-ink:#8ecb8f; --chip:#2a3038; --mono-bg:#1c2127; --rail:#e07a63;
+}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{background:var(--paper);color:var(--ink);margin:0;font-family:"Inter",-apple-system,"Segoe UI",sans-serif;font-size:15px;line-height:1.5}
+.wrap{max-width:1120px;margin:0 auto;padding:0 26px 90px}
+a{color:var(--wire)}
+h1,h2,h3{font-family:"Space Grotesk","Inter",sans-serif;text-wrap:balance;margin:0}
+code,.mono{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.9em}
+.eyebrow{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--wire-ink)}
+header.top{padding:52px 0 22px;border-bottom:3px solid var(--ink)}
+header.top h1{font-size:clamp(32px,5vw,50px);font-weight:700;letter-spacing:-.02em;line-height:1.03}
+header.top .sub{margin-top:12px;color:var(--ink-2);max-width:66ch}
+.rev{margin-top:16px;font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--ink-2);display:flex;flex-wrap:wrap;gap:6px 22px}
+.statbar{display:flex;flex-wrap:wrap;gap:0;border-bottom:1px solid var(--line)}
+.stat{padding:15px 24px 15px 0;margin-right:24px}
+.stat b{display:block;font-family:"Space Grotesk",sans-serif;font-size:22px;font-variant-numeric:tabular-nums}
+.stat span{font-size:12px;color:var(--ink-2)}
+nav.toc{position:sticky;top:0;z-index:5;background:var(--paper);border-bottom:1px solid var(--line);display:flex;gap:2px;overflow-x:auto;padding:6px 0}
+nav.toc a{color:var(--ink-2);text-decoration:none;font-family:"IBM Plex Mono",monospace;font-size:11.5px;letter-spacing:.04em;padding:7px 10px;border-radius:4px;white-space:nowrap}
+nav.toc a:hover,nav.toc a:focus-visible{background:var(--chip);color:var(--ink);outline:none}
+section{padding-top:42px}
+section>h2{font-size:24px;font-weight:700;letter-spacing:-.01em;padding-bottom:6px}
+section>h2 .n{color:var(--wire);padding-right:8px}
+.lede{color:var(--ink-2);max-width:74ch;margin:2px 0 16px}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:6px;background:var(--card)}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-2);text-align:left;padding:9px 11px;border-bottom:2px solid var(--line);white-space:nowrap}
+td{padding:7px 11px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:none}
+td.mono,td.num{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums}
+td.num{white-space:nowrap}
+.chip{display:inline-block;font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.05em;padding:2px 7px;border-radius:99px;white-space:nowrap}
+.chip.pass{background:var(--pass-bg);color:var(--pass-ink)}
+.chip.cd{background:var(--cd-bg);color:var(--cd)}
+.chip.rail{background:var(--mono-bg);color:var(--rail);border:1px solid var(--rail)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:16px 18px}
+.card h3{font-size:14px;margin-bottom:7px}
+.card p{font-size:13px;margin:0}
+.diagram{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:18px;align-items:start}
+.wirebox{border:1px solid var(--line);border-radius:6px;background:#ffffff;overflow:auto;max-height:760px;padding:10px}
+.wirebox svg{width:100%;height:auto;display:block}
+figcaption{font-size:12px;color:var(--ink-2);padding:8px 2px 0}
+.note{border-left:3px solid var(--wire);background:var(--mono-bg);padding:11px 15px;border-radius:0 6px 6px 0;font-size:13px;margin:14px 0}
+.mono-block{font-family:"IBM Plex Mono",monospace;font-size:12.5px;background:var(--mono-bg);border-radius:6px;padding:13px 15px;overflow-x:auto;line-height:1.7}
+footer{margin-top:56px;padding-top:16px;border-top:3px solid var(--ink);font-size:12.5px;color:var(--ink-2);display:flex;flex-wrap:wrap;gap:6px 24px}
+@media (max-width:820px){.diagram{grid-template-columns:1fr}}
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+</head>
+<body>
+
+
+<div class="wrap">
+<header class="top">
+  <div class="eyebrow">ce-designs/microduck · electronics datasheet · reverse-engineered from Pollen Robotics' open firmware &amp; published model</div>
+  <h1>Microduck Electronics Datasheet</h1>
+  <p class="sub">The complete electrical description of the robot: every component with its datasheet figures, the single-bus servo network, the register and pin maps, the power tree, the three custom boards, and how the software reaches each device. Solid facts are cited to a datasheet page or a firmware file:line; everything unpublished is marked CANNOT DETERMINE with what would settle it.</p>
+  <div class="rev"><span>REV 2026-09-02</span><span>15 actuators · 1 bus · 6 sensor ICs</span><span>firmware Apache-2.0 · mechanics not open</span><span>graphic: wiring/designs/microduck/wiring.svg</span></div>
+</header>
+
+<div class="statbar">
+  <div class="stat"><b>1</b><span>servo bus (TTL half-duplex, 1 Mbps)</span></div>
+  <div class="stat"><b>16</b><span>devices on it (15 servos + IMU board)</span></div>
+  <div class="stat"><b>6.6–8.2 V</b><span>2S pack, read via servo register 144</span></div>
+  <div class="stat"><b>50 Hz</b><span>control loop, P-gain 200</span></div>
+  <div class="stat"><b>11</b><span>ICs datasheeted, sha256'd on the shelf</span></div>
+</div>
+
+<nav class="toc" aria-label="sections">
+  <a href="#overview">OVERVIEW</a><a href="#diagram">SYSTEM DIAGRAM</a><a href="#bus">SERVO BUS</a><a href="#components">COMPONENTS</a><a href="#registers">REGISTERS</a><a href="#power">POWER</a><a href="#boards">CUSTOM BOARDS</a><a href="#pins">PIN MAP</a><a href="#software">SOFTWARE</a><a href="#unknown">UNKNOWNS</a>
+</nav>
+
+<section id="overview">
+  <h2><span class="n">§1</span>Architecture at a glance</h2>
+  <p class="lede">A Radxa Zero 3W in the head is the only compute. One UART becomes a half-duplex Dynamixel bus carrying all fifteen XL330 servos plus the IMU-to-Dynamixel bridge as a sixteenth device. Everything else — audio codec, 8×8 ToF, camera, NFC, USB-C — hangs off the Radxa's I²C3 / I²S3 / CSI / USB through the custom RPI Robot HAT. Power is a removable 2S camera battery, read only through the servos' own voltage register.</p>
+  <div class="grid2">
+    <div class="card"><h3>Compute</h3><p>Radxa Zero 3W — Rockchip RK3566 quad Cortex-A55, 1 GB RAM, 32 GB eMMC, Wi-Fi 6 / BT 5.4, 65 × 30 mm. Runs Armbian; the RK3566's 0.8-TOPS NPU runs a duck detector at 2 Hz (thermal-limited).</p></div>
+    <div class="card"><h3>Actuation</h3><p>15 × ROBOTIS Dynamixel XL330-M288-T, one 1 Mbps Protocol-2 TTL bus on <code>/dev/ttyS2</code> (RK3566 UART2_M0). IDs 10–14 / 20–24 / 30–34; mouth = ID 34, excluded from the 14-DoF policy.</p></div>
+    <div class="card"><h3>Sensing</h3><p>Control IMU LSM6DSV16X on the <code>imu_to_dxl</code> board (bus ID 200); 8×8 ToF VL53L5CX/L8CX; IMX219 camera + M12 lens (mounted inverted); dormant BMI088; mics; two NFC antennas.</p></div>
+    <div class="card"><h3>Power</h3><p>Sony-type NP-F550 2S Li-ion, 2600 mAh, 18.72 Wh, removable. No fuel gauge — state of charge is inferred from the voltage the servos report. USB-C 5 V charges the board; the FUSB302 PD node is disabled.</p></div>
+  </div>
+</section>
+
+<section id="diagram">
+  <h2><span class="n">§2</span>System diagram</h2>
+  <p class="lede">The full ce-wire graphic — every device, net and connector as laid out from the measured placements. Scroll within the frame; it is tall because the servo bus is one long chain from the head to both ankles.</p>
+  <div class="diagram">
+    <figure style="margin:0"><div class="wirebox"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1628.0 3968.2" width="1628.0" height="3968.2" data-design="microduck">
+<style>
+  .bgr{fill:#ffffff}
+  .rt{fill:#1c2733;font:600 10px ui-monospace,SFMono-Regular,Menlo,monospace}
+  .nt{fill:#1c2733;font:700 12.5px -apple-system,'Helvetica Neue',Arial,sans-serif}
+  .ns{fill:#5b6570;font:10px -apple-system,'Helvetica Neue',Arial,sans-serif}
+  .st{fill:#1c2733;font:10.5px ui-monospace,SFMono-Regular,Menlo,monospace}
+  .cg{fill:#ffffff;font:700 8px -apple-system,'Helvetica Neue',Arial,sans-serif}
+  .tk{fill:#5b6570;font:600 7.5px -apple-system,'Helvetica Neue',Arial,sans-serif;letter-spacing:.08em}
+  .tv{fill:#1c2733;font:600 11px -apple-system,'Helvetica Neue',Arial,sans-serif}
+  .tm{fill:#5b6570;font:9.5px ui-monospace,SFMono-Regular,Menlo,monospace}
+</style>
+<rect class="bgr" x="0" y="0" width="1628.0" height="3968.2"/>
+<rect x="14" y="14" width="1600.0" height="3940.2" fill="none" stroke="#1c2733" stroke-width="1.4"/>
+<line x1="14" y1="3910.2" x2="1614.0" y2="3910.2" stroke="#1c2733" stroke-width="1.4"/>
+<g class="rail" data-net="V5_HAT"><line x1="48" y1="200.2" x2="48" y2="733.2" stroke="#a04b12" stroke-width="2.2"/><text class="rt" transform="rotate(-90 48 181.2)" x="48" y="181.2" dy="3.5">V5_HAT</text><rect x="42.5" y="185.2" width="11" height="11" fill="#9a6700"/><text class="cg" x="48.0" y="193.6" text-anchor="middle">?</text><title>V5_HAT — supply, scope host, degree 2 — CANNOT DETERMINE</title></g>
+<g class="rail" data-net="GND"><line x1="74" y1="200.2" x2="74" y2="3693.2" stroke="#454e59" stroke-width="2.2"/><g stroke="#454e59" stroke-width="1.6"><line x1="66" y1="3693.2" x2="82" y2="3693.2"/><line x1="69" y1="3696.7" x2="79" y2="3696.7"/><line x1="72" y1="3700.2" x2="76" y2="3700.2"/></g><text class="rt" transform="rotate(-90 74 181.2)" x="74" y="181.2" dy="3.5">GND</text><rect x="68.5" y="185.2" width="11" height="11" fill="#ffffff" stroke="#adb5bd" stroke-width="1.2"/><title>GND — ground, scope host, degree 22</title></g>
+<g class="rail" data-net="VBAT"><line x1="100" y1="200.2" x2="100" y2="513.2" stroke="#a04b12" stroke-width="2.2"/><text class="rt" transform="rotate(-90 100 181.2)" x="100" y="181.2" dy="3.5">VBAT</text><rect x="94.5" y="185.2" width="11" height="11" fill="#9a6700"/><text class="cg" x="100.0" y="193.6" text-anchor="middle">?</text><title>VBAT — supply, scope host, degree 2 — CANNOT DETERMINE</title></g>
+<g class="rail" data-net="hdr8_UART2_TX_M0"><line x1="126" y1="200.2" x2="126" y2="535.2" stroke="#22598c" stroke-width="1.3"/><text class="rt" transform="rotate(-90 126 181.2)" x="126" y="181.2" dy="3.5">hdr8_UART2_TX_M0</text><rect x="120.5" y="185.2" width="11" height="11" fill="#ffffff" stroke="#adb5bd" stroke-width="1.2"/><title>hdr8_UART2_TX_M0 — signal, scope host, degree 1</title></g>
+<g class="rail" data-net="hdr10_UART2_RX_M0"><line x1="152" y1="200.2" x2="152" y2="557.2" stroke="#22598c" stroke-width="1.3"/><text class="rt" transform="rotate(-90 152 181.2)" x="152" y="181.2" dy="3.5">hdr10_UART2_RX_M0</text><rect x="146.5" y="185.2" width="11" height="11" fill="#ffffff" stroke="#adb5bd" stroke-width="1.2"/><title>hdr10_UART2_RX_M0 — signal, scope host, degree 1</title></g>
+<g class="rail" data-net="hdr3_I2C3_SDA_M0"><line x1="178" y1="200.2" x2="178" y2="3301.2" stroke="#22598c" stroke-width="1.3"/><text class="rt" transform="rotate(-90 178 181.2)" x="178" y="181.2" dy="3.5">hdr3_I2C3_SDA_M0</text><rect x="172.5" y="185.2" width="11" height="11" fill="#ffffff" stroke="#adb5bd" stroke-width="1.2"/><title>hdr3_I2C3_SDA_M0 — signal, scope host, degree 2</title></g>
+<g class="rail" data-net="hdr5_I2C3_SCL_M0"><line x1="204" y1="200.2" x2="204" y2="3323.2" stroke="#22598c" stroke-width="1.3"/><text class="rt" transform="rotate(-90 204 181.2)" x="204" y="181.2" dy="3.5">hdr5_I2C3_SCL_M0</text><rect x="198.5" y="185.2" width="11" height="11" fill="#ffffff" stroke="#adb5bd" stroke-width="1.2"/><title>hdr5_I2C3_SCL_M0 — signal, scope host, degree 2</title></g>
+<g class="rail" data-net="hdr12_I2S3_SCLK_M0"><line x1="230" y1="200.2" x2="230" y2="623.2" stroke="#22598c" stroke-width="1.3"/><text class="rt" transform="rotate(-90 230 181.2)" x="230" y="181.2" dy="3.5">hdr12_I2S3_SCLK_M0</text><rect x="224.5" y="185.2" width="11" height="11" fill="#ffffff" stroke="#adb5bd" stroke-width="1.2"/><title>hdr12_I2S3_SCLK_M0 — signal, scope host, degree 1</title></g>
+<g class="rail" data-net="hdr35_I2S3_LRCK_M0"><line x1="256" y1="200.2" x2="256" y2="645.2" stroke="#22598c" stroke-width="1.3"/><text class="rt" transform="rotate(-90 256 181.2)" x="256" y="181.2" dy="3.5">hdr35_I2S3_LRCK_M0</text><rect x="250.5" y="185.2" width="11" height="11" fill="#ffffff" stroke="#adb5bd" stroke-width="1.2"/><title>hdr35_I2S3_LRCK_M0 — signal, scope host, degree 1</title></g>
+<g class="rail" data-net="hdr40_I2S3_SDO_M0"><line x1="282" y1="200.2" x2="282" y2="667.2" stroke="#22598c" stroke-width="1.3"/><text class="rt" transform="rotate(-90 282 181.2)" x="282" y="181.2" dy="3.5">hdr40_I2S3_SDO_M0</text><rect x="276.5" y="185.2" width="11" height="11" fill="#ffffff" stroke="#adb5bd" stroke-width="1.2"/><title>hdr40_I2S3_SDO_M0 — signal, scope host, degree 1</title></g>
+<g class="rail" data-net="hdr38_I2S3_SDI_M0"><line x1="308" y1="200.2" x2="308" y2="689.2" stroke="#22598c" stroke-width="1.3"/><text class="rt" transform="rotate(-90 308 181.2)" x="308" y="181.2" dy="3.5">hdr38_I2S3_SDI_M0</text><rect x="302.5" y="185.2" width="11" height="11" fill="#ffffff" stroke="#adb5bd" stroke-width="1.2"/><title>hdr38_I2S3_SDI_M0 — signal, scope host, degree 1</title></g>
+<g class="rail" data-net="hdr13_I2S3_MCLK_M0"><line x1="334" y1="200.2" x2="334" y2="711.2" stroke="#22598c" stroke-width="1.3"/><text class="rt" transform="rotate(-90 334 181.2)" x="334" y="181.2" dy="3.5">hdr13_I2S3_MCLK_M0</text><rect x="328.5" y="185.2" width="11" height="11" fill="#ffffff" stroke="#adb5bd" stroke-width="1.2"/><title>hdr13_I2S3_MCLK_M0 — signal, scope host, degree 1</title></g>
+<g class="rail" data-net="SERVO_V"><line x1="360" y1="200.2" x2="360" y2="3137.2" stroke="#a04b12" stroke-width="2.2"/><text class="rt" transform="rotate(-90 360 181.2)" x="360" y="181.2" dy="3.5">SERVO_V</text><rect x="354.5" y="185.2" width="11" height="11" fill="#9a6700"/><text class="cg" x="360.0" y="193.6" text-anchor="middle">?</text><title>SERVO_V — supply, scope host, degree 17 — CANNOT DETERMINE</title></g>
+<g class="rail" data-net="DXL_DATA"><line x1="386" y1="200.2" x2="386" y2="3159.2" stroke="#22598c" stroke-width="1.3"/><text class="rt" transform="rotate(-90 386 181.2)" x="386" y="181.2" dy="3.5">DXL_DATA</text><rect x="380.5" y="185.2" width="11" height="11" fill="#ffffff" stroke="#adb5bd" stroke-width="1.2"/><title>DXL_DATA — signal, scope host, degree 17</title></g>
+<g class="rail" data-net="J5_3V3"><line x1="412" y1="200.2" x2="412" y2="3279.2" stroke="#a04b12" stroke-width="2.2"/><text class="rt" transform="rotate(-90 412 181.2)" x="412" y="181.2" dy="3.5">J5_3V3</text><rect x="406.5" y="185.2" width="11" height="11" fill="#9a6700"/><text class="cg" x="412.0" y="193.6" text-anchor="middle">?</text><title>J5_3V3 — supply, scope host, degree 2 — CANNOT DETERMINE</title></g>
+<g class="rail" data-net="SPK_P"><line x1="438" y1="200.2" x2="438" y2="3421.2" stroke="#22598c" stroke-width="1.3"/><text class="rt" transform="rotate(-90 438 181.2)" x="438" y="181.2" dy="3.5">SPK_P</text><rect x="432.5" y="185.2" width="11" height="11" fill="#ffffff" stroke="#adb5bd" stroke-width="1.2"/><title>SPK_P — signal, scope host, degree 2</title></g>
+<g class="rail" data-net="SPK_N"><line x1="464" y1="200.2" x2="464" y2="3443.2" stroke="#22598c" stroke-width="1.3"/><text class="rt" transform="rotate(-90 464 181.2)" x="464" y="181.2" dy="3.5">SPK_N</text><rect x="458.5" y="185.2" width="11" height="11" fill="#ffffff" stroke="#adb5bd" stroke-width="1.2"/><title>SPK_N — signal, scope host, degree 2</title></g>
+<g class="rail" data-net="MIC_IN"><line x1="490" y1="200.2" x2="490" y2="3563.2" stroke="#22598c" stroke-width="1.3"/><text class="rt" transform="rotate(-90 490 181.2)" x="490" y="181.2" dy="3.5">MIC_IN</text><rect x="484.5" y="185.2" width="11" height="11" fill="#ffffff" stroke="#adb5bd" stroke-width="1.2"/><title>MIC_IN — signal, scope host, degree 2</title></g>
+<g class="rail" data-net="MICBIAS"><line x1="516" y1="200.2" x2="516" y2="3585.2" stroke="#a04b12" stroke-width="2.2"/><text class="rt" transform="rotate(-90 516 181.2)" x="516" y="181.2" dy="3.5">MICBIAS</text><rect x="510.5" y="185.2" width="11" height="11" fill="#9a6700"/><text class="cg" x="516.0" y="193.6" text-anchor="middle">?</text><title>MICBIAS — supply, scope host, degree 2 — CANNOT DETERMINE</title></g>
+<g class="rail" data-net="csi_J7_p22_VCC_3V3"><line x1="542" y1="200.2" x2="542" y2="3705.2" stroke="#a04b12" stroke-width="2.2"/><text class="rt" transform="rotate(-90 542 181.2)" x="542" y="181.2" dy="3.5">csi_J7_p22_VCC_3V3</text><rect x="536.5" y="185.2" width="11" height="11" fill="#9a6700"/><text class="cg" x="542.0" y="193.6" text-anchor="middle">?</text><title>csi_J7_p22_VCC_3V3 — supply, scope host, degree 1 — CANNOT DETERMINE</title></g>
+<g class="rail" data-net="csi_J7_p8p9_CLK0"><line x1="568" y1="200.2" x2="568" y2="3727.2" stroke="#22598c" stroke-width="1.3"/><text class="rt" transform="rotate(-90 568 181.2)" x="568" y="181.2" dy="3.5">csi_J7_p8p9_CLK0</text><rect x="562.5" y="185.2" width="11" height="11" fill="#ffffff" stroke="#adb5bd" stroke-width="1.2"/><title>csi_J7_p8p9_CLK0 — signal, scope host, degree 1</title></g>
+<g class="rail" data-net="csi_J7_p2p3_D0"><line x1="594" y1="200.2" x2="594" y2="3749.2" stroke="#22598c" stroke-width="1.3"/><text class="rt" transform="rotate(-90 594 181.2)" x="594" y="181.2" dy="3.5">csi_J7_p2p3_D0</text><rect x="588.5" y="185.2" width="11" height="11" fill="#ffffff" stroke="#adb5bd" stroke-width="1.2"/><title>csi_J7_p2p3_D0 — signal, scope host, degree 1</title></g>
+<g class="rail" data-net="csi_J7_p5p6_D1"><line x1="620" y1="200.2" x2="620" y2="3771.2" stroke="#22598c" stroke-width="1.3"/><text class="rt" transform="rotate(-90 620 181.2)" x="620" y="181.2" dy="3.5">csi_J7_p5p6_D1</text><rect x="614.5" y="185.2" width="11" height="11" fill="#ffffff" stroke="#adb5bd" stroke-width="1.2"/><title>csi_J7_p5p6_D1 — signal, scope host, degree 1</title></g>
+<g class="rail" data-net="csi_J7_p21_I2C2_SDA_M1"><line x1="646" y1="200.2" x2="646" y2="3793.2" stroke="#22598c" stroke-width="1.3"/><text class="rt" transform="rotate(-90 646 181.2)" x="646" y="181.2" dy="3.5">csi_J7_p21_I2C2_SDA_M1</text><rect x="640.5" y="185.2" width="11" height="11" fill="#ffffff" stroke="#adb5bd" stroke-width="1.2"/><title>csi_J7_p21_I2C2_SDA_M1 — signal, scope host, degree 1</title></g>
+<g class="rail" data-net="csi_J7_p20_I2C2_SCL_M1"><line x1="672" y1="200.2" x2="672" y2="3815.2" stroke="#22598c" stroke-width="1.3"/><text class="rt" transform="rotate(-90 672 181.2)" x="672" y="181.2" dy="3.5">csi_J7_p20_I2C2_SCL_M1</text><rect x="666.5" y="185.2" width="11" height="11" fill="#ffffff" stroke="#adb5bd" stroke-width="1.2"/><title>csi_J7_p20_I2C2_SCL_M1 — signal, scope host, degree 1</title></g>
+<g class="rail" data-net="csi_J7_p17_CAMERAB_PDN_L"><line x1="698" y1="200.2" x2="698" y2="3837.2" stroke="#22598c" stroke-width="1.3"/><text class="rt" transform="rotate(-90 698 181.2)" x="698" y="181.2" dy="3.5">csi_J7_p17_CAMERAB_PDN_L</text><rect x="692.5" y="185.2" width="11" height="11" fill="#ffffff" stroke="#adb5bd" stroke-width="1.2"/><title>csi_J7_p17_CAMERAB_PDN_L — signal, scope host, degree 1</title></g>
+<path class="edge" data-net="V5_HAT" data-owner="host" data-ref="5V" data-x0="48" data-y0="251.2" data-x1="780" data-y1="251.2" fill="none" stroke-width="1.3" stroke="#a04b12" d="M 48 251.2 L 780 251.2"/>
+<circle cx="48" cy="251.2" r="2.6" fill="#a04b12"/>
+<path class="edge" data-net="V5_HAT" data-owner="hat" data-ref="V5_OUT" data-x0="48" data-y0="733.2" data-x1="780" data-y1="733.2" fill="none" stroke-width="1.3" stroke="#a04b12" d="M 48 733.2 L 780 733.2"/>
+<circle cx="48" cy="733.2" r="2.6" fill="#a04b12"/>
+<path class="edge" data-net="GND" data-owner="host" data-ref="GND" data-x0="74" data-y0="273.2" data-x1="780" data-y1="273.2" fill="none" stroke-width="1.3" stroke="#454e59" d="M 74 273.2 L 780 273.2"/>
+<circle cx="74" cy="273.2" r="2.6" fill="#454e59"/>
+<path class="edge" data-net="GND" data-owner="battery" data-ref="BAT-" data-x0="74" data-y0="393.2" data-x1="780" data-y1="393.2" fill="none" stroke-width="1.3" stroke="#454e59" d="M 74 393.2 L 780 393.2"/>
+<circle cx="74" cy="393.2" r="2.6" fill="#454e59"/>
+<path class="edge" data-net="GND" data-owner="hat" data-ref="GND" data-x0="74" data-y0="491.2" data-x1="780" data-y1="491.2" fill="none" stroke-width="1.3" stroke="#454e59" d="M 74 491.2 L 780 491.2"/>
+<circle cx="74" cy="491.2" r="2.6" fill="#454e59"/>
+<path class="edge" data-net="GND" data-owner="imu200" data-ref="GND" data-x0="74" data-y0="985.2" data-x1="780" data-y1="985.2" fill="none" stroke-width="1.3" stroke="#454e59" d="M 74 985.2 L 780 985.2"/>
+<circle cx="74" cy="985.2" r="2.6" fill="#454e59"/>
+<path class="edge" data-net="GND" data-owner="id34" data-ref="GND" data-x0="74" data-y0="1127.2" data-x1="780" data-y1="1127.2" fill="none" stroke-width="1.3" stroke="#454e59" d="M 74 1127.2 L 780 1127.2"/>
+<circle cx="74" cy="1127.2" r="2.6" fill="#454e59"/>
+<path class="edge" data-net="GND" data-owner="id33" data-ref="GND" data-x0="74" data-y0="1269.2" data-x1="780" data-y1="1269.2" fill="none" stroke-width="1.3" stroke="#454e59" d="M 74 1269.2 L 780 1269.2"/>
+<circle cx="74" cy="1269.2" r="2.6" fill="#454e59"/>
+<path class="edge" data-net="GND" data-owner="id32" data-ref="GND" data-x0="74" data-y0="1411.2" data-x1="780" data-y1="1411.2" fill="none" stroke-width="1.3" stroke="#454e59" d="M 74 1411.2 L 780 1411.2"/>
+<circle cx="74" cy="1411.2" r="2.6" fill="#454e59"/>
+<path class="edge" data-net="GND" data-owner="id31" data-ref="GND" data-x0="74" data-y0="1553.2" data-x1="780" data-y1="1553.2" fill="none" stroke-width="1.3" stroke="#454e59" d="M 74 1553.2 L 780 1553.2"/>
+<circle cx="74" cy="1553.2" r="2.6" fill="#454e59"/>
+<path class="edge" data-net="GND" data-owner="id30" data-ref="GND" data-x0="74" data-y0="1695.2" data-x1="780" data-y1="1695.2" fill="none" stroke-width="1.3" stroke="#454e59" d="M 74 1695.2 L 780 1695.2"/>
+<circle cx="74" cy="1695.2" r="2.6" fill="#454e59"/>
+<path class="edge" data-net="GND" data-owner="id20" data-ref="GND" data-x0="74" data-y0="1837.2" data-x1="780" data-y1="1837.2" fill="none" stroke-width="1.3" stroke="#454e59" d="M 74 1837.2 L 780 1837.2"/>
+<circle cx="74" cy="1837.2" r="2.6" fill="#454e59"/>
+<path class="edge" data-net="GND" data-owner="id21" data-ref="GND" data-x0="74" data-y0="1979.2" data-x1="780" data-y1="1979.2" fill="none" stroke-width="1.3" stroke="#454e59" d="M 74 1979.2 L 780 1979.2"/>
+<circle cx="74" cy="1979.2" r="2.6" fill="#454e59"/>
+<path class="edge" data-net="GND" data-owner="id22" data-ref="GND" data-x0="74" data-y0="2121.2" data-x1="780" data-y1="2121.2" fill="none" stroke-width="1.3" stroke="#454e59" d="M 74 2121.2 L 780 2121.2"/>
+<circle cx="74" cy="2121.2" r="2.6" fill="#454e59"/>
+<path class="edge" data-net="GND" data-owner="id23" data-ref="GND" data-x0="74" data-y0="2263.2" data-x1="780" data-y1="2263.2" fill="none" stroke-width="1.3" stroke="#454e59" d="M 74 2263.2 L 780 2263.2"/>
+<circle cx="74" cy="2263.2" r="2.6" fill="#454e59"/>
+<path class="edge" data-net="GND" data-owner="id24" data-ref="GND" data-x0="74" data-y0="2405.2" data-x1="780" data-y1="2405.2" fill="none" stroke-width="1.3" stroke="#454e59" d="M 74 2405.2 L 780 2405.2"/>
+<circle cx="74" cy="2405.2" r="2.6" fill="#454e59"/>
+<path class="edge" data-net="GND" data-owner="id10" data-ref="GND" data-x0="74" data-y0="2547.2" data-x1="780" data-y1="2547.2" fill="none" stroke-width="1.3" stroke="#454e59" d="M 74 2547.2 L 780 2547.2"/>
+<circle cx="74" cy="2547.2" r="2.6" fill="#454e59"/>
+<path class="edge" data-net="GND" data-owner="id11" data-ref="GND" data-x0="74" data-y0="2689.2" data-x1="780" data-y1="2689.2" fill="none" stroke-width="1.3" stroke="#454e59" d="M 74 2689.2 L 780 2689.2"/>
+<circle cx="74" cy="2689.2" r="2.6" fill="#454e59"/>
+<path class="edge" data-net="GND" data-owner="id12" data-ref="GND" data-x0="74" data-y0="2831.2" data-x1="780" data-y1="2831.2" fill="none" stroke-width="1.3" stroke="#454e59" d="M 74 2831.2 L 780 2831.2"/>
+<circle cx="74" cy="2831.2" r="2.6" fill="#454e59"/>
+<path class="edge" data-net="GND" data-owner="id13" data-ref="GND" data-x0="74" data-y0="2973.2" data-x1="780" data-y1="2973.2" fill="none" stroke-width="1.3" stroke="#454e59" d="M 74 2973.2 L 780 2973.2"/>
+<circle cx="74" cy="2973.2" r="2.6" fill="#454e59"/>
+<path class="edge" data-net="GND" data-owner="id14" data-ref="GND" data-x0="74" data-y0="3115.2" data-x1="780" data-y1="3115.2" fill="none" stroke-width="1.3" stroke="#454e59" d="M 74 3115.2 L 780 3115.2"/>
+<circle cx="74" cy="3115.2" r="2.6" fill="#454e59"/>
+<path class="edge" data-net="GND" data-owner="tof" data-ref="GND" data-x0="74" data-y0="3257.2" data-x1="780" data-y1="3257.2" fill="none" stroke-width="1.3" stroke="#454e59" d="M 74 3257.2 L 780 3257.2"/>
+<circle cx="74" cy="3257.2" r="2.6" fill="#454e59"/>
+<path class="edge" data-net="GND" data-owner="mic" data-ref="GND" data-x0="74" data-y0="3541.2" data-x1="780" data-y1="3541.2" fill="none" stroke-width="1.3" stroke="#454e59" d="M 74 3541.2 L 780 3541.2"/>
+<circle cx="74" cy="3541.2" r="2.6" fill="#454e59"/>
+<path class="edge" data-net="GND" data-owner="camera" data-ref="GND" data-x0="74" data-y0="3683.2" data-x1="780" data-y1="3683.2" fill="none" stroke-width="1.3" stroke="#454e59" d="M 74 3683.2 L 780 3683.2"/>
+<circle cx="74" cy="3683.2" r="2.6" fill="#454e59"/>
+<path class="edge" data-net="VBAT" data-owner="battery" data-ref="BAT+" data-x0="100" data-y0="371.2" data-x1="780" data-y1="371.2" fill="none" stroke-width="1.3" stroke="#a04b12" d="M 100 371.2 L 780 371.2"/>
+<circle cx="100" cy="371.2" r="2.6" fill="#a04b12"/>
+<path class="edge" data-net="VBAT" data-owner="hat" data-ref="VBAT" data-x0="100" data-y0="513.2" data-x1="780" data-y1="513.2" fill="none" stroke-width="1.3" stroke="#a04b12" d="M 100 513.2 L 780 513.2"/>
+<circle cx="100" cy="513.2" r="2.6" fill="#a04b12"/>
+<path class="edge" data-net="hdr8_UART2_TX_M0" data-owner="hat" data-ref="UART2_TX" data-x0="126" data-y0="535.2" data-x1="780" data-y1="535.2" fill="none" stroke-width="1.3" stroke="#22598c" d="M 126 535.2 L 780 535.2"/>
+<circle cx="126" cy="535.2" r="2.6" fill="#22598c"/>
+<path class="edge" data-net="hdr10_UART2_RX_M0" data-owner="hat" data-ref="UART2_RX" data-x0="152" data-y0="557.2" data-x1="780" data-y1="557.2" fill="none" stroke-width="1.3" stroke="#22598c" d="M 152 557.2 L 780 557.2"/>
+<circle cx="152" cy="557.2" r="2.6" fill="#22598c"/>
+<path class="edge" data-net="hdr3_I2C3_SDA_M0" data-owner="hat" data-ref="I2C3_SDA" data-x0="178" data-y0="579.2" data-x1="780" data-y1="579.2" fill="none" stroke-width="1.3" stroke="#22598c" d="M 178 579.2 L 780 579.2"/>
+<circle cx="178" cy="579.2" r="2.6" fill="#22598c"/>
+<path class="edge" data-net="hdr3_I2C3_SDA_M0" data-owner="tof" data-ref="SDA" data-x0="178" data-y0="3301.2" data-x1="780" data-y1="3301.2" fill="none" stroke-width="1.3" stroke="#22598c" d="M 178 3301.2 L 780 3301.2"/>
+<circle cx="178" cy="3301.2" r="2.6" fill="#22598c"/>
+<path class="edge" data-net="hdr5_I2C3_SCL_M0" data-owner="hat" data-ref="I2C3_SCL" data-x0="204" data-y0="601.2" data-x1="780" data-y1="601.2" fill="none" stroke-width="1.3" stroke="#22598c" d="M 204 601.2 L 780 601.2"/>
+<circle cx="204" cy="601.2" r="2.6" fill="#22598c"/>
+<path class="edge" data-net="hdr5_I2C3_SCL_M0" data-owner="tof" data-ref="SCL" data-x0="204" data-y0="3323.2" data-x1="780" data-y1="3323.2" fill="none" stroke-width="1.3" stroke="#22598c" d="M 204 3323.2 L 780 3323.2"/>
+<circle cx="204" cy="3323.2" r="2.6" fill="#22598c"/>
+<path class="edge" data-net="hdr12_I2S3_SCLK_M0" data-owner="hat" data-ref="I2S3_SCLK" data-x0="230" data-y0="623.2" data-x1="780" data-y1="623.2" fill="none" stroke-width="1.3" stroke="#22598c" d="M 230 623.2 L 780 623.2"/>
+<circle cx="230" cy="623.2" r="2.6" fill="#22598c"/>
+<path class="edge" data-net="hdr35_I2S3_LRCK_M0" data-owner="hat" data-ref="I2S3_LRCK" data-x0="256" data-y0="645.2" data-x1="780" data-y1="645.2" fill="none" stroke-width="1.3" stroke="#22598c" d="M 256 645.2 L 780 645.2"/>
+<circle cx="256" cy="645.2" r="2.6" fill="#22598c"/>
+<path class="edge" data-net="hdr40_I2S3_SDO_M0" data-owner="hat" data-ref="I2S3_SDO" data-x0="282" data-y0="667.2" data-x1="780" data-y1="667.2" fill="none" stroke-width="1.3" stroke="#22598c" d="M 282 667.2 L 780 667.2"/>
+<circle cx="282" cy="667.2" r="2.6" fill="#22598c"/>
+<path class="edge" data-net="hdr38_I2S3_SDI_M0" data-owner="hat" data-ref="I2S3_SDI" data-x0="308" data-y0="689.2" data-x1="780" data-y1="689.2" fill="none" stroke-width="1.3" stroke="#22598c" d="M 308 689.2 L 780 689.2"/>
+<circle cx="308" cy="689.2" r="2.6" fill="#22598c"/>
+<path class="edge" data-net="hdr13_I2S3_MCLK_M0" data-owner="hat" data-ref="MCLK" data-x0="334" data-y0="711.2" data-x1="780" data-y1="711.2" fill="none" stroke-width="1.3" stroke="#22598c" d="M 334 711.2 L 780 711.2"/>
+<circle cx="334" cy="711.2" r="2.6" fill="#22598c"/>
+<path class="edge" data-net="SERVO_V" data-owner="hat" data-ref="SERVO_V" data-x0="360" data-y0="755.2" data-x1="780" data-y1="755.2" fill="none" stroke-width="1.3" stroke="#a04b12" d="M 360 755.2 L 780 755.2"/>
+<circle cx="360" cy="755.2" r="2.6" fill="#a04b12"/>
+<path class="edge" data-net="SERVO_V" data-owner="imu200" data-ref="VDD" data-x0="360" data-y0="1007.2" data-x1="780" data-y1="1007.2" fill="none" stroke-width="1.3" stroke="#a04b12" d="M 360 1007.2 L 780 1007.2"/>
+<circle cx="360" cy="1007.2" r="2.6" fill="#a04b12"/>
+<path class="edge" data-net="SERVO_V" data-owner="id34" data-ref="VDD" data-x0="360" data-y0="1149.2" data-x1="780" data-y1="1149.2" fill="none" stroke-width="1.3" stroke="#a04b12" d="M 360 1149.2 L 780 1149.2"/>
+<circle cx="360" cy="1149.2" r="2.6" fill="#a04b12"/>
+<path class="edge" data-net="SERVO_V" data-owner="id33" data-ref="VDD" data-x0="360" data-y0="1291.2" data-x1="780" data-y1="1291.2" fill="none" stroke-width="1.3" stroke="#a04b12" d="M 360 1291.2 L 780 1291.2"/>
+<circle cx="360" cy="1291.2" r="2.6" fill="#a04b12"/>
+<path class="edge" data-net="SERVO_V" data-owner="id32" data-ref="VDD" data-x0="360" data-y0="1433.2" data-x1="780" data-y1="1433.2" fill="none" stroke-width="1.3" stroke="#a04b12" d="M 360 1433.2 L 780 1433.2"/>
+<circle cx="360" cy="1433.2" r="2.6" fill="#a04b12"/>
+<path class="edge" data-net="SERVO_V" data-owner="id31" data-ref="VDD" data-x0="360" data-y0="1575.2" data-x1="780" data-y1="1575.2" fill="none" stroke-width="1.3" stroke="#a04b12" d="M 360 1575.2 L 780 1575.2"/>
+<circle cx="360" cy="1575.2" r="2.6" fill="#a04b12"/>
+<path class="edge" data-net="SERVO_V" data-owner="id30" data-ref="VDD" data-x0="360" data-y0="1717.2" data-x1="780" data-y1="1717.2" fill="none" stroke-width="1.3" stroke="#a04b12" d="M 360 1717.2 L 780 1717.2"/>
+<circle cx="360" cy="1717.2" r="2.6" fill="#a04b12"/>
+<path class="edge" data-net="SERVO_V" data-owner="id20" data-ref="VDD" data-x0="360" data-y0="1859.2" data-x1="780" data-y1="1859.2" fill="none" stroke-width="1.3" stroke="#a04b12" d="M 360 1859.2 L 780 1859.2"/>
+<circle cx="360" cy="1859.2" r="2.6" fill="#a04b12"/>
+<path class="edge" data-net="SERVO_V" data-owner="id21" data-ref="VDD" data-x0="360" data-y0="2001.2" data-x1="780" data-y1="2001.2" fill="none" stroke-width="1.3" stroke="#a04b12" d="M 360 2001.2 L 780 2001.2"/>
+<circle cx="360" cy="2001.2" r="2.6" fill="#a04b12"/>
+<path class="edge" data-net="SERVO_V" data-owner="id22" data-ref="VDD" data-x0="360" data-y0="2143.2" data-x1="780" data-y1="2143.2" fill="none" stroke-width="1.3" stroke="#a04b12" d="M 360 2143.2 L 780 2143.2"/>
+<circle cx="360" cy="2143.2" r="2.6" fill="#a04b12"/>
+<path class="edge" data-net="SERVO_V" data-owner="id23" data-ref="VDD" data-x0="360" data-y0="2285.2" data-x1="780" data-y1="2285.2" fill="none" stroke-width="1.3" stroke="#a04b12" d="M 360 2285.2 L 780 2285.2"/>
+<circle cx="360" cy="2285.2" r="2.6" fill="#a04b12"/>
+<path class="edge" data-net="SERVO_V" data-owner="id24" data-ref="VDD" data-x0="360" data-y0="2427.2" data-x1="780" data-y1="2427.2" fill="none" stroke-width="1.3" stroke="#a04b12" d="M 360 2427.2 L 780 2427.2"/>
+<circle cx="360" cy="2427.2" r="2.6" fill="#a04b12"/>
+<path class="edge" data-net="SERVO_V" data-owner="id10" data-ref="VDD" data-x0="360" data-y0="2569.2" data-x1="780" data-y1="2569.2" fill="none" stroke-width="1.3" stroke="#a04b12" d="M 360 2569.2 L 780 2569.2"/>
+<circle cx="360" cy="2569.2" r="2.6" fill="#a04b12"/>
+<path class="edge" data-net="SERVO_V" data-owner="id11" data-ref="VDD" data-x0="360" data-y0="2711.2" data-x1="780" data-y1="2711.2" fill="none" stroke-width="1.3" stroke="#a04b12" d="M 360 2711.2 L 780 2711.2"/>
+<circle cx="360" cy="2711.2" r="2.6" fill="#a04b12"/>
+<path class="edge" data-net="SERVO_V" data-owner="id12" data-ref="VDD" data-x0="360" data-y0="2853.2" data-x1="780" data-y1="2853.2" fill="none" stroke-width="1.3" stroke="#a04b12" d="M 360 2853.2 L 780 2853.2"/>
+<circle cx="360" cy="2853.2" r="2.6" fill="#a04b12"/>
+<path class="edge" data-net="SERVO_V" data-owner="id13" data-ref="VDD" data-x0="360" data-y0="2995.2" data-x1="780" data-y1="2995.2" fill="none" stroke-width="1.3" stroke="#a04b12" d="M 360 2995.2 L 780 2995.2"/>
+<circle cx="360" cy="2995.2" r="2.6" fill="#a04b12"/>
+<path class="edge" data-net="SERVO_V" data-owner="id14" data-ref="VDD" data-x0="360" data-y0="3137.2" data-x1="780" data-y1="3137.2" fill="none" stroke-width="1.3" stroke="#a04b12" d="M 360 3137.2 L 780 3137.2"/>
+<circle cx="360" cy="3137.2" r="2.6" fill="#a04b12"/>
+<path class="edge" data-net="DXL_DATA" data-owner="hat" data-ref="DXL_DATA" data-x0="386" data-y0="777.2" data-x1="780" data-y1="777.2" fill="none" stroke-width="1.3" stroke="#22598c" d="M 386 777.2 L 780 777.2"/>
+<circle cx="386" cy="777.2" r="2.6" fill="#22598c"/>
+<path class="edge" data-net="DXL_DATA" data-owner="imu200" data-ref="DATA" data-x0="386" data-y0="1029.2" data-x1="780" data-y1="1029.2" fill="none" stroke-width="1.3" stroke="#22598c" d="M 386 1029.2 L 780 1029.2"/>
+<circle cx="386" cy="1029.2" r="2.6" fill="#22598c"/>
+<path class="edge" data-net="DXL_DATA" data-owner="id34" data-ref="DATA" data-x0="386" data-y0="1171.2" data-x1="780" data-y1="1171.2" fill="none" stroke-width="1.3" stroke="#22598c" d="M 386 1171.2 L 780 1171.2"/>
+<circle cx="386" cy="1171.2" r="2.6" fill="#22598c"/>
+<path class="edge" data-net="DXL_DATA" data-owner="id33" data-ref="DATA" data-x0="386" data-y0="1313.2" data-x1="780" data-y1="1313.2" fill="none" stroke-width="1.3" stroke="#22598c" d="M 386 1313.2 L 780 1313.2"/>
+<circle cx="386" cy="1313.2" r="2.6" fill="#22598c"/>
+<path class="edge" data-net="DXL_DATA" data-owner="id32" data-ref="DATA" data-x0="386" data-y0="1455.2" data-x1="780" data-y1="1455.2" fill="none" stroke-width="1.3" stroke="#22598c" d="M 386 1455.2 L 780 1455.2"/>
+<circle cx="386" cy="1455.2" r="2.6" fill="#22598c"/>
+<path class="edge" data-net="DXL_DATA" data-owner="id31" data-ref="DATA" data-x0="386" data-y0="1597.2" data-x1="780" data-y1="1597.2" fill="none" stroke-width="1.3" stroke="#22598c" d="M 386 1597.2 L 780 1597.2"/>
+<circle cx="386" cy="1597.2" r="2.6" fill="#22598c"/>
+<path class="edge" data-net="DXL_DATA" data-owner="id30" data-ref="DATA" data-x0="386" data-y0="1739.2" data-x1="780" data-y1="1739.2" fill="none" stroke-width="1.3" stroke="#22598c" d="M 386 1739.2 L 780 1739.2"/>
+<circle cx="386" cy="1739.2" r="2.6" fill="#22598c"/>
+<path class="edge" data-net="DXL_DATA" data-owner="id20" data-ref="DATA" data-x0="386" data-y0="1881.2" data-x1="780" data-y1="1881.2" fill="none" stroke-width="1.3" stroke="#22598c" d="M 386 1881.2 L 780 1881.2"/>
+<circle cx="386" cy="1881.2" r="2.6" fill="#22598c"/>
+<path class="edge" data-net="DXL_DATA" data-owner="id21" data-ref="DATA" data-x0="386" data-y0="2023.2" data-x1="780" data-y1="2023.2" fill="none" stroke-width="1.3" stroke="#22598c" d="M 386 2023.2 L 780 2023.2"/>
+<circle cx="386" cy="2023.2" r="2.6" fill="#22598c"/>
+<path class="edge" data-net="DXL_DATA" data-owner="id22" data-ref="DATA" data-x0="386" data-y0="2165.2" data-x1="780" data-y1="2165.2" fill="none" stroke-width="1.3" stroke="#22598c" d="M 386 2165.2 L 780 2165.2"/>
+<circle cx="386" cy="2165.2" r="2.6" fill="#22598c"/>
+<path class="edge" data-net="DXL_DATA" data-owner="id23" data-ref="DATA" data-x0="386" data-y0="2307.2" data-x1="780" data-y1="2307.2" fill="none" stroke-width="1.3" stroke="#22598c" d="M 386 2307.2 L 780 2307.2"/>
+<circle cx="386" cy="2307.2" r="2.6" fill="#22598c"/>
+<path class="edge" data-net="DXL_DATA" data-owner="id24" data-ref="DATA" data-x0="386" data-y0="2449.2" data-x1="780" data-y1="2449.2" fill="none" stroke-width="1.3" stroke="#22598c" d="M 386 2449.2 L 780 2449.2"/>
+<circle cx="386" cy="2449.2" r="2.6" fill="#22598c"/>
+<path class="edge" data-net="DXL_DATA" data-owner="id10" data-ref="DATA" data-x0="386" data-y0="2591.2" data-x1="780" data-y1="2591.2" fill="none" stroke-width="1.3" stroke="#22598c" d="M 386 2591.2 L 780 2591.2"/>
+<circle cx="386" cy="2591.2" r="2.6" fill="#22598c"/>
+<path class="edge" data-net="DXL_DATA" data-owner="id11" data-ref="DATA" data-x0="386" data-y0="2733.2" data-x1="780" data-y1="2733.2" fill="none" stroke-width="1.3" stroke="#22598c" d="M 386 2733.2 L 780 2733.2"/>
+<circle cx="386" cy="2733.2" r="2.6" fill="#22598c"/>
+<path class="edge" data-net="DXL_DATA" data-owner="id12" data-ref="DATA" data-x0="386" data-y0="2875.2" data-x1="780" data-y1="2875.2" fill="none" stroke-width="1.3" stroke="#22598c" d="M 386 2875.2 L 780 2875.2"/>
+<circle cx="386" cy="2875.2" r="2.6" fill="#22598c"/>
+<path class="edge" data-net="DXL_DATA" data-owner="id13" data-ref="DATA" data-x0="386" data-y0="3017.2" data-x1="780" data-y1="3017.2" fill="none" stroke-width="1.3" stroke="#22598c" d="M 386 3017.2 L 780 3017.2"/>
+<circle cx="386" cy="3017.2" r="2.6" fill="#22598c"/>
+<path class="edge" data-net="DXL_DATA" data-owner="id14" data-ref="DATA" data-x0="386" data-y0="3159.2" data-x1="780" data-y1="3159.2" fill="none" stroke-width="1.3" stroke="#22598c" d="M 386 3159.2 L 780 3159.2"/>
+<circle cx="386" cy="3159.2" r="2.6" fill="#22598c"/>
+<path class="edge" data-net="J5_3V3" data-owner="hat" data-ref="J5_3V3" data-x0="412" data-y0="799.2" data-x1="780" data-y1="799.2" fill="none" stroke-width="1.3" stroke="#a04b12" d="M 412 799.2 L 780 799.2"/>
+<circle cx="412" cy="799.2" r="2.6" fill="#a04b12"/>
+<path class="edge" data-net="J5_3V3" data-owner="tof" data-ref="3V3" data-x0="412" data-y0="3279.2" data-x1="780" data-y1="3279.2" fill="none" stroke-width="1.3" stroke="#a04b12" d="M 412 3279.2 L 780 3279.2"/>
+<circle cx="412" cy="3279.2" r="2.6" fill="#a04b12"/>
+<path class="edge" data-net="SPK_P" data-owner="hat" data-ref="SPK+" data-x0="438" data-y0="821.2" data-x1="780" data-y1="821.2" fill="none" stroke-width="1.3" stroke="#22598c" d="M 438 821.2 L 780 821.2"/>
+<circle cx="438" cy="821.2" r="2.6" fill="#22598c"/>
+<path class="edge" data-net="SPK_P" data-owner="speaker" data-ref="SPK+" data-x0="438" data-y0="3421.2" data-x1="780" data-y1="3421.2" fill="none" stroke-width="1.3" stroke="#22598c" d="M 438 3421.2 L 780 3421.2"/>
+<circle cx="438" cy="3421.2" r="2.6" fill="#22598c"/>
+<path class="edge" data-net="SPK_N" data-owner="hat" data-ref="SPK-" data-x0="464" data-y0="843.2" data-x1="780" data-y1="843.2" fill="none" stroke-width="1.3" stroke="#22598c" d="M 464 843.2 L 780 843.2"/>
+<circle cx="464" cy="843.2" r="2.6" fill="#22598c"/>
+<path class="edge" data-net="SPK_N" data-owner="speaker" data-ref="SPK-" data-x0="464" data-y0="3443.2" data-x1="780" data-y1="3443.2" fill="none" stroke-width="1.3" stroke="#22598c" d="M 464 3443.2 L 780 3443.2"/>
+<circle cx="464" cy="3443.2" r="2.6" fill="#22598c"/>
+<path class="edge" data-net="MIC_IN" data-owner="hat" data-ref="MIC_IN" data-x0="490" data-y0="865.2" data-x1="780" data-y1="865.2" fill="none" stroke-width="1.3" stroke="#22598c" d="M 490 865.2 L 780 865.2"/>
+<circle cx="490" cy="865.2" r="2.6" fill="#22598c"/>
+<path class="edge" data-net="MIC_IN" data-owner="mic" data-ref="MIC" data-x0="490" data-y0="3563.2" data-x1="780" data-y1="3563.2" fill="none" stroke-width="1.3" stroke="#22598c" d="M 490 3563.2 L 780 3563.2"/>
+<circle cx="490" cy="3563.2" r="2.6" fill="#22598c"/>
+<path class="edge" data-net="MICBIAS" data-owner="hat" data-ref="MICBIAS" data-x0="516" data-y0="887.2" data-x1="780" data-y1="887.2" fill="none" stroke-width="1.3" stroke="#a04b12" d="M 516 887.2 L 780 887.2"/>
+<circle cx="516" cy="887.2" r="2.6" fill="#a04b12"/>
+<path class="edge" data-net="MICBIAS" data-owner="mic" data-ref="BIAS" data-x0="516" data-y0="3585.2" data-x1="780" data-y1="3585.2" fill="none" stroke-width="1.3" stroke="#a04b12" d="M 516 3585.2 L 780 3585.2"/>
+<circle cx="516" cy="3585.2" r="2.6" fill="#a04b12"/>
+<path class="edge" data-net="csi_J7_p22_VCC_3V3" data-owner="camera" data-ref="VCC_3V3" data-x0="542" data-y0="3705.2" data-x1="780" data-y1="3705.2" fill="none" stroke-width="1.3" stroke="#a04b12" d="M 542 3705.2 L 780 3705.2"/>
+<circle cx="542" cy="3705.2" r="2.6" fill="#a04b12"/>
+<path class="edge" data-net="csi_J7_p8p9_CLK0" data-owner="camera" data-ref="CSI_CLK" data-x0="568" data-y0="3727.2" data-x1="780" data-y1="3727.2" fill="none" stroke-width="1.3" stroke="#22598c" d="M 568 3727.2 L 780 3727.2"/>
+<circle cx="568" cy="3727.2" r="2.6" fill="#22598c"/>
+<path class="edge" data-net="csi_J7_p2p3_D0" data-owner="camera" data-ref="CSI_D0" data-x0="594" data-y0="3749.2" data-x1="780" data-y1="3749.2" fill="none" stroke-width="1.3" stroke="#22598c" d="M 594 3749.2 L 780 3749.2"/>
+<circle cx="594" cy="3749.2" r="2.6" fill="#22598c"/>
+<path class="edge" data-net="csi_J7_p5p6_D1" data-owner="camera" data-ref="CSI_D1" data-x0="620" data-y0="3771.2" data-x1="780" data-y1="3771.2" fill="none" stroke-width="1.3" stroke="#22598c" d="M 620 3771.2 L 780 3771.2"/>
+<circle cx="620" cy="3771.2" r="2.6" fill="#22598c"/>
+<path class="edge" data-net="csi_J7_p21_I2C2_SDA_M1" data-owner="camera" data-ref="I2C2_SDA" data-x0="646" data-y0="3793.2" data-x1="780" data-y1="3793.2" fill="none" stroke-width="1.3" stroke="#22598c" d="M 646 3793.2 L 780 3793.2"/>
+<circle cx="646" cy="3793.2" r="2.6" fill="#22598c"/>
+<path class="edge" data-net="csi_J7_p20_I2C2_SCL_M1" data-owner="camera" data-ref="I2C2_SCL" data-x0="672" data-y0="3815.2" data-x1="780" data-y1="3815.2" fill="none" stroke-width="1.3" stroke="#22598c" d="M 672 3815.2 L 780 3815.2"/>
+<circle cx="672" cy="3815.2" r="2.6" fill="#22598c"/>
+<path class="edge" data-net="csi_J7_p17_CAMERAB_PDN_L" data-owner="camera" data-ref="PDN" data-x0="698" data-y0="3837.2" data-x1="780" data-y1="3837.2" fill="none" stroke-width="1.3" stroke="#22598c" d="M 698 3837.2 L 780 3837.2"/>
+<circle cx="698" cy="3837.2" r="2.6" fill="#22598c"/>
+<g class="node" data-label="host" data-x="780" data-y="200.2" data-w="250" data-h="94">
+<rect x="780" y="200.2" width="250" height="94" fill="#ffffff" stroke="#1c2733" stroke-width="1.4"/>
+<rect x="780" y="200.2" width="250" height="32" fill="#f2f5f8" stroke="#1c2733" stroke-width="1.4"/>
+<text class="nt" x="790" y="215.2">host</text>
+<text class="ns" x="790" y="227.2">radxa-zero-3w · controller</text>
+<circle cx="780" cy="251.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="5V"/>
+<text class="st" x="789" y="254.7">5V</text>
+<circle cx="780" cy="273.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="GND"/>
+<text class="st" x="789" y="276.7">GND</text>
+</g>
+<g class="node" data-label="battery" data-x="780" data-y="320.2" data-w="250" data-h="94">
+<rect x="780" y="320.2" width="250" height="94" fill="#ffffff" stroke="#1c2733" stroke-width="1.4"/>
+<rect x="780" y="320.2" width="250" height="32" fill="#f2f5f8" stroke="#1c2733" stroke-width="1.4"/>
+<text class="nt" x="790" y="335.2">battery</text>
+<text class="ns" x="790" y="347.2">np-f550 · soldered</text>
+<rect x="1013" y="326.2" width="11" height="11" fill="#1a7f37"/><text class="cg" x="1018.5" y="334.59999999999997" text-anchor="middle">&#10003;</text>
+<circle cx="780" cy="371.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="BAT+"/>
+<text class="st" x="789" y="374.7">BAT+</text>
+<circle cx="780" cy="393.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="BAT-"/>
+<text class="st" x="789" y="396.7">BAT-</text>
+</g>
+<g class="node" data-label="hat" data-x="780" data-y="440.2" data-w="250" data-h="468">
+<rect x="780" y="440.2" width="250" height="468" fill="#ffffff" stroke="#1c2733" stroke-width="1.4"/>
+<rect x="780" y="440.2" width="250" height="32" fill="#f2f5f8" stroke="#1c2733" stroke-width="1.4"/>
+<text class="nt" x="790" y="455.2">hat</text>
+<text class="ns" x="790" y="467.2">microduck-robot-hat-pcb · soldered</text>
+<rect x="1013" y="446.2" width="11" height="11" fill="#1a7f37"/><text class="cg" x="1018.5" y="454.59999999999997" text-anchor="middle">&#10003;</text>
+<circle cx="780" cy="491.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="GND"/>
+<text class="st" x="789" y="494.7">GND</text>
+<circle cx="780" cy="513.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="VBAT"/>
+<text class="st" x="789" y="516.7">VBAT</text>
+<circle cx="780" cy="535.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="UART2_TX"/>
+<text class="st" x="789" y="538.7">UART2_TX</text>
+<circle cx="780" cy="557.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="UART2_RX"/>
+<text class="st" x="789" y="560.7">UART2_RX</text>
+<circle cx="780" cy="579.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="I2C3_SDA"/>
+<text class="st" x="789" y="582.7">I2C3_SDA</text>
+<circle cx="780" cy="601.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="I2C3_SCL"/>
+<text class="st" x="789" y="604.7">I2C3_SCL</text>
+<circle cx="780" cy="623.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="I2S3_SCLK"/>
+<text class="st" x="789" y="626.7">I2S3_SCLK</text>
+<circle cx="780" cy="645.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="I2S3_LRCK"/>
+<text class="st" x="789" y="648.7">I2S3_LRCK</text>
+<circle cx="780" cy="667.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="I2S3_SDO"/>
+<text class="st" x="789" y="670.7">I2S3_SDO</text>
+<circle cx="780" cy="689.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="I2S3_SDI"/>
+<text class="st" x="789" y="692.7">I2S3_SDI</text>
+<circle cx="780" cy="711.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="MCLK"/>
+<text class="st" x="789" y="714.7">MCLK</text>
+<circle cx="780" cy="733.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="V5_OUT"/>
+<text class="st" x="789" y="736.7">V5_OUT</text>
+<circle cx="780" cy="755.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="SERVO_V"/>
+<text class="st" x="789" y="758.7">SERVO_V</text>
+<circle cx="780" cy="777.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="DXL_DATA"/>
+<text class="st" x="789" y="780.7">DXL_DATA</text>
+<circle cx="780" cy="799.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="J5_3V3"/>
+<text class="st" x="789" y="802.7">J5_3V3</text>
+<circle cx="780" cy="821.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="SPK+"/>
+<text class="st" x="789" y="824.7">SPK+</text>
+<circle cx="780" cy="843.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="SPK-"/>
+<text class="st" x="789" y="846.7">SPK-</text>
+<circle cx="780" cy="865.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="MIC_IN"/>
+<text class="st" x="789" y="868.7">MIC_IN</text>
+<circle cx="780" cy="887.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="MICBIAS"/>
+<text class="st" x="789" y="890.7">MICBIAS</text>
+</g>
+<g class="node" data-label="imu200" data-x="780" data-y="934.2" data-w="250" data-h="116">
+<rect x="780" y="934.2" width="250" height="116" fill="#ffffff" stroke="#1c2733" stroke-width="1.4"/>
+<rect x="780" y="934.2" width="250" height="32" fill="#f2f5f8" stroke="#1c2733" stroke-width="1.4"/>
+<text class="nt" x="790" y="949.2">imu200</text>
+<text class="ns" x="790" y="961.2">microduck-imu-to-dxl · soldered</text>
+<rect x="1013" y="940.2" width="11" height="11" fill="#1a7f37"/><text class="cg" x="1018.5" y="948.6" text-anchor="middle">&#10003;</text>
+<circle cx="780" cy="985.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="GND"/>
+<text class="st" x="789" y="988.7">GND</text>
+<circle cx="780" cy="1007.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="VDD"/>
+<text class="st" x="789" y="1010.7">VDD</text>
+<circle cx="780" cy="1029.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="DATA"/>
+<text class="st" x="789" y="1032.7">DATA</text>
+</g>
+<g class="node" data-label="id34" data-x="780" data-y="1076.2" data-w="250" data-h="116">
+<rect x="780" y="1076.2" width="250" height="116" fill="#ffffff" stroke="#1c2733" stroke-width="1.4"/>
+<rect x="780" y="1076.2" width="250" height="32" fill="#f2f5f8" stroke="#1c2733" stroke-width="1.4"/>
+<text class="nt" x="790" y="1091.2">id34</text>
+<text class="ns" x="790" y="1103.2">xl330-m288-t · soldered</text>
+<rect x="1013" y="1082.2" width="11" height="11" fill="#1a7f37"/><text class="cg" x="1018.5" y="1090.6000000000001" text-anchor="middle">&#10003;</text>
+<circle cx="780" cy="1127.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="GND"/>
+<text class="st" x="789" y="1130.7">GND</text>
+<circle cx="780" cy="1149.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="VDD"/>
+<text class="st" x="789" y="1152.7">VDD</text>
+<circle cx="780" cy="1171.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="DATA"/>
+<text class="st" x="789" y="1174.7">DATA</text>
+</g>
+<g class="node" data-label="id33" data-x="780" data-y="1218.2" data-w="250" data-h="116">
+<rect x="780" y="1218.2" width="250" height="116" fill="#ffffff" stroke="#1c2733" stroke-width="1.4"/>
+<rect x="780" y="1218.2" width="250" height="32" fill="#f2f5f8" stroke="#1c2733" stroke-width="1.4"/>
+<text class="nt" x="790" y="1233.2">id33</text>
+<text class="ns" x="790" y="1245.2">xl330-m288-t · soldered</text>
+<rect x="1013" y="1224.2" width="11" height="11" fill="#1a7f37"/><text class="cg" x="1018.5" y="1232.6000000000001" text-anchor="middle">&#10003;</text>
+<circle cx="780" cy="1269.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="GND"/>
+<text class="st" x="789" y="1272.7">GND</text>
+<circle cx="780" cy="1291.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="VDD"/>
+<text class="st" x="789" y="1294.7">VDD</text>
+<circle cx="780" cy="1313.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="DATA"/>
+<text class="st" x="789" y="1316.7">DATA</text>
+</g>
+<g class="node" data-label="id32" data-x="780" data-y="1360.2" data-w="250" data-h="116">
+<rect x="780" y="1360.2" width="250" height="116" fill="#ffffff" stroke="#1c2733" stroke-width="1.4"/>
+<rect x="780" y="1360.2" width="250" height="32" fill="#f2f5f8" stroke="#1c2733" stroke-width="1.4"/>
+<text class="nt" x="790" y="1375.2">id32</text>
+<text class="ns" x="790" y="1387.2">xl330-m288-t · soldered</text>
+<rect x="1013" y="1366.2" width="11" height="11" fill="#1a7f37"/><text class="cg" x="1018.5" y="1374.6000000000001" text-anchor="middle">&#10003;</text>
+<circle cx="780" cy="1411.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="GND"/>
+<text class="st" x="789" y="1414.7">GND</text>
+<circle cx="780" cy="1433.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="VDD"/>
+<text class="st" x="789" y="1436.7">VDD</text>
+<circle cx="780" cy="1455.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="DATA"/>
+<text class="st" x="789" y="1458.7">DATA</text>
+</g>
+<g class="node" data-label="id31" data-x="780" data-y="1502.2" data-w="250" data-h="116">
+<rect x="780" y="1502.2" width="250" height="116" fill="#ffffff" stroke="#1c2733" stroke-width="1.4"/>
+<rect x="780" y="1502.2" width="250" height="32" fill="#f2f5f8" stroke="#1c2733" stroke-width="1.4"/>
+<text class="nt" x="790" y="1517.2">id31</text>
+<text class="ns" x="790" y="1529.2">xl330-m288-t · soldered</text>
+<rect x="1013" y="1508.2" width="11" height="11" fill="#1a7f37"/><text class="cg" x="1018.5" y="1516.6000000000001" text-anchor="middle">&#10003;</text>
+<circle cx="780" cy="1553.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="GND"/>
+<text class="st" x="789" y="1556.7">GND</text>
+<circle cx="780" cy="1575.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="VDD"/>
+<text class="st" x="789" y="1578.7">VDD</text>
+<circle cx="780" cy="1597.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="DATA"/>
+<text class="st" x="789" y="1600.7">DATA</text>
+</g>
+<g class="node" data-label="id30" data-x="780" data-y="1644.2" data-w="250" data-h="116">
+<rect x="780" y="1644.2" width="250" height="116" fill="#ffffff" stroke="#1c2733" stroke-width="1.4"/>
+<rect x="780" y="1644.2" width="250" height="32" fill="#f2f5f8" stroke="#1c2733" stroke-width="1.4"/>
+<text class="nt" x="790" y="1659.2">id30</text>
+<text class="ns" x="790" y="1671.2">xl330-m288-t · soldered</text>
+<rect x="1013" y="1650.2" width="11" height="11" fill="#1a7f37"/><text class="cg" x="1018.5" y="1658.6000000000001" text-anchor="middle">&#10003;</text>
+<circle cx="780" cy="1695.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="GND"/>
+<text class="st" x="789" y="1698.7">GND</text>
+<circle cx="780" cy="1717.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="VDD"/>
+<text class="st" x="789" y="1720.7">VDD</text>
+<circle cx="780" cy="1739.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="DATA"/>
+<text class="st" x="789" y="1742.7">DATA</text>
+</g>
+<g class="node" data-label="id20" data-x="780" data-y="1786.2" data-w="250" data-h="116">
+<rect x="780" y="1786.2" width="250" height="116" fill="#ffffff" stroke="#1c2733" stroke-width="1.4"/>
+<rect x="780" y="1786.2" width="250" height="32" fill="#f2f5f8" stroke="#1c2733" stroke-width="1.4"/>
+<text class="nt" x="790" y="1801.2">id20</text>
+<text class="ns" x="790" y="1813.2">xl330-m288-t · soldered</text>
+<rect x="1013" y="1792.2" width="11" height="11" fill="#1a7f37"/><text class="cg" x="1018.5" y="1800.6000000000001" text-anchor="middle">&#10003;</text>
+<circle cx="780" cy="1837.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="GND"/>
+<text class="st" x="789" y="1840.7">GND</text>
+<circle cx="780" cy="1859.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="VDD"/>
+<text class="st" x="789" y="1862.7">VDD</text>
+<circle cx="780" cy="1881.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="DATA"/>
+<text class="st" x="789" y="1884.7">DATA</text>
+</g>
+<g class="node" data-label="id21" data-x="780" data-y="1928.2" data-w="250" data-h="116">
+<rect x="780" y="1928.2" width="250" height="116" fill="#ffffff" stroke="#1c2733" stroke-width="1.4"/>
+<rect x="780" y="1928.2" width="250" height="32" fill="#f2f5f8" stroke="#1c2733" stroke-width="1.4"/>
+<text class="nt" x="790" y="1943.2">id21</text>
+<text class="ns" x="790" y="1955.2">xl330-m288-t · soldered</text>
+<rect x="1013" y="1934.2" width="11" height="11" fill="#1a7f37"/><text class="cg" x="1018.5" y="1942.6000000000001" text-anchor="middle">&#10003;</text>
+<circle cx="780" cy="1979.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="GND"/>
+<text class="st" x="789" y="1982.7">GND</text>
+<circle cx="780" cy="2001.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="VDD"/>
+<text class="st" x="789" y="2004.7">VDD</text>
+<circle cx="780" cy="2023.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="DATA"/>
+<text class="st" x="789" y="2026.7">DATA</text>
+</g>
+<g class="node" data-label="id22" data-x="780" data-y="2070.2" data-w="250" data-h="116">
+<rect x="780" y="2070.2" width="250" height="116" fill="#ffffff" stroke="#1c2733" stroke-width="1.4"/>
+<rect x="780" y="2070.2" width="250" height="32" fill="#f2f5f8" stroke="#1c2733" stroke-width="1.4"/>
+<text class="nt" x="790" y="2085.2">id22</text>
+<text class="ns" x="790" y="2097.2">xl330-m288-t · soldered</text>
+<rect x="1013" y="2076.2" width="11" height="11" fill="#1a7f37"/><text class="cg" x="1018.5" y="2084.6" text-anchor="middle">&#10003;</text>
+<circle cx="780" cy="2121.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="GND"/>
+<text class="st" x="789" y="2124.7">GND</text>
+<circle cx="780" cy="2143.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="VDD"/>
+<text class="st" x="789" y="2146.7">VDD</text>
+<circle cx="780" cy="2165.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="DATA"/>
+<text class="st" x="789" y="2168.7">DATA</text>
+</g>
+<g class="node" data-label="id23" data-x="780" data-y="2212.2" data-w="250" data-h="116">
+<rect x="780" y="2212.2" width="250" height="116" fill="#ffffff" stroke="#1c2733" stroke-width="1.4"/>
+<rect x="780" y="2212.2" width="250" height="32" fill="#f2f5f8" stroke="#1c2733" stroke-width="1.4"/>
+<text class="nt" x="790" y="2227.2">id23</text>
+<text class="ns" x="790" y="2239.2">xl330-m288-t · soldered</text>
+<rect x="1013" y="2218.2" width="11" height="11" fill="#1a7f37"/><text class="cg" x="1018.5" y="2226.6" text-anchor="middle">&#10003;</text>
+<circle cx="780" cy="2263.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="GND"/>
+<text class="st" x="789" y="2266.7">GND</text>
+<circle cx="780" cy="2285.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="VDD"/>
+<text class="st" x="789" y="2288.7">VDD</text>
+<circle cx="780" cy="2307.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="DATA"/>
+<text class="st" x="789" y="2310.7">DATA</text>
+</g>
+<g class="node" data-label="id24" data-x="780" data-y="2354.2" data-w="250" data-h="116">
+<rect x="780" y="2354.2" width="250" height="116" fill="#ffffff" stroke="#1c2733" stroke-width="1.4"/>
+<rect x="780" y="2354.2" width="250" height="32" fill="#f2f5f8" stroke="#1c2733" stroke-width="1.4"/>
+<text class="nt" x="790" y="2369.2">id24</text>
+<text class="ns" x="790" y="2381.2">xl330-m288-t · soldered</text>
+<rect x="1013" y="2360.2" width="11" height="11" fill="#1a7f37"/><text class="cg" x="1018.5" y="2368.6" text-anchor="middle">&#10003;</text>
+<circle cx="780" cy="2405.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="GND"/>
+<text class="st" x="789" y="2408.7">GND</text>
+<circle cx="780" cy="2427.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="VDD"/>
+<text class="st" x="789" y="2430.7">VDD</text>
+<circle cx="780" cy="2449.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="DATA"/>
+<text class="st" x="789" y="2452.7">DATA</text>
+</g>
+<g class="node" data-label="id10" data-x="780" data-y="2496.2" data-w="250" data-h="116">
+<rect x="780" y="2496.2" width="250" height="116" fill="#ffffff" stroke="#1c2733" stroke-width="1.4"/>
+<rect x="780" y="2496.2" width="250" height="32" fill="#f2f5f8" stroke="#1c2733" stroke-width="1.4"/>
+<text class="nt" x="790" y="2511.2">id10</text>
+<text class="ns" x="790" y="2523.2">xl330-m288-t · soldered</text>
+<rect x="1013" y="2502.2" width="11" height="11" fill="#1a7f37"/><text class="cg" x="1018.5" y="2510.6" text-anchor="middle">&#10003;</text>
+<circle cx="780" cy="2547.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="GND"/>
+<text class="st" x="789" y="2550.7">GND</text>
+<circle cx="780" cy="2569.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="VDD"/>
+<text class="st" x="789" y="2572.7">VDD</text>
+<circle cx="780" cy="2591.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="DATA"/>
+<text class="st" x="789" y="2594.7">DATA</text>
+</g>
+<g class="node" data-label="id11" data-x="780" data-y="2638.2" data-w="250" data-h="116">
+<rect x="780" y="2638.2" width="250" height="116" fill="#ffffff" stroke="#1c2733" stroke-width="1.4"/>
+<rect x="780" y="2638.2" width="250" height="32" fill="#f2f5f8" stroke="#1c2733" stroke-width="1.4"/>
+<text class="nt" x="790" y="2653.2">id11</text>
+<text class="ns" x="790" y="2665.2">xl330-m288-t · soldered</text>
+<rect x="1013" y="2644.2" width="11" height="11" fill="#1a7f37"/><text class="cg" x="1018.5" y="2652.6" text-anchor="middle">&#10003;</text>
+<circle cx="780" cy="2689.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="GND"/>
+<text class="st" x="789" y="2692.7">GND</text>
+<circle cx="780" cy="2711.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="VDD"/>
+<text class="st" x="789" y="2714.7">VDD</text>
+<circle cx="780" cy="2733.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="DATA"/>
+<text class="st" x="789" y="2736.7">DATA</text>
+</g>
+<g class="node" data-label="id12" data-x="780" data-y="2780.2" data-w="250" data-h="116">
+<rect x="780" y="2780.2" width="250" height="116" fill="#ffffff" stroke="#1c2733" stroke-width="1.4"/>
+<rect x="780" y="2780.2" width="250" height="32" fill="#f2f5f8" stroke="#1c2733" stroke-width="1.4"/>
+<text class="nt" x="790" y="2795.2">id12</text>
+<text class="ns" x="790" y="2807.2">xl330-m288-t · soldered</text>
+<rect x="1013" y="2786.2" width="11" height="11" fill="#1a7f37"/><text class="cg" x="1018.5" y="2794.6" text-anchor="middle">&#10003;</text>
+<circle cx="780" cy="2831.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="GND"/>
+<text class="st" x="789" y="2834.7">GND</text>
+<circle cx="780" cy="2853.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="VDD"/>
+<text class="st" x="789" y="2856.7">VDD</text>
+<circle cx="780" cy="2875.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="DATA"/>
+<text class="st" x="789" y="2878.7">DATA</text>
+</g>
+<g class="node" data-label="id13" data-x="780" data-y="2922.2" data-w="250" data-h="116">
+<rect x="780" y="2922.2" width="250" height="116" fill="#ffffff" stroke="#1c2733" stroke-width="1.4"/>
+<rect x="780" y="2922.2" width="250" height="32" fill="#f2f5f8" stroke="#1c2733" stroke-width="1.4"/>
+<text class="nt" x="790" y="2937.2">id13</text>
+<text class="ns" x="790" y="2949.2">xl330-m288-t · soldered</text>
+<rect x="1013" y="2928.2" width="11" height="11" fill="#1a7f37"/><text class="cg" x="1018.5" y="2936.6" text-anchor="middle">&#10003;</text>
+<circle cx="780" cy="2973.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="GND"/>
+<text class="st" x="789" y="2976.7">GND</text>
+<circle cx="780" cy="2995.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="VDD"/>
+<text class="st" x="789" y="2998.7">VDD</text>
+<circle cx="780" cy="3017.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="DATA"/>
+<text class="st" x="789" y="3020.7">DATA</text>
+</g>
+<g class="node" data-label="id14" data-x="780" data-y="3064.2" data-w="250" data-h="116">
+<rect x="780" y="3064.2" width="250" height="116" fill="#ffffff" stroke="#1c2733" stroke-width="1.4"/>
+<rect x="780" y="3064.2" width="250" height="32" fill="#f2f5f8" stroke="#1c2733" stroke-width="1.4"/>
+<text class="nt" x="790" y="3079.2">id14</text>
+<text class="ns" x="790" y="3091.2">xl330-m288-t · soldered</text>
+<rect x="1013" y="3070.2" width="11" height="11" fill="#1a7f37"/><text class="cg" x="1018.5" y="3078.6" text-anchor="middle">&#10003;</text>
+<circle cx="780" cy="3115.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="GND"/>
+<text class="st" x="789" y="3118.7">GND</text>
+<circle cx="780" cy="3137.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="VDD"/>
+<text class="st" x="789" y="3140.7">VDD</text>
+<circle cx="780" cy="3159.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="DATA"/>
+<text class="st" x="789" y="3162.7">DATA</text>
+</g>
+<g class="node" data-label="tof" data-x="780" data-y="3206.2" data-w="250" data-h="138">
+<rect x="780" y="3206.2" width="250" height="138" fill="#ffffff" stroke="#1c2733" stroke-width="1.4"/>
+<rect x="780" y="3206.2" width="250" height="32" fill="#f2f5f8" stroke="#1c2733" stroke-width="1.4"/>
+<text class="nt" x="790" y="3221.2">tof</text>
+<text class="ns" x="790" y="3233.2">microduck-tof-module · soldered</text>
+<rect x="1013" y="3212.2" width="11" height="11" fill="#1a7f37"/><text class="cg" x="1018.5" y="3220.6" text-anchor="middle">&#10003;</text>
+<circle cx="780" cy="3257.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="GND"/>
+<text class="st" x="789" y="3260.7">GND</text>
+<circle cx="780" cy="3279.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="3V3"/>
+<text class="st" x="789" y="3282.7">3V3</text>
+<circle cx="780" cy="3301.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="SDA"/>
+<text class="st" x="789" y="3304.7">SDA</text>
+<circle cx="780" cy="3323.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="SCL"/>
+<text class="st" x="789" y="3326.7">SCL</text>
+</g>
+<g class="node" data-label="speaker" data-x="780" data-y="3370.2" data-w="250" data-h="94">
+<rect x="780" y="3370.2" width="250" height="94" fill="#ffffff" stroke="#1c2733" stroke-width="1.4"/>
+<rect x="780" y="3370.2" width="250" height="32" fill="#f2f5f8" stroke="#1c2733" stroke-width="1.4"/>
+<text class="nt" x="790" y="3385.2">speaker</text>
+<text class="ns" x="790" y="3397.2">microduck-speaker · soldered</text>
+<rect x="1013" y="3376.2" width="11" height="11" fill="#1a7f37"/><text class="cg" x="1018.5" y="3384.6" text-anchor="middle">&#10003;</text>
+<circle cx="780" cy="3421.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="SPK+"/>
+<text class="st" x="789" y="3424.7">SPK+</text>
+<circle cx="780" cy="3443.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="SPK-"/>
+<text class="st" x="789" y="3446.7">SPK-</text>
+</g>
+<g class="node" data-label="mic" data-x="780" data-y="3490.2" data-w="250" data-h="116">
+<rect x="780" y="3490.2" width="250" height="116" fill="#ffffff" stroke="#1c2733" stroke-width="1.4"/>
+<rect x="780" y="3490.2" width="250" height="32" fill="#f2f5f8" stroke="#1c2733" stroke-width="1.4"/>
+<text class="nt" x="790" y="3505.2">mic</text>
+<text class="ns" x="790" y="3517.2">microduck-mic · soldered</text>
+<rect x="1013" y="3496.2" width="11" height="11" fill="#1a7f37"/><text class="cg" x="1018.5" y="3504.6" text-anchor="middle">&#10003;</text>
+<circle cx="780" cy="3541.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="GND"/>
+<text class="st" x="789" y="3544.7">GND</text>
+<circle cx="780" cy="3563.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="MIC"/>
+<text class="st" x="789" y="3566.7">MIC</text>
+<circle cx="780" cy="3585.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="BIAS"/>
+<text class="st" x="789" y="3588.7">BIAS</text>
+</g>
+<g class="node" data-label="camera" data-x="780" data-y="3632.2" data-w="250" data-h="226">
+<rect x="780" y="3632.2" width="250" height="226" fill="#ffffff" stroke="#1c2733" stroke-width="1.4"/>
+<rect x="780" y="3632.2" width="250" height="32" fill="#f2f5f8" stroke="#1c2733" stroke-width="1.4"/>
+<text class="nt" x="790" y="3647.2">camera</text>
+<text class="ns" x="790" y="3659.2">microduck-camera-module · soldered</text>
+<rect x="1013" y="3638.2" width="11" height="11" fill="#1a7f37"/><text class="cg" x="1018.5" y="3646.6" text-anchor="middle">&#10003;</text>
+<circle cx="780" cy="3683.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="GND"/>
+<text class="st" x="789" y="3686.7">GND</text>
+<circle cx="780" cy="3705.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="VCC_3V3"/>
+<text class="st" x="789" y="3708.7">VCC_3V3</text>
+<circle cx="780" cy="3727.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="CSI_CLK"/>
+<text class="st" x="789" y="3730.7">CSI_CLK</text>
+<circle cx="780" cy="3749.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="CSI_D0"/>
+<text class="st" x="789" y="3752.7">CSI_D0</text>
+<circle cx="780" cy="3771.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="CSI_D1"/>
+<text class="st" x="789" y="3774.7">CSI_D1</text>
+<circle cx="780" cy="3793.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="I2C2_SDA"/>
+<text class="st" x="789" y="3796.7">I2C2_SDA</text>
+<circle cx="780" cy="3815.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="I2C2_SCL"/>
+<text class="st" x="789" y="3818.7">I2C2_SCL</text>
+<circle cx="780" cy="3837.2" r="2.8" fill="#ffffff" stroke="#1c2733" stroke-width="1.3" data-socket="PDN"/>
+<text class="st" x="789" y="3840.7">PDN</text>
+</g>
+<g class="strip">
+<line x1="28" y1="3932.2" x2="48" y2="3932.2" stroke="#a04b12" stroke-width="2.2"/>
+<text class="tm" x="52" y="3935.7">supply</text>
+<line x1="104" y1="3932.2" x2="124" y2="3932.2" stroke="#454e59" stroke-width="2.2"/>
+<text class="tm" x="128" y="3935.7">ground</text>
+<line x1="180" y1="3932.2" x2="200" y2="3932.2" stroke="#22598c" stroke-width="1.3"/>
+<text class="tm" x="204" y="3935.7">signal</text>
+<rect x="256" y="3926.7" width="11" height="11" fill="#1a7f37"/><text class="cg" x="261.5" y="3935.1" text-anchor="middle">&#10003;</text>
+<text class="tm" x="272" y="3935.7">pass</text>
+<rect x="310" y="3926.7" width="11" height="11" fill="#cf222e"/><text class="cg" x="315.5" y="3935.1" text-anchor="middle">&#10005;</text>
+<text class="tm" x="326" y="3935.7">fail</text>
+<rect x="364" y="3926.7" width="11" height="11" fill="#9a6700"/><text class="cg" x="369.5" y="3935.1" text-anchor="middle">?</text>
+<text class="tm" x="380" y="3935.7">cannot determine</text>
+<rect x="490" y="3926.7" width="11" height="11" fill="#ffffff" stroke="#adb5bd" stroke-width="1.2"/>
+<text class="tm" x="506" y="3935.7">unjudged</text>
+<line x1="1476.8" y1="3910.2" x2="1476.8" y2="3954.2" stroke="#d6dbe1" stroke-width="1"/>
+<text class="tk" x="1486.8" y="3925.2">VERDICT</text>
+<text class="tv" x="1486.8" y="3941.2" style="fill:#9a6700">CANNOT DETERMINE</text>
+<line x1="1390.0" y1="3910.2" x2="1390.0" y2="3954.2" stroke="#d6dbe1" stroke-width="1"/>
+<text class="tk" x="1400.0" y="3925.2">PARTS / NETS</text>
+<text class="tv" x="1400.0" y="3941.2">22 / 26</text>
+<line x1="1274.4" y1="3910.2" x2="1274.4" y2="3954.2" stroke="#d6dbe1" stroke-width="1"/>
+<text class="tk" x="1284.4" y="3925.2">CONTROLLER</text>
+<text class="tv" x="1284.4" y="3941.2">radxa-zero-3w</text>
+<line x1="669.2" y1="3910.2" x2="669.2" y2="3954.2" stroke="#d6dbe1" stroke-width="1"/>
+<text class="tk" x="679.2" y="3925.2">TITLE</text>
+<text class="tv" x="679.2" y="3941.2">Microduck wiring — the Dynamixel daisy chain, the HAT harness, battery and camera</text>
+<line x1="604.0" y1="3910.2" x2="604.0" y2="3954.2" stroke="#d6dbe1" stroke-width="1"/>
+<text class="tk" x="614.0" y="3925.2">SHEET</text>
+<text class="tv" x="614.0" y="3941.2">WIRING</text>
+</g>
+</svg></div><figcaption>wiring/designs/microduck/wiring.svg — the ce-wire design, 22 cables, 1615 mm total. Full cable table: <code>wiring/CABLES.md</code>; voltage-drop per hop: <code>wiring/drop.json</code>.</figcaption></figure>
+    <div>
+      <div class="mono-block">Radxa Zero 3W (RK3566)
+ ├─ UART2_M0 → /dev/ttyS2  1 Mbps  Protocol 2
+ │    └─ TTL half-duplex bus (16 devices)
+ │         ├ imu_to_dxl v2  ID 200  (LSM6DSV16X)
+ │         ├ hip yaw   L 20  R 10
+ │         ├ hip roll  L 21  R 11
+ │         ├ hip pitch L 22  R 12
+ │         ├ knee      L 23  R 13
+ │         ├ ankle     L 24  R 14
+ │         ├ neck_pitch    30
+ │         ├ head_pitch    31
+ │         ├ head_yaw      32
+ │         ├ head_roll     33
+ │         └ mouth         34   (not in policy)
+ ├─ I²C3_M0 (pins 3/5, 400 kHz, 10k pull-ups)
+ │    ├ TLV320AIC3104 codec   0x18
+ │    ├ VL53L5/L8CX ToF (J5)  0x29
+ │    └ BMI088 (dormant)      0x19 / 0x68
+ ├─ I²S3 → codec  (MCLK 12 MHz)
+ ├─ MIPI CSI (22-pin) → IMX219  0x10
+ └─ USB-C 5 V → board  (FUSB302 PD off)
+
+battery NP-F550 2S ── banana contact PCB ── HAT ── board</div>
+      <div class="note">Solid path = published (firmware file:line or datasheet). The HAT's internal power path, its half-duplex transceiver and its regulators are <span class="chip cd">CANNOT DETERMINE</span> — Pollen publishes no board files.</div>
+    </div>
+  </div>
+</section>
+
+<section id="bus">
+  <h2><span class="n">§3</span>The servo bus</h2>
+  <p class="lede">One wire does everything. Fifteen servos and the IMU bridge share a single 3.3 V-logic (5 V-tolerant) TTL half-duplex UART at 1 Mbit/s under DYNAMIXEL Protocol 2.0. There is no second bus and no second port (robotd-design.md).</p>
+  <div class="tablewrap"><table>
+    <tr><th>ID</th><th>joint</th><th>side / location</th><th>in policy?</th></tr>
+    <tr><td class="num">20 / 10</td><td>hip_yaw</td><td>L / R — trunk</td><td>yes</td></tr>
+    <tr><td class="num">21 / 11</td><td>hip_roll</td><td>L / R — hip</td><td>yes</td></tr>
+    <tr><td class="num">22 / 12</td><td>hip_pitch</td><td>L / R — thigh</td><td>yes</td></tr>
+    <tr><td class="num">23 / 13</td><td>knee</td><td>L / R — thigh→shin</td><td>yes</td></tr>
+    <tr><td class="num">24 / 14</td><td>ankle</td><td>L / R — shin→foot</td><td>yes</td></tr>
+    <tr><td class="num">30</td><td>neck_pitch</td><td>neck base</td><td>yes</td></tr>
+    <tr><td class="num">31</td><td>head_pitch</td><td>neck top</td><td>yes</td></tr>
+    <tr><td class="num">32</td><td>head_yaw</td><td>head</td><td>yes</td></tr>
+    <tr><td class="num">33</td><td>head_roll</td><td>head</td><td>yes</td></tr>
+    <tr><td class="num">34</td><td>mouth / beak</td><td>head — closed-loop linkage</td><td class="mono">no (idx skipped)</td></tr>
+    <tr><td class="num">200</td><td>imu_to_dxl v2</td><td>trunk — LSM6DSV16X bridge</td><td>read only</td></tr>
+  </table></div>
+  <div class="note">Physical layer is <b>not RS-485</b>: 3-wire TTL half-duplex with no direction GPIO in the firmware, so a self-steering transceiver on the HAT switches direction in hardware (community reading of the source). Chain order (from the wiring lane, measured off the placements): HAT → 34 → 33 → 32 → 31 → 30 → IMU 200 → both legs; longest hop 165 mm through the ±170° head-yaw joint.</div>
+</section>
+
+<section id="components">
+  <h2><span class="n">§4</span>Component datasheet table</h2>
+  <p class="lede">Every IC on the shelf with its verified identity, package, interface, supply and the key rating — each figure quoted from the vendor datasheet, page-cited in the part's own <code>electrical.chip.json</code>. A folder per part under <code>ce-parts/&lt;slug&gt;/</code> holds the fetched PDF and a sha256 in <code>PROVENANCE.json</code>.</p>
+  <div class="tablewrap"><table>
+    <tr><th>part</th><th>role</th><th>package</th><th>interface / addr</th><th>supply (min/typ/max V)</th><th>key rating</th><th>status</th></tr>
+    <tr><td class="mono">XL330-M288-T<br><span style="color:var(--ink-2)">ROBOTIS</span></td><td>servo ×15</td><td>20.0×34.0×26.0 mm, 18 g</td><td class="mono">TTL Protocol 2</td><td class="num">3.7 / 5.0 / 6.0</td><td class="num">stall 0.52 N·m @5 V<br>288.4:1 · 4096 pulse/rev</td><td><span class="chip cd">run at 6.6–8.2 V</span></td></tr>
+    <tr><td class="mono">LSM6DSV16X<br><span style="color:var(--ink-2)">ST</span></td><td>control IMU</td><td>LGA-14L 2.5×3.0×0.83</td><td class="mono">I²C/SPI/I3C · SA0=0x6A/6B</td><td class="num">1.71 / 1.8 / 3.6</td><td class="num">±4000 dps · SFLP fusion<br>game-rotation quaternion</td><td><span class="chip pass">DS13510 r4</span></td></tr>
+    <tr><td class="mono">RK3566<br><span style="color:var(--ink-2)">Radxa Zero 3W</span></td><td>compute</td><td>65×30 mm module</td><td class="mono">UART/I²C/I²S/CSI/USB</td><td class="num">5.0 (USB-C)</td><td class="num">4×A55 · Mali-G52 · 0.8 TOPS<br>1 GB · 32 GB · WiFi6/BT5.4</td><td><span class="chip cd">1GB/32GB SKU absent</span></td></tr>
+    <tr><td class="mono">TLV320AIC3104<br><span style="color:var(--ink-2)">TI</span></td><td>audio codec</td><td>VQFN-32 5×5 mm</td><td class="mono">I²C 0x18 · I²S</td><td class="num">2.7 / 3.3 / 3.6</td><td class="num">stereo · mic + HP/line<br>MCLK 12 MHz, sysclk 12.288</td><td><span class="chip pass">on shelf</span></td></tr>
+    <tr><td class="mono">VL53L8CX<br><span style="color:var(--ink-2)">ST</span></td><td>8×8 ToF</td><td>optical LGA-16 6.4×3.0×1.75</td><td class="mono">I²C 0x52(8-bit)/0x29 · SPI</td><td class="num">3.13 / 3.3 / 3.47</td><td class="num">8×8 zones · to 400 cm · 15 Hz<br>≈93 mA active (derived)</td><td><span class="chip cd">L5CX vs L8CX</span></td></tr>
+    <tr><td class="mono">IMX219<br><span style="color:var(--ink-2)">Sony</span></td><td>camera sensor</td><td>1/4″ · 3280×2464</td><td class="mono">MIPI CSI-2 · I²C 0x10</td><td class="num">2.6 / 2.8 / 3.0 (ana)</td><td class="num">8 MP · mounted inverted<br>M12 wide lens</td><td><span class="chip cd">exact module/FOV</span></td></tr>
+    <tr><td class="mono">BMI088<br><span style="color:var(--ink-2)">Bosch</span></td><td>IMU (dormant)</td><td>LGA 3.0×4.5×0.95</td><td class="mono">I²C 0x19 acc / 0x68 gyro</td><td class="num">1.7 / — / 3.6</td><td class="num">±24 g · ±2000 dps<br>≈5.15 mA (derived)</td><td><span class="chip cd">unused, connected</span></td></tr>
+    <tr><td class="mono">FUSB302<br><span style="color:var(--ink-2)">onsemi</span></td><td>USB-C PD</td><td>MLP-14 2.5×2.5</td><td class="mono">I²C 0x22</td><td class="num">— (PD node disabled)</td><td class="num">Type-C DRP/SRC/SNK<br>overlay disables the node</td><td><span class="chip cd">not fitted / disabled</span></td></tr>
+    <tr><td class="mono">PN7150<br><span style="color:var(--ink-2)">NXP</span></td><td>NFC (candidate)</td><td>HVQFN-40 6×6</td><td class="mono">I²C (NCI)</td><td class="num">3.3</td><td class="num">NFC Forum · Cortex-M0<br>reader/card/P2P</td><td><span class="chip cd">fitted IC unknown</span></td></tr>
+    <tr><td class="mono">ST25R3916<br><span style="color:var(--ink-2)">ST</span></td><td>NFC (candidate)</td><td>QFN-32 5×5</td><td class="mono">SPI / I²C</td><td class="num">2.4–5.5</td><td class="num">multi-protocol NFC reader</td><td><span class="chip cd">fitted IC unknown</span></td></tr>
+    <tr><td class="mono">NP-F550<br><span style="color:var(--ink-2)">Sony-type</span></td><td>2S battery</td><td>38.4×20.6×70.8 mm</td><td class="mono">2 contacts + T</td><td class="num">6.6 / 7.4 / 8.4</td><td class="num">2600 mAh · 18.72 Wh<br>removable, no gauge</td><td><span class="chip pass">envelope measured</span></td></tr>
+  </table></div>
+</section>
+
+<section id="registers">
+  <h2><span class="n">§5</span>Control-table registers &amp; the tick</h2>
+  <div class="grid2">
+    <div class="card"><h3>Written once at boot (robotd, per servo)</h3>
+      <div class="mono-block">return_delay_time = 0    (vendor default 250 → 0)
+baud_rate        = 3    (1 Mbps)
+pwm_slope        = 255
+shutdown         = 52   (overload | overheat | volt fault;
+                         vendor 53 with input-volt bit cleared)</div>
+      <p style="margin-top:8px">Rationale (model.rs): the default 250 is 500 µs turnaround × 16 devices = 8 ms/tick, 40 % of a 20 ms budget — so it is zeroed.</p></div>
+    <div class="card"><h3>Read every tick / every second</h3>
+      <div class="mono-block">50 Hz loop (20 ms):
+  sync_read  regs 124–136  IMU block + 15 servos
+             (present pos / vel / load)
+  sync_write goal positions
+1 Hz slow:
+  read regs 144–146  present_input_voltage (0.1 V/LSB),
+                     temperature
+Gains: P = 200, I = D = 0
+  standing_gain_ratio 0.8 · gain_limp 50 on predicted fall</div></div>
+  </div>
+  <div class="note">The <code>imu_to_dxl</code> board answers ID 200 in the same <code>sync_read</code>: register block at address 124 carries 6 bytes gyro (int16, 17.5 mdps/LSB) + 6 bytes SFLP game-rotation quaternion (x/y/z as fp16, w reconstructed). One IMU, one code path (imu.rs).</div>
+</section>
+
+<section id="power">
+  <h2><span class="n">§6</span>Power tree</h2>
+  <div class="tablewrap"><table>
+    <tr><th>rail</th><th>source</th><th>feeds</th><th>notes</th></tr>
+    <tr><td><span class="chip rail">VBAT 6.6–8.2 V</span></td><td>NP-F550 2S → banana contact PCB → HAT</td><td>all 15 servos directly; the HAT regulators</td><td>state of charge from servo reg 144; at 6.6 V smoothed the robot sits down &amp; powers off</td></tr>
+    <tr><td><span class="chip rail">5 V</span></td><td>USB-C (FUSB302 PD disabled → default 5 V) or HAT buck from VBAT</td><td>Radxa Zero 3W</td><td>“in-robot power comes from the battery via the HAT regardless” (i2c3.dts)</td></tr>
+    <tr><td><span class="chip rail">3V3</span></td><td>HAT / Radxa regulator</td><td>codec, ToF, BMI088, camera, I²C pull-ups</td><td>the HAT’s regulator part is CANNOT DETERMINE</td></tr>
+    <tr><td><span class="chip rail">1V8</span></td><td>on-module / camera</td><td>IMX219 digital, sensor cores</td><td>IMX219 VANA 2.8 V + VDIG 1.8 V per its table 42</td></tr>
+  </table></div>
+  <div class="note"><b>The one anomaly worth flagging:</b> the XL330 datasheet input band is 3.7–6.0 V, but the pack runs 6.6–8.2 V and the firmware’s Max-Voltage-Limit tops at 7.0 V. Either production servos are stock parts run over-spec, or there is a regulated rail we cannot see. A meter on a servo VDD pin settles it. Bus voltage-drop is nonetheless in spec: 21 AWG at 6.6 V still delivers 6.05 V to the far ankle (wiring/drop.json).</div>
+</section>
+
+<section id="boards">
+  <h2><span class="n">§7</span>The three custom boards</h2>
+  <p class="lede">Pollen publishes no schematic, Gerber or BOM for any of these; the facts below are read from the firmware and device trees. Our own reconstruction of the HAT as a ce-pcb board is in progress under <code>electronics/</code>.</p>
+  <div class="grid2">
+    <div class="card"><h3>RPI Robot HAT (P1) — 65 × 30 mm</h3><p>On the Radxa's 40-pin header. Carries the TLV320AIC3104 codec (0x18), the dormant BMI088, the ToF via a Stemma J5 connector (0x29), the half-duplex bus transceiver, the battery-to-board power path and a 10k I²C pull-up pair (R12/R13). Disables the Radxa's FUSB302 PD node.</p></div>
+    <div class="card"><h3>imu_to_dxl v2 (P2)</h3><p>Presents an LSM6DSV16X as a Dynamixel Protocol-2 slave at ID 200, register block 124. Rides the servo bus. MCU, transceiver and firmware are unpublished.</p></div>
+    <div class="card"><h3>Banana battery-contact PCB (P3)</h3><p>Clamped in the trunk by the printed <code>banana_pcb_locker</code>; carries the NP-F550 contacts to the HAT. Shape and contact layout unpublished.</p></div>
+  </div>
+</section>
+
+<section id="pins">
+  <h2><span class="n">§8</span>Pin &amp; connector map</h2>
+  <div class="tablewrap"><table>
+    <tr><th>interface</th><th>Radxa pins</th><th>signal</th><th>to</th><th>source</th></tr>
+    <tr><td class="mono">UART2_M0 (ttyS2)</td><td class="mono">hdr 8 / 10</td><td>TX / RX (half-duplex)</td><td>servo bus via HAT transceiver</td><td>robotd.toml</td></tr>
+    <tr><td class="mono">I²C3_M0</td><td class="mono">hdr 3 / 5</td><td>SDA GPIO1_A0 / SCL GPIO1_A1, 400 kHz</td><td>codec, ToF (J5), BMI088</td><td>i2c3.dts</td></tr>
+    <tr><td class="mono">I²S3</td><td class="mono">i2s3_2ch (M0)</td><td>BCLK/LRCLK/DIN/DOUT, MCLK 12 MHz</td><td>TLV320AIC3104</td><td>aic3104.dts</td></tr>
+    <tr><td class="mono">MIPI CSI</td><td class="mono">22-pin FPC</td><td>2-lane CSI-2 + I²C 0x10</td><td>IMX219 (inverted)</td><td>media-bringup.md</td></tr>
+    <tr><td class="mono">USB-C</td><td class="mono">Type-C</td><td>5 V + PD (disabled)</td><td>charge / tether</td><td>overlay</td></tr>
+    <tr><td class="mono">Stemma J5</td><td class="mono">on HAT</td><td>I²C + 3V3</td><td>ToF module</td><td>i2c3-pihat.dts</td></tr>
+  </table></div>
+  <p class="lede" style="margin-top:10px">Connectors not identified in any published source — <span class="chip cd">CANNOT DETERMINE</span>: the servo bus JST type/pitch on the HAT, the battery contact geometry, the CSI ribbon length, the mic and speaker terminals, and the NFC antenna feed.</p>
+</section>
+
+<section id="software">
+  <h2><span class="n">§9</span>How the software reaches each device</h2>
+  <div class="tablewrap"><table>
+    <tr><th>daemon</th><th>talks to</th><th>via</th></tr>
+    <tr><td class="mono">robotd</td><td>15 servos + IMU 200</td><td>/dev/ttyS2 · rustypot XL330 · 50 Hz ONNX policy (obs[61]→act[14])</td></tr>
+    <tr><td class="mono">tofd</td><td>VL53Lx ToF</td><td>/dev/i2c-pihat (i2c-3) · 8×8 @ 15 Hz</td></tr>
+    <tr><td class="mono">mediad</td><td>IMX219 camera</td><td>rkisp mainpath · H.264 via Rockchip MPP · WebRTC :8443/:8080</td></tr>
+    <tr><td class="mono">(codec)</td><td>TLV320AIC3104</td><td>ALSA card "aic3104" · mic wake-word CNN · per-robot voice</td></tr>
+    <tr><td class="mono">btd / padd</td><td>gamepad</td><td>Bluetooth · same mapping as the sim's gamepad path</td></tr>
+    <tr><td class="mono">updaterd</td><td>—</td><td>signed releases, health-gated rollback</td></tr>
+  </table></div>
+  <p class="lede" style="margin-top:10px">All JSON-RPC over unix sockets. Full software map with file:line: <a href="docs/ELECTRONICS-AND-SOFTWARE.md">docs/ELECTRONICS-AND-SOFTWARE.md</a>. The policy interface, tick shape and fall logic are in the <a href="docs/SIM-CAPABILITY.md">simulation capability doc</a>.</p>
+</section>
+
+<section id="unknown">
+  <h2><span class="n">§10</span>What is not published</h2>
+  <p class="lede">Named honestly so no reader mistakes an inference for a fact. Each is a measurement or a document away from resolution.</p>
+  <div class="tablewrap"><table>
+    <tr><th>unknown</th><th>what settles it</th></tr>
+    <tr><td>Servo supply topology (raw pack vs regulated) &amp; XL330 sub-variant (M288/M077)</td><td>a meter on a servo VDD pin; a teardown photo</td></tr>
+    <tr><td>The three custom PCBs: schematics, regulators, the bus transceiver, MCU on imu_to_dxl</td><td>Pollen board files, or a production-unit teardown</td></tr>
+    <tr><td>NFC reader IC + the two antennas (head, beak)</td><td>a board photo — zero firmware hits so far</td></tr>
+    <tr><td>Speaker (35×25×7 placeholder), microphone part/count, REC LED GPIO</td><td>a BOM or teardown</td></tr>
+    <tr><td>ToF generation (VL53L5CX vs L8CX) and the camera module + ribbon</td><td>a probe on I²C3 / a photo of the CSI board</td></tr>
+    <tr><td>Per-servo running current (only 17 mA standby / 1.47 A stall published)</td><td>a bench measurement — the 15-servo rail budget has no mid figure</td></tr>
+  </table></div>
+</section>
+
+<footer>
+  <span>repo <code>github.com/Leif-Rydenfalk/microduck</code> (private)</span>
+  <span>datasheets + provenance: <code>ce-parts/&lt;slug&gt;/</code></span>
+  <span>netlist: <code>electronics/netlist.json</code></span>
+  <span>graphic: <code>wiring/designs/microduck/wiring.svg</code></span>
+  <span>ce-designs/microduck · 2026-09-02</span>
+</footer>
+</div>
+
+</body>
+</html>
