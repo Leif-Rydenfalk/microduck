@@ -40,6 +40,36 @@ XC_PCT = 5.0        # render mask vs analytic width must agree within this
 HEAD_LEN_MM = 122.690
 
 
+def REMODEL(pair, combined):
+    """What a FAIL actually asks for here, said in full rather than as 're-model the head'."""
+    band = combined.get("band_over_shell") or {}
+    hw = combined.get("head_width") or {}
+    ro = combined.get("ring_od") or {}
+    out = []
+    if band.get("verdict") == "FAIL":
+        out.append("What FAILS is one feature, and it is the only one the photographs resolve at the rule: the accent trim band at the "
+                   "split line is %.3f +- %.3f mm narrower than the head's widest row on the product and flush with it on the mesh. "
+                   "Modelling that means the top shell's lower rim overhangs the band by about %.2f mm per side — an EXTERNAL feature, "
+                   "so it is modelled, not guessed." % (abs(band["dev_mm"]), band["dev_unc_mm"], abs(band["dev_mm"]) / 2.0))
+    if hw:
+        out.append("What does NOT justify a re-model: the head's overall WIDTH (%.3f +- %.3f mm against 91.763, %s) and the eye ring's OD "
+                   "(%.3f +- %.3f mm against 30.000, %s). Both point the same way as the front view's ratio and neither clears the 1.5 mm "
+                   "rule, so scaling the shells to either number would be a plausible default written into tooling — refused." % (
+                       hw["value_mm"], hw["unc_mm"], hw["verdict"], ro.get("value_mm", float("nan")), ro.get("unc_mm", float("nan")),
+                       ro.get("verdict", "CANNOT DETERMINE")))
+    out.append("What a lateral scale would break, MEASURED: part:microduck-jaw's hinge interfaces sit at x +42.068 (mouth_horn, the servo "
+               "horn face) and x -39.700 (bearing_journal) in the mesh frame; the XL330 that drives them does not scale, so a 3 % lateral "
+               "scale of the shells moves the horn face 1.26 mm off the servo. Where a width change comes out of the section is CANNOT "
+               "DETERMINE from photographs (a thinner side wall, a narrower core and a different shell profile all give the same "
+               "silhouette), so the shells stay Pollen's geometry until a calliper says otherwise.")
+    return " ".join(out)
+
+
+def load_opt(name):
+    q = os.path.join(OUT, name)
+    return json.load(open(q)) if os.path.exists(q) else None
+
+
 def grade(d, u):
     if d is None or u is None: return "CANNOT DETERMINE"
     if abs(d) + u <= RULE_MM: return "PASS"
@@ -200,26 +230,68 @@ def main():
     v = combined["verdicts"]
     # the front-view ring/width FAIL is a verdict on the PAIR (ring OD, head width): the photograph cannot say which member is off.
     # The profiles' scale-free ring / head-LENGTH ratio agrees with the mesh, so the best-supported reading is the width; a calliper settles it.
-    pair = dict(verdict=fe["verdict"], dev_mm=fe["dev_mm"], unc_mm=fe["dev_unc_mm"], dev_range_mm=fe.get("dev_mm_range"),
-                ratio_photo=fe["photo"], ratio_mesh=fe["mesh"], excess_pct=fe["diff_pct"],
-                implied_ring_od_mm_if_width_is_mesh=fe["photo_mm_if_width_is_mesh"],
-                implied_head_width_mm_if_ring_is_mesh=(30.0 / fe["photo"]) * (fe["mesh"] * front["mesh_head_width_mm"] / 30.0) if fe["photo"] else None,
-                attribution="CANNOT DETERMINE",
-                attribution_why=("the front view fixes only the RATIO ring/width; the store photographs' scale-free ring/head-length ratio (those in which the ring is seen whole: %s) reads %s mm against the mesh, "
-                                 "which supports the ring being the mesh's 30.000 mm and puts the excess on the head width (implied %s mm, i.e. %s mm); the "
-                                 "alternative — a %s mm ring on a mesh-width head — would make that ring/length ratio %+.1f %% off, which those photographs do not show" % (
-                                     ", ".join(p["id"] for p in photos if p["eye"].get("ring_read_verdict") == "PASS") or "none",
-                                     ("%+.2f ± %.2f" % (EY[0], EY[1])) if EY[0] is not None else "CANNOT DETERMINE",
-                                     fmt((30.0 / fe["photo"]) * (fe["mesh"] * front["mesh_head_width_mm"] / 30.0), 2, False) if fe["photo"] else "—",
-                                     fmt((30.0 / fe["photo"]) * (fe["mesh"] * front["mesh_head_width_mm"] / 30.0) - front["mesh_head_width_mm"], 2) if fe["photo"] else "—",
-                                     fmt(fe["photo_mm_if_width_is_mesh"], 2, False), fe["diff_pct"])))
+    FF = load_opt("front_fit.json")          # tools/head_frontfit.py — the front view RE-MEASURED
+    RW = load_opt("head_width_verdict.json")  # tools/head_width_verdict.py — the two unknowns solved
+    superseded = dict(
+        verdict=fe["verdict"], dev_mm=fe["dev_mm"], unc_mm=fe["dev_unc_mm"], ratio_photo=fe["photo"],
+        ratio_mesh=fe["mesh"], excess_pct=fe["diff_pct"],
+        why_superseded=((RW["result"]["retraction"] if RW and RW["result"].get("retraction") else
+                         "superseded by out/head/front_fit.json") if (FF and RW) else None))
+    if FF and RW:
+        r = RW["result"]; C2 = FF["comparison"]
+        pair = dict(verdict=r["verdict_ring_over_width_pair"], dev_mm=r["pair_dev_mm"], unc_mm=r["pair_dev_unc_mm"],
+                    dev_range_mm=[C2["ratio_mesh_range"][0] * front["mesh_head_width_mm"] - C2["ratio_mesh_median"] * front["mesh_head_width_mm"] + r["pair_dev_mm"],
+                                  C2["ratio_mesh_range"][1] * front["mesh_head_width_mm"] - C2["ratio_mesh_median"] * front["mesh_head_width_mm"] + r["pair_dev_mm"]],
+                    ratio_photo=C2["ratio_photo"], ratio_mesh=C2["ratio_mesh_median"], excess_pct=r["pair_excess_pct"],
+                    excess_unc_pct=r["pair_excess_unc_pct"],
+                    implied_ring_od_mm_if_width_is_mesh=C2["ratio_photo"] * front["mesh_head_width_mm"] * ((30.0 / front["mesh_head_width_mm"]) / C2["ratio_mesh_median"]),
+                    implied_head_width_mm_if_ring_is_mesh=C2["implied_head_width_mm"],
+                    head_width_mm=r["head_width_mm"], head_width_unc_mm=r["head_width_unc_mm"],
+                    head_width_verdict=r["verdict_head_width"],
+                    ring_od_mm=r["ring_od_mm"], ring_od_unc_mm=r["ring_od_unc_mm"], ring_od_verdict=r["verdict_ring_od"],
+                    attribution=r["attribution"], attribution_why=r["attribution_evidence"],
+                    source="out/head/front_fit.json + out/head/head_width_verdict.json",
+                    superseded_front_view=superseded)
+        combined["band_over_shell"] = C2.get("band_over_shell")
+        combined["outline"] = {k: v for k, v in (C2.get("outline") or {}).items() if k not in ("u", "photo", "mesh", "dev_mm", "dev_unc_mm")}
+        combined["tof_window"] = C2.get("tof")
+        combined["head_width"] = dict(value_mm=r["head_width_mm"], unc_mm=r["head_width_unc_mm"],
+                                      dev_mm=r["head_width_dev_mm"], verdict=r["verdict_head_width"],
+                                      lines=r["head_width_lines"], chi2=r["chi2"], dof=r["dof"])
+        combined["ring_od"] = dict(value_mm=r["ring_od_mm"], unc_mm=r["ring_od_unc_mm"],
+                                   dev_mm=r["ring_od_dev_mm"], verdict=r["verdict_ring_od"])
+    else:
+        pair = dict(verdict=fe["verdict"], dev_mm=fe["dev_mm"], unc_mm=fe["dev_unc_mm"], dev_range_mm=fe.get("dev_mm_range"),
+                    ratio_photo=fe["photo"], ratio_mesh=fe["mesh"], excess_pct=fe["diff_pct"],
+                    implied_ring_od_mm_if_width_is_mesh=fe["photo_mm_if_width_is_mesh"],
+                    implied_head_width_mm_if_ring_is_mesh=None,
+                    attribution="CANNOT DETERMINE",
+                    attribution_why="out/head/front_fit.json and out/head/head_width_verdict.json are not on disk: run tools/head_frontfit.py then tools/head_width_verdict.py")
     combined["front_pair"] = pair
+    band = combined.get("band_over_shell")
     fails = [k for k in ("length", "major", "minor") if v[k] == "FAIL"]
-    if fails or pair["verdict"] == "FAIL": head = "FAIL"
+    if fails or pair["verdict"] == "FAIL" or (band and band.get("verdict") == "FAIL"): head = "FAIL"
     elif all(v[k] == "PASS" for k in ("length", "major", "minor")) and pair["verdict"] == "PASS": head = "PASS"
     else: head = "CANNOT DETERMINE"
     head_why = []
-    if pair["verdict"] == "FAIL":
+    if band and band.get("verdict") == "FAIL":
+        head_why.append("the accent trim band at the head's split line is %s mm narrower than the head's own widest row on the product "
+                        "(%.4f ± %.4f of it) and exactly as wide on the mesh (%.4f); the same finding survives the adversarial reading in "
+                        "which only the jaw carries the accent colour (%s mm vs the jaw alone, %s) — a shape difference that needs no "
+                        "scale, no camera and no ring, MEASURED at %.1f sigma and confirmed at 8x on both edges (the cream shell's outer "
+                        "edge sits at x 130 / 557 in the flat-lay while the band's sits at 138 / 551)" % (
+                            fmt(band["dev_mm"]), band["photo"], band["photo_unc"], band["mesh"],
+                            fmt(band.get("dev_mm_vs_jaw_only")), band.get("verdict_vs_jaw_only"),
+                            abs(band["dev_mm"]) / band["dev_unc_mm"] if band["dev_unc_mm"] else float("nan")))
+    if pair.get("head_width_verdict"):
+        head_why.append("head WIDTH, from the two lines that never use the ring's diameter (the profile silhouettes refitted at a swept "
+                        "lateral scale, and the ToF aperture's offset from the eye axis): %s mm against the mesh's 91.763 (%s). Eye ring OD "
+                        "%s mm against 30.000 (%s). The front view's ring/width pair is %+.1f ± %.1f %% (%s)" % (
+                            fmt(pair["head_width_mm"], 3, False) + " ± " + fmt(pair["head_width_unc_mm"], 3, False),
+                            pair["head_width_verdict"],
+                            fmt(pair["ring_od_mm"], 3, False) + " ± " + fmt(pair["ring_od_unc_mm"], 3, False), pair["ring_od_verdict"],
+                            pair["excess_pct"], pair.get("excess_unc_pct", 0.0), pair["verdict"]))
+    if pair["verdict"] == "FAIL" and not pair.get("head_width_verdict"):
         head_why.append("the true front view rules the mesh out at every camera distance: ring OD / head width is %.4f ± %.4f in the photograph against %.4f on the mesh "
                         "(%+.1f %%, %s mm at the mesh width, bracket %s..%s mm over D) — at least one of {ring OD, head width} is more than %.1f mm from the mesh; which one is CANNOT DETERMINE (see front_pair)" % (
                             fe["photo"], fe["photo_unc"], fe["mesh"], fe["diff_pct"], fmt(fe["dev_mm"]), fmt(pair["dev_range_mm"][0]) if pair["dev_range_mm"] else "—",
@@ -228,7 +300,9 @@ def main():
         ("%+.2f ± %.2f" % (L[0], L[1])) if L[0] is not None else "CANNOT DETERMINE", v["length"],
         ("%+.2f ± %.2f" % (MA[0], MA[1])) if MA[0] is not None else "—", ("%+.2f ± %.2f" % (MI[0], MI[1])) if MI[0] is not None else "—"))
     # eye bezel: it exists in the mesh (noenoeil), its diameter at the head's length scale agrees (profiles); the front pair cannot be attributed to it
-    eye_parts = dict(exists_in_mesh="PASS", diameter_vs_length_profiles=v["eye_profile"], ring_width_pair=pair["verdict"], attribution_to_ring="CANNOT DETERMINE")
+    eye_parts = dict(exists_in_mesh="PASS", diameter_vs_length_profiles=v["eye_profile"], ring_width_pair=pair["verdict"],
+                     attribution_to_ring=(pair.get("ring_od_verdict") or "CANNOT DETERMINE"),
+                     ring_od_measured_mm=pair.get("ring_od_mm"), ring_od_measured_unc_mm=pair.get("ring_od_unc_mm"))
     if v["eye_profile"] == "FAIL": eye = "FAIL"
     elif v["eye_profile"] == "PASS" and pair["verdict"] == "PASS": eye = "PASS"
     else: eye = "CANNOT DETERMINE"
@@ -258,11 +332,7 @@ def main():
                                        fe["photo"], fe["mesh"], fe["verdict"],
                                        ("%+.2f ± %.2f" % (EY[0], EY[1])) if EY[0] is not None else "CANNOT DETERMINE")),
                             what_would_settle=settle,
-                            remodel=("a FAIL under the rule calls for a re-model, but the front view fixes a RATIO, not a dimension: re-modelling the width to the "
-                                     "implied %s mm (or the ring to %s mm) would be a plausible default written into tooling — refused; the calliper reading above is the "
-                                     "prerequisite, and the parametric head is prepared to take it (ce-parts/microduck-eye-ring carries the ring; the shells stay Pollen's mesh until measured)" % (
-                                         fmt(pair["implied_head_width_mm_if_ring_is_mesh"], 2, False) if pair["implied_head_width_mm_if_ring_is_mesh"] else "—",
-                                         fmt(fe["photo_mm_if_width_is_mesh"], 2, False))) if head == "FAIL" else None))
+                            remodel=(REMODEL(pair, combined) if head == "FAIL" else None)))
     json.dump(out, open(os.path.join(OUT, "head.json"), "w"), indent=1, default=float)
     print(json.dumps(dict(combined={k: combined[k] for k in combined if k != "front_pair"}, front_pair=pair, verdict=out["verdict"]), indent=1, default=float))
     for p in photos:
