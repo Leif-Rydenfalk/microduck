@@ -36,13 +36,53 @@ import numpy as np
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(ROOT)), "ce-cad"))
+sys.path.insert(0, HERE)          # sim/common.py, whatever the cwd (bin/cad does not pass PYTHONPATH through)
 from cecad import meshslice as ms  # noqa: E402
 
 EVID = os.path.join(ROOT, "out", "sim-evidence")
 L = json.load(open(os.path.join(EVID, "loads_mujoco.json")))
 G = 9.81
 H = 0.250
+# WHERE 0.250 m COMES FROM (F1 skeptic finding 7, 2026-09-03: the one input with no source). It is the lane brief's
+# number — GOAL.md lane F says only "drop/impact"; the F1 brief (orchestrator, 2026-09-02) says "a 0.250 m fall onto one
+# foot and onto the head". No requirement document sets a drop height (docs/MANUFACTURING-REQUIREMENTS.md has none). It is
+# therefore an INPUT CHOSEN BY THE BRIEF, not a requirement; stand_height() below measures what it corresponds to on the
+# robot (the height of its own head above the floor in the STAND keyframe), and height_sensitivity() says how every
+# figure in this study scales with h so that a requirement, once written, can be read off without re-running anything.
+H_SOURCE = ("lane F1 brief (orchestrator, 2026-09-02): 'a 0.250 m fall onto one foot and onto the head'. GOAL.md lane F names no height; "
+            "docs/MANUFACTURING-REQUIREMENTS.md sets no drop requirement. A chosen input, not a requirement — see stand_height_m and height_sensitivity.")
 m = L["model"]["mass_kg_from_mjcf_inertials"]
+
+
+def stand_height():
+    """Top of the robot above the floor in the STAND keyframe, off the compiled MuJoCo model (mesh vertices in world)."""
+    import mujoco
+    mdl = mujoco.MjModel.from_xml_path(os.path.join(EVID, "scene_loads_walk.xml"))
+    dat = mujoco.MjData(mdl)
+    mujoco.mj_resetDataKeyframe(mdl, dat, mujoco.mj_name2id(mdl, mujoco.mjtObj.mjOBJ_KEY, "STAND"))
+    mujoco.mj_forward(mdl, dat)
+    zmax = -1.0
+    for g in range(mdl.ngeom):
+        if mdl.geom_type[g] == mujoco.mjtGeom.mjGEOM_MESH:
+            mid = mdl.geom_dataid[g]
+            V = mdl.mesh_vert[mdl.mesh_vertadr[mid]:mdl.mesh_vertadr[mid] + mdl.mesh_vertnum[mid]]
+            W = V @ dat.geom_xmat[g].reshape(3, 3).T + dat.geom_xpos[g]
+            zmax = max(zmax, float(W[:, 2].max()))
+    return {"stand_top_z_m": round(zmax, 5), "how": "max world z over every mesh geom's vertices, STAND keyframe, out/sim-evidence/scene_loads_walk.xml",
+            "ratio_H_over_stand_height": round(H / zmax, 4)}
+
+
+def height_sensitivity():
+    """How the study's figures scale with the drop height h (all closed-form): energy and momentum^2 ~ h, impact speed and the
+    rigid-spring peak force (model A, F = v sqrt(K m)) ~ sqrt(h), the Hertz peak (model B) ~ h^(3/5); linear FEA stress ~ force.
+    MuJoCo's default contact (model C) is not a linear spring and is NOT scaled here — it needs a re-run at the new h."""
+    rows = []
+    for h in (0.100, 0.250, 0.500, 0.750, 1.000):
+        rows.append({"height_m": h, "energy_ratio": round(h / H, 4), "speed_ratio": round((h / H) ** 0.5, 4),
+                     "model_A_force_ratio": round((h / H) ** 0.5, 4), "model_B_hertz_force_ratio": round((h / H) ** 0.6, 4),
+                     "what_it_is": {0.100: "hand height above a desk", 0.250: "this study; ~ the robot's own head height (stand_height_m)",
+                                    0.500: "twice this study", 0.750: "a table edge (typical 0.72-0.76 m desk)", 1.000: "1 m"}[h]})
+    return rows
 
 
 def head_shell_measure():
@@ -165,7 +205,8 @@ def main():
         "study": "drop_impact",
         "generated": "2026-09-02", "script": "sim/drop_impact.py",
         "inputs": {"mass_kg": m, "mass_source": "loads_mujoco.json model.mass_kg_from_mjcf_inertials (sum of robot_walk.xml <inertial> masses)",
-                   "height_m": H, "g_m_s2": G, "materials": mats, "sole": sole, "head_shell": head,
+                   "height_m": H, "height_source": H_SOURCE, "stand_height_m": stand_height(), "height_sensitivity": height_sensitivity(),
+                   "g_m_s2": G, "materials": mats, "sole": sole, "head_shell": head,
                    "mujoco_default_contact": {"solref": [tc, dr], "solimp_dmax": dmax, "equivalent_stiffness_N_per_m": round(k_default, 1),
                                               "note": "k = m/(dmax tc^2 dampratio^2): the default contact is ~%.0fx softer than the TPU floor" % (K_tpu / k_default)}},
         "method": "energy E = m g h; A rigid-on-spring F = v sqrt(K m); B Hertz energy balance with bottoming-out check; C MuJoCo runs (sim/measure_loads.py)",

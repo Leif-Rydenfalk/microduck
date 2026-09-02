@@ -96,10 +96,34 @@
   "failure_load_N_linear": 16806.3,
   "sf_vs_tds_yield": 21.1154,
   "tds_yield_mpa": 4.0,
-  "sf_vs_tds_ultimate": 137.25
+  "sf_vs_tds_ultimate": 137.25,
+  "grading": {
+   "rule": "SF = min(table, TDS) >= 2; plate if t/mid <= 0.15; linear regime valid while d <= t/2 (plate) and d <= L/10 (all); outside the regime a converged NLGEOM re-solve (sim/fea_nlgeom.py) carries the verdict when it exists; a declared parallel load share (sim/load_share.py) turns FAIL into CANNOT DETERMINE with the bound printed",
+   "sf_table": 131.97113742613845,
+   "sf_tds": 21.1154,
+   "sf_linear_governing": 21.1154,
+   "basis": "TDS",
+   "regime": {
+    "bbox_sorted_mm": [
+     12.905,
+     41.069,
+     54.0
+    ],
+    "plate": false,
+    "d_over_t": 0.0067,
+    "d_over_L": 0.0016,
+    "linear_regime_valid": true,
+    "rule": "plate if t/mid <= 0.15; valid while d/t <= 0.5 (plate) and d/L <= 0.1"
+   },
+   "load_share": null,
+   "nonlinear_study": null,
+   "sf_used": 21.1154,
+   "model": "linear",
+   "verdict": "PASS"
+  }
  },
  "verdict": "PASS",
- "why": "SF 131.971 >= 2 against TPU yield 25 MPa (class tier, accepted by the caller); TDS yield gives SF 21.1154",
+ "why": "SF 21.115 (TDS, linear model) on |F| 127.3483 N: peak von Mises 0.189 MPa vs table yield 25 MPa (SF 131.971) and TDS yield 4 MPa (SF 21.115); the case requires 2; delta 0.0869 mm inside the small-deflection regime (d/t 0.007, d/L 0.0016)",
  "artifacts": [
   "out/sim-evidence/fea/microduck-sole-left_drop",
   "out/sim-evidence/fea/microduck-sole-left_drop.png",
@@ -120,5 +144,12 @@
    "check": "peak von Mises recomputed from the .frd agrees with the report to 0.5 % (cecad.feaimage)"
   }
  ],
- "seconds": 244.8
+ "seconds": 244.8,
+ "rejudged_from": [
+  {
+   "verdict": "PASS",
+   "why": "SF 131.971 >= 2 against TPU yield 25 MPa (class tier, accepted by the caller); TDS yield gives SF 21.1154",
+   "generator": "sim/fea_rejudge.py 2026-09-03"
+  }
+ ]
 }

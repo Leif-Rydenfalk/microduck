@@ -453,6 +453,7 @@ def drop(robot, orient_quat, target_geom, height_m, solref, seconds=0.5, label="
         "label": label, "robot": robot, "scene_file": os.path.relpath(scene, ROOT), "target_geom": target_geom,
         "struck_geom": struck, "timestep_s": float(model.opt.timestep), "n_steps": int(n),
         "height_m": height_m, "orientation_quat_wxyz": [float(x) for x in orient_quat],
+        "height_source": "lane F1 brief (orchestrator, 2026-09-02): 'a 0.250 m fall onto one foot and onto the head' — a chosen input; no requirement document sets a drop height (sim/drop_impact.py H_SOURCE)",
         "solref": list(solref) if solref is not None else "model default (MuJoCo 0.02 s, dampratio 1)",
         "mass_kg": round(mass, 6), "energy_J": round(mass * G * height_m, 5),
         "impact_speed_m_s": round(v_impact, 5), "momentum_Ns": round(mass * v_impact, 5),

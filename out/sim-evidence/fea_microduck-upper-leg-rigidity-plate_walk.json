@@ -106,10 +106,39 @@
   "failure_load_N_linear": 19.7784,
   "sf_vs_tds_yield": 1.0582,
   "tds_yield_mpa": 51.0,
-  "sf_vs_tds_interlayer_across_layers": 0.3527
+  "sf_vs_tds_interlayer_across_layers": 0.3527,
+  "grading": {
+   "rule": "SF = min(table, TDS) >= 2; plate if t/mid <= 0.15; linear regime valid while d <= t/2 (plate) and d <= L/10 (all); outside the regime a converged NLGEOM re-solve (sim/fea_nlgeom.py) carries the verdict when it exists; a declared parallel load share (sim/load_share.py) turns FAIL into CANNOT DETERMINE with the bound printed",
+   "sf_table": 1.0374963172871878,
+   "sf_tds": 1.0582,
+   "sf_linear_governing": 1.037496,
+   "basis": "table",
+   "regime": {
+    "bbox_sorted_mm": [
+     1.0,
+     44.9992,
+     58.0596
+    ],
+    "plate": true,
+    "d_over_t": 2.6595,
+    "d_over_L": 0.0458,
+    "linear_regime_valid": false,
+    "rule": "plate if t/mid <= 0.15; valid while d/t <= 0.5 (plate) and d/L <= 0.1"
+   },
+   "load_share": {
+    "kind": "parallel: closes the thigh housing (part:microduck-upper-leg-left) across its whole span; four screws each end",
+    "share_applied": 1.0,
+    "why_unmeasured": "the plate-vs-housing stiffness ratio was never solved (the housing does not mesh: fea_meshability_microduck-upper-leg-left.json)",
+    "what_settles_it": "a housing that meshes plus a two-body (plate + housing, bolted) solve in cecad.stress / ce-struct, or a printed thigh loaded to the walk peak on a bench with the plate strain-gauged"
+   },
+   "nonlinear_study": null,
+   "sf_used": 1.037496,
+   "model": "linear",
+   "verdict": "CANNOT DETERMINE"
+  }
  },
  "verdict": "CANNOT DETERMINE",
- "why": "bounding case: 100 % of the thigh force through the 1 mm plate gives SF 1.037 (< 2), but the plate shares that load with the housing it closes and its share is unmeasured; a housing that meshes (see fea_meshability) plus a two-body solve settles it",
+ "why": "SF 1.037 (table, linear model) on |F| 19.0636 N: peak von Mises 48.193 MPa vs table yield 50 MPa (SF 1.037) and TDS yield 51 MPa (SF 1.058); the case requires 2; delta 2.6595 mm is OUTSIDE the small-deflection regime (plate: d/t 2.659, d/L 0.0458) so the linear peak is a bound, not a prediction; no nonlinear re-solve on disk yet \u2014 graded on the linear bound; BOUND, not a verdict: this study applies 100 % of a force the part carries in parallel: closes the thigh housing (part:microduck-upper-leg-left) across its whole span; four screws each end; the share is unmeasured (the plate-vs-housing stiffness ratio was never solved (the housing does not mesh: fea_meshability_microduck-upper-leg-left.json)). A PASS at 100 % would have been a PASS; a FAIL at 100 % proves only that the bound is not enough. What settles it: a housing that meshes plus a two-body (plate + housing, bolted) solve in cecad.stress / ce-struct, or a printed thigh loaded to the walk peak on a bench with the plate strain-gauged",
  "artifacts": [
   "out/sim-evidence/fea/microduck-upper-leg-rigidity-plate_walk",
   "out/sim-evidence/fea/microduck-upper-leg-rigidity-plate_walk.png",
@@ -119,20 +148,28 @@
   {
    "image": "out/sim-evidence/fea/microduck-upper-leg-rigidity-plate_walk.png",
    "facts": {
-    "bytes": 113112,
+    "bytes": 114646,
     "size": [
      1240,
      840
     ],
-    "distinct_colors": 8590,
-    "foreground_frac": 0.1194
+    "distinct_colors": 8704,
+    "foreground_frac": 0.1201
    },
-   "check": "peak von Mises recomputed from the .frd agrees with the report to 0.5 % (cecad.feaimage)"
+   "caption_verdict": "CANNOT DETERMINE",
+   "check": "peak von Mises recomputed from the .frd agrees with the report to 0.5 % (cecad.feaimage); caption verdict = study verdict"
   }
  ],
  "seconds": 121.3,
- "rejudged_from": {
-  "verdict": "FAIL",
-  "why": "peak 48.2 MPa leaves SF 1.04 against 50 MPa yield; the case requires 2"
- }
+ "rejudged_from": [
+  {
+   "verdict": "FAIL",
+   "why": "peak 48.2 MPa leaves SF 1.04 against 50 MPa yield; the case requires 2"
+  },
+  {
+   "verdict": "CANNOT DETERMINE",
+   "why": "bounding case: 100 % of the thigh force through the 1 mm plate gives SF 1.037 (< 2), but the plate shares that load with the housing it closes and its share is unmeasured; a housing that meshes (see fea_meshability) plus a two-body solve settles it",
+   "generator": "sim/fea_rejudge.py 2026-09-03"
+  }
+ ]
 }

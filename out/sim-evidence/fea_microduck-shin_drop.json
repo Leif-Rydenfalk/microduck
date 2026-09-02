@@ -94,10 +94,44 @@
   "failure_load_N_linear": 58.8356,
   "sf_vs_tds_yield": 0.5051,
   "tds_yield_mpa": 51.0,
-  "sf_vs_tds_interlayer_across_layers": 0.1684
+  "sf_vs_tds_interlayer_across_layers": 0.1684,
+  "grading": {
+   "rule": "SF = min(table, TDS) >= 2; plate if t/mid <= 0.15; linear regime valid while d <= t/2 (plate) and d <= L/10 (all); outside the regime a converged NLGEOM re-solve (sim/fea_nlgeom.py) carries the verdict when it exists; a declared parallel load share (sim/load_share.py) turns FAIL into CANNOT DETERMINE with the bound printed",
+   "sf_table": 0.4951828397145468,
+   "sf_tds": 0.5051,
+   "sf_linear_governing": 0.495183,
+   "basis": "table",
+   "regime": {
+    "bbox_sorted_mm": [
+     7.95,
+     20.0,
+     58.0
+    ],
+    "plate": false,
+    "d_over_t": 0.6574,
+    "d_over_L": 0.0901,
+    "linear_regime_valid": true,
+    "rule": "plate if t/mid <= 0.15; valid while d/t <= 0.5 (plate) and d/L <= 0.1"
+   },
+   "load_share": null,
+   "nonlinear_study": "out/sim-evidence/fea_nlgeom_microduck-shin_drop.json",
+   "nonlinear": {
+    "max_von_mises_mpa": 119.11458333524824,
+    "max_displacement_mm": 6.394827143964488,
+    "sf_table": 0.4197638828091678,
+    "sf_tds": 0.4281591604653512,
+    "sf_governing": 0.419764,
+    "ratio_vm_nonlinear_over_linear": 1.1796699525472651,
+    "increments": 12,
+    "verdict": "FAIL"
+   },
+   "sf_used": 0.419764,
+   "model": "nonlinear (more conservative than the linear)",
+   "verdict": "FAIL"
+  }
  },
  "verdict": "FAIL",
- "why": "peak 101.0 MPa leaves SF 0.50 against 50 MPa yield; the case requires 2",
+ "why": "SF 0.420 (nonlinear governing, nonlinear (more conservative than the linear) model) on |F| 118.8160 N: peak von Mises 100.973 MPa vs table yield 50 MPa (SF 0.495) and TDS yield 51 MPa (SF 0.505); the case requires 2; delta 5.2267 mm inside the small-deflection regime (d/t 0.657, d/L 0.0901); geometrically nonlinear re-solve (sim/fea_nlgeom.py, 12 increments): peak 119.115 MPa (1.180x the linear), delta 6.3948 mm, SF 0.420 \u2014 the more conservative of the two carries the verdict",
  "artifacts": [
   "out/sim-evidence/fea/microduck-shin_drop",
   "out/sim-evidence/fea/microduck-shin_drop.png",
@@ -118,5 +152,17 @@
    "check": "peak von Mises recomputed from the .frd agrees with the report to 0.5 % (cecad.feaimage)"
   }
  ],
- "seconds": 114.3
+ "seconds": 114.3,
+ "rejudged_from": [
+  {
+   "verdict": "FAIL",
+   "why": "peak 101.0 MPa leaves SF 0.50 against 50 MPa yield; the case requires 2",
+   "generator": "sim/fea_rejudge.py 2026-09-03"
+  },
+  {
+   "verdict": "FAIL",
+   "why": "SF 0.495 (table, linear model) on |F| 118.8160 N: peak von Mises 100.973 MPa vs table yield 50 MPa (SF 0.495) and TDS yield 51 MPa (SF 0.505); the case requires 2; delta 5.2267 mm inside the small-deflection regime (d/t 0.657, d/L 0.0901)",
+   "generator": "sim/fea_rejudge.py 2026-09-03"
+  }
+ ]
 }

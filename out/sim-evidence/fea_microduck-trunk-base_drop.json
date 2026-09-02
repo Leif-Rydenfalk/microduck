@@ -106,10 +106,39 @@
   "failure_load_N_linear": 6.4706,
   "sf_vs_tds_yield": 0.0632,
   "tds_yield_mpa": 51.0,
-  "sf_vs_tds_interlayer_across_layers": 0.0211
+  "sf_vs_tds_interlayer_across_layers": 0.0211,
+  "grading": {
+   "rule": "SF = min(table, TDS) >= 2; plate if t/mid <= 0.15; linear regime valid while d <= t/2 (plate) and d <= L/10 (all); outside the regime a converged NLGEOM re-solve (sim/fea_nlgeom.py) carries the verdict when it exists; a declared parallel load share (sim/load_share.py) turns FAIL into CANNOT DETERMINE with the bound printed",
+   "sf_table": 0.062009550344654704,
+   "sf_tds": 0.0632,
+   "sf_linear_governing": 0.06201,
+   "basis": "table",
+   "regime": {
+    "bbox_sorted_mm": [
+     3.0,
+     36.0,
+     57.0
+    ],
+    "plate": true,
+    "d_over_t": 29.8555,
+    "d_over_L": 1.5713,
+    "linear_regime_valid": false,
+    "rule": "plate if t/mid <= 0.15; valid while d/t <= 0.5 (plate) and d/L <= 0.1"
+   },
+   "load_share": {
+    "kind": "parallel: a 1 mm plate clamped over its whole area between the two trunk shells (part:microduck-trunk-shell-left / -right) and the hip-yaw XL330 case",
+    "share_applied": 1.0,
+    "why_unmeasured": "the shells and the servo case are not in the model; held at its four screw holes alone the plate is a 35 mm span it never sees in the assembly",
+    "what_settles_it": "a two-body solve (shells + base, bolted) in cecad.stress / ce-struct, or a printed trunk loaded to the walk peak at one hip on a bench"
+   },
+   "nonlinear_study": null,
+   "sf_used": 0.06201,
+   "model": "linear",
+   "verdict": "CANNOT DETERMINE"
+  }
  },
  "verdict": "CANNOT DETERMINE",
- "why": "the 1 mm trunk-base plate cannot carry the stance leg's force on its own: held at its four edge screws and loaded at the left hip-yaw hole wall it reads SF 0.062 (< 2), and held at one hip hole and loaded at the other (the first run) it read a 35 mm cantilever. In the product the plate is clamped between the two trunk shells (part:microduck-trunk-shell-left/-right, both rebuilt) and the hip-yaw XL330 case, so the load path is shells + plate + servo case, not the plate alone; the share is unmeasured. What settles it: a two-body solve (shells + base, bolted) in cecad.stress/ce-struct, or a printed trunk loaded to 20 N at one hip on a bench",
+ "why": "SF 0.062 (table, linear model) on |F| 104.3481 N: peak von Mises 806.327 MPa vs table yield 50 MPa (SF 0.062) and TDS yield 51 MPa (SF 0.063); the case requires 2; delta 89.5664 mm is OUTSIDE the small-deflection regime (plate: d/t 29.855, d/L 1.5713) so the linear peak is a bound, not a prediction; no nonlinear re-solve on disk yet \u2014 graded on the linear bound; BOUND, not a verdict: this study applies 100 % of a force the part carries in parallel: a 1 mm plate clamped over its whole area between the two trunk shells (part:microduck-trunk-shell-left / -right) and the hip-yaw XL330 case; the share is unmeasured (the shells and the servo case are not in the model; held at its four screw holes alone the plate is a 35 mm span it never sees in the assembly). A PASS at 100 % would have been a PASS; a FAIL at 100 % proves only that the bound is not enough. What settles it: a two-body solve (shells + base, bolted) in cecad.stress / ce-struct, or a printed trunk loaded to the walk peak at one hip on a bench",
  "artifacts": [
   "out/sim-evidence/fea/microduck-trunk-base_drop",
   "out/sim-evidence/fea/microduck-trunk-base_drop.png",
@@ -119,20 +148,28 @@
   {
    "image": "out/sim-evidence/fea/microduck-trunk-base_drop.png",
    "facts": {
-    "bytes": 128868,
+    "bytes": 130375,
     "size": [
      1240,
      840
     ],
-    "distinct_colors": 10680,
-    "foreground_frac": 0.1229
+    "distinct_colors": 10794,
+    "foreground_frac": 0.1236
    },
-   "check": "peak von Mises recomputed from the .frd agrees with the report to 0.5 % (cecad.feaimage)"
+   "caption_verdict": "CANNOT DETERMINE",
+   "check": "peak von Mises recomputed from the .frd agrees with the report to 0.5 % (cecad.feaimage); caption verdict = study verdict"
   }
  ],
  "seconds": 125.7,
- "rejudged_from": {
-  "verdict": "FAIL",
-  "why": "peak 806.3 MPa leaves SF 0.06 against 50 MPa yield; the case requires 2"
- }
+ "rejudged_from": [
+  {
+   "verdict": "FAIL",
+   "why": "peak 806.3 MPa leaves SF 0.06 against 50 MPa yield; the case requires 2"
+  },
+  {
+   "verdict": "CANNOT DETERMINE",
+   "why": "the 1 mm trunk-base plate cannot carry the stance leg's force on its own: held at its four edge screws and loaded at the left hip-yaw hole wall it reads SF 0.062 (< 2), and held at one hip hole and loaded at the other (the first run) it read a 35 mm cantilever. In the product the plate is clamped between the two trunk shells (part:microduck-trunk-shell-left/-right, both rebuilt) and the hip-yaw XL330 case, so the load path is shells + plate + servo case, not the plate alone; the share is unmeasured. What settles it: a two-body solve (shells + base, bolted) in cecad.stress/ce-struct, or a printed trunk loaded to 20 N at one hip on a bench",
+   "generator": "sim/fea_rejudge.py 2026-09-03"
+  }
+ ]
 }

@@ -1,0 +1,71 @@
+{
+ "study": "fea_nlgeom_microduck-motor-support_head_drop",
+ "part": "part:microduck-motor-support",
+ "case": "head_drop",
+ "generated": "2026-09-03T03:54:55",
+ "script": "sim/fea_nlgeom.py",
+ "inputs": {
+  "linear_study": "out/sim-evidence/fea_microduck-motor-support_head_drop.json",
+  "deck": "out/sim-evidence/fea/microduck-motor-support_head_drop/microduck-motor-support_head_drop_nlgeom.inp",
+  "same_as_linear": "mesh, held node set, nodal loads, E/nu \u2014 only the *STEP line differs",
+  "step": "*STEP, NLGEOM, INC=400 / *STATIC 0.05, 1, 1e-06, 0.1 (initial, total, min, max increment)",
+  "force_magnitude_N": 75.8051,
+  "force_N_part_frame": [
+   -0.04067,
+   -2.09857,
+   -68.3683
+  ],
+  "force_source": "out/sim-evidence/loads_mujoco.json :: drops[drop_head_default_contact_dt5ms].part_frames_at_peak.motor_support.force_from_body_jaw_soft (t 0.240 s)",
+  "material": "PLA",
+  "yield_mpa_used": 50,
+  "require_sf": 2.0,
+  "regime_rule": {
+   "plate_if_thin_over_mid_le": 0.15,
+   "plate_w_over_t_le": 0.5,
+   "member_d_over_L_le": 0.1,
+   "basis": "small-deflection plate theory (Timoshenko & Woinowsky-Krieger, Theory of Plates and Shells: w small against t; t/2 customary) and small rotation (delta/L 0.1 ~ 0.15 rad tip slope)"
+  },
+  "bbox_sorted_mm": [
+   18.8,
+   54.2,
+   73.5
+  ],
+  "linear": {
+   "max_von_mises_mpa": 329.8984331765763,
+   "max_displacement_mm": 16.27740460926729,
+   "sf": 0.1515617989408206,
+   "plate": false,
+   "d_over_t": 0.8658,
+   "d_over_L": 0.2215,
+   "in_small_deflection_regime": false
+  }
+ },
+ "method": "CalculiX *STATIC with NLGEOM (updated Lagrangian, load ramped in increments, materially linear-elastic) on the identical deck; the last converged increment reduced to peak nodal von Mises and |u|",
+ "artifacts": [
+  "out/sim-evidence/fea/microduck-motor-support_head_drop",
+  "out/sim-evidence/fea/microduck-motor-support_head_drop/microduck-motor-support_head_drop_nlgeom.inp",
+  "out/sim-evidence/fea/microduck-motor-support_head_drop/microduck-motor-support_head_drop_nlgeom.frd"
+ ],
+ "looked_at": [],
+ "outputs": {
+  "ccx_returncode": 0,
+  "load_fraction_reached": 1.0,
+  "increments": 12,
+  "seconds": 988.4,
+  "ccx_tail": " convergence; the increment size is increased to 3.750000e-02\n\n the increment size exceeds the remainder of the step and is decreased to 0.000000e+00\n\n Using up to 2 cpu(s) for the stress calculation.\n\n\n Job finished",
+  "max_von_mises_mpa": 285.1215289223176,
+  "max_displacement_mm": 12.707752605544224,
+  "stress_nodes": 60545,
+  "frd_blocks": {
+   "STRESS": 12,
+   "DISP": 12
+  },
+  "sf": 0.17536381833033268,
+  "ratio_nonlinear_over_linear_vm": 0.8642706368044735,
+  "ratio_nonlinear_over_linear_disp": 0.7806989449847097,
+  "nonlinear_d_over_t": 0.6759,
+  "nonlinear_d_over_L": 0.1729
+ },
+ "verdict": "FAIL",
+ "why": "geometrically nonlinear peak 285.122 MPa (linear 329.898, ratio 0.864) and |u| 12.7078 mm (linear 16.2774) at the full 75.8051 N; SF 0.175 against 50 MPa, the case requires 2; 12 increments"
+}

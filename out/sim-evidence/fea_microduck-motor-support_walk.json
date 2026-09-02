@@ -99,10 +99,34 @@
   "failure_load_N_linear": 8.9506,
   "sf_vs_tds_yield": 1.4396,
   "tds_yield_mpa": 51.0,
-  "sf_vs_tds_interlayer_across_layers": 0.4799
+  "sf_vs_tds_interlayer_across_layers": 0.4799,
+  "grading": {
+   "rule": "SF = min(table, TDS) >= 2; plate if t/mid <= 0.15; linear regime valid while d <= t/2 (plate) and d <= L/10 (all); outside the regime a converged NLGEOM re-solve (sim/fea_nlgeom.py) carries the verdict when it exists; a declared parallel load share (sim/load_share.py) turns FAIL into CANNOT DETERMINE with the bound printed",
+   "sf_table": 1.4113580564313712,
+   "sf_tds": 1.4396,
+   "sf_linear_governing": 1.411358,
+   "basis": "table",
+   "regime": {
+    "bbox_sorted_mm": [
+     18.8,
+     54.2,
+     73.5
+    ],
+    "plate": false,
+    "d_over_t": 0.0693,
+    "d_over_L": 0.0177,
+    "linear_regime_valid": true,
+    "rule": "plate if t/mid <= 0.15; valid while d/t <= 0.5 (plate) and d/L <= 0.1"
+   },
+   "load_share": null,
+   "nonlinear_study": null,
+   "sf_used": 1.411358,
+   "model": "linear",
+   "verdict": "FAIL"
+  }
  },
  "verdict": "FAIL",
- "why": "peak 35.4 MPa leaves SF 1.41 against 50 MPa yield; the case requires 2",
+ "why": "SF 1.411 (table, linear model) on |F| 6.3418 N: peak von Mises 35.427 MPa vs table yield 50 MPa (SF 1.411) and TDS yield 51 MPa (SF 1.440); the case requires 2; delta 1.3034 mm inside the small-deflection regime (d/t 0.069, d/L 0.0177)",
  "artifacts": [
   "out/sim-evidence/fea/microduck-motor-support_walk",
   "out/sim-evidence/fea/microduck-motor-support_walk.png",
@@ -123,5 +147,12 @@
    "check": "peak von Mises recomputed from the .frd agrees with the report to 0.5 % (cecad.feaimage)"
   }
  ],
- "seconds": 149.6
+ "seconds": 149.6,
+ "rejudged_from": [
+  {
+   "verdict": "FAIL",
+   "why": "peak 35.4 MPa leaves SF 1.41 against 50 MPa yield; the case requires 2",
+   "generator": "sim/fea_rejudge.py 2026-09-03"
+  }
+ ]
 }
