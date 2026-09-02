@@ -132,8 +132,13 @@ for _s in D["sections"]:
 if _SV01 is None or "readback" not in _SV01:
     raise SystemExit("gen_test_plan: SV-01 has no readback[] - the read-back count cannot be derived")
 _RB = _SV01["readback"]
-_WORDS = {0:"no",1:"one",2:"two",3:"three",4:"four",5:"five",6:"six",7:"seven",8:"eight",
-          9:"nine",10:"ten",11:"eleven",12:"twelve"}
+_WORDNAMES = {0:"no",1:"one",2:"two",3:"three",4:"four",5:"five",6:"six",7:"seven",8:"eight",
+              9:"nine",10:"ten",11:"eleven",12:"twelve",13:"thirteen",14:"fourteen",15:"fifteen",
+              16:"sixteen",17:"seventeen",18:"eighteen",19:"nineteen",20:"twenty"}
+def _WORD(n):
+    """A count spelled out, and a plain numeral past twenty rather than a KeyError. A generator
+    that crashes on a data change is a generator people stop changing the data of."""
+    return _WORDNAMES.get(n, str(n))
 
 _WARM = float(_WALK["command"]["warmup_s"])
 TOK.update({
@@ -152,10 +157,10 @@ TOK.update({
   "TOL_COUNT":             "%d"   % TOL_COUNT,
   "TOL_DEG_OF_COUNT":      "%.4f" % (TOL_COUNT * DEG_PER_COUNT),
   "SV01_READBACK_N":       "%d"   % len(_RB),
-  "SV01_READBACK_WORD":    _WORDS[len(_RB)],
-  "SV01_SCAN_N":           _WORDS[len([r for r in _RB if r[1] == "scan"])],
-  "SV01_WRITTEN_N":        _WORDS[len([r for r in _RB if r[1] == "written"])],
-  "SV01_VERIFY_N":         _WORDS[len([r for r in _RB if r[1] == "verify"])],
+  "SV01_READBACK_WORD":    _WORD(len(_RB)),
+  "SV01_SCAN_N":           _WORD(len([r for r in _RB if r[1] == "scan"])),
+  "SV01_WRITTEN_N":        _WORD(len([r for r in _RB if r[1] == "written"])),
+  "SV01_VERIFY_N":         _WORD(len([r for r in _RB if r[1] == "verify"])),
   "N_RAILS":               "%d" % len(D["rails"]),
 })
 
@@ -552,7 +557,7 @@ servo half from the board half and closes all of it.</div>
 
 def eol_table():
     return "\n".join(
-        '<tr><td class="box">&#9744;</td><td><a href="#%s"><code>%s</code></a></td><td>%s</td><td class="sk">%s</td></tr>'
+        '<tr><td class="box">&#9744;</td><td class="tidcell"><a href="#%s"><code>%s</code></a></td><td>%s</td><td class="sk">%s</td></tr>'
         % (E(i), E(i), M(g), M(t)) for i, g, t in D["eol"])
 
 def logs_table():
@@ -587,7 +592,7 @@ def sources_table():
 
 def eol_exempt_table():
     return "\n".join(
-        '<tr><td><a href="#%s"><code>%s</code></a></td><td>%s</td><td>%s</td></tr>'
+        '<tr><td class="tidcell"><a href="#%s"><code>%s</code></a></td><td>%s</td><td>%s</td></tr>'
         % (E(i), E(i), M(why), M(what)) for i, why, what in D.get("eol_exempt", []))
 
 def corrections_html():
@@ -652,6 +657,12 @@ CHECKS = [
  ("every equipment row's tool_key appears literally in the tool list of every test it says it serves",
   "the instrument table named its gates in prose and three had gone stale: the 88 % reflectance "
   "target said it served SN-05, which is the LSM6DSV16X chip self-test, not the ToF ranging test"),
+ ("every SV-01 read-back address is named in an SV-01 step",
+  "the read-back count is spelled out in the 'what is measured' line; if an address is on the "
+  "list but no step reads it, the count is larger than the procedure"),
+ ("the servo count the electrical figures are built from equals the number of rows in the ID map",
+  "the standby and stall totals in section 4 are 15 x a vendor row; if the ID map ever stops "
+  "having fifteen entries those two currents become wrong without anything saying so"),
  ("every register address is unique",
   "a duplicated address in Table 5 would be quoted twice with different values"),
  ("no unfilled at-sign token survives into the finished HTML",
@@ -716,10 +727,17 @@ def selfcheck(doc=None):
                 if key is not None and key.lower() not in " | ".join(tools_of(tid)).lower():
                     bad.append("equipment row %d (%s) says it serves %s, but %r is not in that "
                                "test's tool list %r" % (n, row[0][:40], tid, key, tools_of(tid)))
+        if N_SERVOS != len(D["id_map"]):
+            bad.append("N_SERVOS is %d but the ID map has %d rows; the standby and stall totals "
+                       "are built from N_SERVOS" % (N_SERVOS, len(D["id_map"])))
         addrs = [r["addr"] for r in D["registers"]]
         if len(set(addrs)) != len(addrs): bad.append("duplicate register address in registers[]")
+        _steps_txt = " ".join(st["do"] + " " + str(st.get("expect", "")) for st in _SV01["steps"])
+        _named = set(int(x) for x in re.findall(r"\((\d+)\)", _steps_txt))
         for a, kind, why in _RB:
             if a not in addrs: bad.append("SV-01 reads back register %d, which is not in Table 5" % a)
+            if a not in _named:
+                bad.append("SV-01 read-back list carries register %d but no step names it" % a)
             if kind not in ("scan", "written", "verify"):
                 bad.append("SV-01 read-back %d has unknown kind %r" % (a, kind))
     else:
@@ -784,6 +802,7 @@ HTML = f"""<!doctype html>
   code.formula{{background:var(--figbg);border:1px solid var(--hair);padding:1px 6px}}
   table.reg td{{font-size:12.5px}}
   td.box{{font-size:17px;width:1%;padding-right:2px;color:var(--ink-2)}}
+  td.tidcell{{white-space:nowrap;width:1%}}
   table.data caption{{caption-side:top;text-align:left;font-family:var(--sans);font-size:11.5px;
                      color:var(--ink-2);padding:0 0 7px;max-width:52em}}
   .cd{{color:var(--partial)}}
