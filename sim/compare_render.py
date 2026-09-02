@@ -41,7 +41,7 @@ def studio_scene(robot_xml):
     comp.set("meshdir", meshdir); comp.set("angle", "radian"); comp.set("autolimits", "true")
     if root.find("option") is None: ET.SubElement(root, "option", timestep=str(common.TIMESTEP))
     vis = ET.SubElement(root, "visual")
-    ET.SubElement(vis, "headlight", diffuse="0.85 0.85 0.85", ambient="0.55 0.55 0.55", specular="0.15 0.15 0.15")
+    ET.SubElement(vis, "headlight", diffuse="0.45 0.45 0.45", ambient="0.28 0.28 0.28", specular="0.08 0.08 0.08")
     ET.SubElement(vis, "rgba", haze="1 1 1 1")
     ET.SubElement(vis, "quality", shadowsize="4096")
     ET.SubElement(vis, "global", offwidth="1600", offheight="1600")
@@ -50,14 +50,14 @@ def studio_scene(robot_xml):
                   width="512", height="512")
     wb = root.find("worldbody")
     ET.SubElement(wb, "light", pos="0.5 -0.6 1.2", dir="-0.4 0.5 -1", directional="true",
-                  diffuse="0.7 0.7 0.7", castshadow="false")
+                  diffuse="0.45 0.45 0.45", castshadow="false")
     ET.SubElement(wb, "light", pos="-0.5 0.4 0.9", dir="0.4 -0.3 -1", directional="true",
-                  diffuse="0.4 0.4 0.4", castshadow="false")
+                  diffuse="0.22 0.22 0.22", castshadow="false")
     kf = ET.SubElement(root, "keyframe")
     # PHOTO pose: STAND legs, but the head only gently down (store photo gaze,
     # not STAND's 40deg forward tilt). neck_pitch idx5, head_pitch idx6.
     import numpy as _np
-    pp = common.DEFAULT_POSE.copy(); pp[5] = 0.12; pp[6] = 0.10
+    pp = common.DEFAULT_POSE.copy(); pp[5] = 0.02; pp[6] = 0.0
     qp = "0 0 0.12 1 0 0 0 " + " ".join("%.10g" % v for v in pp)
     ET.SubElement(kf, "key", name="PHOTO", qpos=qp, ctrl=" ".join("%.10g" % v for v in pp))
     for name, (qpos, ctrl) in common.KEYFRAMES.items():
@@ -78,9 +78,8 @@ def main():
     # frame the whole standing robot: it spans roughly z 0.02..0.30, x -0.1..0.1
     cam.lookat[:] = [0.0, 0.0, 0.16]; cam.distance = 0.46
     opt = mujoco.MjvOption()
-    views = {"front": (0, -8), "prof-right": (90, -8), "back": (180, -8),
-             "prof-left": (270, -8), "iso-fl": (45, -18), "iso-fr": (135, -18),
-             "iso-bl": (315, -18), "top": (0, -80)}
+    views = {"front": (180, -8), "prof-left": (270, -8), "prof-right": (90, -8),
+             "iso-fl": (225, -10), "iso-br": (45, -12)}
     for name, (az, el) in views.items():
         cam.azimuth = float(az); cam.elevation = float(el)
         r.update_scene(data, cam, opt)
@@ -92,10 +91,10 @@ def main():
         bid = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, name)
         return np.array(data.xpos[bid], float)
     joints = {
-        "joint-knee":  ("leg",            90, -6, 0.17),   # left_knee: XL330 + horn + leg/ankle
-        "joint-hip":   ("upper_leg_left", 60, -10, 0.19),  # hip pitch cluster
-        "joint-ankle": ("ankle_left",     90, -4, 0.16),
-        "joint-neck":  ("neck",           75, -2, 0.17),
+        "joint-neck":  ("neck",           270, -2, 0.17),
+        "joint-hip":   ("upper_leg_left", 270, -6, 0.20),
+        "joint-knee":  ("leg",            270, -4, 0.18),
+        "joint-ankle": ("ankle_left",     270, -2, 0.16),
     }
     for name, (body, az, el, dist) in joints.items():
         cam.lookat[:] = bpos(body); cam.azimuth = float(az); cam.elevation = float(el)
@@ -103,6 +102,21 @@ def main():
         r.update_scene(data, cam, opt)
         Image.fromarray(r.render().copy()).save(os.path.join(OUT, "ours-%s.png" % name))
         print("wrote ours-%s.png (lookat %s)" % (name, body))
+    # --- crop the real profile photo into per-joint reference tiles ---
+    ref = os.path.join(os.path.dirname(HERE), "images", "store",
+                       "store_microduck-cream-standing-profile-left.jpg")
+    if os.path.exists(ref):
+        im = Image.open(ref); W0, H0 = im.size
+        boxes = {  # fractional (left, top, right, bottom) on the profile photo
+            "joint-neck":  (0.28, 0.26, 0.60, 0.50),
+            "joint-hip":   (0.40, 0.40, 0.80, 0.64),
+            "joint-knee":  (0.34, 0.52, 0.74, 0.76),
+            "joint-ankle": (0.34, 0.66, 0.76, 0.94),
+        }
+        for name, (l, t, rr, b) in boxes.items():
+            crop = im.crop((int(l*W0), int(t*H0), int(rr*W0), int(b*H0)))
+            crop.save(os.path.join(OUT, "ref-%s.png" % name))
+            print("cropped ref-%s.png" % name)
     print("done ->", OUT)
 
 if __name__ == "__main__":
