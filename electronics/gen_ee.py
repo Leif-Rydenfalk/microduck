@@ -28,16 +28,13 @@ CSS = """
   .bg{fill:var(--bg)} .card{fill:var(--card);stroke:var(--line);stroke-width:1}
   .pwr{stroke:var(--rail);stroke-width:2.2} .bus{stroke:var(--bus);stroke-width:1.6}
   .i2c{stroke:var(--i2c);stroke-width:1.4} .sig{stroke:var(--sig);stroke-width:1.1}
-  .t{fill:var(--ink);font-family:'IBM Plex Sans',-apple-system,Arial,sans-serif}
+  .t{fill:var(--ink);font-family:'Source Serif 4',Georgia,serif}
   .m{fill:var(--ink);font-family:'IBM Plex Mono',ui-monospace,monospace}
-  .lbl{fill:var(--ink2);font-family:'IBM Plex Mono',monospace}
+  .lbl{fill:var(--ink2);font-family:'Source Sans 3',-apple-system,Arial,sans-serif}
   .net{fill:var(--bus);font-family:'IBM Plex Mono',monospace}
   .unk{fill:var(--unk)}
-  :root{--bg:#f7f6f2;--card:#fff;--line:#d9d4c8;--ink:#1c2733;--ink2:#5b6570;
-        --rail:#c0452e;--bus:#2f6f8f;--i2c:#8a6d10;--sig:#7a8390;--unk:#b07a12;--head:#eef1ec}
-  @media(prefers-color-scheme:dark){:root{--bg:#161a1f;--card:#20262d;--line:#39404a;
-        --ink:#e6e9ec;--ink2:#98a1ab;--rail:#e07a63;--bus:#6bb6d6;--i2c:#d8b24e;
-        --sig:#8b95a1;--unk:#e0b455;--head:#232a31}}
+  :root{--bg:#ffffff;--card:#fbfaf7;--line:#d7d3ca;--ink:#1a1a1a;--ink2:#565656;
+        --rail:#9a2b1e;--bus:#243b53;--i2c:#8a5a00;--sig:#8b8b83;--unk:#8a5a00;--head:#f2efe8}
   </style>
 """
 
