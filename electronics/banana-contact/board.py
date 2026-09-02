@@ -228,6 +228,14 @@ def build(self_test=None, publish=True, verbose=True):
                   "power_support.stl (x -22.930..+22.930, z 50.930..56.080) "
                   "becomes x -0.030..45.830, y -0.025..5.125 here"))
 
+    # The finish is an ORDER-FORM field, not a Gerber layer, so it has to be
+    # stated where a fab will read it: the stackup line of out/fab/README.txt.
+    b.stackup.finish = ("ENIG — REQUIRED, not the default. A sliding spring "
+                        "contact on a HASL pad cold-flows and oxidises. "
+                        "JLCPCB publishes 'HASL (leaded / lead-free), ENIG, "
+                        "OSP' for this process (capabilities page, re-read "
+                        "2026-09-02), so this is an order option.")
+
     b.add("P1", fp_contacts(), value="NP-F pack contacts", at=(CX, CY),
           note="B3/B4 — centred in the measured 12.000 mm window of the "
                "power_support head plate")
@@ -325,6 +333,7 @@ def build(self_test=None, publish=True, verbose=True):
     plot(b, os.path.join(OUT, "bottom.svg"), side="bottom", drc=rep,
          verbose=verbose)
     fab(b, os.path.join(OUT, "fab"), report=rep, verbose=verbose)
+    write_order_notes(b, rep, os.path.join(OUT, "fab"))
     if publish:
         publish_pcb(b, rep, images=[os.path.join(OUT, "top.svg"),
                                     os.path.join(OUT, "bottom.svg")],
@@ -346,6 +355,36 @@ def _resolve_offboard(b):
         f"_resolve_offboard(): {len(dropped)} netlist terminals resolved as "
         f"not-pads-of-this-board. The netlist is the WHOLE robot; this board "
         f"is a 45.800 x 5.100 mm contact strip.")
+
+
+
+def write_order_notes(b, rep, outdir):
+    """Put board.notes INTO the fab package.
+
+    The fab README carries the rules, the footprints and the DRC verdict, but
+    not the caveats the board author wrote — and a board gets emailed to a fab
+    without the conversation that produced it. This file travels with the
+    Gerbers.
+    """
+    p = os.path.join(outdir, "ORDER-NOTES.txt")
+    os.makedirs(outdir, exist_ok=True)
+    lines = [b.title, "=" * len(b.title), "",
+             "These are the board author's own notes, shipped WITH the Gerbers",
+             "because the fab README does not carry them. Read them before",
+             "ordering; several are the reason a number is what it is.", "",
+             f"DRC verdict: {rep.verdict}", ""]
+    for i, n in enumerate(b.notes, 1):
+        lines.append(f"{i}. {n}")
+        lines.append("")
+    open(p, "w", encoding="utf-8").write("\n".join(lines))
+    # ...and into the zip, which is the file that actually gets emailed.
+    z = os.path.join(outdir, f"{b.name}-fab.zip")
+    if os.path.exists(z):
+        import zipfile
+        with zipfile.ZipFile(z, "a", zipfile.ZIP_DEFLATED) as zf:
+            if "ORDER-NOTES.txt" not in zf.namelist():
+                zf.write(p, "ORDER-NOTES.txt")
+    return p
 
 
 def main():

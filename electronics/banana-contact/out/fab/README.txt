@@ -3,7 +3,7 @@ Microduck banana battery-contact PCB (reconstruction)
 
 45.8 x 5.1 mm, 233.36 mm2, 2 copper layers
 stackup   JLCPCB 2-layer 1.6 mm, 1 oz — the commodity default
-finish    
+finish    ENIG — REQUIRED, not the default. A sliding spring contact on a HASL pad cold-flows and oxidises. JLCPCB publishes 'HASL (leaded / lead-free), ENIG, OSP' for this process (capabilities page, re-read 2026-09-02), so this is an order option.
 rules     JLCPCB 2-layer, standard process — tighter, and single-sourced
 parts     2   nets 3   tracks 3   vias 0   drills 3
 

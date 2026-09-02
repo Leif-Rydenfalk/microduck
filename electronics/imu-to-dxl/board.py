@@ -590,6 +590,7 @@ def build(self_test=None, publish=True, verbose=True):
     plot(b, os.path.join(OUT, "bottom.svg"), side="bottom", drc=rep,
          verbose=verbose)
     fab(b, os.path.join(OUT, "fab"), report=rep, verbose=verbose)
+    write_order_notes(b, rep, os.path.join(OUT, "fab"))
     if publish:
         publish_pcb(b, rep, images=[os.path.join(OUT, "top.svg"),
                                     os.path.join(OUT, "bottom.svg")],
@@ -623,6 +624,36 @@ def _resolve_offboard(b):
         f"not-pads-of-this-board. The robot netlist is the WHOLE robot; this "
         f"board is one device on it. First ten reasons:\n  - "
         + "\n  - ".join(dropped[:10]))
+
+
+
+def write_order_notes(b, rep, outdir):
+    """Put board.notes INTO the fab package.
+
+    The fab README carries the rules, the footprints and the DRC verdict, but
+    not the caveats the board author wrote — and a board gets emailed to a fab
+    without the conversation that produced it. This file travels with the
+    Gerbers.
+    """
+    p = os.path.join(outdir, "ORDER-NOTES.txt")
+    os.makedirs(outdir, exist_ok=True)
+    lines = [b.title, "=" * len(b.title), "",
+             "These are the board author's own notes, shipped WITH the Gerbers",
+             "because the fab README does not carry them. Read them before",
+             "ordering; several are the reason a number is what it is.", "",
+             f"DRC verdict: {rep.verdict}", ""]
+    for i, n in enumerate(b.notes, 1):
+        lines.append(f"{i}. {n}")
+        lines.append("")
+    open(p, "w", encoding="utf-8").write("\n".join(lines))
+    # ...and into the zip, which is the file that actually gets emailed.
+    z = os.path.join(outdir, f"{b.name}-fab.zip")
+    if os.path.exists(z):
+        import zipfile
+        with zipfile.ZipFile(z, "a", zipfile.ZIP_DEFLATED) as zf:
+            if "ORDER-NOTES.txt" not in zf.namelist():
+                zf.write(p, "ORDER-NOTES.txt")
+    return p
 
 
 def main():
