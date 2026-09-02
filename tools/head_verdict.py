@@ -48,7 +48,7 @@ def REMODEL(pair, combined):
     out = []
     if band.get("verdict") == "FAIL":
         out.append("What FAILS is one feature, and it is the only one the photographs resolve at the rule: the accent trim band at the "
-                   "split line is %.3f +- %.3f mm narrower than the head's widest row on the product and flush with it on the mesh. "
+                   "split line is %.3f \u00b1 %.3f mm narrower than the head's widest row on the product and flush with it on the mesh. "
                    "Modelling that means the top shell's lower rim overhangs the band by about %.2f mm per side — an EXTERNAL feature, "
                    "so it is modelled, not guessed." % (abs(band["dev_mm"]), band["dev_unc_mm"], abs(band["dev_mm"]) / 2.0))
     if hw:

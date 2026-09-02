@@ -194,7 +194,7 @@ def main():
                                if C.get("band_over_shell") else None),
         retraction=("out/head/head.json published front_pair = FAIL (+9.1 %%) for ring OD / head width. That comparison put the "
                     "photograph's ACCENT TRIM BAND (419 px) against the mesh's whole bottom-shell silhouette (692 px). On the mesh "
-                    "those are the same feature to 0.35 mm; on the product they are not — the band is %.3f +- %.3f mm inset from the "
+                    "those are the same feature to 0.35 mm; on the product they are not — the band is %.3f \u00b1 %.3f mm inset from the "
                     "head's widest row. Re-measured on the head's OUTER silhouette on both sides, with one estimator and a gated "
                     "pose, the excess is %.1f \u00b1 %.1f %% and the pair's verdict is %s. The %+.1f %% figure is superseded." % (
                         abs(C["band_over_shell"]["dev_mm"]), C["band_over_shell"]["dev_unc_mm"], pair_excess, pair_u, vPair, 9.1)

@@ -422,7 +422,15 @@ def main():
                                   "band IS the head's widest feature; on the product it is inset."),
                             why_it_matters=("out/head/front_view.json used the photograph's BAND (419 px) as the head width against the "
                                             "mesh's whole bottom-shell silhouette (692 px). Those are the same feature on the mesh and "
-                                            "different features on the product, which is where its +9.1 %% came from."))
+                                            "different features on the product, which is where its +9.1 %% came from."),
+                            basis=("ONE photograph — images/store/store_microduck-inside-the-box.png is the only published TRUE front view "
+                                   "of the head. What that does and does not weaken: (a) the ratio is two widths in the same image of the "
+                                   "same object, so a composite that rescaled the robot layer, uniformly or not, along x preserves it; "
+                                   "(b) pose cannot make it: over every admitted camera distance and yaw the MESH's own band/shell stays "
+                                   "%.5f-%.5f, so a 3.3 %% inset is not a viewing effect; (c) if the frame were a RENDER rather than a "
+                                   "photograph it would strengthen the finding, since a render of these meshes would show the band flush; "
+                                   "(d) what it still cannot rule out is a unit-to-unit or print-to-print difference, and that needs a "
+                                   "second true front view or a calliper." % (min(bs), max(bs))))
     # the OUTLINE: the two row-profiles laid on each other in the ring-anchored frame, compared
     # only where both are the same feature (the dome apex row and the bottom row are clipped or
     # are different parts, and are excluded BY NAME, not by trimming until it agrees)

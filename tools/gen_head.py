@@ -285,6 +285,7 @@ band_dev = f(B.get("dev_mm"), 3, True); band_chip = chip(B.get("verdict", "CANNO
 band_sigma = f(abs(B["dev_mm"]) / B["dev_unc_mm"], 1) if B.get("dev_unc_mm") else "—"
 band_dev_jaw = f(B.get("dev_mm_vs_jaw_only"), 3, True); band_chip_jaw = chip(B.get("verdict_vs_jaw_only", "CANNOT DETERMINE"))
 band_per_side = f(abs(B["dev_mm"]) / 2.0, 2) if B.get("dev_mm") else "—"
+band_basis = esc(B.get("basis", ""))
 _fc = (FF or {}).get("comparison", {})
 adm = _fc.get("admissible_poses", "—"); ofp = _fc.get("of_poses", "—"); gate = esc(_fc.get("pose_gate", ""))
 s_best = f(_fc.get("s_w_that_matches"), 3) if _fc.get("s_w_that_matches") else "—"
@@ -544,7 +545,8 @@ HTML = f"""<!doctype html>
   Band width ÷ the head&rsquo;s own widest row is <b>{band_photo} ± {band_unc}</b> on the product against <b>{band_mesh}</b> on the mesh —
   <b>{band_dev} mm</b> at the mesh width, {band_sigma}σ, {band_chip}. It survives the adversarial reading in which only the jaw carries the
   accent colour ({band_dev_jaw} mm against the jaw alone, {band_chip_jaw}). This ratio uses no scale, no camera model and no ring: it is two
-  widths on the same object in the same photograph.</p></div>
+  widths on the same object in the same photograph.</p>
+  <p class="note">{band_basis}</p></div>
 
   <figure class="wide"><img src="out/head/front_edges.png" alt="the head's shell edge against the trim band's, at 8x, both sides">
     <figcaption>The FAIL at 8× on the photograph itself. Blue = the cream shell&rsquo;s outer edge at the head&rsquo;s widest row
