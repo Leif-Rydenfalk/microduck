@@ -20,6 +20,8 @@ never replaced by a plausible one.
 import html
 import json
 import os
+import re
+import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, "MANUFACTURING-PLAYBOOK.html")
@@ -50,6 +52,13 @@ def n(x, d=4):
         return str(x)
     t = "%.*f" % (d, x)
     return t.rstrip("0").rstrip(".") if "." in t else t
+
+
+def mm4(x):
+    """A DIMENSION in mm, always 4 dp. GOAL.md: "Dimensions in mm to 3-4 dp." n()
+    trims trailing zeros, which is right for a gram or an hour and wrong for a wall
+    thickness — 1.0000 mm printed as "1" reads as a 1-dp figure it is not."""
+    return "\u2014" if x is None else "%.4f" % x
 
 
 def usd(x, d=4):
@@ -138,6 +147,43 @@ if ROWS:
     TOT["labour_plated"] = R["labour_usd_per_hour"] * R["labour_minutes_per_print_job"] / 60.0 * 2
     TOT["robot_lo"] = (TOT["inhouse_lo"]) * R["failure_buffer"]["low"]
     TOT["robot_hi"] = (TOT["inhouse_hi"]) * R["failure_buffer"]["high"]
+    # The farm-stock filament term is NOT all at farm stock: only PLA has a sourced
+    # farm-stock price. TPU stays at the retail spool rate because no farm rate for it
+    # was sourced, and a missing value is not replaced by a plausible one. Split the
+    # term so §2.2 can state its own basis truthfully rather than round it to "farm stock".
+    TOT["by_material"] = {}
+    for r in ROWS:
+        b = TOT["by_material"].setdefault(r["material"], dict(grams=0.0, farm_material=0.0))
+        b["grams"] += r["c"]["grams"] * r["qty"]
+        b["farm_material"] += r["c"]["material_farm_stock"] * r["qty"]
+    for mat, b in TOT["by_material"].items():
+        b["rate_usd_per_kg"] = (R["material_usd_per_kg"]["PLA_farm"] if mat == "PLA"
+                                else R["material_usd_per_kg"][mat])
+        b["rate_is_farm_stock"] = (mat == "PLA")
+
+
+def farm_filament_basis():
+    """The filament half of the farm price, said exactly as it is charged.
+
+    Written from TOT["by_material"], so it can never drift from the arithmetic: it
+    names each material's grams, the rate actually applied, whether that rate is farm
+    stock or retail, and the dollars each contributes to the term.
+    """
+    if not TOT.get("by_material"):
+        return "filament"
+    parts = []
+    for mat in sorted(TOT["by_material"], key=lambda m: -TOT["by_material"][m]["grams"]):
+        b = TOT["by_material"][mat]
+        parts.append("%.4f&nbsp;g of %s at %s $%.2f/kg = %s"
+                     % (b["grams"], mat,
+                        "farm stock" if b["rate_is_farm_stock"] else "the RETAIL spool rate",
+                        b["rate_usd_per_kg"], usd(b["farm_material"], 4)))
+    tail = ("" if all(b["rate_is_farm_stock"] for b in TOT["by_material"].values())
+            else " (no farm-stock rate for %s was sourced, so it is not discounted)"
+                 % "/".join(m for m, b in sorted(TOT["by_material"].items())
+                            if not b["rate_is_farm_stock"]))
+    return ("filament × %.2f waste — %s%s"
+            % (R["material_usd_per_kg"]["waste_factor"], "; ".join(parts), tail))
 
 
 # ---------------------------------------------------------------------------
@@ -151,13 +197,19 @@ def recommend_dir(m):
     """Least unsupported area SUBJECT TO a slenderness cap.
 
     This is the one place in this document where a RULE is applied on top of a
-    measurement, and it is stated rather than hidden: minimising overhang alone
-    always prefers standing a flat plate on edge (measured: the 1 mm
-    upper-leg-rigidity-plate reads 77 mm² unsupported at +Z against 748 mm² lying
-    flat — and +Z is 291 layers of a 1 mm wall, which is the exact failure
-    docs/DFM.md warns about). So a direction is admissible only when the build
-    height is at most SLENDER_K x the smaller of the two in-plane bbox
-    dimensions. If none is admissible, the least slender wins and the row says so.
+    measurement, and it is stated rather than hidden. Minimising overhang alone is
+    blind to how TALL the result is, so on some parts it picks a direction that
+    stands the part on its end — measured on microduck-soft-mouth-top, whose least
+    unsupported direction (+Y) makes a 3.2762 mm plate 32.5651 mm tall, 163 layers
+    on a 3.2762 mm footprint, the exact failure docs/DFM.md warns about. It is NOT a
+    universal preference: on the 1 mm microduck-upper-leg-rigidity-plate the least
+    unsupported direction is already the flat one (+X, 0.0000 mm²), so the rule
+    changes nothing there. Both figures are read out of out/dfm/dfm.json by
+    slender_exemplars() below and published from it — nothing here is typed.
+
+    So a direction is admissible only when the build height is at most SLENDER_K x
+    the smaller of the two in-plane bbox dimensions. If none is admissible, the
+    least slender wins and the row says so.
     """
     bb = m["bbox_mm"]
     axis_i = {"+X": 0, "-X": 0, "+Y": 1, "-Y": 1, "+Z": 2, "-Z": 2}
@@ -173,6 +225,59 @@ def recommend_dir(m):
         return c[0], c[1], c[2], True
     c = min(cand, key=lambda c: c[2])
     return c[0], c[1], c[2], False
+
+
+def slender_exemplars():
+    """The two worked examples §4.2 uses, PICKED AND MEASURED from out/dfm/dfm.json.
+
+    `bites` — of the slugs where the slenderness cap overrides the least-overhang
+              direction, the one where it costs the most unsupported area. It is the
+              case FOR the rule, and it carries the layer counts of both directions.
+    `never` — the thinnest part whose least-overhang direction is ALREADY the flat one
+              (built along its own smallest bbox axis). It is the case against stating
+              the preference as a universal, and it exists precisely so this note
+              cannot claim "always".
+    Either may be None; the note then omits that half rather than inventing it.
+    """
+    if not DFM:
+        return None, None
+    bites, never = [], []
+    for slug, d in DFM["parts"].items():
+        m = d["mesh_dfm"]
+        bb = m["bbox_mm"]
+        least = m["best_build_dir"]
+        rec, b, slender, admissible = recommend_dir(m)
+        lo = m["overhang_by_build_dir"][least]
+        rec_d = m["overhang_by_build_dir"][rec]
+        axis_i = {"+X": 0, "-X": 0, "+Y": 1, "-Y": 1, "+Z": 2, "-Z": 2}
+        inplane_least = min(bb[j] for j in range(3) if j != axis_i[least])
+        row = dict(slug=slug, bbox=bb, thinnest=min(bb),
+                   least=least, least_area=lo["area_lt30_mm2"], least_h=lo["height_mm"],
+                   least_layers=lo["layers_at_0p2"], least_footprint=inplane_least,
+                   least_slender=lo["height_mm"] / max(inplane_least, 1e-9),
+                   rec=rec, rec_area=rec_d["area_lt30_mm2"], rec_h=rec_d["height_mm"],
+                   rec_layers=rec_d["layers_at_0p2"], rec_slender=slender,
+                   admissible=admissible)
+        if rec != least:
+            row["extra_area"] = rec_d["area_lt30_mm2"] - lo["area_lt30_mm2"]
+            bites.append(row)
+        elif abs(lo["height_mm"] - min(bb)) < 1e-6:
+            never.append(row)
+    b = max(bites, key=lambda r: r["extra_area"]) if bites else None
+    nv = min(never, key=lambda r: r["thinnest"]) if never else None
+    if b is not None:
+        b["n_biting"] = len(bites)
+        # the on-end area at the SAME axis as the recommended flat direction's normal,
+        # so the two halves of the sentence are the same part in two orientations
+        b["ratio"] = b["rec_area"] / max(b["least_area"], 1e-9)
+    if nv is not None:
+        tall = max(nv["bbox"])
+        for k, v in DFM["parts"][nv["slug"]]["mesh_dfm"]["overhang_by_build_dir"].items():
+            if abs(v["height_mm"] - tall) < 1e-6:
+                nv["onend"], nv["onend_area"] = k, v["area_lt30_mm2"]
+                nv["onend_layers"] = v["layers_at_0p2"]
+                break
+    return b, nv
 
 
 def dfm_row(slug):
@@ -196,7 +301,7 @@ def dfm_row(slug):
     elif b["frac_lt30"] > 0.05:
         findings.append("%.1f %% unsupported at %s; supports on" % (100 * b["frac_lt30"], best))
     if b["frac_lt10"] > 0.05:
-        findings.append("%.1f %% of the surface is a near-horizontal down-face (β<10°) — "
+        findings.append("%.1f %% of the surface is a near-horizontal down-face (β&lt;10°) — "
                         "bridges and floating islands, %.0f mm² of them projected"
                         % (100 * b["frac_lt10"], b["projected_lt30_mm2"]))
         verdict = "PRINTABLE-WITH-CARE"
@@ -265,7 +370,7 @@ A('''<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Manufacturing Playbook</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opt_sz,wght@8..60,400;8..60,600;8..60,700&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opt_sz,wght@8..60,400;8..60,600;8..60,700&amp;family=Source+Sans+3:wght@400;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
 <link rel="stylesheet" href="tools/doc.css">
 <style>
   .lede{font-size:16.5px;color:var(--ink-2);max-width:44em}
@@ -286,6 +391,14 @@ A('''<!doctype html>
   .gate{font-size:13.5px}
   td.pn{white-space:nowrap;font-family:var(--mono);font-size:12px}
   td.pn code{font-size:12px}
+  /* A table wider than the 840px sheet does not error — .tablewrap grows a scrollbar and
+     the LAST column (the verdict) scrolls off, invisibly, and is gone on paper. Measured
+     with tools/tablefit.py. On the three widest tables the part name and the header are
+     allowed to wrap, which is what buys the width back; hyphenated slugs break after a
+     hyphen, so nothing is broken mid-word. */
+  table.compact th{white-space:normal}
+  table.compact td.pn{white-space:normal}
+  table.compact td.pn,table.compact td.pn code{font-size:11px;word-break:normal}
   ol.steps2{max-width:46em} ol.steps2 li{margin:5px 0}
   @media(max-width:760px){.jig{grid-template-columns:1fr}}
 </style>
@@ -361,7 +474,7 @@ piece cost and its own tool cost, so each has its own break-even quantity — an
 this robot that quantity does not exist, because the printed piece already costs less than
 the cheapest end of the sourced moulded piece price.</p>''')
 
-A('<h3>2.1 The rate brackets, and what each is</h3>')
+A('<h3 id="s2-1">2.1 The rate brackets, and what each is</h3>')
 A(tbl(["term", "bracket", "basis", "source"], [
     [td("material, PLA"), td("$%.2f/kg × %.2f waste" % (R["material_usd_per_kg"]["PLA"],
                                                         R["material_usd_per_kg"]["waste_factor"]), "num"),
@@ -405,7 +518,7 @@ the worst bounding-box deviation across the set is 0.7193 mm (<code>COMPARISON.h
 difference that cannot move a $0.60 piece across a $0.50&ndash;5.00 band. It does change §3 and §4,
 which are about the surface, and those sections say so.</div>''' % src("STALESTL"))
 
-A('<h3>2.2 What one robot&rsquo;s printed parts cost</h3>')
+A('<h3 id="s2-2">2.2 What one robot&rsquo;s printed parts cost</h3>')
 if TOT:
     A(tbl(["line", "value", "how"], [
         [td("filament, sliced"), td("%.2f g over %d pieces" % (TOT["grams"], TOT["pieces"]), "num"),
@@ -422,14 +535,16 @@ if TOT:
          td("the three lines above × the 1.10–1.30 failure buffer")],
         [td("printed parts per robot, bought from a farm"),
          td("%s–%s" % (usd(TOT["farm_lo"], 2), usd(TOT["farm_hi"], 2)), "num"),
-         td("%.2f h × $2–4/h plus farm-stock filament; no labour term — it is the farm's" % TOT["hours"])],
+         td("%.2f h × $%.2f–%.2f/h plus %s; no labour term — it is the farm's"
+            % (TOT["hours"], R["machine_usd_per_hour_farm"]["low"],
+               R["machine_usd_per_hour_farm"]["high"], farm_filament_basis()))],
     ]))
     A('''<div class="verdict"><b>Read this against the bought cost.</b> RELEASE §2 puts the
 readable bought cost at $472–481 per robot at every quantity from 1 to 1000. The printed
 parts are %s–%s of that in-house. <b>The printed half of this robot is not where the money
 is, at any volume.</b> Fifteen XL330 servos are.</div>''' % (usd(TOT["robot_lo"], 2), usd(TOT["robot_hi"], 2)))
 
-A('<h3>2.3 Piece cost and break-even, every printed part</h3>')
+A('<h3 id="s2-3">2.3 Piece cost and break-even, every printed part</h3>')
 A('''<p>N* = T / (c<sub>print</sub> − c<sub>mould</sub>). c<sub>print</sub> is the in-house
 mid-point computed from this part's own sliced grams and seconds plus its share of the plate's
 labour; c<sub>mould</sub> is the sourced $0.50–5.00 band %s; T is one cavity set. A dash in the
@@ -455,7 +570,7 @@ for r in ROWS:
     ])
 A(tbl(["part", "mat", "g/piece", "h/piece", "material", "machine", "labour share",
        "c<sub>print</sub>", "N* @ $1,495 tool", "N* @ $10,000 tool", "N* @ $5.00 piece"],
-      rows, cls="data tight"))
+      rows, cls="data tight compact"))
 
 nbe = sum(1 for r in ROWS if r["be_best"])
 nnone = len(ROWS) - nbe
@@ -476,7 +591,7 @@ standard yet (§8).</div>''' % (
     thou(min(r["be_worst"] for r in ROWS if r["be_worst"])) if any(r["be_worst"] for r in ROWS) else "—",
     thou(max(r["be_worst"] for r in ROWS if r["be_worst"])) if any(r["be_worst"] for r in ROWS) else "—"))
 
-A('<h3>2.4 The decision, by quantity</h3>')
+A('<h3 id="s2-4">2.4 The decision, by quantity</h3>')
 vis_rows = [r for r in ROWS if r["visible"]]
 vis_tool_floor = R["tool_usd"]["floor"] * len(vis_rows)
 all_tool_floor = R["tool_usd"]["floor"] * len(ROWS)
@@ -529,15 +644,15 @@ for r in ROWS:
         td("%.2f %%" % (100 * f["b"]["frac_lt30"]), "num"),
         td("%.2f %%" % (100 * f["b"]["frac_lt10"]), "num"),
         td("%.0f" % f["b"]["projected_lt30_mm2"], "num"),
-        td(n(w.get("min_mm")), "num"),
-        td(n(w.get("p5_mm")), "num"),
-        td(n(f["tw"]) if f["tw"] is not None else '<span class="chip cd">mesh</span>', "num"),
+        td(mm4(w.get("min_mm")), "num"),
+        td(mm4(w.get("p5_mm")), "num"),
+        td(mm4(f["tw"]) if f["tw"] is not None else '<span class="chip cd">mesh</span>', "num"),
         td('<span class="chip %s">%s</span>'
            % ("pass" if f["verdict"] == "PRINTABLE" else "cd",
               "clear" if f["verdict"] == "PRINTABLE" else "watch")),
     ])
 A(tbl(["part", "build dir", "β&lt;30°", "β&lt;10°", "unsup. mm²",
-       "wall min", "wall p5", "solid wall", "oh+wall"], rows, cls="data tight"))
+       "wall min", "wall p5", "solid wall", "oh+wall"], rows, cls="data tight compact"))
 A('<p class="note" style="border:none;background:none;padding:0;font-size:13px">'
   '<b>oh+wall</b> grades ONLY the two things this section measures — unsupported area and wall '
   'thickness. <b>clear</b> = neither is a problem; <b>watch</b> = at least one is, spelled out with '
@@ -574,7 +689,7 @@ section) and takes +Y; and the sliced rule in §4.2 took the flat 8 mm face, buy
 support to get 190 mm² of bed. Three defensible answers, all measured, and the shop should pick
 one and record it.</div>'''.replace("@SRC@", src("DFMMD")))
 
-A('<h3>3.1 The finding, part by part</h3>')
+A('<h3 id="s3-1">3.1 The finding, part by part</h3>')
 rows = []
 for r in ROWS:
     f = dfm_row(r["slug"])
@@ -602,7 +717,29 @@ for r in ROWS:
     ])
 A(tbl(["part", "finding", "verdict"], rows, cls="data tight"))
 
-A('''<h3>3.2 The five recurring risks — the drawing-note block</h3>
+def flat_plate_phrase():
+    """The thin plates named in §3.2, with their measured least-overhang direction.
+
+    Typed names go stale and typed numbers go wrong; this reads every part whose
+    smallest bbox dimension is <= 2.5 mm and whose least-overhang direction is the one
+    that lies it on that face, and says so with the figure.
+    """
+    if not DFM:
+        return "the thin flat plates"
+    out = []
+    for slug, d in sorted(DFM["parts"].items()):
+        m = d["mesh_dfm"]
+        bb = m["bbox_mm"]
+        lo = m["overhang_by_build_dir"][m["best_build_dir"]]
+        if min(bb) <= 2.5 and abs(lo["height_mm"] - min(bb)) < 1e-6:
+            out.append("<code>%s</code> at %.4f&nbsp;mm (%s, %.4f&nbsp;mm² unsupported, "
+                       "%d layers)" % (E(slug.replace("microduck-", "")), min(bb),
+                                       m["best_build_dir"], lo["area_lt30_mm2"],
+                                       lo["layers_at_0p2"]))
+    return " and ".join(out) if out else "the thin flat plates"
+
+
+A('''<h3 id="s3-2">3.2 The five recurring risks — the drawing-note block</h3>
 <ol class="steps2">
 <li><b>Small tapped holes do not print to size.</b> Every Ø1.55/Ø1.60 (M2) and Ø2.05–2.30 hole
 prints undersize and, when horizontal, bridges. Drill to tapping size and form-tap after
@@ -610,16 +747,18 @@ printing; heat-set inserts preferred for M2 into PLA %s.</li>
 <li><b>Horizontal bores that carry a bearing or a press fit must be reamed</b> — ankle Ø14/Ø15,
 upper-leg Ø5.37, bearing-roll / rigidity-plate / trunk-base Ø19, shin and hip pivots. A bridged
 bore is oval as well as undersize at the top %s.</li>
-<li><b>Thin flat plates must be laid flat</b> — upper-leg-rigidity-plate at 1 mm and neck-plate
-at 2 mm. Standing either on edge fails. The overhang table above agrees: their best build
-directions are the flat ones.</li>
+<li><b>Thin flat plates must be laid flat</b> — %s. Standing either on edge fails, and on
+these two the measurement needs no rule to say so: the least-overhang direction is <i>already</i>
+the flat one. Contrast <code>microduck-soft-mouth-top</code>, where it is not, and §4.2&rsquo;s
+slenderness cap is what overrides it.</li>
 <li><b>Sub-0.80 mm walls are knife-edges, not walls.</b> They slice fine. The two genuine
 two-perimeter floors are power-support and hip-bracket at exactly 0.80 mm: no margin, so a
 0.4 mm nozzle and ≥ 2 perimeters are not optional there %s.</li>
 <li><b>power-support&rsquo;s sprung latch tongue</b> is the one genuinely fragile, moving printed
 feature on the robot — thin, cantilevered and cycled. Highest wall count, print with the flex
 plane in-plane, and it is a gate at S1 %s.</li>
-</ol></section>''' % (src("DFMMD", "PARTS5"), src("DFMMD"), src("DFMMD"), src("DFMMD")))
+</ol></section>''' % (src("DFMMD", "PARTS5"), src("DFMMD"), flat_plate_phrase(),
+                       src("DFMMD"), src("DFMMD")))
 
 # ---- 4 -------------------------------------------------------------------
 A('<section id="profiles"><h2><span class="n">4</span>Print profiles</h2>')
@@ -652,7 +791,7 @@ A(tbl(["setting", "value", "note"], [
 
 
 if D.get("profile"):
-    A('<h3>4.1 The process preset, read off the installed profile</h3>')
+    A('<h3 id="s4-1">4.1 The process preset, read off the installed profile</h3>')
     A('<p>Not a summary — these are the resolved values in the profile file itself, '
       'with its <code>inherits</code> chain followed %s. Two of them decide verdicts '
       'elsewhere in this document.</p>' % src("PRESET"))
@@ -670,7 +809,7 @@ if D.get("profile"):
       "slicer's own definition of an overhang and is exactly the β&lt;30° column in §3, so the two "
       'measurements are commensurable.</div>')
 
-A('<h3>4.2 Orientation per part — what the slicer used, and what the measurement says</h3>')
+A('<h3 id="s4-2">4.2 Orientation per part — what the slicer used, and what the measurement says</h3>')
 A('''<p>Three answers to the same question, side by side. <b>Sliced</b> is the orientation rule
 that produced this part&rsquo;s grams and seconds. <b>Least overhang</b> is the axis-aligned direction
 with the smallest unsupported area, straight off the measurement in §3 with nothing added.
@@ -703,22 +842,45 @@ for r in ROWS:
     ])
 A(tbl(["part", "sliced orientation rule", "least overhang", "recommended",
        "slenderness", "unsup. at rec.", "layers", "unsup. at +Z", "+Z vs rec."],
-      rows, cls="data tight"))
-A('''<div class="note"><b>Why &ldquo;least overhang&rdquo; and &ldquo;recommended&rdquo; are different columns.</b>
-Minimising unsupported area, on its own, always wants a flat plate stood on edge — measured:
-the 1 mm upper-leg-rigidity-plate reads <b>77 mm²</b> unsupported built +Z against <b>748 mm²</b>
-lying flat, and +Z is <b>291 layers of a 1 mm wall</b>, which is precisely the failure
-<code>docs/DFM.md</code> warns about. So the recommended column applies one stated rule on top
-of the measurement: <b>build height ≤ %.0f × the smaller in-plane bounding-box dimension</b>, and
-among the directions that pass, the least unsupported area wins. That rule is an engineering
-choice, not a measurement, and it is the only one in this document — everything else in these
-tables is read off the geometry. ce-slice&rsquo;s own auto-orient searches all rotations rather than
-the six axes, so where the sliced rule differs from both columns it is not necessarily
-wrong.</div>''' % SLENDER_K)
+      rows, cls="data tight compact"))
+_XB, _XN = slender_exemplars()
+_note = ['<div class="note"><b>Why &ldquo;least overhang&rdquo; and &ldquo;recommended&rdquo; '
+         'are different columns.</b> Minimising unsupported area, on its own, is blind to how '
+         '<i>tall</i> the result is.']
+if _XB:
+    _note.append(
+        ' On <b>%d of the %d slugs</b> it picks a direction the slenderness cap refuses. The one '
+        'it costs the most is <code>%s</code>: least overhang is <b>%s</b> at <b>%.4f mm²</b>, '
+        'which stands a %.4f mm plate on its edge — <b>%.4f mm tall, %d layers on a %.4f mm '
+        'footprint</b> (slenderness %.2f), precisely the failure <code>docs/DFM.md</code> warns '
+        'about. Laying it flat (<b>%s</b>, %.4f mm tall, %d layers) costs <b>%.4f mm²</b> '
+        'unsupported — %.1f× the area — and is still the right answer.'
+        % (_XB["n_biting"], len(DFM["parts"]) if DFM else 0, E(_XB["slug"]), _XB["least"],
+           _XB["least_area"], _XB["thinnest"], _XB["least_h"], _XB["least_layers"],
+           _XB["least_footprint"], _XB["least_slender"], _XB["rec"], _XB["rec_h"],
+           _XB["rec_layers"], _XB["rec_area"], _XB["ratio"]))
+if _XN:
+    _note.append(
+        ' It is <b>not</b> a universal preference, and this document does not claim one: on the '
+        '%.4f mm <code>%s</code> the least-overhang direction is <i>already</i> the flat one '
+        '(<b>%s</b>, %.4f mm², %d layers) against <b>%.4f mm²</b> and %d layers stood on end '
+        '(%s), so both columns agree and the rule never bites.'
+        % (_XN["thinnest"], E(_XN["slug"]), _XN["least"], _XN["least_area"], _XN["least_layers"],
+           _XN.get("onend_area", float("nan")), _XN.get("onend_layers", 0), _XN.get("onend", "—")))
+_note.append(
+    ' So the recommended column applies one stated rule on top of the measurement: <b>build '
+    'height ≤ %.0f × the smaller in-plane bounding-box dimension</b>, and among the directions '
+    'that pass, the least unsupported area wins. That rule is an engineering choice, not a '
+    'measurement, and it is the only one in this document — everything else in these tables is '
+    'read off the geometry. Every figure in this paragraph is selected and computed from '
+    '<code>out/dfm/dfm.json</code> by <code>slender_exemplars()</code>, not typed. '
+    'ce-slice&rsquo;s own auto-orient searches all rotations rather than the six axes, so where '
+    'the sliced rule differs from both columns it is not necessarily wrong.</div>' % SLENDER_K)
+A("".join(_note))
 
 if STALE:
     t = STALE["totals"]
-    A('<h3>4.3 What the stale print files cost, measured</h3>')
+    A('<h3 id="s4-3">4.3 What the stale print files cost, measured</h3>')
     A('''<p>§8 says the STL for twelve of the thirty slugs predates that part&rsquo;s parametric rebuild.
 That is a defect whether or not it is expensive, but it is worth knowing which. Each of the twelve
 rebuilds — exported to <code>out/dfm/stl-rebuilt/</code> — was sliced on <b>exactly</b> the presets
@@ -759,7 +921,7 @@ A('''<p class="lede">Eleven stations. The build order is the construction manual
 unit move on, and an honest account of the torques nobody has measured.</p>''' % src("MANUAL"))
 
 # 5.1 jigs
-A('<h3>5.1 The jig set</h3>')
+A('<h3 id="s5-1">5.1 The jig set</h3>')
 if JIGS:
     t = JIGS.get("jig_set_total", {})
     A('''<p>Six jigs, designed as cecad parts, each with a verified A3 third-angle drawing and
@@ -800,7 +962,7 @@ drawings: <code>out/jigs/</code>.</p>''' % (n(t.get("grams")), n(t.get("hours"),
   <dl>%s</dl>
 </div>''' % (E(slug), E(slug), E(j["title"]), "".join(dl)))
 
-A('''<h3>5.2 The bearing rule this repo had wrong</h3>
+A('''<h3 id="s5-2">5.2 The bearing rule this repo had wrong</h3>
 <div class="verdict warn"><b>&ldquo;Press the outer race only&rdquo; is wrong for half of this robot&rsquo;s
 bearings.</b> <code>RELEASE.html</code> §4 and the construction manual both give that rule. It is
 right for a seat that is a <b>bore</b> and wrong for a seat that is a <b>boss</b>, and this
@@ -817,7 +979,7 @@ the press force crosses the balls — the bearing is brinelled, it still spins o
 fails months later in a customer&rsquo;s hands. That is why there are four pushers in §5.1 and not
 two, and why S2&rsquo;s first instruction is to read the seat before picking up a tool.</div>''' % src("CONN22", "CONN15"))
 
-A('<h3>5.3 Torque</h3>')
+A('<h3 id="s5-3">5.3 Torque</h3>')
 A('''<p>Three joint families, three <span class="chip cd">CANNOT DETERMINE</span>, three tests.
 Nothing here is a plausible default, and the one hard number that exists is listed only so that
 nobody uses it.</p>''')
@@ -836,7 +998,7 @@ seating torque into a <b>steel</b> nut: M2, stress area 2.07 mm², tensile load 
 ceiling that proves the point: a printed PLA boss will not see a tenth of it before it
 splits.</div>''' % src("HILLCO"))
 
-A('<h3>5.4 Stations</h3>')
+A('<h3 id="s5-4">5.4 Stations</h3>')
 for s in D["stations"]:
     A('<h4>%s · %s <span style="font-weight:400;color:var(--ink-2)">— %s</span></h4>'
       % (E(s["id"]), E(s["name"]), E(s["takt_note"])))
@@ -887,7 +1049,7 @@ for c in D["packaging"]["configurations"]:
     ])
 A(tbl(["configuration", "UN / PI", "state of charge", "marks and paperwork", "what S10 does"],
       rows, cls="data tight"))
-A('<h3>7.1 What the box has to be</h3>')
+A('<h3 id="s7-1">7.1 What the box has to be</h3>')
 A('<ol class="steps2">' + "".join("<li>%s</li>" % E(x) for x in D["packaging"]["box_requirements"]) + "</ol>")
 A('''<div class="verdict warn"><b>The robot has no power switch.</b> Nothing in any source gives it
 one. The packaging insert is therefore the only thing standing between a battery in a box and
@@ -934,7 +1096,40 @@ A('''<footer>
 </body>
 </html>''' % (E(D["doc"]["id"]), E(D["doc"]["rev"])))
 
-open(OUT, "w").write("\n".join(P))
+# ---------------------------------------------------------------------------
+# SELF-CHECK: refuse to publish invalid markup.
+# A raw "<" before a digit (the "β<10°" bug, 2026-09-03) is rendered as text by
+# Chrome's HTML5 tokenizer, so the page LOOKS right and the defect is invisible in a
+# screenshot — but the markup is invalid and a stricter parser, an XHTML/PDF pipeline
+# or a Markdown converter swallows the rest of the element. Nothing is written when
+# this fires: a document that cannot be parsed is not published, it is fixed.
+# ---------------------------------------------------------------------------
+DOC = "\n".join(P)
+
+
+def markup_defects(doc):
+    bad = []
+    for i, ch in enumerate(doc):
+        if ch != "<":
+            continue
+        nxt = doc[i + 1:i + 2]
+        if nxt and (nxt.isalpha() or nxt in "/!?"):
+            continue
+        bad.append(("raw <", i, doc[max(0, i - 60):i + 40].replace("\n", " ")))
+    for m in re.finditer(r"&(?!#?\w+;)", doc):
+        bad.append(("bare &", m.start(),
+                    doc[max(0, m.start() - 60):m.start() + 40].replace("\n", " ")))
+    return bad
+
+
+_bad = markup_defects(DOC)
+if _bad:
+    for kind, i, ctx in _bad[:20]:
+        sys.stderr.write("MARKUP DEFECT %s at %d: ...%s...\n" % (kind, i, ctx))
+    sys.stderr.write("%d markup defect(s); NOTHING WRITTEN.\n" % len(_bad))
+    sys.exit(1)
+
+open(OUT, "w").write(DOC)
 print("wrote", OUT, os.path.getsize(OUT), "bytes;", len(ROWS), "parts,",
       len(JIGS["jigs"]) if JIGS else 0, "jigs,",
       sum(len(s["gates"]) for s in D["stations"]), "gates")
