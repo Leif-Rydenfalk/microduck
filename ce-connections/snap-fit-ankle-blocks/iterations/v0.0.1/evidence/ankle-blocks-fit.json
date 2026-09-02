@@ -1,0 +1,63 @@
+{
+ "$what": "connection:snap-fit-ankle-blocks — the two ankle blocks in the two foot through-pockets, plus the cylindrical cradle they seat on. Measured with cecad.meshfeatures.intervals ray-cast calipers and cecad.meshslice circle fits on Pollen's ankle_left.stl and foot_left.stl (metres, scale 1000), 2026-09-02, ce-designs/microduck lane T",
+ "sides": {
+  "blocks": {"part": "part:microduck-ankle-left", "mesh": "reference/pollen-microduck-rl/assets/ankle_left.stl", "note": "the ankle declares NO interface for these blocks today; the foot's `ankle_cradle` row names them from the ankle's part.py BLOCK_X. Lane T measured them directly off the mesh and added the `foot_blocks` row to the ankle folder."},
+  "pockets": {"part": "part:microduck-foot-left", "interface": "ankle_cradle", "mesh": "reference/pollen-microduck-rl/assets/foot_left.stl"},
+  "mirror": "the right side is the same joint on part:microduck-ankle-right / part:microduck-foot-right"
+ },
+ "frame": "Pollen's shared mesh frame for the left ankle group: x heel 30 .. toe 70, y -12 .. 42, z up; the ankle axis is the x-line through (y 22.0000, z -6.2230).",
+ "blocks": {
+  "count": 2,
+  "x_spans_mm": [[34.1, 39.1], [60.9, 65.9]],
+  "x_len_mm": 5.0,
+  "x_constant_over_y_mm": [31.8, 35.5],
+  "ribs_y_mm": [[31.663, 33.163], [34.163, 35.663]],
+  "rib_thickness_mm": 1.5,
+  "rib_gap_mm": 1.0,
+  "y_envelope_mm": [31.663, 35.663],
+  "y_len_mm": 4.0,
+  "z_inner_rib_mm": [-21.342, -15.281],
+  "z_outer_rib_mm": [-21.342, -13.342],
+  "z_height_inner_mm": 6.061,
+  "z_height_outer_mm": 8.0
+ },
+ "pockets": {
+  "count": 2,
+  "x_spans_mm": [[34.0, 39.2], [60.8, 66.0]],
+  "x_len_mm": 5.2,
+  "y_span_mm": [31.563, 35.763],
+  "y_len_mm": 4.2,
+  "closed_at_y_mm": [31.4, 35.8],
+  "through_in_z": true,
+  "through_in_z_how": "cecad.meshfeatures.intervals along z at (x 36.5, y 32.4), (36.5, 34.9), (63.5, 32.4), (34.2, 32.4) and (39.0, 32.4) all return NO material at all — the pocket is open top to bottom."
+ },
+ "clearance_mm": {
+  "x_total": 0.2, "x_per_side": 0.1,
+  "y_total": 0.2, "y_per_side": 0.1,
+  "how": "pocket 5.2000 - block 5.0000 in x; pocket 4.2000 - block 4.0000 in y. Both read off the two meshes on the same lines with the same instrument.",
+  "reading": "a 0.1000 mm slip fit per side: a LOCATING pair, not an interference and not a snap."
+ },
+ "cradle": {
+  "ankle_under_hull": {
+   "nominal": "R16.3 about (y 22.0000, z -6.2230), 107.7 deg of arc, 34.0000 mm long in x (cecad.meshfeatures.cylinders partial-arc fit Ø32.6000 at centre (50, 22, -6.223))",
+   "circle_fits": [
+    {"x_mm": 40.0, "centre_yz_mm": [22.0025, -6.2117], "r_mm": 16.3058, "residual_max_mm": 0.01556, "residual_mean_mm": 0.00432, "n_pts": 49},
+    {"x_mm": 60.0, "centre_yz_mm": [22.0022, -6.2161], "r_mm": 16.3018, "residual_max_mm": 0.00677, "residual_mean_mm": 0.00396, "n_pts": 48}
+   ],
+   "reading": "R16.3018-16.3058 about a centre 0.007-0.011 mm from the declared ankle axis — the hull IS R16.3000 on the ankle axis."
+  },
+  "foot_seat": {
+   "cited_not_re_measured": "R16.3 cylindrical seat on the x 32.9000..34.1500 / 65.8500..67.1000 ledges, and an R16.5 relief band across the rib tops at y 12.9000..31.1000 — MEASURED in part:microduck-foot-left's own cad/interfaces.json ('ankle_cradle' and 'roller_slot' rows, seat probes X/D at y 10/16/22/28/34).",
+   "why_not_re_measured": "lane T's own circle fits at x 33.5 and 66.5 came back r 16.556-16.646 with residual mean 0.031-0.044 mm: the annulus window catches the R16.5 relief band and the ledge together. That is a worse instrument than the one the foot folder already used, and a worse measurement does not replace a better one.",
+   "derived_radial_clearance_mm": 0.2,
+   "derived_radial_clearance_how": "R16.5 relief band minus R16.3 ledge, both from the foot folder: the ribs stand 0.2000 mm clear of the ankle hull so the load lands on the two end ledges, not on the ribs."
+  }
+ },
+ "no_snap_was_found": {
+  "claim_tested": "the slug is `snap-fit-ankle-blocks` and the foot's `ankle_cradle` row accepts it",
+  "searched_for": "an undercut, barb, lip or lead-in on either the blocks or the pockets",
+  "measurement": "the pockets are OPEN top to bottom in z at every station probed, so there is no lip for a barb to pass; the blocks are prismatic over their whole measured height (x span constant 34.1000..39.1000 for y 31.8..35.5 at z -20, and the z intervals at (36.5, 32.4) and (36.5, 34.9) are single unbroken spans with no step); and the fit is a 0.1000 mm per-side CLEARANCE, which nothing can snap into.",
+  "what_actually_retains_the_foot": "the single M2 at (x 50.0000, y 4.5020): part:microduck-ankle-left `foot_screw` (Ø2.2 through a 2.5 mm plate with a Ø4.4 x 1.0 counterbore) into part:microduck-foot-left `ankle_screw` (Ø1.6 x 5.5 thread-forming pilot with a Ø3.0 x 0.5 relief on a Ø5 boss) — connection:threaded-m2.",
+  "verdict": "the joint is a two-spigot LOCATION and anti-rotation pair on a cylindrical cradle, screw-retained. `snap-fit` is a name, not a measurement, and compat.py carries `claims_a_snap` as the guard."
+ }
+}
