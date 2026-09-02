@@ -107,7 +107,9 @@
    "ceiling_cite": "Radxa 'Requires 5V/2A power adapter' \u2014 an adapter rating, so an upper bound on the 5 V rail."
   },
   "torque_and_speed_source": "sim/gait_sweep.py, data.actuator_force and data.qvel at every 50 Hz control frame of out/sim-sweep/base_walk_vx0.25_traj.npz and stand_hold_traj.npz. The peak-torque table is out/sim-evidence/gait-peaks.json.",
-  "control_dt_s": 0.02
+  "control_dt_s": 0.02,
+  "integration_dt_s": 0.005,
+  "integration_rate_note": "power is integrated at the 200 Hz physics step (MuJoCo timestep 0.005 s), not at the 50 Hz control frame."
  },
  "method": "Per 50 Hz frame and per actuated joint: I = |tau|/kT ; Vm = kE*|omega| + R*I ; P_motor = min(Vm, V_pack)*I. Sum over the 14 simulated joints, add 15 x 17 mA x V_pack of controller standby, average over the mode's window, then add the swept compute+sensor draw and divide the pack's 18.7 Wh by the total. Regeneration is not credited and the PWM stage is taken as loss-free, both of which make the stated hours optimistic.",
  "outputs": {
@@ -120,33 +122,33 @@
      12.0
     ],
     "duration_s": 11.5,
-    "frames": 576,
+    "frames": 2301,
     "servo_motor_power_W": {
-     "mean": 6.6315,
-     "p50": 6.3952,
-     "p95": 9.9096,
-     "peak": 13.1956
+     "mean": 7.0683,
+     "p50": 6.8364,
+     "p95": 10.4712,
+     "peak": 13.3284
     },
     "servo_controller_standby_W": 1.887,
     "servo_total_power_W": {
-     "mean": 8.5185,
-     "p95": 11.7966,
-     "peak": 15.0826
+     "mean": 8.9553,
+     "p95": 12.3582,
+     "peak": 15.2154
     },
     "mechanical_output_power_W": {
-     "mean": 1.8502,
-     "peak": 3.3221
+     "mean": 1.883,
+     "peak": 3.336
     },
-    "electromechanical_efficiency_mean": 0.279,
+    "electromechanical_efficiency_mean": 0.2664,
     "pack_current_from_servos_A": {
-     "mean": 1.1512,
-     "peak": 2.0382
+     "mean": 1.2102,
+     "peak": 2.0561
     },
-    "peak_single_servo_current_A": 1.1545,
+    "peak_single_servo_current_A": 1.2168,
     "peak_single_servo_current_joint": "left_knee",
     "frames_needing_more_than_pack_voltage": 0,
-    "frames_total_joint": 8064,
-    "energy_Wh_per_hour_of_this_mode": 8.5185
+    "frames_total_joint": 32214,
+    "energy_Wh_per_hour_of_this_mode": 8.9553
    },
    "standing": {
     "label": "standing, stand policy holding the pose (cell stand_hold)",
@@ -156,33 +158,33 @@
      8.0
     ],
     "duration_s": 7.0,
-    "frames": 351,
+    "frames": 1401,
     "servo_motor_power_W": {
-     "mean": 0.9433,
-     "p50": 0.9352,
-     "p95": 0.993,
+     "mean": 0.9431,
+     "p50": 0.935,
+     "p95": 0.9912,
      "peak": 1.0136
     },
     "servo_controller_standby_W": 1.887,
     "servo_total_power_W": {
-     "mean": 2.8303,
-     "p95": 2.88,
+     "mean": 2.8301,
+     "p95": 2.8782,
      "peak": 2.9006
     },
     "mechanical_output_power_W": {
      "mean": 0.0003,
-     "peak": 0.0011
+     "peak": 0.0012
     },
     "electromechanical_efficiency_mean": 0.0003,
     "pack_current_from_servos_A": {
-     "mean": 0.3825,
+     "mean": 0.3824,
      "peak": 0.392
     },
     "peak_single_servo_current_A": 0.2883,
     "peak_single_servo_current_joint": "left_hip_roll",
     "frames_needing_more_than_pack_voltage": 0,
-    "frames_total_joint": 4914,
-    "energy_Wh_per_hour_of_this_mode": 2.8303
+    "frames_total_joint": 19614,
+    "energy_Wh_per_hour_of_this_mode": 2.8301
    },
    "idle_torque_off": {
     "label": "idle: torque disabled, no motion \u2014 the only published servo figure applies",
@@ -205,107 +207,107 @@
   },
   "runtime_table": {
    "walking": {
-    "servo_mean_W": 8.5185,
+    "servo_mean_W": 8.9553,
     "rows": [
      {
       "compute_and_sensors_W": 1.0,
-      "total_W": 9.5185,
-      "runtime_h": 1.9646,
-      "runtime_min": 117.88,
-      "pack_current_A_at_7.4V": 1.2863
+      "total_W": 9.9553,
+      "runtime_h": 1.8784,
+      "runtime_min": 112.7,
+      "pack_current_A_at_7.4V": 1.3453
      },
      {
       "compute_and_sensors_W": 1.5,
-      "total_W": 10.0185,
-      "runtime_h": 1.8665,
-      "runtime_min": 111.99,
-      "pack_current_A_at_7.4V": 1.3539
+      "total_W": 10.4553,
+      "runtime_h": 1.7886,
+      "runtime_min": 107.31,
+      "pack_current_A_at_7.4V": 1.4129
      },
      {
       "compute_and_sensors_W": 2.0,
-      "total_W": 10.5185,
-      "runtime_h": 1.7778,
-      "runtime_min": 106.67,
-      "pack_current_A_at_7.4V": 1.4214
+      "total_W": 10.9553,
+      "runtime_h": 1.7069,
+      "runtime_min": 102.42,
+      "pack_current_A_at_7.4V": 1.4804
      },
      {
       "compute_and_sensors_W": 2.5,
-      "total_W": 11.0185,
-      "runtime_h": 1.6971,
-      "runtime_min": 101.83,
-      "pack_current_A_at_7.4V": 1.489
+      "total_W": 11.4553,
+      "runtime_h": 1.6324,
+      "runtime_min": 97.95,
+      "pack_current_A_at_7.4V": 1.548
      },
      {
       "compute_and_sensors_W": 3.0,
-      "total_W": 11.5185,
-      "runtime_h": 1.6235,
-      "runtime_min": 97.41,
-      "pack_current_A_at_7.4V": 1.5566
+      "total_W": 11.9553,
+      "runtime_h": 1.5642,
+      "runtime_min": 93.85,
+      "pack_current_A_at_7.4V": 1.6156
      },
      {
       "compute_and_sensors_W": 4.0,
-      "total_W": 12.5185,
-      "runtime_h": 1.4938,
-      "runtime_min": 89.63,
-      "pack_current_A_at_7.4V": 1.6917
+      "total_W": 12.9553,
+      "runtime_h": 1.4434,
+      "runtime_min": 86.61,
+      "pack_current_A_at_7.4V": 1.7507
      },
      {
       "compute_and_sensors_W": 5.0,
-      "total_W": 13.5185,
-      "runtime_h": 1.3833,
-      "runtime_min": 83.0,
-      "pack_current_A_at_7.4V": 1.8268
+      "total_W": 13.9553,
+      "runtime_h": 1.34,
+      "runtime_min": 80.4,
+      "pack_current_A_at_7.4V": 1.8859
      }
     ]
    },
    "standing": {
-    "servo_mean_W": 2.8303,
+    "servo_mean_W": 2.8301,
     "rows": [
      {
       "compute_and_sensors_W": 1.0,
-      "total_W": 3.8303,
-      "runtime_h": 4.8821,
-      "runtime_min": 292.93,
+      "total_W": 3.8301,
+      "runtime_h": 4.8824,
+      "runtime_min": 292.94,
       "pack_current_A_at_7.4V": 0.5176
      },
      {
       "compute_and_sensors_W": 1.5,
-      "total_W": 4.3303,
-      "runtime_h": 4.3184,
-      "runtime_min": 259.1,
-      "pack_current_A_at_7.4V": 0.5852
+      "total_W": 4.3301,
+      "runtime_h": 4.3186,
+      "runtime_min": 259.12,
+      "pack_current_A_at_7.4V": 0.5851
      },
      {
       "compute_and_sensors_W": 2.0,
-      "total_W": 4.8303,
-      "runtime_h": 3.8714,
-      "runtime_min": 232.28,
+      "total_W": 4.8301,
+      "runtime_h": 3.8716,
+      "runtime_min": 232.29,
       "pack_current_A_at_7.4V": 0.6527
      },
      {
       "compute_and_sensors_W": 2.5,
-      "total_W": 5.3303,
-      "runtime_h": 3.5082,
-      "runtime_min": 210.49,
+      "total_W": 5.3301,
+      "runtime_h": 3.5084,
+      "runtime_min": 210.5,
       "pack_current_A_at_7.4V": 0.7203
      },
      {
       "compute_and_sensors_W": 3.0,
-      "total_W": 5.8303,
-      "runtime_h": 3.2074,
-      "runtime_min": 192.44,
+      "total_W": 5.8301,
+      "runtime_h": 3.2075,
+      "runtime_min": 192.45,
       "pack_current_A_at_7.4V": 0.7879
      },
      {
       "compute_and_sensors_W": 4.0,
-      "total_W": 6.8303,
-      "runtime_h": 2.7378,
+      "total_W": 6.8301,
+      "runtime_h": 2.7379,
       "runtime_min": 164.27,
       "pack_current_A_at_7.4V": 0.923
      },
      {
       "compute_and_sensors_W": 5.0,
-      "total_W": 7.8303,
+      "total_W": 7.8301,
       "runtime_h": 2.3882,
       "runtime_min": 143.29,
       "pack_current_A_at_7.4V": 1.0581
@@ -368,26 +370,26 @@
    }
   },
   "sensitivity_servo_constants_walking_mean_W": {
-   "3.7": 7.7637,
-   "5.0": 8.5185,
-   "6.0": 8.8747
+   "3.7": 8.1413,
+   "5.0": 8.9553,
+   "6.0": 9.3391
   },
   "sensitivity_pack_voltage_walking_mean_W": {
-   "6.6": 8.3145,
-   "7.4": 8.5185,
-   "8.2": 8.7225
+   "6.6": 8.7513,
+   "7.4": 8.9553,
+   "8.2": 9.1593
   },
   "pollen_claim": {
    "claimed_h": 1.0,
    "cite": "Pollen's press kit, via docs/ELECTRONICS-AND-SOFTWARE.md 9 and docs/PARTS.md row 35: removable NP-F550, 2S Li-ion, 2600 mAh, '~1 h'. Recorded in ce-parts/np-f550/electrical.part.json capacity.runtime_h_claimed_by_pollen with the note '18.7 Wh / 1 h ~ 19 W average, a number nobody here measured'.",
    "implied_total_average_W": 18.7,
-   "measured_servo_average_W_walking": 8.5185,
-   "implied_compute_and_sensors_W": 10.1815,
-   "reading": "This model puts walking at 8.518 W of servo draw, so the pack's 18.7 Wh would run 1.96 h of continuous walking with 1.0 W of compute and 1.78 h with 2.0 W \u2014 roughly TWICE Pollen's published ~1 h. The gap is the model's own stated omissions, and it points at the servos rather than at compute: for the whole machine to average the 18.700 W that ~1 h implies, everything that is not modelled here would have to draw 10.181 W, which is ABOVE Radxa's entire 5 V/2 A (10.0 W) adapter rating for the board. A board cannot exceed its own supply ceiling, so the missing power is more likely (a) the XL330's unpublished no-load current, which this model sets to zero and which fifteen servos multiply, (b) PWM-stage loss, taken here as zero, and (c) pack energy below the 6.6 V cutoff that is never delivered \u2014 in some combination. It is also possible the press-kit hour is a mixed-use hour rather than an hour of walking. EVERY ONE OF THOSE IS SETTLED BY THE SAME MEASUREMENT: an ammeter in the pack lead, plus Present Current(126) summed off the bus so the servo and board halves separate."
+   "measured_servo_average_W_walking": 8.9553,
+   "implied_compute_and_sensors_W": 9.7447,
+   "reading": "This model puts walking at 8.955 W of servo draw, so the pack's 18.7 Wh would run 1.88 h of continuous walking with 1.0 W of compute and 1.71 h with 2.0 W \u2014 roughly TWICE Pollen's published ~1 h. The gap is the model's own stated omissions, and it points at the servos rather than at compute: for the whole machine to average the 18.700 W that ~1 h implies, everything that is not modelled here would have to draw 9.745 W \u2014 97.4 % of Radxa's entire 5 V/2 A (10.0 W) adapter rating for the board, which makes it an implausible figure for compute alone. The missing power is more likely (a) the XL330's unpublished no-load current, which this model sets to zero and which fifteen servos multiply, (b) PWM-stage loss, taken here as zero, and (c) pack energy below the 6.6 V cutoff that is never delivered \u2014 in some combination. It is also possible the press-kit hour is a mixed-use hour rather than an hour of walking. EVERY ONE OF THOSE IS SETTLED BY THE SAME MEASUREMENT: an ammeter in the pack lead, plus Present Current(126) summed off the bus so the servo and board halves separate."
   }
  },
  "verdict": "CANNOT DETERMINE",
- "why": "The SERVO half is measured and cited: walking draws 8.518 W mean / 15.083 W peak at the pack (1.151 A / 2.038 A at 7.4 V), standing 2.830 W, idle-with-torque-off 1.887 W, all from MuJoCo torque and speed through ROBOTIS's own published stall and no-load rows. The COMPUTE half is not: no vendor states the Radxa ZERO 3W's consumption, so a single runtime number cannot be given without inventing one. What CAN be stated: at a compute+sensor draw of 1.0 W the pack gives 1.96 h of walking, at 2.0 W 1.78 h, at 3.0 W 1.62 h, at 5.0 W 1.38 h; standing at 2.0 W gives 3.87 h. Pollen's published ~1 h implies 18.700 W total, i.e. 10.181 W for everything that is not a servo. WHAT SETTLES IT: an ammeter in the pack lead of a running unit \u2014 one measurement closes both this and the pack's usable-energy question.",
+ "why": "The SERVO half is measured and cited: walking draws 8.955 W mean / 15.215 W peak at the pack (1.210 A / 2.056 A at 7.4 V), standing 2.830 W, idle-with-torque-off 1.887 W, all from MuJoCo torque and speed through ROBOTIS's own published stall and no-load rows. The COMPUTE half is not: no vendor states the Radxa ZERO 3W's consumption, so a single runtime number cannot be given without inventing one. What CAN be stated: at a compute+sensor draw of 1.0 W the pack gives 1.88 h of walking, at 2.0 W 1.71 h, at 3.0 W 1.56 h, at 5.0 W 1.34 h; standing at 2.0 W gives 3.87 h. Pollen's published ~1 h implies 18.700 W total, i.e. 9.745 W for everything that is not a servo. WHAT SETTLES IT: an ammeter in the pack lead of a running unit \u2014 one measurement closes both this and the pack's usable-energy question.",
  "script": "sim/battery_runtime.py",
  "artifacts": [
   "out/sim-sweep/base_walk_vx0.25_traj.npz",

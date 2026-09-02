@@ -38,6 +38,8 @@
   "timestep_s": 0.005,
   "decimation": 4,
   "control_steps": 600,
+  "torque_grf_record_hz": 200.0,
+  "torque_grf_frames": 2401,
   "push_frames_applied": 0,
   "total_mass_kg": 0.737243,
   "floor_friction_slide": 1.0,
@@ -63,6 +65,14 @@
   "walked_x_m": 0.00567,
   "walked_y_m": 0.00582,
   "mean_speed_m_s": 0.0006,
+  "path_length_m": 0.02504,
+  "net_yaw_drift_deg": -2.704,
+  "max_abs_yaw_drift_deg": 2.714,
+  "yaw_drift_deg_per_m_of_path": null,
+  "forward_tracking_ratio": 0.0145,
+  "forward_tracking_note": "mean_path_speed_m_s divided by the commanded vx. The walking policy has a stand-still band below ~0.25 m/s (out/sim/vx_sweep.json), so the ratio is meaningless there and only the moving cells should be read.",
+  "mean_path_speed_m_s": 0.00218,
+  "path_vs_displacement": "walked_m is the straight-line displacement of the trunk; path_length_m is the integrated ground track. A large gap means the robot curved.",
   "trunk_z_m": {
    "start": 0.12,
    "min": 0.11515,
@@ -73,23 +83,23 @@
   "end_tilt_deg": 0.4,
   "max_joint_torque_Nm": 0.12435,
   "max_joint_torque_joint": "right_knee",
-  "sum_abs_torque_peak_Nm": 0.54519,
+  "sum_abs_torque_peak_Nm": 0.55098,
   "grf_peak_N": {
-   "left_foot": 6.1805,
-   "right_foot": 6.9574,
-   "both_feet_sum_peak": 13.1379
+   "left_foot": 12.5542,
+   "right_foot": 13.8452,
+   "both_feet_sum_peak": 26.3993
   },
   "grf_vertical_peak_N": {
-   "left_foot": 6.1236,
-   "right_foot": 6.8788,
-   "both_feet_sum_peak": 13.0024
+   "left_foot": 12.4434,
+   "right_foot": 13.712,
+   "both_feet_sum_peak": 26.1554
   },
   "grf_vertical_percentiles_N": {
-   "both_feet_sum_p50": 7.2011,
-   "both_feet_sum_p95": 7.546,
-   "both_feet_sum_p99": 7.6427,
-   "single_foot_p99": 5.5051,
-   "single_foot_max": 6.8788
+   "both_feet_sum_p50": 7.2031,
+   "both_feet_sum_p95": 7.56,
+   "both_feet_sum_p99": 7.6358,
+   "single_foot_p99": 5.5018,
+   "single_foot_max": 13.712
   },
   "weight_N": 7.2324,
   "self_collisions": {
@@ -106,20 +116,20 @@
   "joints_saturating_mjcf_forcerange": [],
   "per_joint": {
    "left_hip_yaw": {
-    "peak_abs_torque_Nm": 0.036,
-    "peak_at_s": 0.52,
-    "peak_signed_torque_Nm": -0.036,
-    "p95_abs_torque_Nm": 0.00718,
-    "p99_abs_torque_Nm": 0.01574,
-    "rms_torque_Nm": 0.00383,
-    "mean_abs_torque_Nm": 0.0017,
+    "peak_abs_torque_Nm": 0.03678,
+    "peak_at_s": 0.505,
+    "peak_signed_torque_Nm": -0.03678,
+    "p95_abs_torque_Nm": 0.00729,
+    "p99_abs_torque_Nm": 0.01748,
+    "rms_torque_Nm": 0.00393,
+    "mean_abs_torque_Nm": 0.00173,
     "frames_at_forcerange_limit": 0,
     "mjcf_forcerange_Nm": [
      -0.96,
      0.96
     ],
-    "peak_abs_speed_rad_s": 0.2584,
-    "peak_abs_speed_rpm_output": 2.468,
+    "peak_abs_speed_rad_s": 0.2595,
+    "peak_abs_speed_rpm_output": 2.478,
     "range_rad": [
      -0.43633,
      0.5236
@@ -136,20 +146,20 @@
     "max_overshoot_beyond_limit_deg": 0.0
    },
    "left_hip_roll": {
-    "peak_abs_torque_Nm": 0.06946,
-    "peak_at_s": 0.54,
-    "peak_signed_torque_Nm": -0.06946,
-    "p95_abs_torque_Nm": 0.05906,
-    "p99_abs_torque_Nm": 0.06004,
-    "rms_torque_Nm": 0.05712,
-    "mean_abs_torque_Nm": 0.057,
+    "peak_abs_torque_Nm": 0.06974,
+    "peak_at_s": 0.525,
+    "peak_signed_torque_Nm": -0.06974,
+    "p95_abs_torque_Nm": 0.05905,
+    "p99_abs_torque_Nm": 0.06005,
+    "rms_torque_Nm": 0.05715,
+    "mean_abs_torque_Nm": 0.05707,
     "frames_at_forcerange_limit": 0,
     "mjcf_forcerange_Nm": [
      -0.96,
      0.96
     ],
-    "peak_abs_speed_rad_s": 0.1492,
-    "peak_abs_speed_rpm_output": 1.425,
+    "peak_abs_speed_rad_s": 0.1783,
+    "peak_abs_speed_rpm_output": 1.702,
     "range_rad": [
      -0.38397,
      0.38397
@@ -158,21 +168,21 @@
      -22.0,
      22.0
     ],
-    "q_min_deg": -5.166,
-    "q_max_deg": -4.556,
-    "range_utilisation_pct": 1.39,
+    "q_min_deg": -5.178,
+    "q_max_deg": -4.553,
+    "range_utilisation_pct": 1.42,
     "frames_within_1deg_of_limit": 0,
     "frames_beyond_limit": 0,
     "max_overshoot_beyond_limit_deg": 0.0
    },
    "left_hip_pitch": {
-    "peak_abs_torque_Nm": 0.05149,
-    "peak_at_s": 0.52,
-    "peak_signed_torque_Nm": 0.05149,
+    "peak_abs_torque_Nm": 0.05365,
+    "peak_at_s": 0.525,
+    "peak_signed_torque_Nm": 0.05365,
     "p95_abs_torque_Nm": 0.01219,
-    "p99_abs_torque_Nm": 0.01406,
-    "rms_torque_Nm": 0.01038,
-    "mean_abs_torque_Nm": 0.00981,
+    "p99_abs_torque_Nm": 0.01679,
+    "rms_torque_Nm": 0.01048,
+    "mean_abs_torque_Nm": 0.00986,
     "frames_at_forcerange_limit": 0,
     "mjcf_forcerange_Nm": [
      -0.96,
@@ -189,20 +199,20 @@
      90.0
     ],
     "q_min_deg": -26.238,
-    "q_max_deg": -19.597,
+    "q_max_deg": -19.596,
     "range_utilisation_pct": 3.69,
     "frames_within_1deg_of_limit": 0,
     "frames_beyond_limit": 0,
     "max_overshoot_beyond_limit_deg": 0.0
    },
    "left_knee": {
-    "peak_abs_torque_Nm": 0.08315,
-    "peak_at_s": 0.32,
-    "peak_signed_torque_Nm": -0.08315,
-    "p95_abs_torque_Nm": 0.06593,
-    "p99_abs_torque_Nm": 0.07973,
-    "rms_torque_Nm": 0.05996,
-    "mean_abs_torque_Nm": 0.0596,
+    "peak_abs_torque_Nm": 0.08341,
+    "peak_at_s": 0.305,
+    "peak_signed_torque_Nm": -0.08341,
+    "p95_abs_torque_Nm": 0.06595,
+    "p99_abs_torque_Nm": 0.0799,
+    "rms_torque_Nm": 0.05999,
+    "mean_abs_torque_Nm": 0.05966,
     "frames_at_forcerange_limit": 0,
     "mjcf_forcerange_Nm": [
      -0.96,
@@ -226,20 +236,20 @@
     "max_overshoot_beyond_limit_deg": 0.0
    },
    "left_ankle": {
-    "peak_abs_torque_Nm": 0.07053,
-    "peak_at_s": 0.02,
-    "peak_signed_torque_Nm": -0.07053,
-    "p95_abs_torque_Nm": 0.02699,
-    "p99_abs_torque_Nm": 0.0277,
-    "rms_torque_Nm": 0.02447,
-    "mean_abs_torque_Nm": 0.02414,
+    "peak_abs_torque_Nm": 0.07299,
+    "peak_at_s": 0.005,
+    "peak_signed_torque_Nm": -0.07299,
+    "p95_abs_torque_Nm": 0.027,
+    "p99_abs_torque_Nm": 0.02778,
+    "rms_torque_Nm": 0.0245,
+    "mean_abs_torque_Nm": 0.02418,
     "frames_at_forcerange_limit": 0,
     "mjcf_forcerange_Nm": [
      -0.96,
      0.96
     ],
-    "peak_abs_speed_rad_s": 0.5293,
-    "peak_abs_speed_rpm_output": 5.054,
+    "peak_abs_speed_rad_s": 0.5524,
+    "peak_abs_speed_rpm_output": 5.275,
     "range_rad": [
      -1.5708,
      1.5708
@@ -248,7 +258,7 @@
      -90.0,
      90.0
     ],
-    "q_min_deg": 21.828,
+    "q_min_deg": 21.825,
     "q_max_deg": 25.954,
     "range_utilisation_pct": 2.29,
     "frames_within_1deg_of_limit": 0,
@@ -256,13 +266,13 @@
     "max_overshoot_beyond_limit_deg": 0.0
    },
    "neck_pitch": {
-    "peak_abs_torque_Nm": 0.0647,
-    "peak_at_s": 0.02,
-    "peak_signed_torque_Nm": -0.0647,
-    "p95_abs_torque_Nm": 0.01721,
-    "p99_abs_torque_Nm": 0.03824,
-    "rms_torque_Nm": 0.01669,
-    "mean_abs_torque_Nm": 0.016,
+    "peak_abs_torque_Nm": 0.06654,
+    "peak_at_s": 0.005,
+    "peak_signed_torque_Nm": -0.06654,
+    "p95_abs_torque_Nm": 0.01723,
+    "p99_abs_torque_Nm": 0.04357,
+    "rms_torque_Nm": 0.01678,
+    "mean_abs_torque_Nm": 0.01605,
     "frames_at_forcerange_limit": 0,
     "mjcf_forcerange_Nm": [
      -0.96,
@@ -278,7 +288,7 @@
      -90.0,
      60.0
     ],
-    "q_min_deg": 12.129,
+    "q_min_deg": 12.126,
     "q_max_deg": 20.0,
     "range_utilisation_pct": 5.25,
     "frames_within_1deg_of_limit": 0,
@@ -286,20 +296,20 @@
     "max_overshoot_beyond_limit_deg": 0.0
    },
    "head_pitch": {
-    "peak_abs_torque_Nm": 0.05566,
-    "peak_at_s": 0.54,
-    "peak_signed_torque_Nm": -0.05566,
-    "p95_abs_torque_Nm": 0.04287,
-    "p99_abs_torque_Nm": 0.04356,
-    "rms_torque_Nm": 0.04148,
-    "mean_abs_torque_Nm": 0.04128,
+    "peak_abs_torque_Nm": 0.05625,
+    "peak_at_s": 0.525,
+    "peak_signed_torque_Nm": -0.05625,
+    "p95_abs_torque_Nm": 0.04288,
+    "p99_abs_torque_Nm": 0.04357,
+    "rms_torque_Nm": 0.0415,
+    "mean_abs_torque_Nm": 0.04132,
     "frames_at_forcerange_limit": 0,
     "mjcf_forcerange_Nm": [
      -0.96,
      0.96
     ],
-    "peak_abs_speed_rad_s": 0.2551,
-    "peak_abs_speed_rpm_output": 2.436,
+    "peak_abs_speed_rad_s": 0.2681,
+    "peak_abs_speed_rpm_output": 2.56,
     "range_rad": [
      -1.5708,
      1.5708
@@ -316,13 +326,13 @@
     "max_overshoot_beyond_limit_deg": 0.0
    },
    "head_yaw": {
-    "peak_abs_torque_Nm": 0.02216,
-    "peak_at_s": 0.52,
-    "peak_signed_torque_Nm": 0.02216,
-    "p95_abs_torque_Nm": 0.00523,
-    "p99_abs_torque_Nm": 0.01416,
-    "rms_torque_Nm": 0.00274,
-    "mean_abs_torque_Nm": 0.00131,
+    "peak_abs_torque_Nm": 0.02279,
+    "peak_at_s": 0.505,
+    "peak_signed_torque_Nm": 0.02279,
+    "p95_abs_torque_Nm": 0.00526,
+    "p99_abs_torque_Nm": 0.01512,
+    "rms_torque_Nm": 0.00283,
+    "mean_abs_torque_Nm": 0.00134,
     "frames_at_forcerange_limit": 0,
     "mjcf_forcerange_Nm": [
      -0.96,
@@ -346,13 +356,13 @@
     "max_overshoot_beyond_limit_deg": 0.0
    },
    "head_roll": {
-    "peak_abs_torque_Nm": 0.01369,
-    "peak_at_s": 0.16,
-    "peak_signed_torque_Nm": -0.01369,
-    "p95_abs_torque_Nm": 0.00628,
-    "p99_abs_torque_Nm": 0.01041,
-    "rms_torque_Nm": 0.0037,
-    "mean_abs_torque_Nm": 0.00326,
+    "peak_abs_torque_Nm": 0.0144,
+    "peak_at_s": 0.145,
+    "peak_signed_torque_Nm": -0.0144,
+    "p95_abs_torque_Nm": 0.0063,
+    "p99_abs_torque_Nm": 0.01055,
+    "rms_torque_Nm": 0.00373,
+    "mean_abs_torque_Nm": 0.00327,
     "frames_at_forcerange_limit": 0,
     "mjcf_forcerange_Nm": [
      -0.96,
@@ -376,20 +386,20 @@
     "max_overshoot_beyond_limit_deg": 0.0
    },
    "right_hip_yaw": {
-    "peak_abs_torque_Nm": 0.02628,
-    "peak_at_s": 0.52,
-    "peak_signed_torque_Nm": 0.02628,
-    "p95_abs_torque_Nm": 0.00468,
-    "p99_abs_torque_Nm": 0.01744,
-    "rms_torque_Nm": 0.00326,
-    "mean_abs_torque_Nm": 0.00178,
+    "peak_abs_torque_Nm": 0.02676,
+    "peak_at_s": 0.005,
+    "peak_signed_torque_Nm": 0.02676,
+    "p95_abs_torque_Nm": 0.00473,
+    "p99_abs_torque_Nm": 0.01879,
+    "rms_torque_Nm": 0.00332,
+    "mean_abs_torque_Nm": 0.0018,
     "frames_at_forcerange_limit": 0,
     "mjcf_forcerange_Nm": [
      -0.96,
      0.96
     ],
-    "peak_abs_speed_rad_s": 0.173,
-    "peak_abs_speed_rpm_output": 1.652,
+    "peak_abs_speed_rad_s": 0.1762,
+    "peak_abs_speed_rpm_output": 1.683,
     "range_rad": [
      -0.5236,
      0.43633
@@ -406,20 +416,20 @@
     "max_overshoot_beyond_limit_deg": 0.0
    },
    "right_hip_roll": {
-    "peak_abs_torque_Nm": 0.05449,
-    "peak_at_s": 0.52,
-    "peak_signed_torque_Nm": 0.05449,
-    "p95_abs_torque_Nm": 0.0332,
-    "p99_abs_torque_Nm": 0.048,
-    "rms_torque_Nm": 0.02929,
-    "mean_abs_torque_Nm": 0.02896,
+    "peak_abs_torque_Nm": 0.05452,
+    "peak_at_s": 0.505,
+    "peak_signed_torque_Nm": 0.05452,
+    "p95_abs_torque_Nm": 0.03329,
+    "p99_abs_torque_Nm": 0.04796,
+    "rms_torque_Nm": 0.0293,
+    "mean_abs_torque_Nm": 0.029,
     "frames_at_forcerange_limit": 0,
     "mjcf_forcerange_Nm": [
      -0.96,
      0.96
     ],
-    "peak_abs_speed_rad_s": 0.265,
-    "peak_abs_speed_rpm_output": 2.53,
+    "peak_abs_speed_rad_s": 0.287,
+    "peak_abs_speed_rpm_output": 2.74,
     "range_rad": [
      -0.38397,
      0.38397
@@ -428,21 +438,21 @@
      -22.0,
      22.0
     ],
-    "q_min_deg": 4.926,
-    "q_max_deg": 5.357,
-    "range_utilisation_pct": 0.98,
+    "q_min_deg": 4.925,
+    "q_max_deg": 5.359,
+    "range_utilisation_pct": 0.99,
     "frames_within_1deg_of_limit": 0,
     "frames_beyond_limit": 0,
     "max_overshoot_beyond_limit_deg": 0.0
    },
    "right_hip_pitch": {
-    "peak_abs_torque_Nm": 0.05969,
-    "peak_at_s": 0.54,
-    "peak_signed_torque_Nm": -0.05969,
-    "p95_abs_torque_Nm": 0.02753,
-    "p99_abs_torque_Nm": 0.04349,
-    "rms_torque_Nm": 0.02484,
-    "mean_abs_torque_Nm": 0.02444,
+    "peak_abs_torque_Nm": 0.06232,
+    "peak_at_s": 0.525,
+    "peak_signed_torque_Nm": -0.06232,
+    "p95_abs_torque_Nm": 0.02756,
+    "p99_abs_torque_Nm": 0.04587,
+    "rms_torque_Nm": 0.02491,
+    "mean_abs_torque_Nm": 0.0245,
     "frames_at_forcerange_limit": 0,
     "mjcf_forcerange_Nm": [
      -0.96,
@@ -458,9 +468,9 @@
      -90.0,
      90.0
     ],
-    "q_min_deg": 21.307,
-    "q_max_deg": 26.363,
-    "range_utilisation_pct": 2.81,
+    "q_min_deg": 21.305,
+    "q_max_deg": 26.412,
+    "range_utilisation_pct": 2.84,
     "frames_within_1deg_of_limit": 0,
     "frames_beyond_limit": 0,
     "max_overshoot_beyond_limit_deg": 0.0
@@ -469,10 +479,10 @@
     "peak_abs_torque_Nm": 0.12435,
     "peak_at_s": 1.24,
     "peak_signed_torque_Nm": 0.12435,
-    "p95_abs_torque_Nm": 0.12019,
+    "p95_abs_torque_Nm": 0.12024,
     "p99_abs_torque_Nm": 0.12229,
-    "rms_torque_Nm": 0.11397,
-    "mean_abs_torque_Nm": 0.11334,
+    "rms_torque_Nm": 0.11403,
+    "mean_abs_torque_Nm": 0.11347,
     "frames_at_forcerange_limit": 0,
     "mjcf_forcerange_Nm": [
      -0.96,
@@ -488,28 +498,28 @@
      -90.0,
      90.0
     ],
-    "q_min_deg": -1.995,
-    "q_max_deg": 0.376,
-    "range_utilisation_pct": 1.32,
+    "q_min_deg": -1.998,
+    "q_max_deg": 0.414,
+    "range_utilisation_pct": 1.34,
     "frames_within_1deg_of_limit": 0,
     "frames_beyond_limit": 0,
     "max_overshoot_beyond_limit_deg": 0.0
    },
    "right_ankle": {
-    "peak_abs_torque_Nm": 0.08082,
-    "peak_at_s": 0.02,
-    "peak_signed_torque_Nm": 0.08082,
-    "p95_abs_torque_Nm": 0.05595,
-    "p99_abs_torque_Nm": 0.05671,
-    "rms_torque_Nm": 0.05155,
-    "mean_abs_torque_Nm": 0.05095,
+    "peak_abs_torque_Nm": 0.08366,
+    "peak_at_s": 0.005,
+    "peak_signed_torque_Nm": 0.08366,
+    "p95_abs_torque_Nm": 0.05607,
+    "p99_abs_torque_Nm": 0.05709,
+    "rms_torque_Nm": 0.05158,
+    "mean_abs_torque_Nm": 0.05101,
     "frames_at_forcerange_limit": 0,
     "mjcf_forcerange_Nm": [
      -0.96,
      0.96
     ],
-    "peak_abs_speed_rad_s": 0.6124,
-    "peak_abs_speed_rpm_output": 5.848,
+    "peak_abs_speed_rad_s": 0.621,
+    "peak_abs_speed_rpm_output": 5.93,
     "range_rad": [
      -1.5708,
      1.5708
@@ -518,15 +528,15 @@
      -90.0,
      90.0
     ],
-    "q_min_deg": -26.285,
-    "q_max_deg": -22.616,
-    "range_utilisation_pct": 2.04,
+    "q_min_deg": -26.286,
+    "q_max_deg": -22.593,
+    "range_utilisation_pct": 2.05,
     "frames_within_1deg_of_limit": 0,
     "frames_beyond_limit": 0,
     "max_overshoot_beyond_limit_deg": 0.0
    }
   },
   "nan": false,
-  "wall_seconds": 1.08
+  "wall_seconds": 3.789
  }
 }

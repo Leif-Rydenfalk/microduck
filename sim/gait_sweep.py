@@ -109,14 +109,22 @@ def run_cell(cfg, out_dir=OUT):
     args = argparse.Namespace(vx=cfg.vx, vy=cfg.vy, wz=cfg.wz, warmup=cfg.warmup,
                               sit_at=cfg.sit_at, stand_at=cfg.stand_at)
 
-    T = n_steps + 1
-    tau = np.zeros((T, NUM_JOINTS))          # actuator_force, N.m (gear 1 -> joint torque)
-    jq = np.zeros((T, NUM_JOINTS))
-    jv = np.zeros((T, NUM_JOINTS))
-    grf = np.zeros((T, 2))                   # per-foot |contact force| resultant, N
-    grf_z = np.zeros((T, 2))                 # per-foot world +z component, N
+    T = n_steps + 1                          # 50 Hz control frames (pose, video, fall rule)
+    P = n_steps * DECIMATION + 1             # 200 Hz PHYSICS frames (torque, speed, GRF)
+    # torque/speed/GRF are recorded at EVERY physics step: sampling them only at the 50 Hz
+    # control frame misses the intra-step peak (measured 5.4 % low on left_knee in the
+    # reference cell against the 200 Hz record in sim/thermal_duty.py).
+    tau = np.zeros((P, NUM_JOINTS))          # actuator_force, N.m (gear 1 -> joint torque)
+    jq = np.zeros((P, NUM_JOINTS))
+    jv = np.zeros((P, NUM_JOINTS))
+    grf = np.zeros((P, 2))                   # per-foot |contact force| resultant, N
+    grf_z = np.zeros((P, 2))                 # per-foot world +z component, N
+    pvec = np.arange(P) * float(model.opt.timestep)
     trunk_z = np.zeros(T)
     tilt = np.zeros(T)
+    roll_a = np.zeros(T)
+    pitch_a = np.zeros(T)
+    cmd_hist = np.zeros((T, rn.cmd.shape[0]))
     nself = np.zeros(T, int)
     ncon = np.zeros(T, int)
     tvec = np.arange(T) * CTRL_DT
@@ -138,16 +146,20 @@ def run_cell(cfg, out_dir=OUT):
                     fz[k] += float(sign * fw[2])
         return f, fz
 
+    def snap_phys(k):
+        tau[k] = data.actuator_force
+        jq[k] = data.qpos[rn.qpos_idx]
+        jv[k] = data.qvel[rn.qvel_idx]
+        a, b = foot_forces()
+        grf[k], grf_z[k] = a, b
+
     def snap(i):
         q = data.qpos[rn.root_qadr + 3:rn.root_qadr + 7]
         r, p = common.quat_to_roll_pitch(q)
-        tau[i] = data.actuator_force
-        jq[i] = data.qpos[rn.qpos_idx]
-        jv[i] = data.qvel[rn.qvel_idx]
-        a, b = foot_forces()
-        grf[i], grf_z[i] = a, b
         trunk_z[i] = data.qpos[rn.root_qadr + 2]
+        roll_a[i], pitch_a[i] = r, p
         tilt[i] = math.degrees(max(abs(r), abs(p)))
+        cmd_hist[i] = rn.cmd
         nself[i] = rn.self_contacts()
         ncon[i] = data.ncon
         qpos_hist[i] = data.qpos
@@ -155,6 +167,7 @@ def run_cell(cfg, out_dir=OUT):
     t0 = time.time()
     start_xy = data.qpos[rn.root_qadr:rn.root_qadr + 2].copy()
     snap(0)
+    snap_phys(0)
     push_frames = 0
     for k in range(n_steps):
         t = k * CTRL_DT
@@ -168,8 +181,9 @@ def run_cell(cfg, out_dir=OUT):
             d = d / np.linalg.norm(d)
             data.xfrc_applied[trunk_bid, 0:3] = cfg.push_N * d
             push_frames += 1
-        for _ in range(DECIMATION):
+        for d_i in range(DECIMATION):
             mujoco.mj_step(model, data)
+            snap_phys(k * DECIMATION + d_i + 1)
         snap(k + 1)
     wall = time.time() - t0
 
@@ -197,7 +211,7 @@ def run_cell(cfg, out_dir=OUT):
         pk_i = int(np.abs(tau[:, i]).argmax())
         per_joint[jn] = {
             "peak_abs_torque_Nm": round(pk, 5),
-            "peak_at_s": round(float(tvec[pk_i]), 3),
+            "peak_at_s": round(float(pvec[pk_i]), 3),
             "peak_signed_torque_Nm": round(float(tau[pk_i, i]), 5),
             "p95_abs_torque_Nm": round(float(np.percentile(np.abs(tau[:, i]), 95)), 5),
             "p99_abs_torque_Nm": round(float(np.percentile(np.abs(tau[:, i]), 99)), 5),
@@ -222,6 +236,14 @@ def run_cell(cfg, out_dir=OUT):
     xy = qpos_hist[cmd_mask][:, rn.root_qadr:rn.root_qadr + 2]
     tt = tvec[cmd_mask]
     speed = float(np.linalg.norm(xy[-1] - xy[0]) / max(tt[-1] - tt[0], 1e-9)) if len(tt) > 1 else 0.0
+    path_len = float(np.linalg.norm(np.diff(xy, axis=0), axis=1).sum()) if len(tt) > 1 else 0.0
+    qw = qpos_hist[:, rn.root_qadr + 3]
+    qx = qpos_hist[:, rn.root_qadr + 4]
+    qy = qpos_hist[:, rn.root_qadr + 5]
+    qz = qpos_hist[:, rn.root_qadr + 6]
+    yaw = np.unwrap(np.arctan2(2 * (qw * qz + qx * qy), 1 - 2 * (qy ** 2 + qz ** 2)))
+    yaw_deg = np.degrees(yaw - yaw[0])
+    path_speed = path_len / max(tt[-1] - tt[0], 1e-9) if len(tt) > 1 else 0.0
 
     out = {
         "cell": cfg.name, "family": cfg.family, "note": cfg.note,
@@ -233,6 +255,8 @@ def run_cell(cfg, out_dir=OUT):
             "action_scale": pol.action_scale,
             "control_hz": round(1.0 / CTRL_DT, 1), "timestep_s": float(model.opt.timestep),
             "decimation": DECIMATION, "control_steps": n_steps,
+            "torque_grf_record_hz": round(1.0 / float(model.opt.timestep), 1),
+            "torque_grf_frames": P,
             "push_frames_applied": push_frames,
             **model_state,
         },
@@ -244,6 +268,18 @@ def run_cell(cfg, out_dir=OUT):
             "walked_m": round(float(np.linalg.norm(disp)), 5),
             "walked_x_m": round(float(disp[0]), 5), "walked_y_m": round(float(disp[1]), 5),
             "mean_speed_m_s": round(speed, 5),
+            "path_length_m": round(path_len, 5),
+            "net_yaw_drift_deg": round(float(yaw_deg[-1]), 3),
+            "max_abs_yaw_drift_deg": round(float(np.abs(yaw_deg).max()), 3),
+            "yaw_drift_deg_per_m_of_path": round(float(yaw_deg[-1] / path_len), 4) if path_len > 0.05 else None,
+            "forward_tracking_ratio": round(path_speed / cfg.vx, 4) if (cfg.policy == "walking" and cfg.vx > 0)
+            else None,
+            "forward_tracking_note": "mean_path_speed_m_s divided by the commanded vx. The walking policy has a "
+                                     "stand-still band below ~0.25 m/s (out/sim/vx_sweep.json), so the ratio is "
+                                     "meaningless there and only the moving cells should be read.",
+            "mean_path_speed_m_s": round(path_speed, 5),
+            "path_vs_displacement": "walked_m is the straight-line displacement of the trunk; path_length_m is "
+                                    "the integrated ground track. A large gap means the robot curved.",
             "trunk_z_m": {"start": round(float(trunk_z[0]), 5), "min": round(float(trunk_z.min()), 5),
                           "max": round(float(trunk_z.max()), 5), "end": round(float(trunk_z[-1]), 5)},
             "max_tilt_deg": round(float(tilt.max()), 3), "end_tilt_deg": round(float(tilt[-1]), 3),
@@ -279,9 +315,17 @@ def run_cell(cfg, out_dir=OUT):
     if cfg.save_traj:
         np.savez_compressed(os.path.join(out_dir, cfg.name + "_traj.npz"), scene=scene_path, robot=cfg.robot,
                             policy=cfg.policy, ctrl_dt=CTRL_DT, root_qadr=rn.root_qadr,
-                            time=tvec, qpos=qpos_hist, qvel=np.zeros((T, model.nv)), ctrl=np.zeros((T, NUM_JOINTS)),
-                            action=np.zeros((T, NUM_JOINTS)), tau=tau, jq=jq, jv=jv, grf=grf, grf_z=grf_z,
-                            trunk_z=trunk_z, roll=np.zeros(T), pitch=np.zeros(T), ncon=ncon, nself=nself)
+                            time=tvec, phys_time=pvec, qpos=qpos_hist, qvel=np.zeros((T, model.nv)),
+                            ctrl=np.zeros((T, NUM_JOINTS)),
+                            action=np.zeros((T, NUM_JOINTS)), cmd=cmd_hist, tau=tau, jq=jq, jv=jv,
+                            grf=grf, grf_z=grf_z, trunk_z=trunk_z, roll=roll_a, pitch=pitch_a,
+                            ncon=ncon, nself=nself)
+        json.dump({"name": cfg.name, "policy": cfg.policy,
+                   "policy_file": "sim/policies/" + POLICY_FILES[cfg.policy],
+                   "robot": cfg.robot, "note": cfg.note,
+                   "$about": "the shim sim/render_video.py reads beside a _traj.npz; the full cell record is "
+                             + cfg.name + ".json"},
+                  open(os.path.join(out_dir, cfg.name + "_summary.json"), "w"), indent=1)
     return out
 
 
@@ -326,6 +370,13 @@ def matrix():
                      seconds=8.0, start="FOLD"))
     cells.append(Cfg("stand_hold", "sitstand", policy="stand", robot="ours_allcollisions",
                      seconds=8.0, start="STAND", save_traj=True))
+    # endurance: does the gait hold up over a long run, or drift/fail late?
+    cells.append(Cfg("endurance_60s_vx0.25", "endurance", vx=0.25, seconds=60.0,
+                     note="60 s of continuous walking at the reference command"))
+    cells.append(Cfg("endurance_60s_vx0.35", "endurance", vx=0.35, seconds=60.0,
+                     note="60 s of continuous walking at 0.35 m/s"))
+    cells.append(Cfg("endurance_60s_slope5_up", "endurance", vx=0.25, seconds=60.0, slope_deg=5.0,
+                     slope_dir="up", note="60 s uphill at 5 deg"))
     # self-collision census on the all-collisions model while walking
     cells.append(Cfg("walk_allcollisions", "selfcollision", robot="ours_allcollisions", vx=0.25, seconds=12.0,
                      note="the walk on the model that has EVERY body's collision geom enabled"))

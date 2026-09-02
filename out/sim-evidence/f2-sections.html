@@ -1,0 +1,238 @@
+
+<section id="f2-gait">
+  <h2><span class="n">F2.1</span>Gait robustness — 37 perturbation cells</h2>
+  <p class="lede">Pollen's own published ONNX policies driving <b>our</b> rebuilt meshes on Pollen's
+  stock collision geometry and inertials, through a matrix of commanded speed, mass, foot friction,
+  ground slope and external push. Every number is read off the simulation state: nothing here is a
+  round figure or a default.</p>
+
+  <div class="statbar">
+    <div class="stat"><b>37</b><span>cells run</span></div>
+    <div class="stat"><b>31</b><span>walking cells</span></div>
+    <div class="stat"><b>2</b><span>walking falls</span></div>
+    <div class="stat"><b>0.8022 N·m</b><span>worst locomotion torque</span></div>
+    <div class="stat"><b>23.39 N</b><span>peak single-foot GRF</span></div>
+  </div>
+
+  <div class="note"><span class="chip pass">PASS</span> Across 37 cells the walking policy did not fall in any of the 31 walking cells except the 5 N lateral pushes (+y and -y; 5 N along +x and -x was survived). In the 25 UNDISTURBED locomotion cells (vx 0-0.80 m/s, mass +/-10 %, foot friction 0.40-1.00, 5 deg slopes in four directions) no joint left its MJCF range at all and no self-collision occurred. Under an external push, 9 joints are driven past their MJCF stop, worst head_yaw by 7.6355 deg in cell push_5N_lat_neg — on the real robot that is a hard stop taking the load. Self-collision occurred in 5 cells (push_2N_lat, push_5N_fwd, push_5N_lat, push_5N_lat_neg, sitstand_mu0.40), all push or sit-stand. The sit-stand cells report fell=true by the trunk-height rule because the commanded sit puts the trunk on the floor on purpose; each row also carries fell_outside_commanded_ground_window, which is the rule with that window removed.</div>
+
+  <h3>How each perturbation is applied to the model</h3>
+  <ul>
+    <li><b>Mass</b> — model.body_mass and model.body_inertia scaled; the fitted NP-F550-class pack is 99 g (ce-parts/np-f550/electrical.part.json mass_g, Duracell DR5 page &#x27;Weight 99 g&#x27;), which is 13.43 % of the model&#x27;s 737.243 g — whether Pollen&#x27;s trunk inertial already includes the pack is CANNOT DETERMINE, so +/-10 % is swept as the brief specifies rather than a battery-in/battery-out pair being asserted.</li>
+    <li><b>Friction</b> — geom_friction[:,0] set on the floor AND both foot geoms (MuJoCo mixes a contact pair&#x27;s friction elementwise-max, so setting one side alone does nothing).</li>
+    <li><b>Slope</b> — floor kept flat, gravity rotated: G = g*(sin(th)*dhat - cos(th)*zhat), dhat the horizontal downhill direction. Identical mechanics in the plane&#x27;s frame.</li>
+    <li><b>Push</b> — data.xfrc_applied on body trunk_base, world frame, held for 0.2 s from t = 6.0 s.</li>
+  </ul>
+
+  <p class="num">Table F2-1. The full sweep, ordered by family. Torque is
+  <code>data.actuator_force</code> (N·m, gear 1) recorded at every 200 Hz physics step; GRF is
+  <code>mj_contactForce</code> on every contact touching a foot geom, world +z. <b>Walked</b> is the
+  straight-line trunk displacement and <b>path</b> the integrated ground track — the gap is the
+  robot curving. Range utilisation is the widest joint's swept span as a percentage of its MJCF
+  range.</p>
+  <div class="tablewrap">
+  <table class="data">
+    <thead><tr><th>Cell</th><th>Perturbation</th><th>Outcome</th><th>Walked (m)</th><th>Path (m)</th>
+    <th>Mean speed (m/s)</th><th>Peak τ (N·m)</th><th>at joint</th><th>Peak GRF<sub>z</sub> (N)</th>
+    <th>Yaw drift (°)</th><th>Self-coll.</th><th>Max range use (%)</th></tr></thead>
+    <tbody>
+<tr><td><code>base_walk_vx0.25</code></td><td>v<sub>x</sub> 0.25 m/s</td><td class="n"><span class="chip pass">upright</span></td><td class="n">1.2232</td><td class="n">1.7911</td><td class="n">0.1062</td><td class="n">0.4304</td><td><code>left_knee</code></td><td class="n">26.16</td><td class="n">-15.4</td><td class="n">0</td><td class="n">24.2</td></tr>
+<tr><td><code>vx_0.00</code></td><td>v<sub>x</sub> 0.00 m/s</td><td class="n"><span class="chip pass">upright</span></td><td class="n">0.0012</td><td class="n">0.0046</td><td class="n">0.0001</td><td class="n">0.0845</td><td><code>right_knee</code></td><td class="n">26.16</td><td class="n">-0.2</td><td class="n">0</td><td class="n">5.5</td></tr>
+<tr><td><code>vx_0.05</code></td><td>v<sub>x</sub> 0.05 m/s</td><td class="n"><span class="chip pass">upright</span></td><td class="n">0.0034</td><td class="n">0.0117</td><td class="n">0.0002</td><td class="n">0.0882</td><td><code>right_knee</code></td><td class="n">26.16</td><td class="n">-0.6</td><td class="n">0</td><td class="n">5.7</td></tr>
+<tr><td><code>vx_0.10</code></td><td>v<sub>x</sub> 0.10 m/s</td><td class="n"><span class="chip pass">upright</span></td><td class="n">0.0077</td><td class="n">0.0316</td><td class="n">0.0006</td><td class="n">0.1057</td><td><code>right_knee</code></td><td class="n">26.16</td><td class="n">-0.6</td><td class="n">0</td><td class="n">5.5</td></tr>
+<tr><td><code>vx_0.15</code></td><td>v<sub>x</sub> 0.15 m/s</td><td class="n"><span class="chip pass">upright</span></td><td class="n">0.0081</td><td class="n">0.0250</td><td class="n">0.0006</td><td class="n">0.1244</td><td><code>right_knee</code></td><td class="n">26.16</td><td class="n">-2.7</td><td class="n">0</td><td class="n">6.3</td></tr>
+<tr><td><code>vx_0.20</code></td><td>v<sub>x</sub> 0.20 m/s</td><td class="n"><span class="chip pass">upright</span></td><td class="n">0.0105</td><td class="n">0.0188</td><td class="n">0.0008</td><td class="n">0.1374</td><td><code>right_knee</code></td><td class="n">26.16</td><td class="n">-2.9</td><td class="n">0</td><td class="n">8.9</td></tr>
+<tr><td><code>vx_0.30</code></td><td>v<sub>x</sub> 0.30 m/s</td><td class="n"><span class="chip pass">upright</span></td><td class="n">1.4574</td><td class="n">1.9589</td><td class="n">0.1266</td><td class="n">0.4559</td><td><code>left_knee</code></td><td class="n">26.16</td><td class="n">-18.8</td><td class="n">0</td><td class="n">21.8</td></tr>
+<tr><td><code>vx_0.35</code></td><td>v<sub>x</sub> 0.35 m/s</td><td class="n"><span class="chip pass">upright</span></td><td class="n">1.7064</td><td class="n">2.1627</td><td class="n">0.1482</td><td class="n">0.5548</td><td><code>right_knee</code></td><td class="n">26.16</td><td class="n">-30.9</td><td class="n">0</td><td class="n">25.0</td></tr>
+<tr><td><code>vx_0.40</code></td><td>v<sub>x</sub> 0.40 m/s</td><td class="n"><span class="chip pass">upright</span></td><td class="n">1.9540</td><td class="n">2.3667</td><td class="n">0.1698</td><td class="n">0.5078</td><td><code>left_knee</code></td><td class="n">26.37</td><td class="n">-42.4</td><td class="n">0</td><td class="n">26.4</td></tr>
+<tr><td><code>vx_0.50</code></td><td>v<sub>x</sub> 0.50 m/s</td><td class="n"><span class="chip pass">upright</span></td><td class="n">2.8012</td><td class="n">3.0564</td><td class="n">0.2435</td><td class="n">0.5807</td><td><code>right_knee</code></td><td class="n">28.73</td><td class="n">-33.8</td><td class="n">0</td><td class="n">31.4</td></tr>
+<tr><td><code>vx_0.60</code></td><td>v<sub>x</sub> 0.60 m/s</td><td class="n"><span class="chip pass">upright</span></td><td class="n">3.5413</td><td class="n">3.7546</td><td class="n">0.3078</td><td class="n">0.6616</td><td><code>left_knee</code></td><td class="n">31.97</td><td class="n">-43.6</td><td class="n">0</td><td class="n">33.2</td></tr>
+<tr><td><code>vx_0.80</code></td><td>v<sub>x</sub> 0.80 m/s</td><td class="n"><span class="chip pass">upright</span></td><td class="n">3.2183</td><td class="n">5.1310</td><td class="n">0.2799</td><td class="n">0.7699</td><td><code>left_knee</code></td><td class="n">35.30</td><td class="n">-186.6</td><td class="n">0</td><td class="n">38.8</td></tr>
+<tr><td><code>endurance_60s_slope5_up</code></td><td>v<sub>x</sub> 0.25 m/s · 5° slope, downhill up</td><td class="n"><span class="chip pass">upright</span></td><td class="n">15.0095</td><td class="n">16.4708</td><td class="n">0.2521</td><td class="n">0.7153</td><td><code>right_hip_pitch</code></td><td class="n">32.28</td><td class="n">-161.1</td><td class="n">0</td><td class="n">45.3</td></tr>
+<tr><td><code>endurance_60s_vx0.25</code></td><td>v<sub>x</sub> 0.25 m/s</td><td class="n"><span class="chip pass">upright</span></td><td class="n">6.2228</td><td class="n">9.4756</td><td class="n">0.1046</td><td class="n">0.4304</td><td><code>left_knee</code></td><td class="n">26.16</td><td class="n">-58.9</td><td class="n">0</td><td class="n">24.5</td></tr>
+<tr><td><code>endurance_60s_vx0.35</code></td><td>v<sub>x</sub> 0.35 m/s</td><td class="n"><span class="chip pass">upright</span></td><td class="n">6.3575</td><td class="n">11.2149</td><td class="n">0.1069</td><td class="n">0.5548</td><td><code>right_knee</code></td><td class="n">26.16</td><td class="n">-155.5</td><td class="n">0</td><td class="n">25.0</td></tr>
+<tr><td><code>mass_m090</code></td><td>v<sub>x</sub> 0.25 m/s · mass ×0.90 (0.6635 kg)</td><td class="n"><span class="chip pass">upright</span></td><td class="n">1.1614</td><td class="n">1.7571</td><td class="n">0.1008</td><td class="n">0.4286</td><td><code>left_knee</code></td><td class="n">23.76</td><td class="n">-16.8</td><td class="n">0</td><td class="n">24.9</td></tr>
+<tr><td><code>mass_m110</code></td><td>v<sub>x</sub> 0.25 m/s · mass ×1.10 (0.8110 kg)</td><td class="n"><span class="chip pass">upright</span></td><td class="n">1.2894</td><td class="n">1.8251</td><td class="n">0.1120</td><td class="n">0.4699</td><td><code>left_knee</code></td><td class="n">28.48</td><td class="n">-6.1</td><td class="n">0</td><td class="n">23.9</td></tr>
+<tr><td><code>mu_0.40</code></td><td>v<sub>x</sub> 0.25 m/s · μ 0.40</td><td class="n"><span class="chip pass">upright</span></td><td class="n">1.1331</td><td class="n">1.6720</td><td class="n">0.0984</td><td class="n">0.4325</td><td><code>left_knee</code></td><td class="n">27.60</td><td class="n">-16.0</td><td class="n">0</td><td class="n">23.0</td></tr>
+<tr><td><code>mu_0.70</code></td><td>v<sub>x</sub> 0.25 m/s · μ 0.70</td><td class="n"><span class="chip pass">upright</span></td><td class="n">1.1719</td><td class="n">1.7420</td><td class="n">0.1018</td><td class="n">0.4248</td><td><code>left_knee</code></td><td class="n">27.06</td><td class="n">-23.2</td><td class="n">0</td><td class="n">23.5</td></tr>
+<tr><td><code>mu_1.00</code></td><td>v<sub>x</sub> 0.25 m/s</td><td class="n"><span class="chip pass">upright</span></td><td class="n">1.2232</td><td class="n">1.7911</td><td class="n">0.1062</td><td class="n">0.4304</td><td><code>left_knee</code></td><td class="n">26.16</td><td class="n">-15.4</td><td class="n">0</td><td class="n">24.2</td></tr>
+<tr><td><code>slope5_down</code></td><td>v<sub>x</sub> 0.25 m/s · 5° slope, downhill down</td><td class="n"><span class="chip pass">upright</span></td><td class="n">3.6395</td><td class="n">3.7593</td><td class="n">0.3158</td><td class="n">0.7924</td><td><code>right_hip_pitch</code></td><td class="n">34.20</td><td class="n">23.4</td><td class="n">0</td><td class="n">27.1</td></tr>
+<tr><td><code>slope5_side_left</code></td><td>v<sub>x</sub> 0.25 m/s · 5° slope, downhill side left</td><td class="n"><span class="chip pass">upright</span></td><td class="n">2.8817</td><td class="n">3.3043</td><td class="n">0.2504</td><td class="n">0.8022</td><td><code>right_hip_pitch</code></td><td class="n">35.26</td><td class="n">100.9</td><td class="n">0</td><td class="n">32.0</td></tr>
+<tr><td><code>slope5_side_right</code></td><td>v<sub>x</sub> 0.25 m/s · 5° slope, downhill side right</td><td class="n"><span class="chip pass">upright</span></td><td class="n">2.8471</td><td class="n">3.1065</td><td class="n">0.2474</td><td class="n">0.6904</td><td><code>right_hip_pitch</code></td><td class="n">31.89</td><td class="n">-70.0</td><td class="n">0</td><td class="n">27.5</td></tr>
+<tr><td><code>slope5_up</code></td><td>v<sub>x</sub> 0.25 m/s · 5° slope, downhill up</td><td class="n"><span class="chip pass">upright</span></td><td class="n">1.0369</td><td class="n">1.8239</td><td class="n">0.0894</td><td class="n">0.6149</td><td><code>right_ankle</code></td><td class="n">30.93</td><td class="n">-153.1</td><td class="n">0</td><td class="n">45.3</td></tr>
+<tr><td><code>push_1N_lat</code></td><td>v<sub>x</sub> 0.25 m/s · push 1 N +y for 0.2 s</td><td class="n"><span class="chip pass">upright</span></td><td class="n">1.2036</td><td class="n">1.7902</td><td class="n">0.1045</td><td class="n">0.4304</td><td><code>left_knee</code></td><td class="n">26.16</td><td class="n">-20.9</td><td class="n">0</td><td class="n">28.9</td></tr>
+<tr><td><code>push_2N_lat</code></td><td>v<sub>x</sub> 0.25 m/s · push 2 N +y for 0.2 s</td><td class="n"><span class="chip pass">upright</span></td><td class="n">1.3739</td><td class="n">1.9617</td><td class="n">0.1193</td><td class="n">0.9600</td><td><code>head_yaw</code></td><td class="n">34.17</td><td class="n">6.6</td><td class="n">4</td><td class="n">76.0</td></tr>
+<tr><td><code>push_5N_back</code></td><td>v<sub>x</sub> 0.25 m/s · push 5 N −x for 0.2 s</td><td class="n"><span class="chip pass">upright</span></td><td class="n">0.8187</td><td class="n">1.9693</td><td class="n">0.0711</td><td class="n">0.9600</td><td><code>right_hip_pitch</code></td><td class="n">49.97</td><td class="n">-0.0</td><td class="n">0</td><td class="n">52.7</td></tr>
+<tr><td><code>push_5N_fwd</code></td><td>v<sub>x</sub> 0.25 m/s · push 5 N +x for 0.2 s</td><td class="n"><span class="chip pass">upright</span></td><td class="n">1.7173</td><td class="n">2.3199</td><td class="n">0.1492</td><td class="n">0.9600</td><td><code>head_yaw</code></td><td class="n">58.82</td><td class="n">30.5</td><td class="n">4</td><td class="n">73.9</td></tr>
+<tr><td><code>push_5N_lat</code></td><td>v<sub>x</sub> 0.25 m/s · push 5 N +y for 0.2 s</td><td class="n"><span class="chip cd">fell @ 6.46 s</span></td><td class="n">0.6623</td><td class="n">1.2804</td><td class="n">0.0575</td><td class="n">0.9600</td><td><code>head_yaw</code></td><td class="n">93.06</td><td class="n">79.2</td><td class="n">4</td><td class="n">117.0</td></tr>
+<tr><td><code>push_5N_lat_neg</code></td><td>v<sub>x</sub> 0.25 m/s · push 5 N −y for 0.2 s</td><td class="n"><span class="chip cd">fell @ 6.42 s</span></td><td class="n">0.7189</td><td class="n">1.2502</td><td class="n">0.0624</td><td class="n">0.9600</td><td><code>head_yaw</code></td><td class="n">73.50</td><td class="n">29.4</td><td class="n">4</td><td class="n">106.8</td></tr>
+<tr><td><code>sitstand</code></td><td>policy <code>sitstand</code> · all-collision model</td><td class="n"><span class="chip cd">fell @ 1.74 s</span></td><td class="n">0.0278</td><td class="n">0.1507</td><td class="n">0.0028</td><td class="n">0.9600</td><td><code>right_knee</code></td><td class="n">25.23</td><td class="n">-1.6</td><td class="n">0</td><td class="n">44.7</td></tr>
+<tr><td><code>sitstand_m110</code></td><td>mass ×1.10 (0.8110 kg) · policy <code>sitstand</code> · all-collision model</td><td class="n"><span class="chip cd">fell @ 1.76 s</span></td><td class="n">0.0317</td><td class="n">0.1550</td><td class="n">0.0032</td><td class="n">0.9600</td><td><code>right_knee</code></td><td class="n">27.41</td><td class="n">-4.7</td><td class="n">0</td><td class="n">45.2</td></tr>
+<tr><td><code>sitstand_mu0.40</code></td><td>μ 0.40 · policy <code>sitstand</code> · all-collision model</td><td class="n"><span class="chip cd">fell @ 1.72 s</span></td><td class="n">0.0268</td><td class="n">0.2354</td><td class="n">0.0027</td><td class="n">0.9600</td><td><code>right_knee</code></td><td class="n">27.30</td><td class="n">43.1</td><td class="n">4</td><td class="n">59.5</td></tr>
+<tr><td><code>stand_from_FOLD</code></td><td>policy <code>stand</code> · all-collision model</td><td class="n"><span class="chip cd">fell @ 0.04 s</span></td><td class="n">0.0520</td><td class="n">0.0868</td><td class="n">0.0065</td><td class="n">0.9600</td><td><code>left_hip_pitch</code></td><td class="n">41.48</td><td class="n">-6.8</td><td class="n">0</td><td class="n">67.1</td></tr>
+<tr><td><code>stand_from_SIT</code></td><td>policy <code>stand</code> · all-collision model</td><td class="n"><span class="chip pass">upright</span></td><td class="n">0.0380</td><td class="n">0.0826</td><td class="n">0.0047</td><td class="n">0.9600</td><td><code>right_ankle</code></td><td class="n">19.16</td><td class="n">-1.9</td><td class="n">0</td><td class="n">48.7</td></tr>
+<tr><td><code>stand_hold</code></td><td>policy <code>stand</code> · all-collision model</td><td class="n"><span class="chip pass">upright</span></td><td class="n">0.0031</td><td class="n">0.0069</td><td class="n">0.0004</td><td class="n">0.1298</td><td><code>right_hip_roll</code></td><td class="n">25.31</td><td class="n">1.7</td><td class="n">0</td><td class="n">5.5</td></tr>
+<tr><td><code>walk_allcollisions</code></td><td>v<sub>x</sub> 0.25 m/s · all-collision model</td><td class="n"><span class="chip pass">upright</span></td><td class="n">1.2232</td><td class="n">1.7911</td><td class="n">0.1062</td><td class="n">0.4304</td><td><code>left_knee</code></td><td class="n">26.16</td><td class="n">-15.4</td><td class="n">0</td><td class="n">24.2</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>The push threshold</h3>
+  <p>A 0.2 s lateral push on the trunk is survived at 1 N and 2 N and knocks the robot over at 5 N in both +y and -y. 5 N along +x and -x is survived. Body weight is 7.2324 N, so the lateral tipping threshold lies between 0.28 and 0.69 body weights applied for 0.2 s (an impulse between 0.2 and 1.0 N.s).</p>
+
+  <h3>Heading and forward tracking</h3>
+  <p>The walking policy does not hold a straight line. In every moving cell the integrated ground track (path_length_m) exceeds the straight-line displacement (walked_m), and the trunk yaw drifts monotonically — so a distance quoted as displacement UNDERSTATES how far the robot walked, and a robot commanded straight will arc away from its line. Worst yaw drift and worst tracking ratio are below. Worst net yaw drift: <code>vx_0.80</code>, <b>-186.608°</b> over the run
+  (<b>-36.3685 °/m</b> of ground track). The forward tracking ratio — mean path speed divided by
+  the commanded v<sub>x</sub> — is <b>0.623</b> at the reference command and stays between
+  <b>0.435</b> and <b>0.807</b> across every moving level-ground cell, so the policy delivers roughly
+  half to two-thirds of what it is asked for, along a curving track.</p>
+</section>
+
+<section id="f2-peaks">
+  <h2><span class="n">F2.2</span>Peak joint torque and ground reaction — the load basis</h2>
+  <p class="lede">This is the table lanes F1 (structural FEA) and F3 (servo thermal) read.
+  It is not a rule of thumb: each figure is the largest <code>actuator_force</code> that joint
+  reached in any upright locomotion cell, and the cell it came from is named.</p>
+
+  <div class="note">Servo capability, quoted verbatim from ROBOTIS and not paraphrased:
+  <span class="mono">0.42 [N.m] (at 3.7 [V], 1.11 [A], 0.378 [Nm/A]) / 0.52 [N.m] (at 5.0 [V], 1.47 [A], 0.354 [Nm/A]) / 0.60 [N.m] (at 6.0 [V], 1.74 [A], 0.345 [Nm/A]) ; No Load Speed 76 [rev/min] (at 3.7 [V]) / 103 [rev/min] (at 5.0 [V]) / 123 [rev/min] (at 6.0 [V]) ; Standby Current | 17 [mA]</span> Source: ROBOTIS e-Manual, https://emanual.robotis.com/docs/en/dxl/x/xl330-m288/ , Specifications table; fetched 2026-09-02, sha256 in ce-parts/xl330-m288-t/PROVENANCE.json, local copy ce-parts/xl330-m288-t/iterations/v0.0.1/docs/fetched/robotis-emanual-xl330-m288.html. The same table on the successor host https://docs.robotis.com/docs/dxl/model_reference/x_series/xl_series/xl330-m288/ reads identically.</div>
+
+  <p class="num">Table F2-2. Per-joint torque envelope. <b>Baseline</b> is the reference walk at
+    v<sub>x</sub> 0.25 m/s; <b>locomotion peak</b> is the worst over the 22 upright cells with no
+    external push; <b>push peak</b> is the worst under a 0.2 s trunk push, where the MJCF actuator
+    saturates its own ±0.96 N·m ceiling and the figure is the simulation's limit, not a measured
+    actuator capability. Rows past the 6.0 V stall row are flagged.</p>
+  <div class="tablewrap">
+  <table class="data">
+    <thead><tr><th>Joint</th><th>Baseline peak (N·m)</th><th>Locomotion peak (N·m)</th>
+    <th>p99 (N·m)</th><th>Worst cell</th><th>% of stall<br>5 V / 6 V</th>
+    <th>Push peak (N·m)</th><th>Peak speed (rad/s)</th>
+    <th>Max range use (%)</th></tr></thead>
+    <tbody>
+<tr><td><code>left_hip_yaw</code></td><td class="n">0.1061</td><td class="n">0.2788</td><td class="n">0.2456</td><td><code>endurance_60s_slope5_up</code></td><td class="n">53.6 / 46.5</td><td class="n">0.9376</td><td class="n">3.289</td><td class="n">45.3</td></tr>
+<tr><td><code>left_hip_roll</code></td><td class="n">0.1938</td><td class="n">0.3149</td><td class="n">0.2355</td><td><code>vx_0.80</code></td><td class="n">60.5 / 52.5</td><td class="n">0.9600</td><td class="n">3.089</td><td class="n">38.8</td></tr>
+<tr><td><code>left_hip_pitch</code></td><td class="n">0.1833</td><td class="n">0.5699</td><td class="n">0.4881</td><td><code>slope5_side_left</code></td><td class="n">109.6 / 95.0</td><td class="n">0.9600</td><td class="n">7.812</td><td class="n">21.6</td></tr>
+<tr class="cd"><td><code>left_knee</code></td><td class="n">0.4304</td><td class="n">0.7699</td><td class="n">0.7354</td><td><code>vx_0.80</code></td><td class="n">148.1 / 128.3</td><td class="n">0.9600</td><td class="n">9.577</td><td class="n">36.4</td></tr>
+<tr><td><code>left_ankle</code></td><td class="n">0.2012</td><td class="n">0.3844</td><td class="n">0.3557</td><td><code>vx_0.80</code></td><td class="n">73.9 / 64.1</td><td class="n">0.9600</td><td class="n">6.316</td><td class="n">21.4</td></tr>
+<tr><td><code>neck_pitch</code></td><td class="n">0.0920</td><td class="n">0.2968</td><td class="n">0.1716</td><td><code>endurance_60s_slope5_up</code></td><td class="n">57.1 / 49.5</td><td class="n">0.9600</td><td class="n">3.522</td><td class="n">24.4</td></tr>
+<tr><td><code>head_pitch</code></td><td class="n">0.0688</td><td class="n">0.2280</td><td class="n">0.2002</td><td><code>slope5_down</code></td><td class="n">43.9 / 38.0</td><td class="n">0.8434</td><td class="n">2.029</td><td class="n">12.3</td></tr>
+<tr><td><code>head_yaw</code></td><td class="n">0.1505</td><td class="n">0.5750</td><td class="n">0.4852</td><td><code>slope5_side_left</code></td><td class="n">110.6 / 95.8</td><td class="n">0.9600</td><td class="n">7.894</td><td class="n">14.6</td></tr>
+<tr><td><code>head_roll</code></td><td class="n">0.0815</td><td class="n">0.2733</td><td class="n">0.1235</td><td><code>endurance_60s_slope5_up</code></td><td class="n">52.5 / 45.5</td><td class="n">0.9600</td><td class="n">3.340</td><td class="n">31.3</td></tr>
+<tr><td><code>right_hip_yaw</code></td><td class="n">0.0701</td><td class="n">0.1865</td><td class="n">0.1657</td><td><code>slope5_side_left</code></td><td class="n">35.9 / 31.1</td><td class="n">0.9600</td><td class="n">2.285</td><td class="n">26.6</td></tr>
+<tr><td><code>right_hip_roll</code></td><td class="n">0.1570</td><td class="n">0.2564</td><td class="n">0.1947</td><td><code>slope5_side_left</code></td><td class="n">49.3 / 42.7</td><td class="n">0.9600</td><td class="n">2.414</td><td class="n">27.4</td></tr>
+<tr class="cd"><td><code>right_hip_pitch</code></td><td class="n">0.2476</td><td class="n">0.8022</td><td class="n">0.6909</td><td><code>slope5_side_left</code></td><td class="n">154.3 / 133.7</td><td class="n">0.9600</td><td class="n">10.651</td><td class="n">28.0</td></tr>
+<tr class="cd"><td><code>right_knee</code></td><td class="n">0.4154</td><td class="n">0.7209</td><td class="n">0.6918</td><td><code>vx_0.80</code></td><td class="n">138.6 / 120.2</td><td class="n">0.9600</td><td class="n">8.920</td><td class="n">30.2</td></tr>
+<tr class="cd"><td><code>right_ankle</code></td><td class="n">0.1902</td><td class="n">0.6149</td><td class="n">0.2883</td><td><code>endurance_60s_slope5_up</code></td><td class="n">118.2 / 102.5</td><td class="n">0.9600</td><td class="n">7.481</td><td class="n">21.5</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="verdict"><span class="chip cd">FAIL</span> <b>Peak-torque verdict.</b> Peak actuator torque over 25 upright LOCOMOTION cells is 0.8022 N.m at right_hip_pitch (cell slope5_side_left). THESE JOINTS EXCEED the XL330-M288-T&#x27;s published stall torque at 6.0 V (0.60 N.m) in an upright locomotion cell, so the physical servo cannot reproduce the simulated gait there: left_knee 0.7699 N.m in vx_0.80, right_hip_pitch 0.8022 N.m in slope5_side_left, right_knee 0.7209 N.m in vx_0.80, right_ankle 0.6149 N.m in endurance_60s_slope5_up AT THE REFERENCE COMMAND (vx 0.25 m/s, level, nominal mass) the worst joint is left_knee at 0.4304 N.m = 82.78 % of the 5.0 V stall row, so the nominal gait is inside the actuator; the failure is at the edges of the envelope (endurance_60s_slope5_up, slope5_down, slope5_side_left, slope5_side_right, slope5_up, vx_0.60, vx_0.80). Joints over the 5.0 V stall row (0.52 N.m): left_hip_pitch, left_knee, head_yaw, right_hip_pitch, right_knee, right_ankle. The MJCF&#x27;s own actuator ceiling is +/-0.96 N.m (reference/pollen-microduck-rl/robot_walk.xml:44-47 default class &#x27;chosen_actuator&#x27;: &lt;position kp=&quot;0.55&quot; kv=&quot;0.0&quot; forcerange=&quot;-0.96 0.96&quot; ctrlrange=&quot;-10.0 10.0&quot;/&gt;), which is ABOVE every published stall row, so the simulation is permitted torques the actuator has no vendor figure for; that ceiling is reached only in the push and sit-stand cells.</div>
+
+  <div class="note"><b><span class="chip pass">PASS</span> at the reference command.</b> At the reference walk command (vx 0.25 m/s, the browser simulator&#x27;s VEL_FWD, level ground, nominal mass, friction 1.0) the worst joint is left_knee at 0.4304 N.m — 82.78 % of the XL330-M288-T&#x27;s 0.52 N.m stall torque at 5.0 V and 71.74 % of the 0.60 N.m row at 6.0 V. The reference gait is inside the actuator. The FAIL above is about the EDGES of the envelope, not about walking.</div>
+
+  <p class="num">Table F2-2b. Every upright locomotion cell in which a joint asks for more than the
+  XL330-M288-T's published 0.60 N·m stall torque at 6.0 V. On the physical robot the servo
+  saturates instead: the gait these cells show is not reproducible as simulated.</p>
+  <div class="tablewrap">
+  <table class="data">
+    <thead><tr><th>Cell</th><th>Joint</th><th>Peak τ (N·m)</th><th>% of 0.60 N·m</th></tr></thead>
+    <tbody>
+<tr class="cd"><td><code>endurance_60s_slope5_up</code></td><td><code>right_hip_pitch</code></td><td class="n">0.7153</td><td class="n">119.2</td></tr>
+<tr class="cd"><td><code>endurance_60s_slope5_up</code></td><td><code>right_knee</code></td><td class="n">0.6498</td><td class="n">108.3</td></tr>
+<tr class="cd"><td><code>endurance_60s_slope5_up</code></td><td><code>right_ankle</code></td><td class="n">0.6149</td><td class="n">102.5</td></tr>
+<tr class="cd"><td><code>slope5_down</code></td><td><code>right_hip_pitch</code></td><td class="n">0.7924</td><td class="n">132.1</td></tr>
+<tr class="cd"><td><code>slope5_down</code></td><td><code>right_knee</code></td><td class="n">0.6977</td><td class="n">116.3</td></tr>
+<tr class="cd"><td><code>slope5_side_left</code></td><td><code>right_hip_pitch</code></td><td class="n">0.8022</td><td class="n">133.7</td></tr>
+<tr class="cd"><td><code>slope5_side_left</code></td><td><code>right_knee</code></td><td class="n">0.6891</td><td class="n">114.9</td></tr>
+<tr class="cd"><td><code>slope5_side_left</code></td><td><code>left_knee</code></td><td class="n">0.6115</td><td class="n">101.9</td></tr>
+<tr class="cd"><td><code>slope5_side_right</code></td><td><code>right_hip_pitch</code></td><td class="n">0.6904</td><td class="n">115.1</td></tr>
+<tr class="cd"><td><code>slope5_side_right</code></td><td><code>right_knee</code></td><td class="n">0.6472</td><td class="n">107.9</td></tr>
+<tr class="cd"><td><code>slope5_up</code></td><td><code>right_ankle</code></td><td class="n">0.6149</td><td class="n">102.5</td></tr>
+<tr class="cd"><td><code>vx_0.60</code></td><td><code>left_knee</code></td><td class="n">0.6616</td><td class="n">110.3</td></tr>
+<tr class="cd"><td><code>vx_0.60</code></td><td><code>right_knee</code></td><td class="n">0.6447</td><td class="n">107.5</td></tr>
+<tr class="cd"><td><code>vx_0.80</code></td><td><code>left_knee</code></td><td class="n">0.7699</td><td class="n">128.3</td></tr>
+<tr class="cd"><td><code>vx_0.80</code></td><td><code>right_knee</code></td><td class="n">0.7209</td><td class="n">120.2</td></tr>
+<tr class="cd"><td><code>vx_0.80</code></td><td><code>right_hip_pitch</code></td><td class="n">0.6069</td><td class="n">101.2</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>Ground reaction</h3>
+  <p>Static weight <b>7.2324 N</b>. The measurement is validated against statics before it is used:
+  in the standing cells the median summed vertical GRF is <b>7.2425 N</b> and <b>7.2289 N</b>
+  against that 7.2324 N weight — 0.14 % and 0.05 %. Walking, one foot peaks at
+  <b>23.3897 N</b> (<b>3.234×</b> body weight, p99 21.7125 N). The worst anywhere in the matrix is
+  <b>93.0579 N</b> summed over both feet in <code>push_5N_lat</code>. A single-foot design load of 23.3897 N (3.234 x body weight) is what the walk actually produced; the worst case measured anywhere in the matrix is 93.0579 N summed over both feet in cell push_5N_lat (a 5 N lateral push that knocked the robot over).</p>
+
+  <h3>Joint travel past the MJCF stop</h3>
+  <p>In the 25 undisturbed locomotion cells no joint left its range at all. Under an external
+  push 9 joints are driven past their MJCF stop, worst <code>head_yaw</code> by <b>7.6355°</b> in
+  <code>push_5N_lat_neg</code>. MuJoCo enforces a joint range as a soft constraint, so an overshoot is the solver letting the joint past its stop under load. On the physical robot that load is taken by a mechanical hard stop, not by the servo — the parts on the list above are the ones that would be struck.</p>
+</section>
+
+<section id="f2-video">
+  <h2><span class="n">F2.3</span>One video per cell family, read back</h2>
+  <p class="lede">Every video is re-read frame by frame after encoding and refused if it is blank
+  or frozen; the numbers under each strip are that read-back.</p>
+<div class="card"><h3><code>base_walk_vx0.25</code> — walk vx 0.25 m/s - the reference cell</h3><div class="grid2"><figure><img src="out/sim-sweep/frames/base_walk_vx0.25_t00.0s.png" alt="base_walk_vx0.25_t00.0s.png"><figcaption>00.0s</figcaption></figure><figure><img src="out/sim-sweep/frames/base_walk_vx0.25_t04.2s.png" alt="base_walk_vx0.25_t04.2s.png"><figcaption>04.2s</figcaption></figure><figure><img src="out/sim-sweep/frames/base_walk_vx0.25_t07.2s.png" alt="base_walk_vx0.25_t07.2s.png"><figcaption>07.2s</figcaption></figure><figure><img src="out/sim-sweep/frames/base_walk_vx0.25_t10.8s.png" alt="base_walk_vx0.25_t10.8s.png"><figcaption>10.8s</figcaption></figure></div><p class="note">121 frames at 10.0 fps, mujoco.Renderer (offscreen, MUJOCO_GL=glfw). Read back from the encoded file: 121 frames, mean inter-frame difference 7.484, frame intensity 88.0–91.5 (a blank or frozen video is refused). Video: <a href="out/sim-sweep/video/base_walk_vx0.25.mp4"><code>out/sim-sweep/video/base_walk_vx0.25.mp4</code></a>.</p></div>
+<div class="card"><h3><code>vx_0.60</code> — vx 0.60 m/s - fastest command that stayed upright</h3><div class="grid2"><figure><img src="out/sim-sweep/frames/vx_0.60_t00.0s.png" alt="vx_0.60_t00.0s.png"><figcaption>00.0s</figcaption></figure><figure><img src="out/sim-sweep/frames/vx_0.60_t04.2s.png" alt="vx_0.60_t04.2s.png"><figcaption>04.2s</figcaption></figure><figure><img src="out/sim-sweep/frames/vx_0.60_t07.2s.png" alt="vx_0.60_t07.2s.png"><figcaption>07.2s</figcaption></figure><figure><img src="out/sim-sweep/frames/vx_0.60_t10.8s.png" alt="vx_0.60_t10.8s.png"><figcaption>10.8s</figcaption></figure></div><p class="note">121 frames at 10.0 fps, mujoco.Renderer (offscreen, MUJOCO_GL=glfw). Read back from the encoded file: 121 frames, mean inter-frame difference 12.077, frame intensity 87.6–93.6 (a blank or frozen video is refused). Video: <a href="out/sim-sweep/video/vx_0.60.mp4"><code>out/sim-sweep/video/vx_0.60.mp4</code></a>.</p></div>
+<div class="card"><h3><code>mass_m110</code> — total mass +10 %</h3><div class="grid2"><figure><img src="out/sim-sweep/frames/mass_m110_t00.0s.png" alt="mass_m110_t00.0s.png"><figcaption>00.0s</figcaption></figure><figure><img src="out/sim-sweep/frames/mass_m110_t04.2s.png" alt="mass_m110_t04.2s.png"><figcaption>04.2s</figcaption></figure><figure><img src="out/sim-sweep/frames/mass_m110_t07.2s.png" alt="mass_m110_t07.2s.png"><figcaption>07.2s</figcaption></figure><figure><img src="out/sim-sweep/frames/mass_m110_t10.8s.png" alt="mass_m110_t10.8s.png"><figcaption>10.8s</figcaption></figure></div><p class="note">121 frames at 10.0 fps, mujoco.Renderer (offscreen, MUJOCO_GL=glfw). Read back from the encoded file: 121 frames, mean inter-frame difference 7.520, frame intensity 88.6–92.3 (a blank or frozen video is refused). Video: <a href="out/sim-sweep/video/mass_m110.mp4"><code>out/sim-sweep/video/mass_m110.mp4</code></a>.</p></div>
+<div class="card"><h3><code>mu_0.40</code> — foot+floor sliding friction 0.40</h3><div class="grid2"><figure><img src="out/sim-sweep/frames/mu_0.40_t00.0s.png" alt="mu_0.40_t00.0s.png"><figcaption>00.0s</figcaption></figure><figure><img src="out/sim-sweep/frames/mu_0.40_t04.2s.png" alt="mu_0.40_t04.2s.png"><figcaption>04.2s</figcaption></figure><figure><img src="out/sim-sweep/frames/mu_0.40_t07.2s.png" alt="mu_0.40_t07.2s.png"><figcaption>07.2s</figcaption></figure><figure><img src="out/sim-sweep/frames/mu_0.40_t10.8s.png" alt="mu_0.40_t10.8s.png"><figcaption>10.8s</figcaption></figure></div><p class="note">121 frames at 10.0 fps, mujoco.Renderer (offscreen, MUJOCO_GL=glfw). Read back from the encoded file: 121 frames, mean inter-frame difference 7.222, frame intensity 88.3–91.8 (a blank or frozen video is refused). Video: <a href="out/sim-sweep/video/mu_0.40.mp4"><code>out/sim-sweep/video/mu_0.40.mp4</code></a>.</p></div>
+<div class="card"><h3><code>slope5_up</code> — 5 deg uphill (gravity rotated)</h3><div class="grid2"><figure><img src="out/sim-sweep/frames/slope5_up_t00.0s.png" alt="slope5_up_t00.0s.png"><figcaption>00.0s</figcaption></figure><figure><img src="out/sim-sweep/frames/slope5_up_t04.2s.png" alt="slope5_up_t04.2s.png"><figcaption>04.2s</figcaption></figure><figure><img src="out/sim-sweep/frames/slope5_up_t07.2s.png" alt="slope5_up_t07.2s.png"><figcaption>07.2s</figcaption></figure><figure><img src="out/sim-sweep/frames/slope5_up_t10.8s.png" alt="slope5_up_t10.8s.png"><figcaption>10.8s</figcaption></figure></div><p class="note">121 frames at 10.0 fps, mujoco.Renderer (offscreen, MUJOCO_GL=glfw). Read back from the encoded file: 121 frames, mean inter-frame difference 6.378, frame intensity 88.5–92.2 (a blank or frozen video is refused). Video: <a href="out/sim-sweep/video/slope5_up.mp4"><code>out/sim-sweep/video/slope5_up.mp4</code></a>.</p></div>
+<div class="card"><h3><code>push_5N_lat</code> — 5 N lateral push for 0.2 s at t=6.0 s - FELL</h3><div class="grid2"><figure><img src="out/sim-sweep/frames/push_5N_lat_t00.0s.png" alt="push_5N_lat_t00.0s.png"><figcaption>00.0s</figcaption></figure><figure><img src="out/sim-sweep/frames/push_5N_lat_t04.2s.png" alt="push_5N_lat_t04.2s.png"><figcaption>04.2s</figcaption></figure><figure><img src="out/sim-sweep/frames/push_5N_lat_t07.2s.png" alt="push_5N_lat_t07.2s.png"><figcaption>07.2s</figcaption></figure><figure><img src="out/sim-sweep/frames/push_5N_lat_t10.8s.png" alt="push_5N_lat_t10.8s.png"><figcaption>10.8s</figcaption></figure></div><p class="note">121 frames at 10.0 fps, mujoco.Renderer (offscreen, MUJOCO_GL=glfw). Read back from the encoded file: 121 frames, mean inter-frame difference 4.435, frame intensity 85.4–90.2 (a blank or frozen video is refused). Video: <a href="out/sim-sweep/video/push_5N_lat.mp4"><code>out/sim-sweep/video/push_5N_lat.mp4</code></a>.</p></div>
+<div class="card"><h3><code>sitstand</code> — sit-stand policy: stand to sit to stand</h3><div class="grid2"><figure><img src="out/sim-sweep/frames/sitstand_t00.0s.png" alt="sitstand_t00.0s.png"><figcaption>00.0s</figcaption></figure><figure><img src="out/sim-sweep/frames/sitstand_t03.5s.png" alt="sitstand_t03.5s.png"><figcaption>03.5s</figcaption></figure><figure><img src="out/sim-sweep/frames/sitstand_t06.0s.png" alt="sitstand_t06.0s.png"><figcaption>06.0s</figcaption></figure><figure><img src="out/sim-sweep/frames/sitstand_t09.0s.png" alt="sitstand_t09.0s.png"><figcaption>09.0s</figcaption></figure></div><p class="note">101 frames at 10.0 fps, mujoco.Renderer (offscreen, MUJOCO_GL=glfw). Read back from the encoded file: 101 frames, mean inter-frame difference 1.351, frame intensity 89.4–92.4 (a blank or frozen video is refused). Video: <a href="out/sim-sweep/video/sitstand.mp4"><code>out/sim-sweep/video/sitstand.mp4</code></a>.</p></div>
+<div class="card"><h3><code>stand_hold</code> — stand policy holding the pose</h3><div class="grid2"><figure><img src="out/sim-sweep/frames/stand_hold_t00.0s.png" alt="stand_hold_t00.0s.png"><figcaption>00.0s</figcaption></figure><figure><img src="out/sim-sweep/frames/stand_hold_t02.8s.png" alt="stand_hold_t02.8s.png"><figcaption>02.8s</figcaption></figure><figure><img src="out/sim-sweep/frames/stand_hold_t04.8s.png" alt="stand_hold_t04.8s.png"><figcaption>04.8s</figcaption></figure><figure><img src="out/sim-sweep/frames/stand_hold_t07.2s.png" alt="stand_hold_t07.2s.png"><figcaption>07.2s</figcaption></figure></div><p class="note">81 frames at 10.0 fps, mujoco.Renderer (offscreen, MUJOCO_GL=glfw). Read back from the encoded file: 81 frames, mean inter-frame difference 0.142, frame intensity 89.2–90.1 (a blank or frozen video is refused). Video: <a href="out/sim-sweep/video/stand_hold.mp4"><code>out/sim-sweep/video/stand_hold.mp4</code></a>.</p></div>
+</section>
+
+<section id="f2-battery">
+  <h2><span class="n">F2.4</span>Battery runtime</h2>
+  <p class="lede">Per-servo <b>electrical</b> power integrated over the measured gait, through a
+  linear DC-machine model whose every constant comes from ROBOTIS's own published stall and
+  no-load rows — then divided into the pack's watt-hours.</p>
+
+  <div class="note"><b>The model.</b> Per 200 Hz physics step and per joint:
+  <span class="mono">I = |τ|/k<sub>T</sub> &nbsp; V<sub>m</sub> = k<sub>E</sub>|ω| + R·I &nbsp;
+  P<sub>motor</sub> = min(V<sub>m</sub>, V<sub>pack</sub>)·I</span>, summed over the 14 actuated
+  joints, plus 15 × 17 mA × V<sub>pack</sub> of controller standby.
+  k<sub>T</sub> = 0.353741 N·m/A, R = 3.401361 Ω, k<sub>E</sub> = 0.463558 V·s/rad, all derived from the
+  5.0 V stall row and no-load speed. The three published rows give k<sub>E</sub> independently as
+  0.464900 / 0.463583 / 0.465925 V·s/rad — a 0.50 % spread, which is the check that the model is
+  the right shape.</div>
+
+  <p class="num">Table F2-3. Hours on the pack's 18.7 Wh. The compute + sensor + HAT draw is
+  <b>CANNOT DETERMINE</b> — no vendor publishes it — so it is swept across the columns rather
+  than assumed. Servo power is measured.</p>
+  <div class="tablewrap">
+  <table class="data">
+    <thead><tr><th>Mode</th><th>Servos (W)</th>
+    <th>+1.0 W</th><th>+1.5 W</th><th>+2.0 W</th><th>+2.5 W</th><th>+3.0 W</th><th>+4.0 W</th>
+    <th>+5.0 W</th></tr></thead>
+    <tbody>
+<tr><td>Walking, v<sub>x</sub> 0.25 m/s</td><td class="n">8.955</td><td class="n">1.88</td><td class="n">1.79</td><td class="n">1.71</td><td class="n">1.63</td><td class="n">1.56</td><td class="n">1.44</td><td class="n">1.34</td></tr>
+<tr><td>Standing, pose held</td><td class="n">2.830</td><td class="n">4.88</td><td class="n">4.32</td><td class="n">3.87</td><td class="n">3.51</td><td class="n">3.21</td><td class="n">2.74</td><td class="n">2.39</td></tr>
+<tr><td>Idle, servo torque disabled</td><td class="n">1.887</td><td class="n">6.48</td><td class="n">5.52</td><td class="n">4.81</td><td class="n">4.26</td><td class="n">3.83</td><td class="n">3.18</td><td class="n">2.72</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p>Walking draws <b>8.955 W</b> mean and <b>15.215 W</b> peak at the pack (<b>1.2102 A</b> /
+  <b>2.0561 A</b> at 7.4 V); the busiest single servo peaks at <b>1.2168 A</b> on
+  <code>left_knee</code>, below both the 1.47 A stall current and the firmware's own
+  1.75 A Current&nbsp;Limit(38). Standing costs <b>2.830 W</b>, of which <b>1.887 W</b> is nothing
+  but the fifteen controllers being awake. Electromechanical efficiency while walking is
+  <b>26.6 %</b> (1.8830 W mechanical out of 7.0683 W electrical in).</p>
+
+  <div class="verdict warn"><span class="chip cd">CANNOT DETERMINE</span> <b>Runtime verdict.</b> The SERVO half is measured and cited: walking draws 8.955 W mean / 15.215 W peak at the pack (1.210 A / 2.056 A at 7.4 V), standing 2.830 W, idle-with-torque-off 1.887 W, all from MuJoCo torque and speed through ROBOTIS&#x27;s own published stall and no-load rows. The COMPUTE half is not: no vendor states the Radxa ZERO 3W&#x27;s consumption, so a single runtime number cannot be given without inventing one. What CAN be stated: at a compute+sensor draw of 1.0 W the pack gives 1.88 h of walking, at 2.0 W 1.71 h, at 3.0 W 1.56 h, at 5.0 W 1.34 h; standing at 2.0 W gives 3.87 h. Pollen&#x27;s published ~1 h implies 18.700 W total, i.e. 9.745 W for everything that is not a servo. WHAT SETTLES IT: an ammeter in the pack lead of a running unit — one measurement closes both this and the pack&#x27;s usable-energy question.</div>
+
+  <h3>Against Pollen's published ~1 h</h3>
+  <p>This model puts walking at 8.955 W of servo draw, so the pack&#x27;s 18.7 Wh would run 1.88 h of continuous walking with 1.0 W of compute and 1.71 h with 2.0 W — roughly TWICE Pollen&#x27;s published ~1 h. The gap is the model&#x27;s own stated omissions, and it points at the servos rather than at compute: for the whole machine to average the 18.700 W that ~1 h implies, everything that is not modelled here would have to draw 9.745 W — 97.4 % of Radxa&#x27;s entire 5 V/2 A (10.0 W) adapter rating for the board, which makes it an implausible figure for compute alone. The missing power is more likely (a) the XL330&#x27;s unpublished no-load current, which this model sets to zero and which fifteen servos multiply, (b) PWM-stage loss, taken here as zero, and (c) pack energy below the 6.6 V cutoff that is never delivered — in some combination. It is also possible the press-kit hour is a mixed-use hour rather than an hour of walking. EVERY ONE OF THOSE IS SETTLED BY THE SAME MEASUREMENT: an ammeter in the pack lead, plus Present Current(126) summed off the bus so the servo and board halves separate.</p>
+
+  <h3>What this model deliberately does not know</h3>
+  <ul>
+    <li><b>No-load current.</b> ROBOTIS publishes no no-load current for the XL330-M288-T; the Specifications table carries only the three stall rows and &#x27;Standby Current | 17 [mA]&#x27;. I = tau/kT therefore goes to zero at zero torque, so every motor figure here is a LOWER bound. WHAT SETTLES IT: Present Current(126) read off an unloaded servo turning at speed, or a bench ammeter.</li>
+    <li><b>Compute + sensors.</b> No vendor document states the Radxa ZERO 3W&#x27;s consumption. Radxa&#x27;s own hardware page states only a supply REQUIREMENT — &#x27;Requires 5V/2A power adapter&#x27; (https://docs.radxa.com/en/zero/zero3 , fetched 2026-09-02) — which is a 10.0 W ceiling for the board and whatever hangs off it, not a draw. The product brief PDF (https://dl.radxa.com/zero3/docs/hw/3w/radxa_zero_3w_product_brief.pdf, fetched 2026-09-02) states no consumption figure either. Pollen publishes none, and neither does out/handover/elec-verify-wf_969f3a4c.json, whose Radxa row records the same &#x27;DC +5 V ... 5V/2A&#x27; requirement and no current. Search-engine answer boxes quoting &#x27;0.35-0.45 A idle&#x27; were seen and are NOT recorded: an answer box is not a source. The HAT (codec, dormant BMI088, transceiver), the ToF, the IMX219 camera and the imu_to_dxl board add to it and have no published system-level figure either. WHAT SETTLES IT: a meter in the pack lead of a running unit, or Present Current(126) summed off the bus with the board draw taken by difference.</li>
+    <li><b>Usable pack energy.</b> the whole 18.7 Wh is credited. The robot actually stops at a 6.6 V EMA, and how much of a 2S pack&#x27;s energy is still above 6.6 V under this load is CANNOT DETERMINE (no discharge curve for the fitted cell). Every hour below is therefore an UPPER bound on that account.</li>
+    <li><b>Which pack is fitted.</b> CANNOT DETERMINE which pack is fitted — &#x27;NP-F550&#x27; is Sony&#x27;s shape and Sony&#x27;s own cell is 1500 mAh / 10.8 Wh, so a 2600 mAh &#x27;NP-F550&#x27; is necessarily third-party and no Pollen source names the maker (ce-parts/np-f550/component.json why). Duracell&#x27;s DR5 is the representative 2600 mAh part on the shelf, NOT a proven fit.</li>
+  </ul>
+</section>

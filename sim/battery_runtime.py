@@ -166,7 +166,9 @@ def servo_power(tau, omega, k, v_pack):
 
 def analyse(traj_path, label, k, v_pack, t_from=0.0):
     z = np.load(traj_path, allow_pickle=True)
-    t = z["time"]
+    # torque and joint speed are recorded at the 200 Hz PHYSICS step, not at the 50 Hz
+    # control frame — sampling only the control frame misses the intra-step peak.
+    t = z["phys_time"]
     m = t >= t_from
     tau = z["tau"][m]
     jv = z["jv"][m]
@@ -292,6 +294,9 @@ def main():
                                        "stand_hold_traj.npz. The peak-torque table is out/sim-evidence/"
                                        "gait-peaks.json.",
             "control_dt_s": CTRL_DT,
+            "integration_dt_s": 0.005,
+            "integration_rate_note": "power is integrated at the 200 Hz physics step (MuJoCo timestep 0.005 s), "
+                                     "not at the 50 Hz control frame.",
         },
         "method": "Per 50 Hz frame and per actuated joint: I = |tau|/kT ; Vm = kE*|omega| + R*I ; "
                   "P_motor = min(Vm, V_pack)*I. Sum over the 14 simulated joints, add 15 x 17 mA x V_pack of "
@@ -313,8 +318,8 @@ def main():
                            "TWICE Pollen's published ~1 h. The gap is the model's own stated omissions, and it "
                            "points at the servos rather than at compute: for the whole machine to average the "
                            "%.3f W that ~1 h implies, everything that is not modelled here would have to draw "
-                           "%.3f W, which is ABOVE Radxa's entire 5 V/2 A (10.0 W) adapter rating for the "
-                           "board. A board cannot exceed its own supply ceiling, so the missing power is more "
+                           "%.3f W — %s Radxa's entire 5 V/2 A (10.0 W) adapter rating for the board, which "
+                           "makes it an implausible figure for compute alone. The missing power is more "
                            "likely (a) the XL330's unpublished no-load current, which this model sets to zero "
                            "and which fifteen servos multiply, (b) PWM-stage loss, taken here as zero, and "
                            "(c) pack energy below the 6.6 V cutoff that is never delivered — in some "
@@ -323,7 +328,9 @@ def main():
                            "an ammeter in the pack lead, plus Present Current(126) summed off the bus so the "
                            "servo and board halves separate."
                            % (walk_servo, Wh / (walk_servo + 1.0), Wh / (walk_servo + 2.0),
-                              implied_total, implied_compute),
+                              implied_total, implied_compute,
+                              "ABOVE" if implied_compute > COMPUTE["ceiling_W"] else
+                              "%.1f %% of" % (100.0 * implied_compute / COMPUTE["ceiling_W"])),
             },
         },
         "verdict": "CANNOT DETERMINE",

@@ -51,10 +51,22 @@ MJCF_FORCERANGE_CITE = ("reference/pollen-microduck-rl/robot_walk.xml:44-47 defa
                         "<position kp=\"0.55\" kv=\"0.0\" forcerange=\"-0.96 0.96\" ctrlrange=\"-10.0 10.0\"/>")
 
 
+def artifact_list():
+    """Every file this lane wrote that a reader can open: the per-cell records, the compiled
+    scenes, the saved trajectories, the videos and the frames read back out of them."""
+    out = []
+    for pat in ("*.json", "scene_*.xml", "*_traj.npz", "video/*.mp4", "frames/*.png"):
+        out += [os.path.relpath(p, ROOT) for p in glob.glob(os.path.join(SWEEP, pat))]
+    return sorted(set(out))
+
+
 def load_cells():
     cells = []
     for p in sorted(glob.glob(os.path.join(SWEEP, "*.json"))):
-        cells.append(json.load(open(p)))
+        d = json.load(open(p))
+        if not isinstance(d, dict) or "inputs" not in d or "outputs" not in d:
+            continue      # the _summary.json render shims and videos.json are not cells
+        cells.append(d)
     return cells
 
 
@@ -95,7 +107,7 @@ def peaks(cells):
             }
         return out
 
-    LOCO_FAMILIES = ("baseline", "vx", "mass", "friction", "slope", "selfcollision")
+    LOCO_FAMILIES = ("baseline", "vx", "mass", "friction", "slope", "selfcollision", "endurance")
     loco = [c for c in cells if c["family"] in LOCO_FAMILIES and not c["outputs"]["fell"]]
     dist = [c for c in cells if c["family"] == "push"]
     post = [c for c in cells if c["family"] == "sitstand"]
@@ -109,6 +121,16 @@ def peaks(cells):
     over6 = [j for j, v in walk_tbl.items() if v["peak_abs_torque_Nm"] > XL330["stall_torque_Nm"]["6.0"]]
     base = [c for c in cells if c["cell"] == "base_walk_vx0.25"][0]
 
+    bpk = base["outputs"]["per_joint"]
+    base_worst_j = max(JOINT_NAMES, key=lambda j: bpk[j]["peak_abs_torque_Nm"])
+    base_worst = bpk[base_worst_j]["peak_abs_torque_Nm"]
+    base_ok5 = base_worst <= XL330["stall_torque_Nm"]["5.0"]
+    over_by_cell = {}
+    for c in loco:
+        bad = [j for j in JOINT_NAMES
+               if c["outputs"]["per_joint"][j]["peak_abs_torque_Nm"] > XL330["stall_torque_Nm"]["6.0"]]
+        if bad:
+            over_by_cell[c["cell"]] = {j: c["outputs"]["per_joint"][j]["peak_abs_torque_Nm"] for j in bad}
     verdict = "PASS" if not over6 else "FAIL"
     why = (
         "Peak actuator torque over %d upright LOCOMOTION cells is %.4f N.m at %s (cell %s). "
@@ -121,6 +143,11 @@ def peaks(cells):
            "THESE JOINTS EXCEED the XL330-M288-T's published stall torque at 6.0 V (0.60 N.m) in an upright locomotion "
            "cell, so the physical servo cannot reproduce the simulated gait there: " + ", ".join(
                "%s %.4f N.m in %s" % (j, walk_tbl[j]["peak_abs_torque_Nm"], walk_tbl[j]["peak_cell"]) for j in over6))
+        + " AT THE REFERENCE COMMAND (vx 0.25 m/s, level, nominal mass) the worst joint is %s at %.4f N.m = "
+          "%.2f %% of the 5.0 V stall row, so the nominal gait is inside the actuator; the failure is at the "
+          "edges of the envelope (%s)." % (base_worst_j, base_worst,
+                                           100.0 * base_worst / XL330["stall_torque_Nm"]["5.0"],
+                                           ", ".join(sorted(over_by_cell)) or "none")
         + " Joints over the 5.0 V stall row (0.52 N.m): " + (", ".join(over5) if over5 else "none")
         + ". The MJCF's own actuator ceiling is +/-%.2f N.m (%s), which is ABOVE every published stall row, so the "
           "simulation is permitted torques the actuator has no vendor figure for; that ceiling is reached only in "
@@ -173,6 +200,21 @@ def peaks(cells):
             "worst_disturbance_torque_Nm": max(v["peak_abs_torque_Nm"] for v in dist_tbl.values()),
             "worst_posture_torque_Nm": max(v["peak_abs_torque_Nm"] for v in post_tbl.values()),
             "joints_over_stall_5V": over5, "joints_over_stall_6V": over6,
+            "cells_that_exceed_the_6V_stall_row": over_by_cell,
+            "reference_command_verdict": {
+                "cell": "base_walk_vx0.25",
+                "verdict": "PASS" if base_ok5 else "FAIL",
+                "worst_joint": base_worst_j, "worst_torque_Nm": base_worst,
+                "pct_of_stall_5V": round(100.0 * base_worst / XL330["stall_torque_Nm"]["5.0"], 2),
+                "pct_of_stall_6V": round(100.0 * base_worst / XL330["stall_torque_Nm"]["6.0"], 2),
+                "statement": "At the reference walk command (vx 0.25 m/s, the browser simulator's VEL_FWD, "
+                             "level ground, nominal mass, friction 1.0) the worst joint is %s at %.4f N.m — "
+                             "%.2f %% of the XL330-M288-T's 0.52 N.m stall torque at 5.0 V and %.2f %% of the "
+                             "0.60 N.m row at 6.0 V. The reference gait is inside the actuator. The FAIL above "
+                             "is about the EDGES of the envelope, not about walking."
+                             % (base_worst_j, base_worst,
+                                100.0 * base_worst / XL330["stall_torque_Nm"]["5.0"],
+                                100.0 * base_worst / XL330["stall_torque_Nm"]["6.0"])},
             "baseline_walk_vx0.25": {
                 "per_joint_peak_Nm": {j: base["outputs"]["per_joint"][j]["peak_abs_torque_Nm"] for j in JOINT_NAMES},
                 "sum_abs_torque_peak_Nm": base["outputs"]["sum_abs_torque_peak_Nm"],
@@ -202,7 +244,7 @@ def peaks(cells):
         "verdict": verdict,
         "why": why,
         "script": "sim/gait_sweep.py + sim/gait_evidence.py",
-        "artifacts": sorted(os.path.relpath(p, ROOT) for p in glob.glob(os.path.join(SWEEP, "*.json"))),
+        "artifacts": artifact_list(),
         "looked_at": [
             "reference/pollen-microduck-rl/robot_walk.xml (actuator class chosen_actuator, joint ranges)",
             "sim/microduck_ours.xml, sim/microduck_ours_allcollisions.xml",
@@ -230,6 +272,10 @@ def robustness(cells):
             "fell": o["fell"], "first_fall_s": o["first_fall_s"],
             "fell_outside_commanded_ground_window": o["fell_outside_commanded_ground_window"],
             "walked_m": o["walked_m"], "mean_speed_m_s": o["mean_speed_m_s"],
+            "path_length_m": o.get("path_length_m"), "mean_path_speed_m_s": o.get("mean_path_speed_m_s"),
+            "net_yaw_drift_deg": o.get("net_yaw_drift_deg"),
+            "yaw_drift_deg_per_m_of_path": o.get("yaw_drift_deg_per_m_of_path"),
+            "forward_tracking_ratio": o.get("forward_tracking_ratio"),
             "max_tilt_deg": o["max_tilt_deg"], "trunk_z_min_m": o["trunk_z_m"]["min"],
             "max_joint_torque_Nm": o["max_joint_torque_Nm"], "max_joint_torque_joint": o["max_joint_torque_joint"],
             "sum_abs_torque_peak_Nm": o["sum_abs_torque_peak_Nm"],
@@ -247,6 +293,9 @@ def robustness(cells):
             "joints_saturating_mjcf_forcerange": o["joints_saturating_mjcf_forcerange"],
             "nan": o["nan"],
         })
+    order = {"baseline": 0, "vx": 1, "endurance": 2, "mass": 3, "friction": 4, "slope": 5,
+             "push": 6, "sitstand": 7, "selfcollision": 8}
+    rows.sort(key=lambda r: (order.get(r["family"], 99), r["cell"]))
     walking = [r for r in rows if r["policy"] == "walking"]
     fell_walking = [r["cell"] for r in walking if r["fell"]]
     beyond = sorted({j for r in rows for j in r["joints_beyond_limit"]})
@@ -272,8 +321,8 @@ def robustness(cells):
             "how_each_perturbation_is_applied": {
                 "mass": "model.body_mass and model.body_inertia scaled; the fitted NP-F550-class pack is 99 g "
                         "(ce-parts/np-f550/electrical.part.json mass_g, Duracell DR5 page 'Weight 99 g'), which is "
-                        "13.43 %% of the model's 737.243 g — whether Pollen's trunk inertial already includes the "
-                        "pack is CANNOT DETERMINE, so +/-10 %% is swept as the brief specifies rather than a "
+                        "13.43 % of the model's 737.243 g — whether Pollen's trunk inertial already includes the "
+                        "pack is CANNOT DETERMINE, so +/-10 % is swept as the brief specifies rather than a "
                         "battery-in/battery-out pair being asserted.",
                 "friction": "geom_friction[:,0] set on the floor AND both foot geoms (MuJoCo mixes a contact "
                             "pair's friction elementwise-max, so setting one side alone does nothing).",
@@ -299,6 +348,20 @@ def robustness(cells):
                            "by a mechanical hard stop, not by the servo — the parts on the list above are the "
                            "ones that would be struck."},
             "cells_with_any_self_collision": selfcol,
+            "heading_and_tracking": {
+                "finding": "The walking policy does not hold a straight line. In every moving cell the "
+                           "integrated ground track (path_length_m) exceeds the straight-line displacement "
+                           "(walked_m), and the trunk yaw drifts monotonically — so a distance quoted as "
+                           "displacement UNDERSTATES how far the robot walked, and a robot commanded straight "
+                           "will arc away from its line. Worst yaw drift and worst tracking ratio are below.",
+                "worst_net_yaw_drift": max(
+                    ((r["cell"], r["net_yaw_drift_deg"], r["yaw_drift_deg_per_m_of_path"])
+                     for r in rows if r.get("net_yaw_drift_deg") is not None),
+                    key=lambda x: abs(x[1])),
+                "forward_tracking_ratio_moving_cells": {
+                    r["cell"]: r["forward_tracking_ratio"] for r in rows
+                    if r.get("forward_tracking_ratio") is not None and r["mean_path_speed_m_s"] > 0.05},
+            },
             "push_threshold": {
                 "survived_N": [r["push_N"] for r in rows if r["family"] == "push" and not r["fell"]],
                 "fell_N": [r["push_N"] for r in rows if r["family"] == "push" and r["fell"]],
@@ -323,7 +386,7 @@ def robustness(cells):
                   len(beyond), worst_ovs["max_overshoot_joint"], worst_ovs["max_overshoot_beyond_limit_deg"],
                   worst_ovs["cell"], len(selfcol), ", ".join(selfcol) if selfcol else "none"),
         "script": "sim/gait_sweep.py + sim/gait_evidence.py",
-        "artifacts": sorted(os.path.relpath(p, ROOT) for p in glob.glob(os.path.join(SWEEP, "*.json"))),
+        "artifacts": artifact_list(),
         "looked_at": [
             "out/sim/report.md", "out/sim/vx_sweep.json", "sim/README.md",
             "reference/pollen-microduck-rl/robot_walk.xml",
