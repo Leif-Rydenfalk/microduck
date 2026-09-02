@@ -526,7 +526,92 @@ def build(out_path):
     return out
 
 
+def check():
+    """Every reference this page makes, followed. Exit 0 / 1 FAIL / 2 CANNOT DETERMINE.
+
+    Three questions a page cannot answer about itself by rendering:
+
+      1. Does every `ce-parts/<slug>` a roster row names actually exist? A row
+         whose folder is gone renders as "NO FOLDER", which is honest — but it
+         must be honest ON PURPOSE, not because someone renamed a directory.
+      2. Does every repo path quoted inside a source/cite string resolve? These
+         are the citations the whole document rests on. A citation that does not
+         resolve is not a citation.
+      3. Is any number stated twice? The roster's envelope must not also appear
+         in a ce-parts `bbox_mm`, or the two will drift. Reported, not failed —
+         a duplicate is sometimes the folder's own measurement and sometimes a
+         copy, and only a reader can tell which.
+
+    BREAK IT ON PURPOSE: rename ce-parts/bmi088 and re-run — question 1 goes
+    red and names the row. Put a nonexistent path in a `source` string and
+    question 2 goes red and quotes it.
+    """
+    import re as _re
+    C = load("electronics", "components.json")
+    fails, cds, notes = [], [], []
+
+    for c in C["components"]:
+        if not os.path.isdir(os.path.join(REPO, "ce-parts", c["slug"])):
+            if c.get("no_shelf_folder"):
+                cds.append("%s: no ce-parts folder, and the row says so — %s"
+                           % (c["slug"], c["no_shelf_folder"][:90]))
+            else:
+                fails.append("%s: names a ce-parts folder that does not exist, and "
+                             "the row does not admit it (no `no_shelf_folder`)" % c["slug"])
+
+    # every repo path quoted anywhere in the data file
+    pat = _re.compile(r"\b((?:ce-parts|electronics|tools|wiring|spec|research|out|docs|reference)"
+                      r"/[A-Za-z0-9_./<>*-]+)")
+    seen = set()
+    # A URL contains path-looking text that is NOT a repo path
+    # (https://dl.radxa.com/zero3/docs/hw/3w/... matched `docs/hw/3w/...` and
+    # reported a FAIL for a file that was never claimed to be here). Strip
+    # every URL before scanning; the URLs are checked by being fetched, not
+    # by being stat'd.
+    blob = _re.sub(r"https?://\S+", " ", json.dumps(C, ensure_ascii=False))
+    for m in pat.finditer(blob):
+        p = m.group(1).rstrip(".,);'\"")
+        if p in seen or "<" in p or "*" in p:
+            continue
+        seen.add(p)
+        if not os.path.exists(os.path.join(REPO, p)):
+            fails.append("cited path does not resolve: %s" % p)
+
+    for c in C["components"]:
+        sh = shelf(c["slug"])
+        bb = (sh or {}).get("component", {}).get("bbox_mm") if sh else None
+        d = c.get("dimensions_mm") or {}
+        if bb and any(d.get(k) is not None for k in "xyz"):
+            here = [d.get("x"), d.get("y"), d.get("z")]
+            same = (len(bb) == 3 and all(
+                a is not None and b is not None and abs(float(a) - float(b)) < 5e-4
+                for a, b in zip(here, bb)))
+            if same:
+                notes.append("%s: envelope agrees with ce-parts bbox_mm %s "
+                             "(stated twice on purpose — this check is the guard)"
+                             % (c["slug"], bb))
+            else:
+                fails.append("%s: envelope DISAGREES — components.json %s vs "
+                             "ce-parts bbox_mm %s. One of them is stale."
+                             % (c["slug"], here, bb))
+
+    for f in fails:
+        print("FAIL             %s" % f)
+    for c in cds:
+        print("CANNOT DETERMINE %s" % c)
+    for n in notes:
+        print("note             %s" % n)
+    print("--- %d paths followed, %d FAIL, %d CANNOT DETERMINE, %d notes"
+          % (len(seen), len(fails), len(cds), len(notes)))
+    return 1 if fails else (2 if cds else 0)
+
+
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default="ELECTRONICS-DATASHEET.html")
-    build(ap.parse_args().out)
+    ap.add_argument("--check", action="store_true",
+                    help="follow every reference the page makes; exit 0/1/2")
+    a = ap.parse_args()
+    if a.check:
+        raise SystemExit(check())
+    build(a.out)
