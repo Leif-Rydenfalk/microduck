@@ -401,9 +401,11 @@ def fit_photo(ph, hr, rgb, eye, quick=False, w_eye=10.0):
 
     D_mm = ph["D_mm"]
 
+    neck = ph.get("neck_pitch_deg", 0.0)   # the store photographs show a vertical neck; STAND's leans 20 deg
+
     def render(p):
         el, az, pitch, yaw, roll, jaw = p
-        hr.pose(pitch, yaw, roll, jaw if ph["jaw_open"] else 0.0)
+        hr.pose(pitch, yaw, roll, jaw if ph["jaw_open"] else 0.0, neck_pitch_deg=neck)
         hr.set_camera(az, el, D_mm)
         head, eyem, ids, isg = hr.masks()
         return head, eyem
@@ -571,7 +573,7 @@ def main():
         eye = measure_eye(rgb, ph["eye_box"], ph["eye_hue"], smin=ph.get("eye_smin", 0.35))
         fit = fit_photo(ph, hr, rgb, eye, quick=args.quick)
         # re-pose at the fitted parameters and measure the servo(s) in the render
-        hr.pose(fit["head_pitch_deg"], fit["head_yaw_deg"], fit["head_roll_deg"], fit["jaw_open_deg"])
+        hr.pose(fit["head_pitch_deg"], fit["head_yaw_deg"], fit["head_roll_deg"], fit["jaw_open_deg"], neck_pitch_deg=ph.get("neck_pitch_deg", 0.0))
         hr.set_camera(fit["cam_az_deg"], fit["cam_el_deg"], fit["cam_distance_mm"])
         ids, types = hr.seg(); isg = types == int(mujoco.mjtObj.mjOBJ_GEOM)
         ratios = []
@@ -579,13 +581,22 @@ def main():
             if "width_px" not in s: continue
             rs = measure_servo_mask(hr.servo_mask(s["geom"], ids, isg), s["tilt_deg"])
             s["render"] = rs
+            dz_servo, dz_head = hr.servo_depths_mm(s["geom"])
+            # ANALYTIC render width of the same case: the frame is exactly 2*HALF_FRAME_MM at the lookat depth,
+            # the case is 20.000 along world x and 26.000 along world y (neck vertical, no yaw), seen from azimuth az,
+            # and sits dz_servo/dz_head as deep as the lookat. Exact given the MJCF placement; the mask read is the cross-check.
+            az = math.radians(fit["cam_az_deg"])
+            w_face = XL330_FACE_W_MM * abs(math.sin(az)) + 26.0 * abs(math.cos(az))
+            w_an = w_face * (hr.size / (2.0 * HALF_FRAME_MM)) * (dz_head / dz_servo)
+            s["render_width_px_analytic"] = w_an
+            s["render_width_analytic_how"] = "(20.000*|sin az| + 26.000*|cos az|) mm * %d px / %.1f mm * D_head/D_servo (%.4f)" % (hr.size, 2 * HALF_FRAME_MM, dz_head / dz_servo)
             if "width_px" in rs:
-                dz_servo, dz_head = hr.servo_depths_mm(s["geom"])
-                rr = fit["k_photo_px_per_render_px"] * rs["width_px"] / s["width_px"]
-                rel = math.sqrt((s["width_px_unc"] / s["width_px"]) ** 2 + (rs["width_px_unc"] / rs["width_px"]) ** 2
-                                + (fit["k_fit_spread"] / fit["k_photo_px_per_render_px"]) ** 2)
-                s["size_ratio"] = dict(product_over_mesh=rr, unc=rr * rel, servo_depth_mm=dz_servo, head_depth_mm=dz_head)
-                ratios.append((rr, rr * rel))
+                s["render_mask_vs_analytic_pct"] = (rs["width_px"] / w_an - 1) * 100
+            rr = fit["k_photo_px_per_render_px"] * w_an / s["width_px"]
+            rel = math.sqrt((s["width_px_unc"] / s["width_px"]) ** 2 + (fit["k_fit_spread"] / fit["k_photo_px_per_render_px"]) ** 2)
+            s["size_ratio"] = dict(product_over_mesh=rr, unc=rr * rel, servo_depth_mm=dz_servo, head_depth_mm=dz_head,
+                                   how="k * W_render_analytic / W_photo; unc = photo width + fit spread of k (the analytic width is exact)")
+            ratios.append((rr, rr * rel))
         r = dict(id=ph["id"], title=ph["title"], path=ph["path"], colourway=ph["colourway"], note=ph["note"],
                  image_size_px=[int(rgb.shape[1]), int(rgb.shape[0])],
                  scale=dict(feature="XL330-M288-T case, 20.000 mm across the horn/label face", source=XL330_SRC, servos=servo),

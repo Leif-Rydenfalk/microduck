@@ -38,12 +38,14 @@ def scale_rows():
                 rows.append("<tr><td>%s</td><td>%s</td><td colspan=5>%s — %s</td></tr>" % (esc(p["title"]), esc(s.get("what", "")), chip("CANNOT DETERMINE"), esc(s.get("why", ""))))
                 continue
             r = s.get("render", {}); sr = s.get("size_ratio", {})
+            wr = s.get("render_width_px_analytic")
+            cross = ("mask %s px (%s %%)" % (f(r.get("width_px"), 1), f(s.get("render_mask_vs_analytic_pct"), 1, True))) if r and "width_px" in r else "mask: not visible"
             rows.append(
                 "<tr><td>%s</td><td>%s</td><td class=n>%s (%d of %d lines)</td><td class=n>%s</td>"
-                "<td class=n>%s</td><td class=n>%s</td><td class=n>%s</td></tr>" % (
+                "<td class=n>%s<br><small>%s</small></td><td class=n>%s</td><td class=n>%s</td></tr>" % (
                     esc(p["title"]), esc(s["what"]), f(s["width_px"], 2), s["n_accepted"], s["n_lines"],
                     pm(s["mm_per_px"], s["mm_per_px_unc"], 5),
-                    f(r.get("width_px"), 2) if r else "—",
+                    f(wr, 2), esc(cross),
                     pm(sr.get("product_over_mesh"), sr.get("unc"), 4) if sr else "—",
                     ("%s / %s" % (f(sr.get("servo_depth_mm"), 1), f(sr.get("head_depth_mm"), 1))) if sr else "—"))
     return "\n".join(rows)
@@ -137,6 +139,19 @@ def photo_sections():
 
 
 settle = "".join("<li>%s</li>" % esc(x) for x in V["what_would_settle"]) or "<li>Nothing — every check PASSES.</li>"
+PF = D.get("profile_frame")
+
+
+def sens_rows():
+    rows = []
+    for x in D.get("sensitivity", []):
+        rows.append("<tr><td>%s</td><td class=n>%s</td><td class=n>%s</td><td class=n>%s</td><td class=n>%s</td><td class=n>%s</td><td><code>%s</code></td></tr>" % (
+            esc(x["photo"]), f(x["D_mm"], 0), f(x["iou"], 4), f(x["yaw"], 1), pm(x["product_over_mesh"], x["unc"], 4), f(x["head_length_dev_mm"], 2, True), esc(x["file"])))
+    for p in D["photos"]:
+        if p.get("size"):
+            rows.append("<tr><td>%s (main run)</td><td class=n>%s</td><td class=n>%s</td><td class=n>%s</td><td class=n>%s</td><td class=n>%s</td><td><code>out/head/head_fit.json</code></td></tr>" % (
+                esc(p["id"]), f(p["fit"]["cam_distance_mm"], 0), f(p["fit"]["iou"], 4), f(p["fit"]["head_yaw_deg"], 1), pm(p["size"]["product_over_mesh"], p["size"]["unc"], 4), f(p["size"]["head_length_dev_mm"], 2, True)))
+    return "\n".join(rows)
 n_photos = C["n_photos"]
 quick = " <b>(quick fit — rerun without --quick before release)</b>" if D.get("quick") else ""
 
@@ -198,7 +213,7 @@ HTML = f"""<!doctype html>
 <nav class="toc">
   <a href="#answer">1 Verdict</a><a href="#rule">2 The question and the rule</a><a href="#scale">3 Scale</a>
   <a href="#photos">4 Photographs, posed and overlaid</a><a href="#dims">5 Measured dimensions</a><a href="#eye">6 Eye bezel</a>
-  <a href="#settle">7 What would settle the rest</a><a href="#method">8 Method and limits</a>
+  <a href="#sens">6b Camera distance</a><a href="#settle">7 What would settle the rest</a><a href="#method">8 Method and limits</a>
 </nav>
 
 <section id="answer">
@@ -249,13 +264,14 @@ HTML = f"""<!doctype html>
   <h2><span class="n">3</span>Scale — millimetres per pixel from the servo in the same frame</h2>
   <p>The XL330-M288-T is the only object of independently known size in every store photograph. Its case width is read as the mode of the
   dark-run widths over many scan lines across the case (label text and cables break single lines; the case gives the same width on every
-  clean line). The same estimator is run on the segmentation mask of the same servo geom in our render at the fitted perspective camera, so
-  the size ratio product/mesh = k · W<sub>render</sub> / W<sub>photo</sub> needs no px-per-mm calibration of the renderer and carries the
-  servo-to-head depth difference through the camera model rather than assuming it away. Uncertainty per servo: ±1 px per edge plus the
-  accepted lines' spread.</p>
+  clean line). The same case in our render at the fitted camera is W<sub>render</sub> = (20.000·|sin az| + 26.000·|cos az|) mm × (frame px / frame mm) ×
+  D<sub>head</sub>/D<sub>servo</sub> — exact, because the render's frame is by construction 190 mm at the head's depth and the servo's depth is read
+  off the posed model; the segmentation mask of the servo geom is read with the same mode-of-runs estimator as a cross-check. The size ratio
+  product/mesh = k · W<sub>render</sub> / W<sub>photo</sub> therefore carries the servo-to-head depth difference through the camera model
+  rather than assuming it away. Uncertainty per servo: ±1 px per edge plus the accepted lines' spread, and the fit's spread of k.</p>
   <div class="tw"><table class="data">
     <caption>Table 2. Scale features. mm/px is at the servo's depth; the depth column gives camera distance to the servo / to the head origin at the fitted camera.</caption>
-    <thead><tr><th>Photograph</th><th>Feature</th><th class=n>Width in photo (px)</th><th class=n>mm / px</th><th class=n>Width in render (px)</th><th class=n>Size ratio product/mesh</th><th class=n>Depth servo / head (mm)</th></tr></thead>
+    <thead><tr><th>Photograph</th><th>Feature</th><th class=n>Width in photo (px)</th><th class=n>mm / px</th><th class=n>Width in render (px, analytic; mask cross-check)</th><th class=n>Size ratio product/mesh</th><th class=n>Depth servo / head (mm)</th></tr></thead>
     <tbody>
 {scale_rows()}
     </tbody>
@@ -316,6 +332,26 @@ HTML = f"""<!doctype html>
     </tbody>
   </table></div>
   <p class="note">{esc(FV["uncertainty"])} The ToF window (a rounded slot {f(FV["photo"]["tof"]["w_px"] / FV["photo"]["head_width_px"] * FV["mesh_head_width_mm"], 1)} × {f(FV["photo"]["tof"]["h_px"] / FV["photo"]["head_width_px"] * FV["mesh_head_width_mm"], 1)} mm implied) has no geom in the mesh — the face panel's slot is CANNOT DETERMINE on the mesh side and is a feature the face-part rebuild must carry.</p>
+</section>
+
+<section id="sens">
+  <h2><span class="n">6b</span>Camera distance — the one thing the store frames do not give</h2>
+  <p>The store photographs carry no EXIF and no ruler; the near ankle servo reads 136–146 px against the neck's 131.4 px (44.1 mm nearer)
+  depending on the scan tilt, which brackets D only between ~700 and ~1650 mm. Because the head is yawed ~50° towards the camera, its face is
+  ~45 mm nearer than the servo and the head-to-servo ratio moves with D. The fit was therefore repeated at other distances; the half-range of
+  r over these runs is added to the uncertainty of the verdict.</p>
+  <div class="tw"><table class="data">
+    <caption>Table 7. Sensitivity of the size ratio to the assumed camera distance (same photograph, same method, quick fits).</caption>
+    <thead><tr><th>Photograph</th><th class=n>D (mm)</th><th class=n>IoU</th><th class=n>fitted yaw (°)</th><th class=n>r = product/mesh</th><th class=n>head length dev (mm)</th><th>file</th></tr></thead>
+    <tbody>
+{sens_rows()}
+    </tbody>
+  </table></div>
+  <p class="note">{esc(C.get("D_sensitivity_note", "no sensitivity runs found"))}</p>
+  <h3>The pure-profile frame — scale-free check</h3>
+  <p>{esc(PF["aspect_reading"]) if PF else "images/github/gh_readme_7.png not analysed"}. The servo in that 884-px video frame merges with its bracket and cables, so it gives no mm/px
+  (out/head/profile_frame.json states why); it is kept because it is the only published view with the head un-yawed, real beside Pollen's own render.</p>
+  <figure class="wide"><img src="out/head/profile_frame_pair.png" alt="pure profile frame, sim beside real"><figcaption>Pollen's README frame: their simulator render (left) beside the real unit (right); blue = the head silhouette's principal-axis box on each.</figcaption></figure>
 </section>
 
 <section id="settle">
