@@ -2,8 +2,8 @@
  "$test_plan_version": 1,
  "doc": {
   "id": "MD-TST-001",
-  "rev": "C",
-  "date": "2026-09-02",
+  "rev": "D",
+  "date": "2026-09-03",
   "title": "Test and validation plan",
   "sub": "How a built Microduck is proved to work, and on what software: electrical bring-up, servo identity and calibration, sensor checks, control-loop acceptance, the radios and the pairing PIN, a walk test, and an endurance and thermal soak - each with a pass/fail gate, the tool it needs, and the log it leaves behind.",
   "units": "mm . g . degrees . volts . amperes . Hz",
@@ -136,7 +136,7 @@
   },
   "DUCKCTL": {
    "label": "microduck docs/robot/duckctl.md",
-   "loc": "https://raw.githubusercontent.com/pollen-robotics/microduck/main/docs/robot/duckctl.md - fetched 2026-09-02 for this document; not mirrored into research/raw/"
+   "loc": "research/raw/microduck_main_docs_robot_duckctl.md - mirrored into the repository 2026-09-03 from https://raw.githubusercontent.com/pollen-robotics/microduck/main/docs/robot/duckctl.md (14,058 bytes, HTTP 200). Every RD-04 claim below is re-checkable from that local copy: the scan listing at :44-56, `ip` at :70-74, `open` at :116, the default PIN at :360, and the error-14 refusal list at :382-387."
   },
   "RUNTIME": {
    "label": "our battery-runtime study",
@@ -199,7 +199,7 @@
   [
    "DC current clamp or shunt, >= 25 A",
    "servo-rail current during the walk test",
-   "15 x stall at 5.0 V = 22.05 A is a number the vendor rows support. Nothing in any source says what the pack or the HAT path can deliver, so the instrument must not be the limit",
+   "15 x stall at 5.0 V = @STALL_TOTAL_A@ A is a number the vendor rows support. Nothing in any source says what the pack or the HAT path can deliver, so the instrument must not be the limit",
    "XLPART",
    [
     "EB-07",
@@ -231,7 +231,7 @@
   [
    "White 88 % reflectance target, >= 200 x 200 mm, matte",
    "the ToF ranging distances (SN-06)",
-   "88 % white is the reflectance ST's own maximum-range and accuracy tables are stated against; any other target invalidates the +/- 5 % gate",
+   "88 % white is the reflectance ST's accuracy tables are stated against at this mode. On a VL53L5CX it is the ONLY reflectance with a percentage figure in the 201-4000 mm band, and below 201 mm that part publishes no white-88 % figure at all; any other target leaves SN-06's +/- 7 % gate with no basis",
    "L8",
    [
     "SN-06"
@@ -241,7 +241,7 @@
   [
    "Steel rule or laser distance meter, 1 mm resolution",
    "SN-06 target distance; WK-02 walked distance",
-   "the +/- 5 % ToF gate at 500 mm is +/- 25 mm, so the reference distance must be better than that",
+   "SN-06's +/- 7 % gate at its tightest gated distance, 250 mm, is +/- 17.5 mm, so the reference distance must be read to far better than that; 1 mm resolution is 1/17 of the band",
    "TESTDESIGN",
    [
     "SN-06",
@@ -343,6 +343,16 @@
     "EN-01"
    ],
    "Stopwatch"
+  ],
+  [
+   "Lux meter, 0-200 klx, 0.01 klx resolution",
+   "Illuminance at the ToF target face.",
+   "SN-06's +/- 7 % is the datasheets' DARK (0 klx) column. A VL53L5CX is allowed +/- 8 % at 5 klx, so without a measured lux the gate cannot say whether a wide reading is a defect or ambient light.",
+   "L5",
+   [
+    "SN-06"
+   ],
+   "Lux meter"
   ]
  ],
  "id_map": [
@@ -1083,11 +1093,11 @@
      ],
      "measure": "Total input current and the derived servo-rail standby, in A to 3 dp.",
      "gate": {
-      "PASS": "the derived servo standby is >= 0.255 A AND SV-03 finds all 16 devices",
+      "PASS": "the derived servo standby is >= @STANDBY_TOTAL_A@ A AND SV-03 finds all 16 devices",
       "FAIL": "SV-03 finds fewer than 16 devices",
-      "CD": "the current is below 0.255 A but SV-03 finds 16 devices — the current path and the data path disagree; do not proceed"
+      "CD": "the current is below @STANDBY_TOTAL_A@ A but SV-03 finds 16 devices — the current path and the data path disagree; do not proceed"
      },
-     "gate_basis": "0.255 A = 15 x 17 mA, the vendor's Standby Current for the XL330-M288-T (E1 Specifications; no test voltage is stated for it). The imu_to_dxl board's own standby is CANNOT DETERMINE (unpublished board), so this is a floor and not a window. The devices answering on the bus is the stronger evidence, which is why SV-03 is in the gate.",
+     "gate_basis": "@STANDBY_TOTAL_A@ A = 15 x 17 mA, the vendor's Standby Current for the XL330-M288-T (E1 Specifications; no test voltage is stated for it). The imu_to_dxl board's own standby is CANNOT DETERMINE (unpublished board), so this is a floor and not a window. The devices answering on the bus is the stronger evidence, which is why SV-03 is in the gate.",
      "log": "logs/<serial>/EB-05-standby.txt",
      "src": [
       "E1",
@@ -1678,7 +1688,7 @@
       "FAIL": "any axis below its minimum, or bist_fail = 1",
       "CD": "the part is absent - see SN-01"
      },
-     "gate_basis": "Every step and every number is the vendor's own recommended procedure and Table 9, BST-BMI088-DS000-19 Rev 1.9, section 4.6.1 and 4.6.2, pages 17-18 of 62. The sheet also says: reset the device after a self-test, because the self-test response affects interrupt generation.",
+     "gate_basis": "Every step and every number is the vendor's own recommended procedure and Table 9, BST-BMI088-DS000-19 Rev 1.9, section 4.6.1, section 4.6.2 and Table 9, all three of them on **page 17 of 62** - re-read 2026-09-03 with `pdftotext -layout -f 17 -l 17` and again for page 18, which carries section 4.7 (New Data Interrupt) and 4.8 (Soft-Reset) and none of the cited material; an earlier revision of this document cited 'pages 17-18' and that one page of over-citation is corrected here. The sheet also says, on the same page: reset the device after a self-test, because the self-test response affects interrupt generation.",
      "log": "logs/<serial>/SN-03-bmi088-selftest.csv",
      "src": [
       "BMI"
@@ -1784,11 +1794,16 @@
      "tool": [
       "White 88 % reflectance target >= 200 x 200 mm",
       "Steel rule or laser distance meter",
+      "Lux meter, 0-200 klx, 0.01 klx resolution",
       "robotctl monitor, key `t`"
      ],
      "steps": [
       {
-       "do": "Place the target normal to the beak at 500 mm, measured to the sensor's front face. Room lighting below 5 klx; note the level.",
+       "do": "Darken the room and measure the illuminance at the target face with the lux meter. Record it. The gate below is the vendor's DARK (0 klx) column; 0.05 klx is this plan's practical stand-in for 0 klx and is stated as a decision, not a datasheet figure.",
+       "expect": "<= 0.05 klx recorded"
+      },
+      {
+       "do": "Place the target normal to the beak at 250 mm, measured to the sensor's front face.",
        "expect": "—"
       },
       {
@@ -1797,7 +1812,7 @@
        "expect": "the 8x8 grid, header naming the sensor and 15 Hz"
       },
       {
-       "do": "Record the header line: it names the sensor generation, the rate, the zones ranged and the near-far span.",
+       "do": "Record the header line: it names the sensor generation, the rate, the zones ranged and the near-far span. WHICH GENERATION IT NAMES DECIDES WHICH DATASHEET ROW THIS TEST IS GATED ON - record it before anything else.",
        "expect": "e.g. `tof VL53L8CX . 15 Hz . 8x8 . 48/64 ranged`"
       },
       {
@@ -1805,21 +1820,25 @@
        "expect": "within gate"
       },
       {
-       "do": "Repeat at 200 mm and at 1000 mm.",
+       "do": "Repeat at 500 mm and at 1000 mm.",
        "expect": "within gate"
+      },
+      {
+       "do": "Optional, ungated: repeat at 100 mm and record the reading. Neither datasheet publishes a white-88 % accuracy there on a VL53L5CX, so it is an observation and not a gate.",
+       "expect": "recorded"
       },
       {
        "do": "Point at open space and confirm the grid shows `.` (measured, nothing in range) and not `x` (could not measure).",
        "expect": "dots, not x"
       }
      ],
-     "measure": "Per distance: number of zones ranged out of 64; the mean and standard deviation of the centre four zones, in mm.",
+     "measure": "Illuminance at the target face (klx); the sensor generation the header names; per distance: number of zones ranged out of 64; the mean and standard deviation of the centre four zones, in mm.",
      "gate": {
-      "PASS": "at each distance, >= 56 of 64 zones ranged, and the centre-four mean within +/- 7 % of the reference distance",
-      "FAIL": "fewer than 56 zones, or the mean outside +/- 7 %",
-      "CD": "the header says `no sensor:` - tofd is up and nothing answered on the bus. Go back to SN-01"
+      "PASS": "illuminance <= 0.05 klx, and at each of 250 mm, 500 mm and 1000 mm >= 56 of 64 zones ranged and the centre-four mean within +/- 7 % of the reference distance",
+      "FAIL": "fewer than 56 zones, or a mean outside +/- 7 %, with the illuminance at or below 0.05 klx",
+      "CD": "the header says `no sensor:` - tofd is up and nothing answered on the bus, go back to SN-01; OR the room could not be darkened below 0.05 klx and the header names a VL53L5CX (or names no generation), because that part's published accuracy at 5 klx is +/- 8 % and not +/- 5 % - record the readings and the lux and re-run in the dark. A lit-room run on a header that names a VL53L8CX IS gated: that part publishes +/- 5 % in both columns."
      },
-     "gate_basis": "+/- 7 % = the vendor's +/- 5 % (8x8 at 15 Hz, white 88 % target, dark) plus the vendor's own stated 'additional 1~2 %' for PCB assembly tilt and mounting in a product housing. BOTH generations give the same +/- 5 % figure at this mode and reflectance, and each states its own far range: VL53L8CX DS14161 Rev 12 Table 20 'Range accuracy in continuous mode', page 26 of 45, reads 200-4000 mm; VL53L5CX DS13754 Rev 13 Table 21 'Range accuracy', page 23 of 40, reads 201-4000 mm. Both page numbers are the footer of the page that carries the table, read with `pdftotext -layout` on the shelf PDFs. The 1 mm difference is the datasheets', not a transcription: it does not move the gate, and the three test distances (200 mm, 500 mm, 1000 mm) sit inside both. So this gate holds even though which generation ships is CANNOT DETERMINE - but note that 200 mm is the boundary row on the VL53L8CX and is BELOW the VL53L5CX's first accuracy row, where that part's 20-200 mm row gives +/- 15 mm absolute rather than a percentage; at 200 mm +/- 7 % is 14 mm, so the 200 mm point is the tightest of the three on a VL53L5CX and must not be dropped. Both parts are 45 deg x 45 deg detection volume, 65 deg diagonal. 56/64 is a decision of this plan; ST publishes no zone-yield figure, and Pollen's own example header shows 48/64 ranged in an ordinary room, so a full 64 must not be demanded. Read the last column of the theremin readout for the per-zone ST status codes if zones are missing: robotctl monitor's grid is STRICTER than the theremin - it marks anything outside status 5/9 as `x`, and a grid full of `x` does not mean the sensor is broken.",
+     "gate_basis": "+/- 7 % = the vendor's +/- 5 % plus the vendor's own stated 'additional 1~2 %' for PCB assembly tilt and mounting in a product housing. Both halves are quoted below with the column they were read from, because an earlier revision of this document claimed 'BOTH generations give the same +/- 5 % figure at this mode and reflectance' without naming a column, and that is true only in the dark. Re-read from the shelf PDFs 2026-09-03, both tables rendered to PNG at 200 dpi and read back rather than trusted to `pdftotext`, which reflows a cell that spans rows and had put the reflectance labels against the wrong distances.\n**VL53L8CX**, DS14161 Rev 12, Table 20 'Range accuracy in continuous mode', page 26 of 45, mode 8x8 at 15 Hz, White target (88 %): 200-4000 mm reads **+/- 5 % dark AND +/- 5 % at 5 klx**; 20-200 mm reads +/- 11 mm dark, +/- 10 mm at 5 klx.\n**VL53L5CX**, DS13754 Rev 13, Table 21 'Range accuracy', page 23 of 40, mode 8x8 15 Hz, White target (88 %): 201-4000 mm reads **+/- 5 % dark but +/- 8 % at 5 klx**. Below 201 mm that datasheet publishes **no white-88 % figure at all** - its whole 20-200 mm band is one row, Gray target (17 %), +/- 15 mm in both columns. An earlier revision quoted that +/- 15 mm as if it applied to the white target this test actually uses, and concluded from it that 200 mm was the tightest of the three distances; both the figure and the conclusion are withdrawn.\n**What changed because of it.** The near test distance moved from 200 mm to **250 mm**, so that all three gated distances sit inside the far band of BOTH datasheets (201-4000 mm on the VL53L5CX, 200-4000 mm on the VL53L8CX) where both publish +/- 5 % dark on a white 88 % target. And the lighting became a measured gate rather than a note: at 5 klx a conforming VL53L5CX is allowed +/- 8 %, which +/- 7 % would have failed. The gate was NOT loosened to +/- 10 % to cover that case - the test conditions were tightened to the column the number comes from, and a run that cannot meet them is CANNOT DETERMINE.\nThe 1~2 % assembly allowance is the **VL53L8CX datasheet's** note, printed under Table 20 on page 26 of 45: 'Final assemblies should include additional tolerance for PCB assembly tilt, and mounting of the PCB in a product housing. Typically an additional 1~2 %.' DS13754 Rev 13 carries no equivalent sentence anywhere (searched for '1~2', 'additional tolerance' and 'PCB assembly tilt'), so applying the same 2 % to a VL53L5CX is a decision of this plan, taken because both parts sit on the same module in the same housing.\nBoth parts are 45 deg x 45 deg detection volume, 65 deg diagonal. 56/64 is a decision of this plan; ST publishes no zone-yield figure, and Pollen's own example header shows 48/64 ranged in an ordinary room, so a full 64 must not be demanded. Read the last column of the theremin readout for the per-zone ST status codes if zones are missing: robotctl monitor's grid is STRICTER than the theremin - it marks anything outside status 5/9 as `x`, and a grid full of `x` does not mean the sensor is broken.",
      "log": "logs/<serial>/SN-06-tof.csv",
      "src": [
       "L8",
@@ -2101,15 +2120,20 @@
       {
        "do": "Read the loop section beside the verdict: achieved rate, missed deadlines, bus errors, IMU stale counters, battery, servo and board temperature.",
        "expect": "recorded"
+      },
+      {
+       "do": "Read the daemon's own defaults for the two safety thresholds this plan's tilt gates rest on. The configure editor shows every key's current value against its default, out of the same crate robotd parses the file with, and marks in yellow only the keys this robot diverges on. Record `safety.limp_fall_tilt_z` and `safety.fall_gravity_z`, and whether either is marked as diverging. Quit without saving.",
+       "cmd": "sudo robotctl configure",
+       "expect": "limp_fall_tilt_z default @LIMP_FALL_TILT_Z@, fall_gravity_z default @FALL_GRAVITY_Z@, neither marked as diverging"
       }
      ],
-     "measure": "Verdict; achieved loop rate (Hz); missed-deadline count; consecutive bus errors; IMU stale count; battery V and %; hottest servo and board temperature.",
+     "measure": "Verdict; achieved loop rate (Hz); missed-deadline count; consecutive bus errors; IMU stale count; battery V and %; hottest servo and board temperature; and the daemon's own defaults for safety.limp_fall_tilt_z and safety.fall_gravity_z, recorded beside the verdict.",
      "gate": {
       "PASS": "healthy, with achieved rate >= 45.0 Hz and consecutive bus errors < 10",
       "FAIL": "unhealthy, or degraded with a reason naming the bus or the loop",
       "CD": "degraded on an unpowered bench board - that is what degraded exists to say; power the joints and re-run"
      },
-     "gate_basis": "The thresholds are robotd's own [update_gate] defaults, with Pollen's stated reasons: min_achieved_hz = 45.0 ('90 % of the default 50 Hz: loose enough not to trip on one slow tick, tight enough that a loop dropping every tenth cycle is not called healthy'); max_consecutive_errors = 10 ('one dropped transaction is ordinary on a serial bus; a run of them means the bus is gone'). Battery and motor temperature appear on the report but MUST NOT reach the verdict - Pollen's own rule, because a release must never be rolled back for the state of the board it landed on.",
+     "gate_basis": "The thresholds are robotd's own [update_gate] defaults, with Pollen's stated reasons: min_achieved_hz = 45.0 ('90 % of the default 50 Hz: loose enough not to trip on one slow tick, tight enough that a loop dropping every tenth cycle is not called healthy'); max_consecutive_errors = 10 ('one dropped transaction is ordinary on a serial bus; a run of them means the bus is gone'). Battery and motor temperature appear on the report but MUST NOT reach the verdict - Pollen's own rule, because a release must never be rolled back for the state of the board it landed on. The added configure step is not gated and cannot fail a unit: it is an OBSERVATION that closes an open question of this document (section @SEC_TAIL_OPEN@). `robotctl configure` is the right instrument for it because Pollen's own cheatsheet states the property that matters - 'It cannot disagree with the daemon. The schema, the defaults and the validation come from the same crate robotd parses the file with, and the key list is pinned complete by a test' (research/raw/microduck_main_docs_robot_cheatsheet.md:116-119). If either default differs from what section @SEC_WALK@ and section @SEC_WALK@ quote, those gates move and this document is regenerated.",
      "log": "logs/<serial>/SW-02-health.json",
      "src": [
       "TOML",
@@ -2430,7 +2454,7 @@
       "FAIL": "the unit does not advertise, or the console does not draw",
       "CD": "the laptop has no working BLE stack - fix the laptop; this says nothing about the unit"
      },
-     "gate_basis": "From Pollen's `docs/robot/duckctl.md` (fetched 2026-09-02): `duckctl scan` lists robots advertising the duck service with MAC, name, IP and service count; `duckctl ip` reads advertisements in about a second without connecting; `duckctl open` opens the console at `http://<address>:8080/`. Scan and discovery need NO PIN; authenticated commands use it and it defaults to `000000` - which is RD-03. The same page lists what `btd` refuses over Bluetooth with error 14: robot.move, robot.head, robot.enable, robot.stop, robot.init, robot.relax, robot.subscribe, update.pin, update.resetToGolden, system.pairingPin and system.setPairingPin. So NO joint may move during this test, and a refusal is the pass condition of step 4 rather than a failure.",
+     "gate_basis": "From Pollen's `docs/robot/duckctl.md`, mirrored into this repository 2026-09-03 as `research/raw/microduck_main_docs_robot_duckctl.md` so every line below can be re-read here rather than re-fetched: `duckctl scan` lists robots advertising the duck service with MAC, name, IP and service count; `duckctl ip` reads advertisements in about a second without connecting; `duckctl open` opens the console at `http://<address>:8080/`. Scan and discovery need NO PIN; authenticated commands use it and it defaults to `000000` - which is RD-03. Line references into that mirror: the scan listing at :44-56, `ip` at :70-74, `open` at :116, the default PIN at :360. The same page, at :382-387, lists what `btd` refuses over Bluetooth with error 14: robot.move, robot.head, robot.enable, robot.stop, robot.init, robot.relax, robot.subscribe, update.pin, update.resetToGolden, system.pairingPin and system.setPairingPin. So NO joint may move during this test, and a refusal is the pass condition of step 4 rather than a failure.",
      "log": "logs/<serial>/RD-04-ble.txt",
      "src": [
       "DUCKCTL",
@@ -2582,7 +2606,7 @@
       "FAIL": "any of the three",
       "CD": "the robot walks but the distance cannot be measured to 1 mm because the path curved off the run - re-run with a longer surface; a curved path is a real result and belongs in the log"
      },
-     "gate_basis": "SIMULATION REFERENCE, measured on our own run walk_ours (out/sim/report.json runs.walk_ours; MuJoCo 3.12.0, Pollen's @SIM_WALK_POLICY@, 50 Hz, timestep 0.005 s, decimation 4). Three distances, and they are three different quantities - the gate uses the first: walked_m = @SIM_WALK_M@ m, the straight-line trunk displacement over the whole @SIM_WALK_S@ s run; walked_x_m = @SIM_WALK_X@ m, the X component of that same displacement; and mean_speed_m_s_commanded_window = @SIM_WALK_SPEED_WINDOW@ m/s, which is NOT either of them divided by 8 - sim/run_policy.py:270-275 takes the displacement between the first and last sample with t >= the @SIM_WALK_WARMUP_S@ s warm-up and divides by that @SIM_WALK_WINDOW_S@ s window. Averaged over the whole run instead, @SIM_WALK_M@ m / @SIM_WALK_S@ s = @SIM_WALK_MEAN_ALL@ m/s. Also measured: maximum tilt @SIM_WALK_TILT@ deg, no fall, 0 self-contacts, contacts mean 1.92, maximum joint speed 5.74 rad/s at the left knee, 0 frames within 1 deg of any limit. The stock and swapped-mesh models produced BIT-IDENTICAL trajectories, so the reference is Pollen's physics and not ours. THE @GATE_WALK_M@ m GATE IS A DECISION OF THIS PLAN: @GATE_PCT@ % of the simulated walked_m, an allowance for sim-to-real transfer that NO source measures - no real-robot walk distance exists anywhere in this repository or in Pollen's published material. The @LIMP_TILT_DEG@ deg tilt gate IS derived: limp_fall_tilt_z = -0.90 in robotd.toml, and acos(0.90) = @LIMP_TILT_DEG@ deg, the tilt at which the daemon itself decides a fall has started. DO NOT TEST AT 0.15 m/s: our own velocity sweep on Pollen's stock model measured vx 0.05 -> 0.003 m, 0.10 -> 0.007 m, 0.15 -> 0.008 m, 0.20 -> 0.011 m, 0.25 -> 0.792 m, 0.30 -> 0.940 m, 0.40 -> 1.281 m in 8 s. Everything below 0.25 sits inside the walking policy's stand-still band and a robot that correctly stands still would read as a failure. The policy itself is upstream: microduck_rl trains it in mjlab AT 50 Hz and exports to ONNX for deployment on the real robot, which is the same 50 Hz our run drives it at - so the control rate under which this reference distance was produced is the vendor's own, not a choice of ours.",
+     "gate_basis": "SIMULATION REFERENCE, measured on our own run walk_ours (out/sim/report.json runs.walk_ours; MuJoCo 3.12.0, Pollen's @SIM_WALK_POLICY@, 50 Hz, timestep 0.005 s, decimation 4). Three distances, and they are three different quantities - the gate uses the first: walked_m = @SIM_WALK_M@ m, the straight-line trunk displacement over the whole @SIM_WALK_S@ s run; walked_x_m = @SIM_WALK_X@ m, the X component of that same displacement; and mean_speed_m_s_commanded_window = @SIM_WALK_SPEED_WINDOW@ m/s, which is NOT either of them divided by 8 - sim/run_policy.py:270-275 takes the displacement between the first and last sample with t >= the @SIM_WALK_WARMUP_S@ s warm-up and divides by that @SIM_WALK_WINDOW_S@ s window. Averaged over the whole run instead, @SIM_WALK_M@ m / @SIM_WALK_S@ s = @SIM_WALK_MEAN_ALL@ m/s. Also measured: maximum tilt @SIM_WALK_TILT@ deg, no fall, 0 self-contacts, contacts mean 1.92, maximum joint speed 5.74 rad/s at the left knee, 0 frames within 1 deg of any limit. The stock and swapped-mesh models produced BIT-IDENTICAL trajectories, so the reference is Pollen's physics and not ours. THE @GATE_WALK_M@ m GATE IS A DECISION OF THIS PLAN: @GATE_PCT@ % of the simulated walked_m, an allowance for sim-to-real transfer that NO source measures - no real-robot walk distance exists anywhere in this repository or in Pollen's published material. The @LIMP_TILT_DEG@ deg tilt gate IS derived, from a value this generator reads off the file rather than carrying a copy of: @TOML_TILT_PROV@, so acos(0.90) = @LIMP_TILT_DEG@ deg, the tilt at which the daemon itself decides a fall has started. **That line is commented out**, which is how that file publishes a daemon default - the same block comments `# limp_fall = true` whose own prose reads 'ON by default since it was validated on a robot' - and two independent texts corroborate the value: research/raw/deploy_robotd.toml:216 says the trigger is 'about 26 deg' and research/raw/microduck_main_docs_design_robotd-design.md:476 says 'already tilted (~26 deg)', against acos(0.90) = @LIMP_TILT_DEG@ deg. Nothing in this repository shows robotd's compiled-in value, so it stays an open question with SW-02 as the instrument that closes it - see section @SEC_TAIL_OPEN@. DO NOT TEST AT 0.15 m/s: our own velocity sweep on Pollen's stock model measured vx 0.05 -> 0.003 m, 0.10 -> 0.007 m, 0.15 -> 0.008 m, 0.20 -> 0.011 m, 0.25 -> 0.792 m, 0.30 -> 0.940 m, 0.40 -> 1.281 m in 8 s. Everything below 0.25 sits inside the walking policy's stand-still band and a robot that correctly stands still would read as a failure. The policy itself is upstream: microduck_rl trains it in mjlab AT 50 Hz and exports to ONNX for deployment on the real robot, which is the same 50 Hz our run drives it at - so the control rate under which this reference distance was produced is the vendor's own, not a choice of ours.",
      "log": "logs/<serial>/WK-02-walk-<n>.jsonl",
      "src": [
       "SIM",
@@ -2610,7 +2634,7 @@
      "measure": "Five distances (m, 3 dp); five maximum tilts (deg); falls out of five; pack voltage before each run (V).",
      "gate": {
       "PASS": "5 of 5 runs meet the WK-02 gate, and the spread of the five distances is <= 0.150 m",
-      "FAIL": "any fall, or any run below 0.594 m",
+      "FAIL": "any fall, or any run below @GATE_WALK_M@ m",
       "CD": "—"
      },
      "gate_basis": "The 0.150 m spread is a decision of this plan; no source publishes run-to-run variance for this robot, and our simulation is deterministic (the stock and swapped models were bit-identical), so it can offer none. Pack voltage is recorded per run because voltage_adapt is OFF by default, so the servos' effective stiffness tracks the pack as it sags and a five-run sequence walks progressively softer.",
@@ -2697,7 +2721,7 @@
       "FAIL": "the robot lands stiff (the policy fought the floor), or does not stand afterwards",
       "CD": "limp_fall = false on this board - then this test does not apply and the robot's behaviour is the prototype's: the policy keeps driving and the humans stay in charge"
      },
-     "gate_basis": "Every threshold is robotd.toml [safety]: trigger when already tilted past limp_fall_tilt_z = -0.90 (25.842 deg), still tipping rather than recovering, and a limp_fall_lookahead_ms = 300 extrapolation of projected gravity lands past limp_fall_predict_z = -0.5 (60.000 deg); debounce limp_fall_debounce_ms = 60, three ticks at 50 Hz. Then gain_limp = 50 until still (limp_fall_still_rate = 1.0 rad/s for limp_fall_still_ms = 200) or limp_fall_max_ms = 1500 whichever comes first, then a limp_fall_pose_ms = 600 ramp at limp_fall_pose_gain = 160. Separately, the fall REPORT (not the gate) is fall_gravity_z = -0.5 debounced 200 ms.",
+     "gate_basis": "Every threshold is robotd.toml [safety], and **every one of them is a commented-out line in the only copy of that file in this repository** - that is how it publishes a daemon default (see WK-02's basis and section @SEC_TAIL_OPEN@). Trigger when already tilted past limp_fall_tilt_z = @LIMP_FALL_TILT_Z@ (@LIMP_TILT_DEG@ deg, @TOML_TILT_PROV@), still tipping rather than recovering, and a limp_fall_lookahead_ms = 300 extrapolation of projected gravity lands past limp_fall_predict_z = -0.5 (@FALL_TILT_DEG@ deg); debounce limp_fall_debounce_ms = 60, three ticks at 50 Hz. Then gain_limp = 50 until still (limp_fall_still_rate = 1.0 rad/s for limp_fall_still_ms = 200) or limp_fall_max_ms = 1500 whichever comes first, then a limp_fall_pose_ms = 600 ramp at limp_fall_pose_gain = 160. Separately, the fall REPORT (not the gate) is fall_gravity_z = @FALL_GRAVITY_Z@ (@TOML_FGZ_PROV@) debounced 200 ms - and that 200 ms is itself the cross-check that these commented lines are the live defaults: robotd-design.md:456-457 describes the same detector as 'debounced 0.2 s'.",
      "log": "logs/<serial>/WK-05-limpfall.jsonl",
      "src": [
       "TOML",
@@ -2948,7 +2972,7 @@
    [
     "Size",
     "at least 1200 x 600 mm clear",
-    "the acceptance run is 0.594 m minimum with a start line and room to stop",
+    "the acceptance run is @GATE_WALK_M@ m minimum with a start line and room to stop",
     "TESTDESIGN"
    ],
    [
@@ -2994,7 +3018,7 @@
   ],
   [
    "EB-05",
-   "derived servo standby >= 0.255 A AND SV-03 finds all 16 devices",
+   "derived servo standby >= @STANDBY_TOTAL_A@ A AND SV-03 finds all 16 devices",
    "PSU readout or DMM in series"
   ],
   [
@@ -3019,7 +3043,7 @@
   ],
   [
    "SV-02",
-   "|Present Position - 2048| <= 11 counts (= 0.9668 deg) on every joint at mechanical zero",
+   "|Present Position - 2048| <= 11 counts (= @TOL_DEG_OF_COUNT@ deg) on every joint at mechanical zero",
    "adapter + jig"
   ],
   [
@@ -3064,7 +3088,7 @@
   ],
   [
    "SN-06",
-   "ToF centre-four within +/- 7 % at 200, 500, 1000 mm",
+   "ToF centre-four within +/- 7 % at 250, 500, 1000 mm, room <= 0.05 klx",
    "white 88 % target"
   ],
   [
@@ -3139,7 +3163,7 @@
   ],
   [
    "WK-02",
-   "walked >= 0.594 m in 8.0 s; no fall; tilt <= 25.842 deg",
+   "walked >= @GATE_WALK_M@ m in @SIM_WALK_S@ s; no fall; tilt <= @LIMP_TILT_DEG@ deg",
    "floor + rule"
   ],
   [
@@ -3282,7 +3306,7 @@
   {
    "q": "What does a real Microduck actually walk in 8 s at vx 0.25?",
    "test": "WK-02",
-   "status": "CANNOT DETERMINE. The 0.594 m gate is 75 % of our simulated 0.7925 m and the 75 % is a decision, not a measurement",
+   "status": "CANNOT DETERMINE. The @GATE_WALK_M@ m gate is @GATE_PCT@ % of our simulated @SIM_WALK_M@ m and the @GATE_PCT@ % is a decision, not a measurement",
    "settles": "WK-02 and WK-03 on the first five built units. Replace the fraction with the measured mean minus three standard deviations and regenerate this document."
   },
   {
@@ -3320,6 +3344,12 @@
    "test": "SV-02",
    "status": "CANNOT DETERMINE from the MJCF. A joint declared inside body C joins C to its parent P, and the kinematic file says nothing about which side the actuator is bolted to. Table 5's bodies column used to assert one of the two per row and was measurably inconsistent - nine rows named the parent and five the child - so it now shows both, measured. The mouth (ID 34) is not in the MJCF at all.",
    "settles": "The mesh placements in spec/mesh-placements.json read against the xl330 body geometry: the housing is the body whose frame the servo case is fixed in, the horn is the body that rotates with the output. Lane B's per-joint drawings settle it visually, and SV-02's jig has to know it anyway - the mechanical zero is measured against whichever body the horn indexes to."
+  },
+  {
+   "q": "Are limp_fall_tilt_z = @LIMP_FALL_TILT_Z@ and fall_gravity_z = @FALL_GRAVITY_Z@ really robotd's compiled-in defaults?",
+   "test": "SW-02",
+   "status": "CANNOT DETERMINE from the repository. Both lines are COMMENTED OUT in the only copy of that file here - research/raw/deploy_robotd.toml:@TOML_LINE_TILT@ and :@TOML_LINE_FGZ@ - and robotd's source is not published, so no file here shows the compiled-in value. Three things say the commented values ARE the defaults and none of them is the file's own assignment: that file's convention (it comments `# limp_fall = true` in the same block, and the prose beside it reads 'ON by default'); the prose at deploy_robotd.toml:216 and at robotd-design.md:476, which independently put the trigger at 'about 26 deg' / '~26 deg' against our acos(0.90) = @LIMP_TILT_DEG@ deg; and robotd-design.md:456-457, whose 'debounced 0.2 s' matches the commented `fall_debounce_ms = 200` exactly. The evidence supports the values this document uses; it does not prove them, and the document now says the lines are commented instead of printing them as assignments.",
+   "settles": "The step added to SW-02: `sudo robotctl configure` on a built unit prints every key's current value against its default, from the same crate robotd parses with, and marks only the keys that diverge. If either default differs, the @LIMP_TILT_DEG@ deg gate in section @SEC_WALK@ and the limp thresholds in section @SEC_WALK@ move and this document is regenerated."
   }
  ],
  "eol_note": "One line per gate, in test order, and it is COMPLETE by construction: the generator refuses to write this document unless every test with a PASS gate is either on this list or on the exemption list below it with a reason. A unit ships when every box is ticked and no row reads CANNOT DETERMINE. SN-10 (the camera-use indicator) IS on the list even though its GPIO is unknown, because a person can see whether the light is on - and it is the only check of a privacy requirement Pollen wrote down for itself. EB-08 is on the list with its RECORD as the gate rather than a verdict, because the four charging cases have never been measured on any unit and the first unit to measure them is the one that settles the open question.",
@@ -3412,7 +3442,7 @@
    "q": "Which ToF generation ships, VL53L5CX or VL53L8CX?",
    "was": "CANNOT DETERMINE in Rev A - the datasheets were read but nothing said which part is fitted.",
    "now": "SETTLED, and the answer is BOTH. `tof/src/lib.rs` lines 8-11, verbatim: 'Both generations, decided at runtime. The two are interchangeable on the board and differ only in firmware and a driver prefix, so which one is fitted is not a build-time choice: an ID read picks the driver before any firmware is uploaded (Generation). Ducks in the field have both.' The daemon also tries two addresses, 0x29 then 0x52 - 0x29 is the factory default for both generations, and 0x52 is where a prototype moved an L5CX when an I2C IMU wanted 0x29, an address that survives power cycles (tofd/src/main.rs, ADDRESS_CANDIDATES).",
-   "consequence": "SN-06 needs no change: the +/- 5 % accuracy figure is identical for both parts at 8x8 / 15 Hz against an 88 % white target, over each datasheet's own far range - 200-4000 mm on the VL53L8CX (DS14161 Rev 12 Table 20, page 26/45) and 201-4000 mm on the VL53L5CX (DS13754 Rev 13 Table 21, page 23/40). Section 3's rail table does: the ToF CORE_1V8 row is N/A rather than FAIL on a unit that came up as a VL53L5CX, because that part has no separate core rail. Record the generation the header names before judging that row.",
+   "consequence": "SN-06 DID need a change, and Rev B's claim here that it did not was wrong. The +/- 5 % figure is identical for both parts at 8x8 / 15 Hz against an 88 % white target only in the **Dark (0 klx)** column: under 5 klx ambient the VL53L8CX still reads +/- 5 % (DS14161 Rev 12 Table 20, page 26/45, 200-4000 mm) but the VL53L5CX reads **+/- 8 %** (DS13754 Rev 13 Table 21, page 23/40, 201-4000 mm), so a conforming L5CX in a lit room could fail a +/- 7 % gate. And the near end is worse than 'each datasheet's own far range' suggested: below 201 mm the VL53L5CX publishes no white-88 % accuracy at all, only a Gray-17 % row. Rev D moves SN-06's near distance to 250 mm, makes the room's illuminance a measured gate condition, and makes a lit-room run on an unidentified generation CANNOT DETERMINE rather than a fail. Section 3's rail table also changes: the ToF CORE_1V8 row is N/A rather than FAIL on a unit that came up as a VL53L5CX, because that part has no separate core rail. Record the generation the header names before judging either.",
    "src": [
     "TOFLIB",
     "TOFSRC",
@@ -3458,7 +3488,7 @@
  "corrections": [
   {
    "what": "WK-02 walk gate basis quoted 'mean 0.1053 m/s' against out/sim/report.md walk_ours.",
-   "measured": "No source carries 0.1053. out/sim/report.json runs.walk_ours gives mean_speed_m_s_commanded_window = 0.1055 and out/sim/report.md:40 gives 0.105. 0.1053 is walked_x_m / 7.5 = 0.7894 / 7.5 - the X component over the commanded window, a third quantity, and it contradicted the 0.7925 m in the same sentence.",
+   "measured": "No source carries 0.1053. out/sim/report.json runs.walk_ours gives mean_speed_m_s_commanded_window = @SIM_WALK_SPEED_WINDOW@ and out/sim/report.md:40 gives the same quantity rounded to 3 dp. 0.1053 is walked_x_m / @SIM_WALK_WINDOW_S@ = @SIM_WALK_X@ / @SIM_WALK_WINDOW_S@ - the X component over the commanded window, a third quantity, and it contradicted the @SIM_WALK_M@ m in the same sentence.",
    "now": "Every distance and speed in the WK-02 basis is a token substituted from out/sim/report.json at generation time, each named with the key it came from, and the three quantities are distinguished in the text.",
    "src": [
     "SIM"
@@ -3545,6 +3575,73 @@
    "src": [
     "SIM",
     "MODEL"
+   ]
+  },
+  {
+   "what": "SN-06's basis claimed 'BOTH generations give the same +/- 5 % figure at this mode and reflectance', with no column named.",
+   "measured": "True in the Dark (0 klx) column only. Both tables were re-read 2026-09-03 by rendering the page to PNG at 200 dpi and reading the picture, because `pdftotext -layout` reflows a cell that spans several rows and had put the reflectance labels against the wrong distances. VL53L8CX DS14161 Rev 12 Table 20 page 26/45, 8x8 at 15 Hz, White 88 %, 200-4000 mm: +/- 5 % dark AND +/- 5 % at 5 klx. VL53L5CX DS13754 Rev 13 Table 21 page 23/40, 8x8 15 Hz, White 88 %, 201-4000 mm: +/- 5 % dark but +/- 8 % at 5 klx. SN-06's own step 1 permitted 'room lighting below 5 klx', so a conforming VL53L5CX in a lit room could read outside the +/- 7 % gate. The error made the gate too TIGHT, so no unit ever passed wrongly - but the completeness claim was false.",
+   "now": "The gate is unchanged at +/- 7 % and the test conditions were tightened to the column that number comes from: step 1 now measures the illuminance with a lux meter and PASS requires <= 0.05 klx. A run above that on a header naming a VL53L5CX, or naming no generation, is CANNOT DETERMINE rather than FAIL. A lit-room run on a VL53L8CX stays gated, because that part publishes +/- 5 % in both columns. The equipment table gained the lux meter, and the resolved-question block that had said 'SN-06 needs no change' is corrected in place.",
+   "src": [
+    "L5",
+    "L8"
+   ]
+  },
+  {
+   "what": "SN-06's basis applied the VL53L5CX's 20-200 mm '+/- 15 mm' to a white 88 % target and concluded that 200 mm was the tightest of the three distances.",
+   "measured": "DS13754 Rev 13 Table 21, page 23/40: the whole 20-200 mm band is ONE row, Gray target (17 %), +/- 15 mm in both columns. There is no white-88 % row below 201 mm at all, and this test uses a white 88 % target. The figure was read off a different reflectance than the test runs, so the conclusion drawn from it had no basis.",
+   "now": "Both the figure and the conclusion are withdrawn. The near gated distance moved from 200 mm to 250 mm so that all three sit inside the far band of BOTH datasheets (201-4000 mm on the L5CX, 200-4000 mm on the L8CX), where both publish +/- 5 % dark on white 88 %. A 100 mm reading is kept as an explicitly ungated observation.",
+   "src": [
+    "L5"
+   ]
+  },
+  {
+   "what": "SN-03's basis cited 'BST-BMI088-DS000-19 Rev 1.9, section 4.6.1 and 4.6.2, pages 17-18 of 62'.",
+   "measured": "Sections 4.6.1, 4.6.2 and Table 9 are ENTIRELY on page 17 of 62. Page 18 carries section 4.7 (New Data Interrupt) and 4.8 (Soft-Reset) and none of the cited material. Both pages re-read 2026-09-03 with `pdftotext -layout`. The register writes, the wait times and the >= 1000 / 1000 / 500 mg minima are all exact; the page range was one page wider than the source.",
+   "now": "The citation reads 'page 17 of 62' and names all three cited items on that one page.",
+   "src": [
+    "BMI"
+   ]
+  },
+  {
+   "what": "The two robotd.toml thresholds behind the tilt gates were hard-coded in the generator and printed as set assignments.",
+   "measured": "Both lines are COMMENTED OUT in the only copy in this repository: research/raw/deploy_robotd.toml:@TOML_LINE_TILT@ '# limp_fall_tilt_z = -0.90' and :@TOML_LINE_FGZ@ '# fall_gravity_z = -0.5'. The document said 'limp_fall_tilt_z = -0.90 in robotd.toml', which the file does not say.",
+   "now": "The generator now PARSES both values out of that file and reports the line number and whether the line is commented, so the prose reads '@TOML_TILT_PROV@' and flips to 'a live assignment' by itself if the file ever changes. A self-check refuses to publish a document that omits either provenance. The values themselves are almost certainly right - three independent corroborations are quoted in section @SEC_WALK@ - but they are now an open question with SW-02 as the instrument that closes it, and SW-02 gained the `robotctl configure` step that reads the daemon's own defaults.",
+   "src": [
+    "TOML",
+    "RDESIGN",
+    "CHEAT"
+   ]
+  },
+  {
+   "what": "Two derived simulation numbers were hand-typed into prose that no self-check read.",
+   "measured": "Proved by mutation: with runs.walk_ours.walked_m set to half a metre in a sandbox copy of out/sim/report.json, the generator correctly moved the gate to 75 % of the mutated figure, reported 'selfcheck: 0 failures' and published a document whose section @SEC_WALK@ carried the new gate while section @SEC_TAIL_OPEN@ still carried a typed copy of the old one.",
+   "now": "Both strings are token substitutions now (@GATE_WALK_M@, @SIM_WALK_M@, @SIM_WALK_X@, @SIM_WALK_SPEED_WINDOW@, @SIM_WALK_WINDOW_S@). The same mutation was re-run after the fix: every occurrence of the old figure moved, and the document contained the string '@SIM_WALK_M@' zero times.",
+   "src": [
+    "SIM"
+   ]
+  },
+  {
+   "what": "RELEASE.html's typed sentence about this plan said 'the 14 questions a built unit answers'.",
+   "measured": "The plan carried 15 open questions at the time (and 16 now). RELEASE.html is hand-written HTML with no generator, so the count drifted the moment a question was added - the exact failure the house rule against hand-maintained tables exists to stop. The 42-gate and 44-test figures on the same line were correct.",
+   "now": "The sentence is corrected, and this generator now REFUSES to publish while RELEASE.html's three typed figures about this plan disagree with the ones computed here. Broken on purpose three ways before it was trusted: a wrong open count, a wrong test count, and the sentence reworded so the number vanished - all three refused, exit 1, nothing written.",
+   "src": [
+    "TESTDESIGN"
+   ]
+  },
+  {
+   "what": "The `duckctl` source was the only one of the cited sources with no local copy.",
+   "measured": "RD-04's whole procedure, including btd's error-14 refusal list quoted as that test's pass condition, rested on a URL an independent reader could not check against what this document claimed it said.",
+   "now": "Mirrored into research/raw/microduck_main_docs_robot_duckctl.md (14,058 bytes, HTTP 200, 2026-09-03) and re-verified line by line against RD-04: the scan listing at :44-56, `ip` at :70-74, `open` at :116, the default PIN `000000` at :360, and the eleven refused methods at :382-387.",
+   "src": [
+    "DUCKCTL"
+   ]
+  },
+  {
+   "what": "Five of the twenty committed read-back screenshots were the same picture filed under five different section names.",
+   "measured": "out/testplan/tp-elec.png, tp-sens.png, tp-servo.png and tp-walk.png were byte-identical to tp-top.png (sha256 5677d814..., 242,403 B each) - all five showed the TOP of the Rev-A page and none showed the section it was filed as. tp2-scope.png == tp2-top.png and tp3-top.png == tp4-top.png the same way. The anchor scroll had silently failed and the house rule 'LOOK at every artifact you produce' was recorded as done when it was not.",
+   "now": "Screenshots are taken by tools/shoot_test_plan.py, which does not trust the anchor: its readiness expression SCROLLS the target and returns false until the element's own bounding rect proves it arrived, then waits out a repaint before the shutter. It hashes every file, REFUSES to write a manifest if any two shots are identical, and records anchor, offset, sha256, byte size and what each frame is supposed to show in out/testplan/MANIFEST.json. The six false-named files are deleted.",
+   "src": [
+    "TESTDESIGN"
    ]
   }
  ]

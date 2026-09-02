@@ -107,10 +107,36 @@ DEG_PER_COUNT        = 360.0 / RESOLUTION_PULSE_REV
 COUNT_PER_RAD        = RESOLUTION_PULSE_REV / (2.0 * math.pi)
 TOL_DEG              = 1.0           # const.py backlash twins ±1°
 TOL_COUNT            = int(math.floor(TOL_DEG / DEG_PER_COUNT))   # 11
-LIMP_FALL_TILT_Z     = -0.90         # robotd.toml [safety]
-FALL_GRAVITY_Z       = -0.50
+TOML_REL             = "research/raw/deploy_robotd.toml"
+
+def _toml_default(key, rel=TOML_REL):
+    """Read a [safety] threshold OFF the shipped robotd.toml and report three things: the value,
+    the line it is on, and whether that line is COMMENTED OUT. Both thresholds this document
+    quotes are commented in the only copy in the repository. That is the file's own way of
+    publishing a daemon default — it does the same for `# limp_fall = true`, whose prose in the
+    same block reads "ON by default" — but a document that prints the assignment without saying
+    the line is commented is claiming something the file does not say. Returning the flag is
+    what lets the prose say it. Was hard-coded here until 2026-09-03."""
+    fp = os.path.join(REPO, rel)
+    if not os.path.exists(fp):
+        raise SystemExit("gen_test_plan: %s is missing; the tilt gates have no source" % rel)
+    pat = re.compile(r"^\s*(#\s*)?" + re.escape(key) + r"\s*=\s*(-?[0-9.]+)\s*$")
+    for n, line in enumerate(open(fp), 1):
+        m = pat.match(line)
+        if m:
+            return float(m.group(2)), n, bool(m.group(1))
+    raise SystemExit("gen_test_plan: %s carries no assignment for %s" % (rel, key))
+
+LIMP_FALL_TILT_Z, TOML_TILT_LINE, TOML_TILT_COMMENTED = _toml_default("limp_fall_tilt_z")
+FALL_GRAVITY_Z,   TOML_FGZ_LINE,  TOML_FGZ_COMMENTED  = _toml_default("fall_gravity_z")
 LIMP_TILT_DEG        = math.degrees(math.acos(-LIMP_FALL_TILT_Z))
 FALL_TILT_DEG        = math.degrees(math.acos(-FALL_GRAVITY_Z))
+def _tomlprov(key, line, commented):
+    return ("`%s` read off `%s:%d`, where the line **is commented out**" % (key, TOML_REL, line)
+            if commented else
+            "`%s` read off `%s:%d`, a live assignment" % (key, TOML_REL, line))
+TOML_TILT_PROV = _tomlprov("limp_fall_tilt_z", TOML_TILT_LINE, TOML_TILT_COMMENTED)
+TOML_FGZ_PROV  = _tomlprov("fall_gravity_z",  TOML_FGZ_LINE,  TOML_FGZ_COMMENTED)
 _WALK                = SIMREP["runs"]["walk_ours"]      # read, never typed
 SIM_WALK_M           = _WALK["walked_m"]
 SIM_WALK_S           = _WALK["seconds"]
@@ -154,6 +180,13 @@ TOK.update({
   "GATE_WALK_M":           "%.3f" % GATE_WALK_M,
   "GATE_PCT":              "%.0f" % (GATE_FRACTION * 100),
   "LIMP_TILT_DEG":         "%.3f" % LIMP_TILT_DEG,
+  "FALL_TILT_DEG":         "%.3f" % FALL_TILT_DEG,
+  "LIMP_FALL_TILT_Z":      "%.2f" % LIMP_FALL_TILT_Z,
+  "FALL_GRAVITY_Z":        "%.1f" % FALL_GRAVITY_Z,
+  "TOML_TILT_PROV":        TOML_TILT_PROV,
+  "TOML_FGZ_PROV":         TOML_FGZ_PROV,
+  "TOML_LINE_TILT":        "%d" % TOML_TILT_LINE,
+  "TOML_LINE_FGZ":         "%d" % TOML_FGZ_LINE,
   "TOL_COUNT":             "%d"   % TOL_COUNT,
   "TOL_DEG_OF_COUNT":      "%.4f" % (TOL_COUNT * DEG_PER_COUNT),
   "SV01_READBACK_N":       "%d"   % len(_RB),
@@ -162,6 +195,8 @@ TOK.update({
   "SV01_WRITTEN_N":        _WORD(len([r for r in _RB if r[1] == "written"])),
   "SV01_VERIFY_N":         _WORD(len([r for r in _RB if r[1] == "verify"])),
   "N_RAILS":               "%d" % len(D["rails"]),
+  "STANDBY_TOTAL_A":       "%.3f" % STANDBY_TOTAL_A,
+  "STALL_TOTAL_A":         "%.2f" % STALL_TOTAL_A,
 })
 
 SECNUM = {sec["id"]: i + 2 for i, sec in enumerate(D["sections"])}
@@ -171,6 +206,9 @@ TOK.update({("SEC_%s" % sec["id"].upper()): SECNUM[sec["id"]] for sec in D["sect
 TAIL   = [("eol", "End-of-line checklist"), ("logs", "Logs"),
           ("open", "What this plan cannot test"), ("sources", "Sources")]
 TAILNUM = {sid: len(D["sections"]) + 2 + i for i, (sid, _) in enumerate(TAIL)}
+# The four tail sections are numbered too, and are cross-referenced from the data file the same
+# way the body sections are — "section @SEC_TAIL_OPEN@" rather than a typed "section 13".
+TOK.update({("SEC_TAIL_%s" % sid.upper()): TAILNUM[sid] for sid, _ in TAIL})
 
 _tbl = [0]
 def TN():
@@ -503,10 +541,25 @@ plan and not a measurement of anything</b>: no real-robot walk distance exists i
 published material. The tilt gate, by contrast, is derived —
 <code class="formula">acos(%.2f) = %.3f&nbsp;degrees</code> is <code>limp_fall_tilt_z</code>, the tilt at which
 robotd itself decides a fall has started; the fall <i>report</i> threshold
-<code>fall_gravity_z = %.1f</code> is <code class="formula">acos(%.1f) = %.3f&nbsp;degrees</code>.</div>
+<code>fall_gravity_z = %.1f</code> is <code class="formula">acos(%.1f) = %.3f&nbsp;degrees</code>.
+<b>Both of those two numbers are commented-out lines</b>, and this document reads them off the file
+rather than carrying a copy: %s, and %s.
+That is how <code>deploy/robotd.toml</code> publishes a daemon default — the same block comments
+<code>%s</code>, whose own prose in that file reads &ldquo;ON by default since it was validated on a
+robot&rdquo;. Two independent corroborations that the commented values ARE the defaults:
+<code>%s:%d</code> says the trigger is &ldquo;about 26&deg;&rdquo; and
+<code>research/raw/microduck_main_docs_design_robotd-design.md:476</code> says
+&ldquo;already tilted (&asymp;26&deg;)&rdquo;, against our
+<code class="formula">acos(%.2f) = %.3f&nbsp;degrees</code>; and the same design page's
+&ldquo;debounced 0.2&nbsp;s&rdquo; matches the commented <code>fall_debounce_ms = 200</code>.
+<b>What would settle it outright</b>: robotd's own source, which Pollen does not publish, or a
+<code>robotctl</code> dump of the effective configuration on a powered unit — which is
+<a href="#SW-02">SW-02</a>'s log, and is why that log is kept.</div>
 """ % (SECNUM["walk"], E(sr["title"]), TN(), rows,
        E(SIM_WALK_POLICY), SIM_WALK_M, SIM_WALK_S, SIM_WALK_TILT, GATE_WALK_M, GATE_FRACTION * 100,
-       -LIMP_FALL_TILT_Z, LIMP_TILT_DEG, FALL_GRAVITY_Z, -FALL_GRAVITY_Z, FALL_TILT_DEG)
+       -LIMP_FALL_TILT_Z, LIMP_TILT_DEG, FALL_GRAVITY_Z, -FALL_GRAVITY_Z, FALL_TILT_DEG,
+       M(TOML_TILT_PROV), M(TOML_FGZ_PROV), "# limp_fall = true", TOML_REL, 216,
+       -LIMP_FALL_TILT_Z, LIMP_TILT_DEG)
         if s["id"] == "radios":
             pm = D["padmap"]
             extra = """
@@ -565,10 +618,14 @@ def logs_table():
                      % (E(a), M(b), E(c)) for a, b, c in D["logs"])
 
 def open_table():
+    """Every row gets its own anchor (open-01, open-02 ...). Without one, an open question can
+    only be pointed at by scrolling, and tools/shoot_test_plan.py cannot photograph a specific
+    row as evidence that it says what a report claims it says."""
     return "\n".join(
-        '<tr><td>%s</td><td><a href="#%s"><code>%s</code></a></td><td>%s</td><td>%s</td></tr>'
-        % (M(o["q"]), E(o["test"].split(",")[0].strip()), E(o["test"]), M(o["status"]), M(o["settles"]))
-        for o in D["open"])
+        '<tr id="open-%02d"><td>%s</td><td><a href="#%s"><code>%s</code></a></td><td>%s</td><td>%s</td></tr>'
+        % (i + 1, M(o["q"]), E(o["test"].split(",")[0].strip()), E(o["test"]), M(o["status"]),
+           M(o["settles"]))
+        for i, o in enumerate(D["open"]))
 
 def sources_table():
     """The cited-by column is measured, not claimed: SRC_USED is filled by srcline() as the
@@ -643,6 +700,9 @@ CHECKS = [
   "test in the plan, were absent from the ship checklist and nothing noticed"),
  ("every eol exemption names a real test, and that test is NOT also on the eol list",
   "an exemption for a row that is on the list is a contradiction, not a decision"),
+ ("every equipment row's Src column resolves in sources{}",
+  "that column went unchecked until a price, '~15 EUR', was typed into it and rendered as a "
+  "citation next to real ones"),
  ("every source key cited anywhere resolves in sources{}",
   "srcline() used to print the raw key as its own label, so a broken citation rendered as a "
   "plausible-looking source"),
@@ -673,6 +733,31 @@ CHECKS = [
   "to the reader as literal text, because that block is not an f-string and nothing evaluated it"),
  ("the finished HTML contains every test id and every eol id as an anchor",
   "a checklist link that scrolls nowhere is a checklist nobody uses"),
+ ("no derived number appears as a literal in spec/test-plan.json",
+  "on 2026-09-03 the end-of-line row for WK-02 carried a typed '0.594 m ... 25.842 deg' beside a section 9 "
+  "that computed both, so the checklist a factory ticks would have kept the old gate after the "
+  "simulation moved"),
+ ("the counts RELEASE.html quotes for this plan equal the ones computed here",
+  "RELEASE.html is hand-written HTML with no generator of its own, and its typed 'the 14 "
+  "questions a built unit answers' drifted the moment a 15th open question was added. This "
+  "generator cannot own that file, but it can refuse to publish while it disagrees with it"),
+ ("the finished HTML states, for each robotd.toml threshold it quotes, the line it was read "
+  "from and whether that line is commented out",
+  "both thresholds behind the tilt gates are COMMENTED lines in the only copy of "
+  "deploy/robotd.toml here; printing them as live assignments claims something the file does "
+  "not say"),
+]
+
+# RELEASE.html's three typed figures about this plan, and the value each must equal.
+GUARDED_LITERALS = ["GATE_WALK_M", "SIM_WALK_M", "SIM_WALK_X", "SIM_WALK_SPEED_WINDOW",
+                    "SIM_WALK_MEAN_ALL", "LIMP_TILT_DEG", "TOL_DEG_OF_COUNT",
+                    "STANDBY_TOTAL_A", "STALL_TOTAL_A"]
+
+RELEASE_REL = "RELEASE.html"
+RELEASE_CLAIMS = [
+    (r"(\d+)\s+numbered\s+tests",                    lambda: n_tests,      "numbered tests"),
+    (r"the\s+(\d+)-gate\s+end-of-line\s+checklist",  lambda: len(D["eol"]), "end-of-line gates"),
+    (r"the\s+(\d+)\s+questions\s+a\s+built\s+unit",  lambda: n_open,       "open questions"),
 ]
 
 def selfcheck(doc=None):
@@ -717,6 +802,12 @@ def selfcheck(doc=None):
             elif joint not in RANGE_EXEMPT:
                 bad.append("id_map %s has no MJCF joint and no stated exemption" % joint)
         for n, row in enumerate(D["equipment"]):
+            # The Src column of this table went unchecked until 2026-09-03, when a price ("~15
+            # EUR") was typed into it and rendered as a plausible-looking citation. Every other
+            # src[] in the file is checked; this one is now too.
+            if len(row) > 3 and row[3] is not None and row[3] not in SRC:
+                bad.append("equipment row %d (%s) cites unknown source key %r"
+                           % (n, row[0][:40], row[3]))
             serves = row[4] if len(row) > 4 else []
             key    = row[5] if len(row) > 5 else None
             if not serves:
@@ -740,6 +831,32 @@ def selfcheck(doc=None):
                 bad.append("SV-01 read-back list carries register %d but no step names it" % a)
             if kind not in ("scan", "written", "verify"):
                 bad.append("SV-01 read-back %d has unknown kind %r" % (a, kind))
+        # No derived number may appear as a LITERAL in the data file. Every one of these has a
+        # token; a typed copy is a number that stops moving when its source moves, which is how
+        # the end-of-line row for WK-02 came to carry 0.594 m while section 9 was computing it.
+        raw = open(os.path.join(REPO, "spec", "test-plan.json")).read()
+        for k in GUARDED_LITERALS:
+            lit = str(TOK[k])
+            if lit in raw:
+                j = raw.index(lit)
+                bad.append("spec/test-plan.json carries the literal %r, which is the derived value "
+                           "of @%s@ — write the token instead. Context: ...%s..."
+                           % (lit, k, raw[max(0, j - 70):j + 40].replace("\n", " ")))
+        rp = os.path.join(REPO, RELEASE_REL)
+        if not os.path.exists(rp):
+            bad.append("%s is missing; the counts it quotes about this plan cannot be checked"
+                       % RELEASE_REL)
+        else:
+            flat = re.sub(r"\s+", " ", open(rp).read())
+            for pat, want, what in RELEASE_CLAIMS:
+                m = re.search(pat, flat)
+                if m is None:
+                    bad.append("%s no longer states the %s for this plan; the sentence that "
+                               "carried it was reworded, so the cross-check is blind"
+                               % (RELEASE_REL, what))
+                elif int(m.group(1)) != want():
+                    bad.append("%s says %s %s; this plan has %d"
+                               % (RELEASE_REL, m.group(1), what, want()))
     else:
         tmpl = re.findall(r"\{(?:TAILNUM|SECNUM|TN\(|len\(|D\[|E\(|M\()[^}]*\}", doc)
         if tmpl: bad.append("unrendered template expressions in the output: %s" % sorted(set(tmpl)))
@@ -747,6 +864,14 @@ def selfcheck(doc=None):
         if left: bad.append("unfilled tokens in the output: %s" % sorted(set(left)))
         for i in ids + eol_ids + ex_ids:
             if ('id="%s"' % i) not in doc: bad.append("no anchor id=%r in the output" % i)
+        for key, line, commented in (("limp_fall_tilt_z", TOML_TILT_LINE, TOML_TILT_COMMENTED),
+                                     ("fall_gravity_z",  TOML_FGZ_LINE,  TOML_FGZ_COMMENTED)):
+            want = "%s:%d" % (TOML_REL, line)
+            if want not in doc:
+                bad.append("the output never states where %s was read from (%r)" % (key, want))
+            if commented and "commented out" not in doc:
+                bad.append("%s is a commented line in %s and the output never says so"
+                           % (key, TOML_REL))
     return bad
 
 TOK["N_CHECKS"] = len(CHECKS)
@@ -763,7 +888,7 @@ HTML = f"""<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Test &amp; Validation Plan</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opt_sz,wght@8..60,400;8..60,600;8..60,700&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="tools/doc.css">
 <style>
   .srcs{{font-family:var(--sans);font-size:11px;color:var(--ink-2);margin-top:10px;
@@ -893,6 +1018,15 @@ HTML = f"""<!doctype html>
   <div class="tw"><table class="data"><caption>Table {TN()}. The refusals, and the defect each one exists to catch.</caption>
   <thead><tr><th>The check</th><th>Why it is there</th></tr></thead>
   <tbody>{"".join("<tr><td>%s</td><td class='basis'>%s</td></tr>" % (M(a), M(b)) for a, b in CHECKS)}</tbody></table></div>
+  <div class="note"><b>And the page is looked at.</b> <code>tools/shoot_test_plan.py</code> photographs
+  this document section by section into <code>out/testplan/</code> and writes
+  <code>out/testplan/MANIFEST.json</code> &mdash; the anchor, the sha256 and what each frame must show.
+  It does not trust the anchor: its readiness expression scrolls the target itself and returns false
+  until the element's own bounding rectangle proves it arrived, then holds 900&nbsp;ms for repaint before
+  the shutter. It hashes every frame and <b>refuses, deleting the file</b>, if any two are identical.
+  That refusal exists because on 2026-09-02 four frames filed as the electrical, servo, sensor and walk
+  sections were byte-identical to the frame of the page top &mdash; one picture, four names, and the
+  house rule recorded as kept when it was not.</div>
 </section>
 
 {sections_html()}
@@ -934,7 +1068,7 @@ HTML = f"""<!doctype html>
   <thead><tr><th>Question</th><th>Test</th><th>Status today</th><th>What settles it</th></tr></thead>
   <tbody>{open_table()}</tbody></table></div>
 
-  <h3 class="sub">{TAILNUM["open"]}.1 What was open in Rev&nbsp;A and is settled now</h3>
+  <h3 class="sub" id="resolved">{TAILNUM["open"]}.1 What was open in Rev&nbsp;A and is settled now</h3>
   <p>A question that simply stops appearing looks like a question nobody asked. These were open, and
   each one is closed here by a source rather than by a decision.</p>
   {resolved_html()}
