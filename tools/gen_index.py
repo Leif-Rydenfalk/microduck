@@ -96,7 +96,7 @@ SECTIONS = [
 TOOLS = [
     ("tools/gen_comparison.py", "Builds COMPARISON.html from the measured data."),
     ("tools/gen_index.py", "Builds this index, checking every link."),
-    ("tools/gen_test_plan.py", "Builds TEST-PLAN.html from spec/test-plan.json; computes every derived figure (degrees, encoder counts, tilt thresholds) rather than carrying it as text."),
+    ("tools/gen_test_plan.py", "Builds TEST-PLAN.html from spec/test-plan.json; computes every derived figure (degrees, encoder counts, tilt thresholds, the walk reference read out of out/sim/report.json) rather than carrying it as text, and REFUSES to publish \u2014 exiting non-zero having written nothing \u2014 on any of 15 self-checks: a gated test missing from the end-of-line checklist, an unresolved source key, an ID-map range that disagrees with the MJCF, an unfilled token. Each was broken on purpose and watched to fire."),
     ("tools/gen_sourcing.py", "Builds SOURCING.html and RFQ.html from spec/sourcing.json; refuses to publish a verdict the data does not support."),
     ("tools/head_analysis.py", "Measures head conformance from silhouettes."),
     ("tools/gen_head_motion.py", "Builds HEAD-MOTION.html from out/motion/head.json."),
