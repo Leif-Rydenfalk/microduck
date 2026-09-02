@@ -1,0 +1,519 @@
+[
+ {
+  "lane": "H \u2014 Test &amp; validation plan",
+  "document": "/Users/leifrydenfalk/dev/ce-workshop/ce-designs/microduck/TEST-PLAN.html",
+  "open_problems": [
+   "No unit has been built, so not one of the 35 gates has been exercised on hardware. The plan is complete and untried, and RELEASE.html's readiness row says exactly that.",
+   "docs/ELECTRONICS-AND-SOFTWARE.md 3.3 states that a power cycle 'restores factory D' for the XL330's Position D Gain. The vendor initial value of Position D Gain(80) is 0, so a power cycle restores D = 0 \u2014 there is no non-zero factory damping term. The correction is recorded in TEST-PLAN 4.2 (and was already flagged in ce-parts/xl330-m288-t/iterations/v0.0.1/docs/DATASHEET.md), but the source document belongs to lane C and was NOT edited by this lane. Someone should fix that sentence.",
+   "electronics/robot-hat/'s reconstruction leaves the codec's 1.8 V DVDD rail dead-ending on test point TP1 (decision D5) with no 1.8 V source designed in. A board built from our files reads 0 V on the EB-03 HAT_1V8 row. That is a defect of the board, not of the unit, and it blocks the PCB lane before it blocks this one.",
+   "cecad.vision.screenshot_url's blank-image guard rejects a tall full-page capture of a text document ('no continuous mark longer than 5.1% of the frame'), and Chrome truncates full_page at 16384 px, so a 40,000 px document cannot be captured in one shot. Worked around here by capturing per-anchor with verify=False. A page-mode that tiles and verifies per tile would make this loop repeatable for the next long document (P11 tooling item for lane I).",
+   "The 0.75 sim-to-real walk fraction, the 10.0 deg / 50 mm stand-hold gates, the 0.150 m repeatability spread and the 56/64 ToF zone yield are all decisions of this plan rather than measurements. They are labelled as such in the document, but they are the first things a built unit should replace."
+  ],
+  "cannot_determine": [
+   {
+    "what": "What a real Microduck walks in 8.0 s at a commanded vx 0.25 m/s",
+    "why": "No real-robot walk figure exists in this repository or in any Pollen document. Our MuJoCo run of Pollen's own alpha_walking.onnx on Pollen's own physics measured 0.7925 m (stock-mesh and swapped-mesh trajectories bit-identical), but the sim already under-tracks its own command (0.1053 m/s achieved against 0.25 commanded) with position actuators standing in for the BAM model the policy was trained with",
+    "what_settles_it": "WK-02 and WK-03 on the first five built units. Replace the 75 % fraction with the measured mean minus three standard deviations and regenerate. Best-supported option today: keep 0.594 m and label the fraction a decision, which the document does; the alternative it beat was quoting 0.7925 m as the gate, which would fail every real robot for a reason that is not a defect"
+   },
+   {
+    "what": "Whether the XL330 servos see the raw 6.6-8.4 V pack, above their published 3.7-6.0 V band",
+    "why": "Pollen's runtime maps the pack 6.6-8.2 V through the servos' own Present Input Voltage(144) (model.rs:99-113) and writes Shutdown(63)=52, clearing exactly the Input Voltage Error bit \u2014 both consistent with stock servos on the raw pack. But the firmware's Max Voltage Limit(32) cannot be set above 7.0 V, and ROBOTIS publishes no absolute maximum. Code cannot settle it",
+    "what_settles_it": "TEST-PLAN EB-04: a meter on pin 2 of the servo bus at four points, at 8.20 V and 6.60 V supply. Both outcomes are stated in the gate; if SERVO_V is inside 3.7-6.0 V, docs/ELECTRONICS-AND-SOFTWARE.md 3.4 must be corrected"
+   },
+   {
+    "what": "What a Microduck draws, walking",
+    "why": "ROBOTIS publishes no running or no-load current at any voltage for the XL330-M288-T \u2014 only Standby 17 mA and stall 1.11/1.47/1.74 A at 3.7/5.0/6.0 V, and above 6.0 V no stall figure at all. No measured figure exists for the assembled robot, so every rail budget in the repo (including the 1 A-per-moving-servo basis behind wiring/CABLES.md's voltage-drop model) rests on an assumption",
+    "what_settles_it": "TEST-PLAN EB-07: pack current and per-servo Present Current(126) in three states (torque off / home held / walking 8 s), gated on Current Limit(38) = 1750 mA so the per-servo half needs no clamp"
+   },
+   {
+    "what": "Whether any joint's servo-positive direction is inverted relative to the MJCF joint sign",
+    "why": "The home-count column of \u00a74.1 is computed as 2048 + rad x 4096/(2pi) from DEFAULT_POSITION. That mapping assumes servo-positive equals joint-positive with no inversion, and no published source gives a per-joint inversion table \u2014 Pollen's code never needs one because the robots were built with a known convention",
+    "what_settles_it": "SV-05 on the first unit: a joint that lands the same distance the wrong side of 2048 is an inversion, not a calibration error. The measured table becomes a column of \u00a74.1 and the document is regenerated"
+   },
+   {
+    "what": "NFC reader IC, bus and antenna geometry; and the GPIO behind the camera-use indicator LED",
+    "why": "Zero hits for nfc/pn532/st25 in duck-ipc-proto_lib.rs and research/microduck-elec-grep.txt, and zero hits for the LED. No reader is named anywhere. Two candidate readers are datasheeted on the shelf and neither is confirmed fitted: ST25R3916 (two single-ended antenna drives, which would suit the press kit's two antennas) and PN7150 (one antenna path)",
+    "what_settles_it": "A teardown identifying the reader and tracing the LED, or a later pollen-robotics/microduck release exposing an NFC service. Recorded as SN-09 and SN-10 \u2014 rows that exist so the absence is on the record, and deliberately kept OFF the end-of-line checklist so nobody is trained to tick an unanswerable question"
+   },
+   {
+    "what": "The friction coefficient of the printed TPU sole against the acceptance surface",
+    "why": "The simulation uses foot friction 1.0, condim 3 on the foot collision geoms only, against a rigid floor (constants.py:100-104). Nothing in this repository measures the real sole against any real material",
+    "what_settles_it": "A coefficient-of-friction measurement of the printed sole against the chosen bench material. Until then \u00a77.1 specifies the surface by description (hard, flat, dry, matte laminate or sealed MDF; not carpet, not glass, not rubber) and requires the level to be measured and logged, which is the closest specification that can be written without inventing a number"
+   }
+  ],
+  "commits": [
+   "27ffea5464aabbec255ca45af77c304931ba5a99 \u2014 lane H: TEST-PLAN.html \u2014 35 gated tests from spec/test-plan.json via tools/gen_test_plan.py",
+   "b85981f424b0 \u2014 index: register TEST-PLAN.html and its data file under a Test & validation section (lane H)",
+   "1b02adbaaeb1 \u2014 release: link TEST-PLAN.html (TOC, readiness row, section 6) and correct the servo-VDD assertion in the power-up steps"
+  ],
+  "notes": "Deliverable is TEST-PLAN.html (MD-TST-001 Rev A), generated from spec/test-plan.json by tools/gen_test_plan.py \u2014 35 numbered tests, 23 end-of-line gates, 12 open questions, 27 cited sources.\n\nThree things worth the orchestrator's attention.\n\nFIRST: this lane produced the measurement that closes the repository's oldest open electrical question. EB-04 puts a meter on pin 2 of the servo bus at four points and two supply settings; its gate says both outcomes are valid results of the test and names which document must be corrected in each case. EB-07 does the same for the missing running-current figure that every rail budget in the repo currently assumes. Neither existed as a defined measurement before.\n\nSECOND: the derived figures are computed in the generator and never typed. One encoder count is 0.087891 deg, so the +/-1.0 deg calibration tolerance (the amplitude of the backlash twins the policies were trained against) is exactly +/-11 counts; the home pose of all 15 joints is published in counts as 2048 + rad x 4096/(2pi) from DEFAULT_POSITION; the walk tilt gate is acos(0.90) = 25.8419 deg from limp_fall_tilt_z, and the fall-report threshold acos(0.5) = 60.0000 deg. Regenerating the page recomputes all of them.\n\nTHIRD: I made one edit outside my lane. RELEASE.html section 6 step 1 asserted \"Servo-bus VDD is battery-direct through the HAT\" as a fact. It is an inference from model.rs:99-113 and part:xl330-m288-t's own record states the conflict (vendor band 3.7-6.0 V against a 6.6-8.2 V pack read through that very pin). I restated it as CANNOT DETERMINE with EB-04 named as the measurement (commit 1b02adb). The related error in docs/ELECTRONICS-AND-SOFTWARE.md 3.3 about the XL330's \"factory D\" gain I did NOT edit \u2014 that document is lane C's; the correction is recorded in TEST-PLAN 4.2 and listed under open_problems.\n\nEverything was read back: the page was served, screenshotted per section in headless Chrome, and every image inspected. Two rendering defects were caught that way and fixed. No FreeCAD/CalculiX geometry job was run in this lane; the only bin/cad use was headless-Chrome screenshotting, one at a time."
+ },
+ {
+  "lane": "F3 \u2014 thermal + tolerance stack-up",
+  "document": "/Users/leifrydenfalk/dev/ce-workshop/ce-designs/microduck/out/sim-evidence/f3-sections.html",
+  "open_problems": [
+   "Both knees straddle the XL330's own 70 degC Temperature Limit(31) at the measured walking duty. This is the single most consequential thermal result: if the real emissivity and mount blockage land on the bad side, the servo latches Overheating Error (Shutdown(63) Bit 2) mid-walk. One servo step test settles it and nothing else will.",
+   "The MJCF's actuator forcerange is +/-0.96 N.m against the vendor's 0.60 N.m stall torque at 6.0 V \u2014 the simulation is allowed 1.6x more torque than the real part can make. Lane F2 already grades 12 joints over the 6.0 V stall row in push cells. Every thermal number here is computed at the measured torques regardless, but a policy retrained inside the real limit would change the duty.",
+   "The compute's failing thermal leg is die-to-skin and there is no conduction path in the design at all: 194.171 cm3 of still air, no vent, no fan, no heatsink between a 95 degC die and a shell the external solution puts in the high twenties. This is a mechanical design item (a pad or bracket from the SoC to the shell), not an electronics one, and no lane currently owns it.",
+   "The whole 14-hinge tolerance stack rests on a published service tolerance because print_fits.json is empty. Until one coupon is printed and measured, every fit number in this repo is a bound, not a value \u2014 and the bound says a \u00d816 printed bearing seat is coarser than IT15, which cannot be right for a product that works.",
+   "Seven joints seat a 4.0 mm ring on a 1.95 mm boss. The consequence is now quantified \u2014 the bearing leaves 27.1497 deg of cocking freedom at FDM-A and therefore contributes almost nothing to holding the joint's angle \u2014 so the flange is doing all the work and its form tolerance is the one thing nobody has measured.",
+   "left_knee and right_knee carry a bearing that no part folder declares a seat for; their stacks are incomplete until that interface is measured and written."
+  ],
+  "cannot_determine": [
+   {
+    "what": "XL330-M288-T winding-to-case thermal resistance and lumped thermal capacitance",
+    "why": "ROBOTIS publishes no thermal model, no winding resistance and no continuous-torque rating \u2014 only the three stall rows and the 70 degC Temperature Limit(31). So every case temperature computed is a lower bound on the winding, and time-to-limit is reported as a CURVE over cp (500\u20131700 J/kgK on the vendor's 18 g), not a number. At cp=500 with no radiation the knee reaches 70 degC in 12.33 min; at cp=1700, 41.92 min; with black-body radiation it never does.",
+    "what_settles_it": "A step test on one servo: hold a known constant torque against a fixture and log Present Temperature(146) (RAM 146, 1 degC) to steady state. The asymptote gives R_th and the knee gives C in the same run \u2014 and it converts both knees' CANNOT DETERMINE into a verdict."
+   },
+   {
+    "what": "This workshop's own printed dimensional band (the whole tolerance stack rests on it)",
+    "why": "ce-cad/cecad/data/print_fits.json is {\"machines\": {}, \"schema\": 1} \u2014 no machine on the farm has ever been measured, so every tolerance number in the stack rests on a published SERVICE tolerance (Protolabs Network) rather than on the printer that will make these parts. Those service bands make a \u00d816 bearing seat coarser than IT15, which is not survivable, yet the parts evidently work \u2014 the gap between the two is exactly the unmeasured quantity.",
+    "what_settles_it": "Build cecad.coupon.coupon() with the \u00d810 and \u00d816 rungs, print it, measure with calipers and store with cecad.coupon.record_measurements(); cecad.coupon.offsets_for() then answers per machine + material instead of returning CANNOT DETERMINE."
+   },
+   {
+    "what": "The bolted flange's face parallelism (which governs the angular misalignment on every joint)",
+    "why": "The published FDM standards state DIMENSIONAL accuracy, not form. Applying the dimensional band as if it were parallelism across the \u00d815.9\u201319 disc gives 3.0128\u20133.5988 deg, which is an UPPER BOUND of unknown tightness, not a measurement. Both flange faces come off the same layer stack so the true error is expected to be far smaller \u2014 but 'expected' is not measured, and this is the term that governs every joint's angle.",
+    "what_settles_it": "Print a flange coupon and read face parallelism across \u00d816 with a dial indicator on a surface plate; store it beside the bore/pin ladder of cecad.coupon."
+   },
+   {
+    "what": "The Radxa Zero 3W's board-level dissipation and the RK3566's junction-to-air resistance",
+    "why": "ce-parts/radxa-zero-3w/electrical.host.json unknowns[1] verbatim: 'Board current draw (idle / policy running / video encoding): no fetched document states it.' and power[4]: 'Board-level current draw: NOT stated in any fetched document - CANNOT DETERMINE.' Rockchip publishes no theta_JA. The only sourced electrical figure is the 5 V / 2 A supply RATING = 10.0 W ceiling. So the internal leg is not modelled \u2014 it is measured, at 95 degC.",
+    "what_settles_it": "An inline meter on the 5 V path in the three states electrical.host.json itself names (idle, policy running, video encoding), plus /sys/class/thermal/thermal_zone*/temp logged beside a thermocouple on the head shell at a known load."
+   },
+   {
+    "what": "The pack's self-heating and the servo-bus regulator's",
+    "why": "ce-parts/np-f550/electrical.part.json uncertainties verbatim: 'INTERNAL RESISTANCE, MAX CONTINUOUS DISCHARGE, CHARGE RATE: stated by neither fetched page.' \u2014 no cell internal resistance means no I^2 R to compute, and the fitted pack's maker is itself CANNOT DETERMINE. The servo-bus regulator lives on the Robot HAT, one of the three custom PCBs with no published design, so there is no part number, no package and no theta_JA. The 6.4194 W bus lower bound is what such a study would start from.",
+    "what_settles_it": "The pack's own datasheet once the fitted maker is identified (lane E), and the Robot HAT schematic (lane D) naming the regulator."
+   },
+   {
+    "what": "The bearings' radial internal clearance and width tolerance, and the XL330 gearbox backlash / horn-disc tolerance",
+    "why": "The reference names the rings only 'seeed_bearing' \u2014 no designation, no vendor sheet, so no ISO 5753 clearance class (both connection folders say so in their 'interference' check). ROBOTIS publishes no gearbox backlash anywhere on E1, E2 or D1, and D1 ('XL,XC-330.pdf') is stamped '[FOR REFERENCE ONLY]' / 'Nonescale' with no tolerance block. All four terms are listed in the stack's open_terms and NOT folded into any number, so every figure reported understates the real stack.",
+    "what_settles_it": "A micrometer on the actual rings and a dial gauge on an assembled joint; for backlash, lock a servo case, load the horn both ways and read Present Position(132) (4096 pulse/rev = 0.0879 deg/count)."
+   },
+   {
+    "what": "Seat length for the knee bearings",
+    "why": "A 22x16x4 bearing is on both knee axes but no part folder declares a bearing_seat interface for it, so engagement, bearing cocking freedom and the axial-vs-engagement ratio are all blank for left_knee and right_knee.",
+    "what_settles_it": "Measure the seat off microduck-upper-leg-left/right with cecad.meshfeatures and add the bearing_seat interface to its cad/interfaces.json \u2014 the same measurement every other consumer already carries."
+   }
+  ],
+  "commits": [
+   "7826ed2 F3 thermal: measure per-joint XL330 torque duty in MuJoCo and grade winding heating against the vendor 70 degC limit (both knees CANNOT DETERMINE)",
+   "ac7086f F3: measure head/trunk cavity volumes, per-hinge joint geometry, and the 14-hinge tolerance stack-up (bearing seats grade coarser than IT15 at every published FDM band)",
+   "2c66843 F3 thermal: locate the compute in the HEAD (not the trunk), measure the enclosure and show the failing leg is die-to-skin, not skin-to-room",
+   "99de22c F3: section generator for SIMULATION.html from the six evidence JSONs, plus the screenshot read-back of the preview page",
+   "18f9b8c F3: solver self-test with a watched negative control (radiation sign flipped, three checks went red, restored)",
+   "b1dd853 F3: answer the brief's engagement flag directly - axial stack against the bearing's engaged length per joint (hip-yaws consume 76.9 % of 1.95 mm at FDM-A)"
+  ],
+  "notes": "SHAPE: all six JSONs follow the lane's fixed shape {study, inputs{...with sources}, method, outputs, verdict, why, script, artifacts, looked_at}; the two thermal ones add a `cannot_determine` list. `tools/gen_simulation_f3.py` writes out/sim-evidence/f3-sections.html for the synth's tools/gen_simulation.py to include verbatim, exactly as tools/gen_simulation_f2.py does \u2014 the synth needs no new code, just to include the fragment.\n\nCORRECTION FOR THE ORCHESTRATOR: the lane brief said the Radxa sits \"inside the closed trunk\". It does not \u2014 both PCBs are geoms of MJCF body jaw_soft (the head). Any other lane that assumed the trunk (packaging, DFM, assembly ordering, wiring runs) should re-check against out/sim-evidence/cavity-volumes.json.\n\nLOAD BASIS: derived from the MJCF masses and the walk policy as instructed \u2014 model mass 0.737243 kg, weight 7.23236 N, torques read off data.actuator_force at the 200 Hz physics step (script sim/thermal_duty.py, frame = every mj_step of an 12.0 s run at vx 0.25 m/s, statistics over t >= 0.5 s). F2's gait-peaks.json landed while this lane ran and is cited as the cross-check; its baseline_walk_vx0.25 peaks agree with this lane's, which are equal or slightly higher because F2 samples at 50 Hz and this lane at 200 Hz.\n\nNOT DONE BY DESIGN: no number was invented for any unpublished quantity. Where a study needed one it was either (a) derived from published data with the derivation's own consistency check shown (the servo's terminal resistance from three stall rows), (b) bracketed by hard physical bounds needing no source (emissivity 0..1), or (c) left as a parametric curve with the sweep labelled (time-to-limit over cp). No check was loosened; two verdicts that a looser reading would have made PASS are CANNOT DETERMINE instead (the knees, and the whole tolerance stack).\n\nRESOURCE ETIQUETTE: one FreeCAD job at a time; four bin/cad invocations total (three MuJoCo/mesh, one screenshot), each waited for. No process I did not start was touched. Nothing was sent anywhere."
+ },
+ {
+  "lane": "F2 \u2014 MuJoCo gait robustness + battery runtime",
+  "document": "/Users/leifrydenfalk/dev/ce-workshop/ce-designs/microduck/out/sim-evidence/f2-preview.html",
+  "open_problems": [
+   "The simulated gait exceeds the XL330-M288-T's published stall torque on EVERY 5 deg slope and at every command >= 0.60 m/s. Whether the physical robot can walk a 5 deg slope at all is now an open product question: the sim asks right_hip_pitch for 0.8022 N.m and the servo's ceiling is 0.60 N.m at 6.0 V. Lane H should add a slope-walk acceptance test; lane G should state the slope limit in the playbook.",
+   "Pollen's MJCF permits +/-0.96 N.m per joint, 1.60x the highest published stall row. Any conclusion drawn from a cell where the actuator saturates (every push cell, every sit-stand cell) is the simulation's ceiling, not a servo capability. The model would be more faithful with forcerange set to the vendor row for the pack voltage actually used \u2014 but no vendor figure exists above 6.0 V and the robot runs the servos at 6.6-8.2 V, so that clamp cannot be set from evidence today.",
+   "The walking policy does not hold a straight line: net yaw drift reaches -186.608 deg over 12 s at vx 0.80 (-36.37 deg per metre of ground track), and the forward tracking ratio (mean path speed / commanded vx) sits between 0.514 and 0.637 in every moving level-ground cell. A walk acceptance test that measures straight-line displacement will understate distance and will fail a heading criterion the policy was never trained to meet.",
+   "stand_from_FOLD does not recover: the robot stays down with left_hip_pitch pinned at the 0.9600 N.m MJCF ceiling for the whole attempt. Either the FOLD keyframe is outside the stand policy's basin or the actuator model is the binding constraint \u2014 the two are not separable while that ceiling sits above the vendor's stall row.",
+   "sim/render_video.py takes ~45-90 s per 12 s clip on this loaded machine and its overlay font renders non-ASCII as a filled box (an em-dash produced a black square in every frame until I switched the labels to ASCII). Both are worth fixing in the shared tool.",
+   "The Data volume hit 100 % full mid-sweep (OSError errno 28 on cell endurance_60s_slope5_up); another session freed space and the cell was re-run. My footprint is 26 MB. This is a machine-level risk for the remaining night-shift lanes, not an F2 defect."
+  ],
+  "cannot_determine": [
+   {
+    "what": "The Radxa ZERO 3W's actual power consumption (and with it, a single battery-runtime number)",
+    "why": "No vendor document states it. Radxa's hardware page states only a supply REQUIREMENT \u2014 'Requires 5V/2A power adapter' (https://docs.radxa.com/en/zero/zero3, fetched 2026-09-02) \u2014 which is a 10.0 W ceiling, not a draw. The product brief PDF (https://dl.radxa.com/zero3/docs/hw/3w/radxa_zero_3w_product_brief.pdf, fetched 2026-09-02) states no consumption figure. out/handover/elec-verify-wf_969f3a4c.json's Radxa row records the same '5V/2A' and no current. Search-engine answer boxes quoting '0.35-0.45 A idle' were seen and are NOT recorded \u2014 an answer box is not a source. The HAT, ToF, IMX219 and imu_to_dxl board add to it with no published system figure either.",
+    "what_settles_it": "An ammeter in series with the pack lead of a running unit, with Present Current(126) summed off the Dynamixel bus at the same time so the servo and board halves separate. Best option this evidence supports: publish runtime as a function of the unknown (done \u2014 7 compute levels x 3 modes). The alternative it beat: asserting ~2 W from a search-engine summary, which would have produced one confident wrong number."
+   },
+   {
+    "what": "The XL330-M288-T's no-load current",
+    "why": "ROBOTIS's Specifications table publishes three stall rows, three no-load SPEEDS and 'Standby Current | 17 [mA]' \u2014 and no no-load current. ce-parts/xl330-m288-t/electrical.chip.json already records current_mA.typical = null for the same reason.",
+    "what_settles_it": "Present Current(126) read off an unloaded servo turning at speed, or a bench ammeter. Consequence recorded rather than papered over: I = tau/kT goes to zero at zero torque, so every motor-power figure in battery-runtime.json is an explicit LOWER bound, and this is the most likely home for the 2x gap against Pollen's ~1 h."
+   },
+   {
+    "what": "How much of the pack's 18.7 Wh is actually delivered before the 6.6 V cutoff",
+    "why": "robotd shuts down on a ~10 s EMA at 6.6 V (robotd.toml [safety] battery_empty_shutdown), and no discharge curve exists for the fitted cell because the fitted cell is unidentified.",
+    "what_settles_it": "A discharge run on the real pack at the measured walking current. Until then every hour in battery-runtime.json credits 100 % of nominal and is stated as an upper bound on that account."
+   },
+   {
+    "what": "Which NP-F550-shape pack is actually fitted",
+    "why": "Pre-existing and unchanged: 'NP-F550' is Sony's shape and Sony's own cell is 1500 mAh / 10.8 Wh, so a 2600 mAh 'NP-F550' is necessarily third-party, and no Pollen source names the maker (ce-parts/np-f550/component.json). Duracell's DR5 is the representative part on the shelf, not a proven fit.",
+    "what_settles_it": "The label on a shipped pack (maker, cell, Wh, certification marks), or Pollen naming the supplier."
+   },
+   {
+    "what": "Whether Pollen's trunk inertial already includes the 99 g battery",
+    "why": "The MJCF has no battery body; trunk_base carries a single lumped inertial of 0.199224 kg out of a 0.737243 kg total, and nothing in the published model says what that lump contains. 99 g is 13.43 % of the total, so a true battery-in/battery-out pair is a bigger perturbation than +/-10 %.",
+    "what_settles_it": "Weighing a built robot with and without the pack, or a Pollen mass breakdown. Best option this evidence supports: sweep +/-10 % as the brief specifies and say so, rather than assert a battery-out case. The gait proved insensitive across that range (1.1614 m vs 1.2894 m walked, no fall either way), so the finding is unlikely to move."
+   }
+  ],
+  "commits": [
+   "4df37e3 \u2014 F2: MuJoCo gait-robustness sweep (34 cells) + the per-joint peak-torque and ground-reaction table F1/F3 consume",
+   "e404e15 \u2014 F2: battery runtime from the measured MuJoCo torque/speed profile through ROBOTIS's published XL330 stall and no-load rows; compute draw stays CANNOT DETERMINE and is swept",
+   "577070a \u2014 F2: 37-cell gait sweep at 200 Hz with path length, yaw drift and forward-tracking ratio; per-family videos read back; F2 section generator",
+   "7071030 \u2014 F2: list the gait-sweep, evidence and battery-runtime scripts in the repo index"
+  ],
+  "notes": "Deliverables follow the shared lane-F shape {study, inputs, method, outputs, verdict, why, script, artifacts, looked_at}. gait-peaks.json was written and committed FIRST (4df37e3, 21:40) so F1 and F3 could consume it while the rest of the sweep ran.\n\nFOR THE SYNTH AGENT: tools/gen_simulation_f2.py reads the three JSONs plus out/sim-sweep/videos.json and writes out/sim-evidence/f2-sections.html \u2014 four ready-made <section> fragments (F2.1 robustness matrix, F2.2 peak-torque/GRF load basis, F2.3 video strips, F2.4 battery) using only doc.css classes, with repo-relative image paths that resolve from a document at the repository root. Include them verbatim; do not re-derive the tables. out/sim-evidence/f2-preview.html is the same fragments in a standalone page \u2014 that is what I screenshotted and read back.\n\nFOR F1 (FEA): the design loads are in gait-peaks.json outputs.ground_reaction_force_N \u2014 single-foot 23.3897 N (3.234 x body weight) from the actual walk, and 93.0579 N summed over both feet as the worst case anywhere in the matrix (a 5 N push that toppled the robot). This sits between the 20 N standing and 60 N landing cases already in out/stress/report.json, so the existing FEA envelope brackets the measurement.\n\nFOR F3 (thermal): per-joint peak, p99, p95 and RMS torque plus peak joint speed in rad/s and output rpm are in per_joint_locomotion_upright. We now agree with sim/thermal_duty.py to 4 dp on left_knee (0.43045 vs 0.4304) after I moved my recording from the 50 Hz control frame to the 200 Hz physics step.\n\nMethod notes worth carrying into SIMULATION.html: slopes are applied by rotating gravity with the floor left flat (identical mechanics in the plane's frame, and it avoids re-meshing); friction must be set on the floor AND both foot geoms because MuJoCo mixes a contact pair's friction elementwise-max; the GRF pipeline was validated against statics (0.14 % and 0.05 % against computed weight) before any of its numbers were used.\n\nNothing was contacted, no money was spent, nothing was sent to the print farm, no other lane's files were touched, and trash/ was not edited. Changelog entry recorded with every anchor checked PASS: id 2026-09-02-ce-workshop-ce-designs-microduck-gait-envelope-was-never-measured-so-nobody-knew-whether-the."
+ },
+ {
+  "lane": "H \u2014 Test &amp; validation plan (fix stage)",
+  "document": "/Users/leifrydenfalk/dev/ce-workshop/ce-designs/microduck/TEST-PLAN.html",
+  "open_problems": [
+   "Nothing re-runs tools/gen_test_plan.py when a sibling lane lands a cross-referenced file. link() heals the page on the next run and the run now PRINTS the resolved/pending tally naming any pending target, but a committed page can still lag the repository until someone regenerates it. A repo-wide 'regenerate every document whose inputs changed' hook would close it; that is lane I (tooling) work, not lane H data.",
+   "spec/test-plan.json and tools/gen_test_plan.py were being edited by a second agent concurrently throughout this fix (the Rev-B expansion: a 'stack' section, 2 more registers, firmware/software/upstream.json loads, 9 more tests). Every write here was a fresh read-modify-write and the final file carries both sets of changes intact (verified field by field), but a write that landed inside one of my read-write windows would have been lost silently. Two sessions editing one data file has no lock and no detection.",
+   "The scratchpad directory this session was given is shared with at least one other agent \u2014 my screenshot script at scratchpad/shot.py was overwritten mid-run by another lane's script (it began screenshotting MANUFACTURING-PLAYBOOK.html and then ELECTRONICS-DATASHEET.html). Work was moved to scratchpad/laneH/. Any agent relying on a scratchpad filename being its own will silently get another agent's file.",
+   "SN-05 (LSM6DSV16X chip self-test) cannot be run on an assembled robot at all \u2014 the part sits behind an unidentified MCU on the imu_to_dxl board and is on no host bus. It is recorded as an incoming-inspection gate for the bare board. Until an imu_to_dxl board is put on a bench fixture, nothing verifies that IMU's chip-level health on any unit.",
+   "SN-09 (NFC) has no possible test on today's published software: no NFC service in the release, no reader IC identified. Recorded as a permanent exemption with what would put it back."
+  ],
+  "cannot_determine": [
+   {
+    "what": "Which of the two bodies a joint joins physically carries the servo housing, and which carries the horn",
+    "why": "A joint declared inside MJCF body C joins C to its parent P. The kinematic file says which two bodies a joint joins and says nothing about which side the actuator case is bolted to. The old hand-typed column asserted one of the two per row and was measurably inconsistent (9 parent, 5 child), so it has been replaced by both measured bodies rather than a better guess. The mouth (ID 34) is not in the MJCF at all.",
+    "what_settles_it": "spec/mesh-placements.json read against the xl330 body geometry \u2014 the housing is the body whose frame the servo case is fixed in, the horn is the body that rotates with the output; lane B's per-joint drawings settle it visually; and SV-02's jig has to know it anyway, because the mechanical zero is measured against whichever body the horn indexes to. Written into the document's open-questions table (\u00a713, against SV-02) with exactly this text."
+   },
+   {
+    "what": "Whether any gate in this plan is the right gate",
+    "why": "No Microduck has been built here. Every PASS band is a prediction: the walk gate is 75 % of a simulated distance and that fraction is stated as a decision of the plan, not a measurement; no real-robot walk distance exists in this repository or in Pollen's published material.",
+    "what_settles_it": "One built unit run through the plan. The document's \u00a713 lists 15 such questions, each naming the test that closes it; most are answered the first time a unit is on a bench."
+   }
+  ],
+  "commits": [
+   "41cec15 \u2014 lane H fix: every number survives its own citation \u2014 WK-02 walk basis token-substituted from out/sim/report.json (the hand-typed 0.1053 m/s was walked_x_m/7.5, a third quantity), 9 gated tests added to the end-of-line checklist with 2 recorded exemptions, and a selfcheck() that refuses to publish what the data does not support",
+   "9d03f83 \u2014 lane H fix (2): equipment rows carry machine-checked test links \u2014 three stale references corrected (the 88 % ToF target said SN-05, which is the IMU self-test); ID-map bodies read off the MJCF instead of a hand-typed column that mixed parent and child; SV-01's read-back count follows the procedure; 15 self-checks, each broken on purpose and watched to fire",
+   "ac2fdeb \u2014 index: gen_test_plan.py's row now says what it refuses to publish \u2014 15 self-checks, exit non-zero having written nothing"
+  ],
+  "notes": "Method note, because it changes how much the verdicts are worth: the fix was not to correct ten strings. Nine of the ten defects were possible only because tools/gen_test_plan.py checked nothing, so the load-bearing change is that it now refuses. Fifteen checks run before a byte is written; every one was broken on purpose in a sandboxed copy of the repository and watched to go red, 15 of 15, with the control run green before and after. Two of the checks poisoned themselves on the first attempt \u2014 their own explanatory prose contained a literal at-sign token and a literal brace expression, and the checks caught their own text \u2014 which is direct evidence they look at the finished page and not at the intention.\n\nWhere the skeptic and the datasheets disagreed, the datasheets won: finding 5 claimed \"201-4000 mm\" was a 1 mm transcription drift, but DS14161 Table 20 really does read 200-4000 mm while DS13754 Table 21 really does read 201-4000 mm. The plan had flattened two different vendor numbers into one. Correcting it surfaced a real consequence for the gate that the flattening had hidden \u2014 200 mm sits below the VL53L5CX's percentage row, where that part quotes \u00b115 mm absolute, so \u00b17 % (14 mm at 200 mm) makes the 200 mm point the tightest of the three test distances on that generation, and it must not be dropped.\n\nThe document now publishes its own errors: \u00a71.3 carries all eleven corrections with the measurement that settled each, and \u00a71.4 carries the fifteen refusals with the defect each exists to catch. A correction is never quietly overwritten here, because a document whose errors disappear is one nobody can audit. Nothing was loosened to make anything pass: the walk gate is still 75 % of the simulated distance and still says in capitals that the fraction is a decision of the plan and not a measurement of anything.\n\nTwo things a reader should know about the environment. First, a second agent was expanding this same lane's data and generator concurrently the whole time (Rev-B: a new \"stack\" section, two more XL330 registers, firmware/ and software/upstream.json, nine more tests). Every write here was a fresh read-modify-write and the final files carry both sets of changes \u2014 verified field by field \u2014 but that is luck plus care, not a lock. Second, the token machinery this fix introduced was immediately used by that other agent (@SEC_SERVO@ in SV-01's steps) and the derived SV-01 count silently followed their data from \"ten\" to \"twelve\", which is exactly the behaviour the fix was for.\n\nce-changelog entry: 2026-09-02-ce-workshop-ce-designs-the-microduck-test-plan-carried-numbers-and-a-completeness-claim-that (verdict PASS, every anchor checked; the pdftotext command is recorded but by design never re-run by that app)."
+ },
+ {
+  "lane": "A \u2014 HEAD: settle, then (only if needed) reconstruct",
+  "document": "/Users/leifrydenfalk/dev/ce-workshop/ce-designs/microduck/HEAD-RECONSTRUCTION.html",
+  "open_problems": [
+   "Lane T's ce-parts/microduck-top-head-shell/current/cad/interfaces.json record.frame still says 'SEE COMPARISON.html finding 1: this mesh is NOT the product head' \u2014 superseded by this lane's measurement; not edited (another lane's deliverable).",
+   "RELEASE.html \u00a71 'Simulation / validation' row and \u00a77 item 3 ('Product-photo reconciliation') should cite HEAD-RECONSTRUCTION.html and the CANNOT DETERMINE with what settles it; left to the integrator (RELEASE is the master dossier).",
+   "A broken splice of tools/gen_comparison.py by this lane (23:12) was swept into another lane's commit 77cbd91 before I restored it (ad613a1); COMPARISON.html regenerated cleanly since. Other lanes appear to commit with git add of files they did not change \u2014 worth a warning in the orchestrator.",
+   "The full pose fits cost 445\u2013848 s each on this loaded machine (load 40\u2013175); a second accidental copy of the run script was started and killed by me (PIDs 82428/83177, mine); two 'tail -f' processes on my scratchpad run_all.log (PIDs 55003/56552) are not mine and were left alone.",
+   "tools/head_analysis.py (+3.76 % / +69 % ratio analysis) and its out/verify/head_analysis.json are superseded; kept for history, COMPARISON.html \u00a75.1 says so."
+  ],
+  "cannot_determine": [
+   {
+    "what": "Head shell length/width/height of the product vs the mesh at the 1.5 mm per-axis rule",
+    "why": "the two usable photographs (cream +4.52 \u00b1 1.04 mm, graphite \u22126.27 \u00b1 1.44 mm) disagree by 5.13 mm rms \u2014 a systematic error (pose fit at 46\u201362\u00b0 yaw, mask edges, the graphite scale servo sitting 44 mm nearer the camera than the head with the camera distance unknown) larger than each photo's own uncertainty; combined +0.79 \u00b1 5.29 mm",
+    "what_settles_it": "a calliper on one product head (top_head_shell length 122.690 / width 91.760 / height 46.336 mm to 0.1 mm), or one purpose-shot photograph: pure profile, beak closed, head level, a ruler or the XL330 label face in the head's focal plane, \u22654000 px \u2014 scale uncertainty then <0.5 % (0.6 mm)"
+   },
+   {
+    "what": "Eye ring outer diameter at the 1.5 mm rule",
+    "why": "profiles say \u22120.02 \u00b1 0.32 mm (PASS) but the true front view implies +1.16 mm with \u00b10.6 mm from the flat-lay's 11\u00b0 tilt, so |d|+u = 1.76 > 1.5",
+    "what_settles_it": "a calliper across the ring's outer edge (mesh 30.000 mm) or Pollen's part drawing"
+   },
+   {
+    "what": "Camera distance of the store photographs (D)",
+    "why": "no EXIF, no ruler; the ankle-vs-neck servo bracket only gives 700\u20131650 mm",
+    "what_settles_it": "a ruler in frame or the original files' EXIF; it moves r by \u00b10.0105 only, so it is not what blocks the verdict"
+   },
+   {
+    "what": "How the eye ring's \u00d819.0 x 1.5 rear spigot is fixed in the face panel",
+    "why": "the decimated face_part.stl registers only the \u00d814.5 lens hole on that axis (cecad.meshfeatures), no \u00d819 recess or screw",
+    "what_settles_it": "the undecimated face part, or a product face panel in hand"
+   },
+   {
+    "what": "ToF window slot on the mesh side (photo: 9.8 x 5.4 mm implied, 22.53 mm right of the eye)",
+    "why": "the mesh has no ToF window geom; only the MJCF site (22.4 mm) exists",
+    "what_settles_it": "the face-part rebuild must carry the slot; a product face panel gives its size"
+   }
+  ],
+  "commits": [
+   "7f5b672 lane A (head): photogrammetric head tools + front-view result",
+   "ad613a1 lane A: restore tools/gen_comparison.py and make it consume out/head/head.json; head_photomatch pose() takes the head orientation",
+   "f1c9916 lane A: head_profile_frame.py; analytic render servo width; camera-distance sensitivity plumbing",
+   "4209a80 lane A: part:microduck-eye-ring filled \u2014 Pollen's noenoeil IS the eye bezel",
+   "97d7d6a lane A (head): HEAD-RECONSTRUCTION.html \u2014 three store photographs servo-scaled, posed and measured; COMPARISON \u00a71/\u00a75/\u00a75.1 regenerated; INDEX entry",
+   "ce-changelog: 2026-09-03-ce-workshop-ce-designs-is-the-microduck-simulation-head-the-product-head-measured-from-the (verdict CANNOT DETERMINE, every anchor checked)"
+  ],
+  "notes": "Data flow: tools/head_photomatch.py (per-photo scale + perspective pose fit + size; --D/--tag for sensitivity) \u2192 out/head/head_fit*.json; tools/head_frontview.py \u2192 out/head/front_view.json; tools/head_profile_frame.py \u2192 out/head/profile_frame.json; tools/head_verdict.py merges them with the never-loosened rule (PASS |d|+u \u2264 1.5, FAIL |d|\u2212u > 1.5, else CANNOT DETERMINE; per-photo verdicts yield to the inter-photo spread; scale reads excluded when two servos disagree >3\u03c3 or render mask vs analytic width differ >5 %; ring reads excluded when photo/render ellipse axis ratios differ >0.10) \u2192 out/head/head.json \u2192 tools/gen_head.py (HEAD-RECONSTRUCTION.html) and tools/gen_comparison.py (COMPARISON.html \u00a71/\u00a75/\u00a75.1) and tools/head_eye_ring_shelve.py (part folder). Run everything with /Applications/FreeCAD.app/Contents/Resources/bin/python; a full three-photo fit is ~30 min on this loaded machine. Key numbers: cream neck servos 131.30/131.46 px = 0.15232/0.15214 mm/px; graphite ankle servo 136.81 px = 0.14619 mm/px (44.1 mm nearer the camera, carried by the perspective camera); fitted poses cream pitch \u22123.54\u00b0 yaw 61.95\u00b0 roll \u221225.00\u00b0 jaw 24.87\u00b0, graphite pitch \u221223.71\u00b0 yaw \u221246.35\u00b0 roll 13.77\u00b0 jaw 0, sky el \u221211.22\u00b0 az 204.67\u00b0 pitch \u221219.84\u00b0 yaw 2.18\u00b0 jaw 20.73\u00b0; r cream 1.0368 \u00b1 0.0085, graphite 0.9489 \u00b1 0.0117, combined 1.0064 \u00b1 0.0431. The earlier 'r = 1.22' and 'r = 0.82' intermediate results were artefacts (azimuth drift to 259.9\u00b0 in an unclipped Nelder-Mead; the render's servo mask read on a 20\u00b0-leaned STAND neck) and are the reason the render width is now analytic with the mask as a cross-check and the neck is posed vertical as in the photographs."
+ },
+ {
+  "lane": "F3 \u2014 thermal + tolerance stack-up (fix pass)",
+  "document": "/Users/leifrydenfalk/dev/ce-workshop/ce-designs/microduck/out/sim-evidence/f3-sections.html",
+  "open_problems": [
+   "ce-cad/cecad/data/print_fits.json is empty \u2014 one printed cecad.coupon at the \u00d810 and \u00d816 rungs would close the tolerance study's governing CANNOT DETERMINE. This is a bench task, not an agent task.",
+   "left_knee and right_knee have a 22x16x4 bearing on the axis (spec/mesh-placements.json, upper_leg_left at (22, 35.777, -4.0)) that NO part folder declares a bearing_seat interface for. microduck-upper-leg-left and microduck-shin both need that interface added before those two joints can be graded at all. Unchanged from the original study, still open.",
+   "The coaxiality step binds at all three bands at all seven affected hinges. If the coupon confirms a coarse printed band, the design fix is a relief on the printed boss so the ring is located by the horn disc alone, or a single-part seat. That is a design decision for the mechanical lane, not a measurement.",
+   "The servo thermal study now FAILs at four of six duty cells. Either the product's duty envelope must be stated and capped below those cells, or the knee joints need a thermal path (the XL330 is a sealed plastic case in a printed mount with 30 % of its skin covered). Nobody owns that decision yet.",
+   "sim/thermal_compute.py's internal leg is still unmodelled \u2014 no theta_JA is published for the RK3566 and the board's dissipation is unmeasured. The design item it names (a conduction path from the SoC to the head shell) has no owner.",
+   "The scratchpad directory is SHARED between the parallel lanes running tonight: a script I wrote to /private/tmp/.../scratchpad/shot.py was overwritten by another lane's file of the same name between writing and running it, and bin/cad executed the other lane's script. Any lane writing helper scripts there must use a unique filename."
+  ],
+  "cannot_determine": [
+   {
+    "what": "Whether the last 0.0500 mm of the 4.0000 mm bearing ring is carried at the six hip joints",
+    "why": "the part folder declares a 1.9500 mm printed boss; the servo placement in joint-geometry.json measures the same boss at 2.0000 mm. The 0.0500 mm difference is below the resolution of the decimated xl330.stl those placements come from, so support is graded 98.75 % CANNOT DETERMINE rather than rounded to 100 %.",
+    "what_settles_it": "a caliper on a real XL330 horn disc and on a printed bracket boss \u2014 one measurement of each."
+   },
+   {
+    "what": "The coaxiality step between the printed \u00d816 boss and the servo's \u00d816 horn boss that share one bore",
+    "why": "worst case 0.6000 mm at FDM-A against 0.2500 mm of radial clearance, so it binds at all three bands \u2014 but the dominant term (the printed position of the boss relative to its own bolt circle) is an UPPER BOUND, not a measurement: no published FDM standard states a POSITIONAL tolerance, Protolabs' rows are DIMENSIONAL. The ring's own radial internal clearance is also unknown ('seeed_bearing', no designation).",
+    "what_settles_it": "print one bracket, put it on a real XL330 horn, read the runout of the printed boss against the horn boss with a dial indicator on the assembled pair; and micrometer the ring's bore and both bosses."
+   },
+   {
+    "what": "This workshop's own printed tolerance band (FDM-C)",
+    "why": "ce-cad/cecad/data/print_fits.json is {\"machines\": {}, \"schema\": 1} \u2014 no machine on the farm has ever been measured. Bambu publishes no part dimensional tolerance for the H2S (only <50 um MOTION accuracy with the optional Vision Encoder), so no vendor spec substitutes. Best available evidence is a published measured study (FDM-D, \u00b10.150 mm, IT09-IT11) on a different machine and a different part.",
+    "what_settles_it": "cecad.coupon.coupon() built with the \u00d810 and \u00d816 rungs, printed on the farm's own H2S in the production PLA, measured with calipers and stored with cecad.coupon.record_measurements(). This single coupon closes the whole tolerance study."
+   },
+   {
+    "what": "Whether the failing duty cells are ever sustained long enough to reach steady state",
+    "why": "vx_0.60, vx_0.80, slope5_side_left, slope5_down and endurance_60s_slope5_up are COMMANDS the policy accepts, measured here for 12 s (60 s for the endurance cell). Steady state assumes the cell is held indefinitely. How long a Microduck is actually walked at them is a product decision nobody has made \u2014 it is not measurable from the repo.",
+    "what_settles_it": "a stated duty cycle for the product, plus the one-servo step test (hold a known torque, log Present Temperature(146) to steady state) that gives R_th and C in the same run."
+   },
+   {
+    "what": "The exact free-air volume of the head cavity",
+    "why": "at 1.00 mm four head meshes still disagree with their own exact solid volume by 15-25 % (face_part 84.4 %, elec_rpi_robot_hat_pcb 119.2 %, soft_mouth_top 50.5 %, pcb__raspberry_pi_zero_2_w 125.1 %). Over 100 % is an open/thin shell mesh that the ray-parity test fills; under 100 % is a feature the grid is still too coarse for. The cross-check verdict is therefore CANNOT DETERMINE.",
+    "what_settles_it": "the effect is already bounded by the 1.50 \u2192 1.00 mm convergence (free air moved -0.574 %); a 0.75 mm run would tighten it further, and a watertight-mesh repair on the four shell meshes would remove the parity artefact entirely. Neither changes the study's conclusion, which rests on a 95 degC MEASUREMENT, not on the air volume."
+   },
+   {
+    "what": "The winding temperature (as opposed to the case temperature) of any XL330 joint",
+    "why": "unchanged from the original study and still true: ROBOTIS publishes no winding-to-case thermal resistance, no thermal capacitance and no continuous-torque rating. Every temperature in the study is a LOWER BOUND on the winding, which makes the four FAILing duty cells worse, not better.",
+    "what_settles_it": "the one-servo step test above."
+   }
+  ],
+  "commits": [
+   "e7d7905 \u2014 F3 fix: the bearing bore is carried by TWO parts (printed boss + the servo's own \u00d816x3 horn disc, measured). Withdraws the 48.75 % engagement FAIL, halves the clearance to one band, computes the coaxiality step, replaces the derived IT table with the published archived ISO 286-1:2010(E) rows, adds a measured print-accuracy band, archives every web source",
+   "9d6bfc7 \u2014 F3 fix: servo thermal graded across every ambient it carries and across every duty cell, not just the vx=0.25 baseline. 4 of 6 cells FAIL at best cooling; verdict moves CANNOT DETERMINE -> FAIL. Resistance spread to 4 dp (3.3863 %)",
+   "367e4eb \u2014 F3 fix: cavity study reports the voxel/exact cross-check instead of computing and discarding it, adds a 1.5->1.0 mm grid convergence, renames the mislabelled shell_bbox_mm to body_bbox_mm beside a real shell_meshes_bbox_mm",
+   "cc60060 \u2014 F3 fix: regenerate the lane's sections from the corrected data; screenshot read back"
+  ],
+  "notes": "All 11 skeptic findings fixed; none was dismissed and none was fixed by loosening a check. Two verdicts moved in opposite directions and both moves are evidence-driven: the tolerance study's bearing-engagement FAIL is WITHDRAWN (real bore support 98.75-100 %, measured), and the servo thermal study's verdict is ESCALATED CANNOT DETERMINE -> FAIL (4 of 6 measured duty cells put a joint over the vendor's own 70 degC Temperature Limit(31) at the best cooling physics allows). The tolerance study's own verdict stays CANNOT DETERMINE \u2014 the governing unknown was never the engagement, it is that this workshop's printed band has never been measured. Three things were strengthened beyond the literal findings: the ISO 286 table is now PUBLISHED and archived rather than derived (the derivation is demoted to a 24-row self-test), the cavity study gained a real grid-convergence check (1.50 -> 1.00 mm, free air -0.574 %), and a third tolerance band from a peer-reviewed measured print-accuracy study was added and clearly marked as non-verdict-setting evidence. New measurements produced: 5 MuJoCo duty cells (out/sim-evidence/duty-cells/) and one finer cavity voxel run. One process defect found and reported in open_problems: the session scratchpad is shared across the parallel lanes and a helper script was silently overwritten by another lane between write and execute."
+ },
+ {
+  "lane": "F1 \u2014 STRUCTURAL (FEA on every structural part + drop/impact + fatigue), parallel workflow",
+  "document": "/Users/leifrydenfalk/dev/ce-workshop/ce-designs/microduck/STRUCTURAL.html (generated by tools/gen_structural.py from out/sim-evidence/*.json; `sections()` exported for the SIMULATION.html synth)",
+  "open_problems": [
+   "DESIGN: at the SOFT end of the drop bracket (127.35 N on one foot, MuJoCo default contact) the shin (SF 0.495, buckles at 110.05 N), hip bracket (0.631), foot cap (1.086), yaw2roll (1.766), neck plate (1.254), power support (1.652) and head chassis (0.273; 0.152 head-first) all fail; the DEFAULT_POSE knee is straight (0.283 deg) so no servo compliance caps the axial impact \u2014 a 0.250 m fall is a design case the leg does not meet in PLA at these walls.",
+   "DESIGN: the head chassis (motor-support) fails already under the walking load (SF 1.411 at 6.342 N; fails at 9.0 N) with the lens tube cantilevered 39.5 mm from the roll-servo barrel; the held patch is the barrel wall (a proxy for the servo clamp) \u2014 worth a fillet/rib or a second support before printing.",
+   "The thigh housing solid needs the arc/wall tangency fix in its part.py (rebuild lane) before any FEA exists for it; the meshability JSON gives the exact location and the fix.",
+   "The 809 MB of CalculiX decks under out/sim-evidence/fea/*/ (.frd/.inp/.step/.dat) are NOT committed (JSONs, report.json and PNGs are); feaimage needs the decks to re-render \u2014 re-run sim/stress_all.py to regenerate them.",
+   "sim/stress_matrix.py (the detached matrix) finished at 21:38: ankle landing 60 N SF 0.674 FAIL and every material FAIL \u2014 that case held and loaded the same axle (the connector-name bug); consumed as history in STRUCTURAL.html \u00a74, not a design finding.",
+   "gen_structural.py `sections()` is ready for the SIMULATION.html synth; three orphaned copies of the first runner (killed wrappers left freecadcmd children alive) were found and killed \u2014 future runners should be started with the freecadcmd pid recorded.",
+   "Two ce-cad observations worth a core fix (P11): cecad.stress's default element size (thinnest bbox side / 3) is a plate heuristic that put 8.5 mm elements on the ankle's 2.5 mm walls; and a connector placed on a bore axis is refused as 'not on the part' at fine meshes unless declared kind=bore with a d-spec \u2014 stress_all.py works around both (sizes_for, harden_connectors) rather than patching ce-cad, which carries other sessions' uncommitted work."
+  ],
+  "cannot_determine": [
+   {
+    "what": "Thigh housing (part:microduck-upper-leg-left) FEA \u2014 walk 19.0636 N and drop 109.556 N cases declared, never solved",
+    "why": "every tessellation of the solid self-intersects at (x 66.6..66.7, y -12.19..-12.21, z 0.0): the R12.2 back-plate outline arc about A0 is tangent to the -y side wall there, leaving a 0.15077 mm2 sliver face (gmsh surface 350, min edge 0.00397 mm) that no surface mesher can triangulate; 6 sizes x 12 strategies refused, including STL routes and mesh repair; the solid is isValid/isClosed to OCC (462 faces, 3838.5671 mm3)",
+    "what_settles_it": "in ce-parts/microduck-upper-leg-left/current/cad/part.py break the arc/wall tangency at (y -12.2, z 0) \u2014 extend the -y wall 0.05 mm past the arc or fuse outline + wall in one sketch (< 0.05 mm, inside the 1.0 mm p95 rule); re-run cad-refcheck, then `ce-cad/bin/cad sim/stress_all.py --force microduck-upper-leg-left`"
+   },
+   {
+    "what": "Peak force of a 0.250 m fall onto one foot (and onto the head)",
+    "why": "the value spans 127.35 N (MuJoCo's default contact, equivalent 1940 N/m) to 10214 N (rigid robot on the TPU floor stiffness, confirmed by MuJoCo at that solref: 12763 N); the Hertz heel model (779-1062 N) indents past the 2.000 mm sole floor so the sole bottoms out onto the PLA ribs; the head apex is not spherical (sphere fit rms 1.843 mm) so no Hertz radius exists",
+    "what_settles_it": "one instrumented 0.250 m drop of a printed unit: trunk accelerometer at >= 5 kHz or a force plate under the foot \u2014 peak force and duration; the structural verdicts already state each part's linear failure load (shin 58.8 N, hip bracket 68.4 N, foot 138.3 N, yaw2roll 184.3 N, motor support 9.0 N) so the measured peak maps straight onto them"
+   },
+   {
+    "what": "Trunk base (part:microduck-trunk-base) safety factor",
+    "why": "as a plate alone it cannot carry the stance leg's 18.09 N (walk) / 104.35 N (drop): SF 0.344 / 0.062 held at its four edge screws, 1.609 / 0.242 as a hip-to-hip cantilever; in the product it is clamped between the two trunk shells and the hip-yaw XL330 case, a load path with an unmeasured share",
+    "what_settles_it": "a two-body solve (shells + base plate, bolted, cecad.stress or ce-struct multi-body) or a printed trunk loaded to 20 N at one hip on a bench"
+   },
+   {
+    "what": "Upper-leg rigidity plate (part:microduck-upper-leg-rigidity-plate) safety factor and buckling",
+    "why": "the bounding case (100 % of the thigh force through the 1 mm plate) reads SF 1.037 walk / 0.136 drop, which proves nothing about a plate sharing the load with the housing it closes; ce-struct buckling returned three eigen-factors within 0.1 % of 1.000 (a localised end-face mode at 0.33 mm voxels, not a plate mode)",
+    "what_settles_it": "the thigh housing meshed (item 1) and a two-body solve of housing + plate through the four M2 screws; or a printed plate compressed in a rig"
+   },
+   {
+    "what": "Strength of the fitted filament in the printed orientation (every SF rests on it)",
+    "why": "Pollen publishes only 'PLA' and 'TPU'; cecad's table is class-tier with no source and its polymer 'yields' are ultimates; the fetched Prusament PLA / NinjaFlex sheets are representative, not the spool; no part.py declares print_up, so the across-layer axis (17 +- 3 MPa interlayer) is unknown per part",
+    "what_settles_it": "ISO 527-1 coupons from the spool used, 5 per orientation (flat, on-edge, vertical), pulled to yield; declare printed.print_up() in each part.py"
+   },
+   {
+    "what": "Battery mass for the power-support load",
+    "why": "the fitted NP-F550-form pack is CANNOT DETERMINE (part:np-f550); the study uses the Duracell DR5's 99 g (ce-parts/np-f550/electrical.part.json:74) as the class figure",
+    "what_settles_it": "the label on a shipped pack (maker, Wh, mass)"
+   },
+   {
+    "what": "Ankle convergence at 0.7 mm",
+    "why": "the 0.7 mm solve did not complete (837 s wall; reason not recorded by that run \u2014 the code now stores it); the 1.5 -> 1.0 mm pair already agrees to 2.17 %",
+    "what_settles_it": "re-run `sim/stress_all.py --force microduck-ankle-left` on an idle machine (load was 46-64 during this run)"
+   }
+  ],
+  "commits": [
+   "481f06e \u2014 sim: MuJoCo-measured load basis (measure_loads.py), drop-impact model comparison, fatigue on the ankle with the Ezeh & Susmel 2019 design curve, FEA runner on every structural part (stress_all.py); stress_evidence.py connector-name bug fixed by delegation; TDS + paper archived under research/",
+   "788181f \u2014 sim: ce-struct buckling + modal on shin / rigidity plate / neck plate (measured landing loads); STRUCTURAL.html generator; fatigue study on the ankle",
+   "a6732b4 \u2014 structural lane: FEA on 14 parts x measured walk/drop/head-drop loads (JSON + read-back fields), ankle mesh convergence + 8-material sweep, ce-struct buckling/modal, drop bracket, fatigue; STRUCTURAL.html generated; evidence ledgers appended for 15 parts",
+   "d977b96 \u2014 STRUCTURAL.html: a CANNOT DETERMINE study never governs the verdict",
+   "ce-changelog: 2026-09-03-ce-workshop-ce-designs-microduck-structural-lane-every-load-bearing-part-solved-under-mujoco (all 7 anchors verified)"
+  ],
+  "notes": "Load basis is measured, not round: sim/measure_loads.py replays BEST_alpha_walking on Pollen's MJCF at 50 Hz and samples mj_contactForce + cfrc_int every physics step; every vector is re-expressed in each part's mesh frame via MuJoCo's mesh_pos/mesh_quat (the naive geom_xmat transform was wrong and was caught by placing the sole's floor point on the floor). The FEA load at a part's distal connectors is -cfrc_int of its body (checked against the stance GRF). 28 FEA studies on 14 parts, each a JSON of the fixed shape {study, inputs(with sources), method, outputs, verdict, why, script, artifacts, looked_at}; SF to 3 dp with the yield basis stated (class table AND fetched TDS AND across-layer interlayer). Mesh: clamp(thinnest bbox side / 3, 0.8, 1.5) mm C3D10, because cecad's plate heuristic put 8.5 mm elements on 2.5 mm walls (first run, measured); axis-placed connectors are hardened to kind=bore so the seat wall carries the patch. The upper-leg gmsh refusal is NOT a mesh-size issue: it is a sliver at an arc/wall tangency where the tessellation self-intersects \u2014 diagnosed to the point, solid untouched as ordered. Solver decks (809 MB) deliberately not committed; everything a reader needs (JSON, report.json, PNG) is. One solver job at a time was kept except the ce-struct runs (seconds) while the FEA runner ran; the detached matrix was consumed, not restarted. bin/cad buffers stdout, so the runner writes out/sim-evidence/fea/progress.txt line by line. The right-hand mirrors (ankle/foot/sole/upper-leg right) inherit the left verdicts (p95 0.000-0.002 mm mirror measurements in their part.py headers). Ledger rows appended for 15 parts (trust T1 simulated, computed by bin/triad). No one was contacted, nothing sent to the print farm, trash/ untouched."
+ },
+ {
+  "lane": "F2 \u2014 MuJoCo gait robustness + battery runtime (skeptic fix pass)",
+  "document": "/Users/leifrydenfalk/dev/ce-workshop/ce-designs/microduck/out/sim-evidence/f2-preview.html",
+  "open_problems": [
+   "LANE F3 HAS A STALE CROSS-CHECK NOTE, NOT TOUCHED (it is F3's file). out/sim-evidence/thermal-servo-xl330.json inputs.load_basis.cross_check.note and tools/gen_simulation_f3.py:111-112 both say F2 samples at the 50 Hz control frame. That has been false since commit 577070a. Correct replacement: 'F2 and this lane both sample the 200 Hz physics step; the two records agree to 5 dp on all 14 baseline joints.' VERIFIED HARMLESS: all 14 values F3 quotes match the current gait-peaks.json baseline_walk_vx0.25 exactly (left_knee 0.43045, right_knee 0.41541, right_hip_pitch 0.24762, ...) \u2014 only the prose is wrong.",
+   "SIMULATION.html and tools/gen_simulation.py do not exist yet. out/sim-evidence/f2-sections.html (64 446 bytes, 8 tables, all print-safe) is written and waiting for the synth agent. INDEX.html already links SIMULATION.html, so that link is currently dead.",
+   "THE GAIT DOES NOT HOLD A HEADING, and that is now a FAIL rather than a hidden fact. All five 5-degree slope cells ended downhill; worst net yaw drift is vx_0.80 at -186.608 deg over 12 s (-36.3685 deg per metre of ground track). This is a property of Pollen's published walking policy on our mass set \u2014 nothing in F2 retrains or tunes it. Closing it needs either a policy trained on our inertials or a yaw controller; it is a product decision about how far the reverse-engineering goes, and it is stated in known_limitations[1] of both evidence files.",
+   "Seven of 25 upright locomotion cells still ask a joint for more than the XL330-M288-T's 0.60 N.m stall row at 6.0 V (worst right_hip_pitch 0.80221 N.m = 133.7 % in slope5_side_left). Unchanged by this pass and still FAIL. Every 5-degree slope and every command >= 0.60 m/s is on the list; the reference walk at 0.25 m/s is not (0.43045 N.m, 82.78 % of the 5.0 V row).",
+   "The MJCF actuator ceiling (+/-0.96 N.m, reference/pollen-microduck-rl/robot_walk.xml:44-47) is ABOVE every published stall row, so the simulation is permitted torques the vendor gives no figure for. It is reached only in the push and sit-stand cells and is labelled as the simulation's ceiling rather than an actuator capability wherever it appears."
+  ],
+  "cannot_determine": [
+   {
+    "what": "Whether the real neck_pitch bracket and its 22x16x4 bearing physically interfere with bottom_head_shell and jaw in the STAND pose",
+    "why": "MuJoCo collides the CONVEX HULL of a mesh. Measured: those geoms interpenetrate 2.1106-4.4723 mm in the STAND keyframe and generate 84.75-179.73 N of contact force in a model where all bodies collide. A part correctly nested inside another part's concave shell reads as penetration to a hull, which is what a neck bracket inside a head shell is \u2014 so the simulation cannot distinguish 'nested as designed' from 'interfering'. The pair is named and excluded from the census, and the exclusion is the one thing the census cannot see.",
+    "what_settles_it": "A solid-solid boolean intersection of neck_pitch + seeed_bearing__configuration__22x16x4 against bottom_head_shell + jaw, posed at the STAND keyframe, in ce-cad. A non-empty common() with a stated volume is an interference; an empty one confirms the hull artefact. Recorded in gait-peaks/gait-robustness known_limitations[2] and in the census file."
+   },
+   {
+    "what": "The true lateral tipping threshold under a 0.2 s trunk push",
+    "why": "The 5 N figure is a property of a model in which only the two soles meet the ground. On sim/microduck_ours_fullcontact.xml the same push does NOT knock the robot over (max tilt 14.795 deg, trunk never below 0.10463 m) \u2014 but that model is not a valid comparison: MEASURED, four extra ankle/foot geoms touch the floor there (ankle_left #26 and #28, ankle_right #72 and #75, from outputs.contacts.floor_contact_points_by_geom_summed_over_control_frames), so it has a different foot and a different gait. Neither model settles it.",
+    "what_settles_it": "A collision set with real body shells that meet the floor \u2014 Pollen publishes none \u2014 or a physical push test on a built unit with an instrumented trunk. Between 1 N and 2 N survived and 5 N fell, so the threshold lies between 0.28 and 0.69 body weights for 0.2 s (an impulse between 0.2 and 1.0 N.s) in the sole-only model."
+   },
+   {
+    "what": "The voltage at which the XL330-M288-T's 17 mA standby current should be billed",
+    "why": "ROBOTIS's Specifications table prints 'Standby Current | 17 [mA]' with no voltage attached \u2014 verified verbatim in the local copy at ce-parts/xl330-m288-t/iterations/v0.0.1/docs/fetched/robotis-emanual-xl330-m288.html. Billed at the pack rail it is 1.887 W; billed at the 5.0 V row it is 1.275 W, 32.4 % less. That difference is the WHOLE of the 'idle, torque off' mode.",
+    "what_settles_it": "An ammeter on a powered XL330-M288-T with Torque Enable(64)=0, read at 5.0 V and again at 7.4 V \u2014 or a ROBOTIS statement of the test condition. Both figures are published; the pack-rail one is used because it is conservative for runtime."
+   },
+   {
+    "what": "A single battery-runtime number (unchanged from the original lane, restated)",
+    "why": "No vendor publishes the Radxa ZERO 3W's consumption (only a 5 V/2 A supply REQUIREMENT), so the compute+sensor half is swept, never assumed. The servo half is measured: walking 8.9553 W mean / 15.215 W peak, standing 2.8301 W, idle 1.8870 W.",
+    "what_settles_it": "An ammeter in the pack lead of a running unit, plus Present Current(126) summed off the bus so the servo and board halves separate. One measurement also closes the pack's usable-energy question."
+   }
+  ],
+  "commits": [
+   "78a0f4f \u2014 lane F2 fix 1/3: the collision mask is now a measurement, not an assumption (sim/collision_model.py + the two generated variants + census)",
+   "018c42d \u2014 lane F2 fix 2/3: the FEA design load is pre-fall, and distance carries a sign (sim/gait_sweep.py + all 39 re-run cells)",
+   "c0fbaa8 \u2014 lane F2 fix 3/3: say what the numbers mean (gait_evidence.py, battery_runtime.py, render_sweep_videos.py, gen_simulation_f2.py, shot_page.py, doc.css, the three evidence JSONs and the HTML)",
+   "98e501f \u2014 lane F2: the page read back (f2-preview.png + 11 strips, 10 videos regenerated with stale frames purged)",
+   "080479b \u2014 lane F2: derive the cell counts in the self-collision scope text instead of hardcoding 30, and re-read the page"
+  ],
+  "notes": "All ten skeptic findings are closed and each was re-verified against the artifact after the fix; a scripted re-check of all ten reports PASS. Three deserve the orchestrator's attention.\n\nFIRST, the design-load change propagates. Any lane that took 93.0579 N from gait-peaks.json as a worst case must re-read: the correct figures are now tiered \u2014 nominal walking 23.3897 N on one foot, worst undisturbed locomotion 35.3005 N both feet / 34.6789 N one foot, abuse (external push, pre-fall) 62.9594 N. The per-joint TORQUE table is unchanged (fingerprint f0ab443bb645b1df), so F3's thermal work is unaffected; only ground reaction moved.\n\nSECOND, two findings turned out to be more interesting than the complaint. The slope cells were not sliding \u2014 forward_progress_m is positive in all five, so the robot walked forward at close to the commanded speed (endurance_60s_slope5_up tracks at 1.0054) while its yaw drifted -161 degrees and it ended up walking down the hill. And the self-collision census, once asked on a model where all 15 bodies can collide over 2187 candidate pairs, still returns zero \u2014 the original PASS was right for the wrong reason, and it is now right for the right one. Making that census valid required measuring and excluding a 2.117-4.472 mm convex-hull overlap between jaw_soft and neck_pitch that was injecting up to 179.73 N; without that step the census model walks 1.1361 m instead of 1.2232 m and is a different robot.\n\nTHIRD, the missing read-back was a tooling gap, not only a lapse. cecad.vision.screenshot_url(full_page=True) produced a stitched capture that repeated the masthead at y~7000 px on a 16 286 px document, and cecad.imgcheck.verify_png refuses any text page ('ink broken into small pieces is lettering on an empty canvas') \u2014 correct for a render, wrong for a document. tools/shot_page.py is the fix and is generic: it reads the live DOM for height, images, BROKEN images and every table's width against its column, captures in one viewport pass, and exits non-zero if a table overflows. It caught Table F2-2 at 868 px in 840 px after I had already 'fixed' the layout. Any lane publishing an HTML document should use it; that is the ce-workshop tooling contribution (lane I) from this pass.\n\nTotal simulation cost: three full 39-cell sweeps (~220 s of MuJoCo each), one video pass (10 cells, ~6 min), and a handful of single-cell runs. One job at a time throughout, per the shared-machine rule. Only F2 files were committed; the F3 stale note and the other lanes' dirty files were left untouched."
+ },
+ {
+  "lane": "A \u2014 HEAD (fix pass): settle, then (only if needed) reconstruct",
+  "document": "/Users/leifrydenfalk/dev/ce-workshop/ce-designs/microduck/HEAD-RECONSTRUCTION.html",
+  "open_problems": [
+   "The graphite refit without a seed stopped in a worse basin (IoU 0.942, roll 34.5\u00b0) than the seeded one (IoU 0.961, roll 9.4\u00b0): the differential-evolution fit is not guaranteed global; both runs are kept (out/head/superseded/head_fit_run2_unseeded_graphite.json) and the seeded solution is used because its objective is better \u2014 a multi-start fit spread would be the honest next step",
+   "sky-three-quarter-front-left has no face_evidence recorded (3/4 view: its dark runs merge the label and side faces); it is excluded from the scale regardless (cross-check \u221212.6 %, two servos 5.8 \u03c3 apart)",
+   "Uncommitted work from OTHER lanes sits in the tree (SHELF-STATUS.html, ce-parts/microduck-ankle-left, -foot-left ledgers/trust.json) \u2014 left untouched",
+   "The eye_below_top and beak-lip front-view rows carry a 5.5 mm u from the shell top row's 25 px threshold spread and cannot discriminate at 1.5 mm"
+  ],
+  "cannot_determine": [
+   {
+    "what": "Which of {eye ring OD, head width} deviates from the mesh by >1.5 mm (the front-view ring/width ratio is +9.1 %, FAIL at every camera distance)",
+    "why": "The only true front view gives a ratio; the profile ring/head-length agreement (+0.49 \u00b1 0.45 mm) supports the ring being 30.000 mm and the width being ~84.10 mm (\u22127.67 mm), but no photograph carries a width in millimetres",
+    "what_settles_it": "A calliper on one product head: ring OD (mesh 30.000), beak width and shell-rim width (mesh 91.763 / 91.760), length (122.690), height (46.336) to 0.1 mm \u2014 or one true front view with a ruler in the plane of the face"
+   },
+   {
+    "what": "Head length at the 1.5 mm rule (combined \u22120.348 \u00b1 4.738 mm; cream +5.23 \u00b1 3.68 vs graphite \u22124.37 \u00b1 3.13 disagree beyond their own u)",
+    "why": "The store frames carry no EXIF and no ruler; the camera distance is only bracketed 700\u20131650 mm and the servo-scaled ratio moves with it (cream r 1.0026..1.0600 over D 600..2000)",
+    "what_settles_it": "The calliper above; or the EXIF focal length + sensor of the store photographs; or one pure-profile photograph, beak closed, head level, the XL330 label face in the head's focal plane, \u22654000 px on the long side"
+   },
+   {
+    "what": "The README pure-profile frame's mm/px (both halves)",
+    "why": "Real half: the servo's right case edge is behind the grey horn bracket (x\u22481950\u20131995 at 4\u00d7); simulator half: the servo and the grey neck plate have the same luminance and saturation, no threshold separates them \u2014 both pictured in out/head/profile_frame_servo_zoom.png",
+    "what_settles_it": "A cleaner pure-profile frame from Pollen's video with the neck servo's case edges clear of the bracket"
+   },
+   {
+    "what": "Eye centre below the shell top (+2.34 \u00b1 5.52 mm) and the beak-lip row (+1.94 \u00b1 5.55 mm) in the front view",
+    "why": "The shell top row moves 25 px across the silhouette threshold sweep (soft edge against the white ground), which dominates their propagated u",
+    "what_settles_it": "A gradient-based top-edge read of the dome, or the calliper above"
+   }
+  ],
+  "commits": [
+   "766b932 \u2014 lane A fix (1/2): tools rewritten (cross-check for every servo, bound detection, beak-band width with sweeps and propagated u, bounded profile-frame scan, D600/D2000 citation, licence)",
+   "78cd2ca \u2014 lane A fix (2/2): refit + regenerated HEAD-RECONSTRUCTION.html, COMPARISON.html \u00a71/\u00a75/\u00a75.1, INDEX.html, out/head data, eye-ring ledger row"
+  ],
+  "notes": "The verdict moved: first release CANNOT DETERMINE \u2192 now FAIL on the head as an assembly, driven by the true front view's ring/width ratio (+9.1 %, robust to camera distance because the ring front sits only 4.4 mm nearer the camera than the beak edge in the mesh) \u2014 not by the servo-scaled length, which stays CANNOT DETERMINE (\u22120.35 \u00b1 4.74 mm). The eye-off-mid-line \u22122.13 mm of the first release was a shadow artefact (\u22120.16 \u00b1 0.50 mm PASS on the beak band). The skeptic's projection 'cream alone \u2192 FAIL' did not survive: cream refit off the bound reads +5.23 \u00b1 3.68 mm once its own D term is carried, and graphite's scale now has a measured cross-check (\u22123.60 %) so it stays admitted. Re-model refused: a ratio FAIL with CANNOT DETERMINE attribution must not be cut into tooling; one calliper reading is the prerequisite and the document says exactly which. Changelog entry: 2026-09-03-ce-workshop-ce-designs-the-head-verdict-rested-on-a-servo-cross-check-that-was-never-read-and (all six anchors PASS). Every number in the documents is generated from out/head/head.json by tools/gen_head.py and tools/gen_comparison.py; nothing hand-maintained."
+ },
+ {
+  "lane": "F1 \u2014 STRUCTURAL (FEA on every structural part + drop/impact + fatigue), skeptic-fix pass, parallel workflow",
+  "document": "/Users/leifrydenfalk/dev/ce-workshop/ce-designs/microduck/STRUCTURAL.html (Rev B; generated by tools/gen_structural.py from out/sim-evidence/*.json; selfcheck() runs 20 checks and exits 1 without writing the page if any fails; sections() exported for the SIMULATION.html synth; linked from RELEASE.html readiness row, TOC and document index, and from INDEX.html)",
+  "open_problems": [
+   "Nine static FAILs stand (motor-support in all three cases, shin/hip-bracket/foot-left/yaw2roll/neck-plate/power-support in the foot drop) and five fatigue FAILs (hip bracket 0.1767 km, shin 0.1321 km, motor support, neck plate, power support) \u2014 design changes, not more analysis, are what moves them",
+   "The trunk base and rigidity plate need an assembly (two-body) solve before any verdict; their single-part numbers are bounds only",
+   "The drop force applied is MuJoCo's soft lower bound; the real peak sits between 779 N (Hertz) and 10214 N (rigid) \u2014 parts that fail at 127 N fail at every point of that bracket, and parts that pass at 127 N are not proven at the real peak",
+   "The fatigue design curve has no notch factor and the FEA peaks sit at notches; mesh sensitivity of the peak is measured on the ankle only (+2.21 %)",
+   "The shin's full-vector buckling factor is decided but not converged (5.03 % drift at 0.5 mm cells)",
+   "loads_mujoco.json was not re-run; its drop records lack height_source (the key is now in measure_loads.py for the next run; drop_impact.json carries the source)"
+  ],
+  "cannot_determine": [
+   {
+    "what": "Trunk base (walk SF 0.344 linear / 0.319 nonlinear; foot drop 0.062 / 0.053) and rigidity plate (walk 1.037 / 0.816; drop 0.136 / 0.061)",
+    "why": "single-part solves of parts that carry their force in parallel with a body not in the model (shells; thigh housing) \u2014 100 % applied as a bound; a FAIL at 100 % proves only the bound is not enough",
+    "what_settles_it": "a two-body bolted solve (shells + base; plate + a housing that meshes) in cecad.stress / ce-struct, or a printed trunk / thigh loaded to the walk peak on a bench with strain gauges"
+   },
+   {
+    "what": "Upper-leg-left (thigh housing) walk and drop",
+    "why": "gmsh refuses the solid at the R12.2-arc / side-wall tangency (6 sizes x 12 strategies, fea_meshability_microduck-upper-leg-left.json)",
+    "what_settles_it": "break the arc-wall tangency by < 0.05 mm in the rebuild, then the declared cases (walk 19.0636 N, drop 109.4988 N)"
+   },
+   {
+    "what": "Neck plate buckling",
+    "why": "the measured axial component is tensile on that member at both drop peaks (+7.6216 N foot drop, +11.6360 N head drop); no compressive case exists in the measured loads",
+    "what_settles_it": "a load case that compresses the plate (a face-down fall onto the beak) measured in MuJoCo, then the same ce-struct study"
+   },
+   {
+    "what": "Rigidity plate buckling",
+    "why": "the three lowest eigen-factors cluster at 1.000 under both loads at 0.33 mm cells \u2014 a local end-face crushing mode, not a plate mode",
+    "what_settles_it": "a shell/solid model loaded through the four screw holes instead of the end face, or a printed plate compressed in a rig"
+   },
+   {
+    "what": "Shin full-vector buckling factor as a converged number",
+    "why": "drift 5.03 % between the 0.7 and 0.5 mm cells (1.004 -> 0.898 -> 0.945); the verdict FAIL is decided by the whole bracket [0.898, 1.110] < 2, the number is not",
+    "what_settles_it": "a 0.35 mm cell or a tetrahedral eigen-solve of the same case"
+   },
+   {
+    "what": "Fatigue of the TPU sole",
+    "why": "no cited S-N curve for NinjaFlex 85A was fetched; the Ezeh & Susmel curve is PLA only (walk peak 0.0307 MPa vs TDS yield 4 MPa)",
+    "what_settles_it": "a cited TPU 85A S-N dataset (R = 0, 100 % infill) or a flex-fatigue coupon of the sole filament"
+   },
+   {
+    "what": "Drop peak force (127 N MuJoCo default-contact lower bound to 10214 N rigid-on-TPU)",
+    "why": "MuJoCo's default contact is ~14871x softer than the TPU floor; the Hertz heel model bottoms out through the 2.000 mm sole floor",
+    "what_settles_it": "one instrumented 0.250 m drop of a printed unit (trunk accelerometer >= 5 kHz or a force plate)"
+   },
+   {
+    "what": "Drop height as a requirement",
+    "why": "0.250 m is the lane brief's input; no requirement document sets a height (robot stands 0.27443 m)",
+    "what_settles_it": "a written drop requirement (height, surface, orientation, pass criterion) in docs/MANUFACTURING-REQUIREMENTS.md, then one MuJoCo re-run at that height (Table 8a scales the analytic models)"
+   },
+   {
+    "what": "Fitted filament and print orientation",
+    "why": "Pollen publishes 'PLA' and 'TPU' with no brand; no part.py declares print_up; every SF rests on the class table and one representative TDS per material",
+    "what_settles_it": "tensile coupons of the spool in the print orientation (ISO 527-1, 5 per orientation) and a fatigue coupon set (R = 0, 10 Hz, 4 levels x 2, run-out 2e6)"
+   }
+  ],
+  "commits": [
+   "42dd3d0 solver decks that the committed report.json values were reduced from (shin walk/drop, yaw2roll drop, ankle convergence sub-runs, material sweep)",
+   "0c7ef53 all 32 studies published incl. head drop; one grading rule (fea_rejudge.py + load_share.py); NLGEOM re-solves; fatigue on every part; drop-height source; caption sync; full whys; selfcheck()",
+   "58d1366 STRUCTURAL.html reachable from RELEASE.html (readiness row, TOC, index) + INDEX.html regenerated",
+   "ac48b74 52 ledger rows appended, trust.json recomputed",
+   "6624be8 buckling re-solved on the measured loads with cell sweep, Euler cross-check, neck plate tensile",
+   "1cd4a9b page read back (STRUCTURAL.png + 38 strips), tables split to fit 840 px, neck plate on the head-drop vector, source-precision rows",
+   "f07fd9c four more NLGEOM results, 55 ledger rows, 229 untracked deck files committed, 119 MB .frd gzipped",
+   "5104c4b last NLGEOM (trunk base drop), 56 ledger rows, final re-shoot",
+   "e34263d NLGEOM chain log",
+   "ce-changelog: 2026-09-03-ce-workshop-ce-designs-structural-lane-published-28-of-its-32-studies-and-graded-the-worst (kind corrected, every anchor PASS)"
+  ],
+  "notes": "Every one of the 16 skeptic findings was acted on; none required loosening a check, and no verdict moved from FAIL to PASS. The uniform grading rule left the 17/9/6 tally unchanged; what changed is that the four head-drop studies are on the page, the worst numbers are printed regardless of grade, and seven studies now carry a geometrically nonlinear answer (all converged to the full load; the shin and both plates come out WORSE than linear \u2014 beam-column and membrane effects \u2014 the motor support slightly better; the head-drop FAIL is confirmed at SF 0.175). The 'one solver job at a time' rule was kept by stopping my own NLGEOM chain between cases to run the ce-struct sweep and relaunching it (the log records both restarts); an orphaned ccx from the stop was killed (mine). Machine load ran 56-70 during the work. Skeptic's brief mentioned 31 fields \u2014 there are 33 PNGs on disk (29 study fields + 4 convergence sub-run pictures), 30 study pictures embedded plus the 4 convergence pictures in \u00a75. Not touched: other lanes' files (INDEX.html regenerated as the house rule requires; RELEASE.html edited surgically in the pattern lanes E/H used)."
+ },
+ {
+  "lane": "F SYNTH \u2014 SIMULATION.html (every simulation study in one document; parallel workflow, owns the lane)",
+  "document": "/Users/leifrydenfalk/dev/ce-workshop/ce-designs/microduck/SIMULATION.html (MD-SIM-001 Rev A; generated by tools/gen_simulation.py from all 64 study files \u2014 61 out/sim-evidence/*.json + out/stress/{matrix,report,corrected}.json; selfcheck() of 13 measured claims exits 1 without writing on any failure; chapters A/B/C are tools/gen_structural.sections(), gen_simulation_f2.sections(), gen_simulation_f3.sections() imported and renumbered, never edited)",
+  "open_problems": [
+   "No FEA study on disk is solved at F2's design tiers (34.6789 N single foot at vx_0.80; 62.9594 N survived push) \u2014 the walk FEAs are graded at the nominal 23.1162 N only; a walk-tier re-solve is the open structural work item (page \u00a74 X3)",
+   "RELEASE.html does not link SIMULATION.html (it links STRUCTURAL.html); left to the orchestrator's integration step \u2014 a TOC entry, a \u00a71 readiness-row link and a document-index entry are the three edits",
+   "STRUCTURAL.html's backlinks() emits a link to SIMULATION.html only when tools/gen_structural.py is re-run; lane F1's page has not been regenerated since SIMULATION.html appeared (not touched here \u2014 another lane's deliverable)",
+   "tools/gen_structural.py prints the literal word None in chapter A's Table A.6 (the never-solved 0.7 mm ankle convergence row, 2 cells) \u2014 reported in SIMULATION.html \u00a711, not patched",
+   "tools/shot_page.py cannot capture a page this tall on this machine (PIL DecompressionBomb limit at 249 519 600 px, then blank Chrome frames at ~160 000 px); the chunked capture lives in the scratchpad (shot_chunks.py) and should become a --chunk option of tools/shot_page.py (lane F2's tool; not edited here)",
+   "The first commit message (87bfb54) rounds the deck-vs-quoted delta to '9.8 %' and says '6 DIFFER'; the exact figures are \u22129.768 % to \u221212.779 % per head-drop deck and 8 AGREE / 5 DIFFER / 1 FAIL after the X12 fix \u2014 corrected in commit 561624e's message and the changelog entry"
+  ],
+  "cannot_determine": [
+   {
+    "what": "Which load the head-drop FEAs should be graded at: the vector at the drop's peak frame (what the decks carry, 27.5654\u201368.4005 N) or the max-over-record magnitude the studies quote (31.604\u201375.8051 N)",
+    "why": "F1's studies quote force_magnitude_N as the headline but apply force_N_part_frame; both are measured numbers from loads_mujoco.json at different instants. The page prints both and the SF re-scaled to the quoted magnitude for the linear solves (neck-plate 2.849704 \u2192 2.4855; the motor-support case is nonlinear and does not scale).",
+    "what_settles_it": "Lane F1 declaring in fea_evidence.py which instant is the load case (peak-frame vector or per-body max) and re-solving the four head-drop decks at the max-over-record vector if that is the intent"
+   },
+   {
+    "what": "37 of the 76 distinct CANNOT DETERMINE items name nothing that settles them in their own file",
+    "why": "The synth records what the files say; inventing a test the study did not specify would be an assertion. Best supported option: leave them listed as the studies' own gaps (done), over the alternative of cross-referencing a generic coupon test to every item.",
+    "what_settles_it": "The owning lane adding what_settles_it to each item (battery-runtime inputs.pack.identity, buckling_microduck-neck-plate top level, tolerance-stack-hinges bearing_bore_support_flags[6..7], out/stress/matrix.json mesh_convergence rows, out/stress/corrected.json results[7])"
+   }
+  ],
+  "commits": [
+   "87bfb54 lane F synth: SIMULATION.html \u2014 every simulation study in one document (tools/gen_simulation.py, SIMULATION.html, out/sim-evidence/simulation-preview/, tools/gen_index.py, INDEX.html)",
+   "561624e lane F synth fix: cross-check X12 false DIFFER from string-formatted stall rows; exact deck-vs-quoted deltas recorded; page re-shot; INDEX regenerated"
+  ],
+  "notes": "Generator: /Applications/FreeCAD.app/Contents/Resources/bin/python tools/gen_simulation.py (PIL for the artifact read-back; stdlib python3 also runs it with 'no PIL' in the read-back column). Page 856 070 bytes, 152 166 px tall, 166 tables, 91 images, 586 local links all resolving, 95 unique ids. Cross-check policy: AGREE = identical digits, DIFFER = not identical with the reason and the number the downstream study used; nothing averaged. Chapter renumbering: F1 '1..10' \u2192 'A.1..A.10' and 'Table N' \u2192 'Table A.N'; F2 'F2.n'/'Table F2-n' \u2192 'B.n'/'Table B.n'; F3 'F3.n'/'Table F3.n' \u2192 'C.n'/'Table C.n' by regex on the emitted HTML; ids untouched (mine are sim-*/ch-*). Stress matrix, report and corrected are consumed as measurement records (per-result verdict counts) and X10 states their supersession beside LOAD-BASIS-CORRECTION.html. No FreeCAD/CalculiX/MuJoCo job was started in this lane (synth only; deck parsing is text). Scratch tools used and not committed: shot_big.py, shot_chunks.py, offsets.py, tblprobe.py in the session scratchpad."
+ }
+]
