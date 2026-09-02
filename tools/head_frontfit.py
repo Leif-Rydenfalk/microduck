@@ -512,6 +512,38 @@ def main():
         out["comparison"]["pose_gate"], out["comparison"]["implied_head_width_mm"], out["comparison"]["implied_head_width_dev_unc_mm"]), fill=(0, 0, 0))
     sheet.save(os.path.join(OUT, "front_fit_pair.png"))
     out["picture"] = "out/head/front_fit_pair.png"
+    # the FAIL, at 8x on the photograph itself: the cream shell's outer edge against the
+    # accent band's, on both sides of the head
+    if p.get("band"):
+        src = Image.fromarray(rgb.astype(np.uint8)).convert("RGB")
+        z = 8; r0, r1 = 375, 500
+        shell_x = wref["x"]; band_x = None
+        bsw = [b for b in p["band"]["sweep"]]
+        if bsw: band_x = bsw[len(bsw) // 2]["x"]
+        crops = []
+        for lab, (cx0, cx1) in (("left edge", (shell_x[0] - 22, shell_x[0] + 48)), ("right edge", (shell_x[1] - 48, shell_x[1] + 22))):
+            c = src.crop((cx0, r0, cx1, r1)).resize(((cx1 - cx0) * z, (r1 - r0) * z), Image.NEAREST)
+            dd2 = ImageDraw.Draw(c)
+            for xv, col, nm in ((shell_x[0] if "left" in lab else shell_x[1], (30, 90, 220), "shell"),
+                                ((band_x[0] if "left" in lab else band_x[1]) if band_x else None, (220, 90, 20), "band")):
+                if xv is None: continue
+                px = (xv - cx0) * z
+                dd2.line([(px, 0), (px, (r1 - r0) * z)], fill=col, width=3)
+                dd2.text((px + 5, 6), "%s x=%d" % (nm, xv), fill=col)
+            crops.append((lab, c))
+        H2 = max(c.size[1] for _, c in crops)
+        W2 = sum(c.size[0] for _, c in crops) + 30
+        eim = Image.new("RGB", (W2, H2 + 40), (255, 255, 255)); de = ImageDraw.Draw(eim)
+        xx = 10
+        for lab, c in crops:
+            eim.paste(c, (xx, 34)); de.text((xx + 2, 20), lab, fill=(0, 0, 0)); xx += c.size[0] + 10
+        de.text((10, 4), "The FAIL at 8x: the cream shell's outer edge (blue) sits outboard of the accent band's (orange) on BOTH sides — "
+                         "band/shell %.4f +- %.4f on the product, %.4f on the mesh, %.3f +- %.3f mm" % (
+                    p["band"]["band_over_shell"], band_row["photo_unc"] if band_row else 0.0,
+                    band_row["mesh"] if band_row else 1.0, band_row["dev_mm"] if band_row else 0.0,
+                    band_row["dev_unc_mm"] if band_row else 0.0), fill=(0, 0, 0))
+        eim.save(os.path.join(OUT, "front_edges.png"))
+        out["picture_edges"] = "out/head/front_edges.png"
     json.dump(out, open(os.path.join(OUT, "front_fit.json"), "w"), indent=1, default=float)
     print(json.dumps(out["comparison"], indent=1, default=float))
     print("wrote", os.path.join(OUT, "front_fit.json"))

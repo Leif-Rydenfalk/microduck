@@ -11,6 +11,15 @@ D = json.load(open(os.path.join(REPO, "out", "head", "head.json")))
 C = D["combined"]; V = D["verdict"]; FV = D["front_view"]; M = D["mesh"]
 
 
+def _opt(name):
+    q = os.path.join(REPO, "out", "head", name)
+    return json.load(open(q)) if os.path.exists(q) else None
+
+
+FF = _opt("front_fit.json")           # tools/head_frontfit.py — the front view re-measured
+RW = _opt("head_width_verdict.json")  # tools/head_width_verdict.py — the two unknowns solved
+
+
 def f(x, nd=3, sign=False):
     if x is None: return "—"
     return ("%+." + str(nd) + "f") % x if sign else ("%." + str(nd) + "f") % x
@@ -184,6 +193,121 @@ def sens_rows():
 n_photos = C["n_photos"]
 quick = " <b>(quick fit — rerun without --quick before release)</b>" if D.get("quick") else ""
 
+
+# ---------------------------------------------------------------- section 7: attribution
+def attrib_line_rows():
+    if not RW: return "<tr><td colspan=5>out/head/head_width_verdict.json not on disk</td></tr>"
+    out = []
+    for l in RW["lines"]:
+        v = l.get("head_width_mm"); u = l.get("head_width_unc_mm")
+        out.append("<tr><td>%s</td><td>%s</td><td class=n>%s</td><td class=n>%s</td><td>%s</td></tr>" % (
+            esc(l["name"]), "yes" if l.get("ring_free") else "<b>no</b>",
+            f(v, 3) if v is not None else "—", ("± " + f(u, 3)) if u else "—",
+            esc(l.get("what") or "")))
+    r = RW["result"]
+    out.append('<tr class="total"><td><b>Head width — the ring-free lines combined</b></td><td>yes</td>'
+               '<td class=n><b>%s</b></td><td class=n><b>± %s</b></td><td>%s vs the mesh 91.763 mm; &chi;&sup2; %s on %d dof</td></tr>' % (
+                   f(r["head_width_mm"], 3), f(r["head_width_unc_mm"], 3),
+                   f(r["head_width_dev_mm"], 3, True) + " mm " + chip(r["verdict_head_width"]), f(r["chi2"], 4), r["dof"]))
+    out.append('<tr class="total"><td><b>Eye ring OD — the front view\u2019s ratio at that width</b></td><td>—</td>'
+               '<td class=n><b>%s</b></td><td class=n><b>± %s</b></td><td>%s vs the mesh 30.000 mm</td></tr>' % (
+                   f(r["ring_od_mm"], 3), f(r["ring_od_unc_mm"], 3),
+                   f(r["ring_od_dev_mm"], 3, True) + " mm " + chip(r["verdict_ring_od"])))
+    return "\n".join(out)
+
+
+def sweep_rows():
+    if not RW: return ""
+    out = []
+    for sw in RW["sweeps"]:
+        cells = " ".join("%s&thinsp;/&thinsp;%s" % (f(a, 4), f(b, 5)) for a, b in zip(sw["swept"], sw["objective"]))
+        best = sw.get("quad_minimiser")
+        out.append("<tr><td><code>%s</code></td><td>%s</td><td class=n>%s</td><td class=n>%s</td><td class=n>%s</td><td>%s</td></tr>" % (
+            esc(sw["photo"]), "lateral scale <i>s<sub>w</sub></i>" if sw["parameter"] == "s_w" else "ring scale <i>s<sub>r</sub></i>",
+            f(best, 4) if best else "—", f(sw.get("sigma"), 4) if sw.get("sigma") else "—", f(sw["objective_noise"], 5),
+            ("<b>minimum on the end of the swept range</b> (runs %s) &mdash; a refusal, not a measurement" % esc(sw["runs_to"] or ""))
+            if sw["min_on_sweep_edge"] else ("grid %s, local-3 %s, IoU peak at %s" % (f(sw["grid_best_s"], 4), f(sw.get("quad_minimiser_local3"), 4), f(sw["best_iou_s"], 4)))))
+        out.append('<tr class="sub"><td colspan=6><small>s / objective: %s</small></td></tr>' % cells)
+    return "\n".join(out)
+
+
+def outline_svg():
+    o = (FF or {}).get("comparison", {}).get("outline")
+    if not o: return ""
+    W, H, ml, mt, mr, mb = 760, 300, 54, 16, 16, 34
+    u = o["u"]; a = o["photo"]; b = o["mesh"]
+    x0, x1 = min(u), max(u); y0, y1 = 0.82, 1.01
+    X = lambda t: ml + (t - x0) / (x1 - x0) * (W - ml - mr)
+    Y = lambda w: mt + (y1 - w) / (y1 - y0) * (H - mt - mb)
+    def path(vals, col, dash=""):
+        d = " ".join(("M" if i == 0 else "L") + "%.1f %.1f" % (X(u[i]), Y(vals[i])) for i in range(len(u)))
+        return '<path d="%s" fill="none" stroke="%s" stroke-width="2"%s/>' % (d, col, (' stroke-dasharray="%s"' % dash) if dash else "")
+    ticks = []
+    for t in [x for x in (-0.1, 0.0, 0.1, 0.2, 0.3) if x0 <= x <= x1]:
+        ticks.append('<line x1="%.1f" y1="%.1f" x2="%.1f" y2="%.1f" stroke="#c9c4bb"/><text x="%.1f" y="%.1f" font-size="10" text-anchor="middle" fill="#6b665e">%+.1f</text>' % (
+            X(t), mt, X(t), H - mb, X(t), H - mb + 13, t))
+    for w in (0.85, 0.90, 0.95, 1.00):
+        ticks.append('<line x1="%.1f" y1="%.1f" x2="%.1f" y2="%.1f" stroke="#eae6df"/><text x="%.1f" y="%.1f" font-size="10" text-anchor="end" fill="#6b665e">%.2f</text>' % (
+            ml, Y(w), W - mr, Y(w), ml - 6, Y(w) + 3, w))
+    return ('<svg viewBox="0 0 %d %d" width="100%%" role="img" aria-label="head outline, product against mesh">'
+            '%s%s%s'
+            '<text x="%.1f" y="%.1f" font-size="10" fill="#6b665e" text-anchor="middle">height above/below the eye-ring centre, in head widths</text>'
+            '<text x="12" y="%.1f" font-size="10" fill="#6b665e" transform="rotate(-90 12 %.1f)" text-anchor="middle">width / widest row</text>'
+            '<g font-size="11"><rect x="%.1f" y="%.1f" width="14" height="3" fill="#b3541e"/><text x="%.1f" y="%.1f">product</text>'
+            '<rect x="%.1f" y="%.1f" width="14" height="3" fill="#2f5d9e"/><text x="%.1f" y="%.1f">Pollen mesh</text></g></svg>') % (
+        W, H, "".join(ticks), path(a, "#b3541e"), path(b, "#2f5d9e"),
+        (ml + W - mr) / 2, H - 2, H / 2, H / 2,
+        ml + 14, mt + 8, ml + 32, mt + 12, ml + 14, mt + 26, ml + 32, mt + 30)
+
+
+def tof_rows():
+    t = (C.get("tof_window") or {})
+    if not t.get("measured_on_mesh"): return "<tr><td colspan=4>not measured</td></tr>"
+    rows = [("window width / head width", t["photo_w_over_width"], t["mesh_w_over_width"]),
+            ("window height / head width", t["photo_h_over_width"], t["mesh_h_over_width"]),
+            ("centre offset from the eye axis / head width", t["photo_dx_over_width"], t["mesh_dx_mm"] / 91.763),
+            ("centre offset below the eye axis / head width", t["photo_dy_over_width"], t["mesh_dy_over_width"])]
+    return "\n".join("<tr><td>%s</td><td class=n>%s</td><td class=n>%s</td><td class=n>%s</td></tr>" % (
+        esc(nm), f(pv, 5), f(mv, 5), f((pv - mv) * 91.763, 3, True)) for nm, pv, mv in rows)
+
+# ---------------------------------------------------------------- section 7 values
+B = C.get("band_over_shell") or {}
+O = (FF or {}).get("comparison", {}).get("outline") or {}
+T = C.get("tof_window") or {}
+P = C.get("front_pair") or {}
+R = (RW or {}).get("result") or {}
+_cls = lambda v: "warn" if v == "FAIL" else ("cd" if v == "CANNOT DETERMINE" else "")
+retraction = esc(R.get("retraction") or "no retraction recorded")
+retr_cls = "cd"
+band_cls = _cls(B.get("verdict"))
+band_photo = f(B.get("photo"), 4); band_unc = f(B.get("photo_unc"), 4); band_mesh = f(B.get("mesh"), 4)
+band_dev = f(B.get("dev_mm"), 3, True); band_chip = chip(B.get("verdict", "CANNOT DETERMINE"))
+band_sigma = f(abs(B["dev_mm"]) / B["dev_unc_mm"], 1) if B.get("dev_unc_mm") else "—"
+band_dev_jaw = f(B.get("dev_mm_vs_jaw_only"), 3, True); band_chip_jaw = chip(B.get("verdict_vs_jaw_only", "CANNOT DETERMINE"))
+band_per_side = f(abs(B["dev_mm"]) / 2.0, 2) if B.get("dev_mm") else "—"
+_fc = (FF or {}).get("comparison", {})
+adm = _fc.get("admissible_poses", "—"); ofp = _fc.get("of_poses", "—"); gate = esc(_fc.get("pose_gate", ""))
+s_best = f(_fc.get("s_w_that_matches"), 3) if _fc.get("s_w_that_matches") else "—"
+attrib_rows = attrib_line_rows()
+_att = R.get("attribution", "") or ""
+attribution_short = esc(_att.split(":")[0])
+attribution = esc(_att.split(":", 1)[1].strip() if ":" in _att else _att)
+attribution_why = esc(R.get("attribution_evidence", ""))
+sweep_rows = sweep_rows()
+pic_cw = "out/head/width_cream-profile-left_s_w_tight.png"
+pic_gw = "out/head/width_graphite-profile-right_s_w_tight.png"
+outline_rms = f(O.get("rms_mm"), 3); outline_max = f(O.get("max_abs_mm"), 3)
+outline_n_fail = O.get("n_fail", "—"); outline_n = O.get("n_points", "—")
+outline_chip = chip(O.get("verdict", "CANNOT DETERMINE"))
+outline_shift = f(abs(O.get("widest_u_shift", 0.0)), 4)
+outline_svg = outline_svg()
+outline_excluded = esc(O.get("excluded", ""))
+tof_note = esc(T.get("note", "")); tof_w = f(T.get("mesh_aperture_w_mm"), 3); tof_h = f(T.get("mesh_aperture_h_mm"), 3)
+tof_dx = f(T.get("mesh_dx_mm"), 3); tof_site = f(T.get("mjcf_site_dy_mm"), 4)
+tof_site_off = f((T.get("mjcf_site_dy_mm") or 0) - (T.get("mesh_dx_mm") or 0), 3)
+tof_rows = tof_rows()
+
+
 HTML = f"""<!doctype html>
 <html lang="en">
 <head>
@@ -244,12 +368,14 @@ HTML = f"""<!doctype html>
   <div class="stat"><b>{chip(V["head"])}</b><span>head verdict at the 1.5 mm rule</span></div>
   <div class="stat"><b>{chip(C["front_pair"]["verdict"])}</b><span>front view: ring OD / head width</span></div>
   <div class="stat"><b>{chip(V["eye_bezel"])}</b><span>eye bezel</span></div>
+  <div class="stat"><b>{chip((C.get("band_over_shell") or {}).get("verdict", "CANNOT DETERMINE"))}</b><span>trim band ÷ the head&rsquo;s widest row (§7)</span></div>
+  <div class="stat"><b>{f((C.get("head_width") or {}).get("value_mm"), 3)} mm</b><span>head width measured (mesh 91.763)</span></div>
 </div>
 
 <nav class="toc">
   <a href="#answer">1 Verdict</a><a href="#rule">2 The question and the rule</a><a href="#scale">3 Scale</a>
   <a href="#photos">4 Photographs, posed and overlaid</a><a href="#dims">5 Measured dimensions</a><a href="#eye">6 Eye bezel</a>
-  <a href="#sens">6b Camera distance</a><a href="#settle">7 What would settle the rest</a><a href="#method">8 Method and limits</a>
+  <a href="#sens">6b Camera distance</a><a href="#attrib">7 Attribution</a><a href="#settle">8 What would settle the rest</a><a href="#method">9 Method and limits</a>
 </nav>
 
 <section id="answer">
@@ -265,7 +391,7 @@ HTML = f"""<!doctype html>
   </div>
   <div class="verdict {'warn' if C['front_pair']['verdict']=='FAIL' else ('cd' if C['front_pair']['verdict']=='CANNOT DETERMINE' else '')}">
     <b>Front view, ring OD / head width: {esc(C["front_pair"]["verdict"])}.</b> In the one true front view the eye ring's outer diameter is
-    <b>{f(C["front_pair"]["ratio_photo"], 4)}</b> of the beak width against <b>{f(C["front_pair"]["ratio_mesh"], 4)}</b> on the mesh
+    <b>{f(C["front_pair"]["ratio_photo"], 4)}</b> of the head&rsquo;s outer silhouette width against <b>{f(C["front_pair"]["ratio_mesh"], 4)}</b> on the mesh
     ({f(C["front_pair"]["excess_pct"], 1, True)} %; {pm(C["front_pair"]["dev_mm"], C["front_pair"]["unc_mm"], 2)} mm at the mesh width, and between
     {f(C["front_pair"]["dev_range_mm"][0], 2, True) if C["front_pair"]["dev_range_mm"] else "—"} and {f(C["front_pair"]["dev_range_mm"][1], 2, True) if C["front_pair"]["dev_range_mm"] else "—"} mm over every
     camera distance from 400 mm to infinity). Which member of the pair is off is <b>CANNOT DETERMINE</b> from a ratio: {esc(C["front_pair"]["attribution_why"])}.
@@ -405,17 +531,88 @@ HTML = f"""<!doctype html>
   <figure class="wide"><img src="out/head/profile_frame_servo_zoom.png" alt="the two servo regions at 4x"><figcaption>The two servo regions at 4×, real (left) and simulator (right): the accepted scan runs in blue span the case plus the horn bracket (real) and the case plus the grey neck plate (simulator) — the reason each half is CANNOT DETERMINE, visible rather than asserted.</figcaption></figure>
 </section>
 
+<section id="attrib">
+  <h2><span class="n">7</span>Attribution — which of {{ring, head width}} is wrong, re-measured like for like</h2>
+  <p>§6 leaves one thing open and it is the important one: the front view fixes the <i>ratio</i> eye-ring&nbsp;OD ÷ head width, and a ratio
+  cannot say which member of the pair is off. Re-reading that measurement found that it was also not comparing the same feature on the two
+  sides. Both are settled here — the first by measuring the pair with one estimator, the second by measuring the head width twice with
+  instruments that never touch the ring at all.</p>
+
+  <div class="verdict {retr_cls}"><b>Retraction.</b> {retraction}</div>
+
+  <div class="verdict {band_cls}"><b>What does FAIL: the accent trim band is inset on the product and flush on the mesh.</b>
+  Band width ÷ the head&rsquo;s own widest row is <b>{band_photo} ± {band_unc}</b> on the product against <b>{band_mesh}</b> on the mesh —
+  <b>{band_dev} mm</b> at the mesh width, {band_sigma}σ, {band_chip}. It survives the adversarial reading in which only the jaw carries the
+  accent colour ({band_dev_jaw} mm against the jaw alone, {band_chip_jaw}). This ratio uses no scale, no camera model and no ring: it is two
+  widths on the same object in the same photograph.</p></div>
+
+  <figure class="wide"><img src="out/head/front_edges.png" alt="the head's shell edge against the trim band's, at 8x, both sides">
+    <figcaption>The FAIL at 8× on the photograph itself. Blue = the cream shell&rsquo;s outer edge at the head&rsquo;s widest row
+    (x&nbsp;129 and 561); orange = the accent band&rsquo;s edge (x&nbsp;137 and 555). The shell overhangs the band by about
+    {band_per_side} mm per side. On Pollen&rsquo;s mesh <code>top_head_shell</code> (91.760), <code>bottom_head_shell</code> (91.763) and
+    <code>jaw</code> (91.416 mm) are flush to 0.35 mm.</figcaption></figure>
+
+  <figure class="wide"><img src="out/head/front_fit_pair.png" alt="front view, real beside ours at two lateral scales">
+    <figcaption>The front view re-measured: the flat-lay with the head&rsquo;s <em>outer</em> silhouette, the ring ellipse and the ToF window
+    marked, beside our mesh rendered head-level at the mesh width and at a lateral scale of {s_best}. Both sides now use the same estimator
+    (masks filled, full principal extents) and the mesh pose is gated by the ring&rsquo;s ellipticity <i>and</i> by its offset from the
+    shell mid-line ({adm} of {ofp} rendered poses admitted: {gate}).</figcaption></figure>
+
+  <div class="tw"><table class="data">
+    <caption>Table 7. The head width, measured three ways, and the ring that follows. A line is <i>ring-free</i> when its value does not
+    depend on the eye ring&rsquo;s diameter — only those are combined, so the answer is not assumed into existence.</caption>
+    <thead><tr><th>Line</th><th>Ring-free</th><th class=n>Head width (mm)</th><th class=n>u</th><th>What it is</th></tr></thead>
+    <tbody>{attrib_rows}</tbody>
+  </table></div>
+  <div class="verdict cd"><b>Attribution: {attribution_short}</b> {attribution}</div>
+  <p class="note">{attribution_why}</p>
+
+  <div class="tw"><table class="data">
+    <caption>Table 8. The profile-likelihood sweeps behind the first line. The head is rebuilt at a swept lateral scale (shells, face panel,
+    jaw and soft pads scaled about the head&rsquo;s own mid-plane — MEASURED as body <i>y</i> to 0.0000°, the eye ring left at 30.000 mm) or
+    at a swept ring scale, and the full pose is refitted at each. σ is the displacement at which the parabola rises by the fit&rsquo;s own
+    measured noise (the spread of its restarts).</caption>
+    <thead><tr><th>Photograph</th><th>Parameter</th><th class=n>minimiser</th><th class=n>σ</th><th class=n>fit noise</th><th>Reading</th></tr></thead>
+    <tbody>{sweep_rows}</tbody>
+  </table></div>
+  <div class="pair">
+    <figure><span class="tag">Real vs ours</span><img src="{pic_cw}" alt="cream profile, lateral-scale sweep"><figcaption>Cream, left profile: the photograph with our silhouette at <i>s<sub>w</sub></i> = 1 (red) and at the fitted scale (blue), then our render at both.</figcaption></figure>
+    <figure><span class="tag">Real vs ours</span><img src="{pic_gw}" alt="graphite profile, lateral-scale sweep"><figcaption>Graphite, right profile: the same, from the other side and a different colourway.</figcaption></figure>
+  </div>
+
+  <h3>7.1 The outline itself, with nothing fitted</h3>
+  <p>The head&rsquo;s front-view outline, width at each row ÷ the widest row, against that row&rsquo;s height above or below the
+  <em>eye-ring centre</em> in the same units. No scale, no camera, no pose fit — if the product and the mesh are the same shape the two
+  curves lie on each other. Over the compared range they agree to <b>{outline_rms} mm rms</b> (worst {outline_max} mm, {outline_n_fail} of
+  {outline_n} sample rows outside the rule by more than their own uncertainty): {outline_chip}. The systematic that remains is the same
+  finding as above — the product is wider above its widest row and narrower below it, and its widest row sits {outline_shift} head-widths
+  higher than the mesh&rsquo;s.</p>
+  <figure class="wide">{outline_svg}<figcaption>Excluded and why: {outline_excluded}</figcaption></figure>
+
+  <h3>7.2 The ToF window — the mesh has one, and it is measurable</h3>
+  <p>{tof_note} The aperture measures <b>{tof_w} × {tof_h} mm</b> and its centre sits <b>{tof_dx} mm</b> to the head&rsquo;s right of the
+  eye-ring axis.</p>
+  <div class="tw"><table class="data">
+    <caption>Table 9. The ToF window, both sides, as fractions of the head width (the photograph carries no scale of its own).</caption>
+    <thead><tr><th>Ratio</th><th class=n>Product</th><th class=n>Mesh</th><th class=n>Δ at the mesh width (mm)</th></tr></thead>
+    <tbody>{tof_rows}</tbody>
+  </table></div>
+</section>
+
 <section id="settle">
-  <h2><span class="n">7</span>What would settle the remaining CANNOT DETERMINEs</h2>
+  <h2><span class="n">8</span>What would settle the remaining CANNOT DETERMINEs</h2>
   <ul>{settle}</ul>
 </section>
 
 <section id="method">
-  <h2><span class="n">8</span>Method and honest limits</h2>
+  <h2><span class="n">9</span>Method and honest limits</h2>
   <ul>
     <li><b>Scripts.</b> <code>tools/head_photomatch.py</code> (scale, pose fit, size — writes <code>out/head/head_fit.json</code> and every overlay),
-      <code>tools/head_frontview.py</code> (front-view ratios with propagated uncertainty and verdicts — <code>out/head/front_view.json</code>), <code>tools/head_profile_frame.py</code> (the README frame — <code>out/head/profile_frame.json</code>), <code>tools/head_verdict.py</code> (merge + verdict —
-      <code>out/head/head.json</code>), <code>tools/gen_head.py</code> (this page). Renderer: MuJoCo offscreen segmentation at 1000², perspective free camera whose
+      <code>tools/head_frontview.py</code> (front-view ratios with propagated uncertainty and verdicts — <code>out/head/front_view.json</code>), <code>tools/head_profile_frame.py</code> (the README frame — <code>out/head/profile_frame.json</code>), <code>tools/head_frontfit.py</code> (the front view re-measured like for like — <code>out/head/front_fit.json</code>),
+      <code>tools/head_width.py</code> (the head rebuilt at a swept lateral or ring scale and refitted — <code>out/head/width_tight.json</code>),
+      <code>tools/head_width_verdict.py</code> (the two unknowns solved — <code>out/head/head_width_verdict.json</code>),
+      <code>tools/head_verdict.py</code> (merge + verdict —
+      <code>out/head/head.json</code>), <code>tools/gen_head.py</code> (this page), <code>tools/shot_page.py</code> (the read-back in <code>out/head/readback/</code>). Renderer: MuJoCo offscreen segmentation at 1000², perspective free camera whose
       field of view follows the fitted distance so the head always spans the same frame.</li>
     <li><b>Which servo face.</b> Read off the published MJCF: the servo mesh is 20.000 (mesh x) × 34.06 (mesh z) × 29.04 (mesh y, case + horn) and in the neck body
       mesh x = world −x, mesh z = world −z, so a profile camera sees the 20.000 × 34 horn/label face (<code>tools/head_probe.py</code>). The photographs show the
@@ -424,6 +621,14 @@ HTML = f"""<!doctype html>
       the camera is perspective and the fit is repeated over D. The flat-lay front view is perspective too: its ring stands 4.4 mm nearer the camera than the beak edge (mesh depths in <code>front_view.json</code>), carried as the D bracket of Table 6.</li>
     <li><b>Constrained fits.</b> A fitted parameter on the edge of its search box means the optimum is outside the box; Table 3 lists every such parameter and the photograph's scale is then refused. The first release's cream fit sat on the roll bound at −25.00° and was published without saying so; the roll box is now ±45° and the check is automatic.</li>
     <li><b>Defects found by review on the first release, all fixed 2026-09-03:</b> a PASS printed for a cross-check that was never read (graphite's ankle servo); a section contradicting its own table on that point; a citation to sensitivity files that did not exist (D700/D1600 — the runs are D600/D2000) and a mis-stated bracket centre; a unitless ratio printed in millimetres; the largest front-view deviation (eye off the mid-line, −2.13 mm) reported as a match — a shadow artefact, now {f(FV["comparison"]["eye_x_offset_over_width"]["dev_mm"], 2, True)} mm on the beak band; a front-view uncertainty typed as 2 % instead of propagated; a profile-frame scan that ran into the background and blamed a bracket; a D-sensitivity note that described a different number than the one used; a licence version that the source does not state; a missing full stop; and tables wider than the page.</li>
+    <li><b>What §7 supersedes, and what it does not.</b> §6 and Table 6 are the FIRST front-view measurement and are kept as published: they
+      are what §7 corrects, and a reader who cannot see the old number cannot check the correction. Where the two disagree, §7 governs — it
+      measures the same feature on both sides. §5 (head length, from the profiles) and §3 (scale) are untouched by it.</li>
+    <li><b>The lateral-scale instrument, and how it was broken on purpose.</b> <code>tools/head_width.py</code> edits the head meshes&rsquo;
+      vertices before the renderer is built (MuJoCo uploads mesh data to its GL context once, at construction) and scales them about the head
+      body&rsquo;s own lateral axis, which is MEASURED as body <i>y</i> to 0.0000°. Self-test: a shell scale of 0.5 halves the rendered head
+      mask (442 → 222 px) and leaves the ring mask at 146 px; a ring scale of 1.5 takes the ring mask 146 → 219 px (×1.500) and leaves the
+      head mask at 442 px.</li>
     <li><b>What the numbers are not.</b> Bounding-box level agreement between the product and the mesh. Not a p95 surface-distance check (that needs a scan
       of a product head), not a manufacturing tolerance. Every number is from published photographs and published digital assets; no physical unit has
       been callipered.</li>

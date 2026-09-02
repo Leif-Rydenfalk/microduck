@@ -143,15 +143,20 @@ def head_verdict_block():
       <tr><td>head silhouette, major axis</td><td class="n">{_pm(C["dev_major_mm"], C["dev_major_unc_mm"])} mm</td><td>{_chip(CV["major"])}</td></tr>
       <tr><td>head silhouette, minor axis</td><td class="n">{_pm(C["dev_minor_mm"], C["dev_minor_unc_mm"])} mm</td><td>{_chip(CV["minor"])}</td></tr>
       <tr><td>eye ring Ø (30.000 mm mesh), profile photographs</td><td class="n">{_pm(C["eye_dev_mm"], C["eye_dev_unc_mm"])} mm</td><td>{_chip(CV["eye_profile"])}</td></tr>
-      <tr><td>front view: ring OD / head width — the pair (which member: CANNOT DETERMINE)</td><td class="n">{_pm(C["eye_front_view_dev_mm"], C["eye_front_view_unc_mm"])} mm at the mesh width</td><td>{_chip(CV["eye_front"])}</td></tr>
+      <tr><td>front view: ring OD / head width — the PAIR, re-measured on the head's outer silhouette with one estimator (out/head/front_fit.json)</td><td class="n">{_pm(C["front_pair"]["dev_mm"], C["front_pair"]["unc_mm"])} mm at the mesh width</td><td>{_chip(C["front_pair"]["verdict"])}</td></tr>
+      <tr><td><b>accent trim band ÷ the head's own widest row</b> — scale-free, camera-free, ring-free</td><td class="n">{_pm(C["band_over_shell"]["dev_mm"], C["band_over_shell"]["dev_unc_mm"])} mm at the mesh width</td><td>{_chip(C["band_over_shell"]["verdict"])}</td></tr>
+      <tr><td>head WIDTH, from the two ring-free lines (profile silhouettes at a swept lateral scale + the ToF aperture offset)</td><td class="n">{_pm(C["head_width"]["dev_mm"], C["head_width"]["unc_mm"])} mm on 91.763</td><td>{_chip(C["head_width"]["verdict"])}</td></tr>
+      <tr><td>eye ring OD, from the front view's ratio at that width</td><td class="n">{_pm(C["ring_od"]["dev_mm"], C["ring_od"]["unc_mm"])} mm on 30.000</td><td>{_chip(C["ring_od"]["verdict"])}</td></tr>
       <tr><td>eye centre below shell top (front view)</td><td class="n">{_pm(FV["eye_below_top_over_width"]["dev_mm"], FV["eye_below_top_over_width"]["dev_unc_mm"])} mm</td><td>{_chip(FV["eye_below_top_over_width"]["verdict"])}</td></tr>
       <tr><td>eye centre off the mid-line (front view)</td><td class="n">{_pm(FV["eye_x_offset_over_width"]["dev_mm"], FV["eye_x_offset_over_width"]["dev_unc_mm"])} mm</td><td>{_chip(FV["eye_x_offset_over_width"]["verdict"])}</td></tr>
-      <tr><td>ToF window centre from the eye (front view vs MJCF site 22.4 mm)</td><td class="n">{_pm(FV["tof_x_from_eye_over_width"]["dev_mm"], FV["tof_x_from_eye_over_width"]["dev_unc_mm"])} mm</td><td>{_chip(FV["tof_x_from_eye_over_width"]["verdict"])}</td></tr>
+      <tr><td>ToF window centre from the eye — the APERTURE in <code>face_part</code>, measured on both sides (front view)</td><td class="n">{_pm((C["tof_window"]["photo_dx_over_width"] - C["tof_window"]["mesh_dx_mm"] / 91.763) * 91.763, C["tof_window"]["mesh_dx_unc_mm"])} mm</td><td>{_chip("CANNOT DETERMINE")}</td></tr>
     </tbody>
   </table></div>
   <div class="pair">
-    <figure><span class="tag">Real · flat-lay, true front view — beside ours</span>
-      <img src="out/head/front_pair.png" alt="front view real beside ours" style="aspect-ratio:auto"></figure>
+    <figure><span class="tag">Real · flat-lay, true front view — beside ours at the mesh width and at the measured one</span>
+      <img src="out/head/front_fit_pair.png" alt="front view real beside ours" style="aspect-ratio:auto"></figure>
+    <figure><span class="tag">Real · the FAIL at 8×, both edges</span>
+      <img src="out/head/front_edges.png" alt="shell edge against trim band edge at 8x" style="aspect-ratio:auto"></figure>
     <figure><span class="tag ours">Profile fit: real | ours | overlay</span>
       <img src="{html.escape(HEAD['photos'][0]['pictures']['pair'])}" alt="profile fit" style="aspect-ratio:auto"></figure>
   </div>

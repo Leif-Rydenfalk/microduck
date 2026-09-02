@@ -180,7 +180,7 @@ def main():
             "sweeps put it %s, %s. So the front view's excess is NOT attributable to the ring by elimination, and it is "
             "not attributable to the width alone either: the measured width deficit accounts for %.1f of the %.1f %%." % (
                 ", ".join("%s s_w %.4f" % (x["photo"], x["quad_minimiser"]) for x in widths if x["quad_minimiser"]),
-                ", ".join("%.3f +- %.3f" % (l["head_width_mm"], l["head_width_unc_mm"]) for l in free),
+                ", ".join("%.3f \u00b1 %.3f" % (l["head_width_mm"], l["head_width_unc_mm"]) for l in free),
                 ("at opposite ends of the swept range (%s), each minimum ON the end of the sweep" %
                  ", ".join("%s %.4f" % (x["photo"], x["grid_best_s"]) for x in rings)) if ring_edge else "inconsistently",
                 "which is a refusal, not a measurement" if ring_edge else "beyond either photograph's own precision",
@@ -196,7 +196,7 @@ def main():
                     "photograph's ACCENT TRIM BAND (419 px) against the mesh's whole bottom-shell silhouette (692 px). On the mesh "
                     "those are the same feature to 0.35 mm; on the product they are not — the band is %.3f +- %.3f mm inset from the "
                     "head's widest row. Re-measured on the head's OUTER silhouette on both sides, with one estimator and a gated "
-                    "pose, the excess is %.1f +- %.1f %% and the pair's verdict is %s. The %+.1f %% figure is superseded." % (
+                    "pose, the excess is %.1f \u00b1 %.1f %% and the pair's verdict is %s. The %+.1f %% figure is superseded." % (
                         abs(C["band_over_shell"]["dev_mm"]), C["band_over_shell"]["dev_unc_mm"], pair_excess, pair_u, vPair, 9.1)
                     if C.get("band_over_shell") else None),
         rule="docs/REBUILD-PROTOCOL.md: bbox within 1.5 mm per axis; PASS when |d| + u <= 1.5, FAIL when |d| - u > 1.5, else CANNOT DETERMINE",

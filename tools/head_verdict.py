@@ -52,8 +52,8 @@ def REMODEL(pair, combined):
                    "Modelling that means the top shell's lower rim overhangs the band by about %.2f mm per side — an EXTERNAL feature, "
                    "so it is modelled, not guessed." % (abs(band["dev_mm"]), band["dev_unc_mm"], abs(band["dev_mm"]) / 2.0))
     if hw:
-        out.append("What does NOT justify a re-model: the head's overall WIDTH (%.3f +- %.3f mm against 91.763, %s) and the eye ring's OD "
-                   "(%.3f +- %.3f mm against 30.000, %s). Both point the same way as the front view's ratio and neither clears the 1.5 mm "
+        out.append("What does NOT justify a re-model: the head's overall WIDTH (%.3f \u00b1 %.3f mm against 91.763, %s) and the eye ring's OD "
+                   "(%.3f \u00b1 %.3f mm against 30.000, %s). Both point the same way as the front view's ratio and neither clears the 1.5 mm "
                    "rule, so scaling the shells to either number would be a plausible default written into tooling — refused." % (
                        hw["value_mm"], hw["unc_mm"], hw["verdict"], ro.get("value_mm", float("nan")), ro.get("unc_mm", float("nan")),
                        ro.get("verdict", "CANNOT DETERMINE")))
@@ -275,13 +275,13 @@ def main():
     else: head = "CANNOT DETERMINE"
     head_why = []
     if band and band.get("verdict") == "FAIL":
-        head_why.append("the accent trim band at the head's split line is %s mm narrower than the head's own widest row on the product "
+        head_why.append("the accent trim band at the head's split line is %.3f mm narrower than the head's own widest row on the product "
                         "(%.4f ± %.4f of it) and exactly as wide on the mesh (%.4f); the same finding survives the adversarial reading in "
                         "which only the jaw carries the accent colour (%s mm vs the jaw alone, %s) — a shape difference that needs no "
                         "scale, no camera and no ring, MEASURED at %.1f sigma and confirmed at 8x on both edges (the cream shell's outer "
                         "edge sits at x 130 / 557 in the flat-lay while the band's sits at 138 / 551)" % (
-                            fmt(band["dev_mm"]), band["photo"], band["photo_unc"], band["mesh"],
-                            fmt(band.get("dev_mm_vs_jaw_only")), band.get("verdict_vs_jaw_only"),
+                            abs(band["dev_mm"]), band["photo"], band["photo_unc"], band["mesh"],
+                            abs(band.get("dev_mm_vs_jaw_only") or 0.0), band.get("verdict_vs_jaw_only"),
                             abs(band["dev_mm"]) / band["dev_unc_mm"] if band["dev_unc_mm"] else float("nan")))
     if pair.get("head_width_verdict"):
         head_why.append("head WIDTH, from the two lines that never use the ring's diameter (the profile silhouettes refitted at a swept "
