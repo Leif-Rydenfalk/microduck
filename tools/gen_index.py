@@ -42,6 +42,12 @@ SECTIONS = [
         ("out/print/PRINT.html", "Print package", "Plate files and the measured filament/time for every printed part."),
         ("BUILD-BOOK.html", "Build book", "The long-form build narrative."),
     ]),
+    ("Test & validation", "How a built unit is proved to work, before it ships.", [
+        ("TEST-PLAN.html", "Test & validation plan",
+         "35 gated tests from a never-powered robot to one that has walked: electrical bring-up, servo ID and calibration, sensor checks, control-loop acceptance and a walk test. Every gate names whether its number came from a vendor datasheet, Pollen's source, our simulation, or a decision of the plan."),
+        ("spec/test-plan.json", "Test plan (data)",
+         "The data the plan is generated from: the rail table, the XL330 register set, the ID map and every gate with its basis."),
+    ]),
     ("Sourcing & procurement", "Where every bought part comes from, and what it costs.", [
         ("SOURCING.html", "Sourcing evidence", "Every bought line: two or more real distributors, tier prices, MOQ, lead time, alternates, and the URL of every page that refused a price."),
         ("RFQ.html", "Requests for quotation", "One ready-to-send request per supplier, placeholders for the human's contact details. Nothing has been sent."),
@@ -67,6 +73,7 @@ SECTIONS = [
 TOOLS = [
     ("tools/gen_comparison.py", "Builds COMPARISON.html from the measured data."),
     ("tools/gen_index.py", "Builds this index, checking every link."),
+    ("tools/gen_test_plan.py", "Builds TEST-PLAN.html from spec/test-plan.json; computes every derived figure (degrees, encoder counts, tilt thresholds) rather than carrying it as text."),
     ("tools/gen_sourcing.py", "Builds SOURCING.html and RFQ.html from spec/sourcing.json; refuses to publish a verdict the data does not support."),
     ("tools/head_analysis.py", "Measures head conformance from silhouettes."),
     ("tools/md2html.py", "Converts the Markdown docs to the shared HTML style."),
