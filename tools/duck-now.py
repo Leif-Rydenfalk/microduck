@@ -40,9 +40,14 @@ for i, p in enumerate(place):
 # TRUE COLOURS (Leif, 2026-09-02: "only render our version and what we have"):
 # every placement painted its MJCF material colour; whose mesh it is stays in
 # duck-now.json, not in the picture.
-mats = {i: (p.get('material_rgba') or [0.7,0.7,0.7,1]) for i,p in enumerate(place)}
+# colours live in spec/mesh-placements.json (per MESH), not in the assembly
+# placements rows — the first render of this script painted everything grey
+# because it looked for material_rgba on the wrong file's rows (measured
+# 2026-09-02, buildbook hero).
+mp = json.load(open(root + '/spec/mesh-placements.json'))
+mesh_rgba = {name: (rows[0].get('material_rgba') or [0.7,0.7,0.7,1]) for name, rows in mp.items()}
 def hexof(i):
-    r = mats.get(i) or [0.7,0.7,0.7,1]
+    r = mesh_rgba.get(place[i]['mesh']) or [0.7,0.7,0.7,1]
     return '#%02x%02x%02x' % tuple(int(255*c) for c in r[:3])
 groups = {}; colors = {}; alphas = {}
 for k, v in ref.items(): groups[k] = v; colors[k] = hexof(int(k.rsplit('#',1)[1]))

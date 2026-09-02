@@ -49,7 +49,7 @@ def _outline(n=8):
     import math
     pts = []
     hx, hz = L / 2 - CORNER_R, W / 2 - CORNER_R
-    corners = [((hz, hx), 0), ((hz, -hx), 90), ((-hz, -hx), 180), ((-hz, hx), 270)]
+    corners = [((hz, hx), 0), ((-hz, hx), 90), ((-hz, -hx), 180), ((hz, -hx), 270)]
     for (cz, cx), a0 in corners:
         for i in range(n + 1):
             a = math.radians(a0 + 90.0 * i / n)

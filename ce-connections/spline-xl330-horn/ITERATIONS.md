@@ -4,3 +4,4 @@
 | iteration | date | why it exists |
 |---|---|---|
 | v0.0.1 | 2026-09-01 | created — nothing measured yet |
+| v0.0.1 | 2026-09-02 | authored: horn pattern measured on both sides (Ø16 disc, 4 x Ø1.6 on Ø12 PCD off xl330.stl; brackets agree to 0.001 mm), mate/compat contracts, 3 ledger rows |
