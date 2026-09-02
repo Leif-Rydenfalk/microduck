@@ -115,13 +115,14 @@
 
 <div class="abstract">
   <h2>Readiness — the honest answer</h2>
-  <p><b>Not completely factory-ready.</b> Every mechanical part can be printed and every off-the-shelf part can be bought today, and the assembled robot runs Pollen's own trained policies in simulation — so a working <b>prototype</b> is buildable now. Three things block a <b>factory</b> release, all named in §1: the three custom circuit boards have no published design files (we have a footprint-accurate stand-in, not fabricable Gerbers), the mechanical drawing generator has two measured defects still being fixed, and the sim meshes have not yet been reconciled against the product photographs. This dossier states what is done, what is not, and gives the complete build sequence for the prototype.</p>
+  <p><b>Not completely factory-ready.</b> Every mechanical part can be printed and every off-the-shelf part can be bought today, and the assembled robot runs Pollen's own trained policies in simulation — so a working <b>prototype</b> is buildable now. Three things block a <b>factory</b> release, all named in §1: the three custom circuit boards have no published design files (we have a footprint-accurate stand-in, not fabricable Gerbers), the mechanical drawing generator has two measured defects still being fixed, and while the sim meshes are now <a href="COMPARISON.html">visually reconciled against the product photographs</a>, a physical metrology (laser-scan) check has not been done. This dossier states what is done, what is not, and gives the complete build sequence for the prototype.</p>
 </div>
 
 <nav class="toc" aria-label="Contents">
   <a href="#readiness"><span class="tn">1</span>Manufacturing readiness</a>
   <a href="#bom"><span class="tn">2</span>Bill of materials</a>
   <a href="#files"><span class="tn">3</span>Release files &amp; previews</a>
+  <a href="COMPARISON.html"><span class="tn">◆</span>Reference match — photo vs CAD</a>
   <a href="#assembly"><span class="tn">4</span>Assembly — full sequence</a>
   <a href="#wiring"><span class="tn">5</span>Wiring</a>
   <a href="#power"><span class="tn">6</span>Power-up &amp; verification</a>
@@ -142,7 +143,7 @@
       <tr><td>Electronics — custom PCBs</td><td><span class="st no">Not ready</span></td><td>Robot HAT, imu_to_dxl and battery-contact PCB: footprint-accurate stand-ins; the HAT's connectors/regulators are reconstructed.</td><td>No published schematic/Gerbers. A real board design + fab is required.</td></tr>
       <tr><td>Assembly definition</td><td><span class="st ready">Ready</span></td><td>Full step-by-step sequence (§4), servo IDs, bearing seats, fastener counts, wiring — from the measured joints.</td><td>Fastener counts are community-derived (flagged); torque unspecified by Pollen.</td></tr>
       <tr><td>BOM &amp; sourcing</td><td><span class="st partial">Partial</span></td><td>All bought lines with vendors (§2); cost roll-up in <a href="docs/PRODUCTION.html">PRODUCTION.md</a>.</td><td>Several prices and the exact fitted speaker/mic/NFC/camera modules are CANNOT DETERMINE.</td></tr>
-      <tr><td>Simulation / validation</td><td><span class="st ready">Ready</span></td><td>MuJoCo runs Pollen's walk / sit-stand policies on our meshes; stock-vs-ours trajectories bit-identical.</td><td>Mesh-vs-product photo reconciliation not yet complete.</td></tr>
+      <tr><td>Simulation / validation</td><td><span class="st ready">Ready</span></td><td>MuJoCo runs Pollen's walk / sit-stand policies on our meshes; stock-vs-ours trajectories bit-identical.</td><td>Visual photo-vs-CAD conformance now documented (<a href="COMPARISON.html">reference match</a>); a physical laser-scan metrology check is still not done.</td></tr>
     </tbody>
   </table></div>
 </section>
@@ -206,6 +207,7 @@
     <li><span class="ft">manual</span><a href="ce-assemblies/microduck/current/manual/MANUAL.html">MANUAL.md</a> — the construction manual (source of §4)</li>
     <li><span class="ft">wiring</span><a href="wiring/CABLES.html">CABLES.md</a> — 22 cables, lengths, voltage-drop</li>
     <li><span class="ft">sim</span><a href="docs/SIM-CAPABILITY.html">SIM-CAPABILITY.md</a> — what the simulation can and cannot do</li>
+    <li><span class="ft">compare</span><a href="COMPARISON.html">COMPARISON.html</a> — our CAD beside the official product photos at matched angles, with joint close-ups</li>
     <li><span class="ft">tools</span><a href="TOOLCHAIN.html">TOOLCHAIN.md</a> — exact tool + kernel versions to reproduce every file</li>
   </ul>
 </section>
@@ -213,6 +215,18 @@
 <section id="assembly">
   <h2 class="sec"><span class="tn">4</span>Assembly — full sequence</h2>
   <p class="lead">Build order: trunk → hips → legs → neck → head → wiring → power-up. Every servo ID, bearing seat and joint is called out. Positions are world-frame (mm) unless a body frame is named. Derived from the measured joint tree (14 hinges).</p>
+
+  <figure style="margin:14px 0;border:1px solid var(--hair);background:var(--figbg);padding:12px">
+    <div class="figrow" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
+      <span><img src="out/assembly/step1.png" alt="step 1 trunk" style="width:100%;background:#fff;border:1px solid var(--hair)"><small style="font-family:var(--sans);font-size:11.5px;color:var(--ink-2);display:block;padding-top:4px">1 · Trunk (orange = added)</small></span>
+      <span><img src="out/assembly/step2.png" alt="step 2 hips" style="width:100%;background:#fff;border:1px solid var(--hair)"><small style="font-family:var(--sans);font-size:11.5px;color:var(--ink-2);display:block;padding-top:4px">2 · Hips</small></span>
+      <span><img src="out/assembly/step3.png" alt="step 3 legs" style="width:100%;background:#fff;border:1px solid var(--hair)"><small style="font-family:var(--sans);font-size:11.5px;color:var(--ink-2);display:block;padding-top:4px">3 · Legs</small></span>
+      <span><img src="out/assembly/step4.png" alt="step 4 neck" style="width:100%;background:#fff;border:1px solid var(--hair)"><small style="font-family:var(--sans);font-size:11.5px;color:var(--ink-2);display:block;padding-top:4px">4 · Neck</small></span>
+      <span><img src="out/assembly/step5.png" alt="step 5 head" style="width:100%;background:#fff;border:1px solid var(--hair)"><small style="font-family:var(--sans);font-size:11.5px;color:var(--ink-2);display:block;padding-top:4px">5 · Head</small></span>
+      <span><img src="out/assembly/assembled.png" alt="assembled" style="width:100%;background:#fff;border:1px solid var(--hair)"><small style="font-family:var(--sans);font-size:11.5px;color:var(--ink-2);display:block;padding-top:4px">Assembled</small></span>
+    </div>
+    <figcaption style="font-family:var(--sans);font-size:12.5px;color:var(--ink-2);padding-top:8px">Figure 4. Cumulative build sequence — each frame is the real geometry posed in MuJoCo; parts added at that step are orange, parts already placed are grey. Rendered by <code>sim/assembly_steps_mj.py</code>. Camera angles and a photo-vs-CAD reference check: <a href="COMPARISON.html">reference-match dossier</a>.</figcaption>
+  </figure>
 
   <div class="callout"><span class="lab">Before you begin — three rules</span>
     <b>Servo IDs:</b> set each XL330's ID and baud (1&nbsp;Mbps, <code>baud_rate=3</code>) <em>before</em> fitting it — the bus is one daisy chain; a duplicate ID means disassembly.

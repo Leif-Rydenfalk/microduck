@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reference Match</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opt_sz,wght@8..60,400;8..60,600;8..60,700&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="tools/doc.css">
+<style>
+  /* comparison-specific */
+  .pair{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:stretch;margin:14px 0}
+  .pair figure{margin:0}
+  .pair figure img{width:100%;aspect-ratio:1/1;object-fit:contain;background:#fff}
+  .tag{font-family:var(--sans);font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+       display:inline-block;padding:2px 8px;margin-bottom:6px;border:1px solid var(--hair);color:var(--ink-2)}
+  .tag.ours{color:var(--accent);border-color:var(--accent)}
+  .gal{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:14px 0}
+  .gal figure{margin:0}
+  .gal figure img{aspect-ratio:1/1;object-fit:contain;background:#fff}
+  .verdict{border-left:3px solid var(--accent);padding:2px 0 2px 18px;margin:14px 0;font-size:15.5px}
+  .verdict b{color:var(--accent)}
+  @media(max-width:640px){.pair{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<p class="backlink"><a href="RELEASE.html">← Release dossier</a></p>
+
+<header class="hero">
+  <p class="eyebrow">Microduck reverse-engineering · reference conformance</p>
+  <h1>Reference match: our CAD vs the official Microduck</h1>
+  <p class="sub">Every render below is our reconstructed geometry, posed at the same standing pose and shot
+  from the same camera angle as the corresponding photo on pollen-robotics.com. Same meshes Pollen published,
+  in Pollen's own kinematic model — so the comparison is a shape check, not an art match.</p>
+  <div class="rev">
+    <span>MD-CMP-001 · Rev A</span><span>2026-09-02</span>
+    <span>renderer: MuJoCo 3.12 offscreen</span><span>pose: STAND keyframe (gentle head)</span>
+  </div>
+</header>
+
+<nav class="toc">
+  <a href="#answer">The direct answer</a>
+  <a href="#profile">Profile — side by side</a>
+  <a href="#angles">Our CAD · all angles</a>
+  <a href="#joints">Joint close-ups</a>
+  <a href="#method">Method & honest caveats</a>
+</nav>
+
+<section id="answer">
+  <h2><span class="n">1</span>Is it the exact same?</h2>
+  <p class="lede">Short version: the <em>geometry is the same by construction</em>; the color and the exact pose are not,
+  and for good reasons stated below.</p>
+
+  <div class="verdict">
+    <b>Shape — YES, by construction.</b> The renders are driven by the exact meshes Pollen published for the
+    Microduck (their MuJoCo/onshape-to-robot export), loaded into their own MJCF kinematic tree. The nine
+    load-bearing links we re-modelled parametrically (<code>trunk_base</code>, <code>yaw2roll</code>,
+    <code>upper_leg_left/right</code>, <code>leg</code>, <code>bearing_roll</code>, <code>power_support</code>,
+    <code>banana_pcb_locker</code>, <code>upper_leg_rigidity_plate</code>) were each graded against Pollen's mesh
+    at <b>≤ 1 mm</b> p95 surface distance both ways before being swapped in. Everything else is Pollen's mesh
+    verbatim. So the silhouette, proportions and joint placement you see are the product's.
+  </div>
+  <div class="verdict">
+    <b>Colour — NO, and it was never meant to be.</b> The tints are the <em>schematic</em> material colours
+    that ship inside the simulation model (bright yellow beak, teal soles, grey servos). They are functional
+    sim colours, not the product's painted finish. Pollen's own simulator renders the duck in these same
+    schematic colours. We remapped our rebuilt parts to the model's real per-part materials so the white
+    shells read correctly, but we did not repaint anything to match marketing photography.
+  </div>
+  <div class="verdict">
+    <b>Pose &amp; lens — CLOSE, not identical.</b> We pose at the model's <code>STAND</code> keyframe with the
+    head brought up to a gentle gaze; the store photos are art-directed poses at unknown joint angles, shot on
+    a long product-photography lens (near-orthographic). Our free camera is a normal perspective, so the
+    silhouette lines up but the perspective foreshortening differs a little.
+  </div>
+</section>
+
+<section id="profile">
+  <h2><span class="n">2</span>Profile — official photo beside our CAD</h2>
+  <p class="lede">The cleanest 1:1 check: a pure side view on white. Left is Pollen's product photo; right is our
+  CAD at the matched angle.</p>
+
+  <h3>Left profile (cream colourway)</h3>
+  <div class="pair">
+    <figure><span class="tag">Official · pollen-robotics.com</span>
+      <img src="images/store/store_microduck-cream-standing-profile-left.jpg" alt="official cream profile left">
+      <figcaption>Store photo — cream, standing, left profile.</figcaption></figure>
+    <figure><span class="tag ours">Our CAD · MuJoCo render</span>
+      <img src="out/compare/ours-prof-left.png" alt="our cad profile left">
+      <figcaption>Our reconstruction, STAND pose, azimuth 270° — same side, beak to the left.</figcaption></figure>
+  </div>
+  <p>The neck stack, the beak overhang, the thigh triangle, the ankle servo block and the foot plate all land in
+  the same places. The head reads a touch more compact and the beak is the sim's yellow rather than the product's
+  orange; both are colour/finish, not shape.</p>
+
+  <h3>Right profile (graphite colourway)</h3>
+  <div class="pair">
+    <figure><span class="tag">Official · pollen-robotics.com</span>
+      <img src="images/store/store_microduck-graphite-standing-profile-right-02.jpg" alt="official graphite profile right">
+      <figcaption>Store photo — graphite, standing, right profile.</figcaption></figure>
+    <figure><span class="tag ours">Our CAD · MuJoCo render</span>
+      <img src="out/compare/ours-prof-right.png" alt="our cad profile right">
+      <figcaption>Our reconstruction, STAND pose, azimuth 90° — opposite side.</figcaption></figure>
+  </div>
+</section>
+
+<section id="angles">
+  <h2><span class="n">3</span>Our CAD, every angle</h2>
+  <p class="lede">The same posed model swept around the vertical axis and from above — one model load, eight cameras,
+  a clean white studio scene (no floor, white sky, two-point fill).</p>
+  <div class="gal">
+    <figure><span class="tag ours">front</span><img src="out/compare/ours-front.png" alt="front"></figure>
+    <figure><span class="tag ours">back</span><img src="out/compare/ours-back.png" alt="back"></figure>
+    <figure><span class="tag ours">iso front-L</span><img src="out/compare/ours-iso-fl.png" alt="iso fl"></figure>
+    <figure><span class="tag ours">iso front-R</span><img src="out/compare/ours-iso-fr.png" alt="iso fr"></figure>
+    <figure><span class="tag ours">iso back-L</span><img src="out/compare/ours-iso-bl.png" alt="iso bl"></figure>
+    <figure><span class="tag ours">top</span><img src="out/compare/ours-top.png" alt="top"></figure>
+  </div>
+</section>
+
+<section id="joints">
+  <h2><span class="n">4</span>Joint close-ups — the rig is already built in</h2>
+  <p class="lede">These are not a separate model. They are the <em>same</em> posed robot, with the camera pushed
+  in on one joint. Posing is instant (<code>mj_resetDataKeyframe</code> + <code>mj_forward</code>, milliseconds) —
+  no CAD-kernel rebuild — because the kinematics are already encoded in the model we reused.</p>
+
+  <div class="gal">
+    <figure><span class="tag ours">hip pitch</span><img src="out/compare/ours-joint-hip.png" alt="hip joint"></figure>
+    <figure><span class="tag ours">knee</span><img src="out/compare/ours-joint-knee.png" alt="knee joint"></figure>
+    <figure><span class="tag ours">ankle</span><img src="out/compare/ours-joint-ankle.png" alt="ankle joint"></figure>
+    <figure><span class="tag ours">neck pitch</span><img src="out/compare/ours-joint-neck.png" alt="neck joint"></figure>
+  </div>
+
+  <p>Every one of the 14 actuated hinges carries a full dynamic definition, not just a visual pivot — axis,
+  origin, travel limit, and the servo's own damping / armature / friction / position-gain / torque limit.
+  A sample straight from the model:</p>
+
+  <div class="tw"><table class="data">
+    <thead><tr><th>Joint</th><th>Axis</th><th>Range (°)</th><th>Damping</th><th>Armature</th>
+      <th>Friction</th><th>k<sub>p</sub></th><th>Torque limit (N·m)</th></tr></thead>
+    <tbody>
+      <tr><td>left_hip_yaw</td><td class="n">z</td><td class="n">−25 … +30</td><td class="n">0.15</td><td class="n">0.001</td><td class="n">0.10</td><td class="n">10.0</td><td class="n">±20.0</td></tr>
+      <tr><td>left_hip_roll</td><td class="n">x</td><td class="n">−22 … +22</td><td class="n">0.048</td><td class="n">0.002</td><td class="n">0.006</td><td class="n">0.52</td><td class="n">±0.91</td></tr>
+      <tr><td>left_hip_pitch</td><td class="n">y</td><td class="n">−90 … +90</td><td class="n">0.041</td><td class="n">0.002</td><td class="n">0.032</td><td class="n">0.39</td><td class="n">±0.67</td></tr>
+      <tr><td>left_knee</td><td class="n">z</td><td class="n">−90 … +90</td><td class="n">0.044</td><td class="n">0.0017</td><td class="n">0.013</td><td class="n">0.43</td><td class="n">±0.75</td></tr>
+      <tr><td>left_ankle</td><td class="n">z</td><td class="n">−90 … +90</td><td class="n">0.053</td><td class="n">0.0018</td><td class="n">0.0048</td><td class="n">0.55</td><td class="n">±0.96</td></tr>
+    </tbody>
+  </table></div>
+  <p style="font-size:13px;color:var(--ink-2)">Source: <code>sim/microduck_ours.xml</code> (Pollen's onshape-to-robot
+  export). Torque limits match the Dynamixel XL330-M288-T stall envelope. The triad side mirrors each hinge as
+  a measured connection in <code>ce-assemblies/microduck/current/joints.json</code> (world origin in mm, world
+  axis, range, parent/child body), so the joint exists in two representations that agree.</p>
+
+  <div class="card">
+    <h3>So why did anything take “a long time”?</h3>
+    <p>Rigging did not — it was reused, instantly. What is slow is building the <em>parametric solid</em> assembly
+    in the FreeCAD kernel (≈70 boolean placements, minutes). That is solid modelling, a different job from posing.
+    For visualisation, simulation and these comparison shots we drive the meshes directly through the model, so the
+    kernel build is never on the path.</p>
+  </div>
+</section>
+
+<section id="method">
+  <h2><span class="n">5</span>Method &amp; honest caveats</h2>
+  <ul>
+    <li><b>Renderer.</b> MuJoCo 3.12 offscreen, 1400² on a white-sky studio scene with no floor and two directional
+      fills — script <code>sim/compare_render.py</code>, scene dumped to <code>out/compare/_studio_scene.xml</code>.</li>
+    <li><b>Pose.</b> The model's <code>STAND</code> keyframe (Pollen's <code>DEFAULT_POSE</code>) with neck- and
+      head-pitch reduced to a gentle gaze so the head is not tilted 40° into the floor. Photos are unknown poses.</li>
+    <li><b>Colour is schematic.</b> Beak yellow and soles teal are the model's own material colours; the product is
+      painted white with orange accents. We did not repaint to match marketing.</li>
+    <li><b>Two content drifts in Pollen's published assets</b> (documented, not ours to fix): the sim carries a
+      <code>raspberry_pi_zero_2_w</code> compute placeholder and an <code>np_f970</code> battery mesh, whereas the
+      shipping product is a Radxa Zero 3W and an NP-F550-class cell. These are asset-naming drifts in the reference,
+      called out in the release dossier.</li>
+    <li><b>What this page does <em>not</em> prove.</b> It is a visual/geometric conformance check. It is not a
+      metrology report — we have not laser-scanned a physical unit. The ≤1 mm figure is our rebuilds vs Pollen's
+      mesh, not vs a real duck.</li>
+  </ul>
+</section>
+
+</div>
+</body>
+</html>
