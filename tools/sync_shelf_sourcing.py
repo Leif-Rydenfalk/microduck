@@ -6,13 +6,20 @@ LINE). ce-parts/<slug>/sourcing.json holds them as the shelf sees them (per
 PART), in ce-parts/SCHEMA.md v2's shape. This copies the second from the first
 so the two cannot drift, and so `bin/triad check part:<slug>` sees the prices.
 
-MERGE ONLY, NEVER OVERWRITE. Another lane owns these folders. An offer already
-in a part's sourcing.json is left exactly as it is - matched_on, note and all -
-and only offers whose URL is not already present are appended. Nothing is
-deleted, and a part with no line in spec/sourcing.json is not touched.
+MERGE, NEVER CLOBBER SOMEONE ELSE'S. Another lane owns these folders. An offer
+this tool did not write is left exactly as it is - matched_on, note and all.
+An offer this tool DID write (its note starts with "from spec/sourcing.json
+line ") is REPLACED from the current data on every run, because the alternative
+is what happened on 2026-09-03: three offers were cited to a listing page in
+spec/sourcing.json, the citations were corrected there, and the stale listing
+URLs stayed on the shelf marked "verified" because appending cannot fix a
+record that is already present. A part with no line in spec/sourcing.json is
+not touched at all.
 
 The schema's hard rules are enforced here rather than assumed:
-  * confidence "verified" requires url AND retrieved AND matched_on;
+  * confidence "verified" requires url AND retrieved AND matched_on, AND that
+    the url IS THE PRODUCT PAGE - ce-parts/SCHEMA.md's own words. A vendor's
+    family price table gets "family"; a listing or search page is refused;
   * a price with no retrieved date is a FAIL, so an offer without a fetch date
     is refused rather than written;
   * zero offers is CANNOT DETERMINE, never PASS;
@@ -27,6 +34,29 @@ REPO = os.path.dirname(HERE)
 SHELF = os.path.join(REPO, "ce-parts")
 DATA = json.load(open(os.path.join(REPO, "spec", "sourcing.json")))
 DRY = "--dry-run" in sys.argv
+MARK = "from spec/sourcing.json line "
+
+MULTI_SUFFIX = {
+    "co.uk", "org.uk", "ac.uk", "co.nz", "com.au", "net.au", "co.in", "co.jp",
+    "com.cn", "com.br", "com.mx", "co.za", "com.sg", "com.hk", "com.tw",
+}
+
+
+def reg_domain(url):
+    """The shop a URL belongs to. Vendor NAME STRINGS are not shops: 'DigiKey'
+    and 'DigiKey (cut tape)' are one distributor under two spellings, and
+    counting names is what let a one-shop line look like two (measured
+    2026-09-03; the same fix is in tools/gen_sourcing.py)."""
+    host = (url or "").split("//", 1)[-1].split("/", 1)[0].split("?", 1)[0]
+    host = host.split("@")[-1].split(":")[0].lower().rstrip(".")
+    if host.startswith("www."):
+        host = host[4:]
+    parts = [p for p in host.split(".") if p]
+    if len(parts) <= 2:
+        return ".".join(parts)
+    if ".".join(parts[-2:]) in MULTI_SUFFIX:
+        return ".".join(parts[-3:])
+    return ".".join(parts[-2:])
 
 # One line can source more than one part (B9 covers both ToF generations, B14
 # both NFC candidates, R1 both USB-C controllers). The slug is named per offer
@@ -44,8 +74,16 @@ def to_shelf_offer(line, off):
         return None
     if not off.get("fetched"):        # a price with no date is a FAIL
         return None
+    kind = off.get("page_kind") or "product"
+    if kind == "listing":             # a listing page is not a citation
+        return None
+    conf = "verified" if kind == "product" else "family"
     tiers = sorted(off.get("tiers") or [])
     matched = [f'vendor page identifies it as "{off.get("sku") or line["mpn"]}"']
+    if conf == "family":
+        matched.append("the URL is the vendor's FAMILY price table, not a per-size "
+                       "product page: the size and its price are printed on it, but "
+                       "ce-parts/SCHEMA.md reserves \"verified\" for the product page")
     if tiers:
         matched.append(f'price {off["currency"]} {tiers[0][1]:g} at {tiers[0][0]}+ read on the page')
     if off.get("note"):
@@ -54,7 +92,7 @@ def to_shelf_offer(line, off):
         "vendor": off["vendor"],
         "mpn": off.get("sku") or line["mpn"],
         "url": off["url"],
-        "confidence": "verified",
+        "confidence": conf,
         "retrieved": off["fetched"],
         "price": ({"currency": off["currency"], "unit": tiers[0][1],
                    "moq": off.get("moq"),
@@ -63,18 +101,21 @@ def to_shelf_offer(line, off):
         "stock": off.get("stock"),
         "packaging": None,
         "matched_on": matched,
-        "note": (f'from spec/sourcing.json line {line["id"]} ({line["item"]}). '
+        "note": (f'{MARK}{line["id"]} ({line["item"]}). '
                  + (off.get("excluded_from_rollup") or "")).strip(),
     }
 
 
-def verdict_for(line, offs):
-    """The shelf verdict for one part. Never stronger than the line's own, and
-    never PASS on fewer than two DISTINCT vendors - one shop priced two ways is
-    one source of supply."""
-    if len({o["vendor"] for o in offs}) < 2:
+def shelf_verdict(line, offs, current):
+    """The verdict a part folder may carry. Never PASS on fewer than two
+    distinct SHOPS, and never stronger than the line's own verdict in
+    spec/sourcing.json - B7 was PASS on the shelf for a day after the line
+    itself moved to CANNOT DETERMINE, because nothing re-derived it."""
+    if len({reg_domain(o["url"]) for o in offs}) < 2:
         return "CANNOT DETERMINE"
-    return "PASS" if line["verdict"] == "PASS" else "CANNOT DETERMINE"
+    if line["verdict"] != "PASS":
+        return "CANNOT DETERMINE"
+    return current if current in ("PASS", "CANNOT DETERMINE", "FAIL") else "PASS"
 
 
 def offers_for(slug, line):
@@ -92,6 +133,31 @@ def offers_for(slug, line):
         if o:
             out.append(o)
     return out
+
+
+def bookkeeping(line):
+    return (f'Offers tagged "{MARK}{line["id"]}" were merged in by '
+            f'tools/sync_shelf_sourcing.py; the pages behind them were fetched '
+            f'{" and ".join(DATA["fetch_dates"])}, and each offer carries its own date. '
+            f'SOURCING.html is the full record including the pages that refused a price.')
+
+
+def finish(rec, line, offs):
+    """Everything this tool re-derives on every run: the verdict, and its own
+    bookkeeping line (REWRITTEN, not appended to, or one stale copy accumulates
+    per run). Called BEFORE the unchanged test, so a change to either is a
+    change - the first version of this ran after an early `continue` and could
+    never update an existing file."""
+    rec["offers"] = offs
+    rec["verdict"] = shelf_verdict(line, offs, rec.get("verdict"))
+    rec.setdefault("uncertainties", [])
+    rec["uncertainties"].extend(
+        u for u in line.get("unknowns", []) if u not in rec["uncertainties"])
+    rec["uncertainties"] = [u for u in rec["uncertainties"]
+                            if not str(u).startswith(f'Offers tagged "{MARK}')]
+    rec["uncertainties"].append(bookkeeping(line))
+    rec["uncertainties"] = list(dict.fromkeys(rec["uncertainties"]))
+    return rec
 
 
 def main():
@@ -115,32 +181,25 @@ def main():
         if os.path.exists(path):
             doc = json.load(open(path))
             rec = doc["record"]
-            have = {o.get("url") for o in rec.get("offers", [])}
-            new = [o for o in offs if o["url"] not in have]
-            if not new:
-                print(f"  keep {slug}: {len(rec.get('offers', []))} offer(s), nothing new")
+            foreign = [o for o in rec.get("offers", [])
+                       if not str(o.get("note") or "").startswith(MARK)]
+            mine_before = len(rec.get("offers", [])) - len(foreign)
+            have = {o.get("url") for o in foreign}
+            fresh = [o for o in offs if o["url"] not in have]
+            after = foreign + fresh
+            before = json.dumps(rec, sort_keys=True)
+            finish(rec, line, after)
+            if json.dumps(rec, sort_keys=True) == before:
+                print(f"  keep {slug}: {len(rec['offers'])} offer(s), nothing changed")
                 kept += 1
                 continue
-            rec.setdefault("offers", []).extend(new)
-            rec.setdefault("uncertainties", []).extend(
-                u for u in line.get("unknowns", []) if u not in rec["uncertainties"])
-            action = f"merged +{len(new)} -> {len(rec['offers'])}"
+            action = (f"{len(foreign)} foreign offer(s) kept, {mine_before} of ours "
+                      f"replaced by {len(fresh)} -> {len(after)}")
         else:
             doc = {"$parts_folder": 2, "kind": "sourcing",
-                   "record": {"slug": slug,
-                              "verdict": verdict_for(line, offs),
-                              "offers": offs,
-                              "uncertainties": list(line.get("unknowns", []))}}
+                   "record": finish({"slug": slug, "verdict": "PASS",
+                                     "uncertainties": []}, line, offs)}
             action = f"created with {len(offs)} offer(s)"
-        # zero offers is CANNOT DETERMINE, never PASS - re-derive every time
-        r = doc["record"]
-        if len({o["vendor"] for o in r["offers"]}) < 2:
-            r["verdict"] = "CANNOT DETERMINE"
-        r["uncertainties"].append(
-            f'Offers tagged "from spec/sourcing.json line {line["id"]}" were merged in by '
-            f'tools/sync_shelf_sourcing.py on {DATA["fetch_dates"][0]}; SOURCING.html is the '
-            f'full record including the pages that refused a price.')
-        r["uncertainties"] = list(dict.fromkeys(r["uncertainties"]))
         print(f"  {slug}: {action}{' (dry run)' if DRY else ''}")
         if not DRY:
             json.dump(doc, open(path, "w"), indent=2, ensure_ascii=False)
