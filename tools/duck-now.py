@@ -43,8 +43,8 @@ for k, v in ours.items(): groups[k] = v; colors[k] = '#f28c28'
 out = root + '/out/render'
 os.makedirs(out, exist_ok=True)
 title = f'Microduck NOW — {len(passed)} parts rebuilt & PASS (orange), rest = Pollen reference (grey): ' + ', '.join(sorted(passed))
-for v in ('iso',):
-    r = meshview.render_groups(groups, f'{out}/duck-now_{v}.png', view=v, colors=colors, size=(900, 900), title=title[:140])
+for v in ('iso', 'left', 'front'):
+    r = meshview.render_groups(groups, f'{out}/duck-now_{v}.png', view=v, colors=colors, size=(1200, 1200), title=title[:140])
     print(v, r['tris'])
 json.dump({'passed': sorted(passed), 'placements_ours': len(ours), 'placements_ref': len(ref)}, open(f'{out}/duck-now.json', 'w'), indent=1)
 print('passed', sorted(passed))

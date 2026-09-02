@@ -12,7 +12,7 @@ command that exits 0; a rung not reached says so in STATUS.md.
 
 | # | rung | proof |
 |---|---|---|
-| 1 | **Every part on the shelf** — 38 slugs build through `bin/cad part:<slug>`; parametric where rebuilt (PASS vs Pollen's mesh), mesh-backed otherwise | `bin/triad check --all` in this root; `out/render/duck-now_*.png` |
+| 1 | **Every part on the shelf** — 38 slugs build through `bin/cad part:<slug>`; MESH-BACKED IS THE PRIMARY FORM (Leif, 2026-09-02: 'use it directly'); parametric rebuilds replace slugs only where they earn it (drawings, licence, changes) | `bin/triad check --all` in this root; `out/render/duck-now_*.png` |
 | 2 | **The whole assembly builds in the kernel** and renders — `bin/cad assembly:microduck --render`, 14/14 joints resolved by measurement | `ce-assemblies/microduck/current/joints.json record.resolved == 14` |
 | 3 | **Animated** — Pollen's MJCF driven by their own published policy (walk, sit/stand) in MuJoCo, with OUR rebuilt meshes swapped in for every PASSed part, rendered to `out/sim/*.mp4` (+ a GIF for the README) | `out/sim/walk.mp4` exists, ≥ 5 s, frames read back; `out/sim/report.json` with joint ranges hit, no self-collision growth vs the stock model |
 | 4 | **Electronics known and checked** — every electronic part on the shelf with its datasheet cited (elec-datasheets), a `cecad.netlist.Design` of the robot that PASSes its checks, the Robot HAT as a ce-pcb board (schematic → layout → DRC → gerbers) | `electronics/README.md`; `bin/pcb` DRC report PASS or a named CANNOT DETERMINE |
