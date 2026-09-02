@@ -31,7 +31,7 @@ radius 8.100 mm from the axis — inside the Ø17.39 outer wall, outside the
 Ø15 bore, so material exists exactly where a band does:
 
     x −39.5000 .. −37.5000     2.0000 mm
-    x −36.5000 .. −35.5000     1.0000 mm      (Ø16.8 relief between)
+    x −36.5000 .. −35.5000     1.0000 mm      (Ø16.8007 relief between)
 
 ## The other side
 

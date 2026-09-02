@@ -18,7 +18,7 @@ evidence/tube-15-geometry.json:
                  residual mean is < 0.0036 mm, swept 149.06-149.09 deg,
                  chord plane z 9.5000, crown z 15.0000. Two ring bands,
                  x -39.5000..-37.5000 (2.0000) and -36.5000..-35.5000
-                 (1.0000), 1.0000 mm of Ø16.8 relief between them.
+                 (1.0000), 1.0000 mm of Ø16.8007 relief between them.
     the ring     the 15x10x3 bearing's Ø15.0 outer race.
     through it   the jaw's Ø10.0000 journal, centre (y 0.0000, z 7.5000),
                  x -39.7000..-37.0000, behind a Ø11.9949 x 0.3000 flange.
