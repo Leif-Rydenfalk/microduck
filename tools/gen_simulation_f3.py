@@ -212,16 +212,19 @@ def tolerance_section():
         e = a["bearing"].get("engagement_pct")
         cls = ' class="cd"' if (e is None or e < 100.0) else ""
         cock = a["angular_misalignment_deg"]["bearing_cock_worst_case"]
+        ae = a["axial_play_vs_bearing_engagement"]
         rows.append(
             "<tr%s><td>%s</td><td>%s</td><td class=n>%s</td>"
             "<td class=n>%.4f</td><td class=n>%.4f</td><td class=n>%.4f</td>"
-            "<td class=n>%.4f</td><td class=n>%s</td><td class=n>%.4f</td></tr>"
+            "<td class=n>%.4f</td><td class=n>%s</td><td class=n>%s</td>"
+            "<td class=n>%.4f</td></tr>"
             % (cls, E(n), E(a["flange"]["part"].replace("microduck-", "")),
                "—" if e is None else "%.2f" % e,
                a["axial_play_mm"]["worst_case"], a["axial_play_mm"]["rss"],
                a["radial_eccentricity_mm"]["worst_case"],
                a["radial_eccentricity_mm"]["rss"],
                "—" if cock is None else "%.4f" % cock,
+               "—" if ae is None else "%.1f" % (100 * ae["worst_case_fraction_of_engagement"]),
                a["rotational_backlash_deg"]["worst_case"]))
     eq = o["band_to_iso286_equivalence"]
     eqrows = "".join(
@@ -263,7 +266,8 @@ def tolerance_section():
     <thead><tr><th>Joint</th><th>Driven part</th><th class=n>engage (%%)</th>
       <th class=n>axial WC (mm)</th><th class=n>axial RSS (mm)</th>
       <th class=n>radial WC (mm)</th><th class=n>radial RSS (mm)</th>
-      <th class=n>bearing cock (°)</th><th class=n>backlash WC (°)</th></tr></thead>
+      <th class=n>bearing cock (°)</th><th class=n>axial / engage (%%)</th>
+      <th class=n>backlash WC (°)</th></tr></thead>
     <tbody>%s</tbody>
   </table></div>
   <div class="tw"><table class="data">

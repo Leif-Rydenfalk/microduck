@@ -381,6 +381,16 @@ def stack(name, spec, geom, band_name):
         "radial_terms": terms_radial,
         "open_terms": open_terms,
         "axial_play_mm": {"worst_case": round(axial_wc, 4), "rss": round(axial_rss, 4)},
+        "axial_play_vs_bearing_engagement": (
+            None if not seat_len else {
+                "engaged_length_mm": seat_len,
+                "worst_case_fraction_of_engagement": round(axial_wc / seat_len, 4),
+                "rss_fraction_of_engagement": round(axial_rss / seat_len, 4),
+                "exceeds_engagement": axial_wc >= seat_len,
+                "why": ("the axial stack is compared against the length the ring is "
+                        "actually engaged over. A stack that reaches the engagement "
+                        "can walk the ring off its seat; below it the ring stays on "
+                        "but with less land than the nominal already gives.")}),
         "radial_eccentricity_mm": {"worst_case": round(radial_wc, 4),
                                    "rss": round(radial_rss, 4)},
         "angular_misalignment_deg": {
@@ -477,6 +487,9 @@ def main():
                                 "that_grade_band_um": band_um}
         equivalence[band_name] = rows
 
+    exceed = sorted(n for n in results
+                    if (results[n]["FDM-A prototyping"]["axial_play_vs_bearing_engagement"] or {})
+                    .get("exceeds_engagement"))
     worst_axial = max(results, key=lambda n: results[n]["FDM-A prototyping"]["axial_play_mm"]["worst_case"])
     worst_ang = max(results, key=lambda n: results[n]["FDM-A prototyping"]["angular_misalignment_deg"]["worst_case"])
 
@@ -526,6 +539,12 @@ def main():
             "band_to_iso286_equivalence": equivalence,
             "per_joint": results,
             "engagement_flags": flags,
+            "joints_whose_axial_stack_reaches_the_bearing_engagement": {
+                "FDM-A prototyping": exceed,
+                "why": "the lane brief's own flag: does the stack exceed the length "
+                       "the bearing is engaged over? At the FDM-A band it does at "
+                       "these joints; the fractions are per joint in "
+                       "axial_play_vs_bearing_engagement."},
             "worst_axial_joint": worst_axial,
             "worst_angular_joint": worst_ang,
         },
@@ -561,13 +580,20 @@ def main():
         "at FDM-B, governed by %s. %d of 14 joints seat the ring on less than its "
         "own width (the Ø16.0 x 1.95 bosses in a 4.0 mm ring, 48.75 %%), and 2 "
         "joints (%s) have a bearing on the axis that NO part folder declares a seat "
-        "for. What settles it is one printed coupon: cecad.coupon.coupon() at the "
+        "for. No joint's axial stack REACHES its engagement at either band, but the "
+        "two hip-yaws come closest: %.4f mm of stack against %.2f mm of engaged ring "
+        "at FDM-A, %.1f %% of it consumed (%.1f %% at FDM-B). "
+        "What settles it is one printed coupon: cecad.coupon.coupon() at the "
         "Ø10 and Ø16 rungs, measured and stored -- print_fits.json is empty today."
         % (worst_ang, a["angular_misalignment_deg"]["worst_case"],
            b["angular_misalignment_deg"]["worst_case"],
            a["angular_misalignment_deg"]["governing"],
            sum(1 for f in flags if f["engagement_pct"] is not None),
-           ", ".join(f["joint"] for f in flags if f["engagement_pct"] is None)))
+           ", ".join(f["joint"] for f in flags if f["engagement_pct"] is None),
+           results["left_hip_yaw"]["FDM-A prototyping"]["axial_play_mm"]["worst_case"],
+           results["left_hip_yaw"]["FDM-A prototyping"]["axial_play_vs_bearing_engagement"]["engaged_length_mm"],
+           100 * results["left_hip_yaw"]["FDM-A prototyping"]["axial_play_vs_bearing_engagement"]["worst_case_fraction_of_engagement"],
+           100 * results["left_hip_yaw"]["FDM-B industrial"]["axial_play_vs_bearing_engagement"]["worst_case_fraction_of_engagement"]))
 
     path = os.path.join(REPO, "out/sim-evidence/tolerance-stack-hinges.json")
     os.makedirs(os.path.dirname(path), exist_ok=True)
