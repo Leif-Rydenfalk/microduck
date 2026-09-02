@@ -39,6 +39,14 @@ SECTIONS = [
     ("Specification & parts", "What the machine is, measured.", [
         ("SPEC.html", "Specification", "Envelope, the 15-joint table, and every mesh with its measured bounding box."),
         ("docs/PARTS.html", "Parts catalogue", "Every part: quantity, material, body, joint, and rebuild status."),
+        ("SHELF-STATUS.html", "Triad shelf status",
+         "Every part, connection and assembly folder on the shelf with the verdict "
+         "`bin/triad check --all` gives it and the sentence the folder wrote about itself, "
+         "grouped by defect class. A snapshot of a live checker run: "
+         "`python3 tools/gen_shelf_status.py --verify` says whether it has gone stale."),
+        ("out/laneT/shelf-status.json", "Triad shelf status (data)",
+         "Every ref, every reason whole and untruncated, its defect class and the file it was "
+         "raised against \u2014 what the page above is rendered from."),
         ("docs/BOM.html", "Bill of materials", "Every line, bought and made."),
         ("docs/CABLES.html", "Cable schedule", "22 cables with lengths and voltage-drop."),
         ("wiring/CABLES.html", "Cable schedule (wiring lane)", "The wiring lane's copy of the cable runs."),
@@ -119,6 +127,7 @@ TOOLS = [
     ("tools/gen_index.py", "Builds this index, checking every link."),
     ("tools/gen_test_plan.py", "Builds TEST-PLAN.html from spec/test-plan.json; computes every derived figure (degrees, encoder counts, tilt thresholds, the walk reference read out of out/sim/report.json) rather than carrying it as text, and REFUSES to publish \u2014 exiting non-zero having written nothing \u2014 on any of 15 self-checks: a gated test missing from the end-of-line checklist, an unresolved source key, an ID-map range that disagrees with the MJCF, an unfilled token. Each was broken on purpose and watched to fire."),
     ("tools/gen_sourcing.py", "Builds SOURCING.html and RFQ.html from spec/sourcing.json; refuses to publish a verdict the data does not support."),
+    ("tools/gen_shelf_status.py", "Runs bin/triad check --all and renders SHELF-STATUS.html + out/laneT/shelf-status.json from its stdout \u2014 quoting every verdict, re-grading nothing, and marking every place a folder\u2019s paragraph is cut. --verify re-runs the checker and exits 1 if the committed page no longer matches the shelf."),
     ("tools/head_analysis.py", "Measures head conformance from silhouettes."),
     ("tools/gen_head_motion.py", "Builds HEAD-MOTION.html from out/motion/head.json."),
     ("sim/head_sweep.py", "Drives and measures the four head joints, renders the head videos, probes the collision-free range."),
@@ -218,7 +227,7 @@ HTML = f"""<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Microduck Repository Index</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opt_sz,wght@8..60,400;8..60,600;8..60,700&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="tools/doc.css">
 <style>
   .d{{font-size:12.5px;color:var(--ink-2);margin-top:2px;max-width:46em}}

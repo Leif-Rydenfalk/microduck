@@ -1,3 +1,24 @@
+/* doc.css — the shared academic style for every document in this repo.
+   Link it, do not copy it.
+
+   THE FONT LINK: the axis is `opsz`, NOT `opt_sz`. Measured 2026-09-03 (lane T
+   fix pass), headless Chrome, document.fonts:
+
+     family=Source+Serif+4:opt_sz,wght@...   ->  HTTP 400, 0 @font-face rules
+                                                 declared, {} families
+     family=Source+Serif+4:opsz,wght@...     ->  HTTP 200, 42 @font-face rules,
+                                                 {Source Serif 4: 18,
+                                                  Source Sans 3: 14,
+                                                  IBM Plex Mono: 10}
+
+   One malformed axis name 400s the WHOLE css2 request, so it did not merely
+   drop the serif — it dropped Source Sans 3 and IBM Plex Mono with it, and
+   every one of the 21 documents that carried the typo silently fell back to
+   Georgia / system sans / Menlo with no error anywhere. Nothing on the page
+   says it happened; the only way to see it is to count faces. If you edit the
+   link, re-run that count before you commit.
+   (document.fonts.check() is not the test: it returns true for a family with
+   no faces at all. Count document.fonts.size.) */
   :root{
     --paper:#ffffff;--card:#fbfaf7;--ink:#1a1a1a;--ink-2:#565656;--ink2:#565656;
     --line:#d7d3ca;--hair:#d7d3ca;--rule:#1a1a1a;--accent:#243b53;--wire:#243b53;--wire-ink:#243b53;

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Reference Match</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opt_sz,wght@8..60,400;8..60,600;8..60,700&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="tools/doc.css">
 <style>
   .pair{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:10px 0 4px}
@@ -266,11 +266,18 @@
         <td><code>pcb__raspberry_pi_zero_2_w</code> 65.000&nbsp;×&nbsp;1.600&nbsp;×&nbsp;30.000&nbsp;mm</td>
         <td>Both are 65×30&nbsp;mm so the envelope holds, but connector positions differ.</td>
         <td>Verify mounting-hole and connector positions against the real Radxa Zero 3W.</td></tr>
-      <tr><td class="n">4</td><td><b>Two ankle variants ship in the asset set</b>
-        (<code>ankle_left</code> 36.500&nbsp;mm vs <code>ankle_l_v1</code> 46.500&nbsp;mm in Y).</td>
-        <td>Table 1, rows 1–4</td>
-        <td>Building the wrong revision changes ankle geometry by 10&nbsp;mm.</td>
-        <td>Confirm which revision ships; the <code>_v1</code> parts appear superseded.</td></tr>
+      <tr><td class="n">4</td><td><b>SETTLED 2026-09-02 — the two ankles are not two revisions.</b>
+        <code>ankle_left</code> (Y&nbsp;36.5000&nbsp;mm) and <code>ankle_l_v1</code>
+        (Y&nbsp;46.4981&nbsp;mm) belong to two <em>locomotion variants</em>, not to a revision
+        history: the &#x27;v1&#x27; in ankle_l_v1 reads as an older revision and is not one: it is the ROLLER variant&#x27;s ankle. Nothing in this repo should treat ankle_left as superseding it or vice versa. The product in the box uses <b>ankle_left / ankle_right — part:microduck-ankle-left and part:microduck-ankle-right</b>.</td>
+        <td><code>out/laneT/ankle-revision.json</code> (2026-09-02), verdict <span class="chip pass">PASS</span>. 3 MJCF model(s) carry
+        <code>ankle_left</code> with a foot and a sole and no roller kit; 2 carry
+        <code>ankle_l_v1</code> with <code>rim</code>/<code>tire</code>/<code>roller_blade</code>
+        and no foot. Three independent readings, all agreeing: MJCF inventory → ankle_left; the vertical screw, measured on four meshes → ankle_left; the bearing pocket → ankle_left.</td>
+        <td>None, now that it is answered — but the old action was wrong and would have caused
+        one: treating <code>_v1</code> as superseded would have deleted the roller variant's ankle.</td>
+        <td>Build <code>ankle_left</code>/<code>ankle_right</code>. Still open, and it does not
+        change this answer: whether Pollen sells the roller kit separately, and whether ankle_l_v1 is a purchasable spare, is not in any file here. What settles it: Pollen&#x27;s shop pages. It does not change the answer for the boxed product.</td></tr>
     </tbody>
   </table></div>
 </section>

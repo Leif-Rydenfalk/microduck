@@ -34,6 +34,8 @@ REPO = os.path.dirname(HERE)
 WORKSHOP = os.path.dirname(os.path.dirname(REPO))
 TRIAD = os.path.join(WORKSHOP, "bin", "triad")
 
+IFACE_RE = re.compile(r"interface '([^']+)' frame unmeasured")
+
 VERDICTS = ("PASS", "FAIL", "CANNOT DETERMINE")
 HEAD_RE = re.compile(r"^(PASS|FAIL|CANNOT DETERMINE)\s+((?:part|connection|assembly):\S+)\s*"
                      r"(?:\((.*)\))?\s*$")
@@ -59,6 +61,12 @@ CLASSES = [
      "an append-only ledger row cites a file that is not on disk, so the row's claim "
      "cannot be checked.",
      lambda s: "does not exist" in s),
+    ("artifact_changed", "Ledger artifact changed after it was ledgered",
+     "a ledger row's sha256 no longer matches the file on disk. TRIAD.md: editing a ledgered "
+     "artifact WITHOUT appending a row is a FAIL, by design \u2014 the last row's hash is the one "
+     "checked, so a re-run that overwrites its own evidence file is caught. The fix is never to "
+     "edit the row: append a new row for the new run, which supersedes the old one and says so.",
+     lambda s: "ledger says" in s),
     ("stale_trust", "trust.json stale",
      "the computed tier on disk disagrees with the ledger it was computed from — run "
      "`bin/triad trust <ref>`.",
@@ -70,6 +78,14 @@ CLASSES = [
     ("unmeasured_frame", "Interface frame unmeasured",
      "an interface row exists but its frame is null, so nothing can be placed against it.",
      lambda s: "frame unmeasured" in s),
+    ("no_why", "Refusal with no reason",
+     "a folder grades itself CANNOT DETERMINE or FAIL and its record carries no `why`. "
+     "TRIAD.md: a refusal that cannot say why it does not know does not know that it does not "
+     "know \u2014 and a reader has nothing to act on. This class must be EMPTY; four rows sat in it "
+     "on 2026-09-03 (part:s-8252, part:fusb302, part:microduck-m12-lens, part:microduck-speaker) "
+     "under a commit message claiming every refusal named what settles it, which is why the class "
+     "exists on this page instead of being fixed silently.",
+     lambda s: "with no `why`" in s),
     ("own_words", "The folder grades itself",
      "TRIAD.md, “Coverage is part of the verdict”: no reader may grade a folder better "
      "than the folder grades itself. The checker repeats that rule on every one of these rows; "
@@ -95,11 +111,121 @@ def trim(why):
     return why.replace(BOILER, "").strip()
 
 
+TRUNC_AT = 420
+
+
+def cut(text, n=TRUNC_AT):
+    """(head, dropped) — truncate on a WORD boundary, and say how much was cut.
+
+    The first version of this page sliced at exactly 420 characters with no
+    marker, so a folder's paragraph rendered as "...so the frame" and
+    "...355.0 deg c" — fragments that end mid-word and read as if the folder
+    had written them that way. A reader could not see WHERE the cut was, which
+    is the one thing a truncation must show. This cuts at the last space
+    before the limit and returns the number of characters dropped so the row
+    can print it.
+    """
+    text = text.strip()
+    if len(text) <= n:
+        return text, 0
+    head = text[:n]
+    sp = head.rfind(" ")
+    if sp > n * 0.5:
+        head = head[:sp]
+    head = head.rstrip(" ,;:.\u2014-")
+    return head, len(text) - len(head)
+
+
+def why_cell(reasons):
+    """The reason column: the checker's own words, with every cut marked."""
+    if not reasons:
+        return "\u2014"
+    parts = []
+    for x in reasons:
+        full = x.get("why_full") or trim(x["why"])
+        head, dropped = cut(full)
+        cell = e(head)
+        if dropped:
+            cell += ('<span class="trunc"> \u2026 <span class="tn">[CUT HERE \u2014 %d more '
+                     'characters; whole sentence in out/laneT/shelf-status.json and in %s]'
+                     '</span></span>' % (dropped, e(x["where"])))
+        parts.append(cell)
+    return " \u00b7 ".join(parts)
+
+
 def classify(reason):
     for key, _t, _d, test in CLASSES:
         if test(reason):
             return key
     return "other"
+
+
+def norm(t):
+    return " ".join(str(t).split())
+
+
+def attach_full_why(refs, root):
+    """Put the folder's WHOLE sentence back.
+
+    MEASURED 2026-09-03: the mid-word fragments in this page's reason column
+    ("...so the frame", "...RESEARCHED AND A") are not this generator's cut —
+    they are `bin/_triadlib.py:1482`, which prints a folder's own `why` as
+    `.strip().replace("\n", " ")[:400]`. The checker hands out 400 characters
+    and no marker, so nothing downstream can tell a folder that stopped there
+    from one that was cut. The whole sentence is on disk in the folder's own
+    record, so this reads it back, checks the checker's text is a prefix of it,
+    and records how much was dropped. Where the prefix does not match, nothing
+    is claimed: the row keeps the checker's words and no `why_full`.
+    """
+    cache, recovered, recoverable = {}, 0, 0
+
+    def doc_at(rel):
+        path = os.path.join(root, rel)
+        if path not in cache:
+            try:
+                cache[path] = json.load(open(path, encoding="utf-8"))
+            except Exception:                                 # noqa: BLE001
+                cache[path] = None
+        return cache[path]
+
+    for r in refs:
+        for x in r["reasons"]:
+            doc = doc_at(x["where"])
+            if not isinstance(doc, dict):
+                continue
+
+            if x["class"] in ("own_words", "unmeasured_frame"):
+                recoverable += 1
+            if x["class"] == "own_words":
+                full = norm(((doc.get("record") or {}).get("why")) or "")
+                printed = norm(trim(x["why"]))
+                if not full or not printed or not full.startswith(printed):
+                    continue
+                x["why_full"] = full
+                x["dropped_by_checker"] = len(full) - len(printed)
+                recovered += 1
+                continue
+
+            # An unmeasured frame: the checker names the interface but not the
+            # folder's reason, so a reader sees "frame unmeasured" and nothing
+            # they can act on. The interface row itself carries a `why` that
+            # says what would settle it; put it back.
+            if x["class"] == "unmeasured_frame":
+                m = IFACE_RE.search(x["why"])
+                if not m:
+                    continue
+                rows = doc.get("interfaces") or (doc.get("record") or {}).get("interfaces") or []
+                for row in rows:
+                    if row.get("name") != m.group(1):
+                        continue
+                    own = norm(row.get("why") or "")
+                    if not own:
+                        break
+                    x["why_full"] = "%s Its own words: %s" % (norm(trim(x["why"])), own)
+                    x["interface_why"] = own
+                    recovered += 1
+                    break
+    return recovered, recoverable
 
 
 def run_check(root):
@@ -169,8 +295,8 @@ def e(s):
 CHIP = {"PASS": "pass", "CANNOT DETERMINE": "cd", "FAIL": "rail"}
 
 
-def render(refs, totals, before, exit_code, root):
-    now = datetime.date.today().isoformat()
+def render(refs, totals, before, exit_code, root, recovered_n=0, recoverable_n=0):
+    now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
     by_class = {}
     for r in refs:
         for x in r["reasons"]:
@@ -184,7 +310,7 @@ def render(refs, totals, before, exit_code, root):
     A('<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">')
     A('<meta name="viewport" content="width=device-width, initial-scale=1">')
     A('<title>Shelf Status</title>')
-    A('<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opt_sz,wght@8..60,400;8..60,600;8..60,700&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">')
+    A('<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">')
     A('<link rel="stylesheet" href="tools/doc.css">')
     A('<style>\n'
       '  td.why{font-size:12.5px;color:var(--ink-2);max-width:none}\n'
@@ -199,6 +325,8 @@ def render(refs, totals, before, exit_code, root):
       '  details.folder summary{cursor:pointer;font-family:var(--sans);font-size:13px}\n'
       '  details.folder summary::marker{color:var(--ink-2)}\n'
       '  details.folder ul{margin:8px 0 4px;font-size:13px}\n'
+      '  span.trunc{color:var(--ink-2)}\n'
+      '  span.tn{font-family:var(--sans);font-size:10.5px;letter-spacing:.01em}\n'
       '</style>\n</head>\n<body>\n<div class="wrap">')
     A('<p class="backlink"><a href="RELEASE.html">← Release dossier</a></p>')
     A('<header class="hero">')
@@ -218,8 +346,15 @@ def render(refs, totals, before, exit_code, root):
     if before:
         A('  <div class="stat"><b>%d → %d</b><span>PASS, before → after</span></div>'
           % (before["pass"], totals["pass"]))
-    A('  <div class="stat"><b>%d</b><span>distinct reasons</span></div>'
-      % sum(len(v) for v in by_class.values()))
+    # NOT "distinct reasons": this is the number of reason ROWS the checker
+    # printed, and most of them share one defect class. Both numbers are shown,
+    # each labelled as what it is.
+    n_rows = sum(len(v) for v in by_class.values())
+    n_classes = len([k for k, v in by_class.items() if v])
+    n_texts = len({trim(x["why"]) for r in refs for x in r["reasons"]})
+    A('  <div class="stat"><b>%d</b><span>reason rows</span></div>' % n_rows)
+    A('  <div class="stat"><b>%d</b><span>distinct sentences</span></div>' % n_texts)
+    A('  <div class="stat"><b>%d</b><span>defect classes</span></div>' % n_classes)
     A('</div>')
     A('<nav class="toc"><a href="#counts">1 The count</a><a href="#classes">2 By defect class</a>'
       '<a href="#refs">3 Every ref</a><a href="#method">4 Method</a></nav>')
@@ -245,6 +380,19 @@ def render(refs, totals, before, exit_code, root):
           'not-PASS %d. After: checked %d, PASS %d, not-PASS %d.</p>'
           % (before["checked"], before["pass"], before["not_pass"],
              totals["checked"], totals["pass"], totals["not_pass"]))
+    # WHAT the not-PASS rows are, not just how many. A bare "PASS went down"
+    # invites the reader to guess a cause; the composition names it.
+    A('<p class="lede">Composition of what is not PASS, by defect class \u2014 one folder can '
+      'raise several rows, so these count rows, not folders:</p>')
+    A('<div class="tablewrap"><table class="data"><thead><tr><th>defect class</th>'
+      '<th>reason rows</th><th>refs affected</th></tr></thead><tbody>')
+    for key, title, _d, _t in CLASSES + [("other", "Other", "", None)]:
+        rows = by_class.get(key) or []
+        if not rows:
+            continue
+        A('<tr><td>%s</td><td class="num">%d</td><td class="num">%d</td></tr>'
+          % (e(title), len(rows), len({r["ref"] for r, _x in rows})))
+    A('</tbody></table></div>')
     A('</section>')
 
     A('<section id="classes"><h2><span class="n">2</span>By defect class</h2>')
@@ -260,14 +408,17 @@ def render(refs, totals, before, exit_code, root):
             A('<details class="folder"><summary><span class="chip %s">%s</span> &nbsp;'
               '<code>%s</code> &nbsp;·&nbsp; %s</summary><ul><li>%s</li></ul></details>'
               % (CHIP[x["verdict"]], e(x["verdict"]), e(r["ref"]), e(x["where"]),
-                 e(trim(x["why"]))))
+                 e(x.get("why_full") or trim(x["why"]))))   # whole sentence: section 2 never cuts
         A('</div>')
     A('</section>')
 
     A('<section id="refs"><h2><span class="n">3</span>Every ref</h2>')
     A('<p class="lede">Assemblies first, then connections, then parts; within each, whatever is '
-      'not PASS comes first. The reason column is the checker’s own words, truncated only '
-      'where a folder wrote a paragraph — the full text is in the JSON beside this page.</p>')
+      'not PASS comes first. The reason column is the checker’s own words. Where a folder wrote a '
+      'paragraph the cell is cut at the last whole word before %d characters and the cut is MARKED '
+      'in the row, with the number of characters dropped — an unmarked truncation reads as if the '
+      'folder had stopped there. Section 2 above truncates nothing, and '
+      '<code>out/laneT/shelf-status.json</code> carries every sentence whole.</p>' % TRUNC_AT)
     if not totals.get("pass_named", False):
         A('<div class="note"><b>PASS refs are not named below.</b> %s</div>'
           % e(totals.get("pass_named_why", "")))
@@ -280,16 +431,17 @@ def render(refs, totals, before, exit_code, root):
     A('<div class="tablewrap"><table class="data"><thead><tr><th>verdict</th><th>ref</th>'
       '<th>iteration</th><th>why it is not PASS</th></tr></thead><tbody>')
     for r in refs_sorted:
-        why = " · ".join(trim(x["why"])[:420] for x in r["reasons"]) or "—"
+        why = why_cell(r["reasons"])
         A('<tr%s><td><span class="chip %s">%s</span></td><td class="ref"><code>%s</code></td>'
           '<td class="mono" style="font-size:11.5px;color:var(--ink-2)">%s</td><td class="why">%s</td></tr>'
           % (' class="pass"' if r["verdict"] == "PASS" else "",
-             CHIP[r["verdict"]], e(r["verdict"]), e(r["ref"]), e(r["meta"]), e(why)))
+             CHIP[r["verdict"]], e(r["verdict"]), e(r["ref"]), e(r["meta"]), why))
     A('</tbody></table></div></section>')
 
     A('<section id="method"><h2><span class="n">4</span>Method</h2>')
-    A('<pre class="code">export CE_TRIAD_ROOT="%s:%s"\n%s check --all\npython3 tools/gen_shelf_status.py</pre>'
+    A('<pre class="code">export CE_TRIAD_ROOT="%s:%s"\n%s check --all\npython3 tools/gen_shelf_status.py            # regenerate this page\npython3 tools/gen_shelf_status.py --verify   # is it still true? exit 0 CURRENT / 1 STALE</pre>'
       % (e(root), e(WORKSHOP), e(os.path.relpath(TRIAD, REPO))))
+    A('<p><b>Where a sentence was cut, and by whom.</b> <code>bin/triad</code> prints a folder\u2019s own <code>why</code> as <code>[:400]</code> (<code>bin/_triadlib.py:1482</code>) \u2014 400 characters, no marker, so its output cannot tell a folder that stopped there from one that was cut. That is where fragments like \u201c\u2026so the frame\u201d came from, not from this page. The whole sentence is on disk in the folder\u2019s own record, so this generator reads it back, checks the checker\u2019s text is a prefix of it, and prints the full sentence in section 2. Section 3\u2019s narrow column still cuts, at the last whole word before %d characters, and says so in the row with the number of characters dropped and the file that holds the rest. %d of the %d reason rows that quote a folder were recovered this way; where the prefix did not match, the checker\u2019s words stand and nothing is claimed about what follows them.</p>' % (TRUNC_AT, recovered_n, n_rows))
     A('<p>The checker is <code>bin/triad</code> in the ce-workshop root, shared by all three '
       'triad systems; its contract is <code>TRIAD.md</code>. This page parses its stdout and '
       'renders it. It re-grades nothing and it never softens a verdict: where a folder says '
@@ -299,6 +451,13 @@ def render(refs, totals, before, exit_code, root):
     A('<p>Machine-readable output, regenerated with the page: '
       '<code>out/laneT/shelf-status.json</code> — every ref, every reason, its defect class '
       'and the file it was raised against.</p>')
+    A('<div class="note"><b>This page is a SNAPSHOT, and it goes stale.</b> The shelf is written '
+      'by many hands at once; a folder created after the timestamp above is not on this page and '
+      'its verdict is not in these counts. Nothing regenerates the page on its own. To find out '
+      'whether what you are reading is still true, ask it: '
+      '<code>python3 tools/gen_shelf_status.py --verify</code> re-runs the checker and prints '
+      'CURRENT or STALE with the difference, exit 0 or 1, writing nothing. '
+      '<code>python3 tools/gen_shelf_status.py</code> then brings it up to date.</div>')
     A('</section>')
     A('<footer><span>MD-SHELF-001 Rev A</span><span>%s</span>'
       '<span>generated by tools/gen_shelf_status.py</span>'
@@ -314,10 +473,15 @@ def main(argv=None):
     ap.add_argument("--html", default=os.path.join(REPO, "SHELF-STATUS.html"))
     ap.add_argument("--before", default=os.path.join(REPO, "out", "laneT", "shelf-before.json"),
                     help="a previous shelf-status.json to show a before/after against")
+    ap.add_argument("--verify", action="store_true",
+                    help="re-run the checker and compare it with the committed JSON. Prints "
+                         "CURRENT or STALE and the difference; writes nothing. Exit 0 current, "
+                         "1 stale, 2 the checker or the JSON could not be read.")
     a = ap.parse_args(argv)
 
     text, code = run_check(a.root)
     refs, totals = parse(text)
+    recovered, recoverable = attach_full_why(refs, a.root)
     if totals is not None:
         listed = {r["ref"] for r in refs}
         on_shelf = enumerate_shelf(a.root)
@@ -352,12 +516,37 @@ def main(argv=None):
     doc = {"$what": "the triad shelf's own verdict on every folder in this repo, per ref, "
                     "with the reason the checker gave and the defect class it belongs to",
            "$generated_by": "tools/gen_shelf_status.py (ce-designs/microduck lane T)",
-           "date": datetime.date.today().isoformat(),
+           "date": datetime.datetime.now().strftime("%Y-%m-%d %H:%M"),
            "command": "bin/triad check --all", "checker_exit_code": code,
            "totals": totals, "refs": refs}
+    if a.verify:
+        try:
+            old = json.load(open(a.json, encoding="utf-8"))
+        except Exception as exc:                              # noqa: BLE001
+            print("CANNOT DETERMINE: %s cannot be read (%s)" % (a.json, exc), file=sys.stderr)
+            return 2
+        o, n = old.get("totals") or {}, totals
+        keys = ("checked", "pass", "not_pass")
+        diff = [(k, o.get(k), n.get(k)) for k in keys if o.get(k) != n.get(k)]
+        old_refs = {r["ref"] for r in old.get("refs", [])}
+        new_refs = {r["ref"] for r in refs}
+        added, gone = sorted(new_refs - old_refs), sorted(old_refs - new_refs)
+        if not diff and not added and not gone:
+            print("CURRENT  page written %s  checked %d  PASS %d  not-PASS %d"
+                  % (old.get("date"), n["checked"], n["pass"], n["not_pass"]))
+            return 0
+        print("STALE    page written %s" % old.get("date"))
+        for k, ov, nv in diff:
+            print("  %-9s page %s  ->  now %s" % (k, ov, nv))
+        for ref in added:
+            print("  NEW on the shelf, not on the page: %s" % ref)
+        for ref in gone:
+            print("  on the page, no longer on the shelf: %s" % ref)
+        print("  fix: python3 tools/gen_shelf_status.py")
+        return 1
     os.makedirs(os.path.dirname(a.json), exist_ok=True)
     json.dump(doc, open(a.json, "w", encoding="utf-8"), indent=1)
-    open(a.html, "w", encoding="utf-8").write(render(refs, totals, before, code, a.root))
+    open(a.html, "w", encoding="utf-8").write(render(refs, totals, before, code, a.root, recovered, recoverable))
     print("checked %(checked)d  PASS %(pass)d  not-PASS %(not_pass)d" % totals)
     print("wrote", os.path.relpath(a.json, REPO), "and", os.path.relpath(a.html, REPO))
     return code
