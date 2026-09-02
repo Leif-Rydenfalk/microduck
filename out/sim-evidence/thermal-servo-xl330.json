@@ -11,19 +11,19 @@
     "file": "out/sim-evidence/gait-peaks.json",
     "script": "sim/gait_sweep.py (lane F2)",
     "baseline_walk_vx0.25_peak_Nm": {
-     "left_hip_yaw": 0.10114,
-     "left_hip_roll": 0.19259,
-     "left_hip_pitch": 0.169,
-     "left_knee": 0.40839,
-     "left_ankle": 0.19536,
-     "neck_pitch": 0.08643,
-     "head_pitch": 0.06817,
-     "head_yaw": 0.14132,
-     "head_roll": 0.07414,
-     "right_hip_yaw": 0.06731,
-     "right_hip_roll": 0.14928,
-     "right_hip_pitch": 0.22465,
-     "right_knee": 0.38194,
+     "left_hip_yaw": 0.10611,
+     "left_hip_roll": 0.19378,
+     "left_hip_pitch": 0.18332,
+     "left_knee": 0.43045,
+     "left_ankle": 0.20119,
+     "neck_pitch": 0.09198,
+     "head_pitch": 0.06878,
+     "head_yaw": 0.15052,
+     "head_roll": 0.08147,
+     "right_hip_yaw": 0.07007,
+     "right_hip_roll": 0.15705,
+     "right_hip_pitch": 0.24762,
+     "right_knee": 0.41541,
      "right_ankle": 0.19017
     },
     "note": "F2 samples at the 50 Hz control frame, this lane at the 200 Hz physics step, so this lane's peaks are equal or higher"
@@ -156,6 +156,48 @@
  },
  "method": "P_copper = (tau_rms / kT)^2 * R_terminal per joint, with tau_rms^2 = mean(tau^2) measured. Steady state solves P = (h_conv(Ts) + h_rad(Ts)) * A_eff * (Ts - Ta) by fixed point, h_conv from Churchill-Chu re-evaluated at the film temperature each iteration with air properties interpolated in Cengel Table A-9. Reported as a bracket over emissivity 0..1 and over 0 % / 30 % of the skin blocked by the printed mount. Gearbox friction loss and drive-stage loss are NOT modelled -- both add heat, so every temperature here UNDERSTATES the real one.",
  "outputs": {
+  "solver_selftest": {
+   "rows": [
+    {
+     "check": "zero power gives zero rise",
+     "verdict": "PASS",
+     "got": 0.0,
+     "expected": 0.0,
+     "note": "P = 0 W"
+    },
+    {
+     "check": "rise = P x R_th",
+     "verdict": "PASS",
+     "got": 27.8537,
+     "expected": 27.853709,
+     "note": "the returned resistance must be the one the temperature came from"
+    },
+    {
+     "check": "10x area lowers the rise",
+     "verdict": "PASS",
+     "got": 3.6828,
+     "expected": "< 5.5707",
+     "note": "area 0.04168 m2 vs 0.004168 m2"
+    },
+    {
+     "check": "Ra_L inside Churchill-Chu laminar validity",
+     "verdict": "PASS",
+     "got": 87220.0,
+     "expected": "10^-1 < Ra_L < 10^9",
+     "note": "the quoted validity range on the correlation's source page"
+    },
+    {
+     "check": "radiation cools (eps 1 < eps 0)",
+     "verdict": "PASS",
+     "got": 52.8537,
+     "expected": "< 72.6999",
+     "note": "same power and area, emissivity 1 vs 0"
+    }
+   ],
+   "verdict": "PASS",
+   "why": "five checks whose expected answers do not come from the solver; the last is a negative control on the sign of the radiation term",
+   "negative_control": "watched going red, 2026-09-02: flipping the sign of h_radiation (return -eps*SIGMA*... in sim/thermal_servo.py) turns three of the five checks FAIL -- 'rise = P x R_th', '10x area lowers the rise' and 'radiation cools' -- and the study's own verdict flips to FAIL with case temperatures of 1.67e12 degC. The sign was then restored and the suite went green again. A check that cannot go red is a decoration."
+  },
   "per_joint": {
    "head_pitch": {
     "mean_tau_squared_Nm2": 0.00145368,

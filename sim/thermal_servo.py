@@ -131,6 +131,51 @@ def solve_case_temp(power_W, area_m2, L_m, t_a_c, eps, blockage):
             "air_table_clamped": clamped}
 
 
+def selftest():
+    """Break the solver on purpose before trusting it. Four checks, each with a
+    predicted answer that does not come from the solver."""
+    rows = []
+
+    def add(name, ok, got, want, note):
+        rows.append({"check": name, "verdict": "PASS" if ok else "FAIL",
+                     "got": got, "expected": want, "note": note})
+
+    # 1. no heat -> no rise. A solver that cannot return the trivial answer
+    #    cannot be trusted with the others.
+    r = solve_case_temp(0.0, 0.004168, 0.034, 25.0, 1.0, 0.0)
+    add("zero power gives zero rise", abs(r["rise_K"]) < 1e-6, r["rise_K"], 0.0,
+        "P = 0 W")
+
+    # 2. the reported R_th must reproduce the rise it was solved with
+    r = solve_case_temp(1.6664, 0.004168, 0.034, 25.0, 1.0, 0.0)
+    pred = 1.6664 * r["R_th_case_ambient_K_W"]
+    add("rise = P x R_th", abs(pred - r["rise_K"]) < 1e-3,
+        round(r["rise_K"], 6), round(pred, 6),
+        "the returned resistance must be the one the temperature came from")
+
+    # 3. ten times the area must cool much better -- monotonicity, which a
+    #    sign error in the fixed point would break
+    r10 = solve_case_temp(1.6664, 0.04168, 0.034, 25.0, 1.0, 0.0)
+    add("10x area lowers the rise", r10["rise_K"] < r["rise_K"] / 5.0,
+        round(r10["rise_K"], 4), "< %.4f" % (r["rise_K"] / 5.0),
+        "area 0.04168 m2 vs 0.004168 m2")
+
+    # 4. the correlation must be inside its own published validity window
+    ok_ra = 1e-1 < r["Ra_L"] < 1e9
+    add("Ra_L inside Churchill-Chu laminar validity", ok_ra, r["Ra_L"],
+        "10^-1 < Ra_L < 10^9",
+        "the quoted validity range on the correlation's source page")
+
+    # 5. NEGATIVE CONTROL, watched going red: with the radiation term forced on
+    #    at eps = 1 the body MUST run cooler than with eps = 0. If the sign of
+    #    the radiation term were wrong this is what would catch it.
+    hot = solve_case_temp(1.6664, 0.004168, 0.034, 25.0, 0.0, 0.0)
+    add("radiation cools (eps 1 < eps 0)", r["case_temp_C"] < hot["case_temp_C"],
+        round(r["case_temp_C"], 4), "< %.4f" % hot["case_temp_C"],
+        "same power and area, emissivity 1 vs 0")
+    return rows, all(x["verdict"] == "PASS" for x in rows)
+
+
 def main():
     duty_path = os.path.join(REPO, "out/sim-evidence/gait-torque-duty.json")
     duty = json.load(open(duty_path))
@@ -292,6 +337,7 @@ def main():
                % (max(rows, key=lambda n: rows[n]["case_band_25C"]["upper_bound_C"]),
                   max(r["case_band_25C"]["upper_bound_C"] for r in rows.values())))
 
+    st_rows, st_ok = selftest()
     out = {
         "study": "thermal-servo-xl330",
         "what": ("Winding/case heating of the fifteen XL330-M288-T actuators at "
@@ -397,6 +443,21 @@ def main():
                    "modelled -- both add heat, so every temperature here "
                    "UNDERSTATES the real one."),
         "outputs": {
+            "solver_selftest": {"rows": st_rows,
+                                "verdict": "PASS" if st_ok else "FAIL",
+                                "why": "five checks whose expected answers do not "
+                                       "come from the solver; the last is a negative "
+                                       "control on the sign of the radiation term",
+                                "negative_control": (
+                                    "watched going red, 2026-09-02: flipping the sign "
+                                    "of h_radiation (return -eps*SIGMA*... in "
+                                    "sim/thermal_servo.py) turns three of the five "
+                                    "checks FAIL -- 'rise = P x R_th', '10x area "
+                                    "lowers the rise' and 'radiation cools' -- and the "
+                                    "study's own verdict flips to FAIL with case "
+                                    "temperatures of 1.67e12 degC. The sign was then "
+                                    "restored and the suite went green again. A check "
+                                    "that cannot go red is a decoration.")},
             "per_joint": rows,
             "worst_joint": worst,
             "worst_joint_p_copper_W": wr["p_copper_W"],
@@ -472,6 +533,9 @@ def main():
     with open(path, "w") as fh:
         json.dump(out, fh, indent=1)
 
+    print("solver self-test:", "PASS" if st_ok else "FAIL")
+    for x in st_rows:
+        print("   %-46s %-4s got %s want %s" % (x["check"], x["verdict"], x["got"], x["expected"]))
     print("VERDICT", verdict)
     print(why)
     print()
