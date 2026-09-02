@@ -32,7 +32,8 @@ sys.path.insert(0, os.path.join(ROOT, "tools"))
 from cecad import triad, inspect                              # noqa: E402
 from cecad.autosheet import auto_blueprint                    # noqa: E402
 from cecad.sheets import verify_sheet                         # noqa: E402
-from cecad.printsheet import print_sheet, verify_print_sheet  # noqa: E402
+from cecad.printsheet import (print_sheet, verify_print_sheet,  # noqa: E402
+                              _NO_FILE)
 
 from drawing_facts import (TOLERANCE_DFM, VENDOR_DFM, classify,  # noqa: E402
                            part_record, is_bought, GENERAL_TOLERANCE,
@@ -158,7 +159,21 @@ def draw(slug):
         out["verified"] = bool(ok)
         out["checks"] = [{"name": n, "ok": o, "detail": str(d)[:200]}
                          for n, o, d in checks]
-        out["verdict"] = "PASS" if ok else "FAIL"
+        # A PRINT SHEET WITH NOTHING TO PRINT IS NOT A WRONG SHEET. Every
+        # number on it is measured off the loaded shape and reads back clean;
+        # what is missing is the one thing the sheet is FOR — the file. That
+        # is a CANNOT DETERMINE with a named next step, not a FAIL, and the
+        # distinction is the difference between "fix the drawing" and "find
+        # the mesh". Any OTHER failing check still fails the sheet.
+        bad = [n for n, o, _ in checks if not o]
+        if bad and bad == [_NO_FILE]:
+            out["verdict"] = "CANNOT DETERMINE"
+            out["why"] = ("the print sheet reads back clean but names no file "
+                          "to print; what settles it is the GEOMETRY path in "
+                          "ce-parts/%s/current/cad/part.py or an STL exported "
+                          "from the loaded shape" % slug)
+        else:
+            out["verdict"] = "PASS" if ok else "FAIL"
     else:
         png, pfacts = render_reference(part, slug, outdir)
         out["reference_render"] = png

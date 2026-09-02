@@ -19,6 +19,7 @@ kernel, so the index can be regenerated on any interpreter.
 """
 import json
 import os
+import re
 import sys
 import time
 
@@ -64,6 +65,49 @@ def _sheet_state(slug):
             why + " — no sheet has been generated for it yet")
 
 
+#: the component.json fields every row carries
+_REC_KEYS = ("title", "origin", "origin_why", "material", "process",
+             "verdict", "qty_per_robot", "sector", "subsector",
+             "source_reference")
+
+
+def _mtime(p):
+    return (time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(
+        os.path.getmtime(p))) if p and os.path.exists(p) else None)
+
+
+def _svg_header(p):
+    """(scale, size) as PRINTED in the sheet's own title line, or (None, None).
+
+    The sheet says what it is; this asks it rather than asking the record."""
+    if not p or not os.path.exists(p):
+        return (None, None)
+    head = open(p, encoding="utf-8", errors="replace").read(400000)
+    m = re.search(r"SCALE (\d+:\d+)\s+(A\d)", head)
+    return (m.group(1), m.group(2)) if m else (None, None)
+
+
+def _drift(r, svg_p, rj):
+    """The reason this result.json no longer describes the sheet beside it,
+    or None. Three measurements, no judgement."""
+    if not os.path.exists(svg_p):
+        return ("result.json names %s and it is not on disk"
+                % os.path.basename(svg_p))
+    if os.path.getmtime(svg_p) > os.path.getmtime(rj) + 1.0:
+        return ("the sheet on disk (%s) is NEWER than the result.json that "
+                "reports on it (%s): another draw run rewrote it, so the "
+                "verdict below is about a file that no longer exists"
+                % (_mtime(svg_p), _mtime(rj)))
+    if r.get("kind") == "drawing":
+        scale, size = _svg_header(svg_p)
+        if scale and size and (scale != r.get("scale")
+                               or size != r.get("size")):
+            return ("result.json says %s at %s and the sheet's own title line "
+                    "says %s at %s" % (r.get("size"), r.get("scale"),
+                                       size, scale))
+    return None
+
+
 def _side(name):
     """out/drawings/<name>.json, or {} — the optional side measurements the
     index folds in. Absent is an ANSWER here: the row says the pass has not
@@ -95,6 +139,53 @@ def main():
             continue
         rec = part_record(slug)
         row = dict(r)
+
+        # IS THE result.json STILL ABOUT THE FILE BESIDE IT? Several sessions
+        # and several draw runs share this folder, and `autosheet._search`
+        # rewrites `<stem>.svg` on every attempt. MEASURED 2026-09-03: the
+        # shipped index said microduck-trunk-base was A2 at 2:1 and the SVG on
+        # disk beside it was A1 at 5:1, 5 h 22 min newer — the index described
+        # a sheet that no longer existed. An index that can publish that
+        # silently is worse than no index, so the drift is measured here and
+        # the row says so.
+        svg_p = r.get("svg") or os.path.join(DRAWINGS, slug, slug + ".svg")
+        row["result_mtime"] = _mtime(rj)
+        row["svg_mtime"] = _mtime(svg_p)
+        drift = _drift(r, svg_p, rj)
+        if drift:
+            row["state"] = "stale"
+            row["verdict"] = "CANNOT DETERMINE"
+            row["why"] = drift
+            row["record"] = {k: rec.get(k) for k in _REC_KEYS}
+            for k in ("svg", "dxf", "pdf", "reference_render", "thumbnail"):
+                if row.get(k):
+                    row[k] = rel(row[k])
+            rows.append(row)
+            seen.add(slug)
+            continue
+
+        # A RESULT WITH NO KIND AND NO VERDICT IS NOT A ROW, IT IS A GAP.
+        # MEASURED 2026-09-03: out/drawings/microduck-robot-hat-pcb/result.json
+        # (written 2026-09-02 02:35, before this generator existed) carried
+        # `kind: null` and `verdict: null`; the index printed it as state
+        # "unknown" with an em dash for a reason — exactly the silence the
+        # docstring above says this file must never be able to show.
+        if not r.get("kind") or not r.get("verdict"):
+            row["state"] = "stale-result"
+            row["verdict"] = "CANNOT DETERMINE"
+            row["why"] = ("result.json predates the current generator: it "
+                          "carries kind=%r and verdict=%r (written %s). "
+                          "Redraw the part with tools/draw_part.py."
+                          % (r.get("kind"), r.get("verdict"),
+                             row["result_mtime"]))
+            row["record"] = {k: rec.get(k) for k in _REC_KEYS}
+            for k in ("svg", "dxf", "pdf", "reference_render", "thumbnail"):
+                if row.get(k):
+                    row[k] = rel(row[k])
+            rows.append(row)
+            seen.add(slug)
+            continue
+
         st = r.get("kind") or "unknown"
         if st == "drawing" and (r.get("bought") or is_bought(slug)):
             # A BOUGHT PART IS NOT A PART WE MAKE. Same sheet, same read-back,
@@ -153,6 +244,8 @@ def main():
                                   if (r.get("recheck") or {}).get("verdict")
                                   == "PASS"),
             "rechecked": sum(1 for r in rows if r.get("recheck")),
+            "stale": sum(1 for r in rows
+                         if r.get("state") in ("stale", "stale-result")),
         },
         "features_generated": _side("features").get("generated"),
         "recheck_generated": _side("verify").get("generated"),

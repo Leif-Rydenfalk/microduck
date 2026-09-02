@@ -189,6 +189,35 @@ def main():
         h.append("</section>")
         return "\n".join(h)
 
+    # THE COUNTERS MUST ADD UP, AND THE PAGE SAYS SO. MEASURED 2026-09-03 on
+    # the shipped index: 16 drawings + 1 print sheet + 36 cannot-determine =
+    # 53 against a headline of 54 parts on the shelf, because one row carried
+    # `verdict: null` and was counted by nothing. An arithmetic identity
+    # printed on the page cannot go quietly wrong.
+    acc = t["pass"] + t["fail"] + t["cannot_determine"]
+    recon = ("%d PASS + %d FAIL + %d CANNOT DETERMINE = %d, against %d parts "
+             "on the shelf — %s"
+             % (t["pass"], t["fail"], t["cannot_determine"], acc, t["shelf"],
+                "every part is accounted for."
+                if acc == t["shelf"] else
+                "THEY DO NOT AGREE: %d row(s) carry a verdict this page "
+                "cannot count, which is a defect in "
+                "tools/collect_drawings.py, not a rounding."
+                % abs(t["shelf"] - acc)))
+    if not doc.get("features_generated"):
+        recon += (" The §A.6 feature census has not been run: "
+                  "out/drawings/features.json is absent, so no row carries "
+                  "one (ce-cad/bin/cad tools/measure_features.py).")
+    if not doc.get("recheck_generated"):
+        recon += (" The independent re-check has not been run: "
+                  "out/drawings/verify.json is absent "
+                  "(ce-cad/bin/cad tools/verify_drawings.py).")
+    else:
+        recon += (" Independent re-check of the files on disk: %s, %d of %d "
+                  "rows rechecked, %d PASS."
+                  % (doc["recheck_generated"], t.get("rechecked", 0),
+                     len(rows), t.get("rechecked_pass", 0)))
+
     unsheeted = {}
     for r in rest:
         unsheeted.setdefault(r.get("state", "unknown"), []).append(r)
@@ -211,7 +240,7 @@ def main():
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Mechanical drawings — index</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opt_sz,wght@8..60,400;8..60,600;8..60,700&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="../../tools/doc.css">
 <style>
   .sheet{{border:1px solid var(--hair);background:var(--card);padding:16px 18px;margin:18px 0}}
@@ -264,7 +293,10 @@ def main():
   <div class="stat"><b>{t['pass']}</b><span>verify PASS</span></div>
   <div class="stat"><b>{t['fail']}</b><span>verify FAIL</span></div>
   <div class="stat"><b>{t['cannot_determine']}</b><span>cannot determine</span></div>
+  <div class="stat"><b>{t.get('stale', 0)}</b><span>stale rows</span></div>
+  <div class="stat"><b>{t.get('rechecked', 0)}</b><span>independently rechecked</span></div>
 </div>
+<p class="note">{E(recon)}</p>
 
 <nav class="toc">
   <a href="#how">1 What a sheet must carry</a>
@@ -303,6 +335,20 @@ def main():
     of one cutting plane. Both are fixed in <code>ce-cad</code> with
     <code>tests/test_cbore_and_wall.py</code>, which fails on the old code and passes on the
     new.</p></div>
+    <div class="card"><h3>Every radius, including the ones no view can leader</h3><p>A radius
+    is leadered only in a view that sees its edge square — a circle seen obliquely projects as
+    an ellipse whose fitted radius is not the edge's. A radius <em>no</em> orthographic view on
+    the sheet sees square used to be invisible to the read-back, and 50 of 97 distinct solid
+    arc radii carried a leader across the shelf. Those radii are now STATED in the notes with
+    their count, their axis and a point on the metal, and <code>verify_sheet</code> fails a
+    sheet carrying a band radius that is neither leadered nor stated
+    (<code>ce-cad/tests/test_sheet_hygiene.py</code>).</p></div>
+    <div class="card"><h3>No line printed through a label</h3><p>Leif's <q>random lines</q> had
+    a second half nothing measured: <code>overlapping_labels</code> answers text over text, and
+    a cutting-plane line drawn straight through a hole callout passed every check.
+    <code>lines_over_labels</code> reads the CUT groups back out of the finished SVG; a sheet
+    with a plane through a label fails, and the search reaches for a different cutting plane
+    or bigger paper.</p></div>
   </div>
 </section>
 
