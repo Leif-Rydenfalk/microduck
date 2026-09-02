@@ -1,0 +1,42 @@
+{
+  "$triad": 1,
+  "kind": "interfaces",
+  "record": {
+    "slug": "microduck-motor-support",
+    "frame": "Pollen's mesh frame for motor_support.stl, mm: x -39.5..34.0 (lens tube at -x), y -26.2..28.0 (mouth side -y, shelf side +y), z 0.4..19.2 (base plate at z 0.4..2.1, roof at 19.2). The MJCF geom pos/quat (body jaw_soft) place it directly.",
+    "interfaces": [
+      {
+        "name": "head_roll",
+        "frame": {"origin_mm": [0.0, 18.0, 4.5], "z_axis": [0, 1, 0], "x_axis": [0, 0, 1]},
+        "accepts": ["connection:spline-xl330-horn"],
+        "role": "joint_child_link",
+        "what": "the head_roll hinge (yaw_roll_motion -> head), range +/-25 deg per the MJCF; the servo barrel measured in this mesh is centred (x 0, z 4.49) — arch shell r_out 12.7 / r_in 11.1 — and the north wall plate (y 17.95..19.3) carries the horn face",
+        "source": "MJCF joint origin/axis transformed into the mesh frame (cecad.meshshelve, v0.0.1) and confirmed by the measured barrel centre (0, 4.49) off the mesh, 2026-09-02"
+      },
+      {
+        "name": "mouth_servo",
+        "frame": {"origin_mm": [0.0, -18.63, 4.49], "z_axis": [0, -1, 0], "x_axis": [0, 0, 1]},
+        "accepts": ["connection:spline-xl330-horn"],
+        "role": "servo_mount",
+        "what": "the mouth/jaw servo sits in the south saddle (arch shell r 12.7/11.1 over the wall band y -20.35..-15.95) with stepped gusset faces at y -18.63/-18.1 (r 9.5 and r 11.1 clearance arches); horn axis along y through (x 0, z 4.49). Which y-side carries the horn and which the idler CANNOT DETERMINE from the mesh alone.",
+        "source": "MEASURED off Pollen's mesh by cecad.meshslice calipers (probes quoted in part.py), 2026-09-02"
+      },
+      {
+        "name": "lens_tube",
+        "frame": {"origin_mm": [-39.5, 0.0, 7.5], "z_axis": [-1, 0, 0], "x_axis": [0, 0, 1]},
+        "accepts": ["connection:press-fit-tube-15"],
+        "role": "lens_seat",
+        "what": "stepped arch tube on the -x face, axis x at (y 0, z 7.5): bore rings Ø15.0 min with Ø17.5 sections (x -35.5..-29.0 and -37.5..-36.5), outer rings Ø17.4/18.4/20.5, flat-bottomed at z 9.5 outboard — the camera lens / lens-holder seat (SPEC §4.3: m12_lens_holder lives in the head). Mate kind not yet on the shelf; the named connection is the work item.",
+        "source": "MEASURED off Pollen's mesh: y=0 z-interval profile x -39.4..-28.6 and arc fits of x-plane cuts, 2026-09-02"
+      },
+      {
+        "name": "base_screws",
+        "frame": {"origin_mm": [-30.0, 23.0, 0.4], "z_axis": [0, 0, -1], "x_axis": [1, 0, 0]},
+        "accepts": ["connection:threaded-m2"],
+        "role": "screw_pattern",
+        "what": "4 x Ø2.7 through the 1.7 mm base plate at (-30,23), (9.35,-23), (-30,-16), (19,19.5) — mounts the plate into the bottom head shell. Ø2.7 measured: loose for M2, plausible M2.5 clearance; the connection folder decides.",
+        "source": "MEASURED off Pollen's mesh by cecad.meshfeatures.cylinders (d 2.7, len 1.7, axis z), 2026-09-02"
+      }
+    ]
+  }
+}

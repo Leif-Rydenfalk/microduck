@@ -331,7 +331,7 @@ def build(self_test=None, publish=True, verbose=True):
     b.add("R2", "0603", value=DATA_PULLUP, at=(31.5, 11.5), rot=90,
           note="DATA pull-up: ROBOTIS TTL circuit '10 kOhm pull-ups to 3.3V "
                "... on Data'")
-    b.add("R4", "0603", value="0R DATA->RX", at=(39.0, 10.5), rot=90,
+    b.add("R4", "0603", value="0R DATA->RX", at=(39.0, 9.0), rot=90,
           note="decision D3 — RX reads the bus line directly; 0R keeps "
                "dxl/DATA and uart2/RX the two nets the netlist draws")
     b.add("R12", "0603", value=I2C_PULLUP, at=(26.0, 21.5), rot=90,
@@ -518,18 +518,81 @@ def build(self_test=None, publish=True, verbose=True):
     # pour first, fully routed without it. The pour flows around the routed
     # B.Cu tracks; LOOK AT THE PLOT for sliced islands (the check is
     # optimistic about pours and says so).
-    # Strategy, measured on this board: power first at 0.5 mm (1.0 mm wide
-    # tracks could not thread the bottom row at the 1.56 mm lattice this
-    # router derives); then every signal net with the default via cost so
-    # signals stay on F.Cu; then GND with a CHEAP via so it drops to the
-    # still-empty back layer — GND copper on B.Cu merges with the pour
-    # instead of slicing it.
-    b.autoroute(nets=["VBAT", "SERVO_V", "V5_HAT"], width=0.5,
-                effort=4, via_cost=2.0, verbose=verbose)
+    # Strategy, measured across three routing attempts on this board:
+    #   run 1  pour declared first -> B.Cu became a plane, single-layer
+    #          routing, 42/84.
+    #   run 2  1.0 mm power tracks -> a 1.56 mm lattice that cannot thread
+    #          the bottom connector row; GND's 34 pads starved the router.
+    #   run 3  GND autorouted last -> 27 of its joins still open.
+    # So: GND never meets the router. Every surface GND pad is BONDED to the
+    # back layer by an explicit stub + via below, the through-hole GND pins
+    # reach B.Cu through their own barrels, and the pour poured LAST unifies
+    # them. The islands check treats a pour optimistically (its own note says
+    # so) — the bottom plot is the verification, and the rails pass keeps
+    # via_cost moderate so B.Cu stays mostly plane.
+    # U1's four ground pins bond STRAIGHT INTO the exposed pad ('Connect
+    # device thermal pad to DRVSS.' — SLAS510G Figure 7-1 note), whose 2x2
+    # thermal vias reach the plane; no via fence around the QFN, so every
+    # signal lane stays open. A fifth-run lesson: a ring of 0.8 mm stub vias
+    # 1.1 mm off the package walled the part in and 18 of 19 HAT_3V3 joins
+    # failed; tracks into the EP cost nothing.
+    for pad, ex, ey in [("6", -1.6, -0.75), ("17", 1.6, -1.75),
+                        ("21", 1.6, 0.25), ("26", 1.25, 1.6)]:
+        c = b.component("U1")
+        x, y = c.pad_xy(c.fp.pad(pad))
+        b.track("GND", [(x, y), (c.x + ex, c.y + ey)], width=0.2)
+    # Surface GND pads elsewhere bond to the back plane with a stub + via.
+    for ref, pad, dx, dy in [
+            ("U4", "2", 0, -1.0),
+            ("C1", "2", 0.9, 0), ("C2", "2", 1.0, 0), ("C3", "2", 0, 1.15),
+            ("C4", "2", 0, -1.2), ("C5", "2", 1.1, 0), ("C6", "2", 0, -1.1),
+            ("C7", "2", 0, 1.1), ("C8", "2", 0, 1.1)]:
+        c = b.component(ref)
+        x, y = c.pad_xy(c.fp.pad(pad))
+        b.track("GND", [(x, y), (x + dx, y + dy)], width=0.25)
+        b.via("GND", (x + dx, y + dy))
+    # U4.3 (GND) bridges to its neighbour pad 2 on the surface.
+    c = b.component("U4")
+    x2, y2 = c.pad_xy(c.fp.pad("2")); x3, y3 = c.pad_xy(c.fp.pad("3"))
+    b.track("GND", [(x2, y2), (x3, y3)], width=0.25)
+    if self_test:
+        # The self-test breaks placement/binding and reads the check —
+        # routing at these pass budgets would cost tens of minutes and
+        # proves nothing about the break.
+        rep = check(b, verbose=verbose)
+        return b, rep
+    # Two hand-laid spines, claimed before the router runs:
+    #  - HAT_3V3 rides B.Cu from J1 pin 1 (a through-hole pad reaches the
+    #    back layer through its own barrel) along y=23.3, under the corridor
+    #    south of the header, so eighteen 3.3 V joins become short hops.
+    #    One deliberate cost: it slices the eventual GND pour along that
+    #    line; the pour reconnects around x>41 — checked on the bottom plot.
+    #  - i2s3/DIN goes the long way: J1 pin 38 escapes upward into the lane
+    #    between the header's outer row and the board edge, west along
+    #    y=29.0, down the west flank of the header, then to codec DIN
+    #    (pin 4). The router failed this join twice ('no legal path');
+    #    the lane is real and this claims it.
+    c1 = b.component("J1")
+    b.track("HAT_3V3", [c1.pad_xy(c1.fp.pad("1")),
+                        (c1.pad_xy(c1.fp.pad("1"))[0], 23.3),
+                        (41.0, 23.3)], width=0.4, layer="B.Cu")
+    p38 = c1.pad_xy(c1.fp.pad("38"))
+    u1 = b.component("U1")
+    din = u1.pad_xy(u1.fp.pad("4"))
+    b.track("i2s3/DIN", [p38, (p38[0], 29.0), (6.3, 29.0), (6.3, 22.6),
+                         din], width=0.15)
+    # Pass budgets: one pass makes at most ONE join per net, so a budget is
+    # the worst island count in the group plus slack — effort 30 across the
+    # board re-proved the same impossible joins for half an hour (run 7).
+    b.autoroute(nets=["VBAT", "SERVO_V", "V5_HAT"], width=0.4,
+                effort=8, via_cost=2.0, verbose=verbose)
+    rails = ("HAT_3V3", "J5_3V3", "HAT_1V8")
     signals = [n for n in b.net_names()
-               if n not in ("GND", "VBAT", "SERVO_V", "V5_HAT")]
-    b.autoroute(nets=signals, effort=5, verbose=verbose)
-    b.autoroute(nets=["GND"], effort=5, via_cost=1.0, verbose=verbose)
+               if n not in ("GND", "VBAT", "SERVO_V", "V5_HAT") + rails]
+    b.autoroute(nets=signals, effort=12, verbose=verbose)
+    b.autoroute(nets=list(rails), width=0.3, effort=22, via_cost=4.0,
+                verbose=verbose)
+    b.autoroute(nets=["GND"], effort=15, via_cost=3.0, verbose=verbose)
     b.pour("GND", "B.Cu")
 
     rep = check(b, verbose=verbose)

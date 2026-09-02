@@ -1,7 +1,10 @@
 """part:microduck-trunk-base — the chassis plate ("trunk_base" in Pollen's
 MJCF), rebuilt.
 
-Contract (TRIAD.md): `def build(doc, params=None) -> Part`. Parametric —
+Contract (TRIAD.md): `# 2026-09-02: hip_yaw connector NAMES swapped to agree with cad/interfaces.json —
+# the verify agent measured part.py had left at x=-17.5 while the MJCF puts
+# left_hip_yaw at mesh x=+17.5 (geometry symmetric, join() by name was the hazard).
+def build(doc, params=None) -> Part`. Parametric —
 there is no geometry/*.step because nobody has Pollen's CAD. Every number
 below was READ OFF Pollen's published mesh
 `reference/pollen-microduck-rl/assets/trunk_base.stl` (metres, decimated)
@@ -82,6 +85,6 @@ def build(doc, params=None):
         p.cone(PIN_D_BASE, PIN_D_TIP, PIN_H + 0.01, at=(x, y, Z1 - 0.01), axis="z")
     p.clean()
     # interfaces: the two hip-yaw axes (servo horn faces, down through the plate), the screw holes
-    p.connector("hip_yaw_left", at=(-17.5, -2.0, Z1), dir="+z")
-    p.connector("hip_yaw_right", at=(17.5, -2.0, Z1), dir="+z")
+    p.connector("hip_yaw_right", at=(-17.5, -2.0, Z1), dir="+z")
+    p.connector("hip_yaw_left", at=(17.5, -2.0, Z1), dir="+z")
     return p

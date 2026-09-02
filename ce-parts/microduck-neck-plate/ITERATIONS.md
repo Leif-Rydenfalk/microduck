@@ -4,3 +4,4 @@
 | iteration | date | why it exists |
 |---|---|---|
 | v0.0.1 | 2026-09-01 | mesh-backed: Pollen's published neck.stl loaded as-is |
+| v0.0.1 | 2026-09-02 | parametric rebuild replaced the meshshelve loader; refcheck PASS vs Pollen's mesh (see docs/README.md) |

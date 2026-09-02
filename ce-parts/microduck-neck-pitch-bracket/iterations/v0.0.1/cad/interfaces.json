@@ -1,34 +1,59 @@
 {
- "$triad": 1,
- "kind": "interfaces",
- "generated_by": "cecad.meshshelve",
- "record": {
-  "ref": "part:microduck-neck-pitch-bracket@v0.0.1",
-  "frame": "the published mesh's own frame (mm after x1000); MJCF geom pos/quat place it",
-  "units": "mm"
- },
- "interfaces": [
-  {
-   "name": "head_pitch",
-   "frame": {
-    "origin_mm": [
-     14.5,
-     0.0,
-     -28.793
+  "$triad": 1,
+  "kind": "interfaces",
+  "record": {
+    "slug": "microduck-neck-pitch-bracket",
+    "interfaces": [
+      {
+        "name": "yaw_horn_top",
+        "frame": {
+          "origin_mm": [0.0, 0.0, -10.1],
+          "z_axis": [0, 0, 1],
+          "x_axis": [1, 0, 0]
+        },
+        "accepts": ["connection:spline-xl330-horn", "connection:threaded-m2"],
+        "role": "horn_face",
+        "what": "Ø18 disc + Ø16 x 1.9 boss face with Ø6 centre bore and 4 x Ø2.2 on a Ø12 bolt circle at 0/90/180/270 deg, counterbored Ø4.4 from below — the head-yaw XL330 (hung in yaw_roll_motion above) bolts its horn here; the yaw axis is mesh +z through (0,0)",
+        "source": "MEASURED off Pollen's mesh by cecad.meshfeatures (boss Ø16 len 1.9 at z -11.05, disc Ø18 len 1.0 at z -12.5, holes residual 0.000) + meshslice probes, 2026-09-02"
+      },
+      {
+        "name": "yaw_bearing_seat",
+        "frame": {
+          "origin_mm": [0.0, 0.0, -10.1],
+          "z_axis": [0, 0, 1],
+          "x_axis": [1, 0, 0]
+        },
+        "accepts": ["connection:press-fit-bearing-22x16x4"],
+        "role": "bearing_seat",
+        "what": "the same Ø16.0 x 1.9 boss as inner-race seat for a 22x16x4 bearing held in the yaw_roll_motion body, coaxial with the head-yaw axis",
+        "source": "MEASURED off Pollen's mesh by cecad.meshfeatures (boss Ø16.00 len 1.9 at (0, 0, -11.05)), 2026-09-02"
+      },
+      {
+        "name": "pitch_horn_right",
+        "frame": {
+          "origin_mm": [17.5, 0.0, -28.793],
+          "z_axis": [1, 0, 0],
+          "x_axis": [0, 1, 0]
+        },
+        "accepts": ["connection:spline-xl330-horn", "connection:threaded-m2"],
+        "role": "horn_face",
+        "what": "side plate horn pattern: Ø6 centre + 4 x Ø2.2 on a Ø12 bolt circle — one side takes the head-pitch XL330's horn, the other its idler (the mesh is x-symmetric; which side is horn is an assembly choice)",
+        "source": "MEASURED off Pollen's mesh by cecad.meshfeatures (Ø6 len 3.0 + 4 x Ø2.2 len 3.0 at x 16, residual 0.000), 2026-09-02"
+      },
+      {
+        "name": "pitch_horn_left",
+        "frame": {
+          "origin_mm": [-17.5, 0.0, -28.793],
+          "z_axis": [-1, 0, 0],
+          "x_axis": [0, 1, 0]
+        },
+        "accepts": ["connection:spline-xl330-horn", "connection:threaded-m2"],
+        "role": "horn_face",
+        "what": "mirror of pitch_horn_right on the -x side plate — same Ø6 + 4 x Ø2.2 pattern",
+        "source": "MEASURED off Pollen's mesh by cecad.meshfeatures, 2026-09-02"
+      }
     ],
-    "z_axis": [
-     1.0,
-     0.0,
-     -0.0
-    ],
-    "x_axis": null
-   },
-   "accepts": [
-    "connection:spline-xl330-horn"
-   ],
-   "role": "joint_child_link",
-   "what": "the head_pitch hinge (neck -> neck_pitch), range [-90.0, 90.0] deg, in this mesh's own frame",
-   "source": "DERIVED by cecad.meshshelve from the MJCF joint origin/axis transformed into the mesh frame (first placement); the interface is the joint, not a measured feature of the mesh"
+    "frame": "Pollen's mesh frame for neck_pitch.stl: x -17.5..17.5 (head-pitch axis along x through (0,0,-28.793)), y -9..9, z -37.793..-10.1 (head-yaw axis along z through (0,0)). Kept so the MJCF geom pos/quat place it directly.",
+    "units": "mm"
   }
- ]
 }

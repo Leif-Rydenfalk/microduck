@@ -5,7 +5,7 @@ Microduck Robot HAT (reconstruction)
 stackup   JLCPCB 2-layer 1.6 mm, 1 oz — the commodity default
 finish    
 rules     JLCPCB 2-layer, standard process — tighter, and single-sourced
-parts     28   nets 21   tracks 257   vias 29   drills 93
+parts     28   nets 21   tracks 286   vias 34   drills 98
 
 READ THIS BEFORE ORDERING
 -------------------------
@@ -50,10 +50,11 @@ DRC RESULT
 ----------
 
    verdict: FAIL
-   47 pass, 5 fail, 3 cannot determine
+   46 pass, 6 fail, 3 cannot determine
 
-   [FAIL] courtyard U2 / H2
+   [FAIL] hole-to-hole via GND / via GND
    [FAIL] unrouted GND
+   [FAIL] unrouted HAT_1V8
    [FAIL] unrouted HAT_3V3
    [FAIL] unrouted SPK_N
    [FAIL] unrouted i2s3/DIN

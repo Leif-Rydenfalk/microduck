@@ -1,3 +1,20 @@
 [live capture NOT installed: RuntimeError: cecad.livehook needs FreeCAD's geometry kernel, which this interpreter does not have (No module named 'FreeCAD').
     Run designs through bin/cad — FreeCAD's interpreter ignores PYTHONPATH and `FreeCAD -c` hangs on stdin.
     cecad.electrical and cecad.vision are kernel-free and work here.]
+Traceback (most recent call last):
+  File "/Users/leifrydenfalk/dev/ce-workshop/ce-cad/bin/cad-refcheck", line 273, in <module>
+    return 0 if verdict == "PASS" else 1
+             ^^^^^^
+  File "/Users/leifrydenfalk/dev/ce-workshop/ce-cad/bin/cad-refcheck", line 214, in main
+    json.dump(report, open(os.path.join(out_dir, "report.json"), "w"), indent=1)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/leifrydenfalk/dev/ce-workshop/ce-cad/bin/cad-refcheck", line 87, in match_features
+    fo = meshfeatures.cylinders(ours["path"], scale=ours["scale"])
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/leifrydenfalk/dev/ce-workshop/ce-cad/cecad/meshfeatures.py", line 148, in cylinders
+    T = np.asarray(mjcf.read_stl(mesh) if isinstance(mesh, str) else mesh, dtype=float) * scale
+                   ^^^^^^^^^^^^^^^^^^^
+  File "/Users/leifrydenfalk/dev/ce-workshop/ce-cad/cecad/mjcf.py", line 112, in read_stl
+    with open(path, "rb") as f:
+         ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'out/refcheck/microduck-ankle-left/r1/ours.stl'

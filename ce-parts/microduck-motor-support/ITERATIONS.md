@@ -4,3 +4,5 @@
 | iteration | date | why it exists |
 |---|---|---|
 | v0.0.1 | 2026-09-01 | mesh-backed: Pollen's published motor_support.stl loaded as-is |
+| v0.1.0 | 2026-09-02 | parametric rebuild measured off motor_support.stl replaces the mesh loader (REBUILD-PROTOCOL) |
+| v0.1.0 | 2026-09-02 | parametric rebuild measured off motor_support.stl (meshslice traces + calipers), graded PASS by cad-refcheck r6: p95 0.363/0.456 mm, bbox 0.00, 6/6 features. Replaces the v0.0.1 mesh loader. |

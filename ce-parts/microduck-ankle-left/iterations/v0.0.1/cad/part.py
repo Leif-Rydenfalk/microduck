@@ -106,7 +106,7 @@ def _wall_profile(n=36):
     for i in range(n + 1):
         a = th_t + (th_j - th_t) * i / n
         pts.append((YC + R_TOP * math.cos(a), min(Z_TOP, ZA + R_TOP * math.sin(a))))
-    a0 = th_j + math.pi                                  # J seen from Q
+    a0 = th_j - math.pi                                  # J seen from Q (th_j - pi lands at -0.28 rad, so the sweep to -pi/2 is the short 74 deg arc, not 434 deg round the back)
     a1 = -math.pi / 2                                    # bottom tangent point (Y0, Z_PLATE_TOP)
     for i in range(1, n + 1):
         a = a0 + (a1 - a0) * i / n
@@ -131,7 +131,10 @@ def build(doc, params=None):
     W = Y1 - Y0
     # under-hull first, clipped to the plate bottom
     p.cyl(2 * HULL_R, X_HULL1 - X_HULL0, at=(X_HULL0, YC, ZA), axis="x")
-    p.box(X_HULL1 - X_HULL0 + 2, W + 2, 30, at=(X_HULL0 - 1, Y0 - 1, Z_PLATE_BOT), op="cut")
+    p.box(X_HULL1 - X_HULL0 + 2, W + 6, 30, at=(X_HULL0 - 1, Y0 - 1, Z_PLATE_BOT), op="cut")
+    # the hull's crown (y up to YC + R = 38.3) pokes past the +y face; the reference is FLAT at
+    # y = Y1 (bbox y max 36.663 = the wall face), so clip it flush (r2: 48 stray tris, y <= 38.3)
+    p.box(X_HULL1 - X_HULL0 + 2, 5, 40, at=(X_HULL0 - 1, Y1, -25), op="cut")
     # the two walls (profile includes the plate under them) and the plate between
     prof = _wall_profile()
     p.prism(prof, X_IN_B - X_OUT_B_BOT + 0.01, at=(X_OUT_B_BOT, 0, 0), axis="x")

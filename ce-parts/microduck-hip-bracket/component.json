@@ -3,13 +3,22 @@
   "kind": "part",
   "record": {
     "slug": "microduck-hip-bracket",
-    "title": "microduck-hip-bracket",
-    "verdict": "CANNOT DETERMINE",
-    "why": "created by `bin/triad new part` — nothing measured yet",
-    "sector": null,
-    "subsector": null,
-    "lifecycle": "unknown",
-    "origin": null,
-    "origin_why": null
+    "title": "Microduck hip-roll bracket \u2014 'hip_l' in Pollen's MJCF: 32.45 x 34.5 x 19 mm L-bracket, XL330 horn pattern + \u00d816 bearing boss on both legs, joining the hip-roll servo to the hip-pitch servo",
+    "verdict": "PASS",
+    "why": "cad/part.py builds one valid solid (bin/cad part:microduck-hip-bracket, 2026-09-02) and ce-cad/bin/cad-refcheck grades it against Pollen's own published mesh reference/pollen-microduck-rl/assets/hip_l.stl: p95 surface distance 0.162 mm ref->ours / 0.242 mm ours->ref, median 0.001 mm, bbox delta 0.00 mm per axis, 21/21 reference holes and bosses matched, 0 unmatched. The report is the ledger artifact (evidence/refcheck/2026-09-01T18-58-41Z).",
+    "sector": "structural",
+    "subsector": "bracket",
+    "lifecycle": "prototype",
+    "origin": "generated",
+    "origin_why": "modelled by hand in cecad from measurements taken off Pollen Robotics' decimated visual mesh (CC BY-SA-NC sim asset) with cad-mjcf sections, 0.5 mm plane rasters (out/hip-bracket/sections.py) and cecad.meshfeatures; nobody has Pollen's CAD and no physical part has been measured. Admitted through the TRIAD.md door: evidence/ledger.jsonl + computed trust.json.",
+    "material": "PLA",
+    "process": "FDM",
+    "source_reference": "reference/pollen-microduck-rl/assets/hip_l.stl (Pollen microduck RL assets, exported by onshape-to-robot)",
+    "used_by": [
+      "assembly:microduck-leg-left",
+      "assembly:microduck-leg-right"
+    ],
+    "qty_per_robot": 2,
+    "why_this_folder_exists": "Both hips of the Microduck are this one bracket \u2014 the mesh is z-symmetric, so the MJCF places the SAME hip_l.stl in hip_l and hip_l_2 with the same pos (-17.5, 0, -18.5) mm and quat (0.707107, -0.707107, 0, 0); there is no mirror part. Nothing on the shelf joins two XL330 outputs at right angles with 22x16x4 bearing seats on both axes."
   }
 }

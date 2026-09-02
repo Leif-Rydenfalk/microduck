@@ -5,7 +5,7 @@ Contract (TRIAD.md): `def build(doc, params=None) -> Part`. Parametric —
 there is no geometry/*.step because nobody has Pollen's CAD. Every number
 below was READ OFF Pollen's published mesh
 `reference/pollen-microduck-rl/assets/hip_l.stl` (metres, decimated) on
-2026-09-01 with `ce-cad/bin/cad-mjcf sections`, `cecad.meshfeatures.cylinders`
+2026-09-01/02 with `ce-cad/bin/cad-mjcf sections`, `cecad.meshfeatures.cylinders`
 and the 0.5 mm plane rasters in `out/hip-bracket/sections.py` (least-squares
 circle fits for every arc), and the rebuild is graded against that mesh by
 `cecad.meshcompare` (see evidence/).
@@ -29,13 +29,25 @@ hip-PITCH servo (in the thigh):
     body's 22x16x4 bearing on this boss.
   * PITCH LEG — a plate perpendicular to x (x 34 .. 38, 4 thick), 19 wide,
     rounded R9.5 about (y 0, z 0) at +y, with the SAME disc/boss/hole
-    pattern on its +x face. The MJCF's hip-pitch joint passes through mesh
+    pattern on its +x face, except its Ø4.84 counterbores open with a
+    Ø5.22 x ~0.55 mouth step at the x=34 face (meshfeatures: three holes
+    Ø5.22 len 0.21-0.58 at x 34.07-34.10; z=6 raster row y 2.61 starts at
+    x 34.17 not 34.00). The MJCF's hip-pitch joint passes through mesh
     (42.5, 0, 0) along x and the hip_l body's own 22x16x4 bearing sits on
     this boss (mesh x 38.5 .. 42.5 = boss + the thigh servo's horn).
   * CORNER — inner fillet R6 (centre 28, -13), outer round R8 (centre 30,
     -13.5), and a 10 mm wide GUSSET rib (z +/-5) filling the outer corner
     out to y = -25 and x = 38 with an R5 corner (centre 33, -20), an R5
     round end about the roll boss centre, R2 root fillets, R1 top rounds.
+
+BUILD HISTORY. r1 (2026-09-01) collapsed to just the pitch boss (bbox
+1.96 x 16 x 16, p95 15.35): the pitch-plate outline was built with a
+spurious (v,u) swap so the plate landed at z up to 13.5 disjoint from the
+body, and makeFillet on that 2-solid shape returned a corrupt solid (bbox
+grew to x 56.7 while volume DROPPED) that later fuses evaporated. Fixed
+2026-09-02: outline is (y, z) = (-u, v) of the stadium with no swap, and
+every fillet is guarded — shape snapshot before, isValid() + bbox-drift
+< 0.3 mm + |dV| < 200 mm3 after, revert and note on any failure.
 """
 import math
 
@@ -68,6 +80,8 @@ HOLE_PCD = 12.0                       # holes at (±6, 0) and (0, ±6) from the 
 CBORE_D = 4.84                        # Ø4.84 counterbores from the far face
 CBORE_TO_X = 37.5                     # pitch side: hole len 2.95 from 40.45 -> floor at 37.5
 CBORE_TO_Y = -19.5                    # roll side: hole len 2.95 from -16.55 -> floor at -19.5 (x=11/13 rows: [-19.5,-16.55])
+MOUTH_D = 5.22                        # pitch cbore mouth step (meshfeatures: 3 x Ø5.22 at x 34.07..34.10)
+MOUTH_DEPTH = 0.55                    # its depth (meshfeatures len 0.21..0.58; z=6 row y2.61: x from 34.17)
 
 # corner
 FIL_IN_R, FIL_IN_C = 6.0, (28.0, -13.0)     # inner fillet: circle fit z=0/z=8, residual 0.003 mm
@@ -77,7 +91,7 @@ RIB_END_R = 5.0                       # rib -x end: arc about (17.5, 0), r 5.05 
 RIB_CORNER_R, RIB_CORNER_C = 5.0, (33.0, -20.0)   # circle fit z=0 corner, residual 0.003 mm
 RIB_ROOT_FIL = 2.0                    # flank->plate fillet (x=20 profile: (5.31,-22.44) (5.59,-22.12) (6.2,-21.63))
 RIB_TOP_RND = 1.0                     # rib top edge round (x=20: (4.47,-24.88) (4.68,-24.73) (4.87,-24.5))
-PLATE_EDGE_RND = 0.75                 # plate z-edges (x=20: z 9.43 -> y -21.07; y=-5: z 9.41 -> x 37.61)
+PLATE_EDGE_RND = 0.75                 # plate z-edges (x=20 z9.25: y [-21.31,-19.19]; r0.75 tangent check)
 
 MATERIAL = "PLA"
 
@@ -95,6 +109,31 @@ def _stadium(cu, cv, r, u_far, n=24):
     pts += _arc((cu, cv), r, -90, -270, n)   # from (cu, cv-r) over (cu-r, cv) to (cu, cv+r)
     pts.append((u_far, r))
     return pts
+
+
+def _guarded_fillet(p, r, where, label):
+    """makeFillet through cecad, but NEVER trust the kernel blind: r1 of this
+    part died when makeFillet on a 2-solid shape returned a 'valid'-looking
+    corrupt solid (bbox +18 mm, volume down) and every later boolean on it
+    silently evaporated the part. Snapshot first; accept only if the result
+    isValid(), the bbox drifted < 0.3 mm on every axis, and |dV| < 200 mm3
+    (these fillets move < 60 mm3 of material); else revert + note."""
+    before = p.shape.copy()
+    v0, b0 = p.shape.Volume, p.shape.BoundBox
+    try:
+        p.fillet(r, where=where)
+    except Exception as e:
+        p.shape = before
+        p.notes.append(f"fillet {label} r{r}: raised {e}; reverted")
+        return
+    b = p.shape.BoundBox
+    drift = max(abs(b.XMin - b0.XMin), abs(b.XMax - b0.XMax),
+                abs(b.YMin - b0.YMin), abs(b.YMax - b0.YMax),
+                abs(b.ZMin - b0.ZMin), abs(b.ZMax - b0.ZMax))
+    if (not p.shape.isValid()) or drift > 0.3 or abs(p.shape.Volume - v0) > 200:
+        p.shape = before
+        p.notes.append(f"fillet {label} r{r}: corrupt result "
+                       f"(drift {drift:.2f} mm, dV {p.shape.Volume - v0:.0f}); reverted")
 
 
 def build(doc, params=None):
@@ -118,11 +157,22 @@ def build(doc, params=None):
               (-RIB_HW - 0.1, X_ROLL - RIB_END_R - 2)]
     p.prism(waste, Y_PLATE_TOP - Y_BACK + 0.2, at=(0, Y_BACK - 0.1, 0), axis="y", op="cut")
 
-    # 2. THIN ROLL PLATE: stadium in (z, x), extruded along y from -21.5 by 2.5
+    # 2. rib fillets while the rib is alone (fewer edges for the kernel to
+    #    trip on): R1 rounds on the y=-25 face edges and the R5-corner flank
+    #    edges, then nothing else touches these faces.
+    def _top(e):
+        b = e.BoundBox
+        on_top = b.YMax < Y_BACK + 0.05                      # edges of the y=-25 face
+        on_corner = (abs(abs(b.ZMin) - RIB_HW) < 0.02 and abs(abs(b.ZMax) - RIB_HW) < 0.02
+                     and b.XMin > RIB_CORNER_C[0] - 0.05 and b.YMax < RIB_CORNER_C[1] + 0.05)
+        return on_top or on_corner
+    _guarded_fillet(p, RIB_TOP_RND, _top, "rib-top")
+
+    # 3. THIN ROLL PLATE: stadium in (z, x), extruded along y from -21.5 by 2.5
     plate = [(v, u) for (u, v) in _stadium(X_ROLL, 0.0, R_END, X_PLATE_BACK)]
     p.prism(plate, Y_PLATE_TOP - Y_PLATE_BOT, at=(0, Y_PLATE_BOT, 0), axis="y")
 
-    # 3. CORNER: one x-y polygon = outer R8 quarter-round minus the inner R6
+    # 4. CORNER: one x-y polygon = outer R8 quarter-round minus the inner R6
     #    fillet circle, full height z +/-9.5
     corner = [(RND_OUT_C[0], Y_PLATE_BOT)]
     corner += _arc(RND_OUT_C, RND_OUT_R, -90, 0)             # (30,-21.5) -> (38,-13.5)
@@ -134,30 +184,22 @@ def build(doc, params=None):
     corner += [(RND_OUT_C[0], Y_PLATE_TOP)]
     p.prism(corner, W, at=(0, 0, -HZ), axis="z")
 
-    # 4. PITCH PLATE: stadium in (y, z) with the R9.5 end at +y, down to -13.5,
-    #    extruded along x from 34 by 4
-    pitch = [(v, u) for (u, v) in _stadium(-Y_PITCH, 0.0, R_END, -RND_OUT_C[1])]   # built as -y then flipped
-    pitch = [(-u, v) for (u, v) in pitch]                    # (y, z): arc at +y, straight edge at y -13.5
+    # 5. PITCH PLATE: outline in (y, z) — semicircle R9.5 about (0, 0) bulging
+    #    +y, straight edge at y = -13.5 — extruded along x from 34 by 4.
+    #    (r1 BUG: an extra (v,u) swap here put this plate at z up to 13.5.)
+    pitch = [(-u, v) for (u, v) in _stadium(-Y_PITCH, 0.0, R_END, -RND_OUT_C[1])]
     p.prism(pitch, X_PLATE_FRONT - X_PLATE_BACK, at=(X_PLATE_BACK, 0, 0), axis="x")
 
-    # 5. rib root fillets R2 (concave, flank z=+/-5 meeting the plate bottom
-    #    y=-21.5 and the R8 round) and R1 rounds on the rib top edges
+    # 6. rib root fillets R2 (concave, flank z=+/-5 meeting the plate bottom
+    #    y=-21.5 and the R8 round)
     def _root(e):
         b = e.BoundBox
         return (abs(abs(b.ZMin) - RIB_HW) < 0.02 and abs(abs(b.ZMax) - RIB_HW) < 0.02
                 and b.YMin > Y_PLATE_BOT - 0.05 and b.YMax < RND_OUT_C[1] + 0.05
                 and b.XMin < X_PLATE_FRONT - 0.05)
-    p.fillet(RIB_ROOT_FIL, where=_root)
+    _guarded_fillet(p, RIB_ROOT_FIL, _root, "rib-root")
 
-    def _top(e):
-        b = e.BoundBox
-        on_top = b.YMax < Y_BACK + 0.05                      # edges of the y=-25 face
-        on_corner = (abs(abs(b.ZMin) - RIB_HW) < 0.02 and abs(abs(b.ZMax) - RIB_HW) < 0.02
-                     and b.XMin > RIB_CORNER_C[0] - 0.05 and b.YMax < RIB_CORNER_C[1] + 0.05)
-        return on_top or on_corner
-    p.fillet(RIB_TOP_RND, where=_top)
-
-    # 6. discs, bosses, recesses, holes, counterbores — roll face (axis y)
+    # 7. discs, bosses, recesses, holes, counterbores — roll face (axis y)
     p.cyl(DISC_D, Y_DISC_TOP - Y_PLATE_TOP + 0.01, at=(X_ROLL, Y_PLATE_TOP - 0.01, 0), axis="y")
     p.cyl(BOSS_D, Y_BOSS_TOP - Y_DISC_TOP + 0.01, at=(X_ROLL, Y_DISC_TOP - 0.01, 0), axis="y")
     p.cyl(RECESS_D, 5, at=(X_ROLL, Y_DISC_TOP, 0), axis="y", op="cut")
@@ -166,7 +208,7 @@ def build(doc, params=None):
         dz = HOLE_PCD / 2 * math.sin(math.radians(ang))
         p.cyl(HOLE_D, 12, at=(X_ROLL + dx, Y_BACK - 1, dz), axis="y", op="cut")
         p.cyl(CBORE_D, CBORE_TO_Y - Y_BACK + 1, at=(X_ROLL + dx, Y_BACK - 1, dz), axis="y", op="cut")
-    # pitch face (axis x)
+    # pitch face (axis x); cbores get the Ø5.22 mouth step at the x=34 face
     p.cyl(DISC_D, X_DISC_FRONT - X_PLATE_FRONT + 0.01, at=(X_PLATE_FRONT - 0.01, Y_PITCH, 0), axis="x")
     p.cyl(BOSS_D, X_BOSS_FRONT - X_DISC_FRONT + 0.01, at=(X_DISC_FRONT - 0.01, Y_PITCH, 0), axis="x")
     p.cyl(RECESS_D, 5, at=(X_DISC_FRONT, Y_PITCH, 0), axis="x", op="cut")
@@ -174,6 +216,7 @@ def build(doc, params=None):
         dy = HOLE_PCD / 2 * math.cos(math.radians(ang))
         dz = HOLE_PCD / 2 * math.sin(math.radians(ang))
         p.cyl(HOLE_D, 12, at=(X_PLATE_BACK - 1, Y_PITCH + dy, dz), axis="x", op="cut")
+        p.cyl(MOUTH_D, MOUTH_DEPTH + 1, at=(X_PLATE_BACK - 1, Y_PITCH + dy, dz), axis="x", op="cut")
         p.cyl(CBORE_D, CBORE_TO_X - X_PLATE_BACK + 1, at=(X_PLATE_BACK - 1, Y_PITCH + dy, dz), axis="x", op="cut")
     p.clean()
 

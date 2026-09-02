@@ -1,11 +1,47 @@
 {
- "$triad": 1,
- "kind": "interfaces",
- "generated_by": "cecad.meshshelve",
- "record": {
-  "ref": "part:microduck-yaw-roll-motion@v0.0.1",
-  "frame": "the published mesh's own frame (mm after x1000); MJCF geom pos/quat place it",
-  "units": "mm"
- },
- "interfaces": []
+  "$triad": 1,
+  "kind": "interfaces",
+  "record": {
+    "slug": "microduck-yaw-roll-motion",
+    "interfaces": [
+      {
+        "name": "yaw_servo_case",
+        "frame": {
+          "origin_mm": [-7.5, 0.0, 16.0],
+          "z_axis": [0, 0, -1],
+          "x_axis": [1, 0, 0]
+        },
+        "accepts": ["connection:threaded-m2"],
+        "role": "case_screws",
+        "what": "top plate underside: 4 x Ø2.5 M2 clearance holes at (-22.5, +-8) and (7.5, +-8) — the XL330's 30 x 16 case pattern; the head-yaw servo hangs under the plate between the walls, output down, its horn bolting to neck_pitch's top boss (yaw axis mesh -z through (0,0))",
+        "source": "MEASURED off Pollen's mesh by cecad.meshfeatures (4 x Ø2.5, residual 0.000; Ø4.6 x 0.5 countersinks on the (7.5,+-8) pair) + meshslice z 17 probes, 2026-09-02"
+      },
+      {
+        "name": "roll_horn",
+        "frame": {
+          "origin_mm": [0.0, 17.9, 4.5],
+          "z_axis": [0, 1, 0],
+          "x_axis": [1, 0, 0]
+        },
+        "accepts": ["connection:spline-xl330-horn", "connection:threaded-m2"],
+        "role": "horn_face",
+        "what": "Ø18 disc + Ø16 x 1.9 boss face with Ø6 centre bore and 4 x Ø2.2 on a Ø12 bolt circle, counterbored Ø4.4 from y 12 — the head-roll XL330 (in the head's motor_support) bolts its horn here; the roll axis is mesh +y through (0, 4.5)",
+        "source": "MEASURED off Pollen's mesh by cecad.meshfeatures (boss Ø16 len 1.9 at y 16.95, Ø6 len 5.9, 4 x Ø2.2 len 3.4 at y 16.2, Ø4.4 cbores at y 13.25) + meshslice probes, 2026-09-02"
+      },
+      {
+        "name": "roll_bearing_seat",
+        "frame": {
+          "origin_mm": [0.0, -18.0, 4.5],
+          "z_axis": [0, -1, 0],
+          "x_axis": [1, 0, 0]
+        },
+        "accepts": ["connection:press-fit-bearing-22x16x4"],
+        "role": "bearing_seat",
+        "what": "Ø16.0 x 4.0 boss with Ø12 through bore — inner-race seat for the 22x16x4 bearing held in the head, coaxial with the head-roll axis, opposite the roll horn",
+        "source": "MEASURED off Pollen's mesh by cecad.meshfeatures (boss Ø16.00 len 4.0 at (0, -16, 4.5), hole Ø12.00 len 8.0), 2026-09-02"
+      }
+    ],
+    "frame": "Pollen's mesh frame for yaw_roll_motion.stl: x -24.5..9.5, y -18..17.9, z -4.5..18. Head-yaw axis along mesh z through (0,0); head-roll axis along mesh y through (0, 4.5). Kept so the MJCF geom pos/quat (pos (0,0,10), quat 90 deg about z) place it directly.",
+    "units": "mm"
+  }
 }

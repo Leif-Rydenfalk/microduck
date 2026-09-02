@@ -1,0 +1,35 @@
+[live capture NOT installed: RuntimeError: cecad.livehook needs FreeCAD's geometry kernel, which this interpreter does not have (No module named 'FreeCAD').
+    Run designs through bin/cad — FreeCAD's interpreter ignores PYTHONPATH and `FreeCAD -c` hangs on stdin.
+    cecad.electrical and cecad.vision are kernel-free and work here.]
+# refcheck part:microduck-motor-support vs motor_support.stl
+
+**FAIL** — p95 surface distance 0.46 mm <= 1.00 both ways; bbox within 0.00 mm; 1 reference feature(s) have no match in ours
+
+| | ref->ours | ours->ref |
+|---|---|---|
+| mean mm | 0.094 | 0.117 |
+| p50 mm | 0.014 | 0.016 |
+| p95 mm | 0.355 | 0.463 |
+| max mm | 2.417 | 2.625 |
+| within 1.0 mm | 99.4% | 98.8% |
+
+bbox ours [73.5, 54.2, 18.8]  ref [73.5, 54.2, 18.8]  delta [-0.0, -0.0, -0.0]
+volume ratio ours/ref 1.0513 (closed-mesh figure, see compare.json)
+
+## features
+
+reference: 5 holes, 1 bosses · ours: 6 holes, 1 bosses · matched 5 · unmatched reference 1 · extra ours 2
+- UNMATCHED boss Ø20.69 at [-33.467, 0.005, 7.144] axis [1.0, -0.0001, 0.0002] len 6.07
+- extra in ours: hole Ø15.00 at [-36.0, -0.0, 7.5]
+- extra in ours: boss Ø21.01 at [-33.558, 0.056, 6.905]
+
+## renders
+
+- overlay_front.png
+- overlay_left.png
+- overlay_top.png
+- overlay_iso.png
+- ours_iso.png
+- ref_iso.png
+
+report: out/refcheck/microduck-motor-support/r2/report.md

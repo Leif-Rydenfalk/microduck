@@ -1,34 +1,35 @@
 {
- "$triad": 1,
- "kind": "interfaces",
- "generated_by": "cecad.meshshelve",
- "record": {
-  "ref": "part:microduck-neck-plate@v0.0.1",
-  "frame": "the published mesh's own frame (mm after x1000); MJCF geom pos/quat place it",
-  "units": "mm"
- },
- "interfaces": [
-  {
-   "name": "neck_pitch",
-   "frame": {
-    "origin_mm": [
-     3.0,
-     -22.0,
-     50.0
+  "$triad": 1,
+  "kind": "interfaces",
+  "record": {
+    "slug": "microduck-neck-plate",
+    "interfaces": [
+      {
+        "name": "servo_a_case",
+        "frame": {
+          "origin_mm": [0.0, -30.0, 75.0],
+          "z_axis": [-1, 0, 0],
+          "x_axis": [0, 1, 0]
+        },
+        "accepts": ["connection:threaded-m2"],
+        "role": "case_screws",
+        "what": "2 x Ø2.3 M2 clearance holes at (y -30, z 72.5/77.5), 5 mm apart — one XL330 case's side screws; the plate face x=0 lies against the servo case",
+        "source": "MEASURED off Pollen's mesh by cecad.meshfeatures (4 holes Ø2.3, residual 0.000) + meshslice z-scans at y -30, 2026-09-02"
+      },
+      {
+        "name": "servo_b_case",
+        "frame": {
+          "origin_mm": [0.0, -14.0, 75.0],
+          "z_axis": [-1, 0, 0],
+          "x_axis": [0, 1, 0]
+        },
+        "accepts": ["connection:threaded-m2"],
+        "role": "case_screws",
+        "what": "2 x Ø2.3 M2 clearance holes at (y -14, z 72.5/77.5) — the other XL330's case screws; the two hole pairs are 16 mm apart, the gap between two 34 mm XL330 bodies whose axes are 50 mm apart",
+        "source": "MEASURED off Pollen's mesh by cecad.meshfeatures + meshslice z-scans at y -14, 2026-09-02"
+      }
     ],
-    "z_axis": [
-     -1.0,
-     0.0,
-     0.0
-    ],
-    "x_axis": null
-   },
-   "accepts": [
-    "connection:spline-xl330-horn"
-   ],
-   "role": "joint_child_link",
-   "what": "the neck_pitch hinge (trunk_base -> neck), range [-90.0, 60.0] deg, in this mesh's own frame",
-   "source": "DERIVED by cecad.meshshelve from the MJCF joint origin/axis transformed into the mesh frame (first placement); the interface is the joint, not a measured feature of the mesh"
+    "frame": "Pollen's mesh frame for neck.stl: x 0..2 (thickness), y -32..-12, z 69.5..80.5. Kept so the MJCF geom pos/quat (two placements in the `neck` body) place it directly.",
+    "units": "mm"
   }
- ]
 }

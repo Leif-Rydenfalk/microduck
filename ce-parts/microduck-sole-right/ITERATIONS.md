@@ -4,3 +4,4 @@
 | iteration | date | why it exists |
 |---|---|---|
 | v0.0.1 | 2026-09-01 | mesh-backed: Pollen's published sole_right.stl loaded as-is |
+| v0.0.2 | 2026-09-02 | parametric rebuild replacing the v0.0.1 mesh loader; graded by cad-refcheck vs sole_right.stl: p95 0.05/0.06 mm, median 0.005/0.005, bbox delta [-0.03, 0.0, -0.003] mm, 0 features to match — PASS |
