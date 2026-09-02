@@ -41,7 +41,14 @@ VIS = set(D["visible"]["slugs"])
 
 
 def n(x, d=4):
-    return "—" if x is None else ("%.*f" % (d, x)).rstrip("0").rstrip(".") if isinstance(x, float) else str(x)
+    """Fixed-point with trailing zeros trimmed — but ONLY after a decimal point.
+    (Stripping "0" off "2000" gave "2" in an earlier draft of this file.)"""
+    if x is None:
+        return "—"
+    if not isinstance(x, float):
+        return str(x)
+    t = "%.*f" % (d, x)
+    return t.rstrip("0").rstrip(".") if "." in t else t
 
 
 def usd(x, d=4):
@@ -373,8 +380,9 @@ A(tbl(["term", "bracket", "basis", "source"], [
      td(E(R["labour_job_note"])), td(src("CC"))],
     [td("moulded piece"), td("$%.2f–%.2f" % (R["mould_piece_usd"]["low"], R["mould_piece_usd"]["high"]), "num"),
      td("aluminium tool, small part, vendor bracket on unlike parts"), td(src("HT"))],
-    [td("tool"), td("$%s floor; $%s–%s aluminium" % (n(R["tool_usd"]["floor"], 0), n(R["tool_usd"]["alu_low"], 0),
-                                                     n(R["tool_usd"]["alu_high"], 0)), "num"),
+    [td("tool"), td("%s floor; %s–%s aluminium" % (usd(R["tool_usd"]["floor"], 0),
+                                                   usd(R["tool_usd"]["alu_low"], 0),
+                                                   usd(R["tool_usd"]["alu_high"], 0)), "num"),
      td("one cavity set per slug; mirrored pairs cannot share"), td(src("PL1", "HT", "PL4"))],
     [td("failure buffer"), td("×%.2f–%.2f" % (R["failure_buffer"]["low"], R["failure_buffer"]["high"]), "num"),
      td("prints that do not finish"), td(src("CC", "GC"))],
@@ -502,7 +510,9 @@ build plate, so β = 90° is a vertical wall and β = 0 is a horizontal down-fac
 casting from %d seeded sample points; the p5 column is the honest thin-wall figure because the
 absolute minimum of a triangulated shell is nearly always a chamfer knife-edge — the same
 caveat <code>docs/DFM.md</code> makes about <code>inspect.thinnest_wall</code>
-%s.</p>''' % (len(ROWS), src("PRESET"), DFM["sample_rays"] if DFM else 0, src("DFM", "DFMMD")))
+%s. One reading rule: on a part with no cavity the ray crosses the whole body, so a large wall
+figure means &ldquo;no thin wall anywhere on this part&rdquo; and not &ldquo;a wall this thick&rdquo; — the eye-ring&rsquo;s
+6.65 mm p5 is the ring&rsquo;s own section, not a shell.</p>''' % (len(ROWS), src("PRESET"), DFM["sample_rays"] if DFM else 0, src("DFM", "DFMMD")))
 
 rows = []
 for r in ROWS:
