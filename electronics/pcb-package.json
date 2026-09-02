@@ -1,0 +1,573 @@
+{
+  "$schema_note": "Data for tools/gen_pcb_package.py. Every price and every dimension carries the URL or file it was read from and the date it was read. Nothing in this file may be edited without moving its source with it. The DRC verdicts, part counts and BOM rows are NOT in this file \u2014 the generator reads them out of each board's own out/fab/ so they cannot drift from the boards.",
+  "document": {
+    "id": "MD-PCB-001",
+    "revision": "A",
+    "date": "2026-09-02",
+    "title": "Custom PCB package",
+    "subtitle": "The three boards Pollen does not publish \u2014 Robot HAT, imu_to_dxl v2 and the banana battery-contact strip \u2014 captured, laid out, design-rule-checked and quoted.",
+    "lane": "GOAL.md lane D, finding 6"
+  },
+  "boards": [
+    {
+      "slug": "robot-hat",
+      "dir": "electronics/robot-hat",
+      "name": "microduck_robot_hat",
+      "title": "Robot HAT",
+      "what": "The board that sits on the Radxa Zero 3W's 40-pin header: battery in, 5 V out to the host, the servo bus behind a half-duplex buffer, the TLV320AIC3104 codec, the dormant BMI088, the Stemma J5 I2C port, speaker and mic.",
+      "outline_mm": [
+        65.0,
+        30.0
+      ],
+      "corner_r_mm": 3.5,
+      "layers": 2,
+      "thickness_mm": 1.6,
+      "finish": "HASL (lead-free) \u2014 the fab default; no function on this board needs a flat gold surface",
+      "mesh_evidence": "reference/pollen-microduck-rl/assets/elec_rpi_robot_hat_pcb.stl",
+      "mount": "4 x M2.5 clearance on the 58.000 x 23.000 pattern, 3.500 mm inset \u2014 measured dia 2.7000 in Pollen's mesh, and 'DRILLED TO 2.75 +/- 0.05mm' in RPI-ZERO-V1_2",
+      "decisions": [
+        [
+          "D1",
+          "5 V rail: Pololu D30V30F5 buck module (U2) from the pack",
+          "vendor spec page 'Output voltage: 5 V', 'Continuous output current: 3.4 A' (part:buck-module-d30v30f5)",
+          "a discrete buck IC \u2014 rejected because a module is one line in a BOM and the regulator is unpublished anyway"
+        ],
+        [
+          "D2",
+          "Servo VDD is the raw pack through R1, a 0R link",
+          "robotd reads the pack THROUGH the servos' own Present Input Voltage \u2014 'There is no fuel gauge and no ADC' (model.rs:99-113); XL330 band 'Input Voltage | 3.7 ~ 6.0 [V]'",
+          "a second regulated rail \u2014 rejected because nothing in the published runtime implies one, and the 0R makes the assumption removable"
+        ],
+        [
+          "D3",
+          "Direction-less half-duplex: one 74LVC1G125, OE driven by UART2 TX",
+          "'no direction GPIO anywhere in the code' (docs \u00a73.1); function table 'L L -> L; L H -> H; H X -> Z' (Nexperia Rev 17.1 Table 4)",
+          "ROBOTIS' own 74LVC2G241 with a TX_Enable \u2014 rejected on the host side only, because robotd never drives one"
+        ],
+        [
+          "D4",
+          "3.3 V taken from header pins 1 and 17",
+          "'1: +3.3V', '17: +3.3V' (part:radxa-zero-3w header_40pin)",
+          "a HAT-local 3.3 V regulator \u2014 no published fact supports one"
+        ],
+        [
+          "D5",
+          "1.8 V DVDD deliberately NOT solved: it ends on TP1",
+          "TLV320AIC3104 DVDD band 1.525-1.95 V; no published 1.8 V source anywhere in Pollen's overlays",
+          "inventing a 1.8 V regulator \u2014 refused, because that would fake a fact"
+        ],
+        [
+          "D6",
+          "Speaker on HPLOUT/HPLCOM, mic on MIC2R",
+          "TI specifies the HP drivers into 16 ohm and line-out into 10 k; the community's 'Mic3R' has 0 hits in SLAS510G",
+          "line-out into an amplifier \u2014 no amplifier appears in any published source"
+        ],
+        [
+          "D7",
+          "J5 pin order GND/3V3/SDA/SCL",
+          "the STEMMA QT / Qwiic convention the connector family names (part:conn-jst-sh-1mm)",
+          "any other order \u2014 nothing distinguishes them"
+        ],
+        [
+          "D8",
+          "Servo connector JST B3B-EH-A",
+          "'PCB Header | JST B3B-EH-A' (part:xl330-m288-t connector)",
+          "the name 'X3P', which appears on no vendor page fetched"
+        ]
+      ]
+    },
+    {
+      "slug": "imu-to-dxl",
+      "dir": "electronics/imu-to-dxl",
+      "name": "microduck_imu_to_dxl",
+      "title": "imu_to_dxl v2",
+      "what": "An LSM6DSV16X presented on the Dynamixel bus as a Protocol-2 slave, ID 200, serving a 12-byte block at register 124. Three bus ports are fitted so the daisy chain can branch here \u2014 which is option A of an open question, not a fact.",
+      "outline_mm": [
+        34.0,
+        24.0
+      ],
+      "corner_r_mm": 2.0,
+      "layers": 2,
+      "thickness_mm": 1.6,
+      "finish": "HASL (lead-free) \u2014 the fab default",
+      "mesh_evidence": null,
+      "mount": "2 x M2 clearance at (2.500, 12.000) and (31.500, 12.000) \u2014 OUR choice (E8); nothing measured constrains it",
+      "decisions": [
+        [
+          "E1",
+          "MCU: STM32G031F6P6, TSSOP-20",
+          "'any Protocol-2-slave MCU (STM32G0/CH32V) would do' (docs \u00a74.1 [C-elec]); USART2 on PA2/PA3 and SPI1 on PA4-PA7 in one 20-pin package (ST DS12992 Rev 4 Fig. 5 p.32/126)",
+          "CH32V003 \u2014 cheaper, but the published sentence names STM32G0 first and nothing else separates them"
+        ],
+        [
+          "E2",
+          "74LVC1G125 with OE on an MCU GPIO",
+          "ROBOTIS' reference is a 74LVC2G241 with a TX_Enable (part:xl330-m288-t communication_circuit) and a SLAVE can drive that pin, unlike robotd",
+          "the literal 2G241 \u2014 its second buffer only isolates RX from the slave's own echo, which Protocol 2 discards"
+        ],
+        [
+          "E3",
+          "3.3 V: TI LP2985A-33DBVR LDO",
+          "'VIN range (new chip): 2.5V to 16V', 'Output current: Up to 150mA', 'Package: 5-pin SOT-23 (DBV)' (SLVS522S rev. May 2025 p.1)",
+          "a switching regulator \u2014 more parts and a noise source 3 mm from an IMU, for milliamps of load"
+        ],
+        [
+          "E4",
+          "IMU on SPI 4-wire, not I2C",
+          "'To select/exploit the I2C interface, the CS line must be tied high' (DS13510 \u00a75.1) \u2014 a driven CS selects SPI",
+          "I2C with two 10k pull-ups and an SA0 strap"
+        ],
+        [
+          "E5",
+          "No DATA pull-up on this board",
+          "ROBOTIS puts '10 kOhm pull-ups to 3.3V on RXD and on Data' at the CONTROLLER; 16 devices each adding 10k would load the line to 625 ohm",
+          "a local pull-up \u2014 R2's 0R site takes one if a bench measurement ever wants it"
+        ],
+        [
+          "E6",
+          "Qvar pins 2/3 to GND; OCS_Aux and SDO_Aux to Vdd_IO",
+          "'Connect to Vdd_IO or GND if the analog hub and Qvar are disabled'; 'Connect to Vdd_IO or leave unconnected' (DS13510 Table 2 p.11/198)",
+          "leaving them floating \u2014 allowed by the sheet, refused here"
+        ],
+        [
+          "E7",
+          "SWD on five 1.5 mm test points",
+          "the firmware is CANNOT DETERMINE, so the board has to be flashable",
+          "a 2x5 Cortex debug header \u2014 12.7 x 7.6 mm of board for a one-time operation"
+        ],
+        [
+          "E8",
+          "Outline 34.000 x 24.000 mm \u2014 OUR choice",
+          "Pollen ships no mesh, no drawing and no photograph of this board; only an `imu` SITE at trunk_base body (-21, 0.1, -14.7) -> world (-21, 0, 105.3) mm",
+          "sizing it to a guessed cavity \u2014 refused; the outline is stated as unmeasured instead"
+        ],
+        [
+          "E9",
+          "Three bus connectors (J1 in, J2 and J3 out) \u2014 option A, not a settled fact",
+          "wiring/CABLES.md rows 6, 7 and 12 cut three EH leads to this board, and wiring/cables.json assumes the fork is here",
+          "option B: two connectors and a Y-splice beside the board. ce-parts/microduck-imu-to-dxl/component.json record.connector_count (corrected 2026-09-02) shows the two are indistinguishable without a photograph \u2014 a DYNAMIXEL bus is multidrop, and Open Duck Mini v2 forks its harness at a T, not at a device. Leaving J3 unstuffed converts this board to option B; the consequence of being wrong is one Y-splitter in the assembly BOM and nothing electrical"
+        ]
+      ]
+    },
+    {
+      "slug": "banana-contact",
+      "dir": "electronics/banana-contact",
+      "name": "microduck_banana_contact",
+      "title": "Banana battery-contact PCB",
+      "what": "The passive strip that meets the NP-F pack's three terminals through the window in the power_support head plate and carries the pack out on a soldered three-wire tail.",
+      "outline_mm": [
+        45.8,
+        5.1
+      ],
+      "corner_r_mm": 0.5,
+      "layers": 2,
+      "thickness_mm": 1.6,
+      "finish": "ENIG \u2014 a sliding spring contact on a HASL pad cold-flows and oxidises. JLCPCB publishes 'HASL (leaded / lead-free), ENIG, OSP' for this process, so it is an order option, not a special process. THE GERBERS DO NOT CARRY IT: it is an order-form field.",
+      "mesh_evidence": "reference/pollen-microduck-rl/assets/power_support.stl + banana_pcb_locker.stl",
+      "mount": "none \u2014 the board is captured by the measured 45.860 x 5.150 mm pocket and clamped by the banana_pcb_locker bar",
+      "decisions": [
+        [
+          "B1",
+          "Outline 45.800 x 5.100 mm",
+          "the pocket MEASURED in power_support.stl: clear width 45.860 (x -22.930..+22.930), clear height 5.150 (z 50.930..56.080)",
+          "54.041 x 6.672, the locker bar's own outline \u2014 8.2 mm wider than the pocket the board has to enter"
+        ],
+        [
+          "B2",
+          "No mounting holes",
+          "the two screw posts are at x = +/-25.198, OUTSIDE the 45.860 mm clear width",
+          "holes over the posts, which would need a board the pocket cannot accept"
+        ],
+        [
+          "B3",
+          "Three contact pads at 4.000 mm pitch \u2014 DERIVED, NOT MEASURED",
+          "the head plate's window is 12.000 mm wide (x -9.990..+1.990) and is the only opening the terminals reach through; three equal cells give 4.000",
+          "3.500 mm \u2014 nothing supports it either, and 4.000 is what the window implies"
+        ],
+        [
+          "B4",
+          "Flat gold pads 2.600 x 2.600 mm, ENIG, no paste",
+          "the pack's own springs land on them; the pocket is 5.150 mm tall",
+          "spring fingers on the PCB \u2014 no through-hole spring contact fits a 5.100 mm strip"
+        ],
+        [
+          "B5",
+          "Soldered three-wire tail on 0.900 mm holes, not a connector",
+          "every vertical JST header confirmed in this project is deeper than this board is tall: B2B-XH-A body 5.75, B3B-EH-A housing 10.0, B2B-PH-K-S 4.5 mm",
+          "a board-mounted connector \u2014 it does not fit, measured"
+        ],
+        [
+          "B6",
+          "The 'C' terminal is fitted on its own net and goes nowhere",
+          "nothing in Pollen's published source reads it; netlist.py wires the pack as {BAT+: VBAT, BAT-: GND}",
+          "omitting the terminal \u2014 a board that ignores it cannot later be told to read it"
+        ]
+      ]
+    }
+  ],
+  "pollen_hat_mesh": {
+    "file": "reference/pollen-microduck-rl/assets/elec_rpi_robot_hat_pcb.stl",
+    "read": "2026-09-02",
+    "method": "Binary-STL reader in plain python3. Every triangle whose normal is +Z and whose three vertices lie on the top face (z = 0.840 mm) was taken; the edges appearing exactly once were walked into closed loops; each loop was fitted for roundness. 62 boundary loops. No tolerance was loosened to make a feature appear.",
+    "placement": "spec/mesh-placements.json: body jaw_soft, pos (26.940, 28.994, -51.900) mm, quat wxyz (0.707107, 0, 0, -0.707107)",
+    "rows": [
+      [
+        "Outline",
+        "65.000 x 30.000 mm",
+        "x -3.500 .. 61.500, y -26.500 .. 3.500 about the mesh origin",
+        "MEASURED"
+      ],
+      [
+        "Thickness",
+        "0.840 mm",
+        "z 0.000 .. 0.840. Not a JLCPCB thickness ('0.4/0.6/0.8/1.0/1.2/1.6/2.0 mm'); read as a modelling simplification, and our board is built on 1.6 mm",
+        "MEASURED, not adopted"
+      ],
+      [
+        "Corner radius",
+        "3.5000 mm",
+        "36 arc points fitted about the mounting-hole centre: r min 3.5000, r max 3.5001. The Raspberry Pi Zero drawing's 'CORNER RADIUS = 3.0mm' does NOT fit these points (3.04 with 0.4 mm scatter about an offset centre)",
+        "MEASURED \u2014 corrected board.py from 3.0"
+      ],
+      [
+        "Mounting holes",
+        "4 x dia 2.7000 mm",
+        "(0.000, 0.000), (58.000, 0.000), (0.000, -23.000), (58.000, -23.000) \u2014 the 58 x 23 pattern at 3.500 inset",
+        "MEASURED, agrees with RPI-ZERO-V1_2 '4x M2.5 ... 2.75 +/- 0.05mm'"
+      ],
+      [
+        "40-pin header",
+        "40 x dia 1.0200 mm",
+        "y = +1.270 and -1.270; x = 4.870 to 53.130 in 2.540 steps (20 columns). Field centre x = 29.000 = board centre",
+        "MEASURED \u2014 the header IS a full 2x20 and IS centred"
+      ],
+      [
+        "Header pegs",
+        "2 x dia 2.0000 mm",
+        "(6.140, 0.000) and (51.860, 0.000) \u2014 1.270 inboard of the outer pin columns, on the header centre line",
+        "MEASURED; FUNCTION CANNOT DETERMINE"
+      ],
+      [
+        "Connector holes",
+        "14 x dia 0.9500 mm on 2.500 mm pitch",
+        "x 43.850 and 48.650, y -23.000/-20.500/-18.000/-15.500 (4 each); x 53.500 and 58.300, y -17.450/-14.950/-12.450 (3 each). Column pairs 4.800 mm apart",
+        "MEASURED; FAMILY CANNOT DETERMINE"
+      ],
+      [
+        "Lone hole",
+        "1 x dia 1.0000 mm",
+        "(31.200, -11.900)",
+        "MEASURED; FUNCTION CANNOT DETERMINE"
+      ]
+    ],
+    "reading": "The 2.500 mm pitch with a 0.950 mm hole is the JST XH/EH signature \u2014 JST eXH's PC board layout gives 'dia 1' at 2.5 and eEH 'dia 0.9 +0.1/0' at 2.5, and 0.950 sits exactly between them \u2014 and the community HAT built for the same robot says 'The connectors are XH 2.54mm' (github.com/blublear/open-duck-mini-hat README, fetched 2026-09-02). Two 3-pin groups is what a bus that has to branch needs, and 3-pin at 2.5 mm is the XL330's own connector. What could NOT be settled is the 4.800 mm gap between the two columns of each pair: it is tighter than two same-side vertical JST headers can stand (B*B-XH-A body 5.75 mm deep, B3B-EH-A housing 10.0 mm long), and no dual-row JST or Molex family with a 2.5 x 4.8 mm grid was found. Best-supported reading: one fitted header per pair plus a duplicate solder-only row 4.800 mm away \u2014 'connector OR wires'. Reading it beat: two headers mounted on opposite faces of the board. WHAT WOULD SETTLE IT: one photograph of a production HAT's connector side, or a teardown.",
+    "not_copied": "This package does NOT place its connectors on that pattern. Our connectors come from the netlist's needs and each part's own JST drawing, which is a different claim from 'this is where Pollen put them'. The measurement is published here so the difference is visible instead of hidden."
+  },
+  "fab_quotes": {
+    "read": "2026-09-02",
+    "note": "Published prices only. No fab was contacted, no file was uploaded to a quote tool, and no account was created. Where a published tier does not exist, the row says CANNOT DETERMINE and names what settles it.",
+    "vendors": [
+      {
+        "vendor": "JLCPCB",
+        "url": "https://jlcpcb.com/",
+        "quote": "From $2.00 / 5 pcs \u2014 Build Time: 24 hours",
+        "spec_url": "https://jlcpcb.com/capabilities/pcb-capabilities",
+        "spec": "2-layer FR-4: track/space 0.10/0.10 mm (4/4 mil) at 1 oz; plated hole 0.15-6.3 mm; PTH annular ring 'Recommended 0.25 mm or above; absolute minimum 0.18 mm'; pad hole-to-hole 0.45 mm; routed edge clearance >= 0.2 mm; max board 670 x 600 mm; outer copper 1/2/2.5/3.5/4.5 oz; finishes HASL (leaded / lead-free), ENIG, OSP; thickness 0.4/0.6/0.8/1.0/1.2/1.6/2.0 mm. RE-READ LIVE 2026-09-02 and every value above was unchanged from the 2026-08-20 transcription in ce-cad's jlcpcb_2l_standard profile.",
+        "quantity_options": "the quote form lists 5, 10, 15, 20, 25, 30, 50, 75, 100, 500, 1000, 2000 pcs",
+        "tiers": {
+          "5": {
+            "usd": 2.0,
+            "basis": "published headline, any 2-layer board up to the promotional size"
+          },
+          "10": {
+            "usd": null,
+            "basis": "CANNOT DETERMINE \u2014 JLCPCB publishes no rate card, only an interactive quote tool"
+          },
+          "100": {
+            "usd": null,
+            "basis": "CANNOT DETERMINE \u2014 same reason"
+          }
+        }
+      },
+      {
+        "vendor": "PCBWay",
+        "url": "https://m.pcbway.com/activitypcb.aspx",
+        "quote": "10 pcs 1-2 layer L<=100mm W<=100mm \u2014 $5; lead time 2-3 days",
+        "spec_url": "https://www.pcbway.com/pcb_prototype/2_Layer_pcb/",
+        "spec": "The 2-layer prototype page lists '100x100mm 2 layers \u2014 US $5' and '150x100mm 2 layers \u2014 US $41'.",
+        "quantity_options": "the promotional tier is 10 pcs; larger quantities are quoted interactively",
+        "tiers": {
+          "5": {
+            "usd": 5.0,
+            "basis": "the 100x100mm 2-layer prototype page's published US $5"
+          },
+          "10": {
+            "usd": 5.0,
+            "basis": "published promotional price, 10 pcs, 1-2 layer, L<=100 W<=100"
+          },
+          "100": {
+            "usd": null,
+            "basis": "CANNOT DETERMINE \u2014 no published rate card at that quantity"
+          }
+        }
+      }
+    ],
+    "moq": "NEITHER FAB SELLS ONE BOARD. The published minimum is 5 pcs (JLCPCB) and 5-10 pcs (PCBWay), so the cost of qty 1 IS the cost of the smallest panel. That is why the qty-1 column below repeats the 5-piece price instead of dividing it.",
+    "excluded": [
+      "Shipping. Neither fab publishes a flat rate; it depends on destination, weight and carrier, and it is chosen at checkout. CANNOT DETERMINE.",
+      "ENIG surcharge on the banana board. Both fabs offer ENIG and neither publishes its price as a rate card entry. CANNOT DETERMINE.",
+      "Assembly. These are bare-board prices. The Robot HAT has 28 parts and the imu_to_dxl 24, so assembly is a real cost and it is not quoted here.",
+      "Stencils, and the electrical test some fabs charge for above a pin count."
+    ],
+    "what_would_settle_it": "Uploading each board's out/fab/*-fab.zip to jlcpcb.com/quote or pcbway.com/orderonline.aspx and reading the number back. That needs an account, so it is a human action, not this lane's."
+  },
+  "parts": {
+    "$note": "MPN per designator. A specific device gets its exact orderable part number and the document that names it. A generic passive gets a SPECIFICATION instead of an MPN, because a 100 nF 0603 is a commodity and naming one manufacturer would be a false precision \u2014 the spec is what must be met, and 'CANNOT DETERMINE' is the honest MPN. Voltage ratings on the passives are OUR choice against the rail each sits on.",
+    "robot-hat": {
+      "J1": [
+        "2x20 2.54 mm through-hole socket, CANNOT DETERMINE",
+        "header-2x20",
+        "40-pin GPIO socket onto the Radxa Zero 3W. The socket's stack height must clear the codec (VQFN 5x5, 1.0 mm) \u2014 a specific part has not been chosen."
+      ],
+      "U1": [
+        "TLV320AIC3104IRHBR",
+        "VQFN-32 RHB 5.0 x 5.0 mm",
+        "Texas Instruments. 'TLV320AIC3104 | VQFN (32) | 5.00 mm x 5.00 mm' \u2014 SLAS510G p.1; outline RHB0032E (4223442/B 08/2019)."
+      ],
+      "U2": [
+        "Pololu D30V30F5 (item #4892)",
+        "module 17.8 x 20.3 mm, 6 x dia 1.02 through-hole",
+        "Pololu 5V 3.4A Step-Down Voltage Regulator D30V30F5. Dimension drawing docs/d30v30fx-dimensions.pdf (20 Oct 2023, dev code reg32a)."
+      ],
+      "U3": [
+        "BMI088",
+        "LGA-16 3.0 x 4.5 x 0.95 mm",
+        "Bosch Sensortec. Landing pattern is Bosch's own Fig. 11, BST-BMI088-DS000-19 Rev 1.9 \u00a78.2 p.55. Fitted but dormant \u2014 'unused but still connected' (i2c3-pihat.dts:31)."
+      ],
+      "U4": [
+        "74LVC1G125GV,125",
+        "SOT753 (SC-74A) 5-lead",
+        "Nexperia. 'Footprint dimensions (mm) 3.45 x 3.3' \u2014 SOT753 package information, 31 May 2022."
+      ],
+      "J2": [
+        "B2B-XH-A(LF)(SN)",
+        "JST XH, 2 circuits, 2.5 mm, through-hole vertical",
+        "JST. PC board layout '2 circuits: dia 1' at 2.5 +/-0.05 (eXH.pdf)."
+      ],
+      "J3": [
+        "B3B-EH-A(LF)(SN)",
+        "JST EH, 3 circuits, 2.5 mm, through-hole vertical",
+        "JST. Named by the servo's own sheet: 'PCB Header | JST B3B-EH-A' (part:xl330-m288-t connector)."
+      ],
+      "J5": [
+        "SM04B-SRSS-TB(LF)(SN)",
+        "JST SH, 4 circuits, 1.0 mm, side entry SMT",
+        "JST. eSH.pdf 'PC board layout' side entry; 'Dimension A' 3.0 for 4 circuits. LAND PATTERN UNCONFIRMED \u2014 the figure's 5.55/4.0/1.8 callouts were not fully resolved."
+      ],
+      "J6": [
+        "B2B-PH-K-S(LF)(SN)",
+        "JST PH, 2 circuits, 2.0 mm, through-hole vertical",
+        "JST. ePH.pdf PC board layout: dia 0.7 +0.1/0 at 2 +/-0.05."
+      ],
+      "J7": [
+        "B3B-PH-K-S(LF)(SN)",
+        "JST PH, 3 circuits, 2.0 mm, through-hole vertical",
+        "JST, same drawing."
+      ],
+      "TP1": [
+        "(bare pad)",
+        "1.5 mm round test point",
+        "HAT_1V8. Decision D5: the codec's 1.525-1.95 V DVDD has no published source and ends here on purpose."
+      ],
+      "R1": [
+        "CANNOT DETERMINE - spec: 0 ohm jumper, 1206, >= 2 A",
+        "1206",
+        "Decision D2, the pack-to-SERVO_V link. 1206 because it carries the whole servo bus."
+      ],
+      "R2": [
+        "CANNOT DETERMINE - spec: 10 kohm +/-1%, 0603, 1/10 W",
+        "0603",
+        "DATA pull-up. ROBOTIS: '10 kOhm pull-ups to 3.3V ... on Data'."
+      ],
+      "R4": [
+        "CANNOT DETERMINE - spec: 0 ohm jumper, 0603",
+        "0603",
+        "RX tap, decision D3."
+      ],
+      "R12": [
+        "CANNOT DETERMINE - spec: 10 kohm +/-1%, 0603, 1/10 W",
+        "0603",
+        "I2C3 SDA pull-up. Designator kept from the dts comment 'one 10 kOhm pull-up pair R12/R13'."
+      ],
+      "R13": [
+        "CANNOT DETERMINE - spec: 10 kohm +/-1%, 0603, 1/10 W",
+        "0603",
+        "I2C3 SCL pull-up, same source."
+      ],
+      "C1": [
+        "CANNOT DETERMINE - spec: 100 nF X7R 0603 >= 16 V",
+        "0603",
+        "SERVO_V decoupling. ROBOTIS' circuit names 'DXL_PWR with a bulk + 0.1uF'."
+      ],
+      "C2": [
+        "CANNOT DETERMINE - value AND part unstated",
+        "1210",
+        "The reference circuit names a bulk capacitor and NO value. The site is fitted; the value is left blank on purpose."
+      ],
+      "C3": [
+        "CANNOT DETERMINE - spec: 100 nF X7R 0603 >= 16 V",
+        "0603",
+        "74LVC1G125 VCC. ROBOTIS: 'VCC pin 8 = 3.3V with 0.1uF'."
+      ],
+      "C4": [
+        "CANNOT DETERMINE - spec: 100 nF X7R 0603 >= 16 V",
+        "0603",
+        "Codec AVDD/DRVDD. 100 nF is OUR practice - no fetched source states the HAT's values."
+      ],
+      "C5": [
+        "CANNOT DETERMINE - spec: 100 nF X7R 0603 >= 16 V",
+        "0603",
+        "Codec DVDD (on TP1's unsourced 1.8 V). Same note."
+      ],
+      "C6": [
+        "CANNOT DETERMINE - spec: 100 nF X7R 0603 >= 16 V",
+        "0603",
+        "Codec IOVDD. Same note."
+      ],
+      "C7": [
+        "CANNOT DETERMINE - spec: 100 nF X7R 0603 >= 16 V",
+        "0603",
+        "BMI088 VDD. Same note."
+      ],
+      "C8": [
+        "CANNOT DETERMINE - spec: 100 nF X7R 0603 >= 16 V",
+        "0603",
+        "BMI088 VDDIO. Same note."
+      ]
+    },
+    "imu-to-dxl": {
+      "U1": [
+        "LSM6DSV16XTR",
+        "LGA-14L 2.5 x 3.0 x 0.86 mm",
+        "STMicroelectronics. The one part Pollen's source names: 'LSM6DSV16X' (imu.rs:1-6). Land pattern from DS13510 Rev 4 Figure 33 p.175/198."
+      ],
+      "U2": [
+        "STM32G031F6P6",
+        "TSSOP-20, 6.5 x 4.4 mm, 0.65 mm pitch",
+        "STMicroelectronics, Cortex-M0+ 64 MHz, 32 kB flash, 8 kB RAM, 2 x USART. Decision E1. DS12992 Rev 4 Figure 5 p.32/126 and \u00a76.4."
+      ],
+      "U3": [
+        "74LVC1G125GV,125",
+        "SOT753 (SC-74A) 5-lead",
+        "Nexperia. Decision E2 - the driver half of ROBOTIS' half-duplex circuit, with OE on an MCU GPIO."
+      ],
+      "U4": [
+        "LP2985A-33DBVR",
+        "SOT-23-5 (DBV), 2.9 x 2.8 mm",
+        "Texas Instruments, 3.3 V fixed, 150 mA, VIN 2.5-16 V. Decision E3. SLVS522S rev. May 2025."
+      ],
+      "J1": [
+        "B3B-EH-A(LF)(SN)",
+        "JST EH, 3 circuits, 2.5 mm, through-hole vertical",
+        "Bus in from the head (cable dxl-id30-imu200, 120 mm)."
+      ],
+      "J2": [
+        "B3B-EH-A(LF)(SN)",
+        "JST EH, 3 circuits, 2.5 mm, through-hole vertical",
+        "Branch to the left hip yaw servo, ID 20 (cable dxl-imu200-id20, 40 mm)."
+      ],
+      "J3": [
+        "B3B-EH-A(LF)(SN)",
+        "JST EH, 3 circuits, 2.5 mm, through-hole vertical",
+        "Branch to the right hip yaw servo, ID 10 (cable dxl-imu200-id10, 40 mm)."
+      ],
+      "C1": [
+        "CANNOT DETERMINE - spec: 1 uF X7R 0603 >= 25 V",
+        "0603",
+        "LDO input. SLVS522S: 'Use a capacitor with a value of 1 uF or larger from this pin to ground'. 25 V because the pack is 8.4 V full-charge and X7R loses capacitance under bias."
+      ],
+      "C2": [
+        "CANNOT DETERMINE - spec: 4.7 uF X5R/X7R 0805 >= 10 V",
+        "0805",
+        "LDO output. COUT >= 2.2 uF nominal, and the sheet derates ceramics 50%, so 4.7 uF keeps > 1 uF effective."
+      ],
+      "C3": [
+        "CANNOT DETERMINE - spec: 10 nF C0G/X7R 0603",
+        "0603",
+        "LDO BYPASS. 'Low noise: 30 uVRMS with 10 nF bypass capacitor' (SLVS522S p.1)."
+      ],
+      "C4": [
+        "CANNOT DETERMINE - spec: 100 nF X7R 0603 >= 16 V",
+        "0603",
+        "IMU Vdd. VENDOR VALUE: 'C1, C2 = 100 nF ceramic' (DS13510 \u00a77.1 Figure 28)."
+      ],
+      "C5": [
+        "CANNOT DETERMINE - spec: 100 nF X7R 0603 >= 16 V",
+        "0603",
+        "IMU Vdd_IO. Same figure."
+      ],
+      "C6": [
+        "CANNOT DETERMINE - spec: 100 nF X7R 0603 >= 16 V",
+        "0603",
+        "MCU VDD/VDDA. OUR practice - DS12992 states no value."
+      ],
+      "C7": [
+        "CANNOT DETERMINE - spec: 100 nF X7R 0603 >= 16 V",
+        "0603",
+        "74LVC1G125 VCC. OUR practice, matching ROBOTIS' 0.1 uF."
+      ],
+      "C8": [
+        "CANNOT DETERMINE - spec: 100 nF X7R 0603 >= 16 V",
+        "0603",
+        "NRST filter. OUR practice."
+      ],
+      "R1": [
+        "CANNOT DETERMINE - spec: 0 ohm jumper, 0603",
+        "0603",
+        "Driver output link, so the buffer can be lifted off the bus on a bench."
+      ],
+      "R2": [
+        "CANNOT DETERMINE - spec: 0 ohm jumper, 0603",
+        "0603",
+        "RX tap. The same site takes a 10 k pull-up if one is ever wanted (decision E5)."
+      ],
+      "TP1": [
+        "(bare pad)",
+        "1.5 mm round test point",
+        "SWDIO (PA13)."
+      ],
+      "TP2": [
+        "(bare pad)",
+        "1.5 mm round test point",
+        "SWCLK (PA14)."
+      ],
+      "TP3": [
+        "(bare pad)",
+        "1.5 mm round test point",
+        "NRST."
+      ],
+      "TP4": [
+        "(bare pad)",
+        "1.5 mm round test point",
+        "3.3 V."
+      ],
+      "TP5": [
+        "(bare pad)",
+        "1.5 mm round test point",
+        "GND."
+      ]
+    },
+    "banana-contact": {
+      "P1": [
+        "(bare gold pads - no part)",
+        "3 x 2.600 x 2.600 mm, ENIG, mask-opened, no paste",
+        "The NP-F pack's own spring contacts land here. PITCH 4.000 mm IS DERIVED FROM THE 12.000 mm WINDOW, NOT MEASURED OFF A PACK."
+      ],
+      "P2": [
+        "(bare plated holes - no part)",
+        "3 x dia 0.900 mm plated, 1.500 mm pad, 4.000 mm pitch",
+        "Soldered three-wire tail, AWG24. Decision B5: no JST header fits a 5.100 mm strip."
+      ]
+    }
+  }
+}

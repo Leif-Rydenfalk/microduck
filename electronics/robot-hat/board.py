@@ -95,9 +95,101 @@ from cecad.pcbview import plot, publish_pcb                          # noqa: E40
 # footprint: the MJCF still uses the pcb__raspberry_pi_zero_2_w mesh
 # (65.0 x 1.6 x 30.0), docs/ELECTRONICS-AND-SOFTWARE.md §2.
 W, H = 65.0, 30.0
-CORNER = 3.0
+# CORNER was 3.0 (the Pi Zero drawing's 'CORNER RADIUS = 3.0mm'). MEASURED
+# 2026-09-02 off POLLEN'S OWN HAT MESH and corrected to 3.5: see POLLEN_MESH
+# below. Pollen's board is not a Pi Zero and its corner arc is centred on the
+# mounting hole, not offset from it.
+CORNER = 3.5
 HOLE_INSET = 3.5
 MOUNT = "M2.5"
+
+# ---------------------------------------------------------------------------
+# WHAT POLLEN'S OWN HAT MESH MEASURES — read 2026-09-02, lane D
+# ---------------------------------------------------------------------------
+# reference/pollen-microduck-rl/assets/elec_rpi_robot_hat_pcb.stl is Pollen's
+# geometry for THIS board (placed by spec/mesh-placements.json in body
+# jaw_soft at (26.940, 28.994, -51.900) mm, quat wxyz (0.7071, 0, 0,
+# -0.7071)). Until this measurement the board's outline came from the
+# Raspberry Pi Zero drawing by analogy. It no longer does.
+#
+# Method: binary-STL reader in plain python3; every triangle whose normal is
+# +Z and whose vertices all lie on the top face (z = 0.840 mm) was taken, the
+# edges that appear exactly once were walked into closed loops, and each loop
+# was fitted for roundness. 62 boundary loops, no fitting tolerance loosened.
+# Datum: the mesh's own origin, which sits on the first mounting hole.
+#
+#   outline ......... 65.000 x 30.000 mm, x -3.500..61.500, y -26.500..3.500
+#   thickness ....... 0.840 - 0.000 = 0.840 mm   <-- NOT 1.6
+#   corner arcs ..... R3.5000 (36 arc points fitted about the mounting-hole
+#                     centre: r min 3.5000, r max 3.5001). An R3.0 arc offset
+#                     0.5 mm inboard would fit the same corner to 3.04 with
+#                     0.4 mm of scatter; it does not.
+#   mounting holes .. 4 x dia 2.7000 at (0.000, 0.000), (58.000, 0.000),
+#                     (0.000, -23.000), (58.000, -23.000)  ->  58 x 23 pattern,
+#                     3.5 mm inset. Matches RPI-ZERO-V1_2's '4x M2.5 MOUNTING
+#                     HOLES DRILLED TO 2.75 +/- 0.05mm'.
+#   40-pin header ... 40 x dia 1.0200 at y = +/-1.270, x = 4.870 to 53.130 in
+#                     2.540 steps (20 columns). Field centre x = 29.000 =
+#                     board centre. So the header IS the full 2x20 and it IS
+#                     centred, which is what J1_AT below already assumed.
+#   header pegs ..... 2 x dia 2.0000 at (6.140, 0.000) and (51.860, 0.000),
+#                     i.e. 1.270 inboard of the outer pin columns, on the
+#                     header centre line. FUNCTION CANNOT DETERMINE: no
+#                     2x20 socket this project has a drawing for has locating
+#                     pegs there.
+#   connectors ...... 14 x dia 0.9500 through-holes in FOUR groups, all on a
+#                     2.500 mm pitch:
+#                       x 43.850, y -23.000/-20.500/-18.000/-15.500  (4)
+#                       x 48.650, y -23.000/-20.500/-18.000/-15.500  (4)
+#                       x 53.500, y -17.450/-14.950/-12.450          (3)
+#                       x 58.300, y -17.450/-14.950/-12.450          (3)
+#                     The 2.500 pitch and the 0.950 hole are the JST XH/EH
+#                     signature (eXH 'dia 1' at 2.5; eEH 'dia 0.9 +0.1/0' at
+#                     2.5 — 0.950 is exactly between them), and the community
+#                     HAT for the same robot says 'The connectors are XH
+#                     2.54mm' (github.com/blublear/open-duck-mini-hat README,
+#                     fetched 2026-09-02). What is NOT determinable is the
+#                     4.800 mm spacing between the two columns of each pair:
+#                     it is too tight for two same-side vertical JST headers
+#                     (B*B-XH-A body 5.75 deep, B3B-EH-A housing 10.0 long),
+#                     and no dual-row JST or Molex family with a 2.5 x 4.8
+#                     grid could be found. Best-supported reading: one fitted
+#                     header per pair plus a duplicate solder-only row at
+#                     4.800 mm, i.e. 'connector OR wires'. Second reading it
+#                     beat: two headers on opposite FACES of the board.
+#                     WHAT WOULD SETTLE IT: one photograph of a production
+#                     HAT's connector side.
+#   single hole ..... 1 x dia 1.0000 at (31.200, -11.900). CANNOT DETERMINE.
+#
+# THIS BOARD DOES NOT COPY THAT CONNECTOR PATTERN. Our connectors are placed
+# from the netlist's needs and each one's own JST drawing (J2 XH-2 battery,
+# J3 EH-3 bus, J5 SH-4 Stemma, J6/J7 PH speaker/mic), which is a different
+# claim from "this is where Pollen put them". The measurement is recorded so
+# the difference is visible, not hidden.
+POLLEN_MESH = {
+    "file": "reference/pollen-microduck-rl/assets/elec_rpi_robot_hat_pcb.stl",
+    "read": "2026-09-02",
+    "outline_mm": [65.000, 30.000],
+    "thickness_mm": 0.840,
+    "corner_r_mm": 3.5000,
+    "mount_dia_mm": 2.7000,
+    "mount_xy_mm": [[0.0, 0.0], [58.0, 0.0], [0.0, -23.0], [58.0, -23.0]],
+    "header_dia_mm": 1.0200,
+    "header_rows_y_mm": [1.270, -1.270],
+    "header_x_mm": [4.870 + 2.54 * i for i in range(20)],
+    "peg_dia_mm": 2.0000,
+    "peg_xy_mm": [[6.140, 0.0], [51.860, 0.0]],
+    "conn_dia_mm": 0.9500,
+    "conn_pitch_mm": 2.500,
+    "conn_column_gap_mm": 4.800,
+    "conn_groups": [
+        {"x": 43.850, "y": [-23.0, -20.5, -18.0, -15.5]},
+        {"x": 48.650, "y": [-23.0, -20.5, -18.0, -15.5]},
+        {"x": 53.500, "y": [-17.45, -14.95, -12.45]},
+        {"x": 58.300, "y": [-17.45, -14.95, -12.45]},
+    ],
+    "lone_hole": {"dia_mm": 1.0000, "xy_mm": [31.200, -11.900]},
+}
 
 # 40-pin header: 2 x 20 on 2.54 mm. Centre on the '+' datum the RPI-ZERO-V1_2
 # drawing marks 29 mm from the left hole centre on the 3.5 mm hole line:
@@ -483,6 +575,23 @@ def build(self_test=None, publish=True, verbose=True):
                          "and uses no signal on ([brief] p.6 table; nothing "
                          "in the overlays or robotd touches it)")
 
+    b.notes.append(
+        "POLLEN'S OWN HAT MESH WAS MEASURED (2026-09-02) and this board's "
+        "outline follows it: 65.000 x 30.000 mm, corner radius 3.5000 mm "
+        "fitted to 36 arc points about the mounting-hole centre (r min "
+        "3.5000, r max 3.5001) — NOT the Raspberry Pi Zero drawing's 3.0 mm, "
+        "which was what this file used until today. The mesh also carries the "
+        "full 2x20 header (40 x dia 1.0200 at y +/-1.270, x 4.870..53.130 on "
+        "2.540, field centre 29.000 = board centre), 4 x dia 2.7000 mounting "
+        "holes on the 58 x 23 pattern, 2 x dia 2.0000 pegs at (6.140, 0.000) "
+        "and (51.860, 0.000), 14 x dia 0.9500 connector holes on a 2.500 mm "
+        "pitch in four groups, and one dia 1.0000 hole at (31.200, -11.900). "
+        "The mesh's thickness is 0.840 mm; this board is built on the 1.6 mm "
+        "stackup, because 0.840 is not a thickness JLCPCB lists ('0.4/0.6/"
+        "0.8/1.0/1.2/1.6/2.0 mm') and a 0.84 mm visual mesh is more likely a "
+        "modelling simplification than a fab order. THE CONNECTOR HOLES ARE "
+        "NOT COPIED HERE — see POLLEN_MESH in this file for the full table "
+        "and for what about them is CANNOT DETERMINE.")
     b.text("microduck robot-hat", (32.5, 19.5), size=1.2)
     b.text("OUR RECONSTRUCTION - NOT POLLEN'S BOARD", (32.5, 17.5), size=1.0)
 
@@ -576,10 +685,17 @@ def build(self_test=None, publish=True, verbose=True):
     b.track("HAT_3V3", [c1.pad_xy(c1.fp.pad("1")),
                         (c1.pad_xy(c1.fp.pad("1"))[0], 23.3),
                         (41.0, 23.3)], width=0.4, layer="B.Cu")
-    p38 = c1.pad_xy(c1.fp.pad("38"))
+    # MEASURED DEFECT, fixed 2026-09-02 (lane D): this spine used to start at
+    # J1 pad 38 while carrying net i2s3/DIN. Pad 38 is I2S3_SDI = i2s3/DOUT
+    # (see `pins` above); the DIN pad is 40. The DRC caught it as three
+    # 0.000 mm clearance failures — 'track i2s3/DIN on F.Cu / pad J1.38' plus
+    # two codec pads the old diagonal approach cut across (U1.2 BCLK, U1.3
+    # WCLK). The track now leaves the RIGHT pad and comes into the codec's
+    # pin 4 horizontally, along pin 4's own y, so it never crosses 2 or 3.
+    p40 = c1.pad_xy(c1.fp.pad("40"))
     u1 = b.component("U1")
     din = u1.pad_xy(u1.fp.pad("4"))
-    b.track("i2s3/DIN", [p38, (p38[0], 29.0), (6.3, 29.0), (6.3, 22.6),
+    b.track("i2s3/DIN", [p40, (p40[0], 29.0), (6.3, 29.0), (6.3, din[1]),
                          din], width=0.15)
     # Pass budgets: one pass makes at most ONE join per net, so a budget is
     # the worst island count in the group plus slack — effort 30 across the
@@ -589,10 +705,20 @@ def build(self_test=None, publish=True, verbose=True):
     rails = ("HAT_3V3", "J5_3V3", "HAT_1V8")
     signals = [n for n in b.net_names()
                if n not in ("GND", "VBAT", "SERVO_V", "V5_HAT") + rails]
-    b.autoroute(nets=signals, effort=12, verbose=verbose)
-    b.autoroute(nets=list(rails), width=0.3, effort=22, via_cost=4.0,
+    # Budget raised 12 -> 20 (lane D, 2026-09-02): the run before this one
+    # left i2s3/BCLK, i2s3/WCLK and i2s3/DOUT unrouted, and those three are
+    # the longest signal joins on the board (J1's far row to the codec). One
+    # pass makes at most ONE join per net, so a budget below the worst island
+    # count cannot finish however long it runs.
+    b.autoroute(nets=signals, effort=20, verbose=verbose)
+    # The three rails were one call at effort 22, which HAT_3V3's 19 joins
+    # then had to share with two other nets' passes; split so each gets its
+    # own budget, HAT_3V3 the largest.
+    b.autoroute(nets=["HAT_3V3"], width=0.3, effort=26, via_cost=4.0,
                 verbose=verbose)
-    b.autoroute(nets=["GND"], effort=15, via_cost=3.0, verbose=verbose)
+    b.autoroute(nets=["J5_3V3", "HAT_1V8"], width=0.3, effort=10,
+                via_cost=4.0, verbose=verbose)
+    b.autoroute(nets=["GND"], effort=20, via_cost=3.0, verbose=verbose)
     b.pour("GND", "B.Cu")
 
     rep = check(b, verbose=verbose)
