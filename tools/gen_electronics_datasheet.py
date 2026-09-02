@@ -373,7 +373,8 @@ def build(out_path):
             ("bus", "§5 The servo bus"), ("registers", "§6 Control table"),
             ("power", "§7 Power tree"), ("mass", "§8 Mass budget"),
             ("boards", "§9 Custom boards"), ("pins", "§10 Pin map"),
-            ("software", "§11 Software"), ("open", "§12 What is not published")]) + "</nav>")
+            ("software", "§11 Software"), ("cables", "§12 Cables"),
+            ("open", "§13 What is not published")]) + "</nav>")
 
     # §1
     A('<section id="overview"><h2><span class="n">§1</span>Architecture at a glance</h2>')
@@ -495,15 +496,60 @@ def build(out_path):
     A("<p>%s</p>" % E(sw["note"]))
     A("</section>")
 
-    # §12 open
-    A('<section id="open"><h2><span class="n">§12</span>What is not published</h2>')
+    # §12 cables and connectors — read live out of the wiring lane's own file
+    cj = os.path.join(REPO, "wiring", "cables.json")
+    A('<section id="cables"><h2><span class="n">§12</span>Cables &amp; connectors</h2>')
+    if os.path.exists(cj):
+        W = json.load(open(cj))["record"]
+        cab = W["cables"]
+        n_len = sum(1 for x in cab if isinstance(x.get("cable_mm"), (int, float)))
+        n_cd = len(cab) - n_len
+        n_conn_cd = sum(1 for x in cab
+                        if "CANNOT DETERMINE" in (x.get("connector") or ""))
+        A('<p class="lede">The harness, read live out of <code>wiring/cables.json</code> — the '
+          'wiring lane measures every run off the placements and this page does not restate it. '
+          'A length is a ROUTE FLOOR through the crossed hinge origins plus the stated slack, not '
+          'a straight line.</p>')
+        rows = []
+        for x in cab:
+            ln = x.get("cable_mm")
+            rows.append([
+                '<span class="mono">%s</span>' % E(x["id"]),
+                "%s \u2192 %s" % (E(x.get("from", "?")), E(x.get("to", "?"))),
+                ('<span class="mono">%g</span>' % ln) if isinstance(ln, (int, float))
+                else '<span class="cd">CD</span>',
+                ('<span class="mono">%g</span>' % x["floor_mm"])
+                if isinstance(x.get("floor_mm"), (int, float)) else "—",
+                '<span class="tiny">%s</span>' % E(x.get("pins", "") or "—"),
+                '<span class="tiny">%s</span>' % E(x.get("connector", "") or "—"),
+                '<span class="mono">%s</span>' % E(str(x.get("qty", "—"))),
+            ])
+        A(table(["cable", "from \u2192 to", "cut mm", "floor mm", "pins", "connector", "qty"],
+                rows,
+                "Table 7. Every cable in the machine, generated from the wiring lane's measured "
+                "file. <b>CD</b> is CANNOT DETERMINE.", cls="data roster"))
+        A('<p>%d cables, %d with a length totalling %s mm, %d with no length at all, and %d whose '
+          'CONNECTOR is CANNOT DETERMINE. That last number is the one a shop feels: a cable you can '
+          'cut to length but cannot terminate is not a cable. Every one of them is a HAT-side or '
+          'module-side connector on a board nobody has published — the same wall as §13 row E1.</p>'
+          % (len(cab), n_len, W.get("total_length_mm", "?"), n_cd, n_conn_cd))
+        A('<p>Full schedule with the crossed joints and the per-hop voltage drop: '
+          '<a href="wiring/CABLES.html">wiring/CABLES.html</a>.</p>')
+    else:
+        A('<p class="lede"><span class="cd">CANNOT DETERMINE</span> — '
+          '<code>wiring/cables.json</code> is not in the repository, so no harness table could be '
+          'generated. It is produced by <code>wiring/measure.py</code>.</p>')
+    A("</section>")
+
+    # §13 open
+    A('<section id="open"><h2><span class="n">§13</span>What is not published</h2>')
     A('<p class="lede">Named honestly so no reader mistakes an inference for a fact. Each row is '
       'a measurement or a document away from resolution, and says which.</p>')
     rows = [[E(o["id"]), E(o["what"]),
              " ".join('<code>%s</code>' % E(w) for w in o["which"]),
              E(o["settles_it"])] for o in C["open_items"]]
     A(table(["#", "what is not known", "parts", "what settles it"], rows,
-            "Table 7. Open items, each with the thing that would close it."))
+            "Table 8. Open items, each with the thing that would close it."))
     A('<p>Per-part open items are listed under each component in §4 — %d of them across the '
       'roster. They are not repeated here; this table carries only what spans more than one part.</p>'
       % n_open)
