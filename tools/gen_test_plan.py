@@ -16,6 +16,17 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
 D = json.load(open(os.path.join(REPO, "spec", "test-plan.json")))
 
+def _load(rel):
+    """A measured artifact, or a loud failure. Nothing in this document is allowed to
+    fall back to a typed copy of a number that lives in a generated file."""
+    fp = os.path.join(REPO, rel)
+    if not os.path.exists(fp):
+        raise SystemExit("gen_test_plan: %s is missing; the gates that rest on it have no basis" % rel)
+    return json.load(open(fp))
+
+SIMREP  = _load("out/sim/report.json")
+RUNTIME = _load("out/sim-evidence/battery-runtime.json")
+
 E = lambda s: html.escape(str(s), quote=False)
 
 _CODE = re.compile(r"`([^`]+)`")
@@ -36,8 +47,11 @@ LIMP_FALL_TILT_Z     = -0.90         # robotd.toml [safety]
 FALL_GRAVITY_Z       = -0.50
 LIMP_TILT_DEG        = math.degrees(math.acos(-LIMP_FALL_TILT_Z))
 FALL_TILT_DEG        = math.degrees(math.acos(-FALL_GRAVITY_Z))
-SIM_WALK_M           = 0.7925        # out/sim/report.md walk_ours
-SIM_WALK_S           = 8.0
+_WALK                = SIMREP["runs"]["walk_ours"]      # read, never typed
+SIM_WALK_M           = _WALK["walked_m"]
+SIM_WALK_S           = _WALK["seconds"]
+SIM_WALK_TILT        = _WALK["max_tilt_deg"]
+SIM_WALK_POLICY      = _WALK["policy_file"]
 GATE_FRACTION        = 0.75          # decision of the plan; stated as such
 GATE_WALK_M          = round(SIM_WALK_M * GATE_FRACTION, 3)
 STANDBY_MA           = 17            # E1 "Standby Current | 17 [mA]"
@@ -45,6 +59,18 @@ N_SERVOS             = 15
 STANDBY_TOTAL_A      = N_SERVOS * STANDBY_MA / 1000.0
 STALL_5V_A           = 1.47
 STALL_TOTAL_A        = N_SERVOS * STALL_5V_A
+
+SECNUM = {sec["id"]: i + 2 for i, sec in enumerate(D["sections"])}
+TAIL   = [("eol", "End-of-line checklist"), ("logs", "Logs"),
+          ("open", "What this plan cannot test"), ("sources", "Sources")]
+TAILNUM = {sid: len(D["sections"]) + 2 + i for i, (sid, _) in enumerate(TAIL)}
+
+_tbl = [0]
+def TN():
+    """Table numbers count themselves, in the order the document renders them. Adding a
+    section must not silently renumber a caption by hand."""
+    _tbl[0] += 1
+    return _tbl[0]
 
 def rad2count(r):  return ZERO_COUNT + r * COUNT_PER_RAD
 def rad2deg(r):    return math.degrees(r)
@@ -114,6 +140,24 @@ def reg_table():
              M(r["write"]), M(r["means"]), M(r["why"])))
     return "\n".join(rows)
 
+def padmap_table():
+    return "\n".join('<tr><td><b>%s</b></td><td>%s</td></tr>' % (E(a), M(b))
+                     for a, b in D["padmap"]["rows"])
+
+def runtime_table():
+    """The endurance expectation, read straight out of the lane-F2 study. Nothing here is
+    retyped: change the study and this table changes with it."""
+    rt = RUNTIME["outputs"]["runtime_table"]
+    rows = []
+    for i, w in enumerate(rt["walking"]["rows"]):
+        st_ = rt["standing"]["rows"][i]
+        idl = rt["idle_torque_off"]["rows"][i]
+        rows.append('<tr><td class="n">%.1f</td><td class="n">%.4f</td><td class="n">%.1f</td>'
+                    '<td class="n">%.1f</td><td class="n">%.1f</td><td class="n">%.4f</td></tr>'
+                    % (w["compute_and_sensors_W"], w["total_W"], w["runtime_min"],
+                       st_["runtime_min"], idl["runtime_min"], w["pack_current_A_at_7.4V"]))
+    return "\n".join(rows)
+
 def test_block(t):
     steps = []
     for i, s in enumerate(t["steps"], 1):
@@ -162,16 +206,16 @@ def sections_html():
   <h2><span class="n">%s</span>%s</h2>
   <p class="lede">Nothing on this list is optional for the test it serves. Where an instrument's
   resolution is named, it is because a gate below is stated to that resolution.</p>
-  <div class="tw"><table class="data"><caption>Table 2. Equipment, and the gate each one serves.</caption>
+  <div class="tw"><table class="data"><caption>Table %d. Equipment, and the gate each one serves.</caption>
   <thead><tr><th>Instrument or fixture</th><th>Used by</th><th>Why this and not something looser</th><th>Src</th></tr></thead>
   <tbody>%s</tbody></table></div>
-</section>""" % (s["id"], s["num"], E(s["title"]), equip_table()))
+</section>""" % (s["id"], SECNUM[s["id"]], E(s["title"]), TN(), equip_table()))
             continue
         extra = ""
         if s["id"] == "electrical":
             extra = """
-<h3 class="sub">3.1 Rails — what to measure, where, and against what</h3>
-<div class="tw"><table class="data"><caption>Table 3. Every supply a fitted part needs, at the pin that needs it.
+<h3 class="sub">%d.1 Rails — what to measure, where, and against what</h3>
+<div class="tw"><table class="data"><caption>Table %d. Every supply a fitted part needs, at the pin that needs it.
 Bands are tightest-part-wins per rail. A band that reads CANNOT DETERMINE is not a pass.</caption>
 <thead><tr><th>Net</th><th>Probe point</th><th>Nominal</th><th>Acceptance band</th><th>Basis</th><th>Src</th></tr></thead>
 <tbody>%s</tbody></table></div>
@@ -180,16 +224,16 @@ Fifteen servos at the vendor's standby current draw <b>%.3f&nbsp;A</b> (15&nbsp;
 Fifteen servos stalled at 5.0&nbsp;V draw <b>%.2f&nbsp;A</b> (15&nbsp;&times;&nbsp;%.2f&nbsp;A) — a real number the vendor's
 own stall row supports, and nothing in any source says what the pack or the HAT path can deliver.
 Above 6.0&nbsp;V no vendor stall figure exists at all, which is exactly why EB-04 comes before EB-07.</div>
-""" % (rails_table(), STANDBY_TOTAL_A, STANDBY_MA, STALL_TOTAL_A, STALL_5V_A)
+""" % (SECNUM["electrical"], TN(), rails_table(), STANDBY_TOTAL_A, STANDBY_MA, STALL_TOTAL_A, STALL_5V_A)
         if s["id"] == "servo":
             extra = """
-<h3 class="sub">4.1 The ID map, and the home pose in counts</h3>
+<h3 class="sub">%d.1 The ID map, and the home pose in counts</h3>
 <p>Encoder counts are computed here, not typed:
 <code class="formula">count = %d + rad &times; %d / (2&pi;) = %d + rad &times; %.6f</code>,
 from the vendor's 4096&nbsp;pulse/rev resolution and <code>bus.rs</code>'s 2048 = 0&nbsp;rad.
 One count is <b>%.4f&nbsp;degrees</b>, so the &plusmn;%.1f&nbsp;degree calibration tolerance is
 <b>&plusmn;%d&nbsp;counts</b>.</p>
-<div class="tw"><table class="data idmap"><caption>Table 4. Servo ID to joint, the joint's MJCF range, and the home pose
+<div class="tw"><table class="data idmap"><caption>Table %d. Servo ID to joint, the joint's MJCF range, and the home pose
 in radians, degrees and encoder counts. Home values are <code>DEFAULT_POSITION</code> from <code>model.rs:39-55</code>;
 ranges are the MJCF limits read back through our own simulation.</caption>
 <thead><tr><th>ID</th><th>Joint</th><th>Body carrying the servo</th>
@@ -199,27 +243,28 @@ ranges are the MJCF limits read back through our own simulation.</caption>
 sixteenth device and is <code>sync_read</code> first on every tick. It has no joint, no range and no home pose —
 but SV-03 fails without it.</div>
 
-<h3 class="sub">4.2 The register set</h3>
+<h3 class="sub">%d.2 The register set</h3>
 <p>Every value below is quoted from the vendor control table in <code>ce-parts/xl330-m288-t/electrical.chip.json</code>.
 <b>EEPROM writes are refused unless Torque&nbsp;Enable(64) is 0</b> — the vendor's own rule, and the reason it is the
 first row of every write sequence.</p>
-<div class="tw"><table class="data reg"><caption>Table 5. The XL330-M288-T registers this plan touches.</caption>
+<div class="tw"><table class="data reg"><caption>Table %d. The XL330-M288-T registers this plan touches.</caption>
 <thead><tr><th>Addr</th><th>Bytes</th><th>Name</th><th>Area</th><th>Vendor initial</th><th>We write</th><th>Meaning</th><th>Why</th></tr></thead>
 <tbody>%s</tbody></table></div>
-""" % (ZERO_COUNT, RESOLUTION_PULSE_REV, ZERO_COUNT, COUNT_PER_RAD,
-       DEG_PER_COUNT, TOL_DEG, TOL_COUNT, idmap_table(), reg_table())
+""" % (SECNUM["servo"], ZERO_COUNT, RESOLUTION_PULSE_REV, ZERO_COUNT, COUNT_PER_RAD,
+       DEG_PER_COUNT, TOL_DEG, TOL_COUNT, TN(), idmap_table(),
+       SECNUM["servo"], TN(), reg_table())
         if s["id"] == "walk":
             sr = D["surface"]
             rows = "".join('<tr><td><b>%s</b></td><td>%s</td><td>%s</td><td class="sk">%s</td></tr>'
                            % (E(a), M(b), M(c), E(d)) for a, b, c, d in sr["rows"])
             extra = """
-<h3 class="sub">%s</h3>
-<div class="tw"><table class="data"><caption>Table 6. The acceptance surface.</caption>
+<h3 class="sub">%d.1 %s</h3>
+<div class="tw"><table class="data"><caption>Table %d. The acceptance surface.</caption>
 <thead><tr><th>Property</th><th>Requirement</th><th>Why</th><th>Src</th></tr></thead>
 <tbody>%s</tbody></table></div>
 <div class="note"><b>Where the walk gate comes from.</b>
-Our MuJoCo run of Pollen's <code>alpha_walking.onnx</code> walked <b>%.4f&nbsp;m in %.1f&nbsp;s</b> at a commanded
-0.25&nbsp;m/s, with a maximum trunk tilt of 4.11&nbsp;degrees and no fall — and the stock-mesh and swapped-mesh
+Our MuJoCo run of Pollen's <code>%s</code> walked <b>%.4f&nbsp;m in %.1f&nbsp;s</b> at a commanded
+0.25&nbsp;m/s, with a maximum trunk tilt of <b>%.2f&nbsp;degrees</b> and no fall — and the stock-mesh and swapped-mesh
 models produced bit-identical trajectories, so that figure is Pollen's physics, not ours.
 The acceptance gate is <b>%.3f&nbsp;m</b>, which is <b>%.0f&nbsp;%%</b> of it. <b>That fraction is a decision of this
 plan and not a measurement of anything</b>: no real-robot walk distance exists in this repository or in Pollen's
@@ -227,8 +272,47 @@ published material. The tilt gate, by contrast, is derived —
 <code class="formula">acos(%.2f) = %.3f&nbsp;degrees</code> is <code>limp_fall_tilt_z</code>, the tilt at which
 robotd itself decides a fall has started; the fall <i>report</i> threshold
 <code>fall_gravity_z = %.1f</code> is <code class="formula">acos(%.1f) = %.3f&nbsp;degrees</code>.</div>
-""" % (E(sr["title"]), rows, SIM_WALK_M, SIM_WALK_S, GATE_WALK_M, GATE_FRACTION * 100,
+""" % (SECNUM["walk"], E(sr["title"]), TN(), rows,
+       E(SIM_WALK_POLICY), SIM_WALK_M, SIM_WALK_S, SIM_WALK_TILT, GATE_WALK_M, GATE_FRACTION * 100,
        -LIMP_FALL_TILT_Z, LIMP_TILT_DEG, FALL_GRAVITY_Z, -FALL_GRAVITY_Z, FALL_TILT_DEG)
+        if s["id"] == "radios":
+            pm = D["padmap"]
+            extra = """
+<h3 class="sub">%d.1 %s</h3>
+<div class="tw"><table class="data"><caption>Table %d. %s</caption>
+<thead><tr><th>Control</th><th>What it does</th></tr></thead>
+<tbody>%s</tbody></table></div>
+""" % (SECNUM["radios"], E(pm["title"]), TN(), M(pm["note"]), padmap_table())
+        if s["id"] == "endurance":
+            rt = RUNTIME["outputs"]["runtime_table"]
+            pc = RUNTIME["outputs"]["pollen_claim"]
+            wh = RUNTIME["inputs"]["pack"]["Wh"]
+            w_lo = rt["walking"]["rows"][-1]["runtime_min"]
+            w_hi = rt["walking"]["rows"][0]["runtime_min"]
+            extra = """
+<h3 class="sub">%d.1 What EN-01 should find, and the number it settles</h3>
+<div class="tw"><table class="data"><caption>Table %d. Runtime against compute draw, from
+<code>out/sim-evidence/battery-runtime.json</code> &mdash; the measured MuJoCo torque and speed profile
+through ROBOTIS's published XL330 rows, on a %.1f&nbsp;Wh pack. The compute-and-sensor column is SWEPT,
+not known: no vendor states the Radxa ZERO&nbsp;3W's consumption, so EN-01 is what picks the row.</caption>
+<thead><tr><th>compute + sensors&nbsp;W</th><th>total&nbsp;W walking</th><th>walking&nbsp;min</th>
+<th>standing&nbsp;min</th><th>idle, torque off&nbsp;min</th><th>pack&nbsp;A at 7.4&nbsp;V</th></tr></thead>
+<tbody>%s</tbody></table></div>
+<div class="note"><b>Our model and Pollen's claim disagree by a factor of about two, and EN-01 is the
+measurement that says which is wrong.</b> The press kit says <b>~%.1f&nbsp;h</b>; a %.1f&nbsp;Wh pack over
+that hour is an average of <b>%.1f&nbsp;W</b> for the whole machine. This model puts walking servo draw at
+<b>%.4f&nbsp;W</b>, which leaves <b>%.4f&nbsp;W</b> for everything else &mdash; %.1f&nbsp;%% of Radxa's entire
+5&nbsp;V/2&nbsp;A adapter rating for the board, which is implausible for compute alone. So the missing power
+is more likely the XL330's unpublished no-load current (set to zero here, and multiplied by fifteen), PWM-stage
+loss (taken as zero), and pack energy below the 6.6&nbsp;V cut-off that is never delivered &mdash; or the
+published hour is a mixed-use hour rather than an hour of walking. Our band for continuous walking is
+<b>%.1f&ndash;%.1f&nbsp;min</b> across the compute sweep, and every figure in it is an UPPER bound.
+One ammeter in the pack lead, plus <code>Present&nbsp;Current(126)</code> summed off the bus, separates the
+servo half from the board half and closes all of it.</div>
+""" % (SECNUM["endurance"], TN(), wh, runtime_table(),
+       pc["claimed_h"], wh, pc["implied_total_average_W"],
+       pc["measured_servo_average_W_walking"], pc["implied_compute_and_sensors_W"],
+       100.0 * pc["implied_compute_and_sensors_W"] / 10.0, w_lo, w_hi)
         tests = "".join(test_block(t) for t in s["tests"])
         out.append("""
 <section id="%s">
@@ -236,7 +320,7 @@ robotd itself decides a fall has started; the fall <i>report</i> threshold
   <p class="lede">%s</p>
   %s
   %s
-</section>""" % (s["id"], s["num"], E(s["title"]), M(s.get("lede", "")), extra, tests))
+</section>""" % (s["id"], SECNUM[s["id"]], E(s["title"]), M(s.get("lede", "")), extra, tests))
     return "\n".join(out)
 
 def eol_table():
@@ -258,8 +342,30 @@ def sources_table():
     return "\n".join('<tr><td><code>%s</code></td><td>%s</td><td class="loc">%s</td></tr>'
                      % (E(k), M(v["label"]), M(v["loc"])) for k, v in D["sources"].items())
 
-TOC = "".join('<a href="#%s"><span class="tn">%s</span>%s</a>' % (s["id"], s["num"], E(s["title"]))
-              for s in D["sections"])
+TOC = "".join('<a href="#%s"><span class="tn">%s</span>%s</a>' % (sec["id"], SECNUM[sec["id"]], E(sec["title"]))
+              for sec in D["sections"])
+TOC += "".join('<a href="#%s"><span class="tn">%s</span>%s</a>' % (sid, TAILNUM[sid], E(title))
+               for sid, title in TAIL)
+
+# 1.2, resolved against the sections that exist rather than typed
+ORDER = "".join("<li><b>Section %d &mdash; %s.</b> %s</li>"
+                % (SECNUM[sid], E([x for x in D["sections"] if x["id"] == sid][0]["title"]).lower(), M(text))
+                for sid, text in D["order"])
+
+def resolved_html():
+    """What was open in an earlier revision and is now settled, with the evidence that
+    settled it. A question that stops appearing looks like a question nobody asked."""
+    out = []
+    for r in D.get("resolved", []):
+        out.append("""
+<div class="resolved">
+  <h4>%s</h4>
+  <p><span class="k">Was</span>%s</p>
+  <p><span class="k">Now</span>%s</p>
+  <p><span class="k">So</span>%s</p>
+  %s
+</div>""" % (M(r["q"]), M(r["was"]), M(r["now"]), M(r["consequence"]), srcline(r.get("src", []))))
+    return "".join(out)
 
 DOC = D["doc"]
 HTML = f"""<!doctype html>
@@ -318,6 +424,11 @@ HTML = f"""<!doctype html>
   section>h2 .n{{font-family:var(--mono);font-weight:600;color:var(--accent);font-size:18px;padding-right:14px}}
   .statbar .stat{{padding:12px 18px 12px 0;margin-right:14px}}
   .statbar .stat b{{font-size:20px}}
+  .resolved{{border-left:2px solid var(--ready);background:var(--figbg);padding:10px 16px;margin:14px 0}}
+  .resolved h4{{font-size:14.5px;margin:0 0 6px}}
+  .resolved p{{font-size:13px;margin:5px 0;max-width:52em}}
+  .resolved .k{{display:inline-block;min-width:44px;font-family:var(--sans);font-size:10.5px;
+               letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);font-weight:600;margin-right:8px}}
   @media(max-width:680px){{.meta{{flex-direction:column;gap:2px}}}}
 </style>
 </head>
@@ -344,7 +455,7 @@ HTML = f"""<!doctype html>
   <div class="stat"><b>{len(D['sources'])}</b><span>cited sources</span></div>
 </div>
 
-<nav class="toc">{TOC}<a href="#eol"><span class="tn">8</span>End-of-line checklist</a><a href="#logs"><span class="tn">9</span>Logs</a><a href="#open"><span class="tn">10</span>What this plan cannot test</a><a href="#sources"><span class="tn">11</span>Sources</a></nav>
+<nav class="toc">{TOC}</nav>
 
 <section id="scope">
   <h2><span class="n">1</span>Scope, verdicts and order</h2>
@@ -368,16 +479,7 @@ HTML = f"""<!doctype html>
   datasheet, from Pollen's own source, from our simulation, or from a decision of this plan.</div>
 
   <h3 class="sub">1.2 Order, and why it is this order</h3>
-  <ol class="steps">
-    <li><b>Section 3 &mdash; electrical.</b> A meter before a battery. The pack is not fitted until the rails
-    have been surveyed on a current-limited bench supply.</li>
-    <li><b>Section 4 &mdash; servo identity.</b> Fifteen servos share one wire and every unassigned one answers
-    to ID&nbsp;1, so identity is assigned one servo at a time, off the bus.</li>
-    <li><b>Section 5 &mdash; sensors.</b> Independent of motion; run before anything moves so a sensor fault is
-    never diagnosed through a gait.</li>
-    <li><b>Section 6 &mdash; control loop.</b> The health verdict is the gate every later test rests on.</li>
-    <li><b>Section 7 &mdash; walk.</b> Last, on the floor, with the robot off its stand for the first time.</li>
-  </ol>
+  <ol class="steps">{ORDER}</ol>
   <div class="note"><b>The stand is not optional.</b> <code>robotctl robot init</code> powers the joints and
   ramps to the home pose over about two seconds &mdash; <b>it moves every joint</b>. Pollen's own cheat sheet
   says it plainly: have the robot on its stand. Every test before section 7 runs with both feet clear
@@ -387,43 +489,45 @@ HTML = f"""<!doctype html>
 {sections_html()}
 
 <section id="eol">
-  <h2><span class="n">8</span>End-of-line checklist</h2>
-  <p class="lede">One line per gate, in test order. A unit ships when every box is ticked and no row
-  reads CANNOT DETERMINE. Rows that are permanently CANNOT DETERMINE &mdash; NFC, the REC indicator
-  &mdash; are deliberately <b>not</b> on this list, because a checklist that contains an unanswerable
-  question trains people to tick it anyway; they live in section&nbsp;10 instead.</p>
-  <div class="tw"><table class="data"><caption>Table 7. End-of-line gates, {len(D['eol'])} of them.</caption>
+  <h2><span class="n">{TAILNUM["eol"]}</span>End-of-line checklist</h2>
+  <p class="lede">{M(D["eol_note"])}</p>
+  <div class="tw"><table class="data"><caption>Table {TN()}. End-of-line gates, {len(D['eol'])} of them.</caption>
   <thead><tr><th></th><th>Test</th><th>Gate</th><th>Instrument</th></tr></thead>
   <tbody>{eol_table()}</tbody></table></div>
 </section>
 
 <section id="logs">
-  <h2><span class="n">9</span>The log a unit leaves behind</h2>
+  <h2><span class="n">{TAILNUM["logs"]}</span>The log a unit leaves behind</h2>
   <p class="lede">A unit's record is a directory, and it is the only thing that survives the unit leaving
   the bench. Two of these files outlive a power cut and the rest do not &mdash; copy the volatile ones
   before the next boot.</p>
-  <div class="tw"><table class="data"><caption>Table 8. What is kept, and why it is kept.</caption>
+  <div class="tw"><table class="data"><caption>Table {TN()}. What is kept, and why it is kept.</caption>
   <thead><tr><th>Path</th><th>What it is</th><th>Src</th></tr></thead>
   <tbody>{logs_table()}</tbody></table></div>
 </section>
 
 <section id="open">
-  <h2><span class="n">10</span>What this plan cannot test, and what would change that</h2>
+  <h2><span class="n">{TAILNUM["open"]}</span>What this plan cannot test, and what would change that</h2>
   <p class="lede">These {n_open} questions are open because a fact is missing, not because a test is
   missing. Each names the test that would answer it and exactly what has to exist first. Most are
   answered the first time a real unit is put on a bench &mdash; which is the point of writing them
   down here rather than leaving them out. The rest need a teardown or a Pollen release, and say so.</p>
-  <div class="tw"><table class="data"><caption>Table 9. Open questions, each with the test that closes it.</caption>
+  <div class="tw"><table class="data"><caption>Table {TN()}. Open questions, each with the test that closes it.</caption>
   <thead><tr><th>Question</th><th>Test</th><th>Status today</th><th>What settles it</th></tr></thead>
   <tbody>{open_table()}</tbody></table></div>
+
+  <h3 class="sub">{TAILNUM["open"]}.1 What was open in Rev&nbsp;A and is settled now</h3>
+  <p>A question that simply stops appearing looks like a question nobody asked. These were open, and
+  each one is closed here by a source rather than by a decision.</p>
+  {resolved_html()}
 </section>
 
 <section id="sources">
-  <h2><span class="n">11</span>Sources</h2>
+  <h2><span class="n">{TAILNUM["sources"]}</span>Sources</h2>
   <p class="lede">Pollen Robotics' firmware and software are Apache-2.0 and are read here line by line;
   their PCBs are not published. Vendor datasheets are stored in the shelf with their provenance.
   Everything below is either in this repository or was fetched on the date named.</p>
-  <div class="tw"><table class="data"><caption>Table 10. Every source cited by a gate in this document.</caption>
+  <div class="tw"><table class="data"><caption>Table {TN()}. Every source cited by a gate in this document.</caption>
   <thead><tr><th>Key</th><th>What</th><th>Where</th></tr></thead>
   <tbody>{sources_table()}</tbody></table></div>
 </section>

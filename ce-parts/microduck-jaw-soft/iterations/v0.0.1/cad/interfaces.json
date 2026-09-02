@@ -1,11 +1,37 @@
 {
- "$triad": 1,
- "kind": "interfaces",
- "generated_by": "cecad.meshshelve",
- "record": {
-  "ref": "part:microduck-jaw-soft@v0.0.1",
-  "frame": "the published mesh's own frame (mm after x1000); MJCF geom pos/quat place it",
-  "units": "mm"
- },
- "interfaces": []
+  "$triad": 1,
+  "kind": "interfaces",
+  "generated_by": "cecad.meshshelve",
+  "record": {
+    "ref": "part:microduck-jaw-soft@v0.0.1",
+    "frame": "Pollen's mesh frame for jaw_soft.stl: bbox x -43.8369..43.8369, y -57.7353..-25.5013, z -11.1477..-2.7101 (87.6737 x 32.2339 x 8.4376 mm), sharing the jaw's frame. Kept so the MJCF geom pos/quat (body jaw_soft) place it directly.",
+    "units": "mm",
+    "interfaces_live_at": "the top-level `interfaces` key, per ce-parts/SCHEMA.md v2.4 (b) which cites `interfaces[0]`. The duplicate `record.interfaces` was removed 2026-09-02 (lane T) after `bin/triad check` FAILed the folder for carrying two spellings of one fact."
+  },
+  "interfaces": [
+    {
+      "name": "jaw_underside",
+      "frame": {
+        "origin_mm": [
+          0.0,
+          -41.6183,
+          -2.7101
+        ],
+        "z_axis": [
+          0,
+          0,
+          1
+        ],
+        "x_axis": [
+          1,
+          0,
+          0
+        ]
+      },
+      "accepts": [],
+      "role": "overmould_face",
+      "what": "the +z face of the soft lower beak, at z -2.7101 — the mesh's own maximum, and the face that meets part:microduck-jaw. Frame origin is the bbox centre in x and y on that face. bbox x -43.8369..43.8369, y -57.7353..-25.5013, z -11.1477..-2.7101 (87.6737 x 32.2339 x 8.4376 mm). MEASURED ABSENCE, which is the whole content of this row: cecad.meshfeatures.cylinders over all 6726 triangles finds ZERO holes, ZERO bosses and ZERO partial arcs, so this part has no fastener, no fit and no keyed feature to anchor on, and none is invented. Its placement relative to the jaw is measured instead: same body, same quat, world origin 0.1000 mm below the jaw's in z ([26.0996, 0, 231.0146] against [26.1, 0, 231.1146]). `accepts` is empty because there is no measured joint here to name a connection for.",
+      "source": "MEASURED off Pollen's jaw_soft.stl by cecad.meshfeatures.cylinders and the mesh bbox, frozen 2026-09-02 by tools/measure_mesh_features.py into out/laneT/features/jaw_soft.json (lane T); the MJCF places this mesh in body 'jaw_soft' at world [26.0996, -0.0, 231.0146] mm, quat (wxyz) [0.707107, 0.0, 0.0, 0.707107] (ce-assemblies/microduck/current/placements.json)"
+    }
+  ]
 }

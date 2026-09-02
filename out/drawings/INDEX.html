@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mechanical drawings — index</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opt_sz,wght@8..60,400;8..60,600;8..60,700&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../../tools/doc.css">
+<style>
+  .sheet{border:1px solid var(--hair);background:var(--card);padding:16px 18px;margin:18px 0}
+  .sheethead{display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:wrap}
+  .sheethead h3{margin:0;font-size:17px;font-family:var(--mono);font-weight:500}
+  .kindtag{font-family:var(--sans);font-size:10.5px;font-weight:600;letter-spacing:.07em;
+           text-transform:uppercase;color:var(--ink-2);border:1px solid var(--hair);padding:2px 7px;margin-left:8px}
+  .sheet figure{margin:12px 0;padding:6px;background:#fff}
+  .sheet figure img{width:100%;background:#fff;border:1px solid var(--hair)}
+  .sheet table.data th[scope=row]{width:34%;text-transform:none;letter-spacing:0;font-size:12.5px;
+           border-top:none;border-bottom:1px solid var(--hair);white-space:normal;vertical-align:top}
+  .sheet table.data td{font-family:var(--mono);font-size:12px}
+  .files{font-family:var(--sans);font-size:12.5px;margin:6px 0 0}
+  .paircap{font-family:var(--sans);font-size:12.5px;color:var(--ink-2);margin:6px 0 0}
+  .note{font-size:13.5px;color:var(--ink-2);max-width:46em}
+  td.dash,.dash{color:#b3aea4}
+  .statbar{display:flex;flex-wrap:wrap;gap:0;border-bottom:1px solid var(--hair);margin:8px 0 2px}
+  .stat{padding:12px 26px 12px 0;margin-right:22px}
+  .stat b{display:block;font-weight:700;font-size:22px;font-variant-numeric:tabular-nums}
+  .stat span{font-family:var(--sans);font-size:12px;color:var(--ink-2)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<p class="backlink"><a href="../../RELEASE.html">← Release dossier</a> ·
+<a href="../../docs/MANUFACTURING-REQUIREMENTS.md">the standard these sheets are held to</a></p>
+
+<header class="hero">
+  <p class="eyebrow">Microduck reverse-engineering · manufacturing files</p>
+  <h1>Mechanical drawings — index</h1>
+  <p class="sub">Every part on the shelf, and the document it carries: a dimensioned shop
+  drawing where a parametric solid exists, a print sheet where the geometry is a published
+  mesh, and a named reason where there is neither. Every number here was measured off the
+  solid under the FreeCAD kernel by <code>tools/draw_part.py</code> and read back off the
+  finished SVG by <code>verify_sheet</code>; this page copies, and measures nothing of its
+  own.</p>
+  <div class="rev">
+    <span>MD-DWG-000 · index</span><span>2026-09-02 22:49:30</span>
+    <span>data: out/drawings/index.json</span>
+    <span>generator: tools/gen_drawings_index.py</span>
+    <span>standard: docs/MANUFACTURING-REQUIREMENTS.md A</span>
+  </div>
+</header>
+
+<div class="statbar">
+  <div class="stat"><b>54</b><span>parts on the shelf</span></div>
+  <div class="stat"><b>1</b><span>dimensioned drawings</span></div>
+  <div class="stat"><b>0</b><span>print sheets</span></div>
+  <div class="stat"><b>1</b><span>verify PASS</span></div>
+  <div class="stat"><b>0</b><span>verify FAIL</span></div>
+  <div class="stat"><b>43</b><span>cannot determine</span></div>
+</div>
+
+<nav class="toc">
+  <a href="#how">1 What a sheet must carry</a>
+  <a href="#dimensioned-drawings">2 Dimensioned drawings</a>
+  <a href="#print-sheets">3 Print sheets</a>
+  <a href="#no-sheet">4 Parts with no sheet</a>
+</nav>
+
+<section id="how">
+  <h2><span class="n">1</span>What a sheet must carry, and how it is checked</h2>
+  <p class="lede">The acceptance standard is <code>docs/MANUFACTURING-REQUIREMENTS.md</code> §A,
+  which is Leif's own review of the first generated files. Each sheet below carries, measured
+  off the solid: a third-angle orthographic set, an isometric reference view, a shaded
+  reference render of the part, every radius and fillet dimensioned with a leader, detail
+  callouts at a larger stated scale on the dense regions, a hole table, a section with wall
+  dimensions and the cutting-plane line on a view that can show it, a print/DFM note block
+  with the tolerance basis, the surface finish, and the title block.</p>
+  <div class="grid2">
+    <div class="card"><h3>Every number is read back</h3><p><code>verify_sheet</code> parses the
+    finished SVG and checks the stated scale, the title-block bbox and volume, both overall
+    dimensions on every view, every hole-table row against <code>cecad.inspect</code>, every
+    printed radius against the solid's own arcs, the detail rings, the isometric, the DFM
+    block, that no two labels overlap and that nothing runs outside the frame.</p></div>
+    <div class="card"><h3>A mesh gets no drawing</h3><p>§A.3: a vendor mesh part gets no
+    dimensioned drawing, because every dimension read off a decimated triangulation is a
+    dimension of the decimation. It gets a print sheet instead — envelope to 4 dp, mass,
+    orientation, the STL path and its sha256, and the refusal printed on the sheet.</p></div>
+    <div class="card"><h3>The tolerance basis is stated, not guessed</h3><p>Every Bambu
+    machine on this farm records <code>tolerance_mm: null</code> with the cite “no coupon
+    printed and measured on this machine”, and Bambu Lab's own H2D Pro specification carries
+    no dimensional-accuracy line. The sheets say so, and print the two cited outsourced
+    figures beside it. Sources: <code>tools/drawing_facts.py</code>.</p></div>
+    <div class="card"><h3>Two generator defects, fixed and tested</h3><p>The generator merged
+    coaxial holes across air into a phantom counterbore, and its only wall figure was a scan
+    of one cutting plane. Both are fixed in <code>ce-cad</code> with
+    <code>tests/test_cbore_and_wall.py</code>, which fails on the old code and passes on the
+    new.</p></div>
+  </div>
+</section>
+
+<section id="dimensioned-drawings"><h2><span class="n">2</span>Dimensioned drawings</h2>
+<p class="lede">Parts whose <code>cad/part.py</code> constructs a parametric solid.</p>
+<article class="sheet" id="microduck-trunk-base">
+<div class="sheethead"><h3>microduck-trunk-base</h3><div><span class="chip pass">PASS</span> <span class="kindtag">drawing</span></div></div>
+<p class="paircap">Microduck trunk base plate — the &#x27;trunk_base&#x27; body mesh of Pollen&#x27;s MJCF: 57 x 36 x 1 mm chassis plate with two Ø19 hip-yaw holes 35 mm apart, 4 x Ø2.3 M2 clearance holes, a 6 x 12 cable slot and four Ø1.8 locating pins</p>
+<figure><a href="microduck-trunk-base/microduck-trunk-base.svg"><img src="microduck-trunk-base/microduck-trunk-base-sheet.png" alt="microduck-trunk-base sheet"></a><figcaption>The finished sheet, photographed in headless Chrome off the SVG on disk and read back — not a preview of what the generator meant to draw.</figcaption></figure>
+<div class="tablewrap"><table class="data"><tbody>
+<tr><th scope="row">Sheet</th><td>A1 at 5:1, 9 attempt(s)</td></tr>
+<tr><th scope="row">Views</th><td>top, front, SECA, ISO, DETA, DETB, DETC</td></tr>
+<tr><th scope="row">Detail callouts</th><td>2x O2.30 cluster; 2x O2.30 cluster; thinnest wall 1.00 mm</td></tr>
+<tr><th scope="row">Envelope (mm)</th><td>57.0000 × 36.0000 × 3.0000</td></tr>
+<tr><th scope="row">Holes measured</th><td>6 (0 counterbore)</td></tr>
+<tr><th scope="row">Ø on the solid</th><td>2.300, 19.000</td></tr>
+<tr><th scope="row">Slots / grooves</th><td>0 / 0</td></tr>
+<tr><th scope="row">Radii on the solid</th><td>R0.800, R0.900, R1.150, R9.500</td></tr>
+<tr><th scope="row">Thinnest wall, whole solid</th><td>1.0000 mm at (-27.402, -6.099, 16.500), 1.409 mm sample spacing</td></tr>
+<tr><th scope="row">verify_sheet</th><td>True (independent read-back: True)</td></tr>
+<tr><th scope="row">component.json origin</th><td>generated</td></tr>
+<tr><th scope="row">component.json verdict</th><td>PASS</td></tr>
+<tr><th scope="row">Material / process</th><td>PLA / FDM</td></tr>
+</tbody></table></div>
+<p class="files"><a href="microduck-trunk-base/microduck-trunk-base.svg">SVG</a> · <a href="microduck-trunk-base/microduck-trunk-base.dxf">DXF</a> · <a href="microduck-trunk-base/microduck-trunk-base.pdf">PDF</a> · <a href="microduck-trunk-base/microduck-trunk-base-ref.png">reference render</a></p>
+</article>
+</section>
+
+<section id="print-sheets"><h2><span class="n">3</span>Print sheets</h2>
+<p class="lede">Parts backed by a published mesh. No dimension can be read off a decimated triangulation, so these carry what is true of a mesh and say what is missing.</p>
+<p class="note">No print sheet has been generated.</p>
+</section>
+
+<section id="no-sheet">
+  <h2><span class="n">4</span>Parts with no sheet, and why</h2>
+  <p class="lede">Every remaining folder on the shelf, with the measured reason. A part
+  missing from this page would be a part nobody looked at; that state is not available here.</p>
+  <div class="tablewrap"><table><thead><tr><th>Part</th><th>State</th><th>Origin</th><th>Why there is no sheet</th></tr></thead><tbody><tr><td><code>microduck-camera-module</code></td><td>no-builder</td><td>inferred</td><td>no cad/part.py under ce-parts/microduck-camera-module</td></tr><tr><td><code>microduck-imu-to-dxl</code></td><td>no-builder</td><td>inferred</td><td>no cad/part.py under ce-parts/microduck-imu-to-dxl</td></tr><tr><td><code>microduck-mic</code></td><td>no-builder</td><td>inferred</td><td>no cad/part.py under ce-parts/microduck-mic</td></tr><tr><td><code>microduck-tof-module</code></td><td>no-builder</td><td>inferred</td><td>no cad/part.py under ce-parts/microduck-tof-module</td></tr><tr><td><code>bmi088</code></td><td>no-geometry</td><td>vendor</td><td>cad/part.py is a `bin/triad new part` stub — build() raises NotImplementedError, so there is no solid and nothing measured</td></tr><tr><td><code>et7301b</code></td><td>no-geometry</td><td>vendor</td><td>cad/part.py is a `bin/triad new part` stub — build() raises NotImplementedError, so there is no solid and nothing measured</td></tr><tr><td><code>fusb302</code></td><td>no-geometry</td><td>vendor</td><td>cad/part.py is a `bin/triad new part` stub — build() raises NotImplementedError, so there is no solid and nothing measured</td></tr><tr><td><code>imx219</code></td><td>no-geometry</td><td>vendor</td><td>cad/part.py is a `bin/triad new part` stub — build() raises NotImplementedError, so there is no solid and nothing measured</td></tr><tr><td><code>lsm6dsv16x</code></td><td>no-geometry</td><td>vendor</td><td>cad/part.py is a `bin/triad new part` stub — build() raises NotImplementedError, so there is no solid and nothing measured</td></tr><tr><td><code>mcp73213</code></td><td>no-geometry</td><td>vendor</td><td>cad/part.py is a `bin/triad new part` stub — build() raises NotImplementedError, so there is no solid and nothing measured</td></tr><tr><td><code>microduck-bottom-head-shell</code></td><td>no-geometry</td><td>unset</td><td>cad/part.py is a `bin/triad new part` stub — build() raises NotImplementedError, so there is no solid and nothing measured</td></tr><tr><td><code>microduck-eye-ring</code></td><td>no-geometry</td><td>unset</td><td>cad/part.py is a `bin/triad new part` stub — build() raises NotImplementedError, so there is no solid and nothing measured</td></tr><tr><td><code>microduck-face-part</code></td><td>no-geometry</td><td>unset</td><td>cad/part.py is a `bin/triad new part` stub — build() raises NotImplementedError, so there is no solid and nothing measured</td></tr><tr><td><code>microduck-m12-lens</code></td><td>no-geometry</td><td>unset</td><td>cad/part.py is a `bin/triad new part` stub — build() raises NotImplementedError, so there is no solid and nothing measured</td></tr><tr><td><code>microduck-m12-lens-holder</code></td><td>no-geometry</td><td>unset</td><td>cad/part.py is a `bin/triad new part` stub — build() raises NotImplementedError, so there is no solid and nothing measured</td></tr><tr><td><code>pn7150</code></td><td>no-geometry</td><td>vendor</td><td>cad/part.py is a `bin/triad new part` stub — build() raises NotImplementedError, so there is no solid and nothing measured</td></tr><tr><td><code>s-8252</code></td><td>no-geometry</td><td>vendor</td><td>cad/part.py is a `bin/triad new part` stub — build() raises NotImplementedError, so there is no solid and nothing measured</td></tr><tr><td><code>st25r3916</code></td><td>no-geometry</td><td>vendor</td><td>cad/part.py is a `bin/triad new part` stub — build() raises NotImplementedError, so there is no solid and nothing measured</td></tr><tr><td><code>tlv320aic3104</code></td><td>no-geometry</td><td>vendor</td><td>cad/part.py is a `bin/triad new part` stub — build() raises NotImplementedError, so there is no solid and nothing measured</td></tr><tr><td><code>vl53l5cx</code></td><td>no-geometry</td><td>vendor</td><td>cad/part.py is a `bin/triad new part` stub — build() raises NotImplementedError, so there is no solid and nothing measured</td></tr><tr><td><code>vl53l8cx</code></td><td>no-geometry</td><td>vendor</td><td>cad/part.py is a `bin/triad new part` stub — build() raises NotImplementedError, so there is no solid and nothing measured</td></tr><tr><td><code>bearing-15x10x3</code></td><td>not-drawn</td><td>unset</td><td>cad/part.py constructs a parametric solid — no sheet has been generated for it yet</td></tr><tr><td><code>bearing-22x16x4</code></td><td>not-drawn</td><td>unset</td><td>cad/part.py constructs a parametric solid — no sheet has been generated for it yet</td></tr><tr><td><code>microduck-ankle-left</code></td><td>not-drawn</td><td>generated</td><td>cad/part.py constructs a parametric solid — no sheet has been generated for it yet</td></tr><tr><td><code>microduck-ankle-right</code></td><td>not-drawn</td><td>generated</td><td>cad/part.py constructs a parametric solid — no sheet has been generated for it yet</td></tr><tr><td><code>microduck-foot-left</code></td><td>not-drawn</td><td>generated</td><td>cad/part.py constructs a parametric solid — no sheet has been generated for it yet</td></tr><tr><td><code>microduck-foot-right</code></td><td>not-drawn</td><td>generated</td><td>cad/part.py constructs a parametric solid — no sheet has been generated for it yet</td></tr><tr><td><code>microduck-motor-support</code></td><td>not-drawn</td><td>generated</td><td>cad/part.py constructs a parametric solid — no sheet has been generated for it yet</td></tr><tr><td><code>microduck-neck-pitch-bracket</code></td><td>not-drawn</td><td>generated</td><td>cad/part.py constructs a parametric solid — no sheet has been generated for it yet</td></tr><tr><td><code>microduck-neck-plate</code></td><td>not-drawn</td><td>generated</td><td>cad/part.py constructs a parametric solid — no sheet has been generated for it yet</td></tr><tr><td><code>microduck-sole-left</code></td><td>not-drawn</td><td>generated</td><td>cad/part.py constructs a parametric solid — no sheet has been generated for it yet</td></tr><tr><td><code>microduck-sole-right</code></td><td>not-drawn</td><td>generated</td><td>cad/part.py constructs a parametric solid — no sheet has been generated for it yet</td></tr><tr><td><code>microduck-speaker</code></td><td>not-drawn</td><td>vendor</td><td>cad/part.py constructs a parametric solid — no sheet has been generated for it yet</td></tr><tr><td><code>microduck-trunk-shell-left</code></td><td>not-drawn</td><td>vendor</td><td>cad/part.py constructs a parametric solid — no sheet has been generated for it yet</td></tr><tr><td><code>microduck-trunk-shell-right</code></td><td>not-drawn</td><td>vendor</td><td>cad/part.py constructs a parametric solid — no sheet has been generated for it yet</td></tr><tr><td><code>microduck-yaw-roll-motion</code></td><td>not-drawn</td><td>generated</td><td>cad/part.py constructs a parametric solid — no sheet has been generated for it yet</td></tr><tr><td><code>np-f550</code></td><td>not-drawn</td><td>vendor</td><td>cad/part.py constructs a parametric solid — no sheet has been generated for it yet</td></tr><tr><td><code>radxa-zero-3w</code></td><td>not-drawn</td><td>vendor</td><td>cad/part.py constructs a parametric solid — no sheet has been generated for it yet</td></tr><tr><td><code>xl330-m288-t</code></td><td>not-drawn</td><td>vendor</td><td>cad/part.py constructs a parametric solid — no sheet has been generated for it yet</td></tr><tr><td><code>microduck-jaw</code></td><td>not-print-sheeted</td><td>vendor</td><td>cad/part.py is a published-mesh loader (meshshelve, from_mesh, Part.from_mesh); a decimated triangulation carries no dimension a shop can work to (docs/MANUFACTURING-REQUIREMENTS.md A.3) — no sheet has been generated for it yet</td></tr><tr><td><code>microduck-jaw-soft</code></td><td>not-print-sheeted</td><td>vendor</td><td>cad/part.py is a published-mesh loader (meshshelve, from_mesh, Part.from_mesh); a decimated triangulation carries no dimension a shop can work to (docs/MANUFACTURING-REQUIREMENTS.md A.3) — no sheet has been generated for it yet</td></tr><tr><td><code>microduck-soft-mouth-top</code></td><td>not-print-sheeted</td><td>vendor</td><td>cad/part.py is a published-mesh loader (meshshelve, from_mesh, Part.from_mesh); a decimated triangulation carries no dimension a shop can work to (docs/MANUFACTURING-REQUIREMENTS.md A.3) — no sheet has been generated for it yet</td></tr><tr><td><code>microduck-top-head-shell</code></td><td>not-print-sheeted</td><td>vendor</td><td>cad/part.py is a published-mesh loader (meshshelve, from_mesh, Part.from_mesh); a decimated triangulation carries no dimension a shop can work to (docs/MANUFACTURING-REQUIREMENTS.md A.3) — no sheet has been generated for it yet</td></tr><tr><td><code>microduck-banana-pcb-locker</code></td><td>unknown</td><td>generated</td><td>—</td></tr><tr><td><code>microduck-bearing-roll</code></td><td>unknown</td><td>generated</td><td>—</td></tr><tr><td><code>microduck-hip-bracket</code></td><td>unknown</td><td>generated</td><td>—</td></tr><tr><td><code>microduck-power-support</code></td><td>unknown</td><td>generated</td><td>—</td></tr><tr><td><code>microduck-robot-hat-pcb</code></td><td>unknown</td><td>unset</td><td>—</td></tr><tr><td><code>microduck-shin</code></td><td>unknown</td><td>generated</td><td>—</td></tr><tr><td><code>microduck-upper-leg-left</code></td><td>unknown</td><td>generated</td><td>—</td></tr><tr><td><code>microduck-upper-leg-right</code></td><td>unknown</td><td>generated</td><td>—</td></tr><tr><td><code>microduck-upper-leg-rigidity-plate</code></td><td>unknown</td><td>generated</td><td>—</td></tr><tr><td><code>microduck-yaw2roll</code></td><td>unknown</td><td>generated</td><td>—</td></tr></tbody></table></div>
+</section>
+
+</div>
+</body>
+</html>

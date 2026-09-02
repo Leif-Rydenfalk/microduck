@@ -1,11 +1,68 @@
 {
- "$triad": 1,
- "kind": "interfaces",
- "generated_by": "cecad.meshshelve",
- "record": {
-  "ref": "part:microduck-jaw@v0.0.1",
-  "frame": "the published mesh's own frame (mm after x1000); MJCF geom pos/quat place it",
-  "units": "mm"
- },
- "interfaces": []
+  "$triad": 1,
+  "kind": "interfaces",
+  "generated_by": "cecad.meshshelve",
+  "record": {
+    "ref": "part:microduck-jaw@v0.0.1",
+    "frame": "Pollen's mesh frame for jaw.stl: the beak hinge line is the x-axis through (y 0.0000, z 7.5000); bbox x -45.7079..45.7079, y -59.7105..9.0000, z -12.9477..16.5000 (91.4158 x 68.7105 x 29.4477 mm). Kept so the MJCF geom pos/quat (body jaw_soft) place it directly.",
+    "units": "mm",
+    "interfaces_live_at": "the top-level `interfaces` key, per ce-parts/SCHEMA.md v2.4 (b) which cites `interfaces[0]`. The duplicate `record.interfaces` was removed 2026-09-02 (lane T) after `bin/triad check` FAILed the folder for carrying two spellings of one fact."
+  },
+  "interfaces": [
+    {
+      "name": "mouth_horn",
+      "frame": {
+        "origin_mm": [
+          42.068,
+          0.0,
+          7.5
+        ],
+        "z_axis": [
+          1,
+          0,
+          0
+        ],
+        "x_axis": [
+          0,
+          0,
+          1
+        ]
+      },
+      "accepts": [
+        "connection:spline-xl330-horn"
+      ],
+      "role": "horn_face",
+      "what": "the driven face of the beak: a Ø6.0000 x 4.1370 centre bore at (42.0680, 0.0000, 7.5000) with 4 x Ø2.2000 clearance holes (lengths 3.6950, 3.7600, 4.2590, 4.3240) on a Ø12.0034 bolt circle centred (42.0045, 0.0000, 7.5000) — the XL330 horn pattern (the servo's own taps are Ø1.6000 on Ø12.0000, measured on xl330.stl) — set in a Ø16.0000 x 2.7670 disc pocket at x 41.3840 that clears the servo's Ø16.0000 x 3.0010 output disc. Every fit residual on this pattern is 0.0000 mm at 355.0 deg cover. Axis x through (y 0.0000, z 7.5000): the beak's hinge line.",
+      "source": "MEASURED off Pollen's jaw.stl by cecad.meshfeatures.cylinders and the mesh bbox, frozen 2026-09-02 by tools/measure_mesh_features.py into out/laneT/features/jaw.json (lane T); the MJCF places this mesh in body 'jaw_soft' at world [26.1, -0.0, 231.1146] mm, quat (wxyz) [0.707107, 0.0, 0.0, 0.707107] (ce-assemblies/microduck/current/placements.json)"
+    },
+    {
+      "name": "bearing_journal",
+      "frame": {
+        "origin_mm": [
+          -39.7,
+          0.0,
+          7.5
+        ],
+        "z_axis": [
+          -1,
+          0,
+          0
+        ],
+        "x_axis": [
+          0,
+          0,
+          1
+        ]
+      },
+      "accepts": [
+        "connection:press-fit-bearing-15x10x3"
+      ],
+      "role": "bearing_seat",
+      "nominal_mm": 10.0,
+      "seat_length_mm": 2.7,
+      "shoulder_z_mm": 0.0,
+      "what": "the idler end of the same hinge line: a Ø10.0000 x 2.7000 journal (x -39.7000..-37.0000, fitted centre (0.0000, 7.5000) with residual <= 0.0025 mm at up to 359.91 deg cover) carrying the 15x10x3 bearing's INNER ring, behind a Ø11.9949 x 0.3000 shoulder flange at x -40.0000..-39.7000 and an axial Ø2.0000 x 7.0030 pin bore at x -40.5010. A Ø16.0000 x 2.7670 disc pocket at x -41.3840 mirrors the horn side. The bearing's OUTER ring is then held in part:microduck-motor-support 'lens_tube' — a Ø14.9938-14.9978 arch coaxial with THIS journal to 0.0005 mm (connection:press-fit-tube-15). Journal 2.7000 mm for a 3.0000 mm ring: 90.0% engagement, and which face the ring seats against is not stated in the reference.",
+      "source": "MEASURED off Pollen's jaw.stl by cecad.meshfeatures.cylinders and the mesh bbox, frozen 2026-09-02 by tools/measure_mesh_features.py into out/laneT/features/jaw.json (lane T); the MJCF places this mesh in body 'jaw_soft' at world [26.1, -0.0, 231.1146] mm, quat (wxyz) [0.707107, 0.0, 0.0, 0.707107] (ce-assemblies/microduck/current/placements.json)"
+    }
+  ]
 }

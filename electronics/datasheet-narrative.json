@@ -1,0 +1,105 @@
+{
+ "$narrative_version": 1,
+ "id": "microduck-electronics-datasheet-narrative",
+ "$about": "The parts of ELECTRONICS-DATASHEET.html that are not one row per component: the bus, the control table, the power tree, the pin map, the software map. Rendered by tools/gen_electronics_datasheet.py. The per-component roster lives in electronics/components.json and the vendor facts live in ce-parts/<slug>/; nothing is duplicated across the three.",
+ "revision": {"document": "MD-EE-001", "revision": "B", "date": "2026-09-02",
+   "supersedes": "Revision A, hand-maintained HTML with no generator. B is generated; every number traces to components.json, ce-parts/<slug>/, or a named file:line."},
+
+ "architecture_cards": [
+  {"title": "Compute",
+   "body": "Radxa ZERO 3W — Rockchip RK3566 quad Cortex-A55, Wi-Fi 6 / BT 5.4, 65.000 x 30.000 mm. Runs Armbian; the RK3566's 0.8-TOPS NPU runs a duck detector at 2 Hz, thermal-limited. The store says 1 GB RAM + 32 GB storage and Radxa's own SKU table has no such row — narrowed to two options in ce-parts/radxa-zero-3w."},
+  {"title": "Actuation",
+   "body": "15 x ROBOTIS DYNAMIXEL XL330-M288-T on one 1 Mbps Protocol-2 TTL bus at /dev/ttyS2 (RK3566 UART2_M0). IDs 10-14 / 20-24 / 30-34; mouth = ID 34, excluded from the 14-DoF policy. 270.0 g of the robot's 780 g."},
+  {"title": "Sensing",
+   "body": "Control IMU LSM6DSV16X on the imu_to_dxl board at bus ID 200; an 8x8 ToF that is a VL53L5CX or a VL53L8CX decided at runtime; IMX219 camera behind an M12 lens, mounted inverted; a BMI088 fitted and dormant on the HAT; one mono analog microphone; two NFC antennas whose reader nothing names."},
+  {"title": "Power",
+   "body": "An NP-F550-form-factor 2S Li-ion pack, removable, in a bay measured 38.7310 x 21.1721 x 70.9231 mm. No fuel gauge and no ADC: state of charge is the voltage the servos report. USB-C brings 5 V in; the FUSB302 PD node is disabled and the fitted CC die is an ET7301B."}
+ ],
+
+ "servo_bus": {
+  "lede": "One wire does everything. Fifteen servos and the IMU bridge share a single 3.3 V-logic (5 V-tolerant) TTL half-duplex UART at 1 Mbit/s under DYNAMIXEL Protocol 2.0. There is no second bus and no second port (robotd-design.md).",
+  "columns": ["ID", "joint", "side / location", "in policy?"],
+  "rows": [
+   ["20 / 10", "hip_yaw", "L / R — trunk", "yes"],
+   ["21 / 11", "hip_roll", "L / R — hip", "yes"],
+   ["22 / 12", "hip_pitch", "L / R — thigh", "yes"],
+   ["23 / 13", "knee", "L / R — thigh->shin", "yes"],
+   ["24 / 14", "ankle", "L / R — shin->foot", "yes"],
+   ["30", "neck_pitch", "neck base", "yes"],
+   ["31", "head_pitch", "neck top", "yes"],
+   ["32", "head_yaw", "head", "yes"],
+   ["33", "head_roll", "head", "yes"],
+   ["34", "mouth / beak", "head — closed-loop linkage", "no (idx skipped)"],
+   ["200", "imu_to_dxl v2", "trunk — LSM6DSV16X bridge", "read only"]
+  ],
+  "notes": [
+   "Physical layer is NOT RS-485: 3-wire TTL half-duplex with no direction GPIO in the firmware, so a self-steering transceiver on the HAT switches direction in hardware (community reading of the source).",
+   "Chain order, measured off the placements by the wiring lane: HAT -> 34 -> 33 -> 32 -> 31 -> 30 -> IMU 200 -> both legs; longest hop 165 mm through the +/-170 deg head-yaw joint.",
+   "WHERE THE CHAIN FORKS IS AN ASSUMPTION, not a measurement. wiring/cables.json puts the branch at the imu_to_dxl board, which needs three connectors. A Dynamixel bus is multidrop and forks equally well at a Y-splice — Open Duck Mini v2's own wiring diagram shows a two-port controller and a T. See ce-parts/microduck-imu-to-dxl connector_count."
+  ]
+ },
+
+ "registers": {
+  "boot": {"title": "Written once at boot (robotd, per servo)",
+   "code": "return_delay_time = 0    (vendor default 250 -> 0)\nbaud_rate        = 3    (1 Mbps)\npwm_slope        = 255\nshutdown         = 52   (overload | overheat | electrical shock;\n                        vendor default 53, INPUT VOLTAGE ERROR bit cleared)",
+   "note": "Rationale (model.rs): the default 250 is 500 us turnaround x 16 devices = 8 ms/tick, 40 % of a 20 ms budget — so it is zeroed. The shutdown byte is the one to read twice: clearing Bit 0 switches off the servo's over-voltage protection, and it has to be switched off because the pack reaches the servos at 6.6-8.2 V against a 6.0 V rating. See §7."},
+  "tick": {"title": "Read every tick / every second",
+   "code": "50 Hz loop (20 ms):\n  sync_read  regs 124-136  IMU block + 15 servos\n             (present pos / vel / load)\n  sync_write goal positions\n1 Hz slow:\n  read regs 144-146  present_input_voltage (0.1 V/LSB),\n                     temperature\nGains: P = 200, I = D = 0\n  standing_gain_ratio 0.8 - gain_limp 50 on predicted fall",
+   "note": "The imu_to_dxl board answers ID 200 in the same sync_read: register block at address 124 carries 6 bytes gyro (int16, 17.5 mdps/LSB) + 6 bytes SFLP game-rotation quaternion (x/y/z as fp16, w reconstructed). One IMU, one code path (imu.rs)."}
+ },
+
+ "power_tree": {
+  "columns": ["rail", "source", "feeds", "notes"],
+  "rows": [
+   ["VBAT 6.6-8.2 V", "NP-F550-form-factor 2S pack -> banana contact PCB -> HAT",
+    "all 15 servos DIRECTLY; the HAT's regulators",
+    "State of charge is read back out of servo register 144. At 6.6 V smoothed the robot sits down and powers off."],
+   ["5 V", "USB-C (PD disabled, so default 5 V) or a HAT buck from VBAT", "Radxa ZERO 3W",
+    "'in-robot power comes from the battery via the HAT regardless' (i2c3.dts). The buck's part number is CANNOT DETERMINE."],
+   ["3V3", "HAT / Radxa regulator", "codec, ToF, BMI088, camera, I2C pull-ups",
+    "The HAT's regulator part is CANNOT DETERMINE. The ToF branch cannot be a naive 3.3 V — see §7."],
+   ["1V8", "on-module / camera", "IMX219 digital, sensor cores",
+    "IMX219 VANA 2.8 V + VDIG 1.8 V per its own table."]
+  ],
+  "resolved_note": {
+   "title": "The servo supply — no longer an open question",
+   "body": "Revision A of this document said: 'Either production servos are stock parts run over-spec, or there is a regulated rail we cannot see. A meter on a servo VDD pin settles it.' Pollen's own source answers it. duck-control/src/model.rs:102-112, verbatim: 'There is no fuel gauge and no ADC. The only measurement available is what the servos report as their own supply (crate::bus::DynamixelIo::bus_voltage), which is the pack seen through the bus.' A regulator between pack and servos would make that reading a constant and useless as the fuel gauge it is. Corroborating it, SERVO_EEPROM writes shutdown = 52 where the vendor default is 53 — the single cleared bit is Input Voltage Error, a fault that a 5 V rail could never trip. THE SERVOS SEE THE PACK. Full verdict, with the stall-current extrapolation: ce-parts/xl330-m288-t component.json voltage_band_verdict."},
+  "drop_note": "Bus voltage drop is nevertheless in spec: 21 AWG at 6.6 V still delivers 6.05 V to the far ankle (wiring/drop.json), 0.550 V of drop from the HAT at 8.2 V."
+ },
+
+ "pin_map": {
+  "columns": ["interface", "Radxa pins", "signal", "to", "source"],
+  "rows": [
+   ["UART2_M0 (ttyS2)", "hdr 8 / 10", "TX / RX (half-duplex)", "servo bus via the HAT's transceiver", "robotd.toml"],
+   ["I2C3_M0", "hdr 3 / 5", "SDA GPIO1_A0 / SCL GPIO1_A1, 400 kHz", "codec 0x18, ToF 0x29 (via J5), BMI088 0x19/0x68", "i2c3.dts"],
+   ["I2S3", "i2s3_2ch (M0)", "BCLK / LRCLK / DIN / DOUT, MCLK 12 MHz", "TLV320AIC3104", "aic3104.dts"],
+   ["MIPI CSI", "22-pin FPC", "CSI-2 lanes + I2C 0x10", "IMX219, mounted inverted", "media-bringup.md"],
+   ["USB-C", "Type-C", "5 V in; PD node disabled", "charge / tether", "overlay"],
+   ["Stemma J5", "on the HAT", "I2C + 3V3", "ToF module", "i2c3-pihat.dts"]
+  ],
+  "note": "Connectors NOT identified in any published source, and each is a real gap for a shop: the servo-bus JST type and pitch on the HAT, the battery contact geometry, the CSI ribbon length and its module-end connector, the mic and speaker terminals, and the NFC antenna feed.",
+  "mount_frame_note": "The Radxa's own mechanical interface — the 4 x O2.8140 mm mounting pattern on 57.8429 x 22.8662 mm and the 40-pin header body frame — was measured off Radxa's raster drawing on 2026-09-02 and is in ce-parts/radxa-zero-3w/iterations/v0.0.1/cad/interfaces.json. It is what a HAT layout starts from. WHICH CORNER IS PIN 1 IS NOT DIMENSIONED and a board laid out the wrong way round is scrap."
+ },
+
+ "software": {
+  "columns": ["daemon", "talks to", "via"],
+  "rows": [
+   ["robotd", "15 servos + IMU 200", "/dev/ttyS2 - rustypot XL330 - 50 Hz ONNX policy (obs[61] -> act[14])"],
+   ["tofd", "VL53L5CX or VL53L8CX", "/dev/i2c-pihat (i2c-3) - 8x8 at 15 Hz - generation chosen at runtime by an ID read"],
+   ["mediad", "IMX219 camera", "rkisp mainpath - H.264 via Rockchip MPP - WebRTC :8443 / :8080"],
+   ["(codec)", "TLV320AIC3104", "ALSA card 'aic3104' - capture on MIC2R/LINE2R pin 16 - mic wake-word CNN - per-robot voice bank"],
+   ["btd / padd", "gamepad", "Bluetooth - same mapping as the sim's gamepad path"],
+   ["updaterd", "—", "signed releases, health-gated rollback"]
+  ],
+  "note": "All JSON-RPC over unix sockets. Full software map with file:line: docs/ELECTRONICS-AND-SOFTWARE.md."
+ },
+
+ "custom_boards": [
+  {"name": "RPI Robot HAT (P1)", "size": "65.02 x 30.02 mm (measured off Pollen's mesh)",
+   "body": "On the Radxa's 40-pin header. Carries the TLV320AIC3104 codec (0x18), the dormant BMI088, the ToF via a Stemma J5 connector (0x29), the half-duplex bus transceiver, the battery-to-board power path and a 10 kohm I2C pull-up pair (R12/R13). Disables the Radxa's PD node. IT MUST ALSO CARRY AN AUDIO POWER AMPLIFIER that no source shows: the codec's recommended minimum load is 16 ohm and its maximum output 30 mW into 16 ohm, against an 8 ohm 2 W transducer."},
+  {"name": "imu_to_dxl v2 (P2)", "size": "unknown — no mesh, no photograph, no drawing",
+   "body": "Presents an LSM6DSV16X as a Dynamixel Protocol-2 slave at ID 200, register block 124. Rides the servo bus and takes its power from it. MCU, transceiver and firmware are unpublished. Its connector count is CANNOT DETERMINE and — contrary to what this repo previously argued — is not forced by the bus topology."},
+  {"name": "Banana battery-contact PCB (P3)", "size": "unknown",
+   "body": "Clamped in the trunk by the printed banana_pcb_locker; carries the pack's contacts to the HAT. Measured clearance to the pack: 0.0145 mm. Shape, contact layout and contact rating unpublished — and it carries the whole servo-bus current, which at 15 servos stalling extrapolates to 36.07 A."}
+ ]
+}

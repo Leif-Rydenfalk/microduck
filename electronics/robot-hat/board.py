@@ -152,8 +152,13 @@ MOUNT = "M2.5"
 #                     4.800 mm spacing between the two columns of each pair:
 #                     it is too tight for two same-side vertical JST headers
 #                     (B*B-XH-A body 5.75 deep, B3B-EH-A housing 10.0 long),
-#                     and no dual-row JST or Molex family with a 2.5 x 4.8
-#                     grid could be found. Best-supported reading: one fitted
+#                     and it is not one dual-row part either: the nearest
+#                     2.5 mm dual-row through-hole family is JST's JFA J2000
+#                     (B08B-J21DK-GGXR, '8 Contact(s), 2.5 mm Pitch, 2 Row,
+#                     Shrouded') and its ROW PITCH IS 2.5 mm, not 4.8 —
+#                     searched 2026-09-02 across JST, Molex and distributor
+#                     listings, nothing with a 2.5 x 4.8 grid came back.
+#                     Best-supported reading: one fitted
 #                     header per pair plus a duplicate solder-only row at
 #                     4.800 mm, i.e. 'connector OR wires'. Second reading it
 #                     beat: two headers on opposite FACES of the board.

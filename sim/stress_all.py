@@ -238,6 +238,33 @@ def add_connectors(slug, p):
     return added
 
 
+def harden_connectors(p, names):
+    """A connector placed on an axis (bearing seat, horn centre, axle) sits in
+    the VOID of its bore, and cecad's load_patch reaches only 3 x element size
+    from it: at 8.5 mm elements the ankle's bearing_seat 'worked' by grabbing
+    the nearest skin 6.98 mm away, at 1.5 mm it is refused as 'not on the
+    part' (measured 2026-09-02). So every connector the case names is measured
+    against the solid: if its point is more than 1.0 mm off the skin it is
+    re-declared as kind 'bore' with spec d = 2 x that gap, which makes
+    load_patch take the cylindrical WALL at that radius — the seat itself.
+    Returns the list of what was changed, for the study JSON."""
+    import Part
+    changed = []
+    for n in names:
+        c = p.connectors.get(n)
+        if c is None:
+            continue
+        try:
+            gap = p.shape.distToShape(Part.Vertex(*c.pos))[0]
+        except Exception as e:  # noqa: BLE001
+            changed.append("%s: distToShape failed (%s)" % (n, e))
+            continue
+        if gap > 1.0 and (c.kind not in st._AXIAL_KINDS or not c.spec):
+            p.connector(n, at=c.pos, dir=c.dir, up=c.up, kind="bore", spec="d%.3f" % (2.0 * gap))
+            changed.append("%s: %.3f mm off the skin -> kind bore, spec d%.3f (wall at r %.3f)" % (n, gap, 2.0 * gap, gap))
+    return changed
+
+
 def plate_ends(p):
     """rigidity plate: the two screws nearest the hip axis A0 (0,0) are held, the two nearest the knee A1 are loaded."""
     cons = {n: c for n, c in p.connectors.items() if n.startswith("screw_")}
@@ -370,6 +397,7 @@ def run_case(slug, mesh, case, fixed, load, force, magnitude, source, why, size=
         fixed, load = plate_ends(p)
         rec["inputs"]["fixed"], rec["inputs"]["load"] = fixed, load
     rec["inputs"]["connectors_added"] = added
+    rec["inputs"]["connectors_hardened"] = harden_connectors(p, list(fixed) + list(load))
     rec["inputs"]["connectors_available"] = sorted(p.connectors)
     from cecad.fits import MATERIALS
     m = MATERIALS.get(str(p.material).upper())
@@ -460,6 +488,9 @@ def write(rec):
     if rec["verdict"] == "CANNOT DETERMINE":
         print("     why:", rec.get("why", "")[:300])
     sys.stdout.flush()
+    with open(os.path.join(FEA, "progress.txt"), "a") as fh:      # freecadcmd buffers stdout; this file does not
+        fh.write("%s %s %s SF=%s vM=%s %ss %s\n" % (time.strftime("%H:%M:%S"), rec["verdict"], rec["study"], (rec.get("outputs") or {}).get("sf"),
+                                                    (rec.get("outputs") or {}).get("max_von_mises_mpa"), rec.get("seconds"), (rec.get("why") or "")[:120]))
     return path
 
 

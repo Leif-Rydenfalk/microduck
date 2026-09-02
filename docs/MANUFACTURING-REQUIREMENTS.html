@@ -104,34 +104,13 @@
 <h3>A · Mechanical drawings — what a sheet must have</h3>
 <p>Diagnosed against <code>out/drawings/microduck-shin/microduck-shin.svg</code> (the first attempt): the primary view is clean and hole-tabled, but the thin side and section views carry <strong>edge-on rib / hidden-line &quot;texture&quot; — the random lines</strong>, and radii and most feature dimensions are absent.</p>
 <p><strong>REMOVE (the &quot;unusable detail / textures&quot;):</strong></p>
-<ol><li>Hidden lines that are not a manufacturing feature — no dashed forest behind</li></ol>
-<p>   a face. Show hidden detail only where a section cannot reach it, and only    the feature edges, never the tessellation.</p>
-<ol><li>Edge-on rib/thread hatching in a thin view — a 2 mm rib seen on its end is a</li></ol>
-<p>   black band that means nothing. Suppress it or replace that view with a    section or a detail.</p>
-<ol><li>Any facet / mesh artefact. Drawings come from the parametric solid; a</li></ol>
-<p>   vendor mesh part gets <strong>no</strong> drawing (it has no manufacturable dimensions).</p>
+<ol><li>Hidden lines that are not a manufacturing feature — no dashed forest behind a face. Show hidden detail only where a section cannot reach it, and only the feature edges, never the tessellation.</li><li>Edge-on rib/thread hatching in a thin view — a 2 mm rib seen on its end is a black band that means nothing. Suppress it or replace that view with a section or a detail.</li><li>Any facet / mesh artefact. Drawings come from the parametric solid; a vendor mesh part gets <strong>no</strong> drawing (it has no manufacturable dimensions).</li></ol>
 <p><strong>ADD (the &quot;detail that is missing&quot;):</strong></p>
-<ol><li><strong>A dimensioned isometric reference view</strong> on every sheet (small, top-right)</li></ol>
-<p>   so the shop sees the part in 3D.</p>
-<ol><li><strong>Every radius and fillet dimensioned</strong> — <code>R2</code>, <code>R0.4</code>, <code>R1.2</code> etc. with a</li></ol>
-<p>   leader to each. This is the specific gap Leif named.</p>
-<ol><li><strong>Dimensions for all details</strong>, not only holes: rib thickness and pitch,</li></ol>
-<p>   wall thickness, boss height, slot width/length, chamfers, the outline    envelope, feature-to-feature and feature-to-datum distances, angles.</p>
-<ol><li><strong>More views / more angles</strong> when one orthographic set cannot show a</li></ol>
-<p>   feature — additional projected views, and <strong>detail callout views</strong> (e.g.    the latch, a boss cluster, the flange holes) at a <strong>larger scale</strong> (2:1,    4:1, 10:1) with <code>DETAIL A / SCALE 4:1</code>.</p>
-<ol><li><strong>Proper scale</strong> — a dense/large part goes on A2 (or splits to sheet 2)</li></ol>
-<p>   rather than shrinking to an unreadable 1:2 on A3. Each view states its own    scale when it differs from the sheet.</p>
-<ol><li>Print/DFM note block: orientation, thinnest wall, that tapped holes print</li></ol>
-<p>   undersize, filament. (<code>docs/DFM.md</code>.)</p>
+<ol><li><strong>A dimensioned isometric reference view</strong> on every sheet (small, top-right) so the shop sees the part in 3D.</li><li><strong>Every radius and fillet dimensioned</strong> — <code>R2</code>, <code>R0.4</code>, <code>R1.2</code> etc. with a leader to each. This is the specific gap Leif named.</li><li><strong>Dimensions for all details</strong>, not only holes: rib thickness and pitch, wall thickness, boss height, slot width/length, chamfers, the outline envelope, feature-to-feature and feature-to-datum distances, angles.</li><li><strong>More views / more angles</strong> when one orthographic set cannot show a feature — additional projected views, and <strong>detail callout views</strong> (e.g. the latch, a boss cluster, the flange holes) at a <strong>larger scale</strong> (2:1, 4:1, 10:1) with <code>DETAIL A / SCALE 4:1</code>.</li><li><strong>Proper scale</strong> — a dense/large part goes on A2 (or splits to sheet 2) rather than shrinking to an unreadable 1:2 on A3. Each view states its own scale when it differs from the sheet.</li><li>Print/DFM note block: orientation, thinnest wall, that tapped holes print undersize, filament. (<code>docs/DFM.md</code>.)</li></ol>
 <p><strong>KEEP:</strong> the measured-off-the-solid discipline (every number read back with <code>verify_sheet</code>), the hole table, the title block, third-angle projection.</p>
 <h3>B · Electronics — three files, in this order</h3>
 <p>Not one mixed diagram. Three deliverables, each turning the previous into more detail:</p>
-<ol><li><strong>BLOCK DIAGRAM</strong> — <code>electronics/1-block-diagram.*</code> — simple, &quot;how everything</li></ol>
-<p>   is supposed to flow&quot;: the functional blocks (compute, power, servo bus,    sensors, audio, comms) and the buses between them. One page, readable at a    glance. No pins.</p>
-<ol><li><strong>SCHEMATIC</strong> — <code>electronics/2-schematic.*</code> — every single component and</li></ol>
-<p>   <strong>every single pin</strong>, with each pin&#x27;s net and where it goes to what. Drawn    per board (Radxa header, RPI Robot HAT, imu_to_dxl, banana PCB) and the    servo-bus harness. Pins that are unknown are shown as unknown, never guessed.</p>
-<ol><li><strong>LAYOUT</strong> — <code>electronics/3-layout.*</code> — how things are <strong>physically</strong></li></ol>
-<p>   connected to each other: the boards and devices in their real positions    (from <code>spec/mesh-placements.json</code>), the connectors between them, cable runs    and lengths (from <code>wiring/CABLES.md</code>). This is the physical-connection map,    not the logical schematic.</p>
+<ol><li><strong>BLOCK DIAGRAM</strong> — <code>electronics/1-block-diagram.*</code> — simple, &quot;how everything is supposed to flow&quot;: the functional blocks (compute, power, servo bus, sensors, audio, comms) and the buses between them. One page, readable at a glance. No pins.</li><li><strong>SCHEMATIC</strong> — <code>electronics/2-schematic.*</code> — every single component and <strong>every single pin</strong>, with each pin&#x27;s net and where it goes to what. Drawn per board (Radxa header, RPI Robot HAT, imu_to_dxl, banana PCB) and the servo-bus harness. Pins that are unknown are shown as unknown, never guessed.</li><li><strong>LAYOUT</strong> — <code>electronics/3-layout.*</code> — how things are <strong>physically</strong> connected to each other: the boards and devices in their real positions (from <code>spec/mesh-placements.json</code>), the connectors between them, cable runs and lengths (from <code>wiring/CABLES.md</code>). This is the physical-connection map, not the logical schematic.</li></ol>
 <p><code>wiring/designs/microduck/wiring.svg</code> is a graphic input, not the deliverable — the layout file supersedes it.</p>
 <h3>Acceptance</h3>
 <p>Each drawing: <code>verify_sheet</code> PASS <strong>and</strong> a human read-back (Read the SVG) that confirms it is clean, fully dimensioned incl. radii, and buildable from the sheet alone. Each EE file: every net traceable end to end; unknowns named. Status tracked in <code>STATUS.md</code>.</p>

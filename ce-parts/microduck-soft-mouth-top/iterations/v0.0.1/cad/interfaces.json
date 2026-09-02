@@ -1,11 +1,37 @@
 {
- "$triad": 1,
- "kind": "interfaces",
- "generated_by": "cecad.meshshelve",
- "record": {
-  "ref": "part:microduck-soft-mouth-top@v0.0.1",
-  "frame": "the published mesh's own frame (mm after x1000); MJCF geom pos/quat place it",
-  "units": "mm"
- },
- "interfaces": []
+  "$triad": 1,
+  "kind": "interfaces",
+  "generated_by": "cecad.meshshelve",
+  "record": {
+    "ref": "part:microduck-soft-mouth-top@v0.0.1",
+    "frame": "Pollen's mesh frame for soft_mouth_top.stl: bbox x -43.9110..43.9110, y -58.0664..-25.5013, z -4.9708..-1.6946 (87.8220 x 32.5651 x 3.2762 mm), sharing the jaw's frame. Kept so the MJCF geom pos/quat (body jaw_soft) place it directly.",
+    "units": "mm",
+    "interfaces_live_at": "the top-level `interfaces` key, per ce-parts/SCHEMA.md v2.4 (b) which cites `interfaces[0]`. The duplicate `record.interfaces` was removed 2026-09-02 (lane T) after `bin/triad check` FAILed the folder for carrying two spellings of one fact."
+  },
+  "interfaces": [
+    {
+      "name": "beak_underside",
+      "frame": {
+        "origin_mm": [
+          0.0,
+          -41.7839,
+          -1.6946
+        ],
+        "z_axis": [
+          0,
+          0,
+          1
+        ],
+        "x_axis": [
+          1,
+          0,
+          0
+        ]
+      },
+      "accepts": [],
+      "role": "overmould_face",
+      "what": "the +z face of the soft upper-beak liner, at z -1.6946 — the mesh's own maximum. Frame origin is the bbox centre in x and y on that face. bbox x -43.9110..43.9110, y -58.0664..-25.5013, z -4.9708..-1.6946 (87.8220 x 32.5651 x 3.2762 mm) — a 3.2762 mm thick skin. MEASURED ABSENCE: cecad.meshfeatures.cylinders over all 7870 triangles finds ZERO holes, ZERO bosses and ZERO partial arcs, so there is no fastener or fit to anchor on and none is invented. Placement measured instead: same body and quat as the jaw, world origin offset (+0.0814, 0.0000, +0.2993) mm from it.",
+      "source": "MEASURED off Pollen's soft_mouth_top.stl by cecad.meshfeatures.cylinders and the mesh bbox, frozen 2026-09-02 by tools/measure_mesh_features.py into out/laneT/features/soft_mouth_top.json (lane T); the MJCF places this mesh in body 'jaw_soft' at world [26.1814, 0.0, 231.4139] mm, quat (wxyz) [0.707107, 0.0, 0.0, 0.707107] (ce-assemblies/microduck/current/placements.json)"
+    }
+  ]
 }

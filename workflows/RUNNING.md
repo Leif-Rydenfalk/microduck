@@ -65,3 +65,48 @@ Findings that change the design, not just the paperwork:
 All three custom boards: design CANNOT DETERMINE (unpublished), action plan VERIFIED with real
 quick-turn fab quotes (JLCPCB from $2/5 pcs 24 h, PCBWay from $5/10 pcs 24 h, OSH Park
 $15.11/set-of-3 at 9–12 days).
+
+## Structural FEA matrix COMPLETED 2026-09-02 21:38 — `out/stress/matrix.json`
+
+12 solves (4 parts x 3 load cases, PLA) + mesh convergence + a 5-material sweep.
+Load basis: 737 g robot -> 7.23 N; standing 20 N, landing 60 N (3x bodyweight one leg),
+lateral 15 N. Linear elastic static, isotropic.
+
+| part | standing | landing | lateral |
+|---|---|---|---|
+| shin | 7.511 PASS | 2.504 PASS | 4.621 PASS |
+| upper-leg-left | CANNOT DETERMINE | CANNOT DETERMINE | CANNOT DETERMINE |
+| ankle-left | 2.021 PASS | **0.674 FAIL** | 8.717 PASS |
+| hip-bracket | 6.424 PASS | 2.140 PASS | 7.209 PASS |
+
+### THE ANKLE FAILS THE LANDING CASE AND NO FILAMENT FIXES IT
+
+Governing case: `microduck-ankle-left` / landing, **SF 0.674**. The material sweep says this
+is not a material problem — every candidate is below 1.0, i.e. predicted to yield:
+
+| PLA | PETG | ABS | NYLON | ASA |
+|---|---|---|---|---|
+| 0.674 | 0.648 | 0.534 | 0.971 | 0.587 |
+
+Nylon is the best of them and still only 0.971. **Substituting filament does not clear this.**
+The routes that would are: thicken the section / add ribs at the ankle bracket, reduce the
+design landing load if 3x bodyweight on one leg is judged unrealistic for a 737 g desktop
+robot, or accept the ankle as a designed sacrificial part. This is a geometry decision and it
+belongs to a human.
+
+### HONEST LIMITS ON THAT NUMBER — do not quote SF 0.674 as converged
+
+- **Mesh convergence could NOT be established.** The convergence pass ran the governing case at
+  gmsh sizes 2.0 / 1.5 / 1.0 and all three returned CANNOT DETERMINE — the ankle only meshes at
+  the auto size. So SF 0.674 rests on a single mesh. The direction is credible (five materials
+  all below 1.0, and the ratio between them tracks yield strength) but the magnitude is not
+  convergence-verified. Fix the meshing before this number is used for a design decision.
+- **`upper-leg-left` never solved in any case.** gmsh fails with "Invalid boundary mesh
+  (overlapping facets) on surface 350" at every size down to 0.8. The SOLID IS NOT THE PROBLEM —
+  it is valid, closed, 462 faces, and `removeSplitter` changes nothing. It is a surface-mesher
+  failure on one face. The thigh is therefore **structurally unverified**, which matters because
+  it sits in the same load path as the ankle that failed.
+- Linear elastic and isotropic. FDM parts are anisotropic and weaker across layers, so for a
+  printed part these are **upper bounds** unless the part is oriented with the load in-plane.
+  No fatigue, no creep, no impact dynamics — a real landing is a dynamic event and this is a
+  static surrogate.

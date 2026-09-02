@@ -85,18 +85,12 @@ def convert(md, title):
             continue
         # unordered list
         if re.match(r"^\s*[-*]\s+", ln):
-            items = []
-            while i < n and re.match(r"^\s*[-*]\s+", lines[i]):
-                items.append("<li>%s</li>" % inline(re.sub(r"^\s*[-*]\s+", "", lines[i])))
-                i += 1
+            items, i = _list_items(lines, i, n, r"^\s*[-*]\s+")
             out.append("<ul>%s</ul>" % "".join(items))
             continue
         # ordered list
         if re.match(r"^\s*\d+\.\s+", ln):
-            items = []
-            while i < n and re.match(r"^\s*\d+\.\s+", lines[i]):
-                items.append("<li>%s</li>" % inline(re.sub(r"^\s*\d+\.\s+", "", lines[i])))
-                i += 1
+            items, i = _list_items(lines, i, n, r"^\s*\d+\.\s+")
             out.append("<ol>%s</ol>" % "".join(items))
             continue
         # blank
@@ -117,6 +111,41 @@ def convert(md, title):
             '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opt_sz,wght@8..60,400;8..60,600;8..60,700&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">\n'
             '<style>\n%s\n</style>\n</head>\n<body>\n<div class="wrap"><p class="backlink"><a href="RELEASE.html">← Release dossier</a></p>\n%s\n</div>\n</body>\n</html>\n'
             % (html.escape(title), CSS, body))
+
+
+#: A WRAPPED BULLET IS ONE BULLET.
+#:
+#: Until 2026-09-02 both list loops consumed exactly ONE LINE per item, so a
+#: bullet wrapped at 79 columns — which is every bullet anybody writes here —
+#: was cut in half: the first line became the <li> and the rest became a
+#: stray <p> AFTER the closing </ul>. MEASURED on docs/DFM.md: 45 of its 66
+#: list items wrap, so 45 were broken that way, and the one `**bold**` that
+#: spanned a wrap printed its asterisks literally, because inline() only ever
+#: saw half of the pair. Nothing raised; the page rendered; it was simply
+#: wrong. It survived this long because PRODUCTION, BOM and SIM-CAPABILITY
+#: contain no bullets at all and the bullets in ELECTRONICS-AND-SOFTWARE (12)
+#: and PARTS (4) all happen to fit on one line — MEASURED by re-rendering all
+#: seven docs after this fix and diffing: only MANUFACTURING-REQUIREMENTS.html
+#: changed, and only there, where 12 wrapped numbered items had been split
+#: into 12 one-line <ol>s with 12 stray <p>s between them.
+#:
+#: A continuation line is any non-blank line that does not itself open a new
+#: block. The guard below is the same one the paragraph gatherer uses, so the
+#: two cannot drift apart.
+_OPENS_BLOCK = r"^(#{1,6}\s|```|>|\s*[-*]\s|\s*\d+\.\s|\s*---+\s*$|\s*\|)"
+
+
+def _list_items(lines, i, n, marker):
+    """Items for one list, each joined with its wrapped continuation lines."""
+    items = []
+    while i < n and re.match(marker, lines[i]):
+        buf = [re.sub(marker, "", lines[i])]
+        i += 1
+        while i < n and lines[i].strip() and not re.match(_OPENS_BLOCK, lines[i]):
+            buf.append(lines[i].strip())
+            i += 1
+        items.append("<li>%s</li>" % inline(" ".join(buf)))
+    return items, i
 
 
 def main(paths):

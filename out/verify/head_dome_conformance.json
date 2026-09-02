@@ -1,0 +1,38 @@
+{
+  "generated": "2026-09-02",
+  "purpose": "Re-test COMPARISON.html finding #1 (head conformance) with the two confounds removed: beak state (colour-segment the trim/beak OUT) and head tilt (measure the shell's own principal axes, not the image axes).",
+  "method": "Downscale to 1200 px long edge (LANCZOS). Classify every non-background pixel by HSV. Take the connected component of shell-colour pixels containing the topmost such pixel = the head shell. PCA on that component; report extent along the major axis (length) and minor axis (height) and their ratio. Ratio is scale-free and invariant to in-plane head tilt. Background = V>0.955 and S<0.045.",
+  "reference_mesh": {
+    "mesh": "top_head_shell",
+    "bbox_mm": {"x": 91.7595, "y": 122.6900, "z": 46.3361},
+    "profile_aspect_y_over_z": 2.6479,
+    "source": "out/verify/mech_dims.json"
+  },
+  "measurements": [
+    {"image": "out/compare/ours-prof-left.png", "what": "our render, top_head_shell (#e6e6e6) only",
+     "rule": "V>=vthr, S<0.45", "vthr_plateau": [0.60, 0.75],
+     "aspect_by_vthr": {"0.60": 2.6829, "0.65": 2.6229, "0.70": 2.6070, "0.72": 2.5602, "0.75": 2.5390},
+     "aspect_mean_plateau": 2.6024, "axis_deg": 4.1,
+     "validation": "agrees with the mesh's own 2.6479 to 1.7 % - the method reproduces a known answer"},
+    {"image": "images/store/store_microduck-cream-standing-profile-left.jpg", "what": "product, Cream colourway, BEAK OPEN, head pitched down",
+     "rule": "V>=vthr, S<0.45 (cream dome); orange trim+beak excluded as chroma",
+     "vthr_plateau": [0.60, 0.72],
+     "aspect_by_vthr": {"0.60": 1.6076, "0.65": 1.6103, "0.70": 1.6162, "0.72": 1.6207},
+     "aspect_mean_plateau": 1.6137, "axis_deg": -9.7},
+    {"image": "images/store/store_microduck-graphite-standing-profile-right-02.jpg", "what": "product, Graphite colourway, BEAK CLOSED, head pitched up ~20deg",
+     "rule": "0.26<=V<=0.62, S<=0.25 (graphite shell + face plate); yellow trim excluded as chroma",
+     "aspect_by_band": {"0.26-0.62": 2.0952, "0.28-0.60": 2.0937, "0.30-0.58": 2.0823, "0.30-0.62": 2.1082, "0.32-0.60": 2.1341},
+     "aspect_mean": 2.1027, "axis_deg": -20.1,
+     "caveat": "this band captures the dark-grey dome AND the lighter-grey face plate as one component, so 2.1027 is a LOWER BOUND on the dome-only aspect; dome-only would read higher, i.e. closer to the mesh's 2.6479"}
+  ],
+  "result": {
+    "between_photograph_spread_pct": 30.3,
+    "sim_vs_cream_photo_pct": 61.3,
+    "sim_vs_graphite_photo_pct": 23.8,
+    "verdict": "CANNOT DETERMINE",
+    "why": "Removing the beak and the tilt did NOT converge the two product photographs: Cream (beak open) gives 1.6137 and Graphite (beak closed) gives >=2.1027 for the same product, a 30.3 % spread. A photo-derived aspect with that spread cannot condemn or clear a 2.6479 mesh. The measurement does correct the direction of the earlier eyeball reading: the beak-closed photograph shows an ELONGATED wedge head much closer to the mesh, so the 'compact domed head' impression comes largely from the open beak and the downward head pitch in the Cream photograph.",
+    "what_would_settle_it": "Calibrated scaling, not ratios: the XL330-M288-T body face (20.000 x 34.000 mm, ROBOTIS datasheet) is in frame in both photographs. Scale mm/px off it and measure the shell in millimetres. Stronger still: calliper a shipped head."
+  },
+  "consequence_for_tooling": "Unchanged and independent of the above: top_head_shell is a decimated vendor sim mesh (16120 triangles, rebuilt=false in out/verify/mech_dims.json, ce-parts/microduck-top-head-shell/component.json verdict CANNOT DETERMINE, empty refcheck ledger). No head tooling may be cut from it.",
+  "reproduce": "FreeCAD python (has PIL 12.0.0): /Applications/FreeCAD.app/Contents/Resources/bin/python tools/head_dome_conformance.py"
+}

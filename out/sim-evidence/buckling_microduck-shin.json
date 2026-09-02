@@ -1,0 +1,70 @@
+{
+ "study": "buckling_microduck-shin",
+ "part": "part:microduck-shin",
+ "generated": "2026-09-02T23:04:23",
+ "script": "sim/struct_ce.py",
+ "inputs": {
+  "mesh": "sim/meshes_ours/leg.stl",
+  "cell_mm": 1.0,
+  "long_axis": "z",
+  "held_face": "z=max",
+  "loaded_face": "z=min",
+  "force_N": 118.816,
+  "force_source": "out/sim-evidence/loads_mujoco.json :: drops[foot].body_transmitted_force_max_N.leg",
+  "material": "PLA",
+  "printNormal_ASSUMED": "x (the thickness axis \u2014 the part printed flat; no part.py declares print_up)",
+  "solver": "ce-struct /api/solve (voxel hex mesh + CalculiX *BUCKLE / *FREQUENCY)"
+ },
+ "method": "axial compression over the whole end face, the other end fixed xyz; buckling eigenvalue = load factor on the applied force; first natural frequency with the same support",
+ "artifacts": [],
+ "looked_at": [],
+ "outputs": {
+  "buckle": {
+   "study": "buckle",
+   "ms": 13393,
+   "cells": 3624,
+   "nodes": 5522,
+   "interfaces": [],
+   "factors": [
+    0.9262424,
+    6.664116,
+    8.191111
+   ],
+   "critical": 0.9262424,
+   "_seconds": 14.37
+  },
+  "frequency": {
+   "study": "frequency",
+   "ms": 12445,
+   "cells": 3624,
+   "nodes": 5522,
+   "interfaces": [],
+   "modes": [
+    {
+     "mode": 1,
+     "eigenvalue": 1941505,
+     "rad_s": 1393.379,
+     "hz": 221.7631
+    },
+    {
+     "mode": 2,
+     "eigenvalue": 11050540,
+     "rad_s": 3324.236,
+     "hz": 529.0686
+    },
+    {
+     "mode": 3,
+     "eigenvalue": 80814070,
+     "rad_s": 8989.665,
+     "hz": 1430.75
+    }
+   ],
+   "first_Hz": 221.7631,
+   "_seconds": 12.91
+  },
+  "critical_load_N": 110.0524,
+  "first_mode_hz": null
+ },
+ "verdict": "FAIL",
+ "why": "buckling load factor 0.9262 on the 118.8160 N landing load (critical 110.05 N); ce-struct rule factor >= 2"
+}

@@ -1,0 +1,33 @@
+{
+ "study": "buckling_microduck-upper-leg-rigidity-plate",
+ "part": "part:microduck-upper-leg-rigidity-plate",
+ "generated": "2026-09-02T23:04:50",
+ "script": "sim/struct_ce.py",
+ "inputs": {
+  "mesh": "sim/meshes_ours/upper_leg_rigidity_plate.stl",
+  "cell_mm": 0.5,
+  "long_axis": "z",
+  "held_face": "z=min",
+  "loaded_face": "z=max",
+  "force_N": 109.4988,
+  "force_source": "out/sim-evidence/loads_mujoco.json :: drops[foot].body_transmitted_force_max_N.upper_leg_left (100 % through the plate: bounding)",
+  "material": "PLA",
+  "printNormal_ASSUMED": "x (the thickness axis \u2014 the part printed flat; no part.py declares print_up)",
+  "solver": "ce-struct /api/solve (voxel hex mesh + CalculiX *BUCKLE / *FREQUENCY)"
+ },
+ "method": "axial compression over the whole end face, the other end fixed xyz; buckling eigenvalue = load factor on the applied force; first natural frequency with the same support",
+ "artifacts": [],
+ "looked_at": [],
+ "outputs": {
+  "buckle": {
+   "error": "0.5 mm cells give only 2 across x on a part that is 1.0 x 45.5 x 58.8 mm. A section fewer than 3 cells thick cannot bend, so the answer would be stiff by an unbounded factor. Use cell <= 0.33 mm (or pass allowThin: true if this really is a pure tension member).",
+   "_seconds": 0.4
+  },
+  "frequency": {
+   "error": "0.5 mm cells give only 2 across x on a part that is 1.0 x 45.5 x 58.8 mm. A section fewer than 3 cells thick cannot bend, so the answer would be stiff by an unbounded factor. Use cell <= 0.33 mm (or pass allowThin: true if this really is a pure tension member).",
+   "_seconds": 0.34
+  }
+ },
+ "verdict": "CANNOT DETERMINE",
+ "why": "buckle solve refused: 0.5 mm cells give only 2 across x on a part that is 1.0 x 45.5 x 58.8 mm. A section fewer than 3 cells thick cannot bend, so the answer would be stiff by an unbounded factor. Use cell <= 0.33 mm (or pass allowThin: true if this really is a pure tension member)."
+}

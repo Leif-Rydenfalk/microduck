@@ -398,9 +398,11 @@ example knob.</div>''' % (TOT.get("pieces", 0), src("SLICE")))
 A('''<div class="note"><b>These costs are for the files on disk.</b> Every gram and second below
 came from slicing the STLs in <code>out/print/stl/</code>. Twelve of those thirty are Pollen's
 vendor mesh for a part that has since been rebuilt parametrically %s — see §8, first row. Re-export
-and re-slice moves these numbers; the arithmetic and the conclusion do not depend on which of the
-two geometries is used, because the difference between a rebuild and the mesh it was graded to at
-p95 &le; 1 mm cannot move a $0.60 piece across a $0.50&ndash;5.00 band.</div>''' % src("STALESTL"))
+and re-slice moves these numbers; the arithmetic and the conclusion in §2.3 do not turn on which of
+the two geometries is used, because every rebuild is graded against the very mesh the STL holds and
+the worst bounding-box deviation across the set is 0.7193 mm (<code>COMPARISON.html</code>) — a
+difference that cannot move a $0.60 piece across a $0.50&ndash;5.00 band. It does change §3 and §4,
+which are about the surface, and those sections say so.</div>''' % src("STALESTL"))
 
 A('<h3>2.2 What one robot&rsquo;s printed parts cost</h3>')
 if TOT:

@@ -1,11 +1,63 @@
 {
- "$triad": 1,
- "kind": "interfaces",
- "generated_by": "cecad.meshshelve",
- "record": {
-  "ref": "part:microduck-top-head-shell@v0.0.1",
-  "frame": "the published mesh's own frame (mm after x1000); MJCF geom pos/quat place it",
-  "units": "mm"
- },
- "interfaces": []
+  "$triad": 1,
+  "kind": "interfaces",
+  "generated_by": "cecad.meshshelve",
+  "record": {
+    "ref": "part:microduck-top-head-shell@v0.0.1",
+    "frame": "Pollen's mesh frame for top_head_shell.stl: bbox x -45.8797..45.8798, y -66.1900..56.5000, z -0.0014..46.3348 (91.7595 x 122.6900 x 46.3361 mm); the three shell screws lie on a Ø112.1175 circle about (0.0000, -16.5000). Kept so the MJCF geom pos/quat (body jaw_soft) place it directly. SEE COMPARISON.html finding 1: this mesh is NOT the product head.",
+    "units": "mm",
+    "interfaces_live_at": "the top-level `interfaces` key, per ce-parts/SCHEMA.md v2.4 (b) which cites `interfaces[0]`. The duplicate `record.interfaces` was removed 2026-09-02 (lane T) after `bin/triad check` FAILed the folder for carrying two spellings of one fact."
+  },
+  "interfaces": [
+    {
+      "name": "shell_screws",
+      "frame": {
+        "origin_mm": [
+          0.0,
+          49.5,
+          3.2
+        ],
+        "z_axis": [
+          0,
+          0,
+          1
+        ],
+        "x_axis": [
+          1,
+          0,
+          0
+        ]
+      },
+      "accepts": [
+        "connection:threaded-m2"
+      ],
+      "role": "screw_pattern",
+      "what": "the three screws that close the head: Ø2.1000 x 11.2000 thread-forming pilots at (x, y) = (0.0000, 49.5000), (39.0000, -49.5000) and (-39.0000, -49.5000), each entered through a Ø2.8000 x 0.8000 counterbore, all axis z. Pilot centres z 9.6000 (span z 4.0000..15.2000); counterbore centres z 3.6000 (span z 3.2000..4.0000), so the seating plane is z 4.0000 and the frame origin is the counterbore mouth. Fit residual 0.0000 mm at 355.0 deg on all six. The three positions lie on a Ø112.1175 circle and match part:microduck-bottom-head-shell 'head_shell_screws' — Ø2.6950 x 2.0040 clearance at the SAME three (x, y), fitted independently on the other mesh.",
+      "source": "MEASURED off Pollen's top_head_shell.stl by cecad.meshfeatures.cylinders and the mesh bbox, frozen 2026-09-02 by tools/measure_mesh_features.py into out/laneT/features/top_head_shell.json (lane T); the MJCF places this mesh in body 'jaw_soft' at world [26.1, -0.0, 231.1146] mm, quat (wxyz) [0.707107, 0.0, 0.0, 0.707107] (ce-assemblies/microduck/current/placements.json)"
+    },
+    {
+      "name": "beak_envelope",
+      "frame": {
+        "origin_mm": [
+          0.0,
+          -4.845,
+          0.0
+        ],
+        "z_axis": [
+          0,
+          0,
+          1
+        ],
+        "x_axis": [
+          1,
+          0,
+          0
+        ]
+      },
+      "accepts": [],
+      "role": "envelope",
+      "what": "the shell's own extent, declared as an interface because it is the number that BLOCKS this part: bbox x -45.8797..45.8798, y -66.1900..56.5000, z -0.0014..46.3348 = 91.7595 x 122.6900 x 46.3361 mm. Frame origin is the bbox centre in x and y on the z=0 datum plane. COMPARISON.html finding 1 is measured against this row: 122.6900 mm front-to-back is far longer than the compact domed head in every product photograph (images/store/*), and no eye bezel is modelled here at all. Any tooling cut from this mesh is wrong. This row exists so that the envelope has a number a replacement can be graded against; it accepts no connection because it is not a joint.",
+      "source": "MEASURED off Pollen's top_head_shell.stl by cecad.meshfeatures.cylinders and the mesh bbox, frozen 2026-09-02 by tools/measure_mesh_features.py into out/laneT/features/top_head_shell.json (lane T); the MJCF places this mesh in body 'jaw_soft' at world [26.1, -0.0, 231.1146] mm, quat (wxyz) [0.707107, 0.0, 0.0, 0.707107] (ce-assemblies/microduck/current/placements.json)"
+    }
+  ]
 }
