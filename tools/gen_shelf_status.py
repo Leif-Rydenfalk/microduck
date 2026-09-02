@@ -35,6 +35,7 @@ WORKSHOP = os.path.dirname(os.path.dirname(REPO))
 TRIAD = os.path.join(WORKSHOP, "bin", "triad")
 
 IFACE_RE = re.compile(r"interface '([^']+)' frame unmeasured")
+ART_RE = re.compile(r"sha256 of (\S+) is ")
 
 VERDICTS = ("PASS", "FAIL", "CANNOT DETERMINE")
 HEAD_RE = re.compile(r"^(PASS|FAIL|CANNOT DETERMINE)\s+((?:part|connection|assembly):\S+)\s*"
@@ -61,12 +62,22 @@ CLASSES = [
      "an append-only ledger row cites a file that is not on disk, so the row's claim "
      "cannot be checked.",
      lambda s: "does not exist" in s),
+    ("superseded_row", "Ledger row superseded \u2014 the record working, not a gap",
+     "an earlier row's artifact was re-measured and a LATER row names the same artifact. "
+     "TRIAD.md: the later row's hash is the one checked, and the earlier row is REPORTED as "
+     "CANNOT DETERMINE rather than silently skipped or deleted, because the ledger is append-only "
+     "and that row records what the artifact WAS when it was measured. A ref whose only reasons "
+     "are these has no gap in it \u2014 its current measurement passed and the old one is kept as "
+     "history. Nothing inside the folder closes it; only a change to the checker's contract would, "
+     "and that is a decision about the contract, not a defect in the part.",
+     lambda s: "SUPERSEDED:" in s),
     ("artifact_changed", "Ledger artifact changed after it was ledgered",
-     "a ledger row's sha256 no longer matches the file on disk. TRIAD.md: editing a ledgered "
-     "artifact WITHOUT appending a row is a FAIL, by design \u2014 the last row's hash is the one "
-     "checked, so a re-run that overwrites its own evidence file is caught. The fix is never to "
-     "edit the row: append a new row for the new run, which supersedes the old one and says so.",
-     lambda s: "ledger says" in s),
+     "a ledger row's sha256 no longer matches the file on disk and NO later row names that "
+     "artifact. TRIAD.md: editing a ledgered artifact WITHOUT appending a row is a FAIL, by "
+     "design \u2014 the last row's hash is the one checked, so a re-run that overwrites its own "
+     "evidence file is caught. The fix is never to edit the row: append a new row for the new run, "
+     "which supersedes the old one and says so.",
+     lambda s: "ledger says" in s or "this row says" in s),
     ("stale_trust", "trust.json stale",
      "the computed tier on disk disagrees with the ledger it was computed from — run "
      "`bin/triad trust <ref>`.",
@@ -190,6 +201,34 @@ def attach_full_why(refs, root):
 
     for r in refs:
         for x in r["reasons"]:
+            # A ledger artifact that no longer hashes: say WHEN the file was
+            # last written. A reader who can see the artifact was rewritten
+            # after the row was ledgered knows this is a re-run in flight, not
+            # a corrupted record, and knows which of the two to go and fix.
+            if x["class"] in ("artifact_changed", "superseded_row"):
+                m = ART_RE.search(x["why"])
+                if m:
+                    # bin/_triadlib.artifact_path resolves a ledger row's
+                    # artifact against res.dir, the ITERATION directory — two
+                    # levels above evidence/ledger.jsonl, not one. Resolving it
+                    # against the evidence directory instead silently produced
+                    # a path that does not exist and dated nothing (measured
+                    # and fixed 2026-09-03).
+                    led = os.path.join(root, x["where"].split(":")[0])
+                    art = os.path.normpath(os.path.join(
+                        os.path.dirname(os.path.dirname(led)), m.group(1)))
+                    try:
+                        ts = datetime.datetime.fromtimestamp(os.path.getmtime(art))
+                        x["artifact"] = os.path.relpath(art, root)
+                        x["artifact_mtime"] = ts.strftime("%Y-%m-%d %H:%M")
+                        x["why_full"] = ("%s (that file was last written %s)"
+                                         % (norm(trim(x["why"])), x["artifact_mtime"]))
+                        recovered += 1
+                        recoverable += 1
+                    except OSError:
+                        pass
+                continue
+
             doc = doc_at(x["where"])
             if not isinstance(doc, dict):
                 continue
@@ -393,6 +432,16 @@ def render(refs, totals, before, exit_code, root, recovered_n=0, recoverable_n=0
         A('<tr><td>%s</td><td class="num">%d</td><td class="num">%d</td></tr>'
           % (e(title), len(rows), len({r["ref"] for r, _x in rows})))
     A('</tbody></table></div>')
+    only_sup = [r for r in refs if r["verdict"] != "PASS" and r["reasons"]
+                and all(x["class"] == "superseded_row" for x in r["reasons"])]
+    if only_sup:
+        A('<div class="note"><b>%d of the not-PASS refs have no gap in them.</b> Their only '
+          'reasons are superseded ledger rows \u2014 an artifact was re-measured and a later row '
+          'names it, so the earlier row is reported rather than deleted. The current measurement '
+          'passed. Nothing inside those folders closes this; it is what an append-only ledger '
+          'costs, and it is the price of being able to check that nobody edited one. They are: '
+          '%s.</div>'
+          % (len(only_sup), ", ".join("<code>%s</code>" % e(r["ref"]) for r in only_sup)))
     A('</section>')
 
     A('<section id="classes"><h2><span class="n">2</span>By defect class</h2>')
@@ -441,7 +490,7 @@ def render(refs, totals, before, exit_code, root, recovered_n=0, recoverable_n=0
     A('<section id="method"><h2><span class="n">4</span>Method</h2>')
     A('<pre class="code">export CE_TRIAD_ROOT="%s:%s"\n%s check --all\npython3 tools/gen_shelf_status.py            # regenerate this page\npython3 tools/gen_shelf_status.py --verify   # is it still true? exit 0 CURRENT / 1 STALE</pre>'
       % (e(root), e(WORKSHOP), e(os.path.relpath(TRIAD, REPO))))
-    A('<p><b>Where a sentence was cut, and by whom.</b> <code>bin/triad</code> prints a folder\u2019s own <code>why</code> as <code>[:400]</code> (<code>bin/_triadlib.py:1482</code>) \u2014 400 characters, no marker, so its output cannot tell a folder that stopped there from one that was cut. That is where fragments like \u201c\u2026so the frame\u201d came from, not from this page. The whole sentence is on disk in the folder\u2019s own record, so this generator reads it back, checks the checker\u2019s text is a prefix of it, and prints the full sentence in section 2. Section 3\u2019s narrow column still cuts, at the last whole word before %d characters, and says so in the row with the number of characters dropped and the file that holds the rest. %d of the %d reason rows that quote a folder were recovered this way; where the prefix did not match, the checker\u2019s words stand and nothing is claimed about what follows them.</p>' % (TRUNC_AT, recovered_n, n_rows))
+    A('<p><b>Where a sentence was cut, and by whom.</b> <code>bin/triad</code> prints a folder\u2019s own <code>why</code> as <code>[:400]</code> (<code>bin/_triadlib.py:1482</code>) \u2014 400 characters, no marker, so its output cannot tell a folder that stopped there from one that was cut. That is where fragments like \u201c\u2026so the frame\u201d came from, not from this page. The whole sentence is on disk in the folder\u2019s own record, so this generator reads it back, checks the checker\u2019s text is a prefix of it, and prints the full sentence in section 2. Section 3\u2019s narrow column still cuts, at the last whole word before %d characters, and says so in the row with the number of characters dropped and the file that holds the rest. %d of the %d reason rows that quote a folder were recovered this way; where the prefix did not match, the checker\u2019s words stand and nothing is claimed about what follows them.</p>' % (TRUNC_AT, recovered_n, recoverable_n))
     A('<p>The checker is <code>bin/triad</code> in the ce-workshop root, shared by all three '
       'triad systems; its contract is <code>TRIAD.md</code>. This page parses its stdout and '
       'renders it. It re-grades nothing and it never softens a verdict: where a folder says '
