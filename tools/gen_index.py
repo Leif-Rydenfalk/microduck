@@ -5,10 +5,15 @@ Every entry is CHECKED against the filesystem before it is written, so the index
 can never advertise a document that is not there. A missing target is published
 as missing, with the reason, rather than as a dead link.
 """
-import json, os, html, datetime
+import json, os, html, datetime, re
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
+
+def wbr(path):
+    """A path with explicit break opportunities after its separators, escaped."""
+    return html.escape(path).replace("/", "/<wbr>").replace("-", "-<wbr>")
+
 
 def _count_tests():
     """How many gated tests TEST-PLAN.html actually carries, counted off the published
@@ -75,6 +80,7 @@ SECTIONS = [
         ("SOURCING.html", "Sourcing evidence", "Every bought line: two or more real distributors, tier prices, MOQ, lead time, alternates, and the URL of every page that refused a price."),
         ("RFQ.html", "Requests for quotation", "One ready-to-send request per supplier, placeholders for the human's contact details. Nothing has been sent."),
         ("spec/sourcing.json", "Sourcing (data)", "The 32 bought lines both pages are generated from; every price carries its vendor URL and fetch date."),
+        ("out/release/bom.csv", "Bill of materials (CSV, generated)", "One row per bought line with the unit price, the per-robot cost, the vendor page and the fetch date - written by tools/gen_sourcing.py from spec/sourcing.json since 2026-09-03, so it cannot drift from SOURCING.html the way the hand-written version did."),
         ("docs/production/components.md", "Components at volume (prior lane)", "The prose sourcing pass this data file supersedes."),
     ]),
     ("Simulation & evidence", "Every claim that has a measurement behind it.", [
@@ -181,24 +187,25 @@ for title, blurb, items in SECTIONS:
             sz, mt = st
             body.append(
                 f'<tr><td><a href="{rel}">{html.escape(name)}</a><div class="d">{html.escape(desc)}</div></td>'
-                f'<td><code>{html.escape(rel)}</code></td>'
+                f'<td><code>{wbr(rel)}</code></td>'
                 f'<td class="n">{size_str(sz)}</td><td class="n">{mt}</td>'
                 f'<td><span class="chip pass">present</span></td></tr>')
         else:
             missing += 1
             body.append(
                 f'<tr class="miss"><td>{html.escape(name)}<div class="d">{html.escape(desc)}</div></td>'
-                f'<td><code>{html.escape(rel)}</code></td>'
+                f'<td><code>{wbr(rel)}</code></td>'
                 f'<td class="n">—</td><td class="n">—</td>'
                 f'<td><span class="chip cd">not generated yet</span></td></tr>')
     rows_html.append(
-        f'<section><h2>{html.escape(title)}</h2><p class="lede">{html.escape(blurb)}</p>'
+        f'<section id="{re.sub(r"[^a-z0-9]+", "-", title.lower()).strip("-")}">'
+        f'<h2>{html.escape(title)}</h2><p class="lede">{html.escape(blurb)}</p>'
         f'<div class="tw"><table class="data"><thead><tr><th>Document</th><th>Path</th>'
         f'<th class="n">Size</th><th class="n">Updated</th><th>State</th></tr></thead>'
         f'<tbody>{"".join(body)}</tbody></table></div></section>')
 
 tool_rows = "".join(
-    f'<tr><td><code>{html.escape(t)}</code></td><td>{html.escape(d)}</td>'
+    f'<tr><td><code>{wbr(t)}</code></td><td>{html.escape(d)}</td>'
     f'<td><span class="chip {"pass" if stat(t) else "cd"}">{"present" if stat(t) else "missing"}</span></td></tr>'
     for t, d in TOOLS)
 
@@ -213,7 +220,13 @@ HTML = f"""<!doctype html>
 <style>
   .d{{font-size:12.5px;color:var(--ink-2);margin-top:2px;max-width:46em}}
   tr.miss td{{opacity:.72}}
+  /* A path has no space in it, so with no break opportunity it widens the table past the
+     840px sheet and .tw scrolls the State column out of sight (measured with
+     tools/tablefit.py, 2026-09-03). The break opportunities are placed explicitly with <wbr>
+     after each "/" and "-" by wbr() below, so a path breaks at a separator or not at all —
+     overflow-wrap:anywhere fixed the width but broke "PRODUCTION.html" mid-word. */
   table.data td code{{font-size:11.5px}}
+  table.data td code wbr{{display:inline}}
   .statbar{{display:flex;flex-wrap:wrap;border-bottom:1px solid var(--hair);margin:10px 0 2px}}
   .stat{{padding:12px 26px 12px 0;margin-right:22px}}
   .stat b{{display:block;font-weight:700;font-size:22px;font-variant-numeric:tabular-nums}}
