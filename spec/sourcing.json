@@ -1,9 +1,10 @@
 {
   "$doc": "spec/sourcing.json - the sourcing DATA for the Microduck. Lane E (GOAL.md). One record per BOUGHT line. SOURCING.html and RFQ.html are generated from this file by tools/gen_sourcing.py; neither page is hand-maintained. Nothing here is estimated: a price is present only if it was READ on a vendor page (fetched date recorded) or read off a page a prior lane fetched and cited in docs/production/components.md. A price nobody read is null with the URL that was tried.",
-  "revision": "A",
+  "revision": "B",
   "generated_for": "MD-SRC-001",
   "fetch_dates": [
-    "2026-09-02"
+    "2026-09-02",
+    "2026-09-03"
   ],
   "rules": {
     "price_basis": "unit price at the vendor's own published tier. tiers[] is [order_quantity_of_the_part, unit_price]. A vendor that publishes no tier table carries tiers [[1, price]] and no_tiers=true; its @1 price is then used at every quantity as a CEILING, never as a forecast.",
@@ -223,7 +224,8 @@
           "stock": "Sold out (every 1 GB and 2/4 GB-with-eMMC variant; only '2 GB / no eMMC, header' at $55.99 was in stock)",
           "fetched": "2026-09-02",
           "confidence": "read",
-          "note": "same page also read: 1GB/none no-header $18, 1GB/none header $19, 1GB/8GB no-header $22, 2GB/16GB $32.90/$33.90, 4GB/32GB $50/$51 - all sold out."
+          "note": "same page also read: 1GB/none no-header $18, 1GB/none header $19, 1GB/8GB no-header $22, 2GB/16GB $32.90/$33.90, 4GB/32GB $50/$51 - all sold out.",
+          "rollup_caveat": "prices RS107-D1E8H1W15, the 1 GB / 8 GB board - NOT the 1 GB / 32 GB configuration this line specifies, which is absent from Radxa's own SKU table - and that variant read 'Sold out' on the fetch date. The catalogue 32 GB part on the same page is $50 / $51. The line is graded FAIL"
         },
         {
           "vendor": "ameriDroid (US)",
@@ -380,24 +382,24 @@
           "note": "$104.99 for 4 packs, no charger = $26.25 per pack. Neewer states 7.4 V; the pack chemistry is the same 2S."
         },
         {
-          "vendor": "Neewer (chargers collection)",
-          "sku": "NP-F550 Battery Charger Set",
-          "url": "https://neewer.com/collections/chargers",
+          "vendor": "Neewer (charger set)",
+          "sku": "66600244 - NEEWER NP-F550 Battery Charger Set for Sony",
+          "url": "https://neewer.com/products/batteries-chargers-66600244",
           "currency": "USD",
           "tiers": [
             [
               1,
-              49.99
+              24.995
             ]
           ],
           "no_tiers": true,
           "moq": 1,
           "lead_time": "not stated",
-          "stock": "listed",
-          "fetched": "2026-09-02",
+          "stock": "available (Shopify variant 37973290287297 available:true)",
+          "fetched": "2026-09-03",
           "confidence": "read",
-          "note": "2 packs + charger $49.99. The standalone dual-charger product pages 66600569 / 66600066 both 404.",
-          "excluded_from_rollup": "prices a 2-pack + charger SET, not one pack"
+          "note": "PRODUCT PAGE, read 2026-09-03 (the 2026-09-02 reading was https://neewer.com/collections/chargers, a collection page). Page data verbatim: sku 66600244, price 4999 (cents) = $49.99, barcode 191073009981, weight 320 g, available true. The set is 2 x NP-F550 2600 mAh packs + 1 dual USB charger + cable, so $49.99 / 2 = $24.9950 per pack INCLUDING the charger share - the same basis on which NextBatteries' $49.90 2-pack-plus-charger is recorded at $24.95. Previously excluded from the roll-up for pricing a set rather than a pack; that exclusion is withdrawn because the NextBatteries offer it was measured against is the same kind of set, and holding the two to different rules was the inconsistency. It does not change the roll-up: NextBatteries is $0.0450 cheaper per pack. The standalone dual-charger product pages 66600569 / 66600066 both 404.",
+          "page_kind": "product"
         },
         {
           "vendor": "Pollen Robotics (reference, not a supplier to us)",
@@ -596,14 +598,14 @@
       "qty_per_robot": 1,
       "qty_basis": "docs/BOM.md row B7. Zero if B0183/B0103 is bought (both include a lens).",
       "mpn": "Arducam M40180H13L (representative). Required FOV: CANNOT DETERMINE",
-      "mpn_status": "representative substitute",
-      "rfq_spec": "M12 (S-mount) lens for a 1/4-inch IMX219 sensor. Target FOV NOT YET FIXED - Pollen's press kit says the camera FOV is 'still being finalised' and the community figure is ~62 deg. Quote 70 deg, 90 deg and 140 deg options; an FOV selection kit is acceptable for prototyping.",
-      "verdict": "PASS",
+      "mpn_status": "representative substitute; the required focal length is not fixed",
+      "rfq_spec": "M12 (S-mount) lens for a 1/4-inch IMX219 sensor. TARGET FOV IS NOT FIXED - Pollen's press kit says the camera FOV is 'still being finalised' and the only community figure is ~62 deg HFOV, unverified. Quote 70 deg, 90 deg and 140 deg options and state the FOV ON A 1/4-INCH SENSOR, not on the sensor the datasheet happens to use: the two lenses we have priced advertise 180 deg and 122 deg but deliver 118 deg and 110 deg diagonal on a 1/4-inch part. MECHANICAL LIMIT, MEASURED: the lens in Pollen's own published model is a body of revolution 16.9400 mm in diameter and 18.9200 mm long (out/verify/mech_dims.json, mesh `lens`), inside an m12_lens_holder of 24.0000 x 14.8000 x 16.0000 mm. Barrel diameter must not exceed 16.9400 mm. An FOV selection kit (e.g. Arducam LK001) is acceptable for prototyping and is what we would buy first.",
+      "verdict": "CANNOT DETERMINE",
       "offers": [
         {
           "vendor": "UCTRONICS",
-          "sku": "Arducam M40180H13L (LN180)",
-          "url": "https://www.uctronics.com/lens/m12-mount-lens.html?product_list_mode=list",
+          "sku": "Arducam M40180H13L (SKU LN180)",
+          "url": "https://www.uctronics.com/lens/m12-mount-lens/arducam-m12-mount-camera-lens-m40180h13l.html",
           "currency": "USD",
           "tiers": [
             [
@@ -615,14 +617,16 @@
           "moq": 1,
           "lead_time": "not stated",
           "stock": "not stated",
-          "fetched": "2026-09-02",
+          "fetched": "2026-09-03",
           "confidence": "read",
-          "note": "same page also read: M40205M11 (2.05 mm) $11.99, M27195H15 (1.95 mm) $9.99."
+          "note": "PRODUCT PAGE, read 2026-09-03 (the 2026-09-02 reading was the category page /lens/m12-mount-lens.html?product_list_mode=list, which is a listing, not this part's page). The page states: Optical Format 1/4\", EFL 1.8 mm, FOV on a 1/4\" sensor 122 deg D / 110 deg H / 94.5 deg V, FOV on a 1/4\" RPi camera 110 deg, F/NO 2.4, total length 17.23 mm, barrel 14 x 14.7 mm, holder height 13 mm, 6 g. The category page also priced M40205M11 (2.05 mm) $11.99 and M27195H15 (1.95 mm) $9.99; no stock figure is printed on either.",
+          "rollup_caveat": "prices ONE of three candidate focal lengths on an FOV that Pollen has not fixed ($7.99 / $9.99 / $11.99); the line is graded CANNOT DETERMINE",
+          "page_kind": "product"
         },
         {
           "vendor": "The Pi Hut (UK)",
-          "sku": "M12 fisheye 1.7 mm 180 deg (1/2.5-inch)",
-          "url": "https://thepihut.com/collections/raspberry-pi-camera-lenses",
+          "sku": "LN007 - M12 lens, 180 deg fisheye, 1/2.5 in, 1.7 mm",
+          "url": "https://thepihut.com/products/m12-lens-180-degree-fisheye-1-2-5-optical-format-1-7mm-focal-length",
           "currency": "GBP",
           "tiers": [
             [
@@ -633,10 +637,11 @@
           "no_tiers": true,
           "moq": 1,
           "lead_time": "not stated",
-          "stock": "listed",
-          "fetched": "2026-09-02",
+          "stock": "In stock",
+          "fetched": "2026-09-03",
           "confidence": "read",
-          "note": "same collection page also read: M12 75 deg GBP 14.40, 90 deg GBP 17.30, 140 deg GBP 21.20."
+          "note": "PRODUCT PAGE, read 2026-09-03 (the 2026-09-02 reading was the collection page /collections/raspberry-pi-camera-lenses). GBP 9.60 incl VAT, SKU LN007. The page states: optical format 1/2.5\", EFL 1.7 mm, FOV 180/180/140 deg D/H/V on a 1/2\" sensor but 118 deg on a 1/4\" Pi camera, F/NO 2.0, M12 thread, holder height 13 mm, body 20 x 18.7 mm, 8 g. MEASURED AGAINST OUR GEOMETRY: Pollen's own `lens` mesh is 16.9400 x 18.9200 x 16.9400 mm (out/verify/mech_dims.json, i.e. a body of revolution of diameter 16.9400 mm and length 18.9200 mm). This lens is 20.0000 mm across - 3.0600 mm LARGER in diameter than the part Pollen models - so it is not the modelled lens, whatever its FOV. The Arducam LN180 above is 14.7000 mm across x 17.2300 mm long and sits inside the modelled envelope with 2.2400 mm diametral and 1.6900 mm axial clearance. The collection page also priced M12 75 deg GBP 14.40, 90 deg GBP 17.30, 140 deg GBP 21.20.",
+          "page_kind": "product"
         }
       ],
       "alternates": [
@@ -649,9 +654,12 @@
         }
       ],
       "unknowns": [
-        "Required FOV: CANNOT DETERMINE. Until it is fixed this line is $0-11.99 per robot."
+        "Required FOV: CANNOT DETERMINE. Pollen's press kit says 'still being finalised'; the community figure is ~62 deg HFOV (docs/ELECTRONICS-AND-SOFTWARE.md:225, unverified). Until it is fixed this line is $0-11.99 per robot ($0 if the camera is bought as a bundle that includes a lens - B6's UCTRONICS B0183 and Pi Hut B0103 both do; the cheapest read B6 offer, Seeed 102110719 at $15.90, does NOT).",
+        "Neither priced lens is shown to be the fitted part. Measured: Pollen's `lens` mesh is 16.9400 mm diameter x 18.9200 mm long (out/verify/mech_dims.json). Arducam LN180 is 14.7000 x 17.2300 mm and fits inside it; Pi Hut LN007 is 20.0000 mm across and does not.",
+        "What is NOT measured here: the aperture in `face_part` the barrel passes through. The comparison above is against Pollen's own lens mesh, not against the hole. A 20.0000 mm barrel may or may not clash with the face; measuring that aperture would settle whether the Pi Hut lens is merely a different part or a physically impossible one."
       ],
-      "blocked": []
+      "blocked": [],
+      "verdict_why": "Downgraded from PASS on 2026-09-03 by the same standard that downgraded B12. Two distributors do carry a price on a real product page, but they price TWO DIFFERENT LENSES and neither is shown to be the right one. (1) Required FOV is CANNOT DETERMINE - Pollen's press kit says it is 'still being finalised' and the only community figure is ~62 deg HFOV (docs/ELECTRONICS-AND-SOFTWARE.md:225, flagged unverified). Both priced lenses are far wider than that: 110 deg (Arducam LN180) and 118 deg (Pi Hut LN007), both measured on a 1/4-inch sensor as the vendor pages state. (2) The Pi Hut part is 20.0000 mm across against Pollen's modelled `lens` at 16.9400 mm diameter (out/verify/mech_dims.json) - 3.0600 mm oversize, so it cannot be the modelled part. That leaves ONE candidate lens with one distributor, which is not a sourced line. The UCTRONICS price stays in Table 1 because it was read, and is broken out there as coming from a line this document does not grade buyable. What settles it: Pollen stating the FOV, or a lens measured off a production unit; then this line is one page away from PASS."
     },
     {
       "id": "B8",
@@ -1129,22 +1137,35 @@
         },
         {
           "vendor": "VXB (US)",
-          "sku": "MR6700 Ball Bearing 10x15x3mm Open",
-          "url": "https://vxb.com/search?q=MR6700",
+          "sku": "6700 Open (VXB SKU \"6700 Open\", UPC 00193019072509)",
+          "url": "https://vxb.com/products/6700-ball-bearing-10mm-x-15mm-x-3mm-single-row-ope",
           "currency": "USD",
           "tiers": [
             [
               1,
-              9.99
+              7.77
+            ],
+            [
+              10,
+              6.993
+            ],
+            [
+              20,
+              6.216
+            ],
+            [
+              100,
+              5.439
             ]
           ],
-          "no_tiers": true,
+          "no_tiers": false,
           "moq": 1,
-          "lead_time": "not stated",
-          "stock": "listed",
-          "fetched": "2026-09-02",
+          "lead_time": "\"Orders are currently taking 5-10 business days to process before shipping\" (page banner); OEM 1,000+ \"Lead Time is 30-60 Days\"",
+          "stock": "not stated as a number",
+          "fetched": "2026-09-03",
           "confidence": "read",
-          "note": "$9.99 sale, was $19.99. The same search page also lists '10x15x3mm Non-Standard Ball Bearing Shielded' at $19.99 and MR6700-ZZ / -2RS at 10x15x4 for $7.77."
+          "note": "PRODUCT PAGE, read 2026-09-03 by curl and parsed out of the page text (the 2026-09-02 reading was https://vxb.com/search?q=MR6700, a search-results page, and it carried $9.99 for a listing whose product page no longer resolves - https://vxb.com/products/mr6700-radial-ball-bearing-bore-dia-10mm-od-15mm-width-3mm returns 404). Page text verbatim: 'Regular price $7.77 Sale price $10.00 you save $2.23', 'SKU: 6700 Open', '10mm ID - 15mm OD - 3mm Wide - Open Type', chrome steel, dynamic 0.85 kN / static 0.44 kN, quantity 1 bearing. Tier schedule verbatim: 'Buy 10 You save 10%', 'Buy 20 You save 20%', 'Wholesale Buy Wholesale 100+ You save 30%', 'OEM Buy 1,000+ Only for Manufacturers (Lead Time is 30-60 Days)'. The tier unit prices recorded here are those percentages applied to the read $7.77: 6.9930 / 6.2160 / 5.4390. The 1,000+ OEM tier prints NO price, so it is CANNOT DETERMINE and this line's 1,000-robot column falls back to the 100+ tier.",
+          "page_kind": "product"
         }
       ],
       "alternates": [
@@ -1157,7 +1178,8 @@
         }
       ],
       "unknowns": [
-        "Open vs shielded at this width: CANNOT DETERMINE from the mesh (ce-parts/bearing-15x10x3/sourcing.json). The true width is community-measured, not measured on a unit."
+        "Open vs shielded at this width: CANNOT DETERMINE from the mesh (ce-parts/bearing-15x10x3/sourcing.json). The true width is community-measured, not measured on a unit.",
+        "VXB's 1,000+ tier is 'OEM ... Only for Manufacturers' with no price printed, so the 3,000-piece quantity a 1,000-robot build needs is priced at VXB's 100+ tier here, as a ceiling. Bearings Direct is cheaper at every quantity read, so this does not move the roll-up. What settles it: a VXB OEM quote."
       ],
       "blocked": [
         {
@@ -1224,7 +1246,8 @@
           "stock": "75",
           "fetched": "2026-09-02",
           "confidence": "read",
-          "note": "8 ohm, 2 W (2.5 W max), 82 dB. Body 39 x 20 x 8.2 mm - 4 mm LONGER and 1.2 mm THICKER than the cavity. Does not fit as drawn."
+          "note": "8 ohm, 2 W (2.5 W max), 82 dB. Body 39 x 20 x 8.2 mm - 4 mm LONGER and 1.2 mm THICKER than the cavity. Does not fit as drawn.",
+          "rollup_caveat": "the Soberton SPM-2035NU body is 39.0000 x 20.0000 x 8.2000 mm against a 35.0000 x 25.0000 x 7.0000 mm cavity - it does not fit as drawn. The line is graded CANNOT DETERMINE"
         },
         {
           "vendor": "DigiKey",
@@ -1683,7 +1706,8 @@
           "stock": "listed",
           "fetched": "2026-09-02",
           "confidence": "read",
-          "note": "read verbatim as pack prices: 5-pack GBP 0.90, 25-pack GBP 3.60; per-piece GBP 0.18 and GBP 0.144. 'All prices include 20% VAT'. The 25-pack is the largest pack this shop publishes - 3.3x RST-Versand's per-piece price at 100, so this is a second READING, not a second source of supply."
+          "note": "read verbatim as pack prices: 5-pack GBP 0.90, 25-pack GBP 3.60; per-piece GBP 0.18 and GBP 0.144. 'All prices include 20% VAT'. The 25-pack is the largest pack this shop publishes - 3.3x RST-Versand's per-piece price at 100, so this is a second READING, not a second source of supply.",
+          "page_kind": "family-table"
         }
       ],
       "alternates": [
@@ -1766,7 +1790,8 @@
           "fetched": "2026-09-02",
           "confidence": "read",
           "excluded_from_rollup": "prices ONE of the five sizes on this line; the line has no single unit price",
-          "note": "5-pack GBP 0.90, 25-pack GBP 3.60, inc 20 % VAT."
+          "note": "5-pack GBP 0.90, 25-pack GBP 3.60, inc 20 % VAT.",
+          "page_kind": "family-table"
         },
         {
           "vendor": "ModelFixings (UK)",
@@ -1790,7 +1815,8 @@
           "fetched": "2026-09-02",
           "confidence": "read",
           "excluded_from_rollup": "prices ONE of the five sizes on this line",
-          "note": "5-pack GBP 0.90, 25-pack GBP 3.60, inc 20 % VAT."
+          "note": "5-pack GBP 0.90, 25-pack GBP 3.60, inc 20 % VAT.",
+          "page_kind": "family-table"
         },
         {
           "vendor": "ModelFixings (UK)",
@@ -1814,7 +1840,8 @@
           "fetched": "2026-09-02",
           "confidence": "read",
           "excluded_from_rollup": "prices ONE of the five sizes on this line",
-          "note": "5-pack GBP 1.00, 25-pack GBP 4.00, inc 20 % VAT."
+          "note": "5-pack GBP 1.00, 25-pack GBP 4.00, inc 20 % VAT.",
+          "page_kind": "family-table"
         },
         {
           "vendor": "ModelFixings (UK)",
@@ -1834,7 +1861,8 @@
           "fetched": "2026-09-02",
           "confidence": "read",
           "excluded_from_rollup": "prices ONE of the five sizes on this line",
-          "note": "10-pack GBP 0.80, inc 20 % VAT. STEEL, BZP-plated - NOT the A2 stainless the rest of the schedule specifies. A different material in the same thread."
+          "note": "10-pack GBP 0.80, inc 20 % VAT. STEEL, BZP-plated - NOT the A2 stainless the rest of the schedule specifies. A different material in the same thread.",
+          "page_kind": "family-table"
         }
       ],
       "alternates": [
@@ -3402,7 +3430,8 @@
       "ask": "Quote MR1622 / ET2216 (16 x 22 x 4) at 11 / 1 100 / 11 000 pieces and MR6700 / 61700 (10 x 15 x 3, OPEN) at 3 / 300 / 3 000 pieces, in USD. The only USD figure we could read for the 16x22x4 is a factory RANGE of US$1.00-4.00 at MOQ 1 000 - a range is not a price.",
       "also_ask": [
         "Quote ZZ (shielded), 2RS and open for both sizes - which variant the product uses is unresolved.",
-        "State OD tolerance and roundness: both bearings are press-fit into printed PLA seats."
+        "State OD tolerance and roundness: both bearings are press-fit into printed PLA seats.",
+        "VXB prints a '1,000+ OEM, only for manufacturers, 30-60 day lead time' tier for the 10 x 15 x 3 open bearing with NO price on it. Please quote that tier as a number - it is the only quantity a 1,000-robot build actually needs (3,000 pieces) and it is the one figure the public pages do not carry."
       ]
     },
     {
@@ -3436,7 +3465,8 @@
       "ask": "Quote a 7.2 V 2S Li-ion pack in the Sony NP-F550 (L-series) form factor, >= 2600 mAh / 18.72 Wh, with integrated protection, at 1 / 100 / 1 000 packs, and the matching charger separately. Body must be 70 x 38 x 20 mm class (our cradle is cut to 38.6 x 20.6 x 70.8 mm).",
       "also_ask": [
         "State the cell make and model, the protection IC, the Wh rating and every certification mark on the label. The pack Pollen fits is unidentified and we cannot put an MPN on an order without this.",
-        "Confirm the pack sustains 6.6-8.2 V under a 15 A peak (15 servos x 1 A worst case)."
+        "Confirm the pack sustains 6.6-8.2 V under a 15 A peak (15 servos x 1 A worst case).",
+        "Both retail offers we could read are 2-pack-plus-charger sets ($49.90 NextBatteries, $49.99 Neewer 66600244), so our per-pack figure of ~$24.95 carries a charger we do not need one of per robot. Quote packs ALONE, and the charger separately, at 1 / 100 / 1 000."
       ]
     },
     {
@@ -3452,10 +3482,11 @@
         "B7",
         "B8"
       ],
-      "ask": "Quote an IMX219 M12-mount camera board at 1 / 100 / 1 000, with and without lens, plus a 22-pin 0.5 mm MIPI CSI FFC at ~15 mm. Seeed's 102110719 is the only line with a published tier (10+ at $12.50) - extend it to 100 and 1 000.",
+      "ask": "Quote an IMX219 M12-mount camera board at 1 / 100 / 1 000, with and without lens, plus a 22-pin 0.5 mm MIPI CSI FFC at ~15 mm. Seeed's 102110719 is the only line with a published tier (10+ at $12.50) - extend it to 100 and 1 000. For the lens (B7) specifically: we cannot choose one until the FOV is fixed, so quote by FOV ON A 1/4-INCH SENSOR and state the barrel outside diameter, which must not exceed 16.9400 mm (measured off Pollen's own lens mesh, out/verify/mech_dims.json). The two lenses we priced - Arducam M40180H13L at 14.7000 mm across and The Pi Hut LN007 at 20.0000 mm across - bracket that limit, and the second fails it.",
       "also_ask": [
         "Does B0183 ship WITH the M12 lens? UCTRONICS' package list says yes; The Engineer Store's page for the same SKU says the lens is separate.",
-        "What is the shortest 22-pin 0.5 mm FFC you make? We need ~15 mm and no catalogue part that short was findable."
+        "What is the shortest 22-pin 0.5 mm FFC you make? We need ~15 mm and no catalogue part that short was findable.",
+        "For each M12 lens you quote: the barrel outside diameter and total length in mm, and the diagonal / horizontal / vertical FOV measured on a 1/4-inch sensor."
       ]
     },
     {
