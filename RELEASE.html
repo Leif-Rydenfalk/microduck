@@ -126,6 +126,7 @@
   <a href="#assembly"><span class="tn">4</span>Assembly — full sequence</a>
   <a href="#wiring"><span class="tn">5</span>Wiring</a>
   <a href="#power"><span class="tn">6</span>Power-up &amp; verification</a>
+  <a href="TEST-PLAN.html"><span class="tn">&#9670;</span>Test &amp; validation plan</a>
   <a href="#gap"><span class="tn">7</span>What remains for factory</a>
 </nav>
 
@@ -143,6 +144,7 @@
       <tr><td>Electronics — custom PCBs</td><td><span class="st no">Not ready</span></td><td>Robot HAT, imu_to_dxl and battery-contact PCB: footprint-accurate stand-ins; the HAT's connectors/regulators are reconstructed.</td><td>No published schematic/Gerbers. A real board design + fab is required.</td></tr>
       <tr><td>Assembly definition</td><td><span class="st ready">Ready</span></td><td>Full step-by-step sequence (§4), servo IDs, bearing seats, fastener counts, wiring — from the measured joints.</td><td>Fastener counts are community-derived (flagged); torque unspecified by Pollen.</td></tr>
       <tr><td>BOM &amp; sourcing</td><td><span class="st partial">Partial</span></td><td>All bought lines with vendors (§2); cost roll-up in <a href="docs/PRODUCTION.html">PRODUCTION.md</a>.</td><td>Several prices and the exact fitted speaker/mic/NFC/camera modules are CANNOT DETERMINE.</td></tr>
+      <tr><td>Test &amp; validation</td><td><span class="st ready">Ready</span></td><td>Full bring-up, calibration, sensor, control-loop and walk-acceptance procedure with pass/fail gates (<a href="TEST-PLAN.html">TEST-PLAN</a>), generated from <code>spec/test-plan.json</code>. Every gate names its basis: vendor datasheet, Pollen source, our simulation, or a decision of the plan.</td><td>Untried &mdash; no unit has been built, so no gate has been exercised. The walk gate is 75&nbsp;% of a simulated distance and that fraction is a decision, not a measurement.</td></tr>
       <tr><td>Simulation / validation</td><td><span class="st ready">Ready</span></td><td>MuJoCo runs Pollen's walk / sit-stand policies on our meshes; stock-vs-ours trajectories bit-identical.</td><td>Visual photo-vs-CAD conformance now documented (<a href="COMPARISON.html">reference match</a>); a physical laser-scan metrology check is still not done.</td></tr>
     </tbody>
   </table></div>
@@ -317,8 +319,13 @@
 
 <section id="power">
   <h2 class="sec"><span class="tn">6</span>Power-up &amp; verification</h2>
+  <p class="lead">The four steps below are the short form. The full procedure &mdash; 35 numbered tests
+  from a never-powered robot to one that has walked, each with a pass/fail gate, the instrument it
+  needs and the log it leaves behind &mdash; is <a href="TEST-PLAN.html"><b>TEST-PLAN.html</b></a>.
+  It also carries the end-of-line checklist and the 12 questions a built unit answers that no
+  document can.</p>
   <ol class="instr">
-    <li>Fit the NP-F550. Servo-bus VDD is battery-direct through the HAT; the runtime reads pack voltage as the servos' own supply.</li>
+    <li>Fit the NP-F550. The runtime reads pack voltage through the servos' own <code>Present Input Voltage(144)</code> register (<code>model.rs:99&ndash;113</code>), which is consistent with servo VDD being battery-direct through the HAT &mdash; but that is an <b>inference from Pollen's code, not a measurement</b>. Whether production servos see the raw 6.6&ndash;8.4&nbsp;V pack, above the XL330's published 3.7&ndash;6.0&nbsp;V rating, is <b>CANNOT DETERMINE</b>; <a href="TEST-PLAN.html#EB-04">TEST-PLAN&nbsp;EB-04</a> is the meter that settles it.</li>
     <li>Scan the bus — expect IDs 10–14, 20–24, 30–34 and <b>200</b> (imu_to_dxl). The runtime asserts <code>return_delay_time=0</code>, <code>baud_rate=3</code>, <code>pwm_slope=255</code>, <code>shutdown=52</code> at boot.</li>
     <li>Verify each joint range against the MJCF (e.g. left hip-yaw −25…+30°) before loading a policy.</li>
     <li>Load a policy: the shipped ONNX walk / sit-stand policies run at 50&nbsp;Hz. Our meshes have been validated against Pollen's physics in simulation (§3.4).</li>
