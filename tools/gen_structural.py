@@ -88,7 +88,7 @@ def fea_studies():
 
 # ---------------------------------------------------------------------------
 def sec_verdict(L, feas, drop, fat, conv, mats, meshab):
-    solved = [r for r in feas if (r.get("outputs") or {}).get("sf") is not None]
+    solved = [r for r in feas if (r.get("outputs") or {}).get("sf") is not None and r.get("verdict") in ("PASS", "FAIL")]   # a CANNOT DETERMINE never governs
     fails = [r for r in feas if r.get("verdict") == "FAIL"]
     cds = [r for r in feas if r.get("verdict") == "CANNOT DETERMINE"]
     passes = [r for r in feas if r.get("verdict") == "PASS"]
