@@ -241,14 +241,7 @@ def main(solid_only=False):
     man = json.load(open(os.path.join(ROOT, "out/print/stl_manifest.json")))
     sl = {p["slug"]: p for p in json.load(open(os.path.join(ROOT, "out/print/slice.json")))["parts"]}
     res = {
-        "$comment": (
-            "DFM measured 2026-09-02 by tools/measure_dfm.py under ce-cad/bin/cad. "
-            "Mesh block: read off the exact binary STL that ce-slice sliced. Overhang "
-            "is facet-normal geometry, not an estimate; beta is the facet's angle to "
-            "the build plate, beta<30 deg is BambuStudio's default support threshold. "
-            "Wall is internal ray casting, min/p1/p5/median over a seeded sample; the "
-            "MIN of a triangulated shell is usually a chamfer knife-edge, p5 is the "
-            "honest wall. Solid block: cecad on the parametric rebuild only."),
+        "$comment": "DFM measured 2026-09-02 by tools/measure_dfm.py under ce-cad/bin/cad. Mesh block: read off the exact binary STL that ce-slice sliced. Overhang is facet-normal geometry, not an estimate; beta is the facet's angle to the build plate, and beta<30 deg is the slicer's own support threshold (support_threshold_angle = 30 in 0.20mm Standard @BBL H2S). Facets LYING ON THE BUILD PLATE - highest vertex within one 0.2 mm layer of the model's lowest point - are excluded from every overhang count and reported as bed_contact_area_mm2, because a part's own footprint is the first layer and not an overhang; all fractions are of the remaining surface. The overhang figures are an UPPER BOUND: a down-face landing on material printed below it in an earlier layer is still counted, because nothing here simulates layers. Wall is internal ray casting, min/p1/p5/median over a seeded sample; the MIN of a triangulated shell is usually a chamfer knife-edge, p5 is the honest wall, and on a part with no cavity the ray crosses the whole body so a large figure means 'no thin wall here'. Solid block: cecad on the parametric rebuild only.",
         "generated": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "sample_rays": SAMPLE_N, "seed": SEED,
         "parts": {},

@@ -161,6 +161,11 @@
    "what": "out/print/stl_manifest.json marks 8 slugs \"our parametric rebuild (latest PASS refcheck ours.stl)\" and 22 \"vendor mesh (Pollen reference asset, loaded as-is)\"; ce-parts/*/component.json now records 20 slugs at origin=generated, verdict=PASS. The 12-slug difference is the set rebuilt AFTER the STLs were exported at 2026-09-02 02:40.",
    "where": "out/print/stl_manifest.json + ce-parts/*/component.json",
    "date": "2026-09-02"
+  },
+  "STALEDELTA": {
+   "what": "the twelve stale slugs' parametric rebuilds sliced on the same machine, process, filament and --orient flags as out/print/slice.json; per-part and per-robot deltas",
+   "where": "out/playbook/stale-stl-delta.json, sliced through mcp ce-slice slice_part 2026-09-02",
+   "date": "2026-09-02"
   }
  },
  "rates": {
@@ -644,8 +649,8 @@
   {
    "item": "The print files are stale for 12 of 30 slugs",
    "state": "FAIL",
-   "settles": "Re-export the STLs from the current parametric rebuilds and re-slice both plates. The twelve are ankle-left, ankle-right, foot-left, foot-right, hip-bracket, motor-support, neck-pitch-bracket, neck-plate, sole-left, sole-right, upper-leg-rigidity-plate and yaw-roll-motion: each has a PASSed parametric rebuild in ce-parts today, and the STL sitting in out/print/stl/ for it is still Pollen's vendor mesh, exported before those rebuilds landed.",
-   "consequence": "A shop handed this repository today would print the vendor mesh for those twelve, not our rebuild. Every gram, second, cost and overhang figure in sections 2, 3 and 4 is therefore correct FOR THE FILE ON DISK and not necessarily for the current design of those twelve parts. This is the one item in this playbook that blocks a build rather than merely qualifying it."
+   "settles": "Re-export the STLs from the current parametric rebuilds and re-slice both plates. The twelve are ankle-left, ankle-right, foot-left, foot-right, hip-bracket, motor-support, neck-pitch-bracket, neck-plate, sole-left, sole-right, upper-leg-rigidity-plate and yaw-roll-motion: each has a PASSed parametric rebuild in ce-parts today, and the STL sitting in out/print/stl/ for it is still Pollen's vendor mesh, exported before those rebuilds landed. The rebuilt STLs already exist at out/dfm/stl-rebuilt/ (another lane's export), so this is a re-slice and a re-plate, not a re-model.",
+   "consequence": "Measured, not assumed: \u00a74.3 slices all twelve rebuilds on the same presets. Across a robot the difference is -4.90 g and -0.19 h (-2.0 % and -1.5 %), so \u00a72's costs and break-evens do not move. But four slugs differ by 5 % or more - foot-left and foot-right at -15.7 % mass, motor-support at -15.5 %, yaw-roll-motion at +12.3 % mass and +21.2 % time, and hip-bracket at -24.1 % time - and for those \u00a73's overhang and wall figures and \u00a74.2's orientation describe a shape the design no longer has."
   },
   {
    "item": "Torque schedule",

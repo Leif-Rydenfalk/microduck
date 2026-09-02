@@ -34,6 +34,7 @@ D = load("tools/data/playbook.json")
 SLICE = load("out/print/slice.json")
 DFM = load("out/dfm/dfm.json")
 JIGS = load("out/jigs/jigs.json")
+STALE = load("out/playbook/stale-stl-delta.json")
 
 E = html.escape
 R = D["rates"]
@@ -691,6 +692,41 @@ choice, not a measurement, and it is the only one in this document — everythin
 tables is read off the geometry. ce-slice&rsquo;s own auto-orient searches all rotations rather than
 the six axes, so where the sliced rule differs from both columns it is not necessarily
 wrong.</div>''' % SLENDER_K)
+
+if STALE:
+    t = STALE["totals"]
+    A('<h3>4.3 What the stale print files cost, measured</h3>')
+    A('''<p>§8 says the STL for twelve of the thirty slugs predates that part&rsquo;s parametric rebuild.
+That is a defect whether or not it is expensive, but it is worth knowing which. Each of the twelve
+rebuilds — exported to <code>out/dfm/stl-rebuilt/</code> — was sliced on <b>exactly</b> the presets
+and flags that produced §2 (<code>--orient 1 --allow-rotations</code>, same machine, same process,
+same filament), so the two columns are comparable. Both are the slicer&rsquo;s own numbers.</p>''')
+    rows = []
+    for r in STALE["rows"]:
+        rows.append([
+            td('<code>%s</code>%s' % (E(r["slug"]), " ×%d" % r["qty"] if r["qty"] > 1 else ""), "pn"),
+            td(r["material"]),
+            td("%.4f" % r["disk_g"], "num"), td("%.4f" % r["rebuilt_g"], "num"),
+            td(("<b>%+.2f %%</b>" if abs(r["d_g_pct"]) >= 5 else "%+.2f %%") % r["d_g_pct"], "num"),
+            td("%.1f" % r["disk_s"], "num"), td("%.1f" % r["rebuilt_s"], "num"),
+            td(("<b>%+.2f %%</b>" if abs(r["d_s_pct"]) >= 5 else "%+.2f %%") % r["d_s_pct"], "num"),
+        ])
+    A(tbl(["part", "mat", "g on disk", "g rebuilt", "Δg", "s on disk", "s rebuilt", "Δs"],
+          rows, cls="data tight"))
+    big = [r for r in STALE["rows"] if abs(r["d_g_pct"]) >= 5 or abs(r["d_s_pct"]) >= 5]
+    A('''<div class="verdict warn"><b>Small in the aggregate, large in three places.</b> Across a whole
+robot the twelve stale files are worth <b>%+.2f g</b> and <b>%+.3f h</b> — %+.2f %% of the %.2f g and
+%+.2f %% of the %.2f h in §2. So §2&rsquo;s costs and §2.3&rsquo;s break-evens do not move.
+<b>%d of the twelve differ by 5 %% or more on mass or on time</b>: %s. For those, §3&rsquo;s overhang and
+wall figures and §4.2&rsquo;s orientation are describing a shape the design no longer has. Re-export and
+re-slice before a production run; the geometry to do it with already exists.</div>'''
+      % (t["delta_grams_per_robot"], t["delta_hours_per_robot"],
+         100.0 * t["delta_grams_per_robot"] / t["robot_grams_on_disk"], t["robot_grams_on_disk"],
+         100.0 * t["delta_hours_per_robot"] / t["robot_hours_on_disk"], t["robot_hours_on_disk"],
+         len(big),
+         ", ".join("<code>%s</code> (%+.1f %% g, %+.1f %% s)"
+                   % (E(r["slug"]), r["d_g_pct"], r["d_s_pct"]) for r in big)))
+
 A("</section>")
 
 # ---- 5 -------------------------------------------------------------------
