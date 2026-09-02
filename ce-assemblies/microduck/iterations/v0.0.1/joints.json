@@ -4,7 +4,7 @@
  "generated_by": "cecad.mjcfseed",
  "record": {
   "ref": "assembly:microduck",
-  "how": "one row per MJCF hinge. Side a is the XL330 instance nearest the joint origin in the parent/child body; side b is FOUND BY MEASUREMENT: the placed interface accepting the connection that lies on the joint axis (< 2 mm). Unresolved sides are null and named in `todo`.",
+  "how": "one row per MJCF hinge. Side a is the XL330 instance nearest the joint origin in the parent/child body; side b is FOUND BY MEASUREMENT: the placed interface accepting the connection that lies on the joint axis (< 2 mm), searched in the CHILD body first and then in the PARENT \u2014 because on this machine four hinges put the servo in the child link and bolt its horn to a bracket in the parent. Every row records `in_body` and `side_of_joint`, and any other on-axis candidate under `other_candidates_on_axis`. Unresolved sides are null and named in `todo`.",
   "rows": [
    {
     "connection": "connection:spline-xl330-horn",
@@ -16,8 +16,12 @@
      "measured": "xl330 geom centre 12.50 mm from the joint origin"
     },
     "b": {
-     "ref": null,
-     "interface": null
+     "ref": "part:microduck-yaw2roll",
+     "interface": "yaw_horn",
+     "instance": 10,
+     "in_body": "yaw2roll",
+     "side_of_joint": "child",
+     "measured": "interface origin 0.000 mm off the joint axis after placement, in the child body 'yaw2roll'"
     },
     "params": {
      "joint": "left_hip_yaw",
@@ -40,7 +44,7 @@
      "actuated": true
     },
     "why": "MJCF hinge left_hip_yaw: trunk_base -> yaw2roll, an XL330 output on the parent side turning the child link",
-    "resolved": false
+    "resolved": true
    },
    {
     "connection": "connection:spline-xl330-horn",
@@ -52,8 +56,12 @@
      "measured": "xl330 geom centre 16.50 mm from the joint origin"
     },
     "b": {
-     "ref": null,
-     "interface": null
+     "ref": "part:microduck-hip-bracket",
+     "interface": "roll_horn",
+     "instance": 15,
+     "in_body": "hip_l",
+     "side_of_joint": "child",
+     "measured": "interface origin 0.000 mm off the joint axis after placement, in the child body 'hip_l'"
     },
     "params": {
      "joint": "left_hip_roll",
@@ -76,7 +84,7 @@
      "actuated": true
     },
     "why": "MJCF hinge left_hip_roll: yaw2roll -> hip_l, an XL330 output on the parent side turning the child link",
-    "resolved": false
+    "resolved": true
    },
    {
     "connection": "connection:spline-xl330-horn",
@@ -88,8 +96,12 @@
      "measured": "xl330 geom centre 12.50 mm from the joint origin"
     },
     "b": {
-     "ref": null,
-     "interface": null
+     "ref": "part:microduck-hip-bracket",
+     "interface": "pitch_horn",
+     "instance": 15,
+     "in_body": "hip_l",
+     "side_of_joint": "parent",
+     "measured": "interface origin 0.000 mm off the joint axis after placement, in the parent body 'hip_l'"
     },
     "params": {
      "joint": "left_hip_pitch",
@@ -112,7 +124,7 @@
      "actuated": true
     },
     "why": "MJCF hinge left_hip_pitch: hip_l -> upper_leg_left, an XL330 output on the parent side turning the child link",
-    "resolved": false
+    "resolved": true
    },
    {
     "connection": "connection:spline-xl330-horn",
@@ -127,7 +139,9 @@
      "ref": "part:microduck-shin",
      "interface": "knee",
      "instance": 21,
-     "measured": "interface origin 0.000 mm off the joint axis after placement"
+     "in_body": "leg",
+     "side_of_joint": "child",
+     "measured": "interface origin 0.000 mm off the joint axis after placement, in the child body 'leg'"
     },
     "params": {
      "joint": "left_knee",
@@ -162,8 +176,12 @@
      "measured": "xl330 geom centre 14.50 mm from the joint origin"
     },
     "b": {
-     "ref": null,
-     "interface": null
+     "ref": "part:microduck-ankle-left",
+     "interface": "ankle_horn",
+     "instance": 26,
+     "in_body": "ankle_left",
+     "side_of_joint": "child",
+     "measured": "interface origin 0.000 mm off the joint axis after placement, in the child body 'ankle_left'"
     },
     "params": {
      "joint": "left_ankle",
@@ -186,7 +204,7 @@
      "actuated": true
     },
     "why": "MJCF hinge left_ankle: leg -> ankle_left, an XL330 output on the parent side turning the child link",
-    "resolved": false
+    "resolved": true
    },
    {
     "connection": "connection:spline-xl330-horn",
@@ -198,10 +216,22 @@
      "measured": "xl330 geom centre 14.50 mm from the joint origin"
     },
     "b": {
-     "ref": "part:microduck-neck-plate",
-     "interface": "neck_pitch",
-     "instance": 30,
-     "measured": "interface origin 0.000 mm off the joint axis after placement"
+     "ref": "part:microduck-trunk-shell-left",
+     "interface": "neck_horn",
+     "instance": 8,
+     "in_body": "trunk_base",
+     "side_of_joint": "parent",
+     "measured": "interface origin 0.000 mm off the joint axis after placement, in the parent body 'trunk_base'",
+     "other_candidates_on_axis": [
+      {
+       "ref": "part:microduck-trunk-shell-right",
+       "interface": "neck_horn",
+       "in_body": "trunk_base",
+       "side_of_joint": "parent",
+       "off_axis_mm": 0.0785
+      }
+     ],
+     "chosen_because": "nearest to the joint axis among 2 interfaces accepting connection:spline-xl330-horn within 2 mm, child body preferred over parent"
     },
     "params": {
      "joint": "neck_pitch",
@@ -237,9 +267,21 @@
     },
     "b": {
      "ref": "part:microduck-neck-pitch-bracket",
-     "interface": "head_pitch",
+     "interface": "pitch_horn_right",
      "instance": 31,
-     "measured": "interface origin 0.000 mm off the joint axis after placement"
+     "in_body": "neck_pitch",
+     "side_of_joint": "child",
+     "measured": "interface origin 0.000 mm off the joint axis after placement, in the child body 'neck_pitch'",
+     "other_candidates_on_axis": [
+      {
+       "ref": "part:microduck-neck-pitch-bracket",
+       "interface": "pitch_horn_left",
+       "in_body": "neck_pitch",
+       "side_of_joint": "child",
+       "off_axis_mm": 0.0001
+      }
+     ],
+     "chosen_because": "nearest to the joint axis among 2 interfaces accepting connection:spline-xl330-horn within 2 mm, child body preferred over parent"
     },
     "params": {
      "joint": "head_pitch",
@@ -274,8 +316,12 @@
      "measured": "xl330 geom centre 14.50 mm from the joint origin"
     },
     "b": {
-     "ref": null,
-     "interface": null
+     "ref": "part:microduck-neck-pitch-bracket",
+     "interface": "yaw_horn_top",
+     "instance": 31,
+     "in_body": "neck_pitch",
+     "side_of_joint": "parent",
+     "measured": "interface origin 0.000 mm off the joint axis after placement, in the parent body 'neck_pitch'"
     },
     "params": {
      "joint": "head_yaw",
@@ -298,7 +344,7 @@
      "actuated": true
     },
     "why": "MJCF hinge head_yaw: neck_pitch -> yaw_roll_motion, an XL330 output on the parent side turning the child link",
-    "resolved": false
+    "resolved": true
    },
    {
     "connection": "connection:spline-xl330-horn",
@@ -313,7 +359,19 @@
      "ref": "part:microduck-motor-support",
      "interface": "head_roll",
      "instance": 41,
-     "measured": "interface origin 0.000 mm off the joint axis after placement"
+     "in_body": "jaw_soft",
+     "side_of_joint": "child",
+     "measured": "interface origin 0.000 mm off the joint axis after placement, in the child body 'jaw_soft'",
+     "other_candidates_on_axis": [
+      {
+       "ref": "part:microduck-motor-support",
+       "interface": "mouth_servo",
+       "in_body": "jaw_soft",
+       "side_of_joint": "child",
+       "off_axis_mm": 0.01
+      }
+     ],
+     "chosen_because": "nearest to the joint axis among 2 interfaces accepting connection:spline-xl330-horn within 2 mm, child body preferred over parent"
     },
     "params": {
      "joint": "head_roll",
@@ -348,8 +406,12 @@
      "measured": "xl330 geom centre 12.50 mm from the joint origin"
     },
     "b": {
-     "ref": null,
-     "interface": null
+     "ref": "part:microduck-yaw2roll",
+     "interface": "yaw_horn",
+     "instance": 53,
+     "in_body": "bearing_roll",
+     "side_of_joint": "child",
+     "measured": "interface origin 0.000 mm off the joint axis after placement, in the child body 'bearing_roll'"
     },
     "params": {
      "joint": "right_hip_yaw",
@@ -372,7 +434,7 @@
      "actuated": true
     },
     "why": "MJCF hinge right_hip_yaw: trunk_base -> bearing_roll, an XL330 output on the parent side turning the child link",
-    "resolved": false
+    "resolved": true
    },
    {
     "connection": "connection:spline-xl330-horn",
@@ -384,8 +446,12 @@
      "measured": "xl330 geom centre 16.50 mm from the joint origin"
     },
     "b": {
-     "ref": null,
-     "interface": null
+     "ref": "part:microduck-hip-bracket",
+     "interface": "roll_horn",
+     "instance": 57,
+     "in_body": "hip_l_2",
+     "side_of_joint": "child",
+     "measured": "interface origin 0.000 mm off the joint axis after placement, in the child body 'hip_l_2'"
     },
     "params": {
      "joint": "right_hip_roll",
@@ -408,7 +474,7 @@
      "actuated": true
     },
     "why": "MJCF hinge right_hip_roll: bearing_roll -> hip_l_2, an XL330 output on the parent side turning the child link",
-    "resolved": false
+    "resolved": true
    },
    {
     "connection": "connection:spline-xl330-horn",
@@ -420,8 +486,12 @@
      "measured": "xl330 geom centre 12.50 mm from the joint origin"
     },
     "b": {
-     "ref": null,
-     "interface": null
+     "ref": "part:microduck-hip-bracket",
+     "interface": "pitch_horn",
+     "instance": 57,
+     "in_body": "hip_l_2",
+     "side_of_joint": "parent",
+     "measured": "interface origin 0.000 mm off the joint axis after placement, in the parent body 'hip_l_2'"
     },
     "params": {
      "joint": "right_hip_pitch",
@@ -444,7 +514,7 @@
      "actuated": true
     },
     "why": "MJCF hinge right_hip_pitch: hip_l_2 -> upper_leg_right, an XL330 output on the parent side turning the child link",
-    "resolved": false
+    "resolved": true
    },
    {
     "connection": "connection:spline-xl330-horn",
@@ -459,7 +529,9 @@
      "ref": "part:microduck-shin",
      "interface": "knee",
      "instance": 65,
-     "measured": "interface origin 0.000 mm off the joint axis after placement"
+     "in_body": "leg_2",
+     "side_of_joint": "child",
+     "measured": "interface origin 0.000 mm off the joint axis after placement, in the child body 'leg_2'"
     },
     "params": {
      "joint": "right_knee",
@@ -494,8 +566,12 @@
      "measured": "xl330 geom centre 14.50 mm from the joint origin"
     },
     "b": {
-     "ref": null,
-     "interface": null
+     "ref": "part:microduck-ankle-right",
+     "interface": "ankle_horn",
+     "instance": 66,
+     "in_body": "ankle_right",
+     "side_of_joint": "child",
+     "measured": "interface origin 0.000 mm off the joint axis after placement, in the child body 'ankle_right'"
     },
     "params": {
      "joint": "right_ankle",
@@ -518,21 +594,11 @@
      "actuated": true
     },
     "why": "MJCF hinge right_ankle: leg_2 -> ankle_right, an XL330 output on the parent side turning the child link",
-    "resolved": false
+    "resolved": true
    }
   ],
-  "todo": [
-   "left_hip_yaw: no placed part in body 'yaw2roll' declares an interface accepting connection:spline-xl330-horn on the axis",
-   "left_hip_roll: no placed part in body 'hip_l' declares an interface accepting connection:spline-xl330-horn on the axis",
-   "left_hip_pitch: no placed part in body 'upper_leg_left' declares an interface accepting connection:spline-xl330-horn on the axis",
-   "left_ankle: no placed part in body 'ankle_left' declares an interface accepting connection:spline-xl330-horn on the axis",
-   "head_yaw: no placed part in body 'yaw_roll_motion' declares an interface accepting connection:spline-xl330-horn on the axis",
-   "right_hip_yaw: no placed part in body 'bearing_roll' declares an interface accepting connection:spline-xl330-horn on the axis",
-   "right_hip_roll: no placed part in body 'hip_l_2' declares an interface accepting connection:spline-xl330-horn on the axis",
-   "right_hip_pitch: no placed part in body 'upper_leg_right' declares an interface accepting connection:spline-xl330-horn on the axis",
-   "right_ankle: no placed part in body 'ankle_right' declares an interface accepting connection:spline-xl330-horn on the axis"
-  ],
-  "resolved": 5,
+  "todo": [],
+  "resolved": 14,
   "total": 14
  }
 }
