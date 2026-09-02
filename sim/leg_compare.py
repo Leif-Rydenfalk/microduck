@@ -21,11 +21,30 @@ OUT = LS.OUT
 IMG = os.path.join(ROOT, "images", "store")
 
 
-def tile(px, cap, W):
+def autocrop(im, thr=244, pad=0.03):
+    """crop to the non-white content so ours and the photo are compared at the same
+    subject size instead of at whatever margin each happens to carry."""
+    a = np.asarray(im.convert("L"))
+    ys, xs = np.where(a < thr)
+    if len(xs) == 0:
+        return im
+    px = int(pad * im.size[0]); py = int(pad * im.size[1])
+    return im.crop((max(0, xs.min() - px), max(0, ys.min() - py),
+                    min(im.size[0], xs.max() + px), min(im.size[1], ys.max() + py)))
+
+
+def tile(px, cap, W, H=None):
     im = Image.fromarray(px) if isinstance(px, np.ndarray) else px
-    im = im.convert("RGB")
-    s = W / im.size[0]
-    im = im.resize((W, int(im.size[1] * s)), Image.LANCZOS)
+    im = autocrop(im.convert("RGB"))
+    if H:                                   # match subject HEIGHT across the pair
+        s = H / im.size[1]
+        im = im.resize((max(1, int(im.size[0] * s)), H), Image.LANCZOS)
+        pad = Image.new("RGB", (W, H), (255, 255, 255))
+        pad.paste(im, ((W - im.size[0]) // 2, 0))
+        im = pad
+    else:
+        s = W / im.size[0]
+        im = im.resize((W, int(im.size[1] * s)), Image.LANCZOS)
     out = Image.new("RGB", (W, im.size[1] + 34), (255, 255, 255))
     out.paste(im, (0, 0))
     d = ImageDraw.Draw(out)
@@ -34,9 +53,9 @@ def tile(px, cap, W):
     return out
 
 
-def side_by_side(name, ours, photo_path, cap_l, cap_r, title, W=620):
-    a = tile(ours, cap_l, W)
-    b = tile(Image.open(photo_path), cap_r, W)
+def side_by_side(name, ours, photo_path, cap_l, cap_r, title, W=620, H=760):
+    a = tile(ours, cap_l, W, H)
+    b = tile(Image.open(photo_path), cap_r, W, H)
     H = max(a.size[1], b.size[1])
     im = Image.new("RGB", (W * 2 + 12, H + 46), (255, 255, 255))
     d = ImageDraw.Draw(im)
@@ -63,7 +82,11 @@ def main():
                                      os.path.join(IMG, "store_microduck-cream-standing-profile-left.jpg"),
                                      "OURS — MuJoCo studio, our rebuilt meshes, az 270 el -4 d 0.44 m",
                                      "REAL — store_microduck-cream-standing-profile-left.jpg",
-                                     "Standing, left profile — our CAD vs the product photo")))
+                                     "Standing, left profile — our CAD vs the product photo. Leg chain matches part for part: "
+                                     "hip bracket, thigh + rigidity plate, knee servo, shin, ankle servo, two-plate foot. "
+                                     "Colours are Pollen's MJCF material palette (dev-unit teal/yellow), not the retail "
+                                     "cream/orange. The HEAD shape difference is the open finding of COMPARISON.html \u00a75 "
+                                     "item 1 (lane A), not a leg finding.")))
     # --- sitting: the deepest-trunk frame of the sit-stand policy run ---
     ss = np.load(os.path.join(ROOT, "out", "sim", "sitstand_ours_traj.npz"))
     k = int(np.argmin(ss["trunk_z"]))
@@ -80,7 +103,8 @@ def main():
                                      os.path.join(IMG, "store_microduck-cream-sitting-three-quarter_1.png"),
                                      "OURS — sit-stand policy at its deepest, az 225 el -6 d 0.40 m",
                                      "REAL — store_microduck-cream-sitting-three-quarter_1.png",
-                                     "Sitting — our sit-stand simulation vs the product photo")))
+                                     "Sitting — our sit-stand simulation vs the product photo. Same posture: hips rolled out, knees "
+                                     "folded forward, soles flat on the floor either side of the trunk, thigh plate outboard.")))
     json.dump(out, open(os.path.join(OUT, "legs_compare.json"), "w"), indent=1)
 
 
