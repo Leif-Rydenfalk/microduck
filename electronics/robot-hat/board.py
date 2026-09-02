@@ -44,10 +44,18 @@ OUR RECONSTRUCTION DECISIONS (each one a fact Pollen has not published):
   D4  3.3 V rails: HAT_3V3 from 40-pin pin 1 and J5_3V3 from pin 17 — both
       '+3.3V' per [brief] p.6 / part:radxa-zero-3w header_40pin. Whether the
       real HAT does this or regulates its own: CANNOT DETERMINE.
-  D5  1.8 V: NOT SOLVED. The codec's DVDD (1.525-1.95 V) lands on test point
-      TP1. The real HAT must carry a 1.8 V regulator nobody has published;
-      this board says so instead of inventing one. The codec will not run
-      until a 1.8 V source is fitted to TP1.
+  D5  1.8 V: NOT SOLVED, and now known to be UNSOLVABLE FROM THE HEADER. The
+      codec's DVDD (1.525-1.95 V) lands on test point TP1.
+      MEASURED 2026-09-02 (lane D): the Radxa ZERO 3W's 40-pin table (product
+      brief RAD-DOC-0084 §6.1, read in full) offers exactly three kinds of
+      supply pin — '+3.3V' on 1 and 17, '+5.0V' on 2 and 4, and 'GND' on 6,
+      9, 14, 20, 25, 30, 34 and 39. The strings '1.8V' and '1V8' appear
+      NOWHERE in the document. So firmware.json's open question — "three
+      domains means the HAT carries at least one 1.8 V regulator or uses the
+      Radxa's; neither is published" — loses its second branch: the header
+      cannot supply 1.8 V, so a HAT that runs this codec MUST make its own.
+      This board still refuses to invent that regulator; TP1 is the honest
+      gap, and it is now a gap with a known shape.
   D6  Audio: speaker on HPLOUT/HPLCOM (pins 19/20 — the drivers TI specifies
       into 16 ohm; line-out is specified into 10 k), mic on MIC2R (pin 16).
       The community's 'Mic3R' does not exist on this chip (0 hits in SLAS510G).
@@ -553,7 +561,7 @@ def build(self_test=None, publish=True, verbose=True):
     b.attach("MIC_IN", "U1.16")              # D6: MIC2R/LINE2R, pin 16
     b.attach("SPK_P", "U1.19")               # D6: HPLOUT
     b.attach("SPK_N", "U1.20")               # D6: HPLCOM
-    b.attach("HAT_1V8", "TP1.1")             # D5
+    b.attach("HAT_1V8", "TP1.1")             # D5 — see the header table above
     # decoupling
     b.attach("HAT_3V3", "C4.1"); b.attach("GND", "C4.2")     # AVDD/DRVDD
     b.attach("HAT_1V8", "C5.1"); b.attach("GND", "C5.2")     # DVDD
