@@ -347,9 +347,10 @@ def main():
               f'<td><strong>{esc(defect)}</strong></td><td>{esc(wrong)}</td>'
               f'<td>{esc(caught)}</td><td>{esc(fix)}</td></tr>')
         A('</tbody></table>')
-        A('<p class="fig-cap">Table 1.1. Five defects measured in this lane&rsquo;s own '
-          'work and closed. Three were caught by the design-rule check or by a '
-          'measurement; two were caught by asking a question the check does not ask.</p>')
+        A(f'<p class="fig-cap">Table 1.1. {len(corr["rows"])} defects measured in '
+          f'this lane&rsquo;s own work and closed. Most were caught by the '
+          f'design-rule check or by a measurement; the ones that were not were '
+          f'caught by asking a question the check does not ask.</p>')
     A('</section>')
 
     # ---- 2 -----------------------------------------------------------------

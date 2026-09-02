@@ -626,6 +626,13 @@
         "firmware.json states 'three domains means the HAT carries at least one 1.8 V regulator or uses the Radxa's; neither is published' \u2014 two live branches.",
         "Reading the Radxa ZERO 3W product brief RAD-DOC-0084 \u00a76.1 40-pin table in full instead of only the pins this design uses.",
         "The header's only supply pins are '+3.3V' (1, 17), '+5.0V' (2, 4) and 'GND' (6, 9, 14, 20, 25, 30, 34, 39); '1.8V' and '1V8' appear nowhere in the document. The second branch is dead: a HAT that runs this codec MUST carry its own 1.8 V regulator. D5 still refuses to invent one \u2014 TP1 is the gap \u2014 but the gap now has a known shape."
+      ],
+      [
+        "imu-to-dxl",
+        "Hand-laying one net's copper dropped the rest of it",
+        "Claiming SERVO_V with a hand-laid comb, the first run of that layout took SERVO_V out of the autoroute call altogether \u2014 and the comb only joins the three connector pins. U4.1 (VIN), U4.3 (ON/OFF) and C1.1 were left floating. The same rewrite also dropped GND from the router.",
+        "The DRC, immediately: 'unrouted SERVO_V' and 'unrouted GND', 38 of 53 connections routed.",
+        "SERVO_V is autorouted AFTER the comb at 0.400 mm \u2014 the LDO branch carries this board's own milliamps, not the pass-through, so that is the right width for it \u2014 and GND is back in the router at effort 16, because the LGA's and the MCU's ground pads are too small and too closely spaced to take a stub via."
       ]
     ]
   }

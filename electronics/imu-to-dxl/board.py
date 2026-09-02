@@ -322,11 +322,11 @@ def build(self_test=None, publish=True, verbose=True):
     # -- parts -------------------------------------------------------------
     b.add("U1", fp_lga14(), value="LSM6DSV16X", at=(25.0, 12.5),
           note="the one published part on this board — imu.rs:1-6")
-    b.add("U2", footprint("tssop-20"), value="STM32G031F6P6", at=(10.5, 12.5),
+    b.add("U2", footprint("tssop-20"), value="STM32G031F6P6", at=(11.5, 12.5),
           note="decision E1")
     b.add("U3", fp_sot753(), value="74LVC1G125", at=(31.5, 12.5),
           note="decision E2 — OE driven by the MCU, unlike the HAT's D3")
-    b.add("U4", footprint("sot-23-5"), value="LP2985A-33DBVR", at=(3.5, 11.0),
+    b.add("U4", footprint("sot-23-5"), value="LP2985A-33DBVR", at=(5.0, 11.0),
           rot=90, note="decision E3")
     # E10: all three bus ports on one edge, so the pass-through power path is
     # one straight comb instead of a diagonal the router has to invent.
@@ -562,7 +562,7 @@ def build(self_test=None, publish=True, verbose=True):
     # GND itself is never routed — it is the pour, which is the width of the
     # board.
     for ref, pad, dx, dy in [
-            ("U4", "2", -1.2, 0.0),
+            ("U4", "2", -1.4, 0.0),
             ("U3", "3", 0.0, -1.2),
             ("C1", "2", 1.2, 0.0), ("C2", "2", 1.3, 0.0),
             ("C3", "2", 1.2, 0.0), ("C4", "2", 1.2, 0.0),
@@ -577,10 +577,24 @@ def build(self_test=None, publish=True, verbose=True):
     # 13 pads needs at least 12 passes. V3V3 has 13 (measured), so effort 8
     # left it in 9 islands on the first run — that is the number this budget
     # is set from, not a guess.
+    # SERVO_V's THREE CONNECTOR PINS are already joined by the comb above.
+    # What is left of that net is the LDO branch — U4.1 (VIN), U4.3 (ON/OFF,
+    # tied to VIN) and C1.1 — which carries this board's own milliamps, not
+    # the pass-through, so the router draws it at 0.400 mm and that is the
+    # right width for it. Run 1 of this layout dropped this call entirely and
+    # the DRC said 'unrouted SERVO_V'; the comb is not the whole net.
+    b.autoroute(nets=["SERVO_V"], width=0.4, effort=8, via_cost=2.0,
+                verbose=verbose)
     b.autoroute(nets=["V3V3"], width=0.3, effort=20, via_cost=3.0,
                 verbose=verbose)
     signals = [n for n in b.net_names() if n not in ("GND", "SERVO_V", "V3V3")]
     b.autoroute(nets=signals, effort=14, verbose=verbose)
+    # GND: the stubs above bond the surface pads down to B.Cu and the pour
+    # unifies them, but the LGA's and the MCU's ground pads are too small and
+    # too closely spaced to take a stub via, so the router finishes the net.
+    # Run 1 of this layout left GND out of the router and the DRC said
+    # 'unrouted GND'.
+    b.autoroute(nets=["GND"], effort=16, via_cost=3.0, verbose=verbose)
     b.pour("GND", "B.Cu")
 
     rep = check(b, verbose=verbose)
