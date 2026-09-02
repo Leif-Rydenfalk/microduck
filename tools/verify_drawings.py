@@ -36,7 +36,8 @@ sys.path.insert(0, os.path.join(ROOT, "tools"))
 
 from cecad import triad                                       # noqa: E402
 from cecad.imgcheck import verify_png                         # noqa: E402
-from drawing_facts import classify                            # noqa: E402
+from drawing_facts import (classify, is_bought, GENERAL_TOLERANCE,  # noqa: E402
+                           TOLERANCE_DFM, VENDOR_DFM)
 
 DRAWINGS = os.path.join(ROOT, "out", "drawings")
 OUT = os.path.join(DRAWINGS, "verify.json")
@@ -105,16 +106,44 @@ def check(slug):
         else:
             from cecad.sheets import verify_sheet
             from cecad.autosheet import build_sheet, _mfg_extras
+            # REBUILD THE SHEET THE WAY IT WAS BUILT, or the check measures a
+            # different sheet. `verify_sheet` reads the drawn extents and the
+            # stated scale off the SVG and holds them against the Sheet's own
+            # layout, so a rebuild missing the reference image, the DFM block
+            # or the detail bubbles lays the views out differently and fails a
+            # sheet that is right. The last attempt in the record says exactly
+            # what produced the file on disk.
+            last = (rec.get("attempt_log") or [{}])[-1]
             mfg = _mfg_extras(part)
+            bp = getattr(part, "blueprint", None)
+            if bp is not None and getattr(bp, "meta", None) is not None:
+                bp.meta["general_tolerance"] = GENERAL_TOLERANCE
+            dfm = list(mfg["dfm"]) + list(TOLERANCE_DFM)
+            if is_bought(slug):
+                dfm += list(VENDOR_DFM)
             n, dd = (int(x) for x in (rec.get("scale") or "1:1").split(":"))
             sh, _, _ = build_sheet(
                 part, size=rec.get("size", "A3"),
                 source="ce-parts/%s/current/cad/part.py" % slug,
                 scale=(n, dd), hidden=mfg["hidden"], radii=True,
-                reference_iso=True, details=mfg["details"], dfm=None)
+                reference_iso=True,
+                reference_image=rec.get("reference_render"),
+                reference_caption=("REFERENCE RENDER (ISO2) — rendered off "
+                                   "this solid, %d x %d px"
+                                   % tuple(rec.get("reference_render_px")
+                                           or (0, 0))),
+                details=(mfg["details"] if last.get("details", True) else []),
+                dfm=dfm,
+                section=last.get("section", True),
+                dim=last.get("dim", True),
+                holes=last.get("holes", True),
+                sec_rank=last.get("sec_rank", 0))
             sh._layout()
             ok = verify_sheet(sh, svg, part, verbose=False)
             d["failed"] = []
+            d["rebuilt_from"] = {k: last.get(k) for k in
+                                 ("size", "scale", "sec_rank", "section",
+                                  "dim", "holes", "details")}
         d["reverified"] = bool(ok)
         d["verdict"] = "PASS" if (ok and d.get("header_agrees") is not False) \
             else "FAIL"
