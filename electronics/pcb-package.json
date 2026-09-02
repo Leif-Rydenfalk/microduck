@@ -97,7 +97,7 @@
       "thickness_mm": 1.6,
       "finish": "HASL (lead-free) \u2014 the fab default",
       "mesh_evidence": null,
-      "mount": "2 x M2 clearance at (3.000, 18.500) and (37.000, 18.500) \u2014 OUR choice (E8); nothing measured constrains it",
+      "mount": "2 x M2 clearance at (3.000, 18.500) and (37.000, 18.500) \u2014 OUR choice (E8). WHERE IT SITS IS MEASURED: the MJCF `imu` site is trunk_base body (-21.000, 0.100, -14.700) mm and the nearest placed neighbour is the battery, 0.524 mm above it \u2014 so the board lies flat under the pack, component side facing away from it",
       "decisions": [
         [
           "E1",
@@ -158,6 +158,12 @@
           "The bus power path is a PASS-THROUGH and is hand-laid 2.000 mm wide on both layers, not autorouted",
           "a DYNAMIXEL bus daisy-chains power as well as data: SERVO_V arrives on J1 and leaves on J2 and J3 to both leg chains, so this board carries ten servos' supply. IPC-2221 \u00a76.2 puts the 0.400 mm the router first drew it at 1.29 A per layer, and 2.000 mm at 3.95 A",
           "letting the autorouter own it \u2014 the defect this replaced, found by asking what the copper carries instead of what the DRC checked. The DEMAND is still CANNOT DETERMINE: ROBOTIS publishes only 17 mA standby and 1.47 A stall at 5 V"
+        ],
+        [
+          "E11",
+          "The board lies flat under the battery, component side facing away from it",
+          "every mesh placed in body trunk_base transformed into the body frame and its bounding box measured against the `imu` site: np_f970 (the pack) 0.524 mm clear in z and the site inside its x and y ranges; power_support 15.179 mm in z; the trunk baseplate 16.600 mm in y; the banana locker 49.074 mm in y; both hip-yaw XL330s 12.500 mm in x",
+          "assuming an orientation. The pack leaves 0.524 mm on one side and metres of nothing on the other; there is only one way up. This is a BOUND from bounding boxes, not a clearance study \u2014 it does not include left_shell or right_shell, and the space BELOW the board, which is what limits the 6.500 mm JST EH housings, has not been measured"
         ]
       ]
     },
@@ -640,6 +646,13 @@
         "The board was cut 45.800 x 5.100 mm from section outlines: floor at the rib top z 50.930 and ceiling at the head plate's top edge, read as z 56.080 from one section at x = 20.",
         "RAY-CASTING the power_support solid on a 2 mm grid at y = 31.000, mid-gap, instead of reading section outlines. The map shows air everywhere above z = 51.000 except the two screw posts at x = +/-25 \u2014 the pocket is OPEN UPWARD, and the head plate is BEHIND the board, not above it. The plate's top edge is also curved (56.944 at x ~ +4, 55.51 at x +/-24), so no single number off one section was ever the ceiling.",
         "The real ceiling is the locker bar's own silhouette, z 48.974..55.626, because a board taller than the retainer is a board the retainer does not cover. Pocket 46.292 x 4.696; board 45.800 x 4.600, entering with 0.246 mm per side in x and 0.048 in z. Contacts 2.400 mm square, tail holes 0.800 mm \u2014 the 5.100 mm board would have stood 0.404 mm proud of its own retainer."
+      ],
+      [
+        "imu-to-dxl",
+        "'Nothing measured constrains this outline' was too strong",
+        "E8 said the outline is our choice and that nothing measured constrains it, then left the clearance question open without trying.",
+        "Transforming every mesh placed in body trunk_base into the body frame and measuring each bounding box against the MJCF `imu` site at (-21.000, 0.100, -14.700) mm.",
+        "The pack's bounding box is 0.524 mm above the site, and the site is inside its x and y ranges \u2014 so the board lies flat under the battery and its component side must face away from it. Decision E11. The outline itself is still ours; what is now measured is the ORIENTATION and the one neighbour that is close."
       ]
     ]
   },

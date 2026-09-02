@@ -508,6 +508,27 @@ def build(self_test=None, publish=True, verbose=True):
         "circuit. The check is right to say it cannot verify what the netlist "
         "does not model, and it would be wrong to silence it.")
     b.notes.append(
+        "WHERE THIS BOARD SITS, MEASURED 2026-09-02. The MJCF puts the `imu` "
+        "SITE on trunk_base at body (-21.000, 0.100, -14.700) mm. Every mesh "
+        "placed in that same body was transformed into the body frame and "
+        "the site's clearance to each bounding box computed:\n"
+        "  trunk_base plate .... 16.600 mm clear in y (the site is inside its "
+        "x and z ranges)\n"
+        "  power_support ....... 15.179 mm clear in z\n"
+        "  np_f970 (the pack) .. 0.524 mm clear in z, and INSIDE its x and y "
+        "ranges — the site is 0.524 mm BELOW the pack's bounding box\n"
+        "  banana_pcb_locker ... 49.074 mm clear in y\n"
+        "  xl330 (both hip yaw servos) ... 12.500 mm clear in x\n"
+        "THE PACK IS THE CONSTRAINT. 0.524 mm to the battery means this board "
+        "lies FLAT under the pack, in the body x-y plane, and its component "
+        "side must face AWAY from the pack (-z). Every part on this board is "
+        "on the top layer, so the board is fitted component-side-down; "
+        "nothing here may be taller than the clearance BELOW it, which is a "
+        "number the shells decide and this lane has not measured. The tallest "
+        "part is the JST EH housing at 6.500 mm.\n"
+        "This is a BOUND, not a clearance study: it uses bounding boxes, not "
+        "solids, and it does not include left_shell or right_shell.")
+    b.notes.append(
         "OUTLINE IS NOT MEASURED. 40.000 x 22.000 mm r2.0 with two M2 holes "
         "at (3.000, 18.500) and (37.000, 18.500) is decision E8. Pollen ships "
         "no mesh, no drawing and no photograph of this board; the MJCF places "
