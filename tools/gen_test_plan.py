@@ -30,11 +30,15 @@ RUNTIME = _load("out/sim-evidence/battery-runtime.json")
 E = lambda s: html.escape(str(s), quote=False)
 
 _CODE = re.compile(r"`([^`]+)`")
+_BOLD = re.compile(r"\*\*([^*]+)\*\*")
 def M(t):
-    """Escape, then render `backticked` spans as <code>. Prose in the data file is
-    written with backticks the way the source documents write them; this is the one
-    place that turns them into markup, so no field carries HTML."""
-    return _CODE.sub(lambda m: "<code>%s</code>" % m.group(1), E(t))
+    """Escape, then render `backticked` spans as <code> and **starred** spans as <b>.
+    Prose in the data file is written the way the source documents write it; this is the
+    one place that turns it into markup, so NO field ever carries raw HTML — a field that
+    did would either be escaped and shown as tags to the reader, or trusted and able to
+    break the page."""
+    return _BOLD.sub(lambda m: "<b>%s</b>" % m.group(1),
+                     _CODE.sub(lambda m: "<code>%s</code>" % m.group(1), E(t)))
 
 # ---- derived constants, computed not typed -------------------------------
 RESOLUTION_PULSE_REV = 4096          # E1 §Specifications "Resolution | 4096 [pulse/rev]"
@@ -299,7 +303,7 @@ not known: no vendor states the Radxa ZERO&nbsp;3W's consumption, so EN-01 is wh
 <th>standing&nbsp;min</th><th>idle, torque off&nbsp;min</th><th>pack&nbsp;A at 7.4&nbsp;V</th></tr></thead>
 <tbody>%s</tbody></table></div>
 <div class="note"><b>Our model and Pollen's claim disagree by a factor of about two, and EN-01 is the
-measurement that says which is wrong.</b> The press kit says <b>~%.1f&nbsp;h</b>; a %.1f&nbsp;Wh pack over
+measurement that says which is wrong.</b> The press kit says <b>~%.1f&nbsp;h</b>, and %.1f&nbsp;Wh delivered over
 that hour is an average of <b>%.1f&nbsp;W</b> for the whole machine. This model puts walking servo draw at
 <b>%.4f&nbsp;W</b>, which leaves <b>%.4f&nbsp;W</b> for everything else &mdash; %.1f&nbsp;%% of Radxa's entire
 5&nbsp;V/2&nbsp;A adapter rating for the board, which is implausible for compute alone. So the missing power
@@ -450,7 +454,7 @@ HTML = f"""<!doctype html>
 <div class="statbar">
   <div class="stat"><b>{n_tests}</b><span>numbered tests</span></div>
   <div class="stat"><b>{len(D['eol'])}</b><span>end-of-line gates</span></div>
-  <div class="stat"><b>{n_notest}</b><span>subsystems with no test, and why</span></div>
+  <div class="stat"><b>{len(D.get("resolved", []))}</b><span>questions open in Rev&nbsp;A, settled here</span></div>
   <div class="stat"><b>{n_open}</b><span>open questions, each with what settles it</span></div>
   <div class="stat"><b>{len(D['sources'])}</b><span>cited sources</span></div>
 </div>
@@ -465,7 +469,7 @@ HTML = f"""<!doctype html>
   been powered and ends at a robot that has walked.</p>
 
   <h3 class="sub">1.1 Three verdicts</h3>
-  <div class="tw"><table class="data"><caption>Table 1. Every gate in this document answers with exactly one of these.</caption>
+  <div class="tw"><table class="data"><caption>Table {TN()}. Every gate in this document answers with exactly one of these.</caption>
   <thead><tr><th>Verdict</th><th>Means</th><th>What it does to the unit</th></tr></thead>
   <tbody>
     <tr><td><span class="chip pass">PASS</span></td><td>the stated quantity was measured and it is inside the stated band</td><td>proceed to the next test</td></tr>

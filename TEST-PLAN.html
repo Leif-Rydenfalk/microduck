@@ -80,7 +80,7 @@
 <div class="statbar">
   <div class="stat"><b>44</b><span>numbered tests</span></div>
   <div class="stat"><b>33</b><span>end-of-line gates</span></div>
-  <div class="stat"><b>0</b><span>subsystems with no test, and why</span></div>
+  <div class="stat"><b>3</b><span>questions open in Rev&nbsp;A, settled here</span></div>
   <div class="stat"><b>14</b><span>open questions, each with what settles it</span></div>
   <div class="stat"><b>36</b><span>cited sources</span></div>
 </div>
@@ -121,7 +121,7 @@
   <h2><span class="n">2</span>Test equipment and fixtures</h2>
   <p class="lede">Nothing on this list is optional for the test it serves. Where an instrument's
   resolution is named, it is because a gate below is stated to that resolution.</p>
-  <div class="tw"><table class="data"><caption>Table 1. Equipment, and the gate each one serves.</caption>
+  <div class="tw"><table class="data"><caption>Table 2. Equipment, and the gate each one serves.</caption>
   <thead><tr><th>Instrument or fixture</th><th>Used by</th><th>Why this and not something looser</th><th>Src</th></tr></thead>
   <tbody><tr><td><b>Assembly stand / test jig</b></td><td>holds the robot with both feet clear of the bench</td><td><code>robotctl robot init</code> MOVES EVERY JOINT and ramps to the home pose over ~2 s. The cheatsheet is explicit: 'have the robot on its stand'. Every test before WK runs on the stand</td><td class="sk">CHEAT</td></tr>
 <tr><td><b>Bench PSU, 0-15 V, &gt;= 5 A, adjustable current limit</b></td><td>stands in for the pack for every test up to EB-05</td><td>a 2S Li-ion pack into an unproven board is a fire. The pack is not fitted until EB-01..EB-05 have passed</td><td class="sk">TESTDESIGN</td></tr>
@@ -147,7 +147,7 @@
   <p class="lede">Nothing here assumes a pack. The order is deliberate: find a short with a meter, bring the board up behind a current limit, survey the rails at the pin that needs them, and only then plug in 2S Li-ion. Test EB-04 is the reason this section exists in this form - it is the measurement that settles whether production Microducks run their servos above the vendor's rating.</p>
   
 <h3 class="sub">3.1 Rails — what to measure, where, and against what</h3>
-<div class="tw"><table class="data"><caption>Table 2. Every supply a fitted part needs, at the pin that needs it.
+<div class="tw"><table class="data"><caption>Table 3. Every supply a fitted part needs, at the pin that needs it.
 Bands are tightest-part-wins per rail. A band that reads CANNOT DETERMINE is not a pass.</caption>
 <thead><tr><th>Net</th><th>Probe point</th><th>Nominal</th><th>Acceptance band</th><th>Basis</th><th>Src</th></tr></thead>
 <tbody><tr><td><code>VBAT (pack)</code></td><td>NP-F550 pack terminals, and again at the banana contact PCB output</td><td>7.2 V (Duracell DR5) / 7.4 V (Deity, Viltrox) — the two 2S nominal conventions</td><td class=""><b>6.60 – 8.40 V</b></td><td class="basis">8.40 V = 2 x 4.20 V fully charged off charger; 6.60 V = the runtime's own empty floor, BATTERY_EMPTY_V, which is also 0 % on the gauge and where robotd sits the robot down</td><td class="sk">EVER MODEL TOML</td></tr>
@@ -314,7 +314,7 @@ Above 6.0&nbsp;V no vendor stall figure exists at all, which is exactly why EB-0
 from the vendor's 4096&nbsp;pulse/rev resolution and <code>bus.rs</code>'s 2048 = 0&nbsp;rad.
 One count is <b>0.0879&nbsp;degrees</b>, so the &plusmn;1.0&nbsp;degree calibration tolerance is
 <b>&plusmn;11&nbsp;counts</b>.</p>
-<div class="tw"><table class="data idmap"><caption>Table 3. Servo ID to joint, the joint's MJCF range, and the home pose
+<div class="tw"><table class="data idmap"><caption>Table 4. Servo ID to joint, the joint's MJCF range, and the home pose
 in radians, degrees and encoder counts. Home values are <code>DEFAULT_POSITION</code> from <code>model.rs:39-55</code>;
 ranges are the MJCF limits read back through our own simulation.</caption>
 <thead><tr><th>ID</th><th>Joint</th><th>Body carrying the servo</th>
@@ -342,7 +342,7 @@ but SV-03 fails without it.</div>
 <p>Every value below is quoted from the vendor control table in <code>ce-parts/xl330-m288-t/electrical.chip.json</code>.
 <b>EEPROM writes are refused unless Torque&nbsp;Enable(64) is 0</b> — the vendor's own rule, and the reason it is the
 first row of every write sequence.</p>
-<div class="tw"><table class="data reg"><caption>Table 4. The XL330-M288-T registers this plan touches.</caption>
+<div class="tw"><table class="data reg"><caption>Table 5. The XL330-M288-T registers this plan touches.</caption>
 <thead><tr><th>Addr</th><th>Bytes</th><th>Name</th><th>Area</th><th>Vendor initial</th><th>We write</th><th>Meaning</th><th>Why</th></tr></thead>
 <tbody><tr><td class="n">8</td><td class="n">1</td><td><b>Baud Rate</b></td><td>EEPROM</td><td>1 (57,600 bps)</td><td><code>3</code></td><td>1,000,000 bps</td><td class="basis">robotd opens the port at 1 Mbps. A servo left at the factory 57,600 cannot be reached at all, so this is one of the two values that MUST be set at build time</td></tr>
 <tr><td class="n">7</td><td class="n">1</td><td><b>ID</b></td><td>EEPROM</td><td>1</td><td><code>the assigned ID</code></td><td>10-14, 20-24, 30-34</td><td class="basis">fifteen servos share one multidrop bus. The ID cannot be self-assigned on a shared bus, so it is set one servo at a time. Range 0~252; 254 (0xFE) is the broadcast ID and is never assigned</td></tr>
@@ -742,7 +742,7 @@ first row of every write sequence.</p>
   <p class="lede">Everything a customer touches before the robot walks: the two radios, the name and PIN the robot is known by, and the update path that is the only way a fault is ever fixed in the field. None of it moves a joint, and all of it ships broken if nobody looks. One test in this section - RD-03 - is a security gate rather than a functional one: the factory default pairing PIN is <code>000000</code> and Pollen says in its own cheat sheet what that means.</p>
   
 <h3 class="sub">7.1 Gamepad map</h3>
-<div class="tw"><table class="data"><caption>Table 5. Quoted from Pollen's cheat sheet, Gamepad (<code>configd</code>). RD-02 works through every row. There is no stop button: release the sticks and the robot stands, and robotd's deadman stops it if <code>padd</code> dies.</caption>
+<div class="tw"><table class="data"><caption>Table 6. Quoted from Pollen's cheat sheet, Gamepad (<code>configd</code>). RD-02 works through every row. There is no stop button: release the sticks and the robot stands, and robotd's deadman stops it if <code>padd</code> dies.</caption>
 <thead><tr><th>Control</th><th>What it does</th></tr></thead>
 <tbody><tr><td><b>left stick</b></td><td>drive: forward/back and strafe . head: head yaw and pitch . body pose: up and crouch</td></tr>
 <tr><td><b>right stick</b></td><td>drive: turn . head: neck pitch and head roll . body pose: pitch and roll</td></tr>
@@ -850,7 +850,7 @@ first row of every write sequence.</p>
   <p class="lede">The thresholds here come from our own MuJoCo runs of Pollen's published policies on Pollen's own physics. Where a gate is a simulation figure it says so; where a gate is an allowance for sim-to-real transfer it says that too, and names the fraction, because no real-robot walk figure exists in any source.</p>
   
 <h3 class="sub">8.1 The surface</h3>
-<div class="tw"><table class="data"><caption>Table 6. The acceptance surface.</caption>
+<div class="tw"><table class="data"><caption>Table 7. The acceptance surface.</caption>
 <thead><tr><th>Property</th><th>Requirement</th><th>Why</th><th>Src</th></tr></thead>
 <tbody><tr><td><b>Size</b></td><td>at least 1200 x 600 mm clear</td><td>the acceptance run is 0.594 m minimum with a start line and room to stop</td><td class="sk">TESTDESIGN</td></tr><tr><td><b>Level</b></td><td>within 1.0 deg, measured with a digital inclinometer, recorded in the log</td><td>the gate is a distance in a fixed time; a slope moves it and would not be visible in the data</td><td class="sk">TESTDESIGN</td></tr><tr><td><b>Material</b></td><td>hard, flat, dry, matte - laminate or sealed MDF. NOT carpet, NOT glass, NOT a rubber mat</td><td>the simulation's floor is rigid with foot friction 1.0 and condim 3 on the foot collision geoms only (constants.py). The friction coefficient of the real sole against any real surface is measured nowhere in this repository - CANNOT DETERMINE. A hard matte surface is the closest match that can be specified without measuring one</td><td class="sk">CONST</td></tr><tr><td><b>Temperature</b></td><td>record it</td><td>every servo figure and the pack's behaviour move with it, and none of the vendor current figures carries a temperature</td><td class="sk">XLPART</td></tr></tbody></table></div>
 <div class="note"><b>Where the walk gate comes from.</b>
@@ -974,7 +974,7 @@ robotd itself decides a fall has started; the fall <i>report</i> threshold
   <p class="lede">The last three questions, and the only ones that take real time: how long the robot runs, what it does when the pack is spent, and what happens to a computer sealed in a printed head with no vent, no fan and no heatsink. Every gate here also RETURNS a number this repository is missing - the walking draw of an assembled robot is measured nowhere, by us or by Pollen, and EN-01 is where it stops being an assumption.</p>
   
 <h3 class="sub">9.1 What EN-01 should find, and the number it settles</h3>
-<div class="tw"><table class="data"><caption>Table 7. Runtime against compute draw, from
+<div class="tw"><table class="data"><caption>Table 8. Runtime against compute draw, from
 <code>out/sim-evidence/battery-runtime.json</code> &mdash; the measured MuJoCo torque and speed profile
 through ROBOTIS's published XL330 rows, on a 18.7&nbsp;Wh pack. The compute-and-sensor column is SWEPT,
 not known: no vendor states the Radxa ZERO&nbsp;3W's consumption, so EN-01 is what picks the row.</caption>
@@ -988,7 +988,7 @@ not known: no vendor states the Radxa ZERO&nbsp;3W's consumption, so EN-01 is wh
 <tr><td class="n">4.0</td><td class="n">12.9553</td><td class="n">86.6</td><td class="n">164.3</td><td class="n">190.6</td><td class="n">1.7507</td></tr>
 <tr><td class="n">5.0</td><td class="n">13.9553</td><td class="n">80.4</td><td class="n">143.3</td><td class="n">162.9</td><td class="n">1.8859</td></tr></tbody></table></div>
 <div class="note"><b>Our model and Pollen's claim disagree by a factor of about two, and EN-01 is the
-measurement that says which is wrong.</b> The press kit says <b>~1.0&nbsp;h</b>; a 18.7&nbsp;Wh pack over
+measurement that says which is wrong.</b> The press kit says <b>~1.0&nbsp;h</b>, and 18.7&nbsp;Wh delivered over
 that hour is an average of <b>18.7&nbsp;W</b> for the whole machine. This model puts walking servo draw at
 <b>8.9553&nbsp;W</b>, which leaves <b>9.7447&nbsp;W</b> for everything else &mdash; 97.4&nbsp;% of Radxa's entire
 5&nbsp;V/2&nbsp;A adapter rating for the board, which is implausible for compute alone. So the missing power
@@ -1072,8 +1072,8 @@ servo half from the board half and closes all of it.</div>
 
 <section id="eol">
   <h2><span class="n">10</span>End-of-line checklist</h2>
-  <p class="lede">One line per gate, in test order. A unit ships when every box is ticked and no row reads CANNOT DETERMINE. &lt;b&gt;SN-09 (NFC) is deliberately not on this list&lt;/b&gt;: on today's published software the expected outcome is CANNOT DETERMINE, and a checklist containing a question nobody can answer trains people to tick it anyway. SN-10 (the camera-use indicator) &lt;b&gt;is&lt;/b&gt; on the list, because although its GPIO is unknown, a person can see whether the light is on - and it is the only check of a privacy requirement Pollen wrote down for itself.</p>
-  <div class="tw"><table class="data"><caption>Table 8. End-of-line gates, 33 of them.</caption>
+  <p class="lede">One line per gate, in test order. A unit ships when every box is ticked and no row reads CANNOT DETERMINE. <b>SN-09 (NFC) is deliberately not on this list</b>: on today's published software the expected outcome is CANNOT DETERMINE, and a checklist containing a question nobody can answer trains people to tick it anyway. SN-10 (the camera-use indicator) <b>is</b> on the list, because although its GPIO is unknown, a person can see whether the light is on - and it is the only check of a privacy requirement Pollen wrote down for itself.</p>
+  <div class="tw"><table class="data"><caption>Table 9. End-of-line gates, 33 of them.</caption>
   <thead><tr><th></th><th>Test</th><th>Gate</th><th>Instrument</th></tr></thead>
   <tbody><tr><td class="box">&#9744;</td><td><a href="#EB-01"><code>EB-01</code></a></td><td>no short on any rail before power</td><td class="sk">DMM</td></tr>
 <tr><td class="box">&#9744;</td><td><a href="#EB-03"><code>EB-03</code></a></td><td>every rail with a band inside it</td><td class="sk">DMM</td></tr>
@@ -1115,7 +1115,7 @@ servo half from the board half and closes all of it.</div>
   <p class="lede">A unit's record is a directory, and it is the only thing that survives the unit leaving
   the bench. Two of these files outlive a power cut and the rest do not &mdash; copy the volatile ones
   before the next boot.</p>
-  <div class="tw"><table class="data"><caption>Table 9. What is kept, and why it is kept.</caption>
+  <div class="tw"><table class="data"><caption>Table 10. What is kept, and why it is kept.</caption>
   <thead><tr><th>Path</th><th>What it is</th><th>Src</th></tr></thead>
   <tbody><tr><td><code>logs/&lt;serial&gt;/</code></td><td>one directory per built unit, named by the serial the robot derives its own name from (<code>duck-</code> plus four characters from the SoC serial, <code>robotctl system info</code>)</td><td class="sk">CHEAT</td></tr>
 <tr><td><code>*.jsonl</code></td><td>every <code>robotctl monitor --json</code> capture. Redirected or piped, monitor prints one line per tick and the joint angles stay in RADIANS whatever the screen is set to - the on-screen degrees are a display choice, the file is not</td><td class="sk">CHEAT</td></tr>
@@ -1123,7 +1123,7 @@ servo half from the board half and closes all of it.</div>
 <tr><td><code>update history</code></td><td><code>robotctl update log</code> and /var/lib/robot/updater/runs/*.jsonl are fsync'ed per entry and OUTLIVE a power cut, which the journal on this board does not - /var/log is zram</td><td class="sk">CHEAT</td></tr>
 <tr><td><code>journal</code></td><td><code>journalctl -u robotd -u mediad -u tofd -u padd -b</code> for the boot under test. Volatile: copy it into the unit's directory before the next boot</td><td class="sk">CHEAT</td></tr>
 <tr><td><code>EB-*.csv</code></td><td>every meter reading, to 3 dp, with the probe points named. The rail survey and EB-04 in particular are the evidence that closes an open question in docs/ELECTRONICS-AND-SOFTWARE.md 12</td><td class="sk">TESTDESIGN</td></tr>
-<tr><td><code>RD-03-identity.txt</code></td><td>the serial from <code>robotctl system info</code>, the robot name, and the six-digit pairing PIN this unit shipped with. **This file is the only record that the PIN was ever changed from 000000**, and it is what a support call is answered from</td><td class="sk">CHEAT</td></tr>
+<tr><td><code>RD-03-identity.txt</code></td><td>the serial from <code>robotctl system info</code>, the robot name, and the six-digit pairing PIN this unit shipped with. <b>This file is the only record that the PIN was ever changed from 000000</b>, and it is what a support call is answered from</td><td class="sk">CHEAT</td></tr>
 <tr><td><code>EN-01-runtime.csv</code></td><td>one row per minute of the endurance run: elapsed minutes, <code>Present Input Voltage(144)</code> in volts, battery percent, clamp current in amperes, and what the robot was doing. The last row is the shutdown</td><td class="sk">TESTDESIGN</td></tr>
 <tr><td><code>TH-01-thermal.csv</code></td><td>one row per minute of the soak: SoC millidegrees from <code>/sys/class/thermal/thermal_zone*/temp</code>, <code>scaling_cur_freq</code> in kHz, the fps mediad reports, and room temperature</td><td class="sk">TESTDESIGN</td></tr></tbody></table></div>
 </section>
@@ -1134,7 +1134,7 @@ servo half from the board half and closes all of it.</div>
   missing. Each names the test that would answer it and exactly what has to exist first. Most are
   answered the first time a real unit is put on a bench &mdash; which is the point of writing them
   down here rather than leaving them out. The rest need a teardown or a Pollen release, and say so.</p>
-  <div class="tw"><table class="data"><caption>Table 10. Open questions, each with the test that closes it.</caption>
+  <div class="tw"><table class="data"><caption>Table 11. Open questions, each with the test that closes it.</caption>
   <thead><tr><th>Question</th><th>Test</th><th>Status today</th><th>What settles it</th></tr></thead>
   <tbody><tr><td>Are the XL330 servos fed the raw 2S pack, above their 6.0 V rating?</td><td><a href="#EB-04"><code>EB-04</code></a></td><td>the test exists; no unit has been measured</td><td>a meter on pin 2 of the servo bus with the pack fitted. Both outcomes are informative and one of them requires docs/ELECTRONICS-AND-SOFTWARE.md 3.4 to be corrected.</td></tr>
 <tr><td>What does a Microduck draw, walking?</td><td><a href="#EB-07"><code>EB-07, EN-01</code></a></td><td>no vendor figure exists between standby 17 mA and stall 1.47 A per servo, and no measured figure exists for the assembled robot</td><td>EB-07 states A/B/C in three instantaneous states; EN-01 integrates a whole pack through a real duty cycle and gets compute-and-sensor watts by difference. Until one of them runs, every rail budget in this repository rests on an assumption, including the 1 A-per-moving-servo basis behind the harness voltage-drop model in wiring/CABLES.md and the 1-5 W compute sweep in out/sim-evidence/battery-runtime.json.</td></tr>
@@ -1158,7 +1158,7 @@ servo half from the board half and closes all of it.</div>
 <div class="resolved">
   <h4>Which ToF generation ships, VL53L5CX or VL53L8CX?</h4>
   <p><span class="k">Was</span>CANNOT DETERMINE in Rev A - the datasheets were read but nothing said which part is fitted.</p>
-  <p><span class="k">Now</span>SETTLED, and the answer is BOTH. <code>tof/src/lib.rs</code> lines 8-11, verbatim: '**Both generations, decided at runtime.** The two are interchangeable on the board and differ only in firmware and a driver prefix, so which one is fitted is not a build-time choice: an ID read picks the driver before any firmware is uploaded (Generation). Ducks in the field have both.' The daemon also tries two addresses, 0x29 then 0x52 - 0x29 is the factory default for both generations, and 0x52 is where a prototype moved an L5CX when an I2C IMU wanted 0x29, an address that survives power cycles (tofd/src/main.rs, ADDRESS_CANDIDATES).</p>
+  <p><span class="k">Now</span>SETTLED, and the answer is BOTH. <code>tof/src/lib.rs</code> lines 8-11, verbatim: 'Both generations, decided at runtime. The two are interchangeable on the board and differ only in firmware and a driver prefix, so which one is fitted is not a build-time choice: an ID read picks the driver before any firmware is uploaded (Generation). Ducks in the field have both.' The daemon also tries two addresses, 0x29 then 0x52 - 0x29 is the factory default for both generations, and 0x52 is where a prototype moved an L5CX when an I2C IMU wanted 0x29, an address that survives power cycles (tofd/src/main.rs, ADDRESS_CANDIDATES).</p>
   <p><span class="k">So</span>SN-06 needs no change: the +/- 5 % accuracy figure is identical for both parts at 8x8 / 15 Hz / 201-4000 mm against an 88 % white target. Section 3's rail table does: the ToF CORE_1V8 row is N/A rather than FAIL on a unit that came up as a VL53L5CX, because that part has no separate core rail. Record the generation the header names before judging that row.</p>
   <div class="srcs"><span class="srcitem"><b>TOFLIB</b> tof/src/lib.rs (the ToF driver crate)</span><span class="srcitem"><b>TOFSRC</b> tof/src/main.rs</span><span class="srcitem"><b>L8</b> ST VL53L8CX datasheet</span><span class="srcitem"><b>L5</b> ST VL53L5CX datasheet</span></div>
 </div>
@@ -1183,7 +1183,7 @@ servo half from the board half and closes all of it.</div>
   <p class="lede">Pollen Robotics' firmware and software are Apache-2.0 and are read here line by line;
   their PCBs are not published. Vendor datasheets are stored in the shelf with their provenance.
   Everything below is either in this repository or was fetched on the date named.</p>
-  <div class="tw"><table class="data"><caption>Table 11. Every source cited by a gate in this document.</caption>
+  <div class="tw"><table class="data"><caption>Table 12. Every source cited by a gate in this document.</caption>
   <thead><tr><th>Key</th><th>What</th><th>Where</th></tr></thead>
   <tbody><tr><td><code>E1</code></td><td>ROBOTIS e-Manual XL330-M288-T</td><td class="loc">https://emanual.robotis.com/docs/en/dxl/x/xl330-m288/ — fetched 2026-09-02, sha256 in ce-parts/xl330-m288-t/PROVENANCE.json; quoted verbatim in ce-parts/xl330-m288-t/electrical.chip.json</td></tr>
 <tr><td><code>XLPART</code></td><td>part:xl330-m288-t shelf record</td><td class="loc">ce-parts/xl330-m288-t/electrical.chip.json + electrical.part.json + iterations/v0.0.1/docs/DATASHEET.md</td></tr>

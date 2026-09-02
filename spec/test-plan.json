@@ -3084,7 +3084,7 @@
    "settles": "Installing two releases at the factory - the shipped one and its predecessor - so RD-05 can roll back and return. That is a build decision, not a measurement; record which way each batch was built."
   }
  ],
- "eol_note": "One line per gate, in test order. A unit ships when every box is ticked and no row reads CANNOT DETERMINE. <b>SN-09 (NFC) is deliberately not on this list</b>: on today's published software the expected outcome is CANNOT DETERMINE, and a checklist containing a question nobody can answer trains people to tick it anyway. SN-10 (the camera-use indicator) <b>is</b> on the list, because although its GPIO is unknown, a person can see whether the light is on - and it is the only check of a privacy requirement Pollen wrote down for itself.",
+ "eol_note": "One line per gate, in test order. A unit ships when every box is ticked and no row reads CANNOT DETERMINE. **SN-09 (NFC) is deliberately not on this list**: on today's published software the expected outcome is CANNOT DETERMINE, and a checklist containing a question nobody can answer trains people to tick it anyway. SN-10 (the camera-use indicator) **is** on the list, because although its GPIO is unknown, a person can see whether the light is on - and it is the only check of a privacy requirement Pollen wrote down for itself.",
  "padmap": {
   "title": "Gamepad map",
   "note": "Quoted from Pollen's cheat sheet, Gamepad (`configd`). RD-02 works through every row. There is no stop button: release the sticks and the robot stands, and robotd's deadman stops it if `padd` dies.",
@@ -3173,7 +3173,7 @@
   {
    "q": "Which ToF generation ships, VL53L5CX or VL53L8CX?",
    "was": "CANNOT DETERMINE in Rev A - the datasheets were read but nothing said which part is fitted.",
-   "now": "SETTLED, and the answer is BOTH. `tof/src/lib.rs` lines 8-11, verbatim: '**Both generations, decided at runtime.** The two are interchangeable on the board and differ only in firmware and a driver prefix, so which one is fitted is not a build-time choice: an ID read picks the driver before any firmware is uploaded (Generation). Ducks in the field have both.' The daemon also tries two addresses, 0x29 then 0x52 - 0x29 is the factory default for both generations, and 0x52 is where a prototype moved an L5CX when an I2C IMU wanted 0x29, an address that survives power cycles (tofd/src/main.rs, ADDRESS_CANDIDATES).",
+   "now": "SETTLED, and the answer is BOTH. `tof/src/lib.rs` lines 8-11, verbatim: 'Both generations, decided at runtime. The two are interchangeable on the board and differ only in firmware and a driver prefix, so which one is fitted is not a build-time choice: an ID read picks the driver before any firmware is uploaded (Generation). Ducks in the field have both.' The daemon also tries two addresses, 0x29 then 0x52 - 0x29 is the factory default for both generations, and 0x52 is where a prototype moved an L5CX when an I2C IMU wanted 0x29, an address that survives power cycles (tofd/src/main.rs, ADDRESS_CANDIDATES).",
    "consequence": "SN-06 needs no change: the +/- 5 % accuracy figure is identical for both parts at 8x8 / 15 Hz / 201-4000 mm against an 88 % white target. Section 3's rail table does: the ToF CORE_1V8 row is N/A rather than FAIL on a unit that came up as a VL53L5CX, because that part has no separate core rail. Record the generation the header names before judging that row.",
    "src": [
     "TOFLIB",
