@@ -1,0 +1,62 @@
+{
+ "$what": "connection:snap-fit-roller-axle — the foot's barbed finger pair and the body it actually captures. Measured with cecad.meshfeatures.intervals ray-cast calipers on Pollen's foot_left.stl and ankle_left.stl (metres, scale 1000), 2026-09-02, ce-designs/microduck lane T",
+ "frame": "Pollen's shared mesh frame for the left ankle group: x heel 30 .. toe 70, y -12 .. 42, z up; the ankle axis is the x-line through (y 22.0000, z -6.2230).",
+ "fingers": {
+  "part": "part:microduck-foot-left", "interface": "roller_slot",
+  "count": 2,
+  "run_along": "x",
+  "x_span_mm": [45.0, 55.0],
+  "x_len_mm": 10.0,
+  "x_how": "cecad.meshfeatures.intervals along x at (y 0.0, z -12.5/-12.6/-13.0) and (y 37.0, same) return exactly [[45.0, 55.0]] every time",
+  "top_z_mm": -12.3419,
+  "top_z_how": "the foot's own bbox maximum",
+  "inner_faces_by_height": [
+   {"z_mm": -12.35, "y_lo_mm": 0.369,  "y_hi_mm": 36.458, "gap_mm": 36.089},
+   {"z_mm": -12.40, "y_lo_mm": 0.404,  "y_hi_mm": 36.423, "gap_mm": 36.019},
+   {"z_mm": -12.80, "y_lo_mm": 0.684,  "y_hi_mm": 36.143, "gap_mm": 35.459},
+   {"z_mm": -13.20, "y_lo_mm": 0.964,  "y_hi_mm": 35.863, "gap_mm": 34.899},
+   {"z_mm": -13.40, "y_lo_mm": 1.063,  "y_hi_mm": 35.763, "gap_mm": 34.700},
+   {"z_mm": -13.80, "y_lo_mm": 1.063,  "y_hi_mm": 35.763, "gap_mm": 34.700},
+   {"z_mm": -14.00, "y_lo_mm": 1.063,  "y_hi_mm": 35.763, "gap_mm": 34.700},
+   {"z_mm": -14.50, "y_lo_mm": 0.063,  "y_hi_mm": 36.763, "gap_mm": 36.700},
+   {"z_mm": -15.00, "y_lo_mm": 0.063,  "y_hi_mm": 36.763, "gap_mm": 36.700}
+  ],
+  "lead_in": {"from_gap_mm": 36.089, "to_gap_mm": 34.700, "over_rise_mm": 1.05,
+              "per_side_mm": 0.6945, "half_angle_deg": 33.47,
+              "why": "the gap NARROWS going down from the foot's top face — a mouth that guides the mating body in"},
+  "barb_land": {"gap_mm": 34.7, "z_span_mm": [-14.0, -13.4], "height_mm": 0.6},
+  "barb_proud_per_side_mm": 1.0,
+  "barb_proud_how": "36.7630 (pocket wall) - 35.7630 (barb land) on the +y finger; the -y finger mirrors it (0.0630 vs 1.0630)",
+  "pocket_below_barb": {"gap_mm": 36.7, "from_z_mm": -14.5},
+  "finger_thickness_mm": {"at_top_z_-12.35": 0.807, "at_z_-13.4": 1.617,
+                          "how": "outer face minus inner face on the -y finger: (-0.438 .. 0.369) and (-0.554 .. 1.063)"}
+ },
+ "what_it_actually_captures": {
+  "answer": "part:microduck-ankle-left — its own plate, not a roller",
+  "ankle_plate_width_mm": 36.5,
+  "ankle_plate_y_span_mm": [0.1632, 36.6632],
+  "ankle_plate_z_where_wide_mm": [-15.5, -15.0],
+  "ankle_narrow_above_mm": {"y_span_mm": [1.563, 35.263], "width_mm": 33.7, "z_mm": [-14.5, -13.6]},
+  "step_z_mm": [-15.0, -14.5],
+  "fit_in_the_pocket_mm": {"pocket_gap_mm": 36.7, "plate_width_mm": 36.5, "per_side_mm": 0.1},
+  "deflection_to_pass_the_barb_mm": 0.9,
+  "deflection_how": "(36.5000 - 34.7000) / 2 — each finger must bend 0.9000 mm outward for the ankle's wide plate to pass the barb land",
+  "barb_overhang_over_the_plate_mm": 0.9,
+  "why_this_is_the_answer": "at z -15.0000 and -15.5000 the ankle at x 50 spans y 0.1632..36.6632 — exactly the 36.5000 mm body the 36.7000 mm pocket is sized for, at 0.1000 mm per side; above z -14.5000 the ankle narrows to 33.7000 mm and clears the 34.7000 mm barb land by 0.5000 mm per side. The step between the two is the shoulder the barbs sit over."
+ },
+ "the_roller_reading_is_unsupported": {
+  "claim_tested": "part:microduck-foot-left cad/interfaces.json 'roller_slot': '... two x 45..55 snap fingers rising to z -12.342 with 1.0 mm barbs facing each other — the clip-on roller drops between them'",
+  "the_numbers_are_right": "x 45.0000..55.0000, top z -12.3419, barbs 1.0000 mm proud — all three reproduce exactly on the mesh. Only the last clause is the problem.",
+  "measurement_against_it": [
+   "roller_blade.stl, tire.stl and rim.stl appear in exactly ONE of Pollen's four MJCF files, robot_allcollisions_rollers.xml (both reference copies), and that file contains NO foot_left, foot_right, sole_left or sole_right geom at all — the roller variant replaces the whole foot assembly.",
+   "the rollers variant also swaps the ankle: it uses ankle_l_v1 / ankle_r_v1, whose vertical screw is a Ø2.2/Ø3.5 at (x 50.1090, y -5.5000) matching roller_blade's own Ø1.6 pilot at (50.1090, -5.5000, -18.8240) — while ankle_left's vertical Ø2.2 is at (50.0000, 4.5020), the foot screw.",
+   "so in every model Pollen ships, no roller is placed anywhere near this slot; what IS in it is the ankle's own 36.5000 mm plate."
+  ],
+  "verdict": "the geometry is a snap, and it snaps onto the ANKLE. The slug `snap-fit-roller-axle` is kept because part:microduck-foot-left and -right already accept it and renaming would dangle; the CLAIM was corrected in the part folder and compat.py carries `captures_what` as the guard."
+ },
+ "open": {
+  "snap_force_N": null,
+  "snap_force_why": "each finger must deflect 0.9000 mm to let the plate pass. The force that takes depends on the finger's root section, its free length and the printed PLA's modulus at the layer orientation it is printed in — the first two are measurable off the mesh, the third is not in any file here, and no cantilever calculation is offered in its place.",
+  "what_settles_it": "a printed pair on a gauge: push the ankle plate home and record the peak force, and pull it back off and record that."
+ }
+}
