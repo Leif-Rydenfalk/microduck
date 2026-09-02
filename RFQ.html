@@ -1,0 +1,626 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opt_sz,wght@8..60,400;8..60,600;8..60,700&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="tools/doc.css">
+<style>
+  .lid{font-family:var(--mono);font-size:.72em;color:var(--accent);border:1px solid var(--hair);
+       padding:1px 6px;margin-right:8px;vertical-align:2px}
+  h3{margin:30px 0 4px}
+  .meta{font-family:var(--sans);font-size:12.5px;color:var(--ink-2);margin:2px 0}
+  .sub2{font-family:var(--sans);font-size:11.5px;color:var(--ink-2);line-height:1.4}
+  .flag{font-family:var(--sans);font-size:11.5px;color:var(--partial);margin-top:3px}
+  .cdtxt{color:var(--partial);font-family:var(--sans);font-size:12px;font-weight:600}
+  .note{font-size:13.5px;color:var(--ink-2);max-width:46em;margin:6px 0}
+  .verdict{border-left:3px solid var(--ready);padding:2px 0 2px 16px;margin:10px 0;font-size:14.5px;max-width:48em}
+  .verdict b{color:var(--ready)}
+  .verdict.warn{border-left-color:var(--partial)} .verdict.warn b{color:var(--partial)}
+  .lab{font-family:var(--sans);font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+       color:var(--ink-2);margin:14px 0 2px}
+  ul.tight{margin:2px 0 6px;padding-left:20px} ul.tight li{font-size:13.5px;margin:3px 0}
+  ul.small li{font-size:12px;font-family:var(--sans);color:var(--ink-2)}
+  table.alt td:first-child{white-space:nowrap}
+  table.offers{table-layout:fixed}
+  table.offers th:nth-child(1),table.offers td:nth-child(1){width:16%}
+  table.offers th:nth-child(2),table.offers td:nth-child(2){width:21%;font-family:var(--mono);font-size:11px;white-space:normal;word-break:break-word}
+  table.offers th:nth-child(3),table.offers td:nth-child(3){width:5%}
+  table.offers th:nth-child(4),table.offers td:nth-child(4){width:17%;font-size:12.5px}
+  table.offers th:nth-child(5),table.offers td:nth-child(5){width:14%;font-size:12.5px}
+  table.offers th:nth-child(6),table.offers td:nth-child(6){width:27%}
+  table.offers td{word-break:break-word}
+  table.offers th{white-space:normal}
+  table.rollup td:nth-child(1){width:30%}
+  table.rollup td:nth-child(3){width:16%}
+  .totalrow td{border-top:1.5px solid var(--rule);font-weight:700}
+  .warnbox{border:1.5px solid var(--no);padding:14px 18px;margin:18px 0}
+  .warnbox h3{margin:0 0 6px;font-family:var(--sans);font-size:13px;letter-spacing:.06em;
+       text-transform:uppercase;color:var(--no)}
+  .rfq{border:1px solid var(--rule);padding:22px 26px;margin:26px 0;background:var(--paper)}
+  .rfq h3{margin:0 0 2px;font-size:18px}
+  .ph{background:var(--head);border:1px dashed var(--partial);padding:1px 6px;
+      font-family:var(--mono);font-size:12px;color:var(--partial)}
+  .rfq pre{white-space:pre-wrap;font-family:var(--serif);font-size:14px;line-height:1.55;margin:10px 0}
+</style>
+<title>Microduck RFQ Pack</title></head>
+<body><div class="wrap">
+<p class="backlink"><a href="RELEASE.html">&larr; Release dossier</a> &middot; <a href="SOURCING.html">&larr; Sourcing evidence</a></p>
+
+<header class="hero">
+  <p class="eyebrow">Microduck reverse-engineering &middot; procurement</p>
+  <h1>Requests for quotation, ready to send</h1>
+  <p class="sub">One request per supplier, each covering the lines that supplier can actually quote,
+  with the specification, the quantity tiers, and the specific question that closes an open
+  <b>CANNOT DETERMINE</b> in <a href="SOURCING.html">SOURCING.html</a>. Your contact details are the
+  only thing missing: everything marked <span class="ph">[like this]</span> is a placeholder for a
+  person to fill in.</p>
+  <div class="rev">
+    <span>MD-RFQ-001 &middot; Rev A</span><span>generated 2026-09-02</span>
+    <span>10 suppliers</span>
+    <span>source: <code>spec/sourcing.json</code></span>
+  </div>
+</header>
+
+<div class="warnbox">
+  <h3>Nothing here has been sent</h3>
+  <p>No supplier was contacted, no enquiry was submitted and no money was spent producing this
+  document. These are drafts on a page. Sending them &mdash; and disclosing what the robot is, which
+  several of these questions do &mdash; is a decision for a person, not for the tool that wrote them.
+  Fill in the placeholders, read each one, then send.</p>
+</div>
+
+<nav class="toc">
+<a href="#rfq-robotis">ROBOTIS Co., Ltd.</a><a href="#rfq-radxa">Radxa / approved partner</a><a href="#rfq-digikey">DigiKey</a><a href="#rfq-lcsc">LCSC Electronics</a><a href="#rfq-bearings">Bearing suppliers</a><a href="#rfq-fasteners">Fastener supplier</a><a href="#rfq-battery">Battery pack supplier</a><a href="#rfq-camera">Camera module supplier</a><a href="#rfq-tof">ToF supplier</a><a href="#rfq-filament">Filament supplier</a>
+</nav>
+
+<section id="idx"><h2><span class="n">1</span> Which request answers which open question</h2>
+<p class="lede">Each request exists because a specific number could not be read from a public page.
+The right-hand column is what the reply is expected to close.</p>
+<div class="tablewrap"><table class="data">
+<thead><tr><th>Supplier</th><th>Lines</th><th>What the reply settles</th></tr></thead>
+<tbody>
+<tr><td><a href="#rfq-robotis">ROBOTIS Co., Ltd.</a></td><td><code>B1, B2</code></td><td>OEM / volume pricing for XL330-M288-T at 225, 1 500 and 15 000 units, and for Robot Cable-X3P 180 mm at 300 / 3 000 / 30 000 leads. ROBOTIS publishes no XL330 bulk pack and no tier table, so THIS QUOTE IS THE SINGLE LARGEST OPEN NUMBER IN THE WHOLE COST MODEL…</td></tr><tr><td><a href="#rfq-radxa">Radxa / approved partner (ALLNET China, Arace, ameriDroid, OKdo)</a></td><td><code>B3</code></td><td>Price and lead time for the ZERO 3W in the configuration Pollen specifies (1 GB LPDDR4 / 32 GB eMMC, 40-pin header pre-soldered). NOTE: this configuration is NOT in Radxa&#x27;s own SKU table (RAD-DOC-0084 rev 1.10 §7). Confirm whether it can be built to order,…</td></tr><tr><td><a href="#rfq-digikey">DigiKey</a></td><td><code>B9, B12, B14, P1c, P2c, P1d, R1, R2, R3, C1, C2</code></td><td>Quote the semiconductor and connector lines at 1 / 100 / 1 000 robots. Several carry long factory lead times read on 2026-09-02 (LSM6DSV16X 24 weeks, PN7150 30 weeks, ST25R3916 28 weeks and 0 in stock, FUSB302BMPX 56 weeks, S-8252AAX 0 in stock until…</td></tr><tr><td><a href="#rfq-lcsc">LCSC Electronics</a></td><td><code>B14, P1c, P2c, P1d, R1, R2</code></td><td>Quote the same semiconductor lines at 1 / 100 / 1 000 robots, on reel where the reel quantity is reached. LCSC is 30-55 % below DigiKey on most of these lines; confirm authorised-channel provenance and date codes, because that gap is large enough to need an…</td></tr><tr><td><a href="#rfq-bearings">Bearing suppliers (NZ Miniature Bearings; Jiang Xin Technology; a US/EU miniature-bearing house)</a></td><td><code>B10, B11</code></td><td>Quote MR1622 / ET2216 (16 x 22 x 4) at 11 / 1 100 / 11 000 pieces and MR6700 / 61700 (10 x 15 x 3, OPEN) at 3 / 300 / 3 000 pieces, in USD. The only USD figure we could read for the 16x22x4 is a factory RANGE of US$1.00-4.00 at MOQ 1 000 - a range is not a…</td></tr><tr><td><a href="#rfq-fasteners">Fastener supplier (RST-Versand; or any house that will quote at volume)</a></td><td><code>B18a, B18b, B18c</code></td><td>Quote DIN 912 / ISO 4762 A2 socket-head cap screws at 100 / 10 000 / 100 000 pieces: M2x4, M2x6, M2x8, M2x12, M2.5x6; plus DIN 934 A2 M2 hex nuts. Only the M2x6 has a readable price anywhere (EUR 4.34 per 100, RST-Versand) and no vendor publishes a tier above…</td></tr><tr><td><a href="#rfq-battery">Battery pack supplier (NextBatteries / Neewer / an OEM pack maker)</a></td><td><code>B4</code></td><td>Quote a 7.2 V 2S Li-ion pack in the Sony NP-F550 (L-series) form factor, &gt;= 2600 mAh / 18.72 Wh, with integrated protection, at 1 / 100 / 1 000 packs, and the matching charger separately. Body must be 70 x 38 x 20 mm class (our cradle is cut to 38.6 x 20.6 x…</td></tr><tr><td><a href="#rfq-camera">Camera module supplier (Arducam / UCTRONICS / Seeed)</a></td><td><code>B6, B7, B8</code></td><td>Quote an IMX219 M12-mount camera board at 1 / 100 / 1 000, with and without lens, plus a 22-pin 0.5 mm MIPI CSI FFC at ~15 mm. Seeed&#x27;s 102110719 is the only line with a published tier (10+ at $12.50) - extend it to 100 and 1 000.</td></tr><tr><td><a href="#rfq-tof">ToF supplier (Pololu / SparkFun / ST direct)</a></td><td><code>B9</code></td><td>Quote the VL53L8CX carrier (Pololu #3419) and the VL53L5CX Qwiic Mini (SparkFun SEN-19013) at 1 / 100 / 1 000; neither publishes a tier above 100. Also quote the bare VL53L8CXV0GC/1 and VL53L5CXV0GC/1 at 1 000 and 3 600 for placement on our own HAT - at &gt;=…</td></tr><tr><td><a href="#rfq-filament">Filament supplier (GigaParts / 3D Universe / Bambu Lab direct)</a></td><td><code>B19a, B19b</code></td><td>Quote Bambu Lab PLA Basic and TPU 85A, 1.75 mm, 1 kg, at 1 / 100 / 1 000 spools. At 1 000 robots this is 218.3 kg of PLA and 26.2 kg of TPU; no vendor publishes any volume tier on filament and Bambu&#x27;s own store refuses the fetcher (HTTP 402).</td></tr>
+</tbody></table></div>
+</section>
+
+<section id="reqs"><h2><span class="n">2</span> The requests</h2>
+
+<div class="rfq" id="rfq-robotis">
+<h3>Request for quotation &mdash; ROBOTIS Co., Ltd.</h3>
+<p class="meta">Covers lines B1, B2 &middot; known contact points: america@robotis.com, contactus2@robotis.com, +1 949-377-0377, +82-70-8671-2609
+<br>ROBOTIS INC, 4222 Green River Rd, Corona, CA 92880 (US); ROBOTIS Co. Ltd (KR)</p>
+
+<pre>To:      <span class="ph">[supplier contact name]</span>, ROBOTIS Co., Ltd.
+From:    <span class="ph">[your name]</span>, <span class="ph">[your company]</span>
+         <span class="ph">[email]</span> &middot; <span class="ph">[phone]</span> &middot; <span class="ph">[shipping address]</span>
+Date:    <span class="ph">[date of sending]</span>
+Subject: Request for quotation &mdash; Microduck bipedal robot, lines B1, B2
+
+Dear <span class="ph">[contact]</span>,
+
+We are pricing a production run of a small bipedal robot and would like a written
+quotation for the parts listed below. Quantities are given per robot and at build
+volumes of 1, 100 and 1 000 robots. Please quote each quantity separately, in your
+own currency, and state for every line: unit price, minimum order quantity, lead
+time from receipt of order, packaging, and the incoterm your price assumes.
+
+Where a part number below is marked as unresolved, we are asking you to tell us
+which part you would supply, not to guess what we meant.
+</pre>
+
+<p class="lab">Lines and quantities</p>
+<div class="tablewrap"><table class="data">
+<thead><tr><th>Line</th><th>Item</th><th>Part number as we have it</th>
+<th>Per robot</th><th>Order qty at 1 / 100 / 1 000 robots</th></tr></thead>
+<tbody><tr><td><code>B1</code></td><td>Dynamixel XL330-M288-T smart servo</td>
+<td><code>XL330-M288-T (ROBOTIS SKU 902-0163-000)</code></td><td class="n">15 </td><td class="n">15 / 1,500 / 15,000</td></tr>
+<tr><td><code>B2</code></td><td>Robot Cable-X3P 180 mm, 10-pack (Dynamixel bus leads)</td>
+<td><code>903-0251-000 (Robot Cable-X3P Convertible 180 mm, 10 pcs)</code></td><td class="n">2 </td><td class="n">2 / 200 / 2,000</td></tr></tbody></table></div>
+
+<p class="lab">B1 &mdash; specification</p><p class="note">ROBOTIS DYNAMIXEL XL330-M288-T, TTL half-duplex multidrop bus, Protocol 2.0, 288.4:1, 18 g. Horn hardware and X3P leads as supplied. Quantities are per robot x order size.</p><p class="lab">B2 &mdash; specification</p><p class="note">ROBOTIS Robot Cable-X3P (convertible), 180 mm, 10 pieces per pack. JST EH 3-pin (EHR-03 housing, SEH-001T-P0.6 crimp) at both ends. Our measured cut lengths are 20-165 mm (wiring/CABLES.md); 180 mm is the shortest priced bracket, so every lead is over-length and must be routed with the slack recorded per cable.</p>
+
+<p class="lab">The question that matters most on this quotation</p>
+<p class="note">OEM / volume pricing for XL330-M288-T at 225, 1 500 and 15 000 units, and for Robot Cable-X3P 180 mm at 300 / 3 000 / 30 000 leads. ROBOTIS publishes no XL330 bulk pack and no tier table, so THIS QUOTE IS THE SINGLE LARGEST OPEN NUMBER IN THE WHOLE COST MODEL - the servos are 75 % of the readable bought cost and the only line that does not move between 1 and 1 000 robots.</p>
+
+<p class="lab">Also please answer</p><ul class="tight"><li>Is the XL330-M288-T&#x27;s published 3.7-6.0 V input band a hard limit, or is there an OEM variant rated to 8.4 V? Our pack is 6.6-8.2 V.</li><li>Can leads be supplied at non-catalogue lengths (20, 35, 40, 50, 60, 65, 95, 120, 125, 165 mm)?</li></ul>
+
+<pre>Target lead time: <span class="ph">[state your need, e.g. 6 weeks for the pilot build]</span>
+Target first delivery date: <span class="ph">[date]</span>
+Quotation validity requested: 90 days.
+
+Please also confirm whether you are the authorised channel for these parts, and
+state date codes or batch provenance where the line is a semiconductor.
+
+Kind regards,
+<span class="ph">[your name]</span>
+<span class="ph">[your title, company]</span>
+</pre>
+</div>
+<div class="rfq" id="rfq-radxa">
+<h3>Request for quotation &mdash; Radxa / approved partner (ALLNET China, Arace, ameriDroid, OKdo)</h3>
+<p class="meta">Covers lines B3 &middot; known contact points: via https://radxa.com/products/zeros/zero3w/ - &#x27;exclusively available through our network of Approved Partners&#x27;
+</p>
+
+<pre>To:      <span class="ph">[supplier contact name]</span>, Radxa / approved partner (ALLNET China, Arace, ameriDroid, OKdo)
+From:    <span class="ph">[your name]</span>, <span class="ph">[your company]</span>
+         <span class="ph">[email]</span> &middot; <span class="ph">[phone]</span> &middot; <span class="ph">[shipping address]</span>
+Date:    <span class="ph">[date of sending]</span>
+Subject: Request for quotation &mdash; Microduck bipedal robot, lines B3
+
+Dear <span class="ph">[contact]</span>,
+
+We are pricing a production run of a small bipedal robot and would like a written
+quotation for the parts listed below. Quantities are given per robot and at build
+volumes of 1, 100 and 1 000 robots. Please quote each quantity separately, in your
+own currency, and state for every line: unit price, minimum order quantity, lead
+time from receipt of order, packaging, and the incoterm your price assumes.
+
+Where a part number below is marked as unresolved, we are asking you to tell us
+which part you would supply, not to guess what we meant.
+</pre>
+
+<p class="lab">Lines and quantities</p>
+<div class="tablewrap"><table class="data">
+<thead><tr><th>Line</th><th>Item</th><th>Part number as we have it</th>
+<th>Per robot</th><th>Order qty at 1 / 100 / 1 000 robots</th></tr></thead>
+<tbody><tr><td><code>B3</code></td><td>Radxa ZERO 3W single-board computer</td>
+<td><code>SKU as specified by Pollen (1 GB LPDDR4 / 32 GB eMMC) DOES NOT EXIST</code></td><td class="n">1 </td><td class="n">1 / 100 / 1,000</td></tr></tbody></table></div>
+
+<p class="lab">B3 &mdash; specification</p><p class="note">Radxa ZERO 3W, RK3566 quad Cortex-A55, 40-pin GPIO header PRE-SOLDERED, 22-pin MIPI CSI 0.5 mm, Wi-Fi 6 / BT 5.4, 2x USB-C. Configuration required: 1 GB LPDDR4 with 32 GB eMMC if Radxa will build it (no such catalogue SKU); otherwise quote RS107-D1E8H1W15 (1 GB / 8 GB, header) and RS107-D4E32H1W15 (4 GB / 32 GB, header) so the eMMC question can be priced.</p>
+
+<p class="lab">The question that matters most on this quotation</p>
+<p class="note">Price and lead time for the ZERO 3W in the configuration Pollen specifies (1 GB LPDDR4 / 32 GB eMMC, 40-pin header pre-soldered). NOTE: this configuration is NOT in Radxa&#x27;s own SKU table (RAD-DOC-0084 rev 1.10 §7). Confirm whether it can be built to order, and quote RS107-D1E8H1W15 and RS107-D4E32H1W15 alongside. Every 1 GB variant was sold out at every distributor on 2026-09-02 - a real lead time is needed.</p>
+
+<p class="lab">Also please answer</p><ul class="tight"><li>Availability commitment: the product brief §8 states availability &#x27;until a minimum date of September 2030&#x27;. Confirm for the quoted SKU.</li><li>Price and lead for the matching 22-pin 0.5 mm CSI FFC in a ~15 mm length.</li></ul>
+
+<pre>Target lead time: <span class="ph">[state your need, e.g. 6 weeks for the pilot build]</span>
+Target first delivery date: <span class="ph">[date]</span>
+Quotation validity requested: 90 days.
+
+Please also confirm whether you are the authorised channel for these parts, and
+state date codes or batch provenance where the line is a semiconductor.
+
+Kind regards,
+<span class="ph">[your name]</span>
+<span class="ph">[your title, company]</span>
+</pre>
+</div>
+<div class="rfq" id="rfq-digikey">
+<h3>Request for quotation &mdash; DigiKey</h3>
+<p class="meta">Covers lines B9, B12, B14, P1c, P2c, P1d, R1, R2, R3, C1, C2 &middot; known contact points: https://www.digikey.com
+</p>
+
+<pre>To:      <span class="ph">[supplier contact name]</span>, DigiKey
+From:    <span class="ph">[your name]</span>, <span class="ph">[your company]</span>
+         <span class="ph">[email]</span> &middot; <span class="ph">[phone]</span> &middot; <span class="ph">[shipping address]</span>
+Date:    <span class="ph">[date of sending]</span>
+Subject: Request for quotation &mdash; Microduck bipedal robot, lines B9, B12, B14, P1c, P2c, P1d, R1, R2, R3, C1, C2
+
+Dear <span class="ph">[contact]</span>,
+
+We are pricing a production run of a small bipedal robot and would like a written
+quotation for the parts listed below. Quantities are given per robot and at build
+volumes of 1, 100 and 1 000 robots. Please quote each quantity separately, in your
+own currency, and state for every line: unit price, minimum order quantity, lead
+time from receipt of order, packaging, and the incoterm your price assumes.
+
+Where a part number below is marked as unresolved, we are asking you to tell us
+which part you would supply, not to guess what we meant.
+</pre>
+
+<p class="lab">Lines and quantities</p>
+<div class="tablewrap"><table class="data">
+<thead><tr><th>Line</th><th>Item</th><th>Part number as we have it</th>
+<th>Per robot</th><th>Order qty at 1 / 100 / 1 000 robots</th></tr></thead>
+<tbody><tr><td><code>B9</code></td><td>Time-of-Flight 8x8 multizone ranger (module or bare die)</td>
+<td><code>VL53L8CX or VL53L5CX - which generation ships is CANNOT DETERMINE (both drivers are vendored in Pollen&#x27;s source)</code></td><td class="n">1 </td><td class="n">1 / 100 / 1,000</td></tr>
+<tr><td><code>B12</code></td><td>Speaker, 35 x 25 x 7 mm, 8 ohm, 2 W (head)</td>
+<td><code>CANNOT DETERMINE - Pollen&#x27;s mesh is a 12-triangle box, no part number anywhere</code></td><td class="n">1 </td><td class="n">1 / 100 / 1,000</td></tr>
+<tr><td><code>B14</code></td><td>NFC reader IC + 2 antennas (head and beak)</td>
+<td><code>CANNOT DETERMINE which IC ships. Two candidates are fully characterised in ce-parts (both graded PASS there): NXP PN7150 and ST ST25R3916.</code></td><td class="n">1 </td><td class="n">1 / 100 / 1,000</td></tr>
+<tr><td><code>P1c</code></td><td>TLV320AIC3104IRHBR stereo audio codec (on the Robot HAT)</td>
+<td><code>TLV320AIC3104IRHBR</code></td><td class="n">1 </td><td class="n">1 / 100 / 1,000</td></tr>
+<tr><td><code>P2c</code></td><td>LSM6DSV16X 6-axis IMU (on the imu_to_dxl board, Dynamixel slave ID 200)</td>
+<td><code>LSM6DSV16XTR</code></td><td class="n">1 </td><td class="n">1 / 100 / 1,000</td></tr>
+<tr><td><code>P1d</code></td><td>BMI088 6-axis IMU (dormant footprint on the Robot HAT)</td>
+<td><code>BMI088</code></td><td class="n">1 </td><td class="n">1 / 100 / 1,000</td></tr>
+<tr><td><code>R1</code></td><td>USB-C CC/PD controller fitted on the Radxa ZERO 3W (reference line - NOT separately purchased)</td>
+<td><code>ET7301B (Radxa&#x27;s U6). Pollen&#x27;s device tree names FUSB302, which is the DRIVER name, not the fitted die (part:fusb302 record.title).</code></td><td class="n">0 </td><td class="n">&mdash;</td></tr>
+<tr><td><code>R2</code></td><td>MCP73213 2S Li-ion charge controller (in the external charger, not the robot)</td>
+<td><code>MCP73213-A6SI/MF (DFN-10 3x3)</code></td><td class="n">0 </td><td class="n">&mdash;</td></tr>
+<tr><td><code>R3</code></td><td>S-8252 2S battery protection IC (inside the NP-F550 pack, not separately purchased)</td>
+<td><code>S-8252 series; exact suffix CANNOT DETERMINE (the series has ~30 detection-voltage options and the fitted pack is unidentified)</code></td><td class="n">0 </td><td class="n">&mdash;</td></tr>
+<tr><td><code>C1</code></td><td>JST EH 3-pin connector kit for the Dynamixel bus, if the harness is crimped rather than bought</td>
+<td><code>JST EHR-3 (housing) + JST SEH-001T-P0.6 (crimp contact)</code></td><td class="n">1 </td><td class="n">1 / 100 / 1,000</td></tr>
+<tr><td><code>C2</code></td><td>JST SH 4-pin (ToF / Stemma) and GH 2-pin (speaker) housings</td>
+<td><code>JST SHR-04V-S-B (1.00 mm, 4 pos) + JST GHR-02V-S (1.25 mm, 2 pos)</code></td><td class="n">1 </td><td class="n">1 / 100 / 1,000</td></tr></tbody></table></div>
+
+<p class="lab">B9 &mdash; specification</p><p class="note">ST 8x8 multizone Time-of-Flight ranging sensor, I2C address 0x29, on a carrier with 3V3 regulation and level shifting, or as bare optical LGA-16 for placement on our own HAT. Note the VL53L8CX requires IOVDD 1.2/1.8 V only (part:vl53l8cx) - a 3V3 carrier is not optional if the host is 3V3.</p><p class="lab">B12 &mdash; specification</p><p class="note">Rectangular micro speaker, 8 ohm nominal, &gt;= 2 W, body envelope 35.0 x 25.0 x 7.0 mm MAXIMUM (the cavity in the head shell), lead terminated JST GH 1.25 mm 2-pin or flying leads. Quote SPL at 1 W / 10 cm and the resonant frequency.</p><p class="lab">B14 &mdash; specification</p><p class="note">NFC Forum controller for reader/writer + card-emulation on 13.56 MHz, host interface I2C (PN7150, NCI) or SPI/I2C (ST25R3916), driving TWO antennas (head, beak) - state whether an RF switch is required. Antennas: not specified, quote a 13.56 MHz PCB or FPC antenna to suit a ~30 mm aperture.</p><p class="lab">P1c &mdash; specification</p><p class="note">TI TLV320AIC3104IRHBR, low-power stereo audio codec, I2C control + I2S, VQFN-32. 1 per board.</p><p class="lab">P2c &mdash; specification</p><p class="note">ST LSM6DSV16XTR, 6-axis IMU with on-chip sensor fusion (SFLP), LGA-14L 2.5 x 3.0 x 0.83 mm, I2C/SPI. 1 per imu_to_dxl board.</p><p class="lab">P1d &mdash; specification</p><p class="note">Bosch Sensortec BMI088, 16-bit +/-24 g accelerometer + 16-bit +/-2000 dps gyroscope, LGA-16 3.0 x 4.5 x 0.95 mm, SPI/I2C. 1 per HAT if populated.</p><p class="lab">R1 &mdash; specification</p><p class="note">USB Type-C CC / USB-PD 2.0 controller, I2C address 0x22, register-compatible with the Linux fusb302 driver. Etek ET7301B (WLCSP9 / QFN14) is what Radxa&#x27;s schematic v1.12 places; onsemi FUSB302BMPX (MLP-14 2.5x2.5) is the part the driver is named for and is the second-source footprint.</p><p class="lab">R2 &mdash; specification</p><p class="note">Microchip MCP73213, dual-cell (2S) Li-ion linear charge management controller with input over-voltage protection, DFN-10 3x3. Float voltage option to be selected: 8.4 V for a standard 2S pack. Fast-charge current set by one external resistor, 130-1100 mA.</p><p class="lab">R3 &mdash; specification</p><p class="note">ABLIC S-8252 series protection IC for a 2-serial-cell Li-ion pack, SOT-23-6 or SNT-6A. Overcharge / overdischarge / overcurrent detection voltages to be selected against the pack&#x27;s cells; the runtime&#x27;s own thresholds are 6.6 V empty / 8.2 V full, which constrains the overdischarge option.</p><p class="lab">C1 &mdash; specification</p><p class="note">JST EH series, 2.50 mm pitch: EHR-3 3-position receptacle housing x 32 per robot; SEH-001T-P0.6 socket contact, 22-26 AWG, tin, x 96 per robot. Wire: 21 or 22 AWG per the voltage-drop check in wiring/CABLES.md (worst drop 0.550 V at 21 AWG, PASS).</p><p class="lab">C2 &mdash; specification</p><p class="note">JST SH series 1.00 mm 4-position receptacle housing (SHR-04V-S-B) and JST GH series 1.25 mm 2-position receptacle housing (GHR-02V-S), with matching crimp contacts. 2 of each per robot.</p>
+
+<p class="lab">The question that matters most on this quotation</p>
+<p class="note">Quote the semiconductor and connector lines at 1 / 100 / 1 000 robots. Several carry long factory lead times read on 2026-09-02 (LSM6DSV16X 24 weeks, PN7150 30 weeks, ST25R3916 28 weeks and 0 in stock, FUSB302BMPX 56 weeks, S-8252AAX 0 in stock until 23-Dec-2026, BMI088 0 in stock until 08-Sep-2026) - confirm scheduled-order pricing and whether the lead times still hold.</p>
+
+<p class="lab">Also please answer</p><ul class="tight"><li>Is there a 35 x 25 x 7 mm, 8 ohm, 2 W rectangular speaker in the catalogue? Nothing at that exact size was findable; both parts we priced are oversize.</li></ul>
+
+<pre>Target lead time: <span class="ph">[state your need, e.g. 6 weeks for the pilot build]</span>
+Target first delivery date: <span class="ph">[date]</span>
+Quotation validity requested: 90 days.
+
+Please also confirm whether you are the authorised channel for these parts, and
+state date codes or batch provenance where the line is a semiconductor.
+
+Kind regards,
+<span class="ph">[your name]</span>
+<span class="ph">[your title, company]</span>
+</pre>
+</div>
+<div class="rfq" id="rfq-lcsc">
+<h3>Request for quotation &mdash; LCSC Electronics</h3>
+<p class="meta">Covers lines B14, P1c, P2c, P1d, R1, R2 &middot; known contact points: https://www.lcsc.com
+</p>
+
+<pre>To:      <span class="ph">[supplier contact name]</span>, LCSC Electronics
+From:    <span class="ph">[your name]</span>, <span class="ph">[your company]</span>
+         <span class="ph">[email]</span> &middot; <span class="ph">[phone]</span> &middot; <span class="ph">[shipping address]</span>
+Date:    <span class="ph">[date of sending]</span>
+Subject: Request for quotation &mdash; Microduck bipedal robot, lines B14, P1c, P2c, P1d, R1, R2
+
+Dear <span class="ph">[contact]</span>,
+
+We are pricing a production run of a small bipedal robot and would like a written
+quotation for the parts listed below. Quantities are given per robot and at build
+volumes of 1, 100 and 1 000 robots. Please quote each quantity separately, in your
+own currency, and state for every line: unit price, minimum order quantity, lead
+time from receipt of order, packaging, and the incoterm your price assumes.
+
+Where a part number below is marked as unresolved, we are asking you to tell us
+which part you would supply, not to guess what we meant.
+</pre>
+
+<p class="lab">Lines and quantities</p>
+<div class="tablewrap"><table class="data">
+<thead><tr><th>Line</th><th>Item</th><th>Part number as we have it</th>
+<th>Per robot</th><th>Order qty at 1 / 100 / 1 000 robots</th></tr></thead>
+<tbody><tr><td><code>B14</code></td><td>NFC reader IC + 2 antennas (head and beak)</td>
+<td><code>CANNOT DETERMINE which IC ships. Two candidates are fully characterised in ce-parts (both graded PASS there): NXP PN7150 and ST ST25R3916.</code></td><td class="n">1 </td><td class="n">1 / 100 / 1,000</td></tr>
+<tr><td><code>P1c</code></td><td>TLV320AIC3104IRHBR stereo audio codec (on the Robot HAT)</td>
+<td><code>TLV320AIC3104IRHBR</code></td><td class="n">1 </td><td class="n">1 / 100 / 1,000</td></tr>
+<tr><td><code>P2c</code></td><td>LSM6DSV16X 6-axis IMU (on the imu_to_dxl board, Dynamixel slave ID 200)</td>
+<td><code>LSM6DSV16XTR</code></td><td class="n">1 </td><td class="n">1 / 100 / 1,000</td></tr>
+<tr><td><code>P1d</code></td><td>BMI088 6-axis IMU (dormant footprint on the Robot HAT)</td>
+<td><code>BMI088</code></td><td class="n">1 </td><td class="n">1 / 100 / 1,000</td></tr>
+<tr><td><code>R1</code></td><td>USB-C CC/PD controller fitted on the Radxa ZERO 3W (reference line - NOT separately purchased)</td>
+<td><code>ET7301B (Radxa&#x27;s U6). Pollen&#x27;s device tree names FUSB302, which is the DRIVER name, not the fitted die (part:fusb302 record.title).</code></td><td class="n">0 </td><td class="n">&mdash;</td></tr>
+<tr><td><code>R2</code></td><td>MCP73213 2S Li-ion charge controller (in the external charger, not the robot)</td>
+<td><code>MCP73213-A6SI/MF (DFN-10 3x3)</code></td><td class="n">0 </td><td class="n">&mdash;</td></tr></tbody></table></div>
+
+<p class="lab">B14 &mdash; specification</p><p class="note">NFC Forum controller for reader/writer + card-emulation on 13.56 MHz, host interface I2C (PN7150, NCI) or SPI/I2C (ST25R3916), driving TWO antennas (head, beak) - state whether an RF switch is required. Antennas: not specified, quote a 13.56 MHz PCB or FPC antenna to suit a ~30 mm aperture.</p><p class="lab">P1c &mdash; specification</p><p class="note">TI TLV320AIC3104IRHBR, low-power stereo audio codec, I2C control + I2S, VQFN-32. 1 per board.</p><p class="lab">P2c &mdash; specification</p><p class="note">ST LSM6DSV16XTR, 6-axis IMU with on-chip sensor fusion (SFLP), LGA-14L 2.5 x 3.0 x 0.83 mm, I2C/SPI. 1 per imu_to_dxl board.</p><p class="lab">P1d &mdash; specification</p><p class="note">Bosch Sensortec BMI088, 16-bit +/-24 g accelerometer + 16-bit +/-2000 dps gyroscope, LGA-16 3.0 x 4.5 x 0.95 mm, SPI/I2C. 1 per HAT if populated.</p><p class="lab">R1 &mdash; specification</p><p class="note">USB Type-C CC / USB-PD 2.0 controller, I2C address 0x22, register-compatible with the Linux fusb302 driver. Etek ET7301B (WLCSP9 / QFN14) is what Radxa&#x27;s schematic v1.12 places; onsemi FUSB302BMPX (MLP-14 2.5x2.5) is the part the driver is named for and is the second-source footprint.</p><p class="lab">R2 &mdash; specification</p><p class="note">Microchip MCP73213, dual-cell (2S) Li-ion linear charge management controller with input over-voltage protection, DFN-10 3x3. Float voltage option to be selected: 8.4 V for a standard 2S pack. Fast-charge current set by one external resistor, 130-1100 mA.</p>
+
+<p class="lab">The question that matters most on this quotation</p>
+<p class="note">Quote the same semiconductor lines at 1 / 100 / 1 000 robots, on reel where the reel quantity is reached. LCSC is 30-55 % below DigiKey on most of these lines; confirm authorised-channel provenance and date codes, because that gap is large enough to need an answer before it is trusted (the PN7150 is $3.9307 vs $9.095 at 100).</p>
+
+<p class="lab">Also please answer</p><ul class="tight"><li>Do you stock the Etek ET7301B (or ET7301BY)? It is the USB-C PD controller Radxa fits, and no distributor with a price was found anywhere.</li></ul>
+
+<pre>Target lead time: <span class="ph">[state your need, e.g. 6 weeks for the pilot build]</span>
+Target first delivery date: <span class="ph">[date]</span>
+Quotation validity requested: 90 days.
+
+Please also confirm whether you are the authorised channel for these parts, and
+state date codes or batch provenance where the line is a semiconductor.
+
+Kind regards,
+<span class="ph">[your name]</span>
+<span class="ph">[your title, company]</span>
+</pre>
+</div>
+<div class="rfq" id="rfq-bearings">
+<h3>Request for quotation &mdash; Bearing suppliers (NZ Miniature Bearings; Jiang Xin Technology; a US/EU miniature-bearing house)</h3>
+<p class="meta">Covers lines B10, B11 &middot; known contact points: https://nzminiaturebearings.com, https://jiangxin2020.en.made-in-china.com
+</p>
+
+<pre>To:      <span class="ph">[supplier contact name]</span>, Bearing suppliers (NZ Miniature Bearings; Jiang Xin Technology; a US/EU miniature-bearing house)
+From:    <span class="ph">[your name]</span>, <span class="ph">[your company]</span>
+         <span class="ph">[email]</span> &middot; <span class="ph">[phone]</span> &middot; <span class="ph">[shipping address]</span>
+Date:    <span class="ph">[date of sending]</span>
+Subject: Request for quotation &mdash; Microduck bipedal robot, lines B10, B11
+
+Dear <span class="ph">[contact]</span>,
+
+We are pricing a production run of a small bipedal robot and would like a written
+quotation for the parts listed below. Quantities are given per robot and at build
+volumes of 1, 100 and 1 000 robots. Please quote each quantity separately, in your
+own currency, and state for every line: unit price, minimum order quantity, lead
+time from receipt of order, packaging, and the incoterm your price assumes.
+
+Where a part number below is marked as unresolved, we are asking you to tell us
+which part you would supply, not to guess what we meant.
+</pre>
+
+<p class="lab">Lines and quantities</p>
+<div class="tablewrap"><table class="data">
+<thead><tr><th>Line</th><th>Item</th><th>Part number as we have it</th>
+<th>Per robot</th><th>Order qty at 1 / 100 / 1 000 robots</th></tr></thead>
+<tbody><tr><td><code>B10</code></td><td>Ball bearing 22 x 16 x 4 mm (thin section)</td>
+<td><code>MR1622-ZZ (aliases ET2216ZZ, SET2216, A2216, DDA2216(ZZ), 1622ZZ)</code></td><td class="n">11 </td><td class="n">11 / 1,100 / 11,000</td></tr>
+<tr><td><code>B11</code></td><td>Ball bearing 15 x 10 x 3 mm</td>
+<td><code>MR6700 open (aliases 61700J1, 61700R, 6700E, 6700; ISO 61700)</code></td><td class="n">3 </td><td class="n">3 / 300 / 3,000</td></tr></tbody></table></div>
+
+<p class="lab">B10 &mdash; specification</p><p class="note">Thin-section deep-groove ball bearing, bore 16.000 mm, OD 22.000 mm, width 4.000 mm, designation MR1622 / ET2216 / DDA2216. Chrome steel (GCr15 / SAE52100) or stainless. Shield variant to be quoted BOTH ways (ZZ metal shields and open) - which one the product fits is unresolved. Press-fit into a printed PLA seat, so OD tolerance and roundness matter more than the ABEC class.</p><p class="lab">B11 &mdash; specification</p><p class="note">Deep-groove ball bearing, bore 10.000 mm, OD 15.000 mm, width 3.000 mm, designation MR6700 / 61700, OPEN. Quote 61700-2Z (shielded, same 10x15x3) alongside. Press-fit into printed PLA.</p>
+
+<p class="lab">The question that matters most on this quotation</p>
+<p class="note">Quote MR1622 / ET2216 (16 x 22 x 4) at 11 / 1 100 / 11 000 pieces and MR6700 / 61700 (10 x 15 x 3, OPEN) at 3 / 300 / 3 000 pieces, in USD. The only USD figure we could read for the 16x22x4 is a factory RANGE of US$1.00-4.00 at MOQ 1 000 - a range is not a price.</p>
+
+<p class="lab">Also please answer</p><ul class="tight"><li>Quote ZZ (shielded), 2RS and open for both sizes - which variant the product uses is unresolved.</li><li>State OD tolerance and roundness: both bearings are press-fit into printed PLA seats.</li></ul>
+
+<pre>Target lead time: <span class="ph">[state your need, e.g. 6 weeks for the pilot build]</span>
+Target first delivery date: <span class="ph">[date]</span>
+Quotation validity requested: 90 days.
+
+Please also confirm whether you are the authorised channel for these parts, and
+state date codes or batch provenance where the line is a semiconductor.
+
+Kind regards,
+<span class="ph">[your name]</span>
+<span class="ph">[your title, company]</span>
+</pre>
+</div>
+<div class="rfq" id="rfq-fasteners">
+<h3>Request for quotation &mdash; Fastener supplier (RST-Versand; or any house that will quote at volume)</h3>
+<p class="meta">Covers lines B18a, B18b, B18c &middot; known contact points: https://www.rst-versand.de
+</p>
+
+<pre>To:      <span class="ph">[supplier contact name]</span>, Fastener supplier (RST-Versand; or any house that will quote at volume)
+From:    <span class="ph">[your name]</span>, <span class="ph">[your company]</span>
+         <span class="ph">[email]</span> &middot; <span class="ph">[phone]</span> &middot; <span class="ph">[shipping address]</span>
+Date:    <span class="ph">[date of sending]</span>
+Subject: Request for quotation &mdash; Microduck bipedal robot, lines B18a, B18b, B18c
+
+Dear <span class="ph">[contact]</span>,
+
+We are pricing a production run of a small bipedal robot and would like a written
+quotation for the parts listed below. Quantities are given per robot and at build
+volumes of 1, 100 and 1 000 robots. Please quote each quantity separately, in your
+own currency, and state for every line: unit price, minimum order quantity, lead
+time from receipt of order, packaging, and the incoterm your price assumes.
+
+Where a part number below is marked as unresolved, we are asking you to tell us
+which part you would supply, not to guess what we meant.
+</pre>
+
+<p class="lab">Lines and quantities</p>
+<div class="tablewrap"><table class="data">
+<thead><tr><th>Line</th><th>Item</th><th>Part number as we have it</th>
+<th>Per robot</th><th>Order qty at 1 / 100 / 1 000 robots</th></tr></thead>
+<tbody><tr><td><code>B18a</code></td><td>M2 x 6 socket head cap screw, A2 stainless, DIN 912</td>
+<td><code>DIN 912 / ISO 4762 M2x6 A2</code></td><td class="n">80 </td><td class="n">80 / 8,000 / 80,000</td></tr>
+<tr><td><code>B18b</code></td><td>M2 socket head cap screws, other lengths (x4, x8, x12) + M2 nuts + M2.5x6</td>
+<td><code>DIN 912 M2x4 / M2x8 / M2x12 A2; DIN 934 M2 nut A2; DIN 912 M2.5x6 A2</code></td><td class="n">185 </td><td class="n">185 / 18,500 / 185,000</td></tr>
+<tr><td><code>B18c</code></td><td>M2 heat-set threaded inserts, brass, ~3.0 mm</td>
+<td><code>M2 x 3.0 mm brass heat-set insert (no single industry designation)</code></td><td class="n">60 </td><td class="n">60 / 6,000 / 60,000</td></tr></tbody></table></div>
+
+<p class="lab">B18a &mdash; specification</p><p class="note">Hex socket head cap screw, M2 x 6 mm, A2 (304) stainless, DIN 912 / ISO 4762. Quantity per robot 80 (community-derived; a measured schedule is still open). Quote at 100 / 8 000 / 80 000 pieces.</p><p class="lab">B18b &mdash; specification</p><p class="note">Hex socket head cap screws DIN 912 / ISO 4762, A2 stainless: M2x4 (60), M2x8 (40), M2x12 (15), M2.5x6 (20). Hex nuts DIN 934 A2 M2 (50). Per robot; quote at 100 / 10 000 / 100 000.</p><p class="lab">B18c &mdash; specification</p><p class="note">Brass heat-set threaded insert, M2 internal thread, ~3.0 mm length, knurled, for installation into FDM PLA with a soldering iron. Lead and cadmium free. 60 per robot (community-derived).</p>
+
+<p class="lab">The question that matters most on this quotation</p>
+<p class="note">Quote DIN 912 / ISO 4762 A2 socket-head cap screws at 100 / 10 000 / 100 000 pieces: M2x4, M2x6, M2x8, M2x12, M2.5x6; plus DIN 934 A2 M2 hex nuts. Only the M2x6 has a readable price anywhere (EUR 4.34 per 100, RST-Versand) and no vendor publishes a tier above 100.</p>
+
+<p class="lab">Also please answer</p><ul class="tight"><li>Quote M2 brass heat-set inserts (~3.0 mm) at 100 / 6 000 / 60 000 - Prusa, CNC Kitchen and Vector3D all stop at a 100-piece pack.</li></ul>
+
+<pre>Target lead time: <span class="ph">[state your need, e.g. 6 weeks for the pilot build]</span>
+Target first delivery date: <span class="ph">[date]</span>
+Quotation validity requested: 90 days.
+
+Please also confirm whether you are the authorised channel for these parts, and
+state date codes or batch provenance where the line is a semiconductor.
+
+Kind regards,
+<span class="ph">[your name]</span>
+<span class="ph">[your title, company]</span>
+</pre>
+</div>
+<div class="rfq" id="rfq-battery">
+<h3>Request for quotation &mdash; Battery pack supplier (NextBatteries / Neewer / an OEM pack maker)</h3>
+<p class="meta">Covers lines B4 &middot; known contact points: https://www.nextbatteries.com, https://neewer.com
+</p>
+
+<pre>To:      <span class="ph">[supplier contact name]</span>, Battery pack supplier (NextBatteries / Neewer / an OEM pack maker)
+From:    <span class="ph">[your name]</span>, <span class="ph">[your company]</span>
+         <span class="ph">[email]</span> &middot; <span class="ph">[phone]</span> &middot; <span class="ph">[shipping address]</span>
+Date:    <span class="ph">[date of sending]</span>
+Subject: Request for quotation &mdash; Microduck bipedal robot, lines B4
+
+Dear <span class="ph">[contact]</span>,
+
+We are pricing a production run of a small bipedal robot and would like a written
+quotation for the parts listed below. Quantities are given per robot and at build
+volumes of 1, 100 and 1 000 robots. Please quote each quantity separately, in your
+own currency, and state for every line: unit price, minimum order quantity, lead
+time from receipt of order, packaging, and the incoterm your price assumes.
+
+Where a part number below is marked as unresolved, we are asking you to tell us
+which part you would supply, not to guess what we meant.
+</pre>
+
+<p class="lab">Lines and quantities</p>
+<div class="tablewrap"><table class="data">
+<thead><tr><th>Line</th><th>Item</th><th>Part number as we have it</th>
+<th>Per robot</th><th>Order qty at 1 / 100 / 1 000 robots</th></tr></thead>
+<tbody><tr><td><code>B4</code></td><td>NP-F550-form-factor 2S Li-ion pack, 7.2 V, 2600 mAh (+ dual-charger share)</td>
+<td><code>CANNOT DETERMINE - the maker of the fitted pack is unidentified</code></td><td class="n">1 </td><td class="n">1 / 100 / 1,000</td></tr></tbody></table></div>
+
+<p class="lab">B4 &mdash; specification</p><p class="note">Rechargeable pack in the Sony InfoLITHIUM L-series (NP-F550) mechanical form factor, 7.2 V nominal 2-series Li-ion, &gt;= 2600 mAh (&gt;= 18.72 Wh), with integrated protection (over-charge / over-discharge / over-current), body 70 x 38 x 20 mm class, standard L-series contact block. Must sustain 6.6-8.2 V under a 15-servo load; the runtime maps 6.6 V empty / 8.2 V full. Certification marks and cell maker to be stated on the quote.</p>
+
+<p class="lab">The question that matters most on this quotation</p>
+<p class="note">Quote a 7.2 V 2S Li-ion pack in the Sony NP-F550 (L-series) form factor, &gt;= 2600 mAh / 18.72 Wh, with integrated protection, at 1 / 100 / 1 000 packs, and the matching charger separately. Body must be 70 x 38 x 20 mm class (our cradle is cut to 38.6 x 20.6 x 70.8 mm).</p>
+
+<p class="lab">Also please answer</p><ul class="tight"><li>State the cell make and model, the protection IC, the Wh rating and every certification mark on the label. The pack Pollen fits is unidentified and we cannot put an MPN on an order without this.</li><li>Confirm the pack sustains 6.6-8.2 V under a 15 A peak (15 servos x 1 A worst case).</li></ul>
+
+<pre>Target lead time: <span class="ph">[state your need, e.g. 6 weeks for the pilot build]</span>
+Target first delivery date: <span class="ph">[date]</span>
+Quotation validity requested: 90 days.
+
+Please also confirm whether you are the authorised channel for these parts, and
+state date codes or batch provenance where the line is a semiconductor.
+
+Kind regards,
+<span class="ph">[your name]</span>
+<span class="ph">[your title, company]</span>
+</pre>
+</div>
+<div class="rfq" id="rfq-camera">
+<h3>Request for quotation &mdash; Camera module supplier (Arducam / UCTRONICS / Seeed)</h3>
+<p class="meta">Covers lines B6, B7, B8 &middot; known contact points: https://www.uctronics.com, https://www.seeedstudio.com
+</p>
+
+<pre>To:      <span class="ph">[supplier contact name]</span>, Camera module supplier (Arducam / UCTRONICS / Seeed)
+From:    <span class="ph">[your name]</span>, <span class="ph">[your company]</span>
+         <span class="ph">[email]</span> &middot; <span class="ph">[phone]</span> &middot; <span class="ph">[shipping address]</span>
+Date:    <span class="ph">[date of sending]</span>
+Subject: Request for quotation &mdash; Microduck bipedal robot, lines B6, B7, B8
+
+Dear <span class="ph">[contact]</span>,
+
+We are pricing a production run of a small bipedal robot and would like a written
+quotation for the parts listed below. Quantities are given per robot and at build
+volumes of 1, 100 and 1 000 robots. Please quote each quantity separately, in your
+own currency, and state for every line: unit price, minimum order quantity, lead
+time from receipt of order, packaging, and the incoterm your price assumes.
+
+Where a part number below is marked as unresolved, we are asking you to tell us
+which part you would supply, not to guess what we meant.
+</pre>
+
+<p class="lab">Lines and quantities</p>
+<div class="tablewrap"><table class="data">
+<thead><tr><th>Line</th><th>Item</th><th>Part number as we have it</th>
+<th>Per robot</th><th>Order qty at 1 / 100 / 1 000 robots</th></tr></thead>
+<tbody><tr><td><code>B6</code></td><td>IMX219 camera board, M12 mount, with lens</td>
+<td><code>Arducam B0183 (representative). The module Pollen fits: CANNOT DETERMINE</code></td><td class="n">1 </td><td class="n">1 / 100 / 1,000</td></tr>
+<tr><td><code>B7</code></td><td>M12 wide-angle lens (only if the camera board is bought bare)</td>
+<td><code>Arducam M40180H13L (representative). Required FOV: CANNOT DETERMINE</code></td><td class="n">1 </td><td class="n">1 / 100 / 1,000</td></tr>
+<tr><td><code>B8</code></td><td>22-pin 0.5 mm MIPI CSI FFC ribbon, Radxa to camera</td>
+<td><code>CANNOT DETERMINE</code></td><td class="n">1 </td><td class="n">1 / 100 / 1,000</td></tr></tbody></table></div>
+
+<p class="lab">B6 &mdash; specification</p><p class="note">8 Mpx Sony IMX219 CMOS camera board with an M12 lens holder, 22-pin 0.5 mm MIPI CSI-2 FFC, board outline compatible with a 25 x 24 mm class mount behind face_part. Lens FOV to be specified - Pollen&#x27;s press kit says the FOV is &#x27;still being finalised&#x27;, so quote the module both bare and with a 75 deg (H) low-distortion M12 lens.</p><p class="lab">B7 &mdash; specification</p><p class="note">M12 (S-mount) lens for a 1/4-inch IMX219 sensor. Target FOV NOT YET FIXED - Pollen&#x27;s press kit says the camera FOV is &#x27;still being finalised&#x27; and the community figure is ~62 deg. Quote 70 deg, 90 deg and 140 deg options; an FOV selection kit is acceptable for prototyping.</p><p class="lab">B8 &mdash; specification</p><p class="note">MIPI CSI-2 flat flex, 22 positions, 0.5 mm pitch at the Radxa end, length ~15 mm (route floor 13.3 mm measured off spec/mesh-placements.json). Camera-board end is 22-pin 0.5 mm OR 15-pin 1.0 mm depending on the module chosen - quote both, and state contact side (same-side vs opposite-side).</p>
+
+<p class="lab">The question that matters most on this quotation</p>
+<p class="note">Quote an IMX219 M12-mount camera board at 1 / 100 / 1 000, with and without lens, plus a 22-pin 0.5 mm MIPI CSI FFC at ~15 mm. Seeed&#x27;s 102110719 is the only line with a published tier (10+ at $12.50) - extend it to 100 and 1 000.</p>
+
+<p class="lab">Also please answer</p><ul class="tight"><li>Does B0183 ship WITH the M12 lens? UCTRONICS&#x27; package list says yes; The Engineer Store&#x27;s page for the same SKU says the lens is separate.</li><li>What is the shortest 22-pin 0.5 mm FFC you make? We need ~15 mm and no catalogue part that short was findable.</li></ul>
+
+<pre>Target lead time: <span class="ph">[state your need, e.g. 6 weeks for the pilot build]</span>
+Target first delivery date: <span class="ph">[date]</span>
+Quotation validity requested: 90 days.
+
+Please also confirm whether you are the authorised channel for these parts, and
+state date codes or batch provenance where the line is a semiconductor.
+
+Kind regards,
+<span class="ph">[your name]</span>
+<span class="ph">[your title, company]</span>
+</pre>
+</div>
+<div class="rfq" id="rfq-tof">
+<h3>Request for quotation &mdash; ToF supplier (Pololu / SparkFun / ST direct)</h3>
+<p class="meta">Covers lines B9 &middot; known contact points: https://www.pololu.com, https://www.sparkfun.com
+</p>
+
+<pre>To:      <span class="ph">[supplier contact name]</span>, ToF supplier (Pololu / SparkFun / ST direct)
+From:    <span class="ph">[your name]</span>, <span class="ph">[your company]</span>
+         <span class="ph">[email]</span> &middot; <span class="ph">[phone]</span> &middot; <span class="ph">[shipping address]</span>
+Date:    <span class="ph">[date of sending]</span>
+Subject: Request for quotation &mdash; Microduck bipedal robot, lines B9
+
+Dear <span class="ph">[contact]</span>,
+
+We are pricing a production run of a small bipedal robot and would like a written
+quotation for the parts listed below. Quantities are given per robot and at build
+volumes of 1, 100 and 1 000 robots. Please quote each quantity separately, in your
+own currency, and state for every line: unit price, minimum order quantity, lead
+time from receipt of order, packaging, and the incoterm your price assumes.
+
+Where a part number below is marked as unresolved, we are asking you to tell us
+which part you would supply, not to guess what we meant.
+</pre>
+
+<p class="lab">Lines and quantities</p>
+<div class="tablewrap"><table class="data">
+<thead><tr><th>Line</th><th>Item</th><th>Part number as we have it</th>
+<th>Per robot</th><th>Order qty at 1 / 100 / 1 000 robots</th></tr></thead>
+<tbody><tr><td><code>B9</code></td><td>Time-of-Flight 8x8 multizone ranger (module or bare die)</td>
+<td><code>VL53L8CX or VL53L5CX - which generation ships is CANNOT DETERMINE (both drivers are vendored in Pollen&#x27;s source)</code></td><td class="n">1 </td><td class="n">1 / 100 / 1,000</td></tr></tbody></table></div>
+
+<p class="lab">B9 &mdash; specification</p><p class="note">ST 8x8 multizone Time-of-Flight ranging sensor, I2C address 0x29, on a carrier with 3V3 regulation and level shifting, or as bare optical LGA-16 for placement on our own HAT. Note the VL53L8CX requires IOVDD 1.2/1.8 V only (part:vl53l8cx) - a 3V3 carrier is not optional if the host is 3V3.</p>
+
+<p class="lab">The question that matters most on this quotation</p>
+<p class="note">Quote the VL53L8CX carrier (Pololu #3419) and the VL53L5CX Qwiic Mini (SparkFun SEN-19013) at 1 / 100 / 1 000; neither publishes a tier above 100. Also quote the bare VL53L8CXV0GC/1 and VL53L5CXV0GC/1 at 1 000 and 3 600 for placement on our own HAT - at &gt;= 100 robots the bare die is $6.06-6.72 against $19.43 for the cheapest carrier.</p>
+
+<p class="lab">Also please answer</p><ul class="tight"><li>Confirm the VL53L8CX&#x27;s IOVDD restriction (1.2/1.8 V only) - it decides whether the carrier is optional.</li></ul>
+
+<pre>Target lead time: <span class="ph">[state your need, e.g. 6 weeks for the pilot build]</span>
+Target first delivery date: <span class="ph">[date]</span>
+Quotation validity requested: 90 days.
+
+Please also confirm whether you are the authorised channel for these parts, and
+state date codes or batch provenance where the line is a semiconductor.
+
+Kind regards,
+<span class="ph">[your name]</span>
+<span class="ph">[your title, company]</span>
+</pre>
+</div>
+<div class="rfq" id="rfq-filament">
+<h3>Request for quotation &mdash; Filament supplier (GigaParts / 3D Universe / Bambu Lab direct)</h3>
+<p class="meta">Covers lines B19a, B19b &middot; known contact points: https://www.gigaparts.com, https://shop3duniverse.com
+</p>
+
+<pre>To:      <span class="ph">[supplier contact name]</span>, Filament supplier (GigaParts / 3D Universe / Bambu Lab direct)
+From:    <span class="ph">[your name]</span>, <span class="ph">[your company]</span>
+         <span class="ph">[email]</span> &middot; <span class="ph">[phone]</span> &middot; <span class="ph">[shipping address]</span>
+Date:    <span class="ph">[date of sending]</span>
+Subject: Request for quotation &mdash; Microduck bipedal robot, lines B19a, B19b
+
+Dear <span class="ph">[contact]</span>,
+
+We are pricing a production run of a small bipedal robot and would like a written
+quotation for the parts listed below. Quantities are given per robot and at build
+volumes of 1, 100 and 1 000 robots. Please quote each quantity separately, in your
+own currency, and state for every line: unit price, minimum order quantity, lead
+time from receipt of order, packaging, and the incoterm your price assumes.
+
+Where a part number below is marked as unresolved, we are asking you to tell us
+which part you would supply, not to guess what we meant.
+</pre>
+
+<p class="lab">Lines and quantities</p>
+<div class="tablewrap"><table class="data">
+<thead><tr><th>Line</th><th>Item</th><th>Part number as we have it</th>
+<th>Per robot</th><th>Order qty at 1 / 100 / 1 000 robots</th></tr></thead>
+<tbody><tr><td><code>B19a</code></td><td>PLA filament (hard printed parts)</td>
+<td><code>Bambu Lab PLA Basic, 1.75 mm, 1 kg spool</code></td><td class="n">0.218295 kg</td><td class="n">0.2183 / 21.8295 / 218.2946</td></tr>
+<tr><td><code>B19b</code></td><td>TPU filament (soft parts: soles x2, jaw_soft, soft_mouth_top)</td>
+<td><code>Bambu Lab TPU 85A, 1.75 mm, 1 kg spool</code></td><td class="n">0.0262028 kg</td><td class="n">0.0262 / 2.6203 / 26.2028</td></tr></tbody></table></div>
+
+<p class="lab">B19a &mdash; specification</p><p class="note">Bambu Lab PLA Basic, 1.75 mm, 1 kg spools. 0.2183 kg per robot -&gt; 1 spool covers 4 robots. Colour per the product colourway (cream / graphite / sky). Quote spooled and refill.</p><p class="lab">B19b &mdash; specification</p><p class="note">Bambu Lab TPU 85A, 1.75 mm, 1 kg spools. 0.0262 kg per robot -&gt; 1 spool covers 38 robots. NOT AMS-compatible (AMS HT only) - the print cell must feed it externally.</p>
+
+<p class="lab">The question that matters most on this quotation</p>
+<p class="note">Quote Bambu Lab PLA Basic and TPU 85A, 1.75 mm, 1 kg, at 1 / 100 / 1 000 spools. At 1 000 robots this is 218.3 kg of PLA and 26.2 kg of TPU; no vendor publishes any volume tier on filament and Bambu&#x27;s own store refuses the fetcher (HTTP 402).</p>
+
+<p class="lab">Also please answer</p><ul class="tight"><li>Refill (no spool) pricing at volume.</li><li>Confirm TPU 85A vs 90A availability - our slice used the 85A preset and the product&#x27;s real durometer is unresolved.</li></ul>
+
+<pre>Target lead time: <span class="ph">[state your need, e.g. 6 weeks for the pilot build]</span>
+Target first delivery date: <span class="ph">[date]</span>
+Quotation validity requested: 90 days.
+
+Please also confirm whether you are the authorised channel for these parts, and
+state date codes or batch provenance where the line is a semiconductor.
+
+Kind regards,
+<span class="ph">[your name]</span>
+<span class="ph">[your title, company]</span>
+</pre>
+</div>
+</section>
+
+<footer class="foot">
+  <span>Drafts only &mdash; nothing sent, nothing ordered &middot; 2026-09-02</span>
+</footer>
+</div></body></html>
