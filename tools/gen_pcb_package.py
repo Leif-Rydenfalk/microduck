@@ -335,10 +335,13 @@ def main():
       'asks that the robot not be described as open-source hardware. Everything in '
       'this document is <em>our</em> reconstruction from the published behaviour '
       'plus the vendor datasheets of the chips that behaviour names.</p>')
+    tags = " &middot; ".join(
+        f'{b["decisions"][0][0]}&ndash;{b["decisions"][-1][0]}' for b in boards
+        if b.get("decisions"))
     A('<div class="note"><p><strong>Nothing here claims to match Pollen&rsquo;s boards.</strong> '
       'Not the layout, not the connector placement, not the part choice. Where a fact '
       'is published, it is quoted with its file and line. Where it is not, the choice '
-      'is ours, it is numbered (D1&ndash;D8, E1&ndash;E8, B1&ndash;B6), and the option it '
+      f'is ours, it is numbered ({tags}), and the option it '
       'beat is written down beside it.</p></div>')
     A('<table class="tight"><thead><tr><th>Board</th><th>What it does</th>'
       '<th>Outline (mm)</th><th>Layers</th><th>DRC</th></tr></thead><tbody>')
