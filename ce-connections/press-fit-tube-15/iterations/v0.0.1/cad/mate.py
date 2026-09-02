@@ -9,19 +9,30 @@ PURE PYTHON MATH. No `import FreeCAD` at module top, ever. Shaped after
 ce-connections/press-fit-bearing-15x10x3; the frame arithmetic is
 deliberately duplicated into each connection folder (TRIAD.md line 51).
 
-WHAT THIS JOINT IS, measured 2026-09-02 and frozen in
-evidence/tube-15-geometry.json:
+WHAT THIS JOINT IS, measured 2026-09-02, RE-MEASURED off the mesh vertices
+2026-09-03, and frozen in evidence/tube-15-geometry.json:
 
     the cradle   motor_support.stl, mesh-frame x-axis through (y 0.0000,
-                 z 7.4995). Circle fits to meshslice cross-sections read
-                 Ø14.9938 / 14.9954 / 14.9978 at the three stations whose
-                 residual mean is < 0.0036 mm, swept 149.06-149.09 deg,
-                 chord plane z 9.5000, crown z 15.0000. Two ring bands,
+                 z 7.5000). A free-centre circle fitted to the 31 unique
+                 vertices at each of x -39.5000 / -37.5000 / -36.5000 /
+                 -35.5000 reads Ø15.000000, residual max 0.0000007 mm,
+                 swept 149.06-149.09 deg, chord plane z 9.5000, crown
+                 z 15.0000, outer surface Ø17.400000. Two ring bands,
                  x -39.5000..-37.5000 (2.0000) and -36.5000..-35.5000
-                 (1.0000), 1.0000 mm of Ø16.8007 relief between them.
-    the ring     the 15x10x3 bearing's Ø15.0 outer race.
-    through it   the jaw's Ø10.0000 journal, centre (y 0.0000, z 7.5000),
-                 x -39.7000..-37.0000, behind a Ø11.9949 x 0.3000 flange.
+                 (1.0000), 1.0000 mm of Ø16.800000 relief between them.
+    the ring     the 15x10x3 bearing's Ø15.000000 outer race (vertex fit,
+                 72 vertices at each of z 0.3000 / 2.7000).
+    through it   the jaw's Ø10.000000 journal, centre (y 0.0000, z 7.5000),
+                 x -39.7000..-37.0000, behind a Ø12.000000 x 0.3000 flange.
+
+    SUPERSEDED: the Ø14.9938-14.9978 / Ø11.9949 / Ø17.3926 / Ø16.8007
+                figures this file was first written from came from
+                cecad.meshslice cross-section fits, which mix facet corners
+                (on the cylinder) with edge-interpolated points (inside it by
+                up to one sagitta, 0.00773 mm) and read one half-sagitta,
+                0.0039 mm, small. Cradle and ring are LINE-TO-LINE: diametral
+                gap 0.0000 mm, no interference. mate()'s behaviour does not
+                change -- it never placed anything from the diameter.
 
 IT IS NOT A BORE. 210.94 deg of the circle is open air: there is no
 material below z 9.5000 at these stations. mate() therefore returns
@@ -40,8 +51,8 @@ import json as _json
 import math
 import os as _os
 
-BORE_D_MM = 14.9938          # smallest clean-station circle fit of the arch
-BORE_D_MM_SPAN = (14.9938, 14.9978)
+BORE_D_MM = 15.0             # vertex fit, identical at all four x stations
+BORE_D_MM_SPAN = (15.0, 15.0)
 RING_D_MM = 15.0             # part:bearing-15x10x3 outer race
 RING_B_MM = 3.0
 ARC_DEG = 149.06
@@ -240,7 +251,7 @@ def mate(a_iface, b_iface, params=None):
             "groove, shoulder or end stop on either ring band "
             "(x -39.5000..-37.5000 and -36.5000..-35.5000), so nothing in the "
             "geometry locates the ring axially at all. Pollen's MJCF puts it "
-            "at x -40.0000..-37.0000; the jaw's Ø11.9949 x 0.3000 flange at "
+            "at x -40.0000..-37.0000; the jaw's Ø12.0000 x 0.3000 flange at "
             "x -40.0000..-39.7000 would put it at -39.7000..-36.7000. State "
             "which datum you mean.")
 
@@ -287,9 +298,9 @@ def mate(a_iface, b_iface, params=None):
 
 if __name__ == "__main__":
     fr = lambda o, z: {"origin_mm": list(o), "z_axis": list(z), "x_axis": [0, 0, 1]}
-    ring = {"name": "od", "nominal_mm": 15.0, "frame": fr((-40.0, 0.0, 7.4995), (-1, 0, 0))}
-    cradle = {"name": "lens_tube", "role": "lens_seat", "nominal_mm": 14.9938,
-              "frame": fr((-39.5, 0.0, 7.4995), (-1, 0, 0)), "shoulder_z_mm": 0.0}
+    ring = {"name": "od", "nominal_mm": 15.0, "frame": fr((-40.0, 0.0, 7.5), (-1, 0, 0))}
+    cradle = {"name": "lens_tube", "role": "lens_seat", "nominal_mm": 15.0,
+              "frame": fr((-39.5, 0.0, 7.5), (-1, 0, 0)), "shoulder_z_mm": 0.0}
     m = mate(ring, cradle)
     print("dof_left:", m["dof_left"], "| adds:", m["adds"],
           "| holds_by:", m["joint"]["holds_by"])

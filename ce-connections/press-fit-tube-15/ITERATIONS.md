@@ -4,4 +4,4 @@
 | iteration | date | why it exists |
 |---|---|---|
 | v0.0.1 | 2026-09-02 | created — nothing measured yet |
-| v0.0.1 | 2026-09-02 | authored (lane T): the Ø15.0 arch measured off Pollen's motor_support.stl at five stations (Ø14.9938–14.9978, 149.06°, chord z 9.5000), the ring and the jaw's Ø10.0000 journal measured on their own meshes, mate()/compat() contracts, and the measured refutation of the "lens seat" reading |
+| v0.0.1 | 2026-09-02 | authored (lane T): the Ø15.0 arch measured off Pollen's motor_support.stl at five stations (149.06°, chord z 9.5000; its diameter first published as Ø14.9938–14.9978 from chord fits, corrected to Ø15.000000 on 2026-09-03 by a free-centre vertex fit), the ring and the jaw's Ø10.0000 journal measured on their own meshes, mate()/compat() contracts, and the measured refutation of the "lens seat" reading |

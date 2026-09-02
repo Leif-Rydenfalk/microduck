@@ -1,82 +1,400 @@
 {
- "$what": "connection:press-fit-tube-15 — the Ø15 arch cradle and the ring it holds, frozen from cecad.meshslice circle fits, cecad.meshfeatures.cylinders and cecad.meshfeatures.intervals on Pollen's meshes (metres, scale 1000), 2026-09-02, ce-designs/microduck lane T",
- "host": {
-  "mesh": "reference/pollen-microduck-rl/assets/motor_support.stl",
-  "part": "part:microduck-motor-support",
-  "interface": "lens_tube",
-  "frame": "the mesh frame of motor_support.stl: x -39.5..34.0, y -26.2..28.0, z 0.4..19.2; the cradle axis is the x-line through (y 0, z 7.4995)",
-  "arch_inner_arc_fits": [
-   {"x_mm": -39.45, "centre_yz_mm": [-0.0019, 7.4924], "r_mm": 7.5061, "d_mm": 15.0121, "residual_max_mm": 0.05379, "residual_mean_mm": 0.0026, "span_deg": 149.08, "n_pts": 62, "z_extent_mm": [9.5, 15.0]},
-   {"x_mm": -39.0,  "centre_yz_mm": [0.0001, 7.4996],  "r_mm": 7.4977, "d_mm": 14.9954, "residual_max_mm": 0.0029,  "residual_mean_mm": 0.00264, "span_deg": 149.06, "n_pts": 61, "z_extent_mm": [9.5, 15.0]},
-   {"x_mm": -38.5,  "centre_yz_mm": [-0.0, 7.4995],    "r_mm": 7.4969, "d_mm": 14.9938, "residual_max_mm": 0.0038,  "residual_mean_mm": 0.00352, "span_deg": 149.06, "n_pts": 61, "z_extent_mm": [9.5, 15.0]},
-   {"x_mm": -36.4,  "centre_yz_mm": [0.0, 7.4998],     "r_mm": 7.4989, "d_mm": 14.9978, "residual_max_mm": 0.0014,  "residual_mean_mm": 0.00127, "span_deg": 149.07, "n_pts": 61, "z_extent_mm": [9.5, 15.0]},
-   {"x_mm": -35.55, "centre_yz_mm": [-0.0002, 7.4886], "r_mm": 7.509,  "d_mm": 15.0179, "residual_max_mm": 0.03912, "residual_mean_mm": 0.00348, "span_deg": 149.09, "n_pts": 63, "z_extent_mm": [9.5, 15.0]}
-  ],
-  "arch_inner_d_mm_clean_stations": [14.9938, 14.9954, 14.9978],
-  "arch_outer_arc_fit": {"x_mm": -39.45, "centre_yz_mm": [-0.001, 7.5035], "r_mm": 8.6963, "d_mm": 17.3926, "residual_max_mm": 0.02627, "residual_mean_mm": 0.00147, "span_deg": 153.46},
-  "ring_bands_x_mm": [[-39.5, -37.5], [-36.5, -35.5]],
-  "ring_bands_len_mm": [2.0, 1.0],
-  "relief_between_bands_x_mm": [-37.5, -36.5],
-  "relief_d_mm": 16.8007,
-  "relief_d_basis": {
-   "why_this_replaced_16.8": "the value written here on 2026-09-02 was 16.8 \u2014 one decimal place in a file whose every other dimension carries four, and the house rule is 3\u20134 dp with the tolerance basis stated. RE-MEASURED 2026-09-03 (lane T fix pass) off the mesh VERTICES rather than off a ray, because a ray through a tessellated bore reads the facet, not the cylinder.",
-   "method": "every vertex of motor_support.stl (scale 1000) with radius 8.30\u20138.50 mm about the cradle axis (y 0, z 7.4995) and x in -37.6..-36.4 \u2014 the relief band and nothing else. n = 64 vertices, in two rings of 32 at x -37.5000 and x -36.5000; no vertex row exists between them, so the surface is a straight cylinder over its whole length.",
-   "radius_mm": {"mean": 8.40036, "sd": 0.000124, "min": 8.40012, "max": 8.40050, "n": 64},
-   "diameter_mm": {"mean": 16.8007, "sd": 0.000247, "min": 16.8002, "max": 16.8010},
-   "tolerance_basis": "1 sigma = 0.000247 mm on the diameter over 64 vertices; the full spread max-min is 0.0008 mm. That scatter is the STL\u2019s float32 storage, not a shape: the design nominal is \u00d816.8000 and the mesh carries it to +0.0007 mm.",
-   "axial_extent_mm": [-37.5, -36.5],
-   "axial_length_mm": 1.0,
-   "tessellation": {"facet_step_deg": 4.9176, "facets_per_full_circle": 73.21, "arc_present_deg": 152.4451, "sagitta_mm": 0.00773, "mid_chord_diameter_mm": 16.7852},
-   "why_a_ray_reads_less": "the bore is a 32-facet chord polygon over the 152.4451\u00b0 that exists; its vertices lie ON the cylinder and every facet lies INSIDE it by up to one sagitta, 0.00773 mm. A ray-cast caliper that crosses a facet near its centre therefore reads \u00d816.7852, and cecad.meshslice.intervals() rounds its returns to 3 dp on top of that. An independent check on 2026-09-03 read r 8.3928 \u2192 \u00d816.7856 at x -37.0 by exactly that route; it is the SAME surface measured through a chord, and it agrees with the mid-chord prediction to 0.0004 mm. The vertex figure is the one that describes the cylinder.",
-   "cross_check": "the same vertex method on the \u00d815 ring-band bore (r 7.45\u20137.55, x -39.8..-35.3, n = 124 at x -39.5000/-37.5000/-36.5000/-35.5000) reads \u00d815.0007, sd 0.000237 \u2014 the same +0.0007 mm float32 offset from its own \u00d815.0000 nominal, which is what makes the offset a storage artefact rather than a feature.",
-   "measured": "2026-09-03, cecad.meshslice.load + numpy on the mesh vertices; script out/laneT/remeasure_relief.py, output out/laneT/relief-remeasure.json"
+  "$what": "connection:press-fit-tube-15 — the Ø15 arch cradle and the ring it holds, frozen from cecad.meshslice circle fits, cecad.meshfeatures.cylinders and cecad.meshfeatures.intervals on Pollen's meshes (metres, scale 1000), 2026-09-02, ce-designs/microduck lane T",
+  "host": {
+    "mesh": "reference/pollen-microduck-rl/assets/motor_support.stl",
+    "part": "part:microduck-motor-support",
+    "interface": "lens_tube",
+    "frame": "the mesh frame of motor_support.stl: x -39.5..34.0, y -26.2..28.0, z 0.4..19.2; the cradle axis is the x-line through (y 0, z 7.4995)",
+    "arch_inner_arc_fits": [
+      {
+        "x_mm": -39.45,
+        "centre_yz_mm": [
+          -0.0019,
+          7.4924
+        ],
+        "r_mm": 7.5061,
+        "d_mm": 15.0121,
+        "residual_max_mm": 0.05379,
+        "residual_mean_mm": 0.0026,
+        "span_deg": 149.08,
+        "n_pts": 62,
+        "z_extent_mm": [
+          9.5,
+          15.0
+        ]
+      },
+      {
+        "x_mm": -39.0,
+        "centre_yz_mm": [
+          0.0001,
+          7.4996
+        ],
+        "r_mm": 7.4977,
+        "d_mm": 14.9954,
+        "residual_max_mm": 0.0029,
+        "residual_mean_mm": 0.00264,
+        "span_deg": 149.06,
+        "n_pts": 61,
+        "z_extent_mm": [
+          9.5,
+          15.0
+        ]
+      },
+      {
+        "x_mm": -38.5,
+        "centre_yz_mm": [
+          -0.0,
+          7.4995
+        ],
+        "r_mm": 7.4969,
+        "d_mm": 14.9938,
+        "residual_max_mm": 0.0038,
+        "residual_mean_mm": 0.00352,
+        "span_deg": 149.06,
+        "n_pts": 61,
+        "z_extent_mm": [
+          9.5,
+          15.0
+        ]
+      },
+      {
+        "x_mm": -36.4,
+        "centre_yz_mm": [
+          0.0,
+          7.4998
+        ],
+        "r_mm": 7.4989,
+        "d_mm": 14.9978,
+        "residual_max_mm": 0.0014,
+        "residual_mean_mm": 0.00127,
+        "span_deg": 149.07,
+        "n_pts": 61,
+        "z_extent_mm": [
+          9.5,
+          15.0
+        ]
+      },
+      {
+        "x_mm": -35.55,
+        "centre_yz_mm": [
+          -0.0002,
+          7.4886
+        ],
+        "r_mm": 7.509,
+        "d_mm": 15.0179,
+        "residual_max_mm": 0.03912,
+        "residual_mean_mm": 0.00348,
+        "span_deg": 149.09,
+        "n_pts": 63,
+        "z_extent_mm": [
+          9.5,
+          15.0
+        ]
+      }
+    ],
+    "arch_inner_d_mm_clean_stations": [
+      14.9938,
+      14.9954,
+      14.9978
+    ],
+    "arch_outer_arc_fit": {
+      "x_mm": -39.45,
+      "centre_yz_mm": [
+        -0.001,
+        7.5035
+      ],
+      "r_mm": 8.6963,
+      "d_mm": 17.3926,
+      "residual_max_mm": 0.02627,
+      "residual_mean_mm": 0.00147,
+      "span_deg": 153.46
+    },
+    "ring_bands_x_mm": [
+      [
+        -39.5,
+        -37.5
+      ],
+      [
+        -36.5,
+        -35.5
+      ]
+    ],
+    "ring_bands_len_mm": [
+      2.0,
+      1.0
+    ],
+    "relief_between_bands_x_mm": [
+      -37.5,
+      -36.5
+    ],
+    "relief_d_mm": 16.8007,
+    "relief_d_basis": {
+      "why_this_replaced_16.8": "the value written here on 2026-09-02 was 16.8 — one decimal place in a file whose every other dimension carries four, and the house rule is 3–4 dp with the tolerance basis stated. RE-MEASURED 2026-09-03 (lane T fix pass) off the mesh VERTICES rather than off a ray, because a ray through a tessellated bore reads the facet, not the cylinder.",
+      "method": "every vertex of motor_support.stl (scale 1000) with radius 8.30–8.50 mm about the cradle axis (y 0, z 7.4995) and x in -37.6..-36.4 — the relief band and nothing else. n = 64 vertices, in two rings of 32 at x -37.5000 and x -36.5000; no vertex row exists between them, so the surface is a straight cylinder over its whole length.",
+      "radius_mm": {
+        "mean": 8.40036,
+        "sd": 0.000124,
+        "min": 8.40012,
+        "max": 8.4005,
+        "n": 64
+      },
+      "diameter_mm": {
+        "mean": 16.8007,
+        "sd": 0.000247,
+        "min": 16.8002,
+        "max": 16.801
+      },
+      "tolerance_basis": "1 sigma = 0.000247 mm on the diameter over 64 vertices; the full spread max-min is 0.0008 mm. That scatter is the STL’s float32 storage, not a shape: the design nominal is Ø16.8000 and the mesh carries it to +0.0007 mm.",
+      "axial_extent_mm": [
+        -37.5,
+        -36.5
+      ],
+      "axial_length_mm": 1.0,
+      "tessellation": {
+        "facet_step_deg": 4.9176,
+        "facets_per_full_circle": 73.21,
+        "arc_present_deg": 152.4451,
+        "sagitta_mm": 0.00773,
+        "mid_chord_diameter_mm": 16.7852
+      },
+      "why_a_ray_reads_less": "the bore is a 32-facet chord polygon over the 152.4451° that exists; its vertices lie ON the cylinder and every facet lies INSIDE it by up to one sagitta, 0.00773 mm. A ray-cast caliper that crosses a facet near its centre therefore reads Ø16.7852, and cecad.meshslice.intervals() rounds its returns to 3 dp on top of that. An independent check on 2026-09-03 read r 8.3928 → Ø16.7856 at x -37.0 by exactly that route; it is the SAME surface measured through a chord, and it agrees with the mid-chord prediction to 0.0004 mm. The vertex figure is the one that describes the cylinder.",
+      "cross_check": "the same vertex method on the Ø15 ring-band bore (r 7.45–7.55, x -39.8..-35.3, n = 124 at x -39.5000/-37.5000/-36.5000/-35.5000) reads Ø15.0007, sd 0.000237 — the same +0.0007 mm float32 offset from its own Ø15.0000 nominal, which is what makes the offset a storage artefact rather than a feature.",
+      "measured": "2026-09-03, cecad.meshslice.load + numpy on the mesh vertices; script out/laneT/remeasure_relief.py, output out/laneT/relief-remeasure.json"
+    },
+    "how_bands_were_read": "cecad.meshfeatures.intervals(motor_support, axis x, y=0, z=15.6) — a line at radius 8.100 mm from the cradle axis, inside the Ø17.39 outer surface and outside the Ø15.0 bore: material exists only where the ring band exists",
+    "open_below_z_mm": 9.5,
+    "open_angle_deg": 210.94,
+    "open_angle_why": "360 - 149.06: the arch is cut off flat at z 9.5000 and there is NO material below that plane at these x stations (cecad.meshslice section at x=-38.5 spans z 9.5000..16.1919 only). The cradle is a hook, not a bore.",
+    "arch_inner_arc_fits_superseded_by": "vertex_remeasure_2026_09_03.cradle_bore — these are chord fits and read one half-sagitta (0.0039 mm) small.",
+    "arch_outer_arc_fit_superseded_by": "vertex_remeasure_2026_09_03.cradle_outer",
+    "relief_d_mm_superseded_by": "vertex_remeasure_2026_09_03.cradle_relief (Ø16.8000)"
   },
-  "how_bands_were_read": "cecad.meshfeatures.intervals(motor_support, axis x, y=0, z=15.6) — a line at radius 8.100 mm from the cradle axis, inside the Ø17.39 outer surface and outside the Ø15.0 bore: material exists only where the ring band exists",
-  "open_below_z_mm": 9.5,
-  "open_angle_deg": 210.94,
-  "open_angle_why": "360 - 149.06: the arch is cut off flat at z 9.5000 and there is NO material below that plane at these x stations (cecad.meshslice section at x=-38.5 spans z 9.5000..16.1919 only). The cradle is a hook, not a bore."
- },
- "guest_ring": {
-  "part": "part:bearing-15x10x3",
-  "mesh": "reference/pollen-microduck-rl/assets/seeed_bearing__configuration_default.stl",
-  "od_mm": 15.0,
-  "bore_mm": 10.0,
-  "width_mm": 3.0,
-  "cite": "ce-connections/press-fit-bearing-15x10x3/iterations/v0.0.1/evidence/bearing-15x10x3-geometry.json (cecad.meshfeatures.cylinders + bbox, 2026-09-02)",
-  "placed_in_host_frame": {
-   "body": "jaw_soft",
-   "x_span_mm": [-40.0, -37.0],
-   "axis_through_yz_mm": [0.0, 7.7],
-   "how": "the MJCF body/geom frames of robot_allcollisions.xml composed at zero pose, then expressed in the motor_support mesh frame (cecad.mjcf.bodies_world + quat_to_mat)"
+  "guest_ring": {
+    "part": "part:bearing-15x10x3",
+    "mesh": "reference/pollen-microduck-rl/assets/seeed_bearing__configuration_default.stl",
+    "od_mm": 15.0,
+    "bore_mm": 10.0,
+    "width_mm": 3.0,
+    "cite": "ce-connections/press-fit-bearing-15x10x3/iterations/v0.0.1/evidence/bearing-15x10x3-geometry.json (cecad.meshfeatures.cylinders + bbox, 2026-09-02)",
+    "placed_in_host_frame": {
+      "body": "jaw_soft",
+      "x_span_mm": [
+        -40.0,
+        -37.0
+      ],
+      "axis_through_yz_mm": [
+        0.0,
+        7.7
+      ],
+      "how": "the MJCF body/geom frames of robot_allcollisions.xml composed at zero pose, then expressed in the motor_support mesh frame (cecad.mjcf.bodies_world + quat_to_mat)"
+    }
+  },
+  "guest_journal": {
+    "part": "part:microduck-jaw",
+    "mesh": "reference/pollen-microduck-rl/assets/jaw.stl",
+    "journal_d_mm": 10.0,
+    "journal_arc_fits": [
+      {
+        "x_mm": -39.7,
+        "centre_yz_mm": [
+          -0.0,
+          7.5
+        ],
+        "r_mm": 5.0,
+        "d_mm": 10.0,
+        "residual_max_mm": 0.0,
+        "span_deg": 355.0
+      },
+      {
+        "x_mm": -39.5,
+        "centre_yz_mm": [
+          0.0,
+          7.5
+        ],
+        "r_mm": 4.9993,
+        "d_mm": 9.9987,
+        "residual_max_mm": 0.00065,
+        "span_deg": 355.37
+      },
+      {
+        "x_mm": -38.35,
+        "centre_yz_mm": [
+          0.0,
+          7.5
+        ],
+        "r_mm": 4.9976,
+        "d_mm": 9.9952,
+        "residual_max_mm": 0.00238,
+        "span_deg": 357.5
+      },
+      {
+        "x_mm": -37.2,
+        "centre_yz_mm": [
+          -0.0,
+          7.5
+        ],
+        "r_mm": 4.9993,
+        "d_mm": 9.9987,
+        "residual_max_mm": 0.00065,
+        "span_deg": 359.63
+      },
+      {
+        "x_mm": -37.05,
+        "centre_yz_mm": [
+          0.0,
+          7.5
+        ],
+        "r_mm": 4.9998,
+        "d_mm": 9.9997,
+        "residual_max_mm": 0.00017,
+        "span_deg": 359.91
+      }
+    ],
+    "journal_x_span_mm": [
+      -39.7,
+      -37.0
+    ],
+    "journal_len_mm": 2.7,
+    "shoulder_flange_d_mm": 11.9949,
+    "shoulder_flange_x_span_mm": [
+      -40.0,
+      -39.7
+    ],
+    "shoulder_flange_len_mm": 0.3,
+    "how_journal_span_was_read": "cecad.meshfeatures.intervals(jaw, axis x) at (y 4.9, z 7.5) -> [-43.732, -37.0] (inside the Ø10 journal) and at (y 5.5, z 7.5) -> [-43.707, -39.7] (outside it): the journal proper is x -39.7000..-37.0000",
+    "superseded_by": "vertex_remeasure_2026_09_03.jaw_journal and .jaw_flange (Ø10.0000 and Ø12.0000)"
+  },
+  "coaxiality_mm": {
+    "cradle_axis_vs_journal_axis": 0.0005,
+    "cradle_axis_vs_mjcf_bearing_geom": 0.2005,
+    "why": "the cradle bore centre reads z 7.4995 (best station, residual mean 0.00352 mm) and the jaw journal centre reads z 7.5000 exactly (residual max 0.00254 mm) — the two PARTS are coaxial to 0.0005 mm. Pollen's MJCF places the bearing GEOM's axis at z 7.7000, 0.2005 mm above both, and 0.3000 mm outboard of the journal shoulder. That is a discrepancy in the visual placement of the model, not in the two parts' geometry, and it is recorded here rather than averaged away.",
+    "superseded_by": "vertex_remeasure_2026_09_03.coaxiality_mm"
+  },
+  "not_a_lens_seat": {
+    "claim_tested": "microduck-motor-support cad/interfaces.json calls this interface 'lens_tube' and its `what` says 'the camera lens / lens-holder seat'",
+    "measurement": "in the motor_support mesh frame the m12_lens_holder occupies x -12.0914..11.9086, y -52.38..-37.58, z 12.0..28.0 and the lens x -8.5614..8.3786, y -63.8..-44.88, z 11.53..28.47 — both on a y-axis 37..64 mm away from this feature, sharing neither its axis nor its diameter (lens barrel Ø11.6/13.6/16.94, holder bore Ø11.6). NOTHING that could be called a lens is on this axis.",
+    "what_is_on_this_axis": "the 15x10x3 bearing (0.181 mm off-axis in world coordinates) and, through it, the jaw's Ø10.0000 journal (0.0005 mm)",
+    "verdict": "FAIL for the lens reading, PASS for the jaw-pivot reading"
+  },
+  "vertex_remeasure_2026_09_03": {
+    "$what": "EVERY DIAMETER IN THIS FILE RE-MEASURED OFF THE MESH VERTICES, 2026-09-03 (lane T fix pass, second round). It supersedes the meshslice cross-section fits recorded above wherever the two disagree.",
+    "why": "An independent reader found that the headline bore Ø14.9938-14.9978 is the same facet-chord artefact this folder had already diagnosed for its Ø16.8 relief on 2026-09-02 and had not applied to its own headline number. cecad.meshslice's cross-section point set mixes facet CORNERS (which lie ON the design cylinder) with points interpolated along facet EDGES (which lie INSIDE it by up to one sagitta): each fit above reports n_pts 61 = 31 corners + 30 edge points, and with a facet step of 4.9176-4.9689 deg the sagitta is 0.00773 mm — half of it, 0.0039 mm, is exactly the shortfall from Ø15.0000. The reader is right and the correction is made here rather than argued with.",
+    "method": "unique vertices of the binary STL (cecad.meshslice.load, scale 1000), selected by an x window and by radius about a SEED axis, then a circle fitted per x station with its CENTRE FREE (Kasa algebraic fit + 40 Gauss-Newton steps on the geometric residual, converged to |step| < 1e-14). residual_max is the largest distance of any vertex from that fitted circle: a residual at the 1e-6 mm level means every vertex lies on ONE circle, and that circle is the design cylinder. Script out/laneT/remeasure_bore_vertices.py (motor_support, jaw) and out/laneT/remeasure_bearing_od.py (the ring), output out/laneT/bore-vertex-remeasure.json and out/laneT/bearing-od-vertex-remeasure.json.",
+    "free_centre_matters": "the centre must be FREE. The 2026-09-02 relief re-measurement took a mean radius about a FIXED seed axis at z 7.4995 — itself a chord-fit number — and read Ø16.8007. The vertex fit with a free centre reads Ø16.800000 and puts the axis at z 7.500000. Over an arc of 152.4451 deg centred on +z, a seed 0.0005 mm below the true axis biases the mean radius by 0.0005 x <cos> = 0.0005 x 0.7315 = 0.000366 mm, i.e. +0.00073 mm on the diameter — which is the whole of the +0.0007 mm that the 2026-09-02 row attributed to 'the STL's float32 storage'. THAT EXPLANATION IS REFUTED by this measurement: the same +0.0007 appeared on the Ø15 bore in that row's own cross-check for the same reason, because both were measured about the same wrong seed. float32 stores 15.0 exactly; the vertices carry it to 1.8e-7 mm.",
+    "cradle_bore_d_mm": 15.0,
+    "cradle_bore": {
+      "d_mm": 15.0,
+      "d_mm_raw": 15.00000018,
+      "centre_yz_mm": [
+        0.0,
+        7.499999907
+      ],
+      "stations_x_mm": [
+        -39.5,
+        -37.5,
+        -36.5,
+        -35.5
+      ],
+      "n_unique_vertices_per_station": 31,
+      "n_unique_vertices_total": 124,
+      "residual_max_mm": 7e-07,
+      "residual_rms_mm": 3.5e-07,
+      "arc_present_deg": 149.07,
+      "facet_step_deg": 4.9689,
+      "tolerance_basis": "all four stations return the identical fit to 8 dp (Ø15.00000018, centre z 7.499999907). The spread across stations is 0.0 mm; the spread WITHIN a station is 0.0000007 mm, which is the float32 storage of the STL. The design nominal is Ø15.0000 and the mesh carries it to 1.8e-7 mm.",
+      "supersedes": "arch_inner_arc_fits above (Ø14.9938 / 14.9954 / 14.9978 and the two outlier stations Ø15.0121 / 15.0179): those are chord fits, one half-sagitta small, and the two outliers are end-cap stations where the section picks up the chamfer."
+    },
+    "cradle_relief_d_mm": 16.8,
+    "cradle_relief": {
+      "d_mm": 16.8,
+      "d_mm_raw": 16.79999936,
+      "centre_yz_mm": [
+        -0.0,
+        7.500000336
+      ],
+      "stations_x_mm": [
+        -37.5,
+        -36.5
+      ],
+      "n_unique_vertices_per_station": 32,
+      "residual_max_mm": 8.9e-07,
+      "supersedes": "relief_d_mm 16.8007 and relief_d_basis above — right method, wrong axis."
+    },
+    "cradle_outer_d_mm": 17.4,
+    "cradle_outer": {
+      "d_mm": 17.4,
+      "d_mm_raw": 17.39999881,
+      "centre_yz_mm": [
+        0.0,
+        7.500000576
+      ],
+      "stations_x_mm": [
+        -39.5,
+        -38.5
+      ],
+      "n_unique_vertices_per_station": 32,
+      "residual_max_mm": 6.4e-07,
+      "supersedes": "arch_outer_arc_fit Ø17.3926 (residual max 0.02627) — the same chord artefact, larger here because the fit also swallowed the fillet at the arch's feet."
+    },
+    "jaw_journal_d_mm": 10.0,
+    "jaw_journal": {
+      "d_mm": 10.0,
+      "d_mm_raw": 9.99999984,
+      "centre_yz_mm": [
+        0.0,
+        7.499999938
+      ],
+      "stations_x_mm": [
+        -39.7,
+        -37.0
+      ],
+      "n_unique_vertices_per_station": 72,
+      "residual_max_mm": 5.5e-07,
+      "supersedes": "journal_arc_fits' 'residual max 0.00254 mm'. That number was the INSTRUMENT's residual, not the surface's: the vertices lie on one circle to 0.00000055 mm."
+    },
+    "jaw_flange_d_mm": 12.0,
+    "jaw_flange": {
+      "d_mm": 12.0,
+      "d_mm_raw": 11.99999985,
+      "centre_yz_mm": [
+        -0.0,
+        7.499999896
+      ],
+      "stations_x_mm": [
+        -40.0,
+        -39.7
+      ],
+      "n_unique_vertices_per_station": 72,
+      "residual_max_mm": 9.8e-07,
+      "axial_len_mm": 0.3,
+      "supersedes": "shoulder_flange_d_mm 11.9949."
+    },
+    "ring_od_d_mm": 15.0,
+    "ring_od": {
+      "d_mm": 15.0,
+      "d_mm_raw": 15.0,
+      "mesh": "reference/pollen-microduck-rl/assets/seeed_bearing__configuration_default.stl",
+      "z_stations_mm": [
+        0.3,
+        2.7
+      ],
+      "n_unique_vertices_per_station": 72,
+      "residual_max_mm": 5.9e-07,
+      "why_re_measured_here": "so that the cradle/ring comparison is like-for-like. Comparing a vertex-measured ring against a chord-measured cradle is what produced the phantom interference. The ring's bore reads Ø10.000000 at z 0.2000/2.8000 and Ø10.399999 at the two chamfered end faces."
+    },
+    "fit_result": {
+      "cradle_bore_d_mm": 15.0,
+      "ring_od_d_mm": 15.0,
+      "diametral_gap_mm": 0.0,
+      "what_it_means": "LINE-TO-LINE. Zero clearance and zero interference, both sides measured the same way. The published claim of '0.0000-0.0062 mm of nominal interference' and compat.py's printed diametral_gap_mm -0.0062 describe an interference that does not exist. The folder's VERDICT does not change — an arch open over 210.94 deg cannot grip at any interference — but the number was wrong and is corrected."
+    },
+    "coaxiality_mm": {
+      "cradle_axis_z_mm": 7.499999907,
+      "journal_axis_z_mm": 7.499999938,
+      "cradle_axis_vs_journal_axis": 0.0,
+      "bound_mm": 1e-06,
+      "why": "0.000000031 mm apart, which is below both fits' own residual (7.0e-7 and 5.5e-7 mm). The honest statement is COAXIAL to better than 0.0000010 mm — bounded by the instrument, not resolved by it. This supersedes the 0.0005 mm above, which was the difference between two CHORD-fit centres (z 7.4995 vs z 7.5000) and not a real offset. The 0.2005 mm by which Pollen's MJCF places the bearing GEOM above the axis becomes 0.2000 mm on the same correction and still stands as a placement artefact of the visual model.",
+      "cradle_axis_vs_mjcf_bearing_geom": 0.2
+    }
   }
- },
- "guest_journal": {
-  "part": "part:microduck-jaw",
-  "mesh": "reference/pollen-microduck-rl/assets/jaw.stl",
-  "journal_d_mm": 10.0,
-  "journal_arc_fits": [
-   {"x_mm": -39.7,  "centre_yz_mm": [-0.0, 7.5], "r_mm": 5.0,    "d_mm": 10.0,   "residual_max_mm": 0.0,     "span_deg": 355.0},
-   {"x_mm": -39.5,  "centre_yz_mm": [0.0, 7.5],  "r_mm": 4.9993, "d_mm": 9.9987, "residual_max_mm": 0.00065, "span_deg": 355.37},
-   {"x_mm": -38.35, "centre_yz_mm": [0.0, 7.5],  "r_mm": 4.9976, "d_mm": 9.9952, "residual_max_mm": 0.00238, "span_deg": 357.5},
-   {"x_mm": -37.2,  "centre_yz_mm": [-0.0, 7.5], "r_mm": 4.9993, "d_mm": 9.9987, "residual_max_mm": 0.00065, "span_deg": 359.63},
-   {"x_mm": -37.05, "centre_yz_mm": [0.0, 7.5],  "r_mm": 4.9998, "d_mm": 9.9997, "residual_max_mm": 0.00017, "span_deg": 359.91}
-  ],
-  "journal_x_span_mm": [-39.7, -37.0],
-  "journal_len_mm": 2.7,
-  "shoulder_flange_d_mm": 11.9949,
-  "shoulder_flange_x_span_mm": [-40.0, -39.7],
-  "shoulder_flange_len_mm": 0.3,
-  "how_journal_span_was_read": "cecad.meshfeatures.intervals(jaw, axis x) at (y 4.9, z 7.5) -> [-43.732, -37.0] (inside the Ø10 journal) and at (y 5.5, z 7.5) -> [-43.707, -39.7] (outside it): the journal proper is x -39.7000..-37.0000"
- },
- "coaxiality_mm": {
-  "cradle_axis_vs_journal_axis": 0.0005,
-  "cradle_axis_vs_mjcf_bearing_geom": 0.2005,
-  "why": "the cradle bore centre reads z 7.4995 (best station, residual mean 0.00352 mm) and the jaw journal centre reads z 7.5000 exactly (residual max 0.00254 mm) — the two PARTS are coaxial to 0.0005 mm. Pollen's MJCF places the bearing GEOM's axis at z 7.7000, 0.2005 mm above both, and 0.3000 mm outboard of the journal shoulder. That is a discrepancy in the visual placement of the model, not in the two parts' geometry, and it is recorded here rather than averaged away."
- },
- "not_a_lens_seat": {
-  "claim_tested": "microduck-motor-support cad/interfaces.json calls this interface 'lens_tube' and its `what` says 'the camera lens / lens-holder seat'",
-  "measurement": "in the motor_support mesh frame the m12_lens_holder occupies x -12.0914..11.9086, y -52.38..-37.58, z 12.0..28.0 and the lens x -8.5614..8.3786, y -63.8..-44.88, z 11.53..28.47 — both on a y-axis 37..64 mm away from this feature, sharing neither its axis nor its diameter (lens barrel Ø11.6/13.6/16.94, holder bore Ø11.6). NOTHING that could be called a lens is on this axis.",
-  "what_is_on_this_axis": "the 15x10x3 bearing (0.181 mm off-axis in world coordinates) and, through it, the jaw's Ø10.0000 journal (0.0005 mm)",
-  "verdict": "FAIL for the lens reading, PASS for the jaw-pivot reading"
- }
 }

@@ -8,16 +8,23 @@ Contract (TRIAD.md, ce-connections section):
 Shaped after ce-connections/press-fit-bearing-15x10x3, with ONE deliberate
 difference that is the reason this folder exists at all: that folder grades
 a FIT, because a 360 deg pocket can have one. This one cannot. The arch
-measured here is Ø14.9938-14.9978 swept 149.06 deg and cut off flat at
+measured here is Ø15.0000 swept 149.06 deg and cut off flat at
 z 9.5000, with 210.94 deg of open air below. An open arch has no
 interference and no grip, so `compatible` grades what geometry can settle --
 diameter, angular capture, band length against ring width, coaxiality --
 and REFUSES the retention question by name instead of grading it 0.
 
 Every number below is MEASURED and frozen in
-evidence/tube-15-geometry.json (cecad.meshslice circle fits,
-cecad.meshfeatures.cylinders and .intervals on Pollen's own meshes,
-2026-09-02). Nothing here is recalled.
+evidence/tube-15-geometry.json. The DIAMETERS were re-measured on 2026-09-03
+off the mesh VERTICES with a free-centre circle fit, and they supersede the
+cecad.meshslice cross-section fits this file was first written from: a
+meshslice section mixes facet CORNERS (which lie ON the design cylinder) with
+edge-interpolated points (which lie INSIDE it by up to one sagitta, 0.00773
+mm), so it read the bore Ø14.9938-14.9978 -- half a sagitta, 0.0039 mm,
+short of the truth. Against a Ø15.0000 ring measured the same way the cradle
+is LINE-TO-LINE, and the -0.0062 mm of "interference" this file used to print
+did not exist. The verdict never rested on it: an arch open over 210.94 deg
+cannot grip at any interference. Nothing here is recalled.
 
 Run it:
 
@@ -28,9 +35,9 @@ Python 3 stdlib only. Units: mm unless a name ends in _deg.
 
 import json
 
-BORE_D_MM = 14.9938
-BORE_D_MM_SPAN = (14.9938, 14.9978)
-BORE_CENTRE_YZ = (0.0, 7.4995)
+BORE_D_MM = 15.0             # vertex fit, 31 unique vertices x 4 x stations,
+BORE_D_MM_SPAN = (15.0, 15.0)  # identical to 8 dp (15.00000018), residual max 7e-7 mm
+BORE_CENTRE_YZ = (0.0, 7.5)  # free-centre fit; 7.4995 was the chord fit's centre
 RING_D_MM = 15.0
 RING_B_MM = 3.0
 ARC_DEG = 149.06
@@ -38,8 +45,14 @@ OPEN_DEG = 210.94
 BANDS_X_MM = ((-39.5, -37.5), (-36.5, -35.5))
 BAND_LENS_MM = (2.0, 1.0)
 JOURNAL_CENTRE_YZ = (0.0, 7.5)
-COAX_TO_JOURNAL_MM = 0.0005
-COAX_TO_MJCF_GEOM_MM = 0.2005
+JOURNAL_D_MM = 10.0          # vertex fit, 72 vertices x 2 stations, residual max 5.5e-7 mm
+FLANGE_D_MM = 12.0           # vertex fit, 72 vertices x 2 stations, residual max 9.8e-7 mm
+# The two fitted axes differ by 0.000000031 mm, below either fit's own residual:
+# the honest statement is "coaxial to better than 0.0000010 mm", bounded by the
+# instrument. 0.0005 mm was the difference between two CHORD-fit centres.
+COAX_TO_JOURNAL_MM = 0.0
+COAX_BOUND_MM = 1e-06
+COAX_TO_MJCF_GEOM_MM = 0.2
 
 CRADLE_NAMES = ("lens_tube", "cradle", "arch", "tube")
 RING_NAMES = ("od", "ring", "tube_od")
@@ -106,13 +119,19 @@ def compatible(a_iface, b_iface):
         add("diameter", "PASS" if abs(gap) <= 0.10 else "FAIL",
             {"body_d_mm": float(a_nom), "cradle_d_mm": float(b_nom),
              "diametral_gap_mm": round(gap, 4),
-             "cradle_measured_span_mm": list(BORE_D_MM_SPAN)},
-            "the reference cradle reads Ø%.4f-%.4f across its clean stations "
-            "against a Ø%.1f ring: -0.0062 to -0.0022 mm of NOMINAL "
-            "interference. At that magnitude, on an FDM-printed 149.06 deg "
-            "arch, it is a coincidence of modelling, not a press fit -- see "
-            "the retention check."
-            % (BORE_D_MM_SPAN[0], BORE_D_MM_SPAN[1], RING_D_MM))
+             "cradle_measured_mm": BORE_D_MM,
+             "cradle_measured_basis": "free-centre circle fit to the mesh "
+                                      "vertices at 4 x stations, residual max "
+                                      "0.0000007 mm"},
+            "the reference cradle reads Ø%.4f at every one of its four "
+            "vertex-bearing stations, against a Ø%.4f ring measured the same "
+            "way: LINE-TO-LINE, diametral gap 0.0000 mm. There is NO "
+            "interference here and none is claimed. Until 2026-09-03 this "
+            "check printed -0.0062 mm of interference; that came of "
+            "chord-fitting the cradle and vertex-measuring the ring, and it "
+            "was not real. On a 149.06 deg arch it would change nothing "
+            "either way -- see the retention check."
+            % (BORE_D_MM, RING_D_MM))
 
     # 2. angular capture ------------------------------------------------
     arc = _field(b_iface, "arc_deg", "angular_capture_deg")
@@ -157,13 +176,18 @@ def compatible(a_iface, b_iface):
         {"cradle_centre_yz_mm": list(BORE_CENTRE_YZ),
          "journal_centre_yz_mm": list(JOURNAL_CENTRE_YZ),
          "offset_mm": COAX_TO_JOURNAL_MM,
+         "offset_bound_mm": COAX_BOUND_MM,
          "mjcf_bearing_geom_offset_mm": COAX_TO_MJCF_GEOM_MM},
-        "the cradle and the jaw's Ø10.0000 journal are coaxial to %.4f mm -- "
-        "the two PARTS agree. Recorded and not averaged away: Pollen's MJCF "
-        "places the bearing GEOM %.4f mm above both axes and 0.3000 mm "
-        "outboard of the journal's Ø11.9949 flange. That is the visual model's "
-        "placement, not the parts'."
-        % (COAX_TO_JOURNAL_MM, COAX_TO_MJCF_GEOM_MM))
+        "the cradle and the jaw's Ø%.4f journal are coaxial to better than "
+        "%.7f mm -- their vertex-fitted axes differ by 0.000000031 mm, which "
+        "is below either fit's own residual, so this is bounded by the "
+        "instrument rather than resolved by it. The two PARTS agree. (0.0005 "
+        "mm was the difference between two CHORD-fit centres, z 7.4995 vs "
+        "z 7.5000; superseded 2026-09-03.) Recorded and not averaged away: "
+        "Pollen's MJCF places the bearing GEOM %.4f mm above both axes and "
+        "0.3000 mm outboard of the journal's Ø%.4f flange. That is the "
+        "visual model's placement, not the parts'."
+        % (JOURNAL_D_MM, COAX_BOUND_MM, COAX_TO_MJCF_GEOM_MM, FLANGE_D_MM))
 
     # 5. retention -- structurally open, said once and named -------------
     closer = _field(b_iface, "closed_by")
@@ -238,10 +262,10 @@ def _finish(checks):
 if __name__ == "__main__":
     ring = {"name": "od", "nominal_mm": 15.0}
     cradle_claimed = {"name": "lens_tube", "role": "lens_seat",
-                      "nominal_mm": 14.9938, "arc_deg": 149.06,
+                      "nominal_mm": 15.0, "arc_deg": 149.06,
                       "bands_x_mm": [[-39.5, -37.5], [-36.5, -35.5]]}
     cradle_honest = dict(cradle_claimed, role="journal_cradle",
-                         what="Ø14.9938 arch swept 149.06 deg, the jaw journal cradle")
+                         what="Ø15.0000 arch swept 149.06 deg, the jaw journal cradle")
     for label, b in (("the claim this folder refuted", cradle_claimed),
                      ("the corrected row, legacy name kept", cradle_honest)):
         v = compatible(ring, b)
