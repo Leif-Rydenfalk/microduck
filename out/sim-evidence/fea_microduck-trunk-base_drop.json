@@ -131,14 +131,24 @@
     "why_unmeasured": "the shells and the servo case are not in the model; held at its four screw holes alone the plate is a 35 mm span it never sees in the assembly",
     "what_settles_it": "a two-body solve (shells + base, bolted) in cecad.stress / ce-struct, or a printed trunk loaded to the walk peak at one hip on a bench"
    },
-   "nonlinear_study": null,
-   "sf_used": 0.06201,
-   "model": "linear",
+   "nonlinear_study": "out/sim-evidence/fea_nlgeom_microduck-trunk-base_drop.json",
+   "nonlinear": {
+    "max_von_mises_mpa": 934.7291460850678,
+    "max_displacement_mm": 34.336999067724314,
+    "sf_table": 0.05349143140493193,
+    "sf_tds": 0.054561260033030565,
+    "sf_governing": 0.053491,
+    "ratio_vm_nonlinear_over_linear": 1.1592426808555623,
+    "increments": 13,
+    "verdict": "FAIL"
+   },
+   "sf_used": 0.053491,
+   "model": "nonlinear",
    "verdict": "CANNOT DETERMINE"
   }
  },
  "verdict": "CANNOT DETERMINE",
- "why": "SF 0.062 (table, linear model) on |F| 104.3481 N: peak von Mises 806.327 MPa vs table yield 50 MPa (SF 0.062) and TDS yield 51 MPa (SF 0.063); the case requires 2; delta 89.5664 mm is OUTSIDE the small-deflection regime (plate: d/t 29.855, d/L 1.5713) so the linear peak is a bound, not a prediction; no nonlinear re-solve on disk yet \u2014 graded on the linear bound; BOUND, not a verdict: this study applies 100 % of a force the part carries in parallel: a 1 mm plate clamped over its whole area between the two trunk shells (part:microduck-trunk-shell-left / -right) and the hip-yaw XL330 case; the share is unmeasured (the shells and the servo case are not in the model; held at its four screw holes alone the plate is a 35 mm span it never sees in the assembly). A PASS at 100 % would have been a PASS; a FAIL at 100 % proves only that the bound is not enough. What settles it: a two-body solve (shells + base, bolted) in cecad.stress / ce-struct, or a printed trunk loaded to the walk peak at one hip on a bench",
+ "why": "SF 0.053 (nonlinear governing, nonlinear model) on |F| 104.3481 N: peak von Mises 806.327 MPa vs table yield 50 MPa (SF 0.062) and TDS yield 51 MPa (SF 0.063); the case requires 2; delta 89.5664 mm is OUTSIDE the small-deflection regime (plate: d/t 29.855, d/L 1.5713) so the linear peak is a bound, not a prediction; geometrically nonlinear re-solve (sim/fea_nlgeom.py, 13 increments): peak 934.729 MPa (1.159x the linear), delta 34.3370 mm, SF 0.053 \u2014 the verdict is taken on it; BOUND, not a verdict: this study applies 100 % of a force the part carries in parallel: a 1 mm plate clamped over its whole area between the two trunk shells (part:microduck-trunk-shell-left / -right) and the hip-yaw XL330 case; the share is unmeasured (the shells and the servo case are not in the model; held at its four screw holes alone the plate is a 35 mm span it never sees in the assembly). A PASS at 100 % would have been a PASS; a FAIL at 100 % proves only that the bound is not enough. What settles it: a two-body solve (shells + base, bolted) in cecad.stress / ce-struct, or a printed trunk loaded to the walk peak at one hip on a bench",
  "artifacts": [
   "out/sim-evidence/fea/microduck-trunk-base_drop",
   "out/sim-evidence/fea/microduck-trunk-base_drop.png",
@@ -169,6 +179,11 @@
   {
    "verdict": "CANNOT DETERMINE",
    "why": "the 1 mm trunk-base plate cannot carry the stance leg's force on its own: held at its four edge screws and loaded at the left hip-yaw hole wall it reads SF 0.062 (< 2), and held at one hip hole and loaded at the other (the first run) it read a 35 mm cantilever. In the product the plate is clamped between the two trunk shells (part:microduck-trunk-shell-left/-right, both rebuilt) and the hip-yaw XL330 case, so the load path is shells + plate + servo case, not the plate alone; the share is unmeasured. What settles it: a two-body solve (shells + base, bolted) in cecad.stress/ce-struct, or a printed trunk loaded to 20 N at one hip on a bench",
+   "generator": "sim/fea_rejudge.py 2026-09-03"
+  },
+  {
+   "verdict": "CANNOT DETERMINE",
+   "why": "SF 0.062 (table, linear model) on |F| 104.3481 N: peak von Mises 806.327 MPa vs table yield 50 MPa (SF 0.062) and TDS yield 51 MPa (SF 0.063); the case requires 2; delta 89.5664 mm is OUTSIDE the small-deflection regime (plate: d/t 29.855, d/L 1.5713) so the linear peak is a bound, not a prediction; no nonlinear re-solve on disk yet \u2014 graded on the linear bound; BOUND, not a verdict: this study applies 100 % of a force the part carries in parallel: a 1 mm plate clamped over its whole area between the two trunk shells (part:microduck-trunk-shell-left / -right) and the hip-yaw XL330 case; the share is unmeasured (the shells and the servo case are not in the model; held at its four screw holes alone the plate is a 35 mm span it never sees in the assembly). A PASS at 100 % would have been a PASS; a FAIL at 100 % proves only that the bound is not enough. What settles it: a two-body solve (shells + base, bolted) in cecad.stress / ce-struct, or a printed trunk loaded to the walk peak at one hip on a bench",
    "generator": "sim/fea_rejudge.py 2026-09-03"
   }
  ]

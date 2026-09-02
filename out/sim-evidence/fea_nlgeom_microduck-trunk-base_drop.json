@@ -1,0 +1,71 @@
+{
+ "study": "fea_nlgeom_microduck-trunk-base_drop",
+ "part": "part:microduck-trunk-base",
+ "case": "drop",
+ "generated": "2026-09-03T04:13:12",
+ "script": "sim/fea_nlgeom.py",
+ "inputs": {
+  "linear_study": "out/sim-evidence/fea_microduck-trunk-base_drop.json",
+  "deck": "out/sim-evidence/fea/microduck-trunk-base_drop/microduck-trunk-base_drop_nlgeom.inp",
+  "same_as_linear": "mesh, held node set, nodal loads, E/nu \u2014 only the *STEP line differs",
+  "step": "*STEP, NLGEOM, INC=400 / *STATIC 0.05, 1, 1e-06, 0.1 (initial, total, min, max increment)",
+  "force_magnitude_N": 104.3481,
+  "force_N_part_frame": [
+   -36.40432,
+   2.82754,
+   97.82311
+  ],
+  "force_source": "out/sim-evidence/loads_mujoco.json :: drops[drop_foot_rollm10_default_contact_dt5ms].part_frames_at_peak.trunk_base.force_from_body_yaw2roll (t 0.230 s)",
+  "material": "PLA",
+  "yield_mpa_used": 50,
+  "require_sf": 2.0,
+  "regime_rule": {
+   "plate_if_thin_over_mid_le": 0.15,
+   "plate_w_over_t_le": 0.5,
+   "member_d_over_L_le": 0.1,
+   "basis": "small-deflection plate theory (Timoshenko & Woinowsky-Krieger, Theory of Plates and Shells: w small against t; t/2 customary) and small rotation (delta/L 0.1 ~ 0.15 rad tip slope)"
+  },
+  "bbox_sorted_mm": [
+   3.0,
+   36.0,
+   57.0
+  ],
+  "linear": {
+   "max_von_mises_mpa": 806.3274079895027,
+   "max_displacement_mm": 89.56641574260642,
+   "sf": 0.062009550344654704,
+   "plate": true,
+   "d_over_t": 29.8555,
+   "d_over_L": 1.5713,
+   "in_small_deflection_regime": false
+  }
+ },
+ "method": "CalculiX *STATIC with NLGEOM (updated Lagrangian, load ramped in increments, materially linear-elastic) on the identical deck; the last converged increment reduced to peak nodal von Mises and |u|",
+ "artifacts": [
+  "out/sim-evidence/fea/microduck-trunk-base_drop",
+  "out/sim-evidence/fea/microduck-trunk-base_drop/microduck-trunk-base_drop_nlgeom.inp",
+  "out/sim-evidence/fea/microduck-trunk-base_drop/microduck-trunk-base_drop_nlgeom.frd"
+ ],
+ "looked_at": [],
+ "outputs": {
+  "ccx_returncode": 0,
+  "load_fraction_reached": 1.0,
+  "increments": 13,
+  "seconds": 148.9,
+  "ccx_tail": " the increment size exceeds the maximum allowed and is decreased to 1.000000e-01\n\n the increment size exceeds the remainder of the step and is decreased to 0.000000e+00\n\n Using up to 2 cpu(s) for the stress calculation.\n\n\n Job finished",
+  "max_von_mises_mpa": 934.7291460850678,
+  "max_displacement_mm": 34.336999067724314,
+  "stress_nodes": 33740,
+  "frd_blocks": {
+   "STRESS": 13,
+   "DISP": 13
+  },
+  "sf": 0.05349143140493193,
+  "ratio_nonlinear_over_linear_vm": 1.1592426808555623,
+  "ratio_nonlinear_over_linear_disp": 0.38336913209077234,
+  "nonlinear_d_over_t": 11.4457,
+  "nonlinear_d_over_L": 0.6024
+ },
+ "verdict": "FAIL",
+ "why": "geometrically nonlinear peak 934.729 MPa (linear 806.327, ratio 1.159) and |u| 34.3370 mm (linear 89.5664) at the full 104.3481 N; SF 0.053 against 50 MPa, the case requires 2; 13 increments"
+}

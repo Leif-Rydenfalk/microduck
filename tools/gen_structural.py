@@ -366,10 +366,11 @@ def sec_fea(feas):
 
 def sec_nlgeom(nls):
     s = ['<section id="nlgeom"><h2><span class="n">3b</span>Geometrically nonlinear re-solves — where the linear answer left its regime</h2>',
-         '<p class="lede">Five linear studies deflect far beyond the small-deflection assumption (Table 4, "OUTSIDE"). A linear peak there is a bound, not a prediction, so '
+         '<p class="lede">%d linear studies deflect beyond the small-deflection assumption (Table 4a, "OUTSIDE") and two more sit within 10 %% of the limit (d/L 0.0968 and 0.0901). A linear peak outside the regime is a bound, not a prediction, so '
          '<code>sim/fea_nlgeom.py</code> re-runs the IDENTICAL deck (mesh, held nodes, nodal loads, E/ν) with CalculiX <code>*STEP, NLGEOM</code>: the stiffness is '
          'updated on the deformed shape and the load ramped in increments. The material stays linear-elastic, so this isolates the geometric effect; a peak still past '
-         'yield is still a failure. A solve that does not reach the full load is CANNOT DETERMINE with the fraction it reached — never a number at a load it did not carry.</p>']
+         'yield is still a failure. A solve that does not reach the full load is CANNOT DETERMINE with the fraction it reached — never a number at a load it did not carry.</p>' % sum(
+             1 for r in fea_studies() if regime_of(r).get("linear_regime_valid") is False)]
     if not nls:
         s.append('<p>No nonlinear re-solve on disk yet (the chain runs one CalculiX job at a time; each takes 20–60 min on this shared machine). Until it lands, every '
                  '"OUTSIDE" row in Table 4 is graded on its linear bound and says so.</p></section>')
