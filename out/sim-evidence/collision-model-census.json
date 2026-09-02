@@ -1,0 +1,2972 @@
+{
+ "study": "collision-model-census",
+ "inputs": {
+  "models": {
+   "ours": "sim/microduck_ours.xml",
+   "ours_allcollisions": "sim/microduck_ours_allcollisions.xml",
+   "ours_selfcontact": "sim/microduck_ours_selfcontact.xml",
+   "ours_fullcontact": "sim/microduck_ours_fullcontact.xml"
+  },
+  "generated_variants": [
+   {
+    "file": "sim/microduck_ours_selfcontact.xml",
+    "from": "sim/microduck_ours.xml",
+    "geoms_rewritten": 75,
+    "contype": 2,
+    "conaffinity": 2,
+    "purpose": "every geom can touch every other non-adjacent body; floor contact left exactly as microduck_ours.xml (only the two soles). The self-collision census model.",
+    "contact_excludes": [
+     "jaw_soft <-> neck_pitch"
+    ]
+   },
+   {
+    "file": "sim/microduck_ours_fullcontact.xml",
+    "from": "sim/microduck_ours.xml",
+    "geoms_rewritten": 75,
+    "contype": 3,
+    "conaffinity": 3,
+    "purpose": "every geom collides with the floor AND with the rest of the robot. Answers what a fall does when the body cannot pass through the floor plane.",
+    "contact_excludes": [
+     "jaw_soft <-> neck_pitch"
+    ]
+   }
+  ],
+  "mujoco_filter_rule": "a geom pair is checked iff (contype1 & conaffinity2) || (contype2 & conaffinity1), the geoms are in different bodies, and (flag filterparent, enabled by default) the bodies are not a parent/child pair. Evaluated here on the COMPILED model."
+ },
+ "method": "sim/collision_model.py compiles each scene through sim/common.py load_model() and reads model.geom_contype / model.geom_conaffinity / model.geom_bodyid / model.body_parentid off the compiled MjModel. Nothing is read from the XML text.",
+ "outputs": {
+  "ours": {
+   "robot": "ours",
+   "robot_file": "sim/microduck_ours.xml",
+   "scene_file": "out/sim-sweep/_census/scene_ours.xml",
+   "compiled_geoms_total": 76,
+   "compiled_geoms_robot": 75,
+   "bodies_total": 15,
+   "floor": {
+    "contype": 1,
+    "conaffinity": 1
+   },
+   "geoms_that_can_contact_the_floor": [
+    "left_foot_collision",
+    "right_foot_collision"
+   ],
+   "n_geoms_that_can_contact_the_floor": 2,
+   "bodies_that_can_contact_the_floor": [
+    "ankle_left",
+    "ankle_right"
+   ],
+   "bodies_that_CANNOT_contact_the_floor": [
+    "bearing_roll",
+    "hip_l",
+    "hip_l_2",
+    "jaw_soft",
+    "leg",
+    "leg_2",
+    "neck",
+    "neck_pitch",
+    "trunk_base",
+    "upper_leg_left",
+    "upper_leg_right",
+    "yaw2roll",
+    "yaw_roll_motion"
+   ],
+   "self_collision_candidate_geom_pairs": 4,
+   "excluded_body_pairs": [],
+   "bodies_that_can_self_collide": [
+    "ankle_left",
+    "ankle_right",
+    "leg",
+    "leg_2",
+    "trunk_base"
+   ],
+   "bodies_that_CANNOT_self_collide": [
+    "bearing_roll",
+    "hip_l",
+    "hip_l_2",
+    "jaw_soft",
+    "neck",
+    "neck_pitch",
+    "upper_leg_left",
+    "upper_leg_right",
+    "yaw2roll",
+    "yaw_roll_motion"
+   ],
+   "per_body": {
+    "trunk_base": {
+     "geoms": 11,
+     "floor_capable": 0,
+     "self_capable": 1
+    },
+    "yaw2roll": {
+     "geoms": 4,
+     "floor_capable": 0,
+     "self_capable": 0
+    },
+    "hip_l": {
+     "geoms": 2,
+     "floor_capable": 0,
+     "self_capable": 0
+    },
+    "upper_leg_left": {
+     "geoms": 5,
+     "floor_capable": 0,
+     "self_capable": 0
+    },
+    "leg": {
+     "geoms": 3,
+     "floor_capable": 0,
+     "self_capable": 1
+    },
+    "ankle_left": {
+     "geoms": 5,
+     "floor_capable": 1,
+     "self_capable": 1
+    },
+    "neck": {
+     "geoms": 4,
+     "floor_capable": 0,
+     "self_capable": 0
+    },
+    "neck_pitch": {
+     "geoms": 2,
+     "floor_capable": 0,
+     "self_capable": 0
+    },
+    "yaw_roll_motion": {
+     "geoms": 4,
+     "floor_capable": 0,
+     "self_capable": 0
+    },
+    "jaw_soft": {
+     "geoms": 16,
+     "floor_capable": 0,
+     "self_capable": 0
+    },
+    "bearing_roll": {
+     "geoms": 4,
+     "floor_capable": 0,
+     "self_capable": 0
+    },
+    "hip_l_2": {
+     "geoms": 2,
+     "floor_capable": 0,
+     "self_capable": 0
+    },
+    "upper_leg_right": {
+     "geoms": 5,
+     "floor_capable": 0,
+     "self_capable": 0
+    },
+    "leg_2": {
+     "geoms": 3,
+     "floor_capable": 0,
+     "self_capable": 1
+    },
+    "ankle_right": {
+     "geoms": 5,
+     "floor_capable": 1,
+     "self_capable": 1
+    }
+   },
+   "per_geom": [
+    {
+     "geom": "(unnamed #1)",
+     "body": "trunk_base",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #2)",
+     "body": "trunk_base",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #3)",
+     "body": "trunk_base",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #4)",
+     "body": "trunk_base",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #5)",
+     "body": "trunk_base",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #6)",
+     "body": "trunk_base",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #7)",
+     "body": "trunk_base",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #8)",
+     "body": "trunk_base",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #9)",
+     "body": "trunk_base",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #10)",
+     "body": "trunk_base",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #11)",
+     "body": "trunk_base",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #12)",
+     "body": "yaw2roll",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #13)",
+     "body": "yaw2roll",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #14)",
+     "body": "yaw2roll",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #15)",
+     "body": "yaw2roll",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #16)",
+     "body": "hip_l",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #17)",
+     "body": "hip_l",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #18)",
+     "body": "upper_leg_left",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #19)",
+     "body": "upper_leg_left",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #20)",
+     "body": "upper_leg_left",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #21)",
+     "body": "upper_leg_left",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #22)",
+     "body": "upper_leg_left",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #23)",
+     "body": "leg",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #24)",
+     "body": "leg",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #25)",
+     "body": "leg",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #26)",
+     "body": "ankle_left",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "left_foot_collision",
+     "body": "ankle_left",
+     "contype": 1,
+     "conaffinity": 1,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #28)",
+     "body": "ankle_left",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #29)",
+     "body": "ankle_left",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #30)",
+     "body": "ankle_left",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #31)",
+     "body": "neck",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #32)",
+     "body": "neck",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #33)",
+     "body": "neck",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #34)",
+     "body": "neck",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #35)",
+     "body": "neck_pitch",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #36)",
+     "body": "neck_pitch",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #37)",
+     "body": "yaw_roll_motion",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #38)",
+     "body": "yaw_roll_motion",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #39)",
+     "body": "yaw_roll_motion",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #40)",
+     "body": "yaw_roll_motion",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #41)",
+     "body": "jaw_soft",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #42)",
+     "body": "jaw_soft",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #43)",
+     "body": "jaw_soft",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #44)",
+     "body": "jaw_soft",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #45)",
+     "body": "jaw_soft",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #46)",
+     "body": "jaw_soft",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #47)",
+     "body": "jaw_soft",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #48)",
+     "body": "jaw_soft",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #49)",
+     "body": "jaw_soft",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #50)",
+     "body": "jaw_soft",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #51)",
+     "body": "jaw_soft",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #52)",
+     "body": "jaw_soft",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #53)",
+     "body": "jaw_soft",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #54)",
+     "body": "jaw_soft",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #55)",
+     "body": "jaw_soft",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #56)",
+     "body": "jaw_soft",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #57)",
+     "body": "bearing_roll",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #58)",
+     "body": "bearing_roll",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #59)",
+     "body": "bearing_roll",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #60)",
+     "body": "bearing_roll",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #61)",
+     "body": "hip_l_2",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #62)",
+     "body": "hip_l_2",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #63)",
+     "body": "upper_leg_right",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #64)",
+     "body": "upper_leg_right",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #65)",
+     "body": "upper_leg_right",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #66)",
+     "body": "upper_leg_right",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #67)",
+     "body": "upper_leg_right",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #68)",
+     "body": "leg_2",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #69)",
+     "body": "leg_2",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #70)",
+     "body": "leg_2",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #71)",
+     "body": "ankle_right",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #72)",
+     "body": "ankle_right",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "right_foot_collision",
+     "body": "ankle_right",
+     "contype": 1,
+     "conaffinity": 1,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #74)",
+     "body": "ankle_right",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #75)",
+     "body": "ankle_right",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    }
+   ]
+  },
+  "ours_allcollisions": {
+   "robot": "ours_allcollisions",
+   "robot_file": "sim/microduck_ours_allcollisions.xml",
+   "scene_file": "out/sim-sweep/_census/scene_ours_allcollisions.xml",
+   "compiled_geoms_total": 82,
+   "compiled_geoms_robot": 81,
+   "bodies_total": 15,
+   "floor": {
+    "contype": 1,
+    "conaffinity": 1
+   },
+   "geoms_that_can_contact_the_floor": [
+    "(unnamed #19)",
+    "(unnamed #26)",
+    "(unnamed #49)",
+    "(unnamed #56)",
+    "(unnamed #58)",
+    "(unnamed #67)",
+    "(unnamed #76)",
+    "(unnamed #9)",
+    "left_foot_collision",
+    "right_foot_collision"
+   ],
+   "n_geoms_that_can_contact_the_floor": 10,
+   "bodies_that_can_contact_the_floor": [
+    "ankle_left",
+    "ankle_right",
+    "hip_l",
+    "hip_l_2",
+    "jaw_soft",
+    "leg",
+    "leg_2",
+    "trunk_base"
+   ],
+   "bodies_that_CANNOT_contact_the_floor": [
+    "bearing_roll",
+    "neck",
+    "neck_pitch",
+    "upper_leg_left",
+    "upper_leg_right",
+    "yaw2roll",
+    "yaw_roll_motion"
+   ],
+   "self_collision_candidate_geom_pairs": 40,
+   "excluded_body_pairs": [],
+   "bodies_that_can_self_collide": [
+    "ankle_left",
+    "ankle_right",
+    "hip_l",
+    "hip_l_2",
+    "jaw_soft",
+    "leg",
+    "leg_2",
+    "trunk_base"
+   ],
+   "bodies_that_CANNOT_self_collide": [
+    "bearing_roll",
+    "neck",
+    "neck_pitch",
+    "upper_leg_left",
+    "upper_leg_right",
+    "yaw2roll",
+    "yaw_roll_motion"
+   ],
+   "per_body": {
+    "trunk_base": {
+     "geoms": 12,
+     "floor_capable": 1,
+     "self_capable": 1
+    },
+    "yaw2roll": {
+     "geoms": 4,
+     "floor_capable": 0,
+     "self_capable": 0
+    },
+    "hip_l": {
+     "geoms": 3,
+     "floor_capable": 1,
+     "self_capable": 1
+    },
+    "upper_leg_left": {
+     "geoms": 5,
+     "floor_capable": 0,
+     "self_capable": 0
+    },
+    "leg": {
+     "geoms": 3,
+     "floor_capable": 1,
+     "self_capable": 1
+    },
+    "ankle_left": {
+     "geoms": 5,
+     "floor_capable": 1,
+     "self_capable": 1
+    },
+    "neck": {
+     "geoms": 4,
+     "floor_capable": 0,
+     "self_capable": 0
+    },
+    "neck_pitch": {
+     "geoms": 2,
+     "floor_capable": 0,
+     "self_capable": 0
+    },
+    "yaw_roll_motion": {
+     "geoms": 4,
+     "floor_capable": 0,
+     "self_capable": 0
+    },
+    "jaw_soft": {
+     "geoms": 19,
+     "floor_capable": 3,
+     "self_capable": 1
+    },
+    "bearing_roll": {
+     "geoms": 4,
+     "floor_capable": 0,
+     "self_capable": 0
+    },
+    "hip_l_2": {
+     "geoms": 3,
+     "floor_capable": 1,
+     "self_capable": 1
+    },
+    "upper_leg_right": {
+     "geoms": 5,
+     "floor_capable": 0,
+     "self_capable": 0
+    },
+    "leg_2": {
+     "geoms": 3,
+     "floor_capable": 1,
+     "self_capable": 1
+    },
+    "ankle_right": {
+     "geoms": 5,
+     "floor_capable": 1,
+     "self_capable": 1
+    }
+   },
+   "per_geom": [
+    {
+     "geom": "(unnamed #1)",
+     "body": "trunk_base",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #2)",
+     "body": "trunk_base",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #3)",
+     "body": "trunk_base",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #4)",
+     "body": "trunk_base",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #5)",
+     "body": "trunk_base",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #6)",
+     "body": "trunk_base",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #7)",
+     "body": "trunk_base",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #8)",
+     "body": "trunk_base",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #9)",
+     "body": "trunk_base",
+     "contype": 1,
+     "conaffinity": 1,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #10)",
+     "body": "trunk_base",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #11)",
+     "body": "trunk_base",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #12)",
+     "body": "trunk_base",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #13)",
+     "body": "yaw2roll",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #14)",
+     "body": "yaw2roll",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #15)",
+     "body": "yaw2roll",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #16)",
+     "body": "yaw2roll",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #17)",
+     "body": "hip_l",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #18)",
+     "body": "hip_l",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #19)",
+     "body": "hip_l",
+     "contype": 1,
+     "conaffinity": 1,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #20)",
+     "body": "upper_leg_left",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #21)",
+     "body": "upper_leg_left",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #22)",
+     "body": "upper_leg_left",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #23)",
+     "body": "upper_leg_left",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #24)",
+     "body": "upper_leg_left",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #25)",
+     "body": "leg",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #26)",
+     "body": "leg",
+     "contype": 1,
+     "conaffinity": 1,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #27)",
+     "body": "leg",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #28)",
+     "body": "ankle_left",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "left_foot_collision",
+     "body": "ankle_left",
+     "contype": 1,
+     "conaffinity": 1,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #30)",
+     "body": "ankle_left",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #31)",
+     "body": "ankle_left",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #32)",
+     "body": "ankle_left",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #33)",
+     "body": "neck",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #34)",
+     "body": "neck",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #35)",
+     "body": "neck",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #36)",
+     "body": "neck",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #37)",
+     "body": "neck_pitch",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #38)",
+     "body": "neck_pitch",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #39)",
+     "body": "yaw_roll_motion",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #40)",
+     "body": "yaw_roll_motion",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #41)",
+     "body": "yaw_roll_motion",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #42)",
+     "body": "yaw_roll_motion",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #43)",
+     "body": "jaw_soft",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #44)",
+     "body": "jaw_soft",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #45)",
+     "body": "jaw_soft",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #46)",
+     "body": "jaw_soft",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #47)",
+     "body": "jaw_soft",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #48)",
+     "body": "jaw_soft",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #49)",
+     "body": "jaw_soft",
+     "contype": 1,
+     "conaffinity": 1,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #50)",
+     "body": "jaw_soft",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #51)",
+     "body": "jaw_soft",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #52)",
+     "body": "jaw_soft",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #53)",
+     "body": "jaw_soft",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #54)",
+     "body": "jaw_soft",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #55)",
+     "body": "jaw_soft",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #56)",
+     "body": "jaw_soft",
+     "contype": 1,
+     "conaffinity": 1,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #57)",
+     "body": "jaw_soft",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #58)",
+     "body": "jaw_soft",
+     "contype": 1,
+     "conaffinity": 1,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #59)",
+     "body": "jaw_soft",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #60)",
+     "body": "jaw_soft",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #61)",
+     "body": "jaw_soft",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #62)",
+     "body": "bearing_roll",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #63)",
+     "body": "bearing_roll",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #64)",
+     "body": "bearing_roll",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #65)",
+     "body": "bearing_roll",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #66)",
+     "body": "hip_l_2",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #67)",
+     "body": "hip_l_2",
+     "contype": 1,
+     "conaffinity": 1,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #68)",
+     "body": "hip_l_2",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #69)",
+     "body": "upper_leg_right",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #70)",
+     "body": "upper_leg_right",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #71)",
+     "body": "upper_leg_right",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #72)",
+     "body": "upper_leg_right",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #73)",
+     "body": "upper_leg_right",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #74)",
+     "body": "leg_2",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #75)",
+     "body": "leg_2",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #76)",
+     "body": "leg_2",
+     "contype": 1,
+     "conaffinity": 1,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #77)",
+     "body": "ankle_right",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #78)",
+     "body": "ankle_right",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "right_foot_collision",
+     "body": "ankle_right",
+     "contype": 1,
+     "conaffinity": 1,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #80)",
+     "body": "ankle_right",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #81)",
+     "body": "ankle_right",
+     "contype": 0,
+     "conaffinity": 0,
+     "can_contact_floor": false
+    }
+   ]
+  },
+  "ours_selfcontact": {
+   "robot": "ours_selfcontact",
+   "robot_file": "sim/microduck_ours_selfcontact.xml",
+   "scene_file": "out/sim-sweep/_census/scene_ours_selfcontact.xml",
+   "compiled_geoms_total": 76,
+   "compiled_geoms_robot": 75,
+   "bodies_total": 15,
+   "floor": {
+    "contype": 1,
+    "conaffinity": 1
+   },
+   "geoms_that_can_contact_the_floor": [
+    "left_foot_collision",
+    "right_foot_collision"
+   ],
+   "n_geoms_that_can_contact_the_floor": 2,
+   "bodies_that_can_contact_the_floor": [
+    "ankle_left",
+    "ankle_right"
+   ],
+   "bodies_that_CANNOT_contact_the_floor": [
+    "bearing_roll",
+    "hip_l",
+    "hip_l_2",
+    "jaw_soft",
+    "leg",
+    "leg_2",
+    "neck",
+    "neck_pitch",
+    "trunk_base",
+    "upper_leg_left",
+    "upper_leg_right",
+    "yaw2roll",
+    "yaw_roll_motion"
+   ],
+   "self_collision_candidate_geom_pairs": 2187,
+   "excluded_body_pairs": [
+    "neck_pitch <-> jaw_soft"
+   ],
+   "bodies_that_can_self_collide": [
+    "ankle_left",
+    "ankle_right",
+    "bearing_roll",
+    "hip_l",
+    "hip_l_2",
+    "jaw_soft",
+    "leg",
+    "leg_2",
+    "neck",
+    "neck_pitch",
+    "trunk_base",
+    "upper_leg_left",
+    "upper_leg_right",
+    "yaw2roll",
+    "yaw_roll_motion"
+   ],
+   "bodies_that_CANNOT_self_collide": [],
+   "per_body": {
+    "trunk_base": {
+     "geoms": 11,
+     "floor_capable": 0,
+     "self_capable": 1
+    },
+    "yaw2roll": {
+     "geoms": 4,
+     "floor_capable": 0,
+     "self_capable": 1
+    },
+    "hip_l": {
+     "geoms": 2,
+     "floor_capable": 0,
+     "self_capable": 1
+    },
+    "upper_leg_left": {
+     "geoms": 5,
+     "floor_capable": 0,
+     "self_capable": 1
+    },
+    "leg": {
+     "geoms": 3,
+     "floor_capable": 0,
+     "self_capable": 1
+    },
+    "ankle_left": {
+     "geoms": 5,
+     "floor_capable": 1,
+     "self_capable": 1
+    },
+    "neck": {
+     "geoms": 4,
+     "floor_capable": 0,
+     "self_capable": 1
+    },
+    "neck_pitch": {
+     "geoms": 2,
+     "floor_capable": 0,
+     "self_capable": 1
+    },
+    "yaw_roll_motion": {
+     "geoms": 4,
+     "floor_capable": 0,
+     "self_capable": 1
+    },
+    "jaw_soft": {
+     "geoms": 16,
+     "floor_capable": 0,
+     "self_capable": 1
+    },
+    "bearing_roll": {
+     "geoms": 4,
+     "floor_capable": 0,
+     "self_capable": 1
+    },
+    "hip_l_2": {
+     "geoms": 2,
+     "floor_capable": 0,
+     "self_capable": 1
+    },
+    "upper_leg_right": {
+     "geoms": 5,
+     "floor_capable": 0,
+     "self_capable": 1
+    },
+    "leg_2": {
+     "geoms": 3,
+     "floor_capable": 0,
+     "self_capable": 1
+    },
+    "ankle_right": {
+     "geoms": 5,
+     "floor_capable": 1,
+     "self_capable": 1
+    }
+   },
+   "per_geom": [
+    {
+     "geom": "(unnamed #1)",
+     "body": "trunk_base",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #2)",
+     "body": "trunk_base",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #3)",
+     "body": "trunk_base",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #4)",
+     "body": "trunk_base",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #5)",
+     "body": "trunk_base",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #6)",
+     "body": "trunk_base",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #7)",
+     "body": "trunk_base",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #8)",
+     "body": "trunk_base",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #9)",
+     "body": "trunk_base",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #10)",
+     "body": "trunk_base",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #11)",
+     "body": "trunk_base",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #12)",
+     "body": "yaw2roll",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #13)",
+     "body": "yaw2roll",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #14)",
+     "body": "yaw2roll",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #15)",
+     "body": "yaw2roll",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #16)",
+     "body": "hip_l",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #17)",
+     "body": "hip_l",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #18)",
+     "body": "upper_leg_left",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #19)",
+     "body": "upper_leg_left",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #20)",
+     "body": "upper_leg_left",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #21)",
+     "body": "upper_leg_left",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #22)",
+     "body": "upper_leg_left",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #23)",
+     "body": "leg",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #24)",
+     "body": "leg",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #25)",
+     "body": "leg",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #26)",
+     "body": "ankle_left",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "left_foot_collision",
+     "body": "ankle_left",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #28)",
+     "body": "ankle_left",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #29)",
+     "body": "ankle_left",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #30)",
+     "body": "ankle_left",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #31)",
+     "body": "neck",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #32)",
+     "body": "neck",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #33)",
+     "body": "neck",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #34)",
+     "body": "neck",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #35)",
+     "body": "neck_pitch",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #36)",
+     "body": "neck_pitch",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #37)",
+     "body": "yaw_roll_motion",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #38)",
+     "body": "yaw_roll_motion",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #39)",
+     "body": "yaw_roll_motion",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #40)",
+     "body": "yaw_roll_motion",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #41)",
+     "body": "jaw_soft",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #42)",
+     "body": "jaw_soft",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #43)",
+     "body": "jaw_soft",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #44)",
+     "body": "jaw_soft",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #45)",
+     "body": "jaw_soft",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #46)",
+     "body": "jaw_soft",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #47)",
+     "body": "jaw_soft",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #48)",
+     "body": "jaw_soft",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #49)",
+     "body": "jaw_soft",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #50)",
+     "body": "jaw_soft",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #51)",
+     "body": "jaw_soft",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #52)",
+     "body": "jaw_soft",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #53)",
+     "body": "jaw_soft",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #54)",
+     "body": "jaw_soft",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #55)",
+     "body": "jaw_soft",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #56)",
+     "body": "jaw_soft",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #57)",
+     "body": "bearing_roll",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #58)",
+     "body": "bearing_roll",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #59)",
+     "body": "bearing_roll",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #60)",
+     "body": "bearing_roll",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #61)",
+     "body": "hip_l_2",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #62)",
+     "body": "hip_l_2",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #63)",
+     "body": "upper_leg_right",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #64)",
+     "body": "upper_leg_right",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #65)",
+     "body": "upper_leg_right",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #66)",
+     "body": "upper_leg_right",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #67)",
+     "body": "upper_leg_right",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #68)",
+     "body": "leg_2",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #69)",
+     "body": "leg_2",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #70)",
+     "body": "leg_2",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #71)",
+     "body": "ankle_right",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #72)",
+     "body": "ankle_right",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "right_foot_collision",
+     "body": "ankle_right",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #74)",
+     "body": "ankle_right",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    },
+    {
+     "geom": "(unnamed #75)",
+     "body": "ankle_right",
+     "contype": 2,
+     "conaffinity": 2,
+     "can_contact_floor": false
+    }
+   ]
+  },
+  "ours_fullcontact": {
+   "robot": "ours_fullcontact",
+   "robot_file": "sim/microduck_ours_fullcontact.xml",
+   "scene_file": "out/sim-sweep/_census/scene_ours_fullcontact.xml",
+   "compiled_geoms_total": 76,
+   "compiled_geoms_robot": 75,
+   "bodies_total": 15,
+   "floor": {
+    "contype": 1,
+    "conaffinity": 1
+   },
+   "geoms_that_can_contact_the_floor": [
+    "(unnamed #1)",
+    "(unnamed #10)",
+    "(unnamed #11)",
+    "(unnamed #12)",
+    "(unnamed #13)",
+    "(unnamed #14)",
+    "(unnamed #15)",
+    "(unnamed #16)",
+    "(unnamed #17)",
+    "(unnamed #18)",
+    "(unnamed #19)",
+    "(unnamed #2)",
+    "(unnamed #20)",
+    "(unnamed #21)",
+    "(unnamed #22)",
+    "(unnamed #23)",
+    "(unnamed #24)",
+    "(unnamed #25)",
+    "(unnamed #26)",
+    "(unnamed #28)",
+    "(unnamed #29)",
+    "(unnamed #3)",
+    "(unnamed #30)",
+    "(unnamed #31)",
+    "(unnamed #32)",
+    "(unnamed #33)",
+    "(unnamed #34)",
+    "(unnamed #35)",
+    "(unnamed #36)",
+    "(unnamed #37)",
+    "(unnamed #38)",
+    "(unnamed #39)",
+    "(unnamed #4)",
+    "(unnamed #40)",
+    "(unnamed #41)",
+    "(unnamed #42)",
+    "(unnamed #43)",
+    "(unnamed #44)",
+    "(unnamed #45)",
+    "(unnamed #46)",
+    "(unnamed #47)",
+    "(unnamed #48)",
+    "(unnamed #49)",
+    "(unnamed #5)",
+    "(unnamed #50)",
+    "(unnamed #51)",
+    "(unnamed #52)",
+    "(unnamed #53)",
+    "(unnamed #54)",
+    "(unnamed #55)",
+    "(unnamed #56)",
+    "(unnamed #57)",
+    "(unnamed #58)",
+    "(unnamed #59)",
+    "(unnamed #6)",
+    "(unnamed #60)",
+    "(unnamed #61)",
+    "(unnamed #62)",
+    "(unnamed #63)",
+    "(unnamed #64)",
+    "(unnamed #65)",
+    "(unnamed #66)",
+    "(unnamed #67)",
+    "(unnamed #68)",
+    "(unnamed #69)",
+    "(unnamed #7)",
+    "(unnamed #70)",
+    "(unnamed #71)",
+    "(unnamed #72)",
+    "(unnamed #74)",
+    "(unnamed #75)",
+    "(unnamed #8)",
+    "(unnamed #9)",
+    "left_foot_collision",
+    "right_foot_collision"
+   ],
+   "n_geoms_that_can_contact_the_floor": 75,
+   "bodies_that_can_contact_the_floor": [
+    "ankle_left",
+    "ankle_right",
+    "bearing_roll",
+    "hip_l",
+    "hip_l_2",
+    "jaw_soft",
+    "leg",
+    "leg_2",
+    "neck",
+    "neck_pitch",
+    "trunk_base",
+    "upper_leg_left",
+    "upper_leg_right",
+    "yaw2roll",
+    "yaw_roll_motion"
+   ],
+   "bodies_that_CANNOT_contact_the_floor": [],
+   "self_collision_candidate_geom_pairs": 2187,
+   "excluded_body_pairs": [
+    "neck_pitch <-> jaw_soft"
+   ],
+   "bodies_that_can_self_collide": [
+    "ankle_left",
+    "ankle_right",
+    "bearing_roll",
+    "hip_l",
+    "hip_l_2",
+    "jaw_soft",
+    "leg",
+    "leg_2",
+    "neck",
+    "neck_pitch",
+    "trunk_base",
+    "upper_leg_left",
+    "upper_leg_right",
+    "yaw2roll",
+    "yaw_roll_motion"
+   ],
+   "bodies_that_CANNOT_self_collide": [],
+   "per_body": {
+    "trunk_base": {
+     "geoms": 11,
+     "floor_capable": 11,
+     "self_capable": 1
+    },
+    "yaw2roll": {
+     "geoms": 4,
+     "floor_capable": 4,
+     "self_capable": 1
+    },
+    "hip_l": {
+     "geoms": 2,
+     "floor_capable": 2,
+     "self_capable": 1
+    },
+    "upper_leg_left": {
+     "geoms": 5,
+     "floor_capable": 5,
+     "self_capable": 1
+    },
+    "leg": {
+     "geoms": 3,
+     "floor_capable": 3,
+     "self_capable": 1
+    },
+    "ankle_left": {
+     "geoms": 5,
+     "floor_capable": 5,
+     "self_capable": 1
+    },
+    "neck": {
+     "geoms": 4,
+     "floor_capable": 4,
+     "self_capable": 1
+    },
+    "neck_pitch": {
+     "geoms": 2,
+     "floor_capable": 2,
+     "self_capable": 1
+    },
+    "yaw_roll_motion": {
+     "geoms": 4,
+     "floor_capable": 4,
+     "self_capable": 1
+    },
+    "jaw_soft": {
+     "geoms": 16,
+     "floor_capable": 16,
+     "self_capable": 1
+    },
+    "bearing_roll": {
+     "geoms": 4,
+     "floor_capable": 4,
+     "self_capable": 1
+    },
+    "hip_l_2": {
+     "geoms": 2,
+     "floor_capable": 2,
+     "self_capable": 1
+    },
+    "upper_leg_right": {
+     "geoms": 5,
+     "floor_capable": 5,
+     "self_capable": 1
+    },
+    "leg_2": {
+     "geoms": 3,
+     "floor_capable": 3,
+     "self_capable": 1
+    },
+    "ankle_right": {
+     "geoms": 5,
+     "floor_capable": 5,
+     "self_capable": 1
+    }
+   },
+   "per_geom": [
+    {
+     "geom": "(unnamed #1)",
+     "body": "trunk_base",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #2)",
+     "body": "trunk_base",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #3)",
+     "body": "trunk_base",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #4)",
+     "body": "trunk_base",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #5)",
+     "body": "trunk_base",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #6)",
+     "body": "trunk_base",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #7)",
+     "body": "trunk_base",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #8)",
+     "body": "trunk_base",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #9)",
+     "body": "trunk_base",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #10)",
+     "body": "trunk_base",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #11)",
+     "body": "trunk_base",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #12)",
+     "body": "yaw2roll",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #13)",
+     "body": "yaw2roll",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #14)",
+     "body": "yaw2roll",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #15)",
+     "body": "yaw2roll",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #16)",
+     "body": "hip_l",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #17)",
+     "body": "hip_l",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #18)",
+     "body": "upper_leg_left",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #19)",
+     "body": "upper_leg_left",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #20)",
+     "body": "upper_leg_left",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #21)",
+     "body": "upper_leg_left",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #22)",
+     "body": "upper_leg_left",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #23)",
+     "body": "leg",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #24)",
+     "body": "leg",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #25)",
+     "body": "leg",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #26)",
+     "body": "ankle_left",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "left_foot_collision",
+     "body": "ankle_left",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #28)",
+     "body": "ankle_left",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #29)",
+     "body": "ankle_left",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #30)",
+     "body": "ankle_left",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #31)",
+     "body": "neck",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #32)",
+     "body": "neck",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #33)",
+     "body": "neck",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #34)",
+     "body": "neck",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #35)",
+     "body": "neck_pitch",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #36)",
+     "body": "neck_pitch",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #37)",
+     "body": "yaw_roll_motion",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #38)",
+     "body": "yaw_roll_motion",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #39)",
+     "body": "yaw_roll_motion",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #40)",
+     "body": "yaw_roll_motion",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #41)",
+     "body": "jaw_soft",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #42)",
+     "body": "jaw_soft",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #43)",
+     "body": "jaw_soft",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #44)",
+     "body": "jaw_soft",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #45)",
+     "body": "jaw_soft",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #46)",
+     "body": "jaw_soft",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #47)",
+     "body": "jaw_soft",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #48)",
+     "body": "jaw_soft",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #49)",
+     "body": "jaw_soft",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #50)",
+     "body": "jaw_soft",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #51)",
+     "body": "jaw_soft",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #52)",
+     "body": "jaw_soft",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #53)",
+     "body": "jaw_soft",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #54)",
+     "body": "jaw_soft",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #55)",
+     "body": "jaw_soft",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #56)",
+     "body": "jaw_soft",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #57)",
+     "body": "bearing_roll",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #58)",
+     "body": "bearing_roll",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #59)",
+     "body": "bearing_roll",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #60)",
+     "body": "bearing_roll",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #61)",
+     "body": "hip_l_2",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #62)",
+     "body": "hip_l_2",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #63)",
+     "body": "upper_leg_right",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #64)",
+     "body": "upper_leg_right",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #65)",
+     "body": "upper_leg_right",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #66)",
+     "body": "upper_leg_right",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #67)",
+     "body": "upper_leg_right",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #68)",
+     "body": "leg_2",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #69)",
+     "body": "leg_2",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #70)",
+     "body": "leg_2",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #71)",
+     "body": "ankle_right",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #72)",
+     "body": "ankle_right",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "right_foot_collision",
+     "body": "ankle_right",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #74)",
+     "body": "ankle_right",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    },
+    {
+     "geom": "(unnamed #75)",
+     "body": "ankle_right",
+     "contype": 3,
+     "conaffinity": 3,
+     "can_contact_floor": true
+    }
+   ]
+  }
+ },
+ "rest_pose_hull_overlap": {
+  "$why": "MuJoCo collides the CONVEX HULL of a mesh, so a part correctly nested inside another part's concave shell reads as penetration and injects a spurious contact force. Pass 1 MEASURES which body pairs do this in the STAND rest pose; pass 2 writes a <contact><exclude/></contact> for exactly those pairs and re-measures until the rest pose is clean. The excluded pairs are named on each variant in inputs.generated_variants, and a genuine collision between an excluded pair is the one thing these variants cannot see \u2014 that pair's clearance is a CAD question, not a simulation one.",
+  "pass1_before_exclusion": {
+   "ours_selfcontact": {
+    "robot": "ours_selfcontact",
+    "keyframe": "STAND",
+    "scene_file": "out/sim-sweep/_census/scene_rest_ours_selfcontact.xml",
+    "at_reset": {
+     "when": "immediately after mj_resetDataKeyframe(STAND) + mj_forward",
+     "pairs": {
+      "jaw_soft/jaw <-> neck_pitch/neck_pitch": {
+       "contact_points": 4,
+       "max_penetration_mm": 2.1106,
+       "total_force_N": 84.65961
+      },
+      "jaw_soft/bottom_head_shell <-> neck_pitch/neck_pitch": {
+       "contact_points": 4,
+       "max_penetration_mm": 2.3311,
+       "total_force_N": 92.65272
+      },
+      "jaw_soft/jaw <-> neck_pitch/seeed_bearing__configuration__22x16x4": {
+       "contact_points": 4,
+       "max_penetration_mm": 4.2795,
+       "total_force_N": 171.82493
+      },
+      "jaw_soft/bottom_head_shell <-> neck_pitch/seeed_bearing__configuration__22x16x4": {
+       "contact_points": 4,
+       "max_penetration_mm": 4.4597,
+       "total_force_N": 179.72965
+      }
+     }
+    },
+    "settled": {
+     "when": "after 1.00 s of free settling with ctrl held at the keyframe",
+     "pairs": {
+      "jaw_soft/jaw <-> neck_pitch/neck_pitch": {
+       "contact_points": 4,
+       "max_penetration_mm": 2.1173,
+       "total_force_N": 84.74765
+      },
+      "jaw_soft/bottom_head_shell <-> neck_pitch/neck_pitch": {
+       "contact_points": 4,
+       "max_penetration_mm": 2.3468,
+       "total_force_N": 92.64726
+      },
+      "jaw_soft/jaw <-> neck_pitch/seeed_bearing__configuration__22x16x4": {
+       "contact_points": 4,
+       "max_penetration_mm": 4.2916,
+       "total_force_N": 172.78368
+      },
+      "jaw_soft/bottom_head_shell <-> neck_pitch/seeed_bearing__configuration__22x16x4": {
+       "contact_points": 4,
+       "max_penetration_mm": 4.4723,
+       "total_force_N": 177.02188
+      }
+     }
+    },
+    "meaning": "MuJoCo collides the CONVEX HULL of a mesh. A part correctly nested inside another part's concave shell therefore reads as penetration and generates a real contact force in the simulation. These pairs are named and excluded from the 'did the motion cause a self-collision' count; the force they inject is why the selfcontact model is a census instrument and not a dynamics model."
+   },
+   "ours_fullcontact": {
+    "robot": "ours_fullcontact",
+    "keyframe": "STAND",
+    "scene_file": "out/sim-sweep/_census/scene_rest_ours_fullcontact.xml",
+    "at_reset": {
+     "when": "immediately after mj_resetDataKeyframe(STAND) + mj_forward",
+     "pairs": {
+      "jaw_soft/jaw <-> neck_pitch/neck_pitch": {
+       "contact_points": 4,
+       "max_penetration_mm": 2.1106,
+       "total_force_N": 84.65961
+      },
+      "jaw_soft/bottom_head_shell <-> neck_pitch/neck_pitch": {
+       "contact_points": 4,
+       "max_penetration_mm": 2.3311,
+       "total_force_N": 92.65272
+      },
+      "jaw_soft/jaw <-> neck_pitch/seeed_bearing__configuration__22x16x4": {
+       "contact_points": 4,
+       "max_penetration_mm": 4.2795,
+       "total_force_N": 171.82493
+      },
+      "jaw_soft/bottom_head_shell <-> neck_pitch/seeed_bearing__configuration__22x16x4": {
+       "contact_points": 4,
+       "max_penetration_mm": 4.4597,
+       "total_force_N": 179.72965
+      }
+     }
+    },
+    "settled": {
+     "when": "after 1.00 s of free settling with ctrl held at the keyframe",
+     "pairs": {
+      "jaw_soft/jaw <-> neck_pitch/neck_pitch": {
+       "contact_points": 4,
+       "max_penetration_mm": 2.1187,
+       "total_force_N": 84.99491
+      },
+      "jaw_soft/bottom_head_shell <-> neck_pitch/neck_pitch": {
+       "contact_points": 4,
+       "max_penetration_mm": 2.3453,
+       "total_force_N": 92.55652
+      },
+      "jaw_soft/jaw <-> neck_pitch/seeed_bearing__configuration__22x16x4": {
+       "contact_points": 4,
+       "max_penetration_mm": 4.2904,
+       "total_force_N": 172.6808
+      },
+      "jaw_soft/bottom_head_shell <-> neck_pitch/seeed_bearing__configuration__22x16x4": {
+       "contact_points": 4,
+       "max_penetration_mm": 4.4707,
+       "total_force_N": 177.16156
+      }
+     }
+    },
+    "meaning": "MuJoCo collides the CONVEX HULL of a mesh. A part correctly nested inside another part's concave shell therefore reads as penetration and generates a real contact force in the simulation. These pairs are named and excluded from the 'did the motion cause a self-collision' count; the force they inject is why the selfcontact model is a census instrument and not a dynamics model."
+   }
+  },
+  "pass2_after_exclusion": {
+   "ours_selfcontact": {
+    "robot": "ours_selfcontact",
+    "keyframe": "STAND",
+    "scene_file": "out/sim-sweep/_census/scene_rest_ours_selfcontact.xml",
+    "at_reset": {
+     "when": "immediately after mj_resetDataKeyframe(STAND) + mj_forward",
+     "pairs": {}
+    },
+    "settled": {
+     "when": "after 1.00 s of free settling with ctrl held at the keyframe",
+     "pairs": {}
+    },
+    "meaning": "MuJoCo collides the CONVEX HULL of a mesh. A part correctly nested inside another part's concave shell therefore reads as penetration and generates a real contact force in the simulation. These pairs are named and excluded from the 'did the motion cause a self-collision' count; the force they inject is why the selfcontact model is a census instrument and not a dynamics model."
+   },
+   "ours_fullcontact": {
+    "robot": "ours_fullcontact",
+    "keyframe": "STAND",
+    "scene_file": "out/sim-sweep/_census/scene_rest_ours_fullcontact.xml",
+    "at_reset": {
+     "when": "immediately after mj_resetDataKeyframe(STAND) + mj_forward",
+     "pairs": {}
+    },
+    "settled": {
+     "when": "after 1.00 s of free settling with ctrl held at the keyframe",
+     "pairs": {}
+    },
+    "meaning": "MuJoCo collides the CONVEX HULL of a mesh. A part correctly nested inside another part's concave shell therefore reads as penetration and generates a real contact force in the simulation. These pairs are named and excluded from the 'did the motion cause a self-collision' count; the force they inject is why the selfcontact model is a census instrument and not a dynamics model."
+   }
+  }
+ },
+ "verdict": "PASS",
+ "why": "The census is a measurement of the models, not a check of the robot; it exists so that every self-collision and floor-contact statement in lane F2 can name the model it is true of. ours: 2 of 15 bodies can contact the floor, 5 of 15 can self-collide; ours_allcollisions: 8 of 15 bodies can contact the floor, 8 of 15 can self-collide; ours_selfcontact: 2 of 15 bodies can contact the floor, 15 of 15 can self-collide; ours_fullcontact: 15 of 15 bodies can contact the floor, 15 of 15 can self-collide",
+ "script": "sim/collision_model.py",
+ "artifacts": [
+  "sim/microduck_ours_selfcontact.xml",
+  "sim/microduck_ours_fullcontact.xml",
+  "out/sim-sweep/_census/scene_ours.xml",
+  "out/sim-sweep/_census/scene_ours_allcollisions.xml",
+  "out/sim-sweep/_census/scene_ours_selfcontact.xml",
+  "out/sim-sweep/_census/scene_ours_fullcontact.xml"
+ ],
+ "looked_at": [
+  "sim/microduck_ours.xml",
+  "sim/microduck_ours_allcollisions.xml",
+  "reference/pollen-microduck-rl/robot_walk.xml",
+  "reference/pollen-microduck-rl/robot_allcollisions.xml",
+  "https://mujoco.readthedocs.io/en/stable/computation/index.html#collision-detection"
+ ]
+}
