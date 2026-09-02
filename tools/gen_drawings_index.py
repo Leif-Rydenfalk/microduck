@@ -80,7 +80,7 @@ def sheet_card(r):
                      '</figcaption></figure>' % (E(ref), E(slug)))
 
     rows = []
-    if kind == "drawing":
+    if kind in ("drawing", "reference-drawing"):
         rows += [
             ("Sheet", "%s at %s, %d attempt(s)"
              % (r.get("size", "?"), r.get("scale", "?"), r.get("attempts", 0))),
@@ -104,6 +104,10 @@ def sheet_card(r):
                  fmt(r.get("thinnest_wall_step_mm"), 3)))
              if r.get("thinnest_wall_mm") is not None
              else "CANNOT DETERMINE"),
+            ("Hidden lines", "; ".join(
+                "%s: %s" % (k, (v or {}).get("why", "—"))
+                for k, v in sorted((r.get("hidden_lines") or {}).items()))
+             or "not recorded"),
             ("verify_sheet", "%s (independent read-back: %s)"
              % (r.get("verified"), r.get("verify_sheet"))),
         ]
@@ -157,9 +161,12 @@ def main():
     rows = doc["rows"]
     t = doc["totals"]
     drawings = [r for r in rows if r.get("state") == "drawing" and r.get("svg")]
+    refs = [r for r in rows if r.get("state") == "reference-drawing"
+            and r.get("svg")]
     prints = [r for r in rows if r.get("state") == "print-sheet"
               and r.get("svg")]
-    rest = [r for r in rows if r not in drawings and r not in prints]
+    done = drawings + refs + prints
+    rest = [r for r in rows if r not in done]
 
     def group(rs, title, n, lede, empty):
         h = ['<section id="%s"><h2><span class="n">%s</span>%s</h2>'
@@ -240,6 +247,7 @@ def main():
 <div class="statbar">
   <div class="stat"><b>{t['shelf']}</b><span>parts on the shelf</span></div>
   <div class="stat"><b>{t['drawings']}</b><span>dimensioned drawings</span></div>
+  <div class="stat"><b>{t.get('reference_drawings', 0)}</b><span>bought-part references</span></div>
   <div class="stat"><b>{t['print_sheets']}</b><span>print sheets</span></div>
   <div class="stat"><b>{t['pass']}</b><span>verify PASS</span></div>
   <div class="stat"><b>{t['fail']}</b><span>verify FAIL</span></div>
@@ -249,8 +257,9 @@ def main():
 <nav class="toc">
   <a href="#how">1 What a sheet must carry</a>
   <a href="#dimensioned-drawings">2 Dimensioned drawings</a>
-  <a href="#print-sheets">3 Print sheets</a>
-  <a href="#no-sheet">4 Parts with no sheet</a>
+  <a href="#reference-drawings-—-bought-parts">3 Reference drawings</a>
+  <a href="#print-sheets">4 Print sheets</a>
+  <a href="#no-sheet">5 Parts with no sheet</a>
 </nav>
 
 <section id="how">
@@ -289,13 +298,20 @@ def main():
        "Parts whose <code>cad/part.py</code> constructs a parametric solid.",
        "No dimensioned drawing has been generated.")}
 
-{group(prints, "Print sheets", 3,
+{group(refs, "Reference drawings — bought parts", 3,
+       "Parts we BUY. The solid is our parametric model of the vendor's part, so the "
+       "sheet is a reference for checking the assembly against a real envelope — the "
+       "vendor's own drawing governs every dimension. Each sheet says so in its "
+       "print/DFM block.",
+       "No bought part has been drawn.")}
+
+{group(prints, "Print sheets", 4,
        "Parts backed by a published mesh. No dimension can be read off a decimated "
        "triangulation, so these carry what is true of a mesh and say what is missing.",
        "No print sheet has been generated.")}
 
 <section id="no-sheet">
-  <h2><span class="n">4</span>Parts with no sheet, and why</h2>
+  <h2><span class="n">5</span>Parts with no sheet, and why</h2>
   <p class="lede">Every remaining folder on the shelf, with the measured reason. A part
   missing from this page would be a part nobody looked at; that state is not available here.</p>
   {''.join(rest_tbl)}
@@ -307,8 +323,8 @@ def main():
 """
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     open(OUT, "w", encoding="utf-8").write(body)
-    print("wrote %s (%d drawings, %d print sheets, %d other)"
-          % (OUT, len(drawings), len(prints), len(rest)))
+    print("wrote %s (%d drawings, %d bought-part references, %d print sheets, "
+          "%d other)" % (OUT, len(drawings), len(refs), len(prints), len(rest)))
 
 
 if __name__ == "__main__":
