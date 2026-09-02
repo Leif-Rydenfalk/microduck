@@ -100,7 +100,11 @@ def _shoot(svg_path, stem):
     try:
         png, facts = shoot_sheet(svg_path, stem + "-sheet.png")
         return png, {"size": list(facts["size"]),
-                     "ink": round(float(facts.get("ink", 0.0)), 4),
+                     # imgcheck calls it `ink_frac`; reading `ink` recorded
+                     # 0.0 for every sheet, which is the one value a thumbnail
+                     # must never be able to claim by accident.
+                     "ink_frac": round(float(facts.get("ink_frac", 0.0)), 5),
+                     "max_stroke": round(float(facts.get("max_stroke", 0.0)), 4),
                      "distinct_colors": facts.get("distinct_colors")}
     except Exception as e:                                    # noqa: BLE001
         return None, {"error": "%s: %s" % (type(e).__name__, e)}
