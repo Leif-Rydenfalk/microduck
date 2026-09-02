@@ -41,6 +41,34 @@
   "torque_grf_record_hz": 200.0,
   "torque_grf_frames": 1601,
   "push_frames_applied": 0,
+  "collision_scope": {
+   "candidate_geom_pairs": 40,
+   "excluded_body_pairs": [],
+   "bodies_that_can_self_collide": [
+    "ankle_left",
+    "ankle_right",
+    "hip_l",
+    "hip_l_2",
+    "jaw_soft",
+    "leg",
+    "leg_2",
+    "trunk_base"
+   ],
+   "bodies_total": 15,
+   "geoms_that_can_contact_the_floor": [
+    "#19",
+    "#26",
+    "#49",
+    "#56",
+    "#58",
+    "#67",
+    "#76",
+    "#9",
+    "left_foot_collision",
+    "right_foot_collision"
+   ],
+   "statement": "In THIS compiled model 8 of the 15 robot bodies can take part in a self-contact at all (40 candidate geom pairs), and 10 geom(s) can touch the floor. A self-collision count answers only that question. Full census: sim/collision_model.py -> out/sim-evidence/collision-model-census.json."
+  },
   "total_mass_kg": 0.737243,
   "floor_friction_slide": 1.0,
   "foot_friction_slide": [
@@ -69,8 +97,18 @@
   "net_yaw_drift_deg": -6.756,
   "max_abs_yaw_drift_deg": 12.44,
   "yaw_drift_deg_per_m_of_path": -77.8093,
-  "forward_tracking_ratio": null,
-  "forward_tracking_note": "mean_path_speed_m_s divided by the commanded vx. The walking policy has a stand-still band below ~0.25 m/s (out/sim/vx_sweep.json), so the ratio is meaningless there and only the moving cells should be read.",
+  "path_tracking_ratio_UNSIGNED": null,
+  "path_tracking_ratio_note": "mean_path_speed_m_s divided by the commanded vx. UNSIGNED and therefore DIRECTION-BLIND: a robot carried backwards down a slope scores HIGH on it. Do not read it as tracking. Read commanded_direction_tracking_ratio instead. It is kept only because path length is the honest answer to 'how far did the feet travel'. The walking policy also has a stand-still band below ~0.25 m/s (out/sim/vx_sweep.json), so it is meaningless there as well.",
+  "forward_progress_m": 0.04688,
+  "forward_progress_note": "each step of the ground track projected onto the robot's OWN instantaneous heading and summed, over the commanded window. NEGATIVE means the robot ended up behind where it started in its own forward direction.",
+  "backward_path_m": 0.00975,
+  "mean_forward_speed_m_s": 0.00586,
+  "commanded_direction_tracking_ratio": null,
+  "displacement_along_initial_heading_m": 0.04938,
+  "downhill_progress_m": null,
+  "uphill_progress_m": null,
+  "fraction_of_displacement_along_the_fall_line": null,
+  "slope_direction_note": null,
   "mean_path_speed_m_s": 0.01085,
   "path_vs_displacement": "walked_m is the straight-line displacement of the trunk; path_length_m is the integrated ground track. A large gap means the robot curved.",
   "trunk_z_m": {
@@ -92,7 +130,11 @@
   "grf_vertical_peak_N": {
    "left_foot": 21.3154,
    "right_foot": 41.4791,
-   "both_feet_sum_peak": 41.4791
+   "both_feet_sum_peak": 41.4791,
+   "both_feet_sum_peak_at_s": 0.05,
+   "both_feet_sum_peak_is_inside_valid_window": true,
+   "single_foot_max": 41.4791,
+   "$caveat": "over the WHOLE record. If both_feet_sum_peak_is_inside_valid_window is false this number is post-fall and non-physical; use grf_vertical_peak_PREFALL_N."
   },
   "grf_vertical_percentiles_N": {
    "both_feet_sum_p50": 7.2223,
@@ -101,15 +143,53 @@
    "single_foot_p99": 8.6001,
    "single_foot_max": 41.4791
   },
+  "physically_valid_window": {
+   "$what": "the PREFIX of the physics record that is both before the first fall and free of any geom centre below the floor plane z = 0. Only numbers from this window are design loads; sim/microduck_ours.xml gives only the two soles a floor-colliding contype (sim/collision_model.py, out/sim-evidence/collision-model-census.json), so after a fall the body passes THROUGH the floor and the contact solver reports reactions no physical robot can see.",
+   "frames_total": 1601,
+   "frames_valid": 1601,
+   "valid_fraction": 1.0,
+   "valid_until_s": 8.0,
+   "first_fall_s": 0.04,
+   "first_UNCOMMANDED_fall_s": null,
+   "$window_rule": "the window closes at the first UNCOMMANDED fall or the first geom centre below the floor, whichever comes first. Uncommanded means the fall rule with the commanded ground window removed \u2014 the sit-stand and stand-from-FOLD cells put the trunk on the floor on purpose and that is not a fall.",
+   "frames_with_a_geom_centre_below_the_floor": 0,
+   "fraction_of_frames_below_the_floor": 0.0,
+   "first_frame_below_the_floor_s": null,
+   "min_geom_centre_z_m": 0.00517,
+   "min_geom_centre_z_at_start_m": 0.02804,
+   "min_trunk_z_m": 0.05601
+  },
+  "grf_vertical_peak_PREFALL_N": {
+   "both_feet_sum_peak": 41.4791,
+   "both_feet_sum_peak_at_s": 0.05,
+   "single_foot_max": 41.4791,
+   "left_foot": 21.3154,
+   "right_foot": 41.4791,
+   "$what": "the same measurement restricted to physically_valid_window. THIS is the design load."
+  },
+  "max_joint_torque_PREFALL_Nm": 0.96,
   "weight_N": 7.2324,
   "self_collisions": {
    "max": 0,
    "frames": 0,
-   "mean": 0.0
+   "mean": 0.0,
+   "max_excluding_rest_pose_overlap": 0,
+   "frames_excluding_rest_pose_overlap": 0,
+   "contact_points_by_pair_summed_over_control_frames": {},
+   "pairs_already_overlapping_in_the_rest_pose": {},
+   "pairs_first_touching_during_the_motion": [],
+   "$counting": "a mesh-mesh contact produces several contact points, so the per-pair figures are CONTACT POINTS summed over the 50 Hz control frames, not frames. max/frames are contact counts per frame.",
+   "candidate_geom_pairs_in_this_model": 40,
+   "$scope": "In THIS compiled model 8 of the 15 robot bodies can take part in a self-contact at all (40 candidate geom pairs), and 10 geom(s) can touch the floor. A self-collision count answers only that question. Full census: sim/collision_model.py -> out/sim-evidence/collision-model-census.json."
   },
   "contacts": {
    "mean": 4.377,
-   "max": 6
+   "max": 6,
+   "floor_contact_points_by_geom_summed_over_control_frames": {
+    "ankle_right/right_foot_collision": 901,
+    "ankle_left/left_foot_collision": 854
+   },
+   "$floor": "which geoms actually touched the ground, measured. In microduck_ours.xml only the two soles CAN; a variant that lets more geoms touch the floor is a different foot and therefore a different gait, and this list is how you see that."
   },
   "joints_beyond_limit": [],
   "joints_within_1deg_of_limit": [
@@ -126,6 +206,9 @@
    "left_hip_yaw": {
     "peak_abs_torque_Nm": 0.29967,
     "peak_at_s": 0.065,
+    "peak_is_inside_valid_window": true,
+    "prefall_peak_abs_torque_Nm": 0.29967,
+    "prefall_peak_at_s": 0.065,
     "peak_signed_torque_Nm": -0.29967,
     "p95_abs_torque_Nm": 0.02797,
     "p99_abs_torque_Nm": 0.19494,
@@ -156,6 +239,9 @@
    "left_hip_roll": {
     "peak_abs_torque_Nm": 0.37636,
     "peak_at_s": 0.105,
+    "peak_is_inside_valid_window": true,
+    "prefall_peak_abs_torque_Nm": 0.37636,
+    "prefall_peak_at_s": 0.105,
     "peak_signed_torque_Nm": -0.37636,
     "p95_abs_torque_Nm": 0.14854,
     "p99_abs_torque_Nm": 0.22617,
@@ -186,6 +272,9 @@
    "left_hip_pitch": {
     "peak_abs_torque_Nm": 0.96,
     "peak_at_s": 0.005,
+    "peak_is_inside_valid_window": true,
+    "prefall_peak_abs_torque_Nm": 0.96,
+    "prefall_peak_at_s": 0.005,
     "peak_signed_torque_Nm": -0.96,
     "p95_abs_torque_Nm": 0.16796,
     "p99_abs_torque_Nm": 0.8312,
@@ -216,6 +305,9 @@
    "left_knee": {
     "peak_abs_torque_Nm": 0.73802,
     "peak_at_s": 0.145,
+    "peak_is_inside_valid_window": true,
+    "prefall_peak_abs_torque_Nm": 0.73802,
+    "prefall_peak_at_s": 0.145,
     "peak_signed_torque_Nm": -0.73802,
     "p95_abs_torque_Nm": 0.16221,
     "p99_abs_torque_Nm": 0.61437,
@@ -246,6 +338,9 @@
    "left_ankle": {
     "peak_abs_torque_Nm": 0.56043,
     "peak_at_s": 0.065,
+    "peak_is_inside_valid_window": true,
+    "prefall_peak_abs_torque_Nm": 0.56043,
+    "prefall_peak_at_s": 0.065,
     "peak_signed_torque_Nm": 0.56043,
     "p95_abs_torque_Nm": 0.10567,
     "p99_abs_torque_Nm": 0.44005,
@@ -276,6 +371,9 @@
    "neck_pitch": {
     "peak_abs_torque_Nm": 0.68552,
     "peak_at_s": 0.005,
+    "peak_is_inside_valid_window": true,
+    "prefall_peak_abs_torque_Nm": 0.68552,
+    "prefall_peak_at_s": 0.005,
     "peak_signed_torque_Nm": -0.68552,
     "p95_abs_torque_Nm": 0.09592,
     "p99_abs_torque_Nm": 0.43245,
@@ -306,6 +404,9 @@
    "head_pitch": {
     "peak_abs_torque_Nm": 0.54667,
     "peak_at_s": 0.025,
+    "peak_is_inside_valid_window": true,
+    "prefall_peak_abs_torque_Nm": 0.54667,
+    "prefall_peak_at_s": 0.025,
     "peak_signed_torque_Nm": -0.54667,
     "p95_abs_torque_Nm": 0.10982,
     "p99_abs_torque_Nm": 0.30611,
@@ -336,6 +437,9 @@
    "head_yaw": {
     "peak_abs_torque_Nm": 0.37337,
     "peak_at_s": 0.045,
+    "peak_is_inside_valid_window": true,
+    "prefall_peak_abs_torque_Nm": 0.37337,
+    "prefall_peak_at_s": 0.045,
     "peak_signed_torque_Nm": -0.37337,
     "p95_abs_torque_Nm": 0.09121,
     "p99_abs_torque_Nm": 0.24463,
@@ -366,6 +470,9 @@
    "head_roll": {
     "peak_abs_torque_Nm": 0.23698,
     "peak_at_s": 0.35,
+    "peak_is_inside_valid_window": true,
+    "prefall_peak_abs_torque_Nm": 0.23698,
+    "prefall_peak_at_s": 0.35,
     "peak_signed_torque_Nm": 0.23698,
     "p95_abs_torque_Nm": 0.06551,
     "p99_abs_torque_Nm": 0.16748,
@@ -396,6 +503,9 @@
    "right_hip_yaw": {
     "peak_abs_torque_Nm": 0.17726,
     "peak_at_s": 0.285,
+    "peak_is_inside_valid_window": true,
+    "prefall_peak_abs_torque_Nm": 0.17726,
+    "prefall_peak_at_s": 0.285,
     "peak_signed_torque_Nm": -0.17726,
     "p95_abs_torque_Nm": 0.03543,
     "p99_abs_torque_Nm": 0.112,
@@ -426,6 +536,9 @@
    "right_hip_roll": {
     "peak_abs_torque_Nm": 0.28343,
     "peak_at_s": 0.125,
+    "peak_is_inside_valid_window": true,
+    "prefall_peak_abs_torque_Nm": 0.28343,
+    "prefall_peak_at_s": 0.125,
     "peak_signed_torque_Nm": 0.28343,
     "p95_abs_torque_Nm": 0.15106,
     "p99_abs_torque_Nm": 0.17465,
@@ -456,6 +569,9 @@
    "right_hip_pitch": {
     "peak_abs_torque_Nm": 0.96,
     "peak_at_s": 0.005,
+    "peak_is_inside_valid_window": true,
+    "prefall_peak_abs_torque_Nm": 0.96,
+    "prefall_peak_at_s": 0.005,
     "peak_signed_torque_Nm": 0.96,
     "p95_abs_torque_Nm": 0.12598,
     "p99_abs_torque_Nm": 0.94841,
@@ -486,6 +602,9 @@
    "right_knee": {
     "peak_abs_torque_Nm": 0.74654,
     "peak_at_s": 0.145,
+    "peak_is_inside_valid_window": true,
+    "prefall_peak_abs_torque_Nm": 0.74654,
+    "prefall_peak_at_s": 0.145,
     "peak_signed_torque_Nm": 0.74654,
     "p95_abs_torque_Nm": 0.18195,
     "p99_abs_torque_Nm": 0.55238,
@@ -516,6 +635,9 @@
    "right_ankle": {
     "peak_abs_torque_Nm": 0.52512,
     "peak_at_s": 0.085,
+    "peak_is_inside_valid_window": true,
+    "prefall_peak_abs_torque_Nm": 0.52512,
+    "prefall_peak_at_s": 0.085,
     "peak_signed_torque_Nm": -0.52512,
     "p95_abs_torque_Nm": 0.12332,
     "p99_abs_torque_Nm": 0.43847,
@@ -545,6 +667,6 @@
    }
   },
   "nan": false,
-  "wall_seconds": 7.44
+  "wall_seconds": 1.147
  }
 }
