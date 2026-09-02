@@ -325,7 +325,7 @@ def matrix():
     cells.append(Cfg("stand_from_FOLD", "sitstand", policy="stand", robot="ours_allcollisions",
                      seconds=8.0, start="FOLD"))
     cells.append(Cfg("stand_hold", "sitstand", policy="stand", robot="ours_allcollisions",
-                     seconds=8.0, start="STAND"))
+                     seconds=8.0, start="STAND", save_traj=True))
     # self-collision census on the all-collisions model while walking
     cells.append(Cfg("walk_allcollisions", "selfcollision", robot="ours_allcollisions", vx=0.25, seconds=12.0,
                      note="the walk on the model that has EVERY body's collision geom enabled"))
