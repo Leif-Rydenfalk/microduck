@@ -10,6 +10,14 @@
   "subsector": "tof_sensor",
   "lifecycle": "unknown",
   "origin": "vendor",
-  "origin_why": "every electrical figure was read off ST's own PDF (DS14161 Rev 12, July 2025), fetched 2026-09-02 from st.com, sha256 in iterations/v0.0.1/PROVENANCE.json"
+  "origin_why": "every electrical figure was read off ST's own PDF (DS14161 Rev 12, July 2025), fetched 2026-09-02 from st.com, sha256 in iterations/v0.0.1/PROVENANCE.json",
+  "which_generation_ships": {
+   "verdict": "BOTH. This is not an open question with one answer — Pollen's own driver says the two are interchangeable and are decided at runtime, and that ducks in the field carry both. Closed 2026-09-02 (lane C).",
+   "the_source_verbatim": "research/raw/tof_src_lib.rs:1-11, Pollen's own crate documentation: 'A VL53L5CX or VL53L8CX on the HAT's I2C bus — the same `i2c3` bus the audio codec sits on ... **Both generations, decided at runtime.** The two are interchangeable on the board and differ only in firmware and a driver prefix, so which one is fitted is not a build-time choice: an ID read picks the driver before any firmware is uploaded ([`Generation`]). Ducks in the field have both.' The crate vendors BOTH of ST's Ultra Lite Drivers verbatim and compiles one per generation (same file, 'Why the C is vendored').",
+   "so_the_bom_line_is": "'VL53L5CX or VL53L8CX, 8x8 multizone ToF, I2C 0x29 (0x52 on units reprogrammed in the prototype era), via the HAT's Stemma J5' — two alternates, both first-class, neither a substitute for the other.",
+   "the_electrical_consequence_this_forces": "THE TWO PARTS DO NOT SHARE AN IO VOLTAGE. The L5CX supports a 3.3 V IOVDD configuration (DS13754 Rev 13 Table 12 p.17: 'IOVDD supply | 3.3 V configuration | 3.0 | 3.3 | 3.6'); the L8CX DOES NOT — its IOVDD configurations are 1.2 V and 1.8 V only and its absolute maximum IOVDD is 1.98 V (DS14161 Rev 12 Tables 11 and 12, p.20). The HAT's I2C3 is a 3.3 V RK3566 bus with a 10 kOhm pull-up pair (R12/R13, docs/ELECTRONICS-AND-SOFTWARE.md §11). A socket that must accept EITHER part therefore CANNOT present 3.3 V to the sensor: the breakout must carry its own regulator and level shift, or the pull-ups must go to 1.8 V. That is now a DERIVED REQUIREMENT on the ToF module, not a speculation — it follows from Pollen supporting both generations on one connector.",
+   "what_is_still_cannot_determine": "WHICH BREAKOUT. Pollen names none. It must be a Stemma-QT/Qwiic-compatible 4-pin JST-SH 1.0 mm board carrying regulation and level shifting (see above); ST's own SATEL-VL53L8 and the Adafruit/SparkFun boards are the candidates and no board page was fetched to confirm any of them here. A teardown photo, or Pollen naming the module, settles it.",
+   "sibling": "part:vl53l5cx carries the identical block."
+  }
  }
 }

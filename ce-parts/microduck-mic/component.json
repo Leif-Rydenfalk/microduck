@@ -3,13 +3,29 @@
  "kind": "part",
  "record": {
   "slug": "microduck-mic",
-  "title": "microduck-mic",
+  "title": "Microduck head microphone — ONE mono analog capsule on the TLV320AIC3104's MIC2R/LINE2R pin 16, right ADC PGA; part number, transducer type and physical position CANNOT DETERMINE",
   "verdict": "CANNOT DETERMINE",
-  "why": "Part number, type (electret vs MEMS), count ('mic(s)'), position and connector: CANNOT DETERMINE (docs §12 item 11). There is no mesh for it in the MJCF, so the wiring lane has no position to measure a cable to.",
+  "why": "PART NUMBER, TRANSDUCER TYPE, PHYSICAL POSITION AND CONNECTOR: still CANNOT DETERMINE — no source names them and no mesh for the mic exists in the MJCF, so the wiring lane still has no point to measure a cable to (wiring/CABLES.md cable 19 `mic-hat`, length CANNOT DETERMINE). WHAT WAS SETTLED 2026-09-02 (lane C), and it is most of what a schematic needs: see record.codec_input_resolved. In short — the mic is ONE mono ANALOG capsule wired to codec pin 16, MIC2R/LINE2R, into the right ADC PGA. That rules out every digital microphone: a PDM or I2S MEMS part cannot connect to an analog PGA input.",
   "sector": "electronics",
   "subsector": null,
   "lifecycle": "unknown",
   "origin": "inferred",
-  "origin_why": "No vendor document describes this board; the record is what Pollen's published source and device tree let one say (docs/ELECTRONICS-AND-SOFTWARE.md)."
+  "origin_why": "No vendor document describes the fitted capsule. What IS sourced is the codec end of the link: TI's own datasheet for the pin, and the Linux driver source for why the control is named Mic3R. Both are in record.codec_input_resolved.evidence.",
+  "codec_input_resolved": {
+   "$about": "Resolving the community teardown's 'Mic3R' against the TLV320AIC3104's own pin list, which has no MIC3 pin at all.",
+   "the_puzzle": "The community teardown says the mic is on 'Mic3R (mono, right PGA); every other input is switched off' (research/raw/community/replica_hardware-teardown.en.md:325). But `pdftotext` over TI's own SLAS510G (ce-parts/tlv320aic3104/datasheet.pdf, 'SLAS510G - MARCH 2007 - REVISED FEBRUARY 2021', 103 pages) finds ZERO occurrences of 'MIC3' or 'Mic3'. The AIC3104's 32-pin VQFN has MIC1L/R, MIC2L/R, LINE1L/R, LINE2L/R and no MIC3.",
+   "the_answer": "'Mic3R' is an ALSA MIXER CONTROL NAME, not a pin. The Linux driver sound/soc/codecs/tlv320aic3x.c carries TWO control sets over the SAME registers and the SAME bit shifts: the generic set names them 'Mic3L Switch'/'Mic3R Switch' (lines 595-596, 604-605) and the AIC3104-specific set names the identical registers and shifts 'Mic2L Switch'/'Mic2R Switch' (lines 612-613, 620-621). Pollen's overlay DELIBERATELY selects the generic set — aic3104-i2c3.dts:45-51 verbatim: 'Same generic \"ti,tlv320aic3x\" compatible (not \"ti,tlv320aic3104\") so the driver exposes the identical mixer-control set on both boards and aic3104-init.sh works unchanged.' So the robot's amixer says Mic3R while the silicon pin is MIC2R.",
+   "the_pin": "TLV320AIC3104 pin 16. SLAS510G Table 7-1 Pin Functions p.5-6 verbatim: 'MIC2R/LINE2R | 16 | I | Right input 2 (SE)'. The register behind the control is Table 10-24 'Page 0, Register 18: MIC2/LINE2 to Right-ADC Control Register', whose D3-D0 field is verbatim 'MIC2R/LINE2R Input Level Control for Right-ADC PGA Mix' with '1111: MIC2R/LINE2R is not connected to the right-ADC PGA' as the reset state.",
+   "what_this_rules_out": "Any DIGITAL microphone. MIC2R/LINE2R is a single-ended ANALOG input to a programmable-gain amplifier; a PDM or I2S MEMS microphone has no analog output and cannot be wired here. The fitted part is an analog capsule — an electret condenser, or a MEMS part with an analog output.",
+   "count": "ONE mono channel is connected. Pollen's store listing says 'Microphones' plural (research/raw/store_microduck.json) and the community teardown says every other codec input is switched off. Both can be true if two capsules are paralleled or summed into one input, but electrically the design captures ONE mono channel — and `robotd.toml [audio]` captures from '<device>,0'.",
+   "micbias": "The codec has a MICBIAS pin (15, SLAS510G Table 7-1). Whether the HAT uses it — which an electret capsule needs and an analog MEMS part does not — is CANNOT DETERMINE: no amixer state or HAT schematic is published.",
+   "evidence": [
+    "docs/linux-sound-soc-codecs-tlv320aic3x.c — sha256 ef2909bd10f0854ac5061b8d1c0410c911498377d234931a9e180edfb51e7e9f, 1870 lines, fetched 2026-09-02 from raw.githubusercontent.com/torvalds/linux/master/sound/soc/codecs/tlv320aic3x.c (HTTP 200, 63694 bytes)",
+    "ce-parts/tlv320aic3104/datasheet.pdf (SLAS510G Rev G, Feb 2021) Table 7-1 p.5-6 and Table 10-24",
+    "research/raw/deploy_audio_aic3104-i2c3.dts:45-51 — Pollen's own reason for the generic compatible",
+    "research/raw/community/replica_hardware-teardown.en.md:325"
+   ],
+   "what_settles_the_rest": "A teardown photo of the head showing the capsule and its lead, `amixer -c aic3104 contents` from a production robot (which would show whether MICBIAS is on and what PGA gain is set), or Pollen naming the part."
+  }
  }
 }

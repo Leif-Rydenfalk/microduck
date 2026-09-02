@@ -5,11 +5,24 @@
   "slug": "microduck-imu-to-dxl",
   "title": "microduck-imu-to-dxl",
   "verdict": "CANNOT DETERMINE",
-  "why": "Connector count on the board is CANNOT DETERMINE. It matters: an XL330 has exactly two bus connectors, so a linear daisy chain can only branch at a device with three or more — the wiring lane puts the head/left-leg/right-leg branch at this board and says so.",
+  "why": "Connector count on the board is CANNOT DETERMINE — and the reason this folder previously gave for why it matters was itself wrong; see record.connector_count. Pollen has published no photograph, schematic or BOM of this board.",
   "sector": "electronics",
   "subsector": null,
   "lifecycle": "unknown",
   "origin": "inferred",
-  "origin_why": "No vendor document describes this board; the record is what Pollen's published source and device tree let one say (docs/ELECTRONICS-AND-SOFTWARE.md)."
+  "origin_why": "No vendor document describes this board; the record is what Pollen's published source and device tree let one say (docs/ELECTRONICS-AND-SOFTWARE.md).",
+  "connector_count": {
+   "verdict": "CANNOT DETERMINE",
+   "correction_2026_09_02": "This folder used to argue: 'an XL330 has exactly two bus connectors, so a linear daisy chain can only branch at a device with three or more — the wiring lane puts the head/left-leg/right-leg branch at this board.' The premise is true and the conclusion does not follow. A DYNAMIXEL TTL bus is MULTIDROP: every node hangs off one three-wire net, so the harness may branch at a Y-splice, a splitter, or a second port on the controller — no device needs three connectors for the bus to fork.",
+   "lineage_evidence": "Open Duck Mini v2, the design the Microduck descends from, does exactly that. Its published wiring diagram (images/open_duck_mini/wiring_v2.png) shows the motor control board — a Waveshare Bus Servo Adapter (A), research/open_duck_mini_v2_bom.csv row 'Servo control board' — with TWO servo-bus ports: one feeds the neck chain, the other feeds a T that splits to the left and right legs. The branch is in the harness, not in a three-port device.",
+   "so_the_options_are": [
+    "A: imu_to_dxl carries 3 bus connectors and is the branch point (what wiring/cables.json assumes: cable 6 in from id30, cables 7 and 12 out to id20 and id10).",
+    "B: imu_to_dxl carries 2 connectors and the legs fork at a Y-splice or splitter beside it. Electrically identical; the assembly gains one part.",
+    "C: imu_to_dxl carries 2 connectors and the bus is a single linear chain with no fork at all — the chain would have to run down one leg to the ankle and back up to the other hip."
+   ],
+   "which_the_evidence_best_supports": "A or B, and they are indistinguishable without a photograph. C is the one the measurement rules out as a design choice: the return leg id24 -> id10 is 105.7 mm STRAIGHT LINE in Pollen's own frame (wiring/cables.json endpoints id24 -y [-21.78, 43.15, 47.5] and id10 -y [-3.0, -7.5, 138.35]), and a real route must cross the left knee and the three left-hip joints, whose combined span at the wiring lane's own 10 mm/rad slack rule adds roughly 87 mm — call it 200 mm of extra 21 AWG on top of the 1615 mm the harness already carries, threaded through four moving joints. It also moves the right leg's five servos from 5 hops behind the branch to 11, deepening their supply drop for no gain.",
+   "what_settles_it": "One photograph of the board — a trunk with the shells off. Pollen has published none; the community teardown (research/raw/community/replica_hardware-teardown.en.md §3) reconstructs the board's FUNCTION from the runtime and states its physical form as unpublished.",
+   "consequence_if_wrong": "Only the assembly BOM: option B adds one Y-splitter and one short lead. No net changes, no length changes worth re-cutting, and wiring/CABLES.md's 22 cables stay correct as a NET LIST either way."
+  }
  }
 }
