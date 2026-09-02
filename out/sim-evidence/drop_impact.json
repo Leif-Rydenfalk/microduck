@@ -1,0 +1,420 @@
+{
+ "study": "drop_impact",
+ "generated": "2026-09-02",
+ "script": "sim/drop_impact.py",
+ "inputs": {
+  "mass_kg": 0.737243,
+  "mass_source": "loads_mujoco.json model.mass_kg_from_mjcf_inertials (sum of robot_walk.xml <inertial> masses)",
+  "height_m": 0.25,
+  "g_m_s2": 9.81,
+  "materials": {
+   "TPU_table": {
+    "E_MPa": 26.0,
+    "nu": 0.48,
+    "source": "ce-cad/cecad/fits.py MATERIALS['TPU'] youngs 0.026 GPa (class tier); nu 0.48 cecad.materials.poisson_for('TPU')"
+   },
+   "TPU_tds": {
+    "E_MPa": 12.0,
+    "nu": 0.48,
+    "source": "research/tds/ninjaflex-tds.pdf: Tensile Modulus ASTM D638 12 MPa (NinjaFlex 85A)"
+   },
+   "PLA_table": {
+    "E_MPa": 3500.0,
+    "nu": 0.36,
+    "source": "ce-cad/cecad/fits.py MATERIALS['PLA'] youngs 3.5 GPa (class tier); nu 0.36 cecad.materials.poisson_for('PLA')"
+   },
+   "PLA_tds": {
+    "E_MPa": 2300.0,
+    "nu": 0.36,
+    "source": "research/tds/prusament-pla-tds-2021-10-en.pdf: Tensile Modulus ISO 527-1 2.3 +- 0.1 GPa (printed, horizontal)"
+   }
+  },
+  "sole": {
+   "heel_arc_R_mm": 7.204,
+   "floor_t_mm": 2.0,
+   "floor_A_mm2": 2219.4,
+   "source": "ce-parts/microduck-sole-left/current/cad/part.py: heel arc R 7.204 c (36.653,-24.036) (out/measure/foot/fit_floor.py); FLOOR_T 2.0; bbox 41.1 x 54"
+  },
+  "head_shell": {
+   "mesh": "ce-parts/microduck-top-head-shell/current/geometry/top_head_shell.stl",
+   "dome_axis": "z",
+   "apex_mm": [
+    -0.0002,
+    -64.1494,
+    46.3348
+   ],
+   "intervals_along_axis_at_apex_mm": [
+    [
+     43.632,
+     46.335
+    ]
+   ],
+   "apex_wall_thickness_mm": 2.703,
+   "local_dome_radius_mm": 9.945,
+   "sphere_fit_rms_mm": 1.8425,
+   "cap_points": 914,
+   "how": "cecad.meshslice.intervals along the dome axis through the apex vertex (outer-most interval = the shell wall); algebraic least-squares sphere on the vertices within 12 mm (in plan) and 6 mm (in height) of the apex"
+  },
+  "mujoco_default_contact": {
+   "solref": [
+    0.02,
+    1.0
+   ],
+   "solimp_dmax": 0.95,
+   "equivalent_stiffness_N_per_m": 1940.1,
+   "note": "k = m/(dmax tc^2 dampratio^2): the default contact is ~14871x softer than the TPU floor"
+  }
+ },
+ "method": "energy E = m g h; A rigid-on-spring F = v sqrt(K m); B Hertz energy balance with bottoming-out check; C MuJoCo runs (sim/measure_loads.py)",
+ "outputs": {
+  "energy_J": 1.80809,
+  "impact_speed_m_s": 2.21472,
+  "momentum_Ns": 1.63279,
+  "model_A_rigid_spring": {
+   "foot_rigid_on_tpu_floor_table": {
+    "K_N_per_m": 28852200.0,
+    "F_peak_N": 10214.43
+   },
+   "foot_rigid_on_tpu_floor_tds": {
+    "K_N_per_m": 13316400.0,
+    "F_peak_N": 6939.34
+   },
+   "head_rigid_on_pla_patch_table": {
+    "K_N_per_m": 25897151.3,
+    "F_peak_N": 9677.22,
+    "patch_mm2_ASSUMED": 20.0
+   }
+  },
+  "model_B_hertz": {
+   "foot_heel_arc_tpu_table": {
+    "E_star_MPa": 33.784,
+    "R_mm": 7.204,
+    "delta_mm": 4.2569,
+    "F_peak_N": 1061.87,
+    "wall_mm": 2.0,
+    "bottoms_out": true,
+    "note": "indentation exceeds the wall \u2014 the Hertz half-space does not hold, the load goes into the structure behind (foot ribs / shell bending); F is then a LOWER bound of the rigid-body impact"
+   },
+   "foot_heel_arc_tpu_tds": {
+    "E_star_MPa": 15.593,
+    "R_mm": 7.204,
+    "delta_mm": 5.7997,
+    "F_peak_N": 779.39,
+    "wall_mm": 2.0,
+    "bottoms_out": true,
+    "note": "indentation exceeds the wall \u2014 the Hertz half-space does not hold, the load goes into the structure behind (foot ribs / shell bending); F is then a LOWER bound of the rigid-body impact"
+   },
+   "head_dome_pla_table": {
+    "verdict": "CANNOT DETERMINE",
+    "why": "the head shell is not spherical at its apex: least-squares sphere on the cap misses by 1.843 mm rms (> 0.3 mm), so no Hertz radius exists to use; what settles it: the head's true apex curvature from the graded head model (lane A)",
+    "fitted_R_mm_unusable": 9.945,
+    "wall_mm": 2.703
+   },
+   "head_dome_pla_tds": {
+    "verdict": "CANNOT DETERMINE",
+    "why": "the head shell is not spherical at its apex: least-squares sphere on the cap misses by 1.843 mm rms (> 0.3 mm), so no Hertz radius exists to use; what settles it: the head's true apex curvature from the graded head model (lane A)",
+    "fitted_R_mm_unusable": 9.945,
+    "wall_mm": 2.703
+   }
+  },
+  "model_C_mujoco": {
+   "drop_foot_rollm10_default_contact_dt5ms": {
+    "peak_normal_force_N": 127.3483,
+    "peak_over_bodyweight": 17.608,
+    "impulse_Ns": 2.05735,
+    "timestep_s": 0.005,
+    "solref": "model default (MuJoCo 0.02 s, dampratio 1)",
+    "struck": "left_foot_collision",
+    "time_to_peak_after_contact_s": 0.0,
+    "peak_knee_torque_Nm": 0.1633,
+    "knee_saturated_steps": 0,
+    "body_forces_N": {
+     "trunk_base": 2.1637,
+     "yaw2roll": 104.3481,
+     "hip_l": 108.397,
+     "upper_leg_left": 109.4988,
+     "leg": 118.816,
+     "ankle_left": 123.0436,
+     "bearing_roll": 19.9292,
+     "hip_l_2": 17.5788,
+     "upper_leg_right": 17.9945,
+     "leg_2": 21.5012,
+     "ankle_right": 23.1171,
+     "neck": 48.8808,
+     "neck_pitch": 42.5028,
+     "yaw_roll_motion": 41.4935,
+     "jaw_soft": 32.8599
+    }
+   },
+   "drop_foot_rollm10_default_contact_dt50us": {
+    "peak_normal_force_N": 126.2629,
+    "peak_over_bodyweight": 17.458,
+    "impulse_Ns": 2.12863,
+    "timestep_s": 5e-05,
+    "solref": "model default (MuJoCo 0.02 s, dampratio 1)",
+    "struck": "left_foot_collision",
+    "time_to_peak_after_contact_s": 0.00045,
+    "peak_knee_torque_Nm": 0.16004,
+    "knee_saturated_steps": 0,
+    "body_forces_N": {
+     "trunk_base": 0.0204,
+     "yaw2roll": 103.5303,
+     "hip_l": 107.5353,
+     "upper_leg_left": 108.626,
+     "leg": 117.8291,
+     "ankle_left": 121.9702,
+     "bearing_roll": 19.7315,
+     "hip_l_2": 18.3823,
+     "upper_leg_right": 19.0731,
+     "leg_2": 24.7011,
+     "ankle_right": 27.3074,
+     "neck": 48.5743,
+     "neck_pitch": 42.2425,
+     "yaw_roll_motion": 41.2441,
+     "jaw_soft": 32.7059
+    }
+   },
+   "drop_foot_rollm10_stiff_tpu_whole_mass_dt50us": {
+    "peak_normal_force_N": 12762.6759,
+    "peak_over_bodyweight": 1764.664,
+    "impulse_Ns": 1.90264,
+    "timestep_s": 5e-05,
+    "solref": [
+     0.0001640038760410408,
+     1.0
+    ],
+    "struck": "left_foot_collision",
+    "time_to_peak_after_contact_s": 0.0,
+    "peak_knee_torque_Nm": 0.1886,
+    "knee_saturated_steps": 0,
+    "body_forces_N": {
+     "trunk_base": 2.4165,
+     "yaw2roll": 10433.6882,
+     "hip_l": 10837.9019,
+     "upper_leg_left": 10948.5811,
+     "leg": 11889.3168,
+     "ankle_left": 12311.3156,
+     "bearing_roll": 1968.8869,
+     "hip_l_2": 1582.3897,
+     "upper_leg_right": 1484.1472,
+     "leg_2": 1442.3492,
+     "ankle_right": 1504.4386,
+     "neck": 4907.2044,
+     "neck_pitch": 4269.3292,
+     "yaw_roll_motion": 4168.1653,
+     "jaw_soft": 3302.2747
+    }
+   },
+   "drop_foot_rollm10_stiff_tpu_foot_mass_dt50us": {
+    "peak_normal_force_N": 21207.5358,
+    "peak_over_bodyweight": 2932.314,
+    "impulse_Ns": 1.85824,
+    "timestep_s": 5e-05,
+    "solref": [
+     4.3392178299634206e-05,
+     1.0
+    ],
+    "struck": "left_foot_collision",
+    "time_to_peak_after_contact_s": 0.0,
+    "peak_knee_torque_Nm": 0.19629,
+    "knee_saturated_steps": 0,
+    "body_forces_N": {
+     "trunk_base": 4.0155,
+     "yaw2roll": 17337.4878,
+     "hip_l": 18009.1637,
+     "upper_leg_left": 18193.0777,
+     "leg": 19756.2868,
+     "ankle_left": 20457.5169,
+     "bearing_roll": 3271.6648,
+     "hip_l_2": 2629.4277,
+     "upper_leg_right": 2466.1794,
+     "leg_2": 2603.3493,
+     "ankle_right": 2713.5299,
+     "neck": 8154.2162,
+     "neck_pitch": 7094.2688,
+     "yaw_roll_motion": 6926.1663,
+     "jaw_soft": 5487.3307
+    }
+   },
+   "drop_foot_upright_default_contact_dt5ms": {
+    "peak_normal_force_N": 81.0818,
+    "peak_over_bodyweight": 11.211,
+    "impulse_Ns": 1.79279,
+    "timestep_s": 0.005,
+    "solref": "model default (MuJoCo 0.02 s, dampratio 1)",
+    "struck": "right_foot_collision",
+    "time_to_peak_after_contact_s": 0.0,
+    "peak_knee_torque_Nm": 0.09785,
+    "knee_saturated_steps": 0,
+    "body_forces_N": {
+     "trunk_base": 0.9043,
+     "yaw2roll": 55.8411,
+     "hip_l": 60.5237,
+     "upper_leg_left": 61.7884,
+     "leg": 72.0948,
+     "ankle_left": 76.8587,
+     "bearing_roll": 55.9117,
+     "hip_l_2": 60.595,
+     "upper_leg_right": 61.8598,
+     "leg_2": 72.1676,
+     "ankle_right": 76.9319,
+     "neck": 59.1132,
+     "neck_pitch": 51.2472,
+     "yaw_roll_motion": 50.0296,
+     "jaw_soft": 39.6768
+    }
+   },
+   "drop_foot_upright_stiff_tpu_whole_mass_dt50us": {
+    "peak_normal_force_N": 9388.6769,
+    "peak_over_bodyweight": 1298.149,
+    "impulse_Ns": 1.80272,
+    "timestep_s": 5e-05,
+    "solref": [
+     0.0001640038760410408,
+     1.0
+    ],
+    "struck": "right_foot_collision",
+    "time_to_peak_after_contact_s": 0.0,
+    "peak_knee_torque_Nm": 0.10299,
+    "knee_saturated_steps": 0,
+    "body_forces_N": {
+     "trunk_base": 1.0418,
+     "yaw2roll": 6402.0211,
+     "hip_l": 6946.9144,
+     "upper_leg_left": 7094.3639,
+     "leg": 8300.496,
+     "ankle_left": 8856.1286,
+     "bearing_roll": 6409.5663,
+     "hip_l_2": 6954.535,
+     "upper_leg_right": 7101.9976,
+     "leg_2": 8308.2302,
+     "ankle_right": 8863.8959,
+     "neck": 6818.8968,
+     "neck_pitch": 5910.0113,
+     "yaw_roll_motion": 5769.1616,
+     "jaw_soft": 4572.1742
+    }
+   },
+   "drop_head_default_contact_dt5ms": {
+    "peak_normal_force_N": 95.2495,
+    "peak_over_bodyweight": 13.17,
+    "impulse_Ns": 2.96798,
+    "timestep_s": 0.005,
+    "solref": "model default (MuJoCo 0.02 s, dampratio 1)",
+    "struck": "mesh:top_head_shell",
+    "time_to_peak_after_contact_s": 0.01,
+    "peak_knee_torque_Nm": 0.03437,
+    "knee_saturated_steps": 0,
+    "body_forces_N": {
+     "trunk_base": 3.2352,
+     "yaw2roll": 20.012,
+     "hip_l": 16.3484,
+     "upper_leg_left": 15.3885,
+     "leg": 8.0484,
+     "ankle_left": 4.6656,
+     "bearing_roll": 19.8119,
+     "hip_l_2": 16.1589,
+     "upper_leg_right": 15.2048,
+     "leg_2": 7.9701,
+     "ankle_right": 4.6221,
+     "neck": 63.208,
+     "neck_pitch": 68.6158,
+     "yaw_roll_motion": 69.4526,
+     "jaw_soft": 75.8051
+    }
+   },
+   "drop_head_default_contact_dt50us": {
+    "peak_normal_force_N": 109.229,
+    "peak_over_bodyweight": 15.103,
+    "impulse_Ns": 3.02199,
+    "timestep_s": 5e-05,
+    "solref": "model default (MuJoCo 0.02 s, dampratio 1)",
+    "struck": "mesh:top_head_shell",
+    "time_to_peak_after_contact_s": 0.0115,
+    "peak_knee_torque_Nm": 0.03608,
+    "knee_saturated_steps": 0,
+    "body_forces_N": {
+     "trunk_base": 0.0344,
+     "yaw2roll": 19.377,
+     "hip_l": 15.7332,
+     "upper_leg_left": 14.7746,
+     "leg": 7.8336,
+     "ankle_left": 4.6761,
+     "bearing_roll": 19.3422,
+     "hip_l_2": 15.7018,
+     "upper_leg_right": 14.7448,
+     "leg_2": 7.8777,
+     "ankle_right": 4.7032,
+     "neck": 70.2645,
+     "neck_pitch": 76.1762,
+     "yaw_roll_motion": 77.0607,
+     "jaw_soft": 83.7722
+    }
+   },
+   "drop_head_stiff_pla_dt50us": {
+    "peak_normal_force_N": 18713.6574,
+    "peak_over_bodyweight": 2587.491,
+    "impulse_Ns": 2.55095,
+    "timestep_s": 5e-05,
+    "solref": [
+     0.00011534139036281411,
+     1.0
+    ],
+    "struck": "mesh:top_head_shell",
+    "time_to_peak_after_contact_s": 0.0,
+    "peak_knee_torque_Nm": 0.03772,
+    "knee_saturated_steps": 0,
+    "body_forces_N": {
+     "trunk_base": 6.6835,
+     "yaw2roll": 3804.1972,
+     "hip_l": 3148.8807,
+     "upper_leg_left": 2971.9751,
+     "leg": 1552.4008,
+     "ankle_left": 903.7638,
+     "bearing_roll": 3522.2686,
+     "hip_l_2": 2859.5104,
+     "upper_leg_right": 2685.1186,
+     "leg_2": 1364.7495,
+     "ankle_right": 977.9263,
+     "neck": 12731.2929,
+     "neck_pitch": 13795.5753,
+     "yaw_roll_motion": 13952.7462,
+     "jaw_soft": 15131.4528
+    }
+   }
+  },
+  "joint_torque_cap": {
+   "knee_angle_default_pose_rad": -0.004939999897032976,
+   "knee_angle_deg": -0.283,
+   "actuator_forcerange_Nm": "chosen_actuator: position kp 0.55, forcerange +-0.96 N m (robot_walk.xml lines 44-46)",
+   "finding": "the DEFAULT_POSE knee is 0.283 deg from straight, so a landing load passes through the shin and thigh almost axially; the 0.96 N m torque limit bounds only the transverse component and cannot cap the axial impact force \u2014 the structure sees whatever the contact compliance lets through"
+  },
+  "cross_check_A_vs_C_stiff": {
+   "analytic_F_N": 10214.43,
+   "mujoco_stiff_F_N": 12762.6759,
+   "ratio": 0.8003,
+   "note": "same K in both; MuJoCo adds critical damping (dampratio 1), which raises the peak above the undamped v sqrt(Km)"
+  },
+  "bracket_foot_N": {
+   "lower_mujoco_default": 127.3483,
+   "hertz_heel_tds": 779.39,
+   "hertz_heel_table": 1061.87,
+   "upper_rigid_tds": 6939.34,
+   "upper_rigid_table": 10214.43
+  },
+  "bracket_head_N": {
+   "lower_mujoco_default": 95.2495,
+   "hertz_dome_tds": null,
+   "hertz_dome_table": null,
+   "upper_rigid_table": 9677.22
+  }
+ },
+ "verdict": "CANNOT DETERMINE",
+ "why": "the peak force of a 0.250 m fall spans 127 N (MuJoCo's default, deliberately soft contact, ~14871x softer than the TPU floor) to 10214 N (rigid robot on the TPU floor stiffness); the Hertz heel-arc model gives 779-1062 N but indents 5.8-4.3 mm, past the 2.000 mm sole floor, so the sole bottoms out onto the PLA foot ribs and the real peak sits between the Hertz and rigid figures. The structural studies use the MuJoCo default-contact peak (127.348 N) as the STATED LOWER BOUND and report each part's linear failure load beside it. What settles it: one instrumented drop (accelerometer on the trunk, or a force plate under the foot) of a printed unit from 0.250 m.",
+ "what_settles_it": "instrumented 0.250 m drop of a printed unit: trunk accelerometer (>= 5 kHz) or a force plate; the peak force and its duration",
+ "artifacts": [
+  "out/sim-evidence/loads_mujoco.json",
+  "out/sim-evidence/loads_mujoco.npz"
+ ],
+ "looked_at": []
+}
