@@ -5,25 +5,29 @@
   "mjcf": "sim/microduck_ours.xml",
   "meshdir": "reference/pollen-microduck-rl/assets (MJCF compiler meshdir; metres, scaled x1000 to mm here). The swapped `*__ours` meshes resolve through the same <asset> table to sim/meshes_ours/.",
   "placements_cross_check": "spec/mesh-placements.json",
-  "voxel_step_mm": 1.5
+  "voxel_step_mm": [
+   1.0,
+   1.5
+  ],
+  "voxel_step_env": "1.5,1.0"
  },
- "method": "ENCLOSED by a 3-axis enclosure test on a 1.5 mm voxel grid (the shell union must have material on both sides along x AND y AND z). OCCUPIED by a per-mesh ray-parity point-in-solid test on the same grid, OR-ed. FREE AIR = enclosed AND NOT occupied, so a content that pokes out through the shell (the beak, the jaw, a servo barrel) is not counted rather than subtracted twice. Mesh solid volumes also computed exactly by signed tetrahedra as an independent check on the voxel occupancy.",
+ "method": "ENCLOSED by a 3-axis enclosure test on a 1.5 mm voxel grid (the shell union must have material on both sides along x AND y AND z). OCCUPIED by a per-mesh ray-parity point-in-solid test on the same grid, OR-ed. FREE AIR = enclosed AND NOT occupied, so a content that pokes out through the shell (the beak, the jaw, a servo barrel) is not counted rather than subtracted twice. Mesh solid volumes also computed exactly by signed tetrahedra as an independent check on the voxel occupancy -- and that check is now REPORTED per mesh (voxel_occupancy_crosscheck), not merely computed. Where more than one voxel step was run the finest is the reported answer and the coarser ones are the grid_convergence table.",
  "outputs": {
   "cavities": {
    "head": {
     "body": "jaw_soft",
     "why_these_meshes": "top_head_shell + bottom_head_shell are the two printed halves that close the head. Every other geom of body jaw_soft is either inside them (the two PCBs, the speaker, the head-roll and jaw XL330s, the motor support, the lens and its holder) or bolted through them (the face, eye ring, jaw and soft mouth).",
-    "voxel_step_mm": 1.5,
+    "voxel_step_mm": 1.0,
     "grid": [
-     40,
-     61,
-     82
+     59,
+     92,
+     123
     ],
     "shell_meshes": [
      "top_head_shell",
      "bottom_head_shell"
     ],
-    "shell_bbox_mm": {
+    "body_bbox_mm": {
      "min": [
       -17.4477,
       -45.8815,
@@ -38,111 +42,270 @@
       59.2824,
       91.763,
       122.69
-     ]
+     ],
+     "basis": "the bbox of EVERY geom of body jaw_soft -- the same union the enclosure test uses, and NOT the two shell halves alone. It was mislabelled 'shell_bbox_mm' in the first version of this study, which made the JSON contradict the shell_meshes list and shell_solid_volume_exact_mm3 printed beside it."
+    },
+    "shell_meshes_bbox_mm": {
+     "min": [
+      -16.9363,
+      -45.8815,
+      -84.19
+     ],
+     "max": [
+      41.8348,
+      45.8816,
+      38.5
+     ],
+     "size": [
+      58.771,
+      91.763,
+      122.69
+     ],
+     "basis": "the bbox of the two named shell halves ONLY (top_head_shell, bottom_head_shell)"
     },
     "shell_triangle_area_mm2": 63664.57,
     "shell_outer_area_estimate_mm2": 31832.28,
     "shell_outer_area_basis": "the two printed shell halves are thin walls, so their triangle area counts the inner face, the outer face and the edges. Half the triangle area is the outer skin to within the edge strip.",
-    "enclosure_hull_area_voxel_mm2": 57447.0,
-    "enclosure_hull_area_basis": "staircase area of the voxel enclosure boundary at 1.50 mm; it OVERSTATES a curved surface by up to ~4/pi and is reported as the upper bracket on the skin area.",
+    "enclosure_hull_area_voxel_mm2": 57702.0,
+    "enclosure_hull_area_basis": "staircase area of the voxel enclosure boundary at 1.00 mm; it OVERSTATES a curved surface by up to ~4/pi and is reported as the upper bracket on the skin area.",
     "shell_solid_volume_exact_mm3": 53669.46,
-    "enclosed_volume_mm3": 341026.88,
-    "enclosed_volume_cm3": 341.0269,
-    "contents_inside_shell_mm3": 94584.38,
-    "free_air_volume_mm3": 194170.5,
-    "free_air_volume_cm3": 194.1705,
-    "free_air_fraction_of_enclosed": 0.5694,
+    "enclosed_volume_mm3": 340843.0,
+    "enclosed_volume_cm3": 340.843,
+    "contents_inside_shell_mm3": 94064.0,
+    "free_air_volume_mm3": 193055.0,
+    "free_air_volume_cm3": 193.055,
+    "free_air_fraction_of_enclosed": 0.5664,
+    "free_air_volume_corrected_mm3": 193055.0,
+    "free_air_volume_corrected_cm3": 193.055,
+    "free_air_correction_basis": "free_air_volume_mm3 OVERSTATES the void by at least 0.000 mm3 (0.000 %): the exact solid volume of every mesh the 1.00 mm grid scored as zero voxels. The corrected figure subtracts it. It is a LOWER-BOUND correction -- a mesh the grid partly missed is not corrected here.",
+    "voxel_occupancy_crosscheck": {
+     "verdict": "CANNOT DETERMINE",
+     "meshes_that_did_not_agree": [
+      {
+       "mesh": "face_part",
+       "verdict": "DISAGREES",
+       "exact_volume_mm3": 5824.178,
+       "voxel_volume_mm3": 4915.0,
+       "why": "the voxel occupancy is 84.4 % of the exact solid volume (-15.6 %). OVER 100 %: the mesh is an open or thin SHELL, so the ray-parity test fills its whole interior while the tetrahedron sum measures only the shell's own material. UNDER 100 %: the 1.00 mm grid is too coarse for the feature.",
+       "thinner_than_voxel": null
+      },
+      {
+       "mesh": "elec_rpi_robot_hat_pcb",
+       "verdict": "DISAGREES",
+       "exact_volume_mm3": 1569.234,
+       "voxel_volume_mm3": 1871.0,
+       "why": "the voxel occupancy is 119.2 % of the exact solid volume (+19.2 %). OVER 100 %: the mesh is an open or thin SHELL, so the ray-parity test fills its whole interior while the tetrahedron sum measures only the shell's own material. UNDER 100 %: the 1.00 mm grid is too coarse for the feature.",
+       "thinner_than_voxel": null
+      },
+      {
+       "mesh": "soft_mouth_top",
+       "verdict": "DISAGREES",
+       "exact_volume_mm3": 2699.58,
+       "voxel_volume_mm3": 1364.0,
+       "why": "the voxel occupancy is 50.5 % of the exact solid volume (-49.5 %). OVER 100 %: the mesh is an open or thin SHELL, so the ray-parity test fills its whole interior while the tetrahedron sum measures only the shell's own material. UNDER 100 %: the 1.00 mm grid is too coarse for the feature.",
+       "thinner_than_voxel": null
+      },
+      {
+       "mesh": "pcb__raspberry_pi_zero_2_w",
+       "verdict": "DISAGREES",
+       "exact_volume_mm3": 3018.389,
+       "voxel_volume_mm3": 3776.0,
+       "why": "the voxel occupancy is 125.1 % of the exact solid volume (+25.1 %). OVER 100 %: the mesh is an open or thin SHELL, so the ray-parity test fills its whole interior while the tetrahedron sum measures only the shell's own material. UNDER 100 %: the 1.00 mm grid is too coarse for the feature.",
+       "thinner_than_voxel": null
+      }
+     ],
+     "n_meshes": 15,
+     "n_disagreeing": 4,
+     "solid_volume_invisible_to_the_grid_mm3": 0.0,
+     "why": "each mesh's exact signed-tetrahedron volume is compared with the volume the voxel grid gives it. Meshes listed here disagree by more than 10 %, and this study reports them instead of computing the check and discarding it. A voxel step of 1.00 mm cannot see a plate thinner than 1.00 mm, and an open shell mesh is filled by the ray-parity test.",
+     "what_settles_it": "re-run at a finer step -- F3_VOXEL_MM=0.75 -- and watch the enclosed and free-air volumes converge; the convergence block records what a refinement changed."
+    },
     "per_mesh": {
      "lens": {
       "count": 1,
       "exact_volume_mm3": 2803.026,
-      "voxel_volume_mm3": 2743.875,
-      "voxel_volume_inside_shell_mm3": 2743.875
+      "voxel_volume_mm3": 2799.0,
+      "voxel_volume_inside_shell_mm3": 2799.0,
+      "voxel_over_exact": 0.9986,
+      "disagreement_pct": -0.14,
+      "voxel_vs_exact_verdict": "AGREES",
+      "voxel_vs_exact_why": "within 10 % of the exact solid volume"
      },
      "face_part": {
       "count": 1,
       "exact_volume_mm3": 5824.178,
-      "voxel_volume_mm3": 6422.625,
-      "voxel_volume_inside_shell_mm3": 6422.625
+      "voxel_volume_mm3": 4915.0,
+      "voxel_volume_inside_shell_mm3": 4915.0,
+      "voxel_over_exact": 0.8439,
+      "disagreement_pct": -15.61,
+      "voxel_vs_exact_verdict": "DISAGREES",
+      "voxel_vs_exact_why": "the voxel occupancy is 84.4 % of the exact solid volume (-15.6 %). OVER 100 %: the mesh is an open or thin SHELL, so the ray-parity test fills its whole interior while the tetrahedron sum measures only the shell's own material. UNDER 100 %: the 1.00 mm grid is too coarse for the feature."
      },
      "xl330": {
       "count": 2,
       "exact_volume_mm3": 31352.076,
-      "voxel_volume_mm3": 29703.375,
-      "voxel_volume_inside_shell_mm3": 29703.375
+      "voxel_volume_mm3": 31502.0,
+      "voxel_volume_inside_shell_mm3": 31502.0,
+      "voxel_over_exact": 1.0048,
+      "disagreement_pct": 0.48,
+      "voxel_vs_exact_verdict": "AGREES",
+      "voxel_vs_exact_why": "within 10 % of the exact solid volume"
      },
      "jaw_soft": {
       "count": 1,
       "exact_volume_mm3": 18601.208,
-      "voxel_volume_mm3": 20013.75,
-      "voxel_volume_inside_shell_mm3": 20013.75
+      "voxel_volume_mm3": 18650.0,
+      "voxel_volume_inside_shell_mm3": 18650.0,
+      "voxel_over_exact": 1.0026,
+      "disagreement_pct": 0.26,
+      "voxel_vs_exact_verdict": "AGREES",
+      "voxel_vs_exact_why": "within 10 % of the exact solid volume"
      },
      "motor_support": {
       "count": 1,
       "exact_volume_mm3": 7515.135,
-      "voxel_volume_mm3": 7094.25,
-      "voxel_volume_inside_shell_mm3": 7094.25
+      "voxel_volume_mm3": 7986.0,
+      "voxel_volume_inside_shell_mm3": 7986.0,
+      "voxel_over_exact": 1.0627,
+      "disagreement_pct": 6.27,
+      "voxel_vs_exact_verdict": "AGREES",
+      "voxel_vs_exact_why": "within 10 % of the exact solid volume"
      },
      "top_head_shell": {
       "count": 1,
       "exact_volume_mm3": 29873.171,
-      "voxel_volume_mm3": 29835.0,
-      "voxel_volume_inside_shell_mm3": 29835.0
+      "voxel_volume_mm3": 30016.0,
+      "voxel_volume_inside_shell_mm3": 30016.0,
+      "voxel_over_exact": 1.0048,
+      "disagreement_pct": 0.48,
+      "voxel_vs_exact_verdict": "AGREES",
+      "voxel_vs_exact_why": "within 10 % of the exact solid volume"
      },
      "seeed_bearing__configuration_default": {
       "count": 1,
       "exact_volume_mm3": 189.476,
-      "voxel_volume_mm3": 195.75,
-      "voxel_volume_inside_shell_mm3": 195.75
+      "voxel_volume_mm3": 192.0,
+      "voxel_volume_inside_shell_mm3": 192.0,
+      "voxel_over_exact": 1.0133,
+      "disagreement_pct": 1.33,
+      "voxel_vs_exact_verdict": "AGREES",
+      "voxel_vs_exact_why": "within 10 % of the exact solid volume"
      },
      "elec_rpi_robot_hat_pcb": {
       "count": 1,
       "exact_volume_mm3": 1569.234,
-      "voxel_volume_mm3": 0.0,
-      "voxel_volume_inside_shell_mm3": 0.0
+      "voxel_volume_mm3": 1871.0,
+      "voxel_volume_inside_shell_mm3": 1871.0,
+      "voxel_over_exact": 1.1923,
+      "disagreement_pct": 19.23,
+      "voxel_vs_exact_verdict": "DISAGREES",
+      "voxel_vs_exact_why": "the voxel occupancy is 119.2 % of the exact solid volume (+19.2 %). OVER 100 %: the mesh is an open or thin SHELL, so the ray-parity test fills its whole interior while the tetrahedron sum measures only the shell's own material. UNDER 100 %: the 1.00 mm grid is too coarse for the feature."
      },
      "soft_mouth_top": {
       "count": 1,
       "exact_volume_mm3": 2699.58,
-      "voxel_volume_mm3": 4357.125,
-      "voxel_volume_inside_shell_mm3": 4357.125
+      "voxel_volume_mm3": 1364.0,
+      "voxel_volume_inside_shell_mm3": 1364.0,
+      "voxel_over_exact": 0.5053,
+      "disagreement_pct": -49.47,
+      "voxel_vs_exact_verdict": "DISAGREES",
+      "voxel_vs_exact_why": "the voxel occupancy is 50.5 % of the exact solid volume (-49.5 %). OVER 100 %: the mesh is an open or thin SHELL, so the ray-parity test fills its whole interior while the tetrahedron sum measures only the shell's own material. UNDER 100 %: the 1.00 mm grid is too coarse for the feature."
      },
      "noenoeil": {
       "count": 1,
       "exact_volume_mm3": 4250.218,
-      "voxel_volume_mm3": 3958.875,
-      "voxel_volume_inside_shell_mm3": 3958.875
+      "voxel_volume_mm3": 4299.0,
+      "voxel_volume_inside_shell_mm3": 4299.0,
+      "voxel_over_exact": 1.0115,
+      "disagreement_pct": 1.15,
+      "voxel_vs_exact_verdict": "AGREES",
+      "voxel_vs_exact_why": "within 10 % of the exact solid volume"
      },
      "jaw": {
       "count": 1,
       "exact_volume_mm3": 9360.108,
-      "voxel_volume_mm3": 9709.875,
-      "voxel_volume_inside_shell_mm3": 9709.875
+      "voxel_volume_mm3": 9412.0,
+      "voxel_volume_inside_shell_mm3": 9412.0,
+      "voxel_over_exact": 1.0055,
+      "disagreement_pct": 0.55,
+      "voxel_vs_exact_verdict": "AGREES",
+      "voxel_vs_exact_why": "within 10 % of the exact solid volume"
      },
      "bottom_head_shell": {
       "count": 1,
       "exact_volume_mm3": 23796.287,
-      "voxel_volume_mm3": 23287.5,
-      "voxel_volume_inside_shell_mm3": 23287.5
+      "voxel_volume_mm3": 25089.0,
+      "voxel_volume_inside_shell_mm3": 25089.0,
+      "voxel_over_exact": 1.0543,
+      "disagreement_pct": 5.43,
+      "voxel_vs_exact_verdict": "AGREES",
+      "voxel_vs_exact_why": "within 10 % of the exact solid volume"
      },
      "m12_lens_holder": {
       "count": 1,
       "exact_volume_mm3": 1097.725,
-      "voxel_volume_mm3": 1123.875,
-      "voxel_volume_inside_shell_mm3": 1123.875
+      "voxel_volume_mm3": 1173.0,
+      "voxel_volume_inside_shell_mm3": 1173.0,
+      "voxel_over_exact": 1.0686,
+      "disagreement_pct": 6.86,
+      "voxel_vs_exact_verdict": "AGREES",
+      "voxel_vs_exact_why": "within 10 % of the exact solid volume"
      },
      "pcb__raspberry_pi_zero_2_w": {
       "count": 1,
       "exact_volume_mm3": 3018.389,
-      "voxel_volume_mm3": 2781.0,
-      "voxel_volume_inside_shell_mm3": 2781.0
+      "voxel_volume_mm3": 3776.0,
+      "voxel_volume_inside_shell_mm3": 3776.0,
+      "voxel_over_exact": 1.251,
+      "disagreement_pct": 25.1,
+      "voxel_vs_exact_verdict": "DISAGREES",
+      "voxel_vs_exact_why": "the voxel occupancy is 125.1 % of the exact solid volume (+25.1 %). OVER 100 %: the mesh is an open or thin SHELL, so the ray-parity test fills its whole interior while the tetrahedron sum measures only the shell's own material. UNDER 100 %: the 1.00 mm grid is too coarse for the feature."
      },
      "speaker": {
       "count": 1,
       "exact_volume_mm3": 6125.0,
-      "voxel_volume_mm3": 6480.0,
-      "voxel_volume_inside_shell_mm3": 6480.0
+      "voxel_volume_mm3": 6125.0,
+      "voxel_volume_inside_shell_mm3": 6125.0,
+      "voxel_over_exact": 1.0,
+      "disagreement_pct": -0.0,
+      "voxel_vs_exact_verdict": "AGREES",
+      "voxel_vs_exact_why": "within 10 % of the exact solid volume"
      }
+    },
+    "grid_convergence": {
+     "rows": [
+      {
+       "voxel_step_mm": 1.5,
+       "grid": [
+        40,
+        61,
+        82
+       ],
+       "enclosed_volume_cm3": 341.0269,
+       "free_air_volume_cm3": 194.1705,
+       "free_air_volume_corrected_cm3": 192.6013,
+       "n_meshes_disagreeing": 3,
+       "solid_invisible_to_grid_mm3": 1569.234
+      },
+      {
+       "voxel_step_mm": 1.0,
+       "grid": [
+        59,
+        92,
+        123
+       ],
+       "enclosed_volume_cm3": 340.843,
+       "free_air_volume_cm3": 193.055,
+       "free_air_volume_corrected_cm3": 193.055,
+       "n_meshes_disagreeing": 4,
+       "solid_invisible_to_grid_mm3": 0.0
+      }
+     ],
+     "reported_step_mm": 1.0,
+     "enclosed_change_pct": -0.054,
+     "free_air_change_pct": -0.574,
+     "verdict": "PASS",
+     "why": "the same cavity measured at 1.50 mm and 1.00 mm. A free-air volume that moves less than 5 % between them is converged for this study's purpose (an air thermal capacitance and a void fraction); one that moves more is not, and says so."
     }
    },
    "trunk": {
@@ -158,7 +321,7 @@
      "left_shell",
      "right_shell"
     ],
-    "shell_bbox_mm": {
+    "body_bbox_mm": {
      "min": [
       -46.8329,
       -32.2645,
@@ -173,7 +336,26 @@
       81.3329,
       64.029,
       85.7339
-     ]
+     ],
+     "basis": "the bbox of EVERY geom of body trunk_base -- the same union the enclosure test uses, and NOT the two shell halves alone. It was mislabelled 'shell_bbox_mm' in the first version of this study, which made the JSON contradict the shell_meshes list and shell_solid_volume_exact_mm3 printed beside it."
+    },
+    "shell_meshes_bbox_mm": {
+     "min": [
+      -46.3979,
+      -32.2645,
+      0.2573
+     ],
+     "max": [
+      34.5,
+      31.7645,
+      42.0264
+     ],
+     "size": [
+      80.8979,
+      64.029,
+      41.769
+     ],
+     "basis": "the bbox of the two named shell halves ONLY (left_shell, right_shell)"
     },
     "shell_triangle_area_mm2": 22877.01,
     "shell_outer_area_estimate_mm2": 11438.51,
@@ -187,54 +369,123 @@
     "free_air_volume_mm3": 36709.88,
     "free_air_volume_cm3": 36.7099,
     "free_air_fraction_of_enclosed": 0.2388,
+    "free_air_volume_corrected_mm3": 36709.88,
+    "free_air_volume_corrected_cm3": 36.7099,
+    "free_air_correction_basis": "free_air_volume_mm3 OVERSTATES the void by at least 0.000 mm3 (0.000 %): the exact solid volume of every mesh the 1.50 mm grid scored as zero voxels. The corrected figure subtracts it. It is a LOWER-BOUND correction -- a mesh the grid partly missed is not corrected here.",
+    "voxel_occupancy_crosscheck": {
+     "verdict": "CANNOT DETERMINE",
+     "meshes_that_did_not_agree": [
+      {
+       "mesh": "seeed_bearing__configuration__22x16x4",
+       "verdict": "DISAGREES",
+       "exact_volume_mm3": 985.951,
+       "voxel_volume_mm3": 759.375,
+       "why": "the voxel occupancy is 77.0 % of the exact solid volume (-23.0 %). OVER 100 %: the mesh is an open or thin SHELL, so the ray-parity test fills its whole interior while the tetrahedron sum measures only the shell's own material. UNDER 100 %: the 1.50 mm grid is too coarse for the feature.",
+       "thinner_than_voxel": null
+      },
+      {
+       "mesh": "trunk_base__ours",
+       "verdict": "DISAGREES",
+       "exact_volume_mm3": 1414.602,
+       "voxel_volume_mm3": 2102.625,
+       "why": "the voxel occupancy is 148.6 % of the exact solid volume (+48.6 %). OVER 100 %: the mesh is an open or thin SHELL, so the ray-parity test fills its whole interior while the tetrahedron sum measures only the shell's own material. UNDER 100 %: the 1.50 mm grid is too coarse for the feature.",
+       "thinner_than_voxel": null
+      },
+      {
+       "mesh": "power_support__ours",
+       "verdict": "DISAGREES",
+       "exact_volume_mm3": 10780.719,
+       "voxel_volume_mm3": 8974.125,
+       "why": "the voxel occupancy is 83.2 % of the exact solid volume (-16.8 %). OVER 100 %: the mesh is an open or thin SHELL, so the ray-parity test fills its whole interior while the tetrahedron sum measures only the shell's own material. UNDER 100 %: the 1.50 mm grid is too coarse for the feature.",
+       "thinner_than_voxel": null
+      }
+     ],
+     "n_meshes": 8,
+     "n_disagreeing": 3,
+     "solid_volume_invisible_to_the_grid_mm3": 0.0,
+     "why": "each mesh's exact signed-tetrahedron volume is compared with the volume the voxel grid gives it. Meshes listed here disagree by more than 10 %, and this study reports them instead of computing the check and discarding it. A voxel step of 1.50 mm cannot see a plate thinner than 1.50 mm, and an open shell mesh is filled by the ray-parity test.",
+     "what_settles_it": "re-run at a finer step -- F3_VOXEL_MM=0.75 -- and watch the enclosed and free-air volumes converge; the convergence block records what a refinement changed."
+    },
     "per_mesh": {
      "seeed_bearing__configuration__22x16x4": {
       "count": 2,
       "exact_volume_mm3": 985.951,
       "voxel_volume_mm3": 759.375,
-      "voxel_volume_inside_shell_mm3": 759.375
+      "voxel_volume_inside_shell_mm3": 759.375,
+      "voxel_over_exact": 0.7702,
+      "disagreement_pct": -22.98,
+      "voxel_vs_exact_verdict": "DISAGREES",
+      "voxel_vs_exact_why": "the voxel occupancy is 77.0 % of the exact solid volume (-23.0 %). OVER 100 %: the mesh is an open or thin SHELL, so the ray-parity test fills its whole interior while the tetrahedron sum measures only the shell's own material. UNDER 100 %: the 1.50 mm grid is too coarse for the feature."
      },
      "right_shell": {
       "count": 1,
       "exact_volume_mm3": 11216.907,
       "voxel_volume_mm3": 11869.875,
-      "voxel_volume_inside_shell_mm3": 11869.875
+      "voxel_volume_inside_shell_mm3": 11869.875,
+      "voxel_over_exact": 1.0582,
+      "disagreement_pct": 5.82,
+      "voxel_vs_exact_verdict": "AGREES",
+      "voxel_vs_exact_why": "within 10 % of the exact solid volume"
      },
      "banana_pcb_locker__ours": {
       "count": 1,
       "exact_volume_mm3": 457.917,
       "voxel_volume_mm3": 482.625,
-      "voxel_volume_inside_shell_mm3": 482.625
+      "voxel_volume_inside_shell_mm3": 482.625,
+      "voxel_over_exact": 1.054,
+      "disagreement_pct": 5.4,
+      "voxel_vs_exact_verdict": "AGREES",
+      "voxel_vs_exact_why": "within 10 % of the exact solid volume"
      },
      "trunk_base__ours": {
       "count": 1,
       "exact_volume_mm3": 1414.602,
       "voxel_volume_mm3": 2102.625,
-      "voxel_volume_inside_shell_mm3": 2102.625
+      "voxel_volume_inside_shell_mm3": 2102.625,
+      "voxel_over_exact": 1.4864,
+      "disagreement_pct": 48.64,
+      "voxel_vs_exact_verdict": "DISAGREES",
+      "voxel_vs_exact_why": "the voxel occupancy is 148.6 % of the exact solid volume (+48.6 %). OVER 100 %: the mesh is an open or thin SHELL, so the ray-parity test fills its whole interior while the tetrahedron sum measures only the shell's own material. UNDER 100 %: the 1.50 mm grid is too coarse for the feature."
      },
      "xl330": {
       "count": 2,
       "exact_volume_mm3": 31352.076,
       "voxel_volume_mm3": 31633.875,
-      "voxel_volume_inside_shell_mm3": 31633.875
+      "voxel_volume_inside_shell_mm3": 31633.875,
+      "voxel_over_exact": 1.009,
+      "disagreement_pct": 0.9,
+      "voxel_vs_exact_verdict": "AGREES",
+      "voxel_vs_exact_why": "within 10 % of the exact solid volume"
      },
      "power_support__ours": {
       "count": 1,
       "exact_volume_mm3": 10780.719,
       "voxel_volume_mm3": 8974.125,
-      "voxel_volume_inside_shell_mm3": 8974.125
+      "voxel_volume_inside_shell_mm3": 8974.125,
+      "voxel_over_exact": 0.8324,
+      "disagreement_pct": -16.76,
+      "voxel_vs_exact_verdict": "DISAGREES",
+      "voxel_vs_exact_why": "the voxel occupancy is 83.2 % of the exact solid volume (-16.8 %). OVER 100 %: the mesh is an open or thin SHELL, so the ray-parity test fills its whole interior while the tetrahedron sum measures only the shell's own material. UNDER 100 %: the 1.50 mm grid is too coarse for the feature."
      },
      "np_f970": {
       "count": 1,
       "exact_volume_mm3": 51555.515,
       "voxel_volume_mm3": 50419.125,
-      "voxel_volume_inside_shell_mm3": 50419.125
+      "voxel_volume_inside_shell_mm3": 50419.125,
+      "voxel_over_exact": 0.978,
+      "disagreement_pct": -2.2,
+      "voxel_vs_exact_verdict": "AGREES",
+      "voxel_vs_exact_why": "within 10 % of the exact solid volume"
      },
      "left_shell": {
       "count": 1,
       "exact_volume_mm3": 11388.333,
       "voxel_volume_mm3": 10766.25,
-      "voxel_volume_inside_shell_mm3": 10766.25
+      "voxel_volume_inside_shell_mm3": 10766.25,
+      "voxel_over_exact": 0.9454,
+      "disagreement_pct": -5.46,
+      "voxel_vs_exact_verdict": "AGREES",
+      "voxel_vs_exact_why": "within 10 % of the exact solid volume"
      }
     }
    }
@@ -243,7 +494,7 @@
   "compute_board_evidence": "sim/microduck_ours.xml body 'jaw_soft' carries <geom type=\"mesh\" class=\"visual\" pos=\"0.015435 -1.13778e-05 -0.06001\" ... mesh=\"pcb__raspberry_pi_zero_2_w\"> and <geom ... pos=\"0.02694 0.0289936 -0.0519\" mesh=\"elec_rpi_robot_hat_pcb\">; spec/mesh-placements.json lists both under body 'jaw_soft'. Body 'trunk_base' carries no compute geom at all -- its only PCB-ish geom is banana_pcb_locker__ours, the battery-contact retainer."
  },
  "verdict": "PASS",
- "why": "HEAD: 341.027 cm3 enclosed by the two head shells, 194.171 cm3 of it free air (56.9 % void), outer skin 31832.3 mm2. TRUNK: 153.701 cm3 enclosed, 36.710 cm3 free air (23.9 % void), outer skin 11438.5 mm2. The compute board is a geom of body jaw_soft, so the compute thermal study is a HEAD study -- the lane brief's 'inside the closed trunk' is contradicted by the model and corrected here.",
+ "why": "HEAD: 340.843 cm3 enclosed by the two head shells, 193.055 cm3 of it free air (56.6 % void), outer skin 31832.3 mm2. TRUNK: 153.701 cm3 enclosed, 36.710 cm3 free air (23.9 % void), outer skin 11438.5 mm2. The compute board is a geom of body jaw_soft, so the compute thermal study is a HEAD study -- the lane brief's 'inside the closed trunk' is contradicted by the model and corrected here.",
  "script": "sim/cavity_measure.py",
  "artifacts": [
   "out/sim-evidence/cavity-volumes.json"

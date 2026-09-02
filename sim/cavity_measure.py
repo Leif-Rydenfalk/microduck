@@ -245,6 +245,51 @@ def measure(name, spec, step, root, assets):
         rec["exact_volume_mm3"] += mesh_volume_mm3(T)
         rec["voxel_volume_mm3"] += float(occ.sum()) * vox
         rec["voxel_volume_inside_shell_mm3"] += float((occ & enclosed).sum()) * vox
+    # THE CROSS-CHECK, REPORTED.  The method text calls the exact
+    # signed-tetrahedron volumes "an independent cross-check on the voxel
+    # occupancy".  A cross-check that is computed and not compared is not a
+    # check, so every mesh is now graded against its own exact volume and the
+    # disagreements are named.  Two failure modes are separated:
+    #   * voxel << exact: the feature is thinner than the voxel step and the
+    #     grid misses it (the Robot HAT PCB is 0.84 mm thick on a 1.5 mm grid).
+    #   * voxel >> exact: the mesh is an open/thin SHELL, so the ray-parity
+    #     test fills its whole interior while the tetrahedron sum measures only
+    #     the shell's own material.
+    crosscheck = []
+    missed_solid_mm3 = 0.0
+    for mesh_name, rec in per_mesh.items():
+        ex, vo = rec["exact_volume_mm3"], rec["voxel_volume_mm3"]
+        thin = None
+        if ex > 0:
+            ratio = vo / ex
+            rec["voxel_over_exact"] = round(ratio, 4)
+            rec["disagreement_pct"] = round(100.0 * (ratio - 1.0), 2)
+            if vo == 0.0:
+                grade, why = "INVISIBLE AT THIS VOXEL STEP", (
+                    "the ray-parity test samples voxel CENTRES; a feature thinner "
+                    "than %.2f mm can lie entirely between two sample planes and "
+                    "score zero. Its exact volume is %.3f mm3." % (step, ex))
+                missed_solid_mm3 += ex
+                thin = True
+            elif abs(ratio - 1.0) > 0.10:
+                grade = "DISAGREES"
+                why = ("the voxel occupancy is %.1f %% of the exact solid volume "
+                       "(%+.1f %%). OVER 100 %%: the mesh is an open or thin SHELL, "
+                       "so the ray-parity test fills its whole interior while the "
+                       "tetrahedron sum measures only the shell's own material. "
+                       "UNDER 100 %%: the %.2f mm grid is too coarse for the feature."
+                       % (100.0 * ratio, 100.0 * (ratio - 1.0), step))
+            else:
+                grade, why = "AGREES", "within 10 % of the exact solid volume"
+        else:
+            grade, why = "CANNOT DETERMINE", "exact volume is zero (degenerate mesh)"
+        rec["voxel_vs_exact_verdict"] = grade
+        rec["voxel_vs_exact_why"] = why
+        if grade != "AGREES":
+            crosscheck.append({"mesh": mesh_name, "verdict": grade,
+                               "exact_volume_mm3": round(ex, 3),
+                               "voxel_volume_mm3": round(vo, 3),
+                               "why": why, "thinner_than_voxel": thin})
     for rec in per_mesh.values():
         for k in list(rec):
             if k.endswith("_mm3"):
@@ -262,18 +307,35 @@ def measure(name, spec, step, root, assets):
     hull_area = faces * step * step
     shell_area = sum(mesh_area_mm2(t) for t in shell_T)
     shell_solid = sum(mesh_volume_mm3(t) for t in shell_T)
+    shell_pts = np.concatenate([t.reshape(-1, 3) for t in shell_T], axis=0)
+    shell_mn, shell_mx = shell_pts.min(axis=0), shell_pts.max(axis=0)
     contents_in = sum(v["voxel_volume_inside_shell_mm3"] for k, v in per_mesh.items()
                       if k not in shell_names)
 
+    # free air, corrected for the contents the grid could not see at all
+    free_corrected = free_mm3 - missed_solid_mm3
     return {
         "body": spec["body"],
         "why_these_meshes": spec["why"],
         "voxel_step_mm": step,
         "grid": [len(xs), len(ys), len(zs)],
         "shell_meshes": shell_names,
-        "shell_bbox_mm": {"min": [round(float(v), 4) for v in mn],
-                          "max": [round(float(v), 4) for v in mx],
-                          "size": [round(float(b - a), 4) for a, b in zip(mn, mx)]},
+        "body_bbox_mm": {"min": [round(float(v), 4) for v in mn],
+                         "max": [round(float(v), 4) for v in mx],
+                         "size": [round(float(b - a), 4) for a, b in zip(mn, mx)],
+                         "basis": ("the bbox of EVERY geom of body %s -- the same "
+                                   "union the enclosure test uses, and NOT the two "
+                                   "shell halves alone. It was mislabelled "
+                                   "'shell_bbox_mm' in the first version of this "
+                                   "study, which made the JSON contradict the "
+                                   "shell_meshes list and shell_solid_volume_exact_mm3 "
+                                   "printed beside it." % spec["body"])},
+        "shell_meshes_bbox_mm": {
+            "min": [round(float(v), 4) for v in shell_mn],
+            "max": [round(float(v), 4) for v in shell_mx],
+            "size": [round(float(b - a), 4) for a, b in zip(shell_mn, shell_mx)],
+            "basis": "the bbox of the two named shell halves ONLY (%s)"
+                     % ", ".join(shell_names)},
         "shell_triangle_area_mm2": round(shell_area, 2),
         "shell_outer_area_estimate_mm2": round(shell_area / 2.0, 2),
         "shell_outer_area_basis": ("the two printed shell halves are thin walls, so "
@@ -292,23 +354,91 @@ def measure(name, spec, step, root, assets):
         "free_air_volume_mm3": round(free_mm3, 2),
         "free_air_volume_cm3": round(free_mm3 / 1000.0, 4),
         "free_air_fraction_of_enclosed": round(free_mm3 / enclosed_mm3, 4),
+        "free_air_volume_corrected_mm3": round(free_corrected, 2),
+        "free_air_volume_corrected_cm3": round(free_corrected / 1000.0, 4),
+        "free_air_correction_basis": (
+            "free_air_volume_mm3 OVERSTATES the void by at least %.3f mm3 (%.3f %%): "
+            "the exact solid volume of every mesh the %.2f mm grid scored as zero "
+            "voxels. The corrected figure subtracts it. It is a LOWER-BOUND "
+            "correction -- a mesh the grid partly missed is not corrected here."
+            % (missed_solid_mm3, 100.0 * missed_solid_mm3 / max(free_mm3, 1e-9), step)),
+        "voxel_occupancy_crosscheck": {
+            "verdict": "CANNOT DETERMINE" if crosscheck else "PASS",
+            "meshes_that_did_not_agree": crosscheck,
+            "n_meshes": len(per_mesh),
+            "n_disagreeing": len(crosscheck),
+            "solid_volume_invisible_to_the_grid_mm3": round(missed_solid_mm3, 3),
+            "why": ("each mesh's exact signed-tetrahedron volume is compared with the "
+                    "volume the voxel grid gives it. Meshes listed here disagree by "
+                    "more than 10 %%, and this study reports them instead of "
+                    "computing the check and discarding it. A voxel step of %.2f mm "
+                    "cannot see a plate thinner than %.2f mm, and an open shell mesh "
+                    "is filled by the ray-parity test." % (step, step)),
+            "what_settles_it": ("re-run at a finer step -- F3_VOXEL_MM=0.75 -- and "
+                               "watch the enclosed and free-air volumes converge; the "
+                               "convergence block records what a refinement changed."),
+        },
         "per_mesh": per_mesh,
     }
 
 
 def main():
-    step = float(os.environ.get("F3_VOXEL_MM", "1.5"))
+    # A GRID-CONVERGENCE LIST, not a single step.  The voxel/exact cross-check
+    # fires at 1.5 mm (a 0.84 mm PCB is invisible to it), so the answer to "how
+    # wrong is the grid" is to refine it and watch the numbers move.  The
+    # FINEST step measured for a cavity is the reported one; the coarser ones
+    # become the convergence table beside it.
+    steps = [float(v) for v in
+             os.environ.get("F3_VOXEL_MM", "1.5").replace(",", " ").split()]
+    conv_cavities = [c for c in
+                     os.environ.get("F3_CONVERGE_CAVITIES", "head").split(",") if c]
     root = ET.parse(MJCF).getroot()
     assets = asset_table(root)
     res = {}
     for name, spec in CAVITIES.items():
-        res[name] = measure(name, spec, step, root, assets)
+        use = steps if (name in conv_cavities and len(steps) > 1) else steps[:1]
+        runs = []
+        for st in sorted(use, reverse=True):          # coarse first, fine last
+            runs.append(measure(name, spec, st, root, assets))
+            print("   %-6s step %.2f mm -> enclosed %.3f cm3  free %.3f cm3"
+                  % (name, st, runs[-1]["enclosed_volume_cm3"],
+                     runs[-1]["free_air_volume_cm3"]))
+        res[name] = runs[-1]                          # the finest run is the answer
+        if len(runs) > 1:
+            rows = [{"voxel_step_mm": r["voxel_step_mm"], "grid": r["grid"],
+                     "enclosed_volume_cm3": r["enclosed_volume_cm3"],
+                     "free_air_volume_cm3": r["free_air_volume_cm3"],
+                     "free_air_volume_corrected_cm3": r["free_air_volume_corrected_cm3"],
+                     "n_meshes_disagreeing": r["voxel_occupancy_crosscheck"]["n_disagreeing"],
+                     "solid_invisible_to_grid_mm3":
+                         r["voxel_occupancy_crosscheck"]["solid_volume_invisible_to_the_grid_mm3"]}
+                    for r in runs]
+            c0, c1 = rows[0], rows[-1]
+            res[name]["grid_convergence"] = {
+                "rows": rows,
+                "reported_step_mm": c1["voxel_step_mm"],
+                "enclosed_change_pct": round(
+                    100.0 * (c1["enclosed_volume_cm3"] - c0["enclosed_volume_cm3"])
+                    / c0["enclosed_volume_cm3"], 3),
+                "free_air_change_pct": round(
+                    100.0 * (c1["free_air_volume_cm3"] - c0["free_air_volume_cm3"])
+                    / c0["free_air_volume_cm3"], 3),
+                "verdict": ("PASS" if abs(c1["free_air_volume_cm3"] -
+                                          c0["free_air_volume_cm3"])
+                            / c0["free_air_volume_cm3"] < 0.05
+                            else "CANNOT DETERMINE"),
+                "why": ("the same cavity measured at %.2f mm and %.2f mm. A free-air "
+                        "volume that moves less than 5 %% between them is converged "
+                        "for this study's purpose (an air thermal capacitance and a "
+                        "void fraction); one that moves more is not, and says so."
+                        % (c0["voxel_step_mm"], c1["voxel_step_mm"])),
+            }
         r = res[name]
         print("%-6s enclosed %8.3f cm3  contents %8.3f cm3  FREE AIR %8.3f cm3  "
               "skin %8.1f mm2  bbox %s"
               % (name, r["enclosed_volume_cm3"], r["contents_inside_shell_mm3"] / 1000.0,
                  r["free_air_volume_cm3"], r["shell_outer_area_estimate_mm2"],
-                 r["shell_bbox_mm"]["size"]))
+                 r["body_bbox_mm"]["size"]))
 
     out = {
         "study": "cavity-volumes",
@@ -320,7 +450,8 @@ def main():
                        "metres, scaled x1000 to mm here). The swapped `*__ours` meshes "
                        "resolve through the same <asset> table to sim/meshes_ours/.",
             "placements_cross_check": "spec/mesh-placements.json",
-            "voxel_step_mm": step,
+            "voxel_step_mm": [r["voxel_step_mm"] for r in res.values()],
+            "voxel_step_env": os.environ.get("F3_VOXEL_MM", "1.5"),
         },
         "method": ("ENCLOSED by a 3-axis enclosure test on a %s mm voxel grid (the "
                    "shell union must have material on both sides along x AND y AND z). "
@@ -329,7 +460,11 @@ def main():
                    "that pokes out through the shell (the beak, the jaw, a servo "
                    "barrel) is not counted rather than subtracted twice. Mesh solid "
                    "volumes also computed exactly by signed tetrahedra as an "
-                   "independent check on the voxel occupancy." % step),
+                   "independent check on the voxel occupancy -- and that check is "
+                   "now REPORTED per mesh (voxel_occupancy_crosscheck), not merely "
+                   "computed. Where more than one voxel step was run the finest is "
+                   "the reported answer and the coarser ones are the "
+                   "grid_convergence table." % max(r["voxel_step_mm"] for r in res.values())),
         "outputs": {
             "cavities": res,
             "compute_board_body": "jaw_soft (the HEAD)",

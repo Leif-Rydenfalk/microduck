@@ -60,7 +60,14 @@ def main():
                                         "out/sim-evidence/thermal-servo-xl330.json")))
 
     # ---- the head as a heat-shedding body --------------------------------
-    size = head["shell_bbox_mm"]["size"]                 # mm
+    # body_bbox_mm: the bbox of EVERY geom of body jaw_soft, which is what the
+    # enclosure test hulls and therefore the right envelope for a skin-area /
+    # characteristic-length argument.  It was published as "shell_bbox_mm" in the
+    # first version and renamed after that key was found to contradict the
+    # shell_meshes list beside it; the two-shells-only bbox is now carried
+    # separately as shell_meshes_bbox_mm and is 0.5114 mm narrower in x.
+    size = head["body_bbox_mm"]["size"]                  # mm
+    shell_size = head["shell_meshes_bbox_mm"]["size"]    # mm, the two halves alone
     L_char = max(size) / 1000.0                          # m, the tallest dimension
     a_low = head["shell_outer_area_estimate_mm2"] / 1e6  # m2, half the shells' triangles
     a_high = head["enclosure_hull_area_voxel_mm2"] / 1e6  # m2, staircase upper bound
@@ -114,8 +121,13 @@ def main():
     (k30, nu30, pr30), _ = air(30.0)
     rho30 = 1.164                       # Cengel A-9 row 30 degC, kg/m3
     cp_air = 1007.0                     # same row, J/kgK
-    v_head_m3 = head["free_air_volume_cm3"] / 1e6
-    v_trunk_m3 = trunk["free_air_volume_cm3"] / 1e6
+    # the CORRECTED free air where the voxel grid's own cross-check says it
+    # missed solid material; smaller air volume = smaller capacitance = the
+    # conservative direction for a "the air is not a reservoir" argument.
+    v_head_m3 = head.get("free_air_volume_corrected_cm3",
+                         head["free_air_volume_cm3"]) / 1e6
+    v_trunk_m3 = trunk.get("free_air_volume_corrected_cm3",
+                           trunk["free_air_volume_cm3"]) / 1e6
     c_air_head = rho30 * v_head_m3 * cp_air
     c_air_trunk = rho30 * v_trunk_m3 * cp_air
 
@@ -134,8 +146,25 @@ def main():
             "enclosure_geometry": {
                 "source": "out/sim-evidence/cavity-volumes.json (sim/cavity_measure.py)",
                 "head_bbox_mm": size,
+                "head_bbox_basis": head["body_bbox_mm"]["basis"],
+                "head_shell_halves_bbox_mm": shell_size,
+                "head_shell_halves_bbox_basis": head["shell_meshes_bbox_mm"]["basis"],
+                "which_bbox_the_thermal_model_uses": (
+                    "body_bbox_mm. Only its LARGEST dimension enters the model, as "
+                    "the Churchill-Chu plate height L; that is z = %.3f mm on both "
+                    "bboxes, so this choice changes no temperature in this study. The "
+                    "two differ by %.4f mm in x and %.4f mm in y."
+                    % (max(size), abs(size[0] - shell_size[0]),
+                       abs(size[1] - shell_size[1]))),
                 "head_enclosed_volume_cm3": head["enclosed_volume_cm3"],
                 "head_free_air_volume_cm3": head["free_air_volume_cm3"],
+                "head_free_air_volume_corrected_cm3": head.get("free_air_volume_corrected_cm3"),
+                "head_free_air_correction_basis": head.get("free_air_correction_basis"),
+                "head_voxel_crosscheck_verdict":
+                    head.get("voxel_occupancy_crosscheck", {}).get("verdict"),
+                "head_voxel_crosscheck_why":
+                    head.get("voxel_occupancy_crosscheck", {}).get("why"),
+                "head_grid_convergence": head.get("grid_convergence"),
                 "head_free_air_fraction": head["free_air_fraction_of_enclosed"],
                 "head_outer_area_m2_low": round(a_low, 6),
                 "head_outer_area_m2_low_basis": head["shell_outer_area_basis"] +
@@ -310,6 +339,8 @@ def main():
         "artifacts": ["out/sim-evidence/thermal-compute-head.json"],
         "looked_at": [
             "out/sim-evidence/cavity-volumes.json",
+            "out/sim-evidence/cavity-volumes.json outputs.cavities.head.voxel_occupancy_crosscheck",
+            "out/sim-evidence/cavity-volumes.json outputs.cavities.head.grid_convergence",
             "out/sim-evidence/thermal-servo-xl330.json",
             "ce-parts/radxa-zero-3w/electrical.host.json",
             "ce-parts/np-f550/electrical.part.json",
@@ -323,6 +354,8 @@ def main():
         ],
     }
 
+    v_head_cm3 = head.get("free_air_volume_corrected_cm3",
+                          head["free_air_volume_cm3"])
     c25 = crit["Ta25C"]
     crit_lo = c25["area_low_shells_only_eps0_worstcooling"]      # smallest area, no radiation
     crit_hi = c25["area_high_voxel_hull_eps1_bestcooling"]       # largest area, black body
@@ -345,11 +378,12 @@ def main():
                     "videoflip pathology) while throttling to 408 MHz. Between that "
                     "die and a skin that the external solution puts in the high "
                     "twenties sits %.3f cm3 of still air (%.1f %% of the enclosed "
-                    "volume), with no vent, no fan and no heatsink anywhere in body "
+                    "volume, and the figure the voxel/exact cross-check corrects to), "
+                    "with no vent, no fan and no heatsink anywhere in body "
                     "jaw_soft. The whole trapped-air volume is a %.4f J/K reservoir "
                     "-- it buffers nothing and only resists. The design item is a "
                     "CONDUCTION PATH from the SoC to the shell, not more skin area."
-                    % (head["free_air_volume_cm3"],
+                    % (v_head_cm3,
                        100 * head["free_air_fraction_of_enclosed"], c_air_head)),
             "model": "CANNOT DETERMINE -- no theta_JA is published for the RK3566 and "
                      "the board's dissipation is unmeasured, so no internal resistance "
@@ -375,12 +409,12 @@ def main():
         "DETERMINE, so the internal leg is not modelled; it is measured, at 95 degC. "
         "The design item this study names is a conduction path from the SoC to the "
         "shell, not more skin."
-        % (head["enclosed_volume_cm3"], head["free_air_volume_cm3"],
+        % (head["enclosed_volume_cm3"], v_head_cm3,
            100 * head["free_air_fraction_of_enclosed"],
            head["shell_outer_area_estimate_mm2"], head["enclosure_hull_area_voxel_mm2"],
            skin_2W["area_high_voxel_hull"]["skin_temp_C_eps1_bestcooling"],
            skin_2W["area_low_shells_only"]["skin_temp_C_eps0_worstcooling"],
-           crit_lo, crit_hi, head["free_air_volume_cm3"], c_air_head))
+           crit_lo, crit_hi, v_head_cm3, c_air_head))
 
     path = os.path.join(REPO, "out/sim-evidence/thermal-compute-head.json")
     os.makedirs(os.path.dirname(path), exist_ok=True)

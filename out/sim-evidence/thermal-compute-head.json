@@ -14,13 +14,60 @@
     91.763,
     122.69
    ],
-   "head_enclosed_volume_cm3": 341.0269,
-   "head_free_air_volume_cm3": 194.1705,
-   "head_free_air_fraction": 0.5694,
+   "head_bbox_basis": "the bbox of EVERY geom of body jaw_soft -- the same union the enclosure test uses, and NOT the two shell halves alone. It was mislabelled 'shell_bbox_mm' in the first version of this study, which made the JSON contradict the shell_meshes list and shell_solid_volume_exact_mm3 printed beside it.",
+   "head_shell_halves_bbox_mm": [
+    58.771,
+    91.763,
+    122.69
+   ],
+   "head_shell_halves_bbox_basis": "the bbox of the two named shell halves ONLY (top_head_shell, bottom_head_shell)",
+   "which_bbox_the_thermal_model_uses": "body_bbox_mm. Only its LARGEST dimension enters the model, as the Churchill-Chu plate height L; that is z = 122.690 mm on both bboxes, so this choice changes no temperature in this study. The two differ by 0.5114 mm in x and 0.0000 mm in y.",
+   "head_enclosed_volume_cm3": 340.843,
+   "head_free_air_volume_cm3": 193.055,
+   "head_free_air_volume_corrected_cm3": 193.055,
+   "head_free_air_correction_basis": "free_air_volume_mm3 OVERSTATES the void by at least 0.000 mm3 (0.000 %): the exact solid volume of every mesh the 1.00 mm grid scored as zero voxels. The corrected figure subtracts it. It is a LOWER-BOUND correction -- a mesh the grid partly missed is not corrected here.",
+   "head_voxel_crosscheck_verdict": "CANNOT DETERMINE",
+   "head_voxel_crosscheck_why": "each mesh's exact signed-tetrahedron volume is compared with the volume the voxel grid gives it. Meshes listed here disagree by more than 10 %, and this study reports them instead of computing the check and discarding it. A voxel step of 1.00 mm cannot see a plate thinner than 1.00 mm, and an open shell mesh is filled by the ray-parity test.",
+   "head_grid_convergence": {
+    "rows": [
+     {
+      "voxel_step_mm": 1.5,
+      "grid": [
+       40,
+       61,
+       82
+      ],
+      "enclosed_volume_cm3": 341.0269,
+      "free_air_volume_cm3": 194.1705,
+      "free_air_volume_corrected_cm3": 192.6013,
+      "n_meshes_disagreeing": 3,
+      "solid_invisible_to_grid_mm3": 1569.234
+     },
+     {
+      "voxel_step_mm": 1.0,
+      "grid": [
+       59,
+       92,
+       123
+      ],
+      "enclosed_volume_cm3": 340.843,
+      "free_air_volume_cm3": 193.055,
+      "free_air_volume_corrected_cm3": 193.055,
+      "n_meshes_disagreeing": 4,
+      "solid_invisible_to_grid_mm3": 0.0
+     }
+    ],
+    "reported_step_mm": 1.0,
+    "enclosed_change_pct": -0.054,
+    "free_air_change_pct": -0.574,
+    "verdict": "PASS",
+    "why": "the same cavity measured at 1.50 mm and 1.00 mm. A free-air volume that moves less than 5 % between them is converged for this study's purpose (an air thermal capacitance and a void fraction); one that moves more is not, and says so."
+   },
+   "head_free_air_fraction": 0.5664,
    "head_outer_area_m2_low": 0.031832,
    "head_outer_area_m2_low_basis": "the two printed shell halves are thin walls, so their triangle area counts the inner face, the outer face and the edges. Half the triangle area is the outer skin to within the edge strip. It counts ONLY top_head_shell + bottom_head_shell, not the face, eye ring, jaw or soft mouth, so it UNDERSTATES the skin and therefore OVERSTATES every temperature below.",
-   "head_outer_area_m2_high": 0.057447,
-   "head_outer_area_m2_high_basis": "staircase area of the voxel enclosure boundary at 1.50 mm; it OVERSTATES a curved surface by up to ~4/pi and is reported as the upper bracket on the skin area.",
+   "head_outer_area_m2_high": 0.057702,
+   "head_outer_area_m2_high_basis": "staircase area of the voxel enclosure boundary at 1.00 mm; it OVERSTATES a curved surface by up to ~4/pi and is reported as the upper bracket on the skin area.",
    "trunk_enclosed_volume_cm3": 153.7009,
    "trunk_free_air_volume_cm3": 36.7099,
    "trunk_free_air_fraction": 0.2388,
@@ -148,13 +195,13 @@
      "Ra_L": 357800.0
     },
     "area_high_voxel_hull": {
-     "skin_temp_C_eps1_bestcooling": 21.0684,
-     "skin_temp_C_eps0_worstcooling": 22.8702,
-     "R_th_skin_to_ambient_K_W_eps1": 2.1368,
-     "R_th_skin_to_ambient_K_W_eps0": 5.7404,
-     "h_conv_W_m2K": 2.4011,
-     "h_rad_W_m2K_eps1": 5.7453,
-     "Ra_L": 208100.0
+     "skin_temp_C_eps1_bestcooling": 21.064,
+     "skin_temp_C_eps0_worstcooling": 22.8599,
+     "R_th_skin_to_ambient_K_W_eps1": 2.128,
+     "R_th_skin_to_ambient_K_W_eps0": 5.7198,
+     "h_conv_W_m2K": 2.3987,
+     "h_rad_W_m2K_eps1": 5.7452,
+     "Ra_L": 207300.0
     }
    },
    {
@@ -170,13 +217,13 @@
      "Ra_L": 667600.0
     },
     "area_high_voxel_hull": {
-     "skin_temp_C_eps1_bestcooling": 22.0317,
-     "skin_temp_C_eps0_worstcooling": 25.0253,
-     "R_th_skin_to_ambient_K_W_eps1": 2.0317,
-     "R_th_skin_to_ambient_K_W_eps0": 5.0253,
-     "h_conv_W_m2K": 2.7941,
-     "h_rad_W_m2K_eps1": 5.7737,
-     "Ra_L": 392800.0
+     "skin_temp_C_eps1_bestcooling": 22.0234,
+     "skin_temp_C_eps0_worstcooling": 25.0074,
+     "R_th_skin_to_ambient_K_W_eps1": 2.0234,
+     "R_th_skin_to_ambient_K_W_eps0": 5.0074,
+     "h_conv_W_m2K": 2.7914,
+     "h_rad_W_m2K_eps1": 5.7734,
+     "Ra_L": 391200.0
     }
    },
    {
@@ -192,13 +239,13 @@
      "Ra_L": 953400.0
     },
     "area_high_voxel_hull": {
-     "skin_temp_C_eps1_bestcooling": 22.9494,
-     "skin_temp_C_eps0_worstcooling": 26.9735,
-     "R_th_skin_to_ambient_K_W_eps1": 1.9663,
-     "R_th_skin_to_ambient_K_W_eps0": 4.649,
-     "h_conv_W_m2K": 3.0521,
-     "h_rad_W_m2K_eps1": 5.8008,
-     "Ra_L": 566100.0
+     "skin_temp_C_eps1_bestcooling": 22.9375,
+     "skin_temp_C_eps0_worstcooling": 26.9485,
+     "R_th_skin_to_ambient_K_W_eps1": 1.9583,
+     "R_th_skin_to_ambient_K_W_eps0": 4.6324,
+     "h_conv_W_m2K": 3.0492,
+     "h_rad_W_m2K_eps1": 5.8005,
+     "Ra_L": 563900.0
     }
    },
    {
@@ -214,13 +261,13 @@
      "Ra_L": 1222000.0
     },
     "area_high_voxel_hull": {
-     "skin_temp_C_eps1_bestcooling": 23.836,
-     "skin_temp_C_eps0_worstcooling": 28.7987,
-     "R_th_skin_to_ambient_K_W_eps1": 1.918,
-     "R_th_skin_to_ambient_K_W_eps0": 4.3993,
-     "h_conv_W_m2K": 3.2486,
-     "h_rad_W_m2K_eps1": 5.8272,
-     "Ra_L": 731200.0
+     "skin_temp_C_eps1_bestcooling": 23.8206,
+     "skin_temp_C_eps0_worstcooling": 28.7672,
+     "R_th_skin_to_ambient_K_W_eps1": 1.9103,
+     "R_th_skin_to_ambient_K_W_eps0": 4.3836,
+     "h_conv_W_m2K": 3.2455,
+     "h_rad_W_m2K_eps1": 5.8267,
+     "Ra_L": 728300.0
     }
    },
    {
@@ -236,13 +283,13 @@
      "Ra_L": 1717000.0
     },
     "area_high_voxel_hull": {
-     "skin_temp_C_eps1_bestcooling": 25.5417,
-     "skin_temp_C_eps0_worstcooling": 32.2122,
-     "R_th_skin_to_ambient_K_W_eps1": 1.8472,
-     "R_th_skin_to_ambient_K_W_eps0": 4.0707,
-     "h_conv_W_m2K": 3.5454,
-     "h_rad_W_m2K_eps1": 5.8781,
-     "Ra_L": 1042000.0
+     "skin_temp_C_eps1_bestcooling": 25.5196,
+     "skin_temp_C_eps0_worstcooling": 32.1685,
+     "R_th_skin_to_ambient_K_W_eps1": 1.8399,
+     "R_th_skin_to_ambient_K_W_eps0": 4.0562,
+     "h_conv_W_m2K": 3.542,
+     "h_rad_W_m2K_eps1": 5.8774,
+     "Ra_L": 1038000.0
     }
    },
    {
@@ -258,13 +305,13 @@
      "Ra_L": 2586000.0
     },
     "area_high_voxel_hull": {
-     "skin_temp_C_eps1_bestcooling": 28.7661,
-     "skin_temp_C_eps0_worstcooling": 38.4652,
-     "R_th_skin_to_ambient_K_W_eps1": 1.7532,
-     "R_th_skin_to_ambient_K_W_eps0": 3.693,
-     "h_conv_W_m2K": 3.9533,
-     "h_rad_W_m2K_eps1": 5.9755,
-     "Ra_L": 1608000.0
+     "skin_temp_C_eps1_bestcooling": 28.7315,
+     "skin_temp_C_eps0_worstcooling": 38.3991,
+     "R_th_skin_to_ambient_K_W_eps1": 1.7463,
+     "R_th_skin_to_ambient_K_W_eps0": 3.6798,
+     "h_conv_W_m2K": 3.9496,
+     "h_rad_W_m2K_eps1": 5.9744,
+     "Ra_L": 1602000.0
     }
    },
    {
@@ -280,13 +327,13 @@
      "Ra_L": 4290000.0
     },
     "area_high_voxel_hull": {
-     "skin_temp_C_eps1_bestcooling": 36.1594,
-     "skin_temp_C_eps0_worstcooling": 52.4123,
-     "R_th_skin_to_ambient_K_W_eps1": 1.6159,
-     "R_th_skin_to_ambient_K_W_eps0": 3.2412,
-     "h_conv_W_m2K": 4.5682,
-     "h_rad_W_m2K_eps1": 6.2041,
-     "Ra_L": 2799000.0
+     "skin_temp_C_eps1_bestcooling": 36.0971,
+     "skin_temp_C_eps0_worstcooling": 52.2958,
+     "R_th_skin_to_ambient_K_W_eps1": 1.6097,
+     "R_th_skin_to_ambient_K_W_eps0": 3.2296,
+     "h_conv_W_m2K": 4.564,
+     "h_rad_W_m2K_eps1": 6.2021,
+     "Ra_L": 2790000.0
     }
    },
    {
@@ -302,13 +349,13 @@
      "Ra_L": 321000.0
     },
     "area_high_voxel_hull": {
-     "skin_temp_C_eps1_bestcooling": 26.0342,
-     "skin_temp_C_eps0_worstcooling": 27.88,
-     "R_th_skin_to_ambient_K_W_eps1": 2.0684,
-     "R_th_skin_to_ambient_K_W_eps0": 5.76,
-     "h_conv_W_m2K": 2.3732,
-     "h_rad_W_m2K_eps1": 6.0428,
-     "Ra_L": 186400.0
+     "skin_temp_C_eps1_bestcooling": 26.0299,
+     "skin_temp_C_eps0_worstcooling": 27.8697,
+     "R_th_skin_to_ambient_K_W_eps1": 2.0598,
+     "R_th_skin_to_ambient_K_W_eps0": 5.7394,
+     "h_conv_W_m2K": 2.3709,
+     "h_rad_W_m2K_eps1": 6.0426,
+     "Ra_L": 185600.0
     }
    },
    {
@@ -324,13 +371,13 @@
      "Ra_L": 600500.0
     },
     "area_high_voxel_hull": {
-     "skin_temp_C_eps1_bestcooling": 26.9706,
-     "skin_temp_C_eps0_worstcooling": 30.0428,
-     "R_th_skin_to_ambient_K_W_eps1": 1.9706,
-     "R_th_skin_to_ambient_K_W_eps0": 5.0428,
-     "h_conv_W_m2K": 2.7625,
-     "h_rad_W_m2K_eps1": 6.0713,
-     "Ra_L": 352500.0
+     "skin_temp_C_eps1_bestcooling": 26.9625,
+     "skin_temp_C_eps0_worstcooling": 30.0247,
+     "R_th_skin_to_ambient_K_W_eps1": 1.9625,
+     "R_th_skin_to_ambient_K_W_eps0": 5.0247,
+     "h_conv_W_m2K": 2.7598,
+     "h_rad_W_m2K_eps1": 6.071,
+     "Ra_L": 351100.0
     }
    },
    {
@@ -346,13 +393,13 @@
      "Ra_L": 859200.0
     },
     "area_high_voxel_hull": {
-     "skin_temp_C_eps1_bestcooling": 27.8641,
-     "skin_temp_C_eps0_worstcooling": 31.9977,
-     "R_th_skin_to_ambient_K_W_eps1": 1.9094,
-     "R_th_skin_to_ambient_K_W_eps0": 4.6651,
-     "h_conv_W_m2K": 3.0182,
-     "h_rad_W_m2K_eps1": 6.0986,
-     "Ra_L": 508900.0
+     "skin_temp_C_eps1_bestcooling": 27.8524,
+     "skin_temp_C_eps0_worstcooling": 31.9727,
+     "R_th_skin_to_ambient_K_W_eps1": 1.9016,
+     "R_th_skin_to_ambient_K_W_eps0": 4.6485,
+     "h_conv_W_m2K": 3.0153,
+     "h_rad_W_m2K_eps1": 6.0982,
+     "Ra_L": 506800.0
     }
    },
    {
@@ -368,13 +415,13 @@
      "Ra_L": 1102000.0
     },
     "area_high_voxel_hull": {
-     "skin_temp_C_eps1_bestcooling": 28.7282,
-     "skin_temp_C_eps0_worstcooling": 33.8293,
-     "R_th_skin_to_ambient_K_W_eps1": 1.8641,
-     "R_th_skin_to_ambient_K_W_eps0": 4.4146,
-     "h_conv_W_m2K": 3.213,
-     "h_rad_W_m2K_eps1": 6.1251,
-     "Ra_L": 658000.0
+     "skin_temp_C_eps1_bestcooling": 28.7132,
+     "skin_temp_C_eps0_worstcooling": 33.7977,
+     "R_th_skin_to_ambient_K_W_eps1": 1.8566,
+     "R_th_skin_to_ambient_K_W_eps0": 4.3989,
+     "h_conv_W_m2K": 3.2099,
+     "h_rad_W_m2K_eps1": 6.1246,
+     "Ra_L": 655400.0
     }
    },
    {
@@ -390,13 +437,13 @@
      "Ra_L": 1553000.0
     },
     "area_high_voxel_hull": {
-     "skin_temp_C_eps1_bestcooling": 30.3927,
-     "skin_temp_C_eps0_worstcooling": 37.2549,
-     "R_th_skin_to_ambient_K_W_eps1": 1.7976,
-     "R_th_skin_to_ambient_K_W_eps0": 4.085,
-     "h_conv_W_m2K": 3.5074,
-     "h_rad_W_m2K_eps1": 6.1765,
-     "Ra_L": 939700.0
+     "skin_temp_C_eps1_bestcooling": 30.3711,
+     "skin_temp_C_eps0_worstcooling": 37.2111,
+     "R_th_skin_to_ambient_K_W_eps1": 1.7904,
+     "R_th_skin_to_ambient_K_W_eps0": 4.0704,
+     "h_conv_W_m2K": 3.5041,
+     "h_rad_W_m2K_eps1": 6.1758,
+     "Ra_L": 936100.0
     }
    },
    {
@@ -412,13 +459,13 @@
      "Ra_L": 2346000.0
     },
     "area_high_voxel_hull": {
-     "skin_temp_C_eps1_bestcooling": 33.5437,
-     "skin_temp_C_eps0_worstcooling": 43.5312,
-     "R_th_skin_to_ambient_K_W_eps1": 1.7087,
-     "R_th_skin_to_ambient_K_W_eps0": 3.7062,
-     "h_conv_W_m2K": 3.9125,
-     "h_rad_W_m2K_eps1": 6.2748,
-     "Ra_L": 1453000.0
+     "skin_temp_C_eps1_bestcooling": 33.5099,
+     "skin_temp_C_eps0_worstcooling": 43.4648,
+     "R_th_skin_to_ambient_K_W_eps1": 1.702,
+     "R_th_skin_to_ambient_K_W_eps0": 3.693,
+     "h_conv_W_m2K": 3.9088,
+     "h_rad_W_m2K_eps1": 6.2737,
+     "Ra_L": 1448000.0
     }
    },
    {
@@ -434,13 +481,13 @@
      "Ra_L": 3913000.0
     },
     "area_high_voxel_hull": {
-     "skin_temp_C_eps1_bestcooling": 40.7833,
-     "skin_temp_C_eps0_worstcooling": 57.5229,
-     "R_th_skin_to_ambient_K_W_eps1": 1.5783,
-     "R_th_skin_to_ambient_K_W_eps0": 3.2523,
-     "h_conv_W_m2K": 4.5231,
-     "h_rad_W_m2K_eps1": 6.5058,
-     "Ra_L": 2541000.0
+     "skin_temp_C_eps1_bestcooling": 40.7223,
+     "skin_temp_C_eps0_worstcooling": 57.4059,
+     "R_th_skin_to_ambient_K_W_eps1": 1.5722,
+     "R_th_skin_to_ambient_K_W_eps0": 3.2406,
+     "h_conv_W_m2K": 4.519,
+     "h_rad_W_m2K_eps1": 6.5038,
+     "Ra_L": 2532000.0
     }
    },
    {
@@ -456,13 +503,13 @@
      "Ra_L": 259200.0
     },
     "area_high_voxel_hull": {
-     "skin_temp_C_eps1_bestcooling": 35.9684,
-     "skin_temp_C_eps0_worstcooling": 37.8988,
-     "R_th_skin_to_ambient_K_W_eps1": 1.9368,
-     "R_th_skin_to_ambient_K_W_eps0": 5.7975,
-     "h_conv_W_m2K": 2.3193,
-     "h_rad_W_m2K_eps1": 6.6681,
-     "Ra_L": 149900.0
+     "skin_temp_C_eps1_bestcooling": 35.9644,
+     "skin_temp_C_eps0_worstcooling": 37.8884,
+     "R_th_skin_to_ambient_K_W_eps1": 1.9288,
+     "R_th_skin_to_ambient_K_W_eps0": 5.7768,
+     "h_conv_W_m2K": 2.3171,
+     "h_rad_W_m2K_eps1": 6.668,
+     "Ra_L": 149300.0
     }
    },
    {
@@ -478,13 +525,13 @@
      "Ra_L": 487400.0
     },
     "area_high_voxel_hull": {
-     "skin_temp_C_eps1_bestcooling": 36.8523,
-     "skin_temp_C_eps0_worstcooling": 40.0763,
-     "R_th_skin_to_ambient_K_W_eps1": 1.8523,
-     "R_th_skin_to_ambient_K_W_eps0": 5.0763,
-     "h_conv_W_m2K": 2.701,
-     "h_rad_W_m2K_eps1": 6.6969,
-     "Ra_L": 284900.0
+     "skin_temp_C_eps1_bestcooling": 36.8446,
+     "skin_temp_C_eps0_worstcooling": 40.0582,
+     "R_th_skin_to_ambient_K_W_eps1": 1.8446,
+     "R_th_skin_to_ambient_K_W_eps0": 5.0582,
+     "h_conv_W_m2K": 2.6984,
+     "h_rad_W_m2K_eps1": 6.6966,
+     "Ra_L": 283800.0
     }
    },
    {
@@ -500,13 +547,13 @@
      "Ra_L": 699700.0
     },
     "area_high_voxel_hull": {
-     "skin_temp_C_eps1_bestcooling": 37.6984,
-     "skin_temp_C_eps0_worstcooling": 42.0446,
-     "R_th_skin_to_ambient_K_W_eps1": 1.7989,
-     "R_th_skin_to_ambient_K_W_eps0": 4.6964,
-     "h_conv_W_m2K": 2.9521,
-     "h_rad_W_m2K_eps1": 6.7245,
-     "Ra_L": 412400.0
+     "skin_temp_C_eps1_bestcooling": 37.6873,
+     "skin_temp_C_eps0_worstcooling": 42.0195,
+     "R_th_skin_to_ambient_K_W_eps1": 1.7916,
+     "R_th_skin_to_ambient_K_W_eps0": 4.6796,
+     "h_conv_W_m2K": 2.9492,
+     "h_rad_W_m2K_eps1": 6.7241,
+     "Ra_L": 410800.0
     }
    },
    {
@@ -522,13 +569,13 @@
      "Ra_L": 900200.0
     },
     "area_high_voxel_hull": {
-     "skin_temp_C_eps1_bestcooling": 38.5185,
-     "skin_temp_C_eps0_worstcooling": 43.8887,
-     "R_th_skin_to_ambient_K_W_eps1": 1.7592,
-     "R_th_skin_to_ambient_K_W_eps0": 4.4443,
-     "h_conv_W_m2K": 3.1436,
-     "h_rad_W_m2K_eps1": 6.7513,
-     "Ra_L": 534500.0
+     "skin_temp_C_eps1_bestcooling": 38.5041,
+     "skin_temp_C_eps0_worstcooling": 43.8569,
+     "R_th_skin_to_ambient_K_W_eps1": 1.7521,
+     "R_th_skin_to_ambient_K_W_eps0": 4.4285,
+     "h_conv_W_m2K": 3.1405,
+     "h_rad_W_m2K_eps1": 6.7509,
+     "Ra_L": 532400.0
     }
    },
    {
@@ -544,13 +591,13 @@
      "Ra_L": 1273000.0
     },
     "area_high_voxel_hull": {
-     "skin_temp_C_eps1_bestcooling": 40.1015,
-     "skin_temp_C_eps0_worstcooling": 47.3377,
-     "R_th_skin_to_ambient_K_W_eps1": 1.7005,
-     "R_th_skin_to_ambient_K_W_eps0": 4.1126,
-     "h_conv_W_m2K": 3.4332,
-     "h_rad_W_m2K_eps1": 6.8034,
-     "Ra_L": 766000.0
+     "skin_temp_C_eps1_bestcooling": 40.0809,
+     "skin_temp_C_eps0_worstcooling": 47.2936,
+     "R_th_skin_to_ambient_K_W_eps1": 1.6936,
+     "R_th_skin_to_ambient_K_W_eps0": 4.0979,
+     "h_conv_W_m2K": 3.4299,
+     "h_rad_W_m2K_eps1": 6.8028,
+     "Ra_L": 763000.0
     }
    },
    {
@@ -566,13 +613,13 @@
      "Ra_L": 1935000.0
     },
     "area_high_voxel_hull": {
-     "skin_temp_C_eps1_bestcooling": 43.1074,
-     "skin_temp_C_eps0_worstcooling": 53.6561,
-     "R_th_skin_to_ambient_K_W_eps1": 1.6215,
-     "R_th_skin_to_ambient_K_W_eps0": 3.7312,
-     "h_conv_W_m2K": 3.8322,
-     "h_rad_W_m2K_eps1": 6.9033,
-     "Ra_L": 1191000.0
+     "skin_temp_C_eps1_bestcooling": 43.0751,
+     "skin_temp_C_eps0_worstcooling": 53.5893,
+     "R_th_skin_to_ambient_K_W_eps1": 1.615,
+     "R_th_skin_to_ambient_K_W_eps0": 3.7179,
+     "h_conv_W_m2K": 3.8286,
+     "h_rad_W_m2K_eps1": 6.9023,
+     "Ra_L": 1186000.0
     }
    },
    {
@@ -588,13 +635,13 @@
      "Ra_L": 3261000.0
     },
     "area_high_voxel_hull": {
-     "skin_temp_C_eps1_bestcooling": 50.0403,
-     "skin_temp_C_eps0_worstcooling": 67.7496,
-     "R_th_skin_to_ambient_K_W_eps1": 1.504,
-     "R_th_skin_to_ambient_K_W_eps0": 3.275,
-     "h_conv_W_m2K": 4.4351,
-     "h_rad_W_m2K_eps1": 7.1387,
-     "Ra_L": 2099000.0
+     "skin_temp_C_eps1_bestcooling": 49.9817,
+     "skin_temp_C_eps0_worstcooling": 67.6318,
+     "R_th_skin_to_ambient_K_W_eps1": 1.4982,
+     "R_th_skin_to_ambient_K_W_eps0": 3.2632,
+     "h_conv_W_m2K": 4.431,
+     "h_rad_W_m2K_eps1": 7.1367,
+     "Ra_L": 2092000.0
     }
    }
   ],
@@ -602,30 +649,30 @@
    "Ta20C": {
     "area_low_shells_only_eps1_bestcooling": 11.3913,
     "area_low_shells_only_eps0_worstcooling": 5.0384,
-    "area_high_voxel_hull_eps1_bestcooling": 20.5576,
-    "area_high_voxel_hull_eps0_worstcooling": 9.0926
+    "area_high_voxel_hull_eps1_bestcooling": 20.6489,
+    "area_high_voxel_hull_eps0_worstcooling": 9.133
    },
    "Ta25C": {
     "area_low_shells_only_eps1_bestcooling": 9.4282,
     "area_low_shells_only_eps0_worstcooling": 4.0083,
-    "area_high_voxel_hull_eps1_bestcooling": 17.0149,
-    "area_high_voxel_hull_eps0_worstcooling": 7.2337
+    "area_high_voxel_hull_eps1_bestcooling": 17.0905,
+    "area_high_voxel_hull_eps0_worstcooling": 7.2658
    },
    "Ta35C": {
     "area_low_shells_only_eps1_bestcooling": 5.5243,
     "area_low_shells_only_eps0_worstcooling": 2.1163,
-    "area_high_voxel_hull_eps1_bestcooling": 9.9695,
-    "area_high_voxel_hull_eps0_worstcooling": 3.8193
+    "area_high_voxel_hull_eps1_bestcooling": 10.0138,
+    "area_high_voxel_hull_eps0_worstcooling": 3.8363
    }
   },
   "critical_dissipation_note": "a LOWER BOUND: it assumes the interior air is no hotter than the shell, which it cannot be. The real figure is smaller.",
   "usb_supply_ceiling_W": 10.0,
   "trapped_air_thermal_capacitance": {
-   "head_free_air_cm3": 194.1705,
-   "head_C_J_per_K": 0.2276,
+   "head_free_air_cm3": 193.055,
+   "head_C_J_per_K": 0.22629,
    "trunk_free_air_cm3": 36.7099,
    "trunk_C_J_per_K": 0.04303,
-   "what_it_means": "the trapped air stores essentially nothing -- at 0.2276 J/K the head's whole air volume absorbs less energy for a 1 K rise than a tenth of a second of the knee servo's copper loss (1.6664 W). The air is a RESISTANCE, not a reservoir; the head's thermal mass is its plastic and its boards."
+   "what_it_means": "the trapped air stores essentially nothing -- at 0.2263 J/K the head's whole air volume absorbs less energy for a 1 K rise than a tenth of a second of the knee servo's copper loss (1.6664 W). The air is a RESISTANCE, not a reservoir; the head's thermal mass is its plastic and its boards."
   },
   "servo_bus_and_pack": {
    "bus_power_lower_bound_W": 6.41939,
@@ -642,17 +689,17 @@
   "which_leg_fails": {
    "external_skin_to_room": {
     "verdict": "PASS",
-    "why": "at 2.0 W in a 25 degC room the head's own skin settles between 28.73 and 39.23 degC, and it takes 4.008-17.015 W to lift the skin to the board's 50 degC ambient rating. A single-board computer of this class does not dissipate that much, so the OUTSIDE of the box is not the bottleneck."
+    "why": "at 2.0 W in a 25 degC room the head's own skin settles between 28.71 and 39.23 degC, and it takes 4.008-17.090 W to lift the skin to the board's 50 degC ambient rating. A single-board computer of this class does not dissipate that much, so the OUTSIDE of the box is not the bottleneck."
    },
    "internal_die_to_skin": {
     "verdict": "FAIL",
-    "why": "this is the leg that fails, and it fails on a MEASUREMENT, not a model: Pollen records the SoC at 95 degC (97 degC in the videoflip pathology) while throttling to 408 MHz. Between that die and a skin that the external solution puts in the high twenties sits 194.171 cm3 of still air (56.9 % of the enclosed volume), with no vent, no fan and no heatsink anywhere in body jaw_soft. The whole trapped-air volume is a 0.2276 J/K reservoir -- it buffers nothing and only resists. The design item is a CONDUCTION PATH from the SoC to the shell, not more skin area.",
+    "why": "this is the leg that fails, and it fails on a MEASUREMENT, not a model: Pollen records the SoC at 95 degC (97 degC in the videoflip pathology) while throttling to 408 MHz. Between that die and a skin that the external solution puts in the high twenties sits 193.055 cm3 of still air (56.6 % of the enclosed volume, and the figure the voxel/exact cross-check corrects to), with no vent, no fan and no heatsink anywhere in body jaw_soft. The whole trapped-air volume is a 0.2263 J/K reservoir -- it buffers nothing and only resists. The design item is a CONDUCTION PATH from the SoC to the shell, not more skin area.",
     "model": "CANNOT DETERMINE -- no theta_JA is published for the RK3566 and the board's dissipation is unmeasured, so no internal resistance can be computed. The external leg is solved and used as the bound instead."
    }
   }
  },
  "verdict": "FAIL",
- "why": "FAIL, on a measurement rather than a model: Pollen's own documents record the SoC at 95 degC flat out (97 degC in the videoflip pathology) throttling to 408 MHz, with object detection held down to 2 Hz because of it -- 'a thermal limit, not a preference'. This study adds the geometry and locates the fault. The head is a sealed printed box, 341.027 cm3 enclosed with 194.171 cm3 of still air in it (56.9 % void), no vent, no fan, no heatsink, outer skin 31832-57447 mm2. Solving the OUTSIDE of that box exonerates it: at 2.0 W the skin settles at 28.73-39.23 degC in a 25 degC room, and it would take 4.008-17.015 W to lift the skin to the board's own 50 degC ambient rating (bracketed by no radiation on the shells-only area at the low end and a black body on the voxel-hull area at the high end) -- more than a board on a 5 V / 2 A = 10.0 W supply is likely to dissipate. So the failure is INSIDE: the path from a 95 degC die through 194.171 cm3 of trapped air, whose entire thermal capacitance is 0.2276 J/K -- less than a seventh of a second of the knee servo's copper loss. The board's real dissipation and the RK3566's junction-to-air resistance are both CANNOT DETERMINE, so the internal leg is not modelled; it is measured, at 95 degC. The design item this study names is a conduction path from the SoC to the shell, not more skin.",
+ "why": "FAIL, on a measurement rather than a model: Pollen's own documents record the SoC at 95 degC flat out (97 degC in the videoflip pathology) throttling to 408 MHz, with object detection held down to 2 Hz because of it -- 'a thermal limit, not a preference'. This study adds the geometry and locates the fault. The head is a sealed printed box, 340.843 cm3 enclosed with 193.055 cm3 of still air in it (56.6 % void), no vent, no fan, no heatsink, outer skin 31832-57702 mm2. Solving the OUTSIDE of that box exonerates it: at 2.0 W the skin settles at 28.71-39.23 degC in a 25 degC room, and it would take 4.008-17.090 W to lift the skin to the board's own 50 degC ambient rating (bracketed by no radiation on the shells-only area at the low end and a black body on the voxel-hull area at the high end) -- more than a board on a 5 V / 2 A = 10.0 W supply is likely to dissipate. So the failure is INSIDE: the path from a 95 degC die through 193.055 cm3 of trapped air, whose entire thermal capacitance is 0.2263 J/K -- less than a seventh of a second of the knee servo's copper loss. The board's real dissipation and the RK3566's junction-to-air resistance are both CANNOT DETERMINE, so the internal leg is not modelled; it is measured, at 95 degC. The design item this study names is a conduction path from the SoC to the shell, not more skin.",
  "cannot_determine": [
   {
    "what": "the board's actual dissipation",
@@ -676,6 +723,8 @@
  ],
  "looked_at": [
   "out/sim-evidence/cavity-volumes.json",
+  "out/sim-evidence/cavity-volumes.json outputs.cavities.head.voxel_occupancy_crosscheck",
+  "out/sim-evidence/cavity-volumes.json outputs.cavities.head.grid_convergence",
   "out/sim-evidence/thermal-servo-xl330.json",
   "ce-parts/radxa-zero-3w/electrical.host.json",
   "ce-parts/np-f550/electrical.part.json",
