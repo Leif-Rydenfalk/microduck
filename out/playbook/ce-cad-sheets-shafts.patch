@@ -1,0 +1,36 @@
+diff --git a/ce-cad/cecad/sheets.py b/ce-cad/cecad/sheets.py
+index a6e82aa..d461b73 100644
+--- a/ce-cad/cecad/sheets.py
++++ b/ce-cad/cecad/sheets.py
+@@ -46,7 +46,8 @@ from . import drawing as D
+ from .drawing import (line, circle, solid, text, polyline, rect, transform,
+                       bbox, text_width, to2d_fn, view_basis, view_prims,
+                       write_dxf, write_svg, VIEW_AXES)
+-from .inspect import holes as measure_holes, bbox_of, _STACK_GAP
++from .inspect import (holes as measure_holes, shafts as measure_shafts,
++                      bbox_of, _STACK_GAP)
+ from .fits import fit_callout, hole_limits, match_declared
+ from . import fits as _fits
+ 
+@@ -4629,6 +4708,21 @@ def verify_sheet(sheet, svg_path, part, verbose=True):
+     # states it and `printed.insert_boss` puts it on the connector.
+     measured_d |= {f"{mk[0]:.2f}"
+                    for mk in manufacturing_callouts(part).values()}
++    # ...and every OUTSIDE diameter. This check's claim is "every Ø on the
++    # sheet is measured in the solid", and until 2026-09-03 it only knew how
++    # to measure HOLES — so a part whose functional feature is a BOSS could
++    # not state that boss's diameter on its own sheet without failing. That
++    # is not the check being strict, it is the check being under-informed:
++    # `inspect.shafts()` is `holes()`'s sibling on the same `_cyl_groups`
++    # pass and measures external diameters off the same solid. MEASURED
++    # 2026-09-03 on part:microduck-jig-horn-zero, whose two Ø1.500 index pins
++    # are additive cylinders: `holes()` returns [], `shafts()` returns them,
++    # and the gauge's only functional dimension could not be drawn. Widening
++    # the set never turns a passing sheet into a failing one; it stops the
++    # check rejecting a number the solid does contain.
++    measured_d |= {f"{sh.d:.2f}" for sh in measure_shafts(part)}
++    for v in sheet.views:
++        measured_d |= {f"{sh.d:.2f}" for sh in measure_shafts(v.obj)}
+     on_sheet = set(re.findall(r"Ø(\d+\.\d\d)", "\n".join(flat)))
+     stray = sorted(on_sheet - measured_d)
+     chk("every Ø on the sheet is measured in the solid", not stray,

@@ -289,6 +289,87 @@ JIGS = [
 ]
 
 
+# ---- dimensions the sheet machinery cannot derive ---------------------------
+# sheets.Sheet dimensions HOLES (inspect.holes) and RADII. A boss is neither, so
+# a part whose functional feature is a protruding pin ships a sheet that draws
+# the pin and dimensions nothing about it. These are declared per slug, as MODEL
+# POINTS ON THE SOLID, and the magnitude is computed by Sheet.dim() from them.
+
+def _horn_dims(part):
+    """The two Ø1.500 x 3.500 pins on the Ø12.000 tapped circle, dimensioned.
+
+    Frame (tools/jigs.py horn_gauge): the plate is a cylinder on +z from z = 0,
+    the pins run z = -3.500 .. 0 at (0, +6.000) and (0, -6.000), and the arm's
+    reference face is the plane y = +9.500 (the top of the XL330 case).
+    View mapping is read off cecad.drawing._DIRS: `top` shows (X, Y) and `front`
+    shows (-X, Z), so each dimension below is placed in the view that sees it.
+    """
+    d, pcd, ln, ref = 1.50, 12.0, 3.5, 9.5
+    return [
+        ("top", (0.0, pcd / 2.0, -ln), (0.0, -pcd / 2.0, -ln), "y",
+         "%.3f PIN CENTRES" % pcd,
+         "the pin circle is the gauge's datum and must match the horn's "
+         "FACE_PCD = 12.0 (ce-parts/xl330-m288-t cad/part.py). Written as the "
+         "centre-to-centre distance, not as a bolt-circle diameter, because "
+         "with two pins that IS the measurement and a PCD is not a diameter "
+         "the solid contains."),
+        ("top", (-d / 2.0, pcd / 2.0, -ln), (d / 2.0, pcd / 2.0, -ln), "x",
+         "2x \u00d8%.3f PIN" % d,
+         "pin diameter, an OUTSIDE diameter of this solid (inspect.shafts); "
+         "the horn's tapped hole is 1.60 across, so the diametral play is "
+         "0.100 mm"),
+        ("front", (0.0, pcd / 2.0, -ln), (0.0, pcd / 2.0, 0.0), "y",
+         "%.3f PIN PROJECTION" % ln,
+         "how far the pin stands proud of the plate face; the horn's tapped "
+         "hole is 6.0 deep so the pin bottoms on nothing"),
+        ("top", (0.0, 0.0, 1.5), (0.0, ref, 1.5), "y",
+         "%.3f REF FACE" % ref,
+         "the arm's reference face above the horn axis = BODY_Z[1] = +9.500, "
+         "the top of the XL330 case"),
+    ]
+
+
+EXTRA_DIMS = {"microduck-jig-horn-zero": _horn_dims}
+
+EXTRA_NOTES = {
+    # ONE note, and it is short on purpose. The manufacturing sheet already
+    # carries six auto-notes plus the PRINT/DFM block on this small part, and
+    # two extra notes pushed that block down over the title block — measured
+    # 2026-09-03 by reading the rendered PNG back, a collision `verify_sheet`
+    # does not catch because both blocks are laid out as extras, not labels.
+    "microduck-jig-horn-zero": (
+        "PINS ARE BOSSES, NOT HOLES, so they carry no hole-table row: 2x "
+        "\u00d81.500 x 3.500 into the horn's 1.60 tapped holes = 0.100 mm play "
+        "= 0.955 deg of index play. INDEX GAUGE, NOT AN ABSOLUTE ZERO.",
+    ),
+}
+
+
+def _assert_dims(part, added):
+    """Every added dimension's magnitude, re-derived from the written sheet data.
+
+    A typed label that disagrees with the geometry is exactly the defect this
+    file exists to avoid, so the count and the magnitude are checked rather than
+    trusted: the label's numeric field must equal the distance between the two
+    model points along the stated view axis, to 1e-6 mm.
+    """
+    import re as _re
+    bad = []
+    for a in added:
+        m = _re.search(r"(\d+\.\d+)", a["label"])
+        if not m:
+            continue
+        want = float(m.group(1))
+        from cecad.drawing import to2d_fn
+        t = to2d_fn(a["view"])
+        p1, p2 = t(tuple(a["from"])), t(tuple(a["to"]))
+        got = abs(p2[0] - p1[0]) if a["axis"] == "x" else abs(p2[1] - p1[1])
+        if abs(got - want) > 1e-6:
+            bad.append("%s %s: label %.6f vs geometry %.6f"
+                       % (a["view"], a["label"], want, got))
+    return bad
+
+
 def main():
     only = [a for a in sys.argv[1:] if not a.startswith("-")]
     os.makedirs(OUT, exist_ok=True)
@@ -318,14 +399,54 @@ def main():
         except Exception as e:
             holes = {"reason": "inspect.holes raised: %s" % e}
         try:
-            r = auto_blueprint(part, stem, source="tools/jigs.py")
+            # manufacturing=True is what puts the DIMENSIONED ISOMETRIC REFERENCE
+            # VIEW on the sheet, plus every radius dimensioned, the detail bubbles
+            # and the print/DFM note block. docs/MANUFACTURING-REQUIREMENTS.md A.4
+            # requires the isometric on EVERY sheet and these six jigs shipped
+            # without one (measured 2026-09-03: grep -ci ISOMETRIC = 0 on all six).
+            r = auto_blueprint(part, stem, source="tools/jigs.py",
+                               manufacturing=True)
+            sh = r["sheet"]
+            added = []
+            if slug in EXTRA_DIMS:
+                # A FEATURE THE SHEET MACHINERY CANNOT SEE. The horn gauge's two
+                # pins are ADDITIVE bosses, not holes, so inspect.holes() returns
+                # [] and the hole table and its O callouts have nothing to carry —
+                # the gauge's entire function was dimensioned nowhere on its own
+                # sheet. Each entry below is a dimension between two MODEL points;
+                # sheets.Sheet.dim() computes the magnitude itself, it is never
+                # typed. `text` only prefixes the diameter symbol and the count to
+                # that measured magnitude, and the assertion it makes (that the
+                # feature is round, and how many there are) is checked against
+                # geometry by _assert_dims() below.
+                for view, p1, p2, axis, text, why in EXTRA_DIMS[slug](part):
+                    sh.dim(view, p1, p2, axis=axis, text=text)
+                    added.append({"view": view, "from": list(p1), "to": list(p2),
+                                  "axis": axis, "label": text, "why": why})
+                for ln in EXTRA_NOTES.get(slug, ()):
+                    sh.note(ln)
+                w = sh.write(stem, quiet=True)
+                for k in ("svg", "dxf", "pdf"):
+                    if w.get(k):
+                        r[k] = w[k]
             ok2 = verify_sheet(r["sheet"], r["svg"], part, verbose=False)
+            svg_txt = open(r["svg"]).read()
             draw = {"svg": os.path.relpath(r["svg"], ROOT),
                     "dxf": os.path.relpath(r["dxf"], ROOT),
                     "pdf": os.path.relpath(r["pdf"], ROOT),
                     "size": r["size"], "scale": "%d:%d" % tuple(r["scale"]),
                     "views": r["views"], "verified": bool(r["verified"]),
+                    "manufacturing": True,
+                    "isometric_on_sheet": "ISOMETRIC VIEW" in svg_txt,
+                    "diameter_callouts_on_sheet": svg_txt.count("\u00d8"),
+                    "added_dimensions": added,
+                    "dfm_note_lines": r.get("dfm"),
+                    "details": r.get("details"),
                     "verify_sheet": bool(ok2)}
+            bad = _assert_dims(part, added)
+            draw["added_dimensions_agree_with_geometry"] = (not bad)
+            if bad:
+                draw["added_dimension_defects"] = bad
         except Exception as e:
             draw = {"reason": "auto_blueprint raised: %s" % e}
         index["jigs"][slug] = {
@@ -345,10 +466,34 @@ def main():
         except Exception:
             pass
     p = os.path.join(OUT, "jigs.json")
-    if only and os.path.exists(p):
-        prev = json.load(open(p))
-        prev["jigs"].update(index["jigs"])
-        index = prev
+    prev = json.load(open(p)) if os.path.exists(p) else None
+    if prev:
+        # THE SLICED BLOCK IS NOT WRITTEN HERE and a rebuild used to delete it:
+        # tools/slice_jigs.py's grams and seconds, and `jig_set_total`, are what
+        # MANUFACTURING-PLAYBOOK.html §5.1 prints. Carry them forward — for a
+        # partial run AND a full one, because a partial run rewrites the record
+        # it merges into — but ONLY while the geometry they were measured on is
+        # unchanged. The STL a slicer read is identified here by its exact
+        # volume and bbox, and a jig whose solid moved loses its sliced numbers
+        # rather than keeping a figure that no longer describes it.
+        carried, dropped = [], []
+        for slug, rec in index["jigs"].items():
+            old = (prev.get("jigs") or {}).get(slug) or {}
+            if "sliced" not in old:
+                continue
+            if (old.get("volume_mm3") == rec["volume_mm3"]
+                    and old.get("bbox_mm") == rec["bbox_mm"]):
+                rec["sliced"] = old["sliced"]
+                carried.append(slug)
+            else:
+                dropped.append(slug)
+        if only:
+            prev["jigs"].update(index["jigs"])
+            index = prev
+        elif not dropped and prev.get("jig_set_total"):
+            index["jig_set_total"] = prev["jig_set_total"]
+        print("carried sliced numbers for %d jig(s); dropped for %d (%s)"
+              % (len(carried), len(dropped), ", ".join(dropped) or "none"))
     json.dump(index, open(p, "w"), indent=1)
     print("wrote", p)
 
