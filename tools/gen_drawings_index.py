@@ -52,6 +52,30 @@ def bbox_txt(b):
     return " × ".join("%.4f" % float(x) for x in b)
 
 
+def _radius_line(r):
+    """§A.5 — Leif's own words, *"Every radius and fillet dimensioned"* — as a
+    fraction rather than an impression.
+
+    The count comes from `tools/measure_features.py`, which reads every arc
+    radius off the SOLID and asks whether that number is printed on the sheet.
+    Absent census, the row says the pass has not been run: a blank would read
+    as full coverage, and full coverage is exactly what the shipped shelf did
+    NOT have (50 of 97 distinct radii, 2026-09-03).
+    """
+    f = (r.get("features") or {}).get("radii")
+    if f is None:
+        return ("not measured — run tools/measure_features.py; the solid "
+                "carries %d distinct arc radii"
+                % len(r.get("radii") or []))
+    on = sum(1 for x in f if x.get("on_sheet"))
+    miss = [("R%.2f" % x["r"]) for x in f if not x.get("on_sheet")]
+    if not f:
+        return "the solid has no arc radius in the dimensionable band"
+    return ("%d of %d distinct radii printed on the sheet%s"
+            % (on, len(f),
+               "" if not miss else " — MISSING: " + ", ".join(miss)))
+
+
 def sheet_card(r):
     slug = r["slug"]
     thumb = up(r.get("thumbnail"))
@@ -119,6 +143,7 @@ def sheet_card(r):
                  ((r.get("recheck") or {}).get("svg_header") or {}).get("size")))
              if r.get("recheck") else
              "not run — tools/verify_drawings.py has not been over this sheet"),
+            ("§A.5 radii dimensioned", _radius_line(r)),
             ("§A.6 feature census",
              (r.get("features") or {}).get("A6_summary")
              or "not run — tools/measure_features.py has not been over this part"),

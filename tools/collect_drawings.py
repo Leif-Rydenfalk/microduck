@@ -151,7 +151,14 @@ def main():
         svg_p = r.get("svg") or os.path.join(DRAWINGS, slug, slug + ".svg")
         row["result_mtime"] = _mtime(rj)
         row["svg_mtime"] = _mtime(svg_p)
-        drift = _drift(r, svg_p, rj)
+        # A part that never built has no sheet BY DESIGN and must not be
+        # reported as one that lost its sheet: `draw()` records the kernel's
+        # own NotImplementedError before it can classify the part, so `kind`
+        # and `svg` are both absent and `why` carries the reason. Asking the
+        # drift question first told microduck-bottom-head-shell that its
+        # result.json "names a file that is not on disk", which is true and
+        # is not the reason.
+        drift = _drift(r, svg_p, rj) if r.get("svg") else None
         if drift:
             row["state"] = "stale"
             row["verdict"] = "CANNOT DETERMINE"
@@ -170,7 +177,7 @@ def main():
         # `kind: null` and `verdict: null`; the index printed it as state
         # "unknown" with an em dash for a reason — exactly the silence the
         # docstring above says this file must never be able to show.
-        if not r.get("kind") or not r.get("verdict"):
+        if not r.get("verdict") or (not r.get("kind") and not r.get("why")):
             row["state"] = "stale-result"
             row["verdict"] = "CANNOT DETERMINE"
             row["why"] = ("result.json predates the current generator: it "
@@ -178,6 +185,16 @@ def main():
                           "Redraw the part with tools/draw_part.py."
                           % (r.get("kind"), r.get("verdict"),
                              row["result_mtime"]))
+        elif not r.get("kind"):
+            # THE DRAW RAN AND THE PART DID NOT BUILD. `draw()` records the
+            # kernel's own reason before it can classify the part, so `kind`
+            # is absent by design here and the row is that reason, not a gap.
+            row["state"] = "unbuildable"
+            row["verdict"] = r.get("verdict") or "CANNOT DETERMINE"
+            row["why"] = r.get("why") or "the part did not build"
+        else:
+            row["state"] = None
+        if row.get("state"):
             row["record"] = {k: rec.get(k) for k in _REC_KEYS}
             for k in ("svg", "dxf", "pdf", "reference_render", "thumbnail"):
                 if row.get(k):
