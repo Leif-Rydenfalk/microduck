@@ -38,14 +38,14 @@ def figure(v, key, wide=False):
     cls = "pass" if ver["verdict"] == "PASS" else "cd"
     return """
 <figure class="fig%s">
-  <video controls muted loop playsinline preload="metadata" poster="%s" src="%s"></video>
+  <video controls muted loop playsinline preload="metadata" poster="frames/%s_f000.png" src="%s"></video>
   <img src="%s" alt="contact sheet, 8 frames of %s">
   <figcaption><b>%s</b> — %s.<br>
     Camera: %s. %d frames at %d fps (%.3f s), mp4 %.2f MB, <a href="%s">GIF</a> %.2f MB.
     Read back frame by frame: <span class="chip %s">%s</span>
     min frame std %.2f (blank &lt; 4.0), max inter-frame delta %.3f, blank frames %d, frozen pairs %d.
   </figcaption>
-</figure>""" % (" wide" if wide else "", base(v["contact_sheet"]), base(v["path"]),
+</figure>""" % (" wide" if wide else "", key, base(v["path"]),
                 base(v["contact_sheet"]), E(key), E(key), E(v["what"]), E(v["camera"]),
                 v["frames"], v["fps"], v["seconds"], v["mp4_mb"], base(v["gif"]), v["gif_mb"],
                 cls, ver["verdict"], ver["min_frame_std"], ver["max_interframe_delta"],
@@ -80,10 +80,15 @@ if VP:
   clip <code>%s</code> (%d frames, %.0f fps, %.3f s, %d×%d, %s). It is Pollen's own
   <b>rendered</b> clip, not a photograph — <b>no photograph of the product mid-stride exists in
   <code>images/</code></b>, so this is a render-to-render comparison and is labelled as one.</p>
-  <p>Both gait periods are measured, not assumed. The product's comes off the pixels: silhouette
-  (luma &gt; 12 on the black alpha background), the x-centroid of the bottom 15&nbsp;%% of the
-  silhouette minus the x-centroid of the whole silhouette — one oscillation per gait cycle —
-  autocorrelated. Ours comes off <code>left_knee</code> in the trajectory.</p>
+  <p>Both gait periods are measured, not assumed. The product's comes off the pixels: the decoded
+  background is exactly black (938&nbsp;762 of 1&nbsp;024&nbsp;000 px at luma 0 on frame 100), so the
+  silhouette is luma &gt; 0.5 plus any 0-luma pixel enclosed by silhouette on all four sides of its
+  row and column — otherwise the robot's own black plastic is knocked out. Then the x-centroid of
+  the bottom 15&nbsp;%% of the silhouette minus the x-centroid of the whole silhouette — one
+  oscillation per gait cycle — autocorrelated. Ours comes off <code>left_knee</code> in the
+  trajectory. <b>Both signals are sampled at 50&nbsp;Hz, so each period is quantised to
+  0.020&nbsp;s</b>: the two agree to within one sample, which is the resolution of the measurement
+  and not a claim of exact equality.</p>
   <table class="tbl">
     <tr><th></th><th class=num>gait period (s)</th><th class=num>autocorr peak</th><th class=num>cadence (steps/min)</th></tr>
     <tr><td>product clip</td><td class=num>%.4f</td><td class=num>%.3f</td><td class=num>%.2f</td></tr>
