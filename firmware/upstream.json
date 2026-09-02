@@ -1,0 +1,63 @@
+{
+ "$schema_note": "Pointer records for the FIRMWARE half - everything running below Linux, or on a chip this robot talks to. Lane H of GOAL.md. Where a firmware is not published, the row says so and names what a test can still observe.",
+ "generated": "2026-09-02 by the lane-H agent",
+ "items": [
+  {
+   "id": "servo",
+   "what": "ROBOTIS XL330-M288-T servo firmware, x15",
+   "published": false,
+   "source_available": "no - ROBOTIS ships the firmware in the servo; only the control table is documented",
+   "identity_registers": "Model Number(0), R, 2 bytes, value 1,200; Firmware Version(6), R, 1 byte",
+   "identity_src": "the fetched e-manual control table, ce-parts/xl330-m288-t/iterations/v0.0.1/docs/fetched/robotis-docs-xl330-m288.html: '0|2|Model Number|R|1,200' and '6|1|Firmware Version|R'",
+   "how_it_is_tested": "SV-01 reads both per servo and records them; a batch that mixes firmware versions is a fact worth having before a fleet exists",
+   "upgrade_path": "ROBOTIS's own tooling. Nothing in Pollen's runtime updates servo firmware."
+  },
+  {
+   "id": "imu_to_dxl",
+   "what": "the imu_to_dxl v2 board: an unidentified MCU that presents an LSM6DSV16X on the Dynamixel bus as device ID 200",
+   "published": false,
+   "source_available": "no - neither schematic nor firmware is published. It is one of the three custom PCBs with no published design (RELEASE.html §1)",
+   "bus_interface": "ID 200 at 1,000,000 bps, Protocol 2.0, on the same UART as the servos; read in the SAME sync_read as the 15 servos and listed FIRST so it answers before them",
+   "block": "12 bytes at address 124: bytes 0..6 gyro x/y/z as i16 LE raw counts at +/-500 dps; bytes 6..12 the SFLP game-rotation quaternion x/y/z as IEEE half-precision, with w = sqrt(1 - x^2 - y^2 - z^2). The board's full diagnostic block is 20 bytes (raw accelerometer, a sample counter and status flags); the control loop consumes only the first 12 so the read fits alongside the servos in one transaction",
+   "block_src": "research/raw/duck-control_src_imu.rs lines 1-17 and duck-control_src_bus.rs lines 3-4; IMU_DXL_ID = 200 at duck-control_src_model.rs:78",
+   "how_it_is_tested": "SN-04 only, and behaviourally: gravity z <= -0.98 upright, and zero stale blocks over 30 s (robotd has a StaleImuTracker for a board that answers without refreshing). A chip-level self-test is impossible on a built robot - SN-05 is an INCOMING test for the board, not a unit test",
+   "what_would_open_it": "Pollen publishing the imu_to_dxl v2 schematic and firmware, or a debug path on the board that exposes the LSM6DSV16X directly"
+  },
+  {
+   "id": "tof_sensor",
+   "what": "ST VL53L5CX / VL53L8CX firmware, uploaded into the sensor at every start",
+   "published": "the UPLOADER is: ST's two Ultra Lite Drivers are vendored verbatim in Pollen's tof crate under BSD-3-Clause (vendor/LICENSE.txt). The blob itself is ST's.",
+   "both_generations": "compiled, and chosen at RUNTIME by an ID read before any firmware is uploaded - 'Ducks in the field have both' (tof/src/lib.rs:8-11)",
+   "addresses_tried": "0x29 then 0x52 (tofd ADDRESS_CANDIDATES); buses tried /dev/i2c-pihat then /dev/i2c-3",
+   "size_discrepancy": "CANNOT DETERMINE which figure is the wire upload: tof/src/main.rs:7 says 'bringing it up uploads ~90 KB of firmware over I2C, taking seconds', while tof/src/lib.rs:15 says each ULD is '40 KB of register sequences plus a 550 KB firmware blob'. Both are Pollen's own comments in the same crate. WHAT SETTLES IT: the byte count of the blob in the vendored ULD, or an I2C capture of one start-up",
+   "how_it_is_tested": "SN-06 - and the header line of robotctl monitor's ToF block names the generation that answered, which is the only place a built unit says which sensor it has"
+  },
+  {
+   "id": "board",
+   "what": "the Radxa ZERO 3W's own boot chain and the Linux image the daemons run on (RK3566)",
+   "published": "Pollen's provisioning is: scripts/setup-board.sh and scripts/install.sh, with the steps written out one by one in docs/robot/install-by-hand.md",
+   "overlays": [
+    "deploy/audio/i2c3-pihat.dts - the HAT's I2C bus; installs the /dev/i2c-pihat udev symlink",
+    "deploy/audio/aic3104-i2c3.dts - the TLV320AIC3104 audio codec",
+    "radxa-zero3-rpi-camera-v2 - the IMX219 camera (SN-07 precondition)"
+   ],
+   "overlays_local": [
+    "research/raw/deploy_audio_i2c3-pihat.dts",
+    "research/raw/deploy_audio_aic3104-i2c3.dts"
+   ],
+   "npu": "the NPU is switched OFF in the device tree as Armbian ships the Radxa Zero 3; sudo sh /opt/robot/daemon/current/scripts/setup-npu.sh turns it on and needs a reboot. models/duck_detect.rknn runs on the NPU, models/duck_detect.onnx on the CPU (robotd.toml [detect])",
+   "how_it_is_tested": "SN-01 (the I2C roll-call proves the overlays took), SN-07, SN-08, TH-01"
+  },
+  {
+   "id": "release_payload",
+   "what": "the signed release updaterd installs: binaries, policies and models in one artifact",
+   "published": true,
+   "verification": "every release is downloaded, hashed and signature-verified before it is applied - the cheat sheet's own update-log excerpt reads 'manifest 0.1.4 . 184.2 MB . sha256 3f9a1c2b... . signed by release.pub . rev 88efc03' then 'hash matches; signature verifies against release.pub'",
+   "durable_record": "/var/lib/robot/updater/runs/*.jsonl, fsync'ed per entry, OUTLIVES a power cut - which the journal on this board does not, because /var/log is zram",
+   "how_it_is_tested": "SW-01 (version agreement) and RD-05 (one rollback, then back)"
+  }
+ ],
+ "not_firmware_but_often_confused_with_it": [
+  "The three custom PCBs (Robot HAT, imu_to_dxl, banana contact board) have no published DESIGN either - see PCB-PACKAGE.html / RELEASE.html §1. A missing schematic and a missing firmware are different absences and this file only speaks for the second."
+ ]
+}

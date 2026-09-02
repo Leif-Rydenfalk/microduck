@@ -1,0 +1,141 @@
+{
+ "$schema_note": "Pointer records for the SOFTWARE half of the Microduck, for lane H of GOAL.md. Data only: TEST-PLAN.html cites it, nothing here is prose for its own sake. Every row carries the source it was read from. Pollen's software is published; their PCBs are not.",
+ "generated": "2026-09-02 by the lane-H agent, from the fetched upstream material in research/raw/ plus two live GitHub API reads",
+ "repos": [
+  {
+   "ref": "pollen-robotics/microduck",
+   "url": "https://github.com/pollen-robotics/microduck",
+   "what": "the robot's own software: the daemons, robotctl, duckctl, the update machinery",
+   "license": "Apache-2.0",
+   "license_src": "https://api.github.com/repos/pollen-robotics/microduck fetched 2026-09-02: license.spdx_id = Apache-2.0, license.name = Apache License 2.0",
+   "default_branch": "main",
+   "description": "A Tiny biped duck robot",
+   "pushed_at": "2026-09-02T15:12:16Z",
+   "readme_local": "research/raw/microduck_main_README.md",
+   "docs_local": [
+    "research/raw/microduck_main_docs_design_architecture.md",
+    "research/raw/microduck_main_docs_design_robotd-design.md",
+    "research/raw/microduck_main_docs_design_updater-design.md",
+    "research/raw/microduck_main_docs_robot_cheatsheet.md",
+    "research/raw/microduck_main_docs_robot_install-by-hand.md",
+    "research/raw/microduck_main_docs_project_media-bringup.md",
+    "research/raw/microduck_main_docs_project_npu-bringup.md",
+    "research/raw/microduck_main_docs_project_roadmap.md"
+   ],
+   "not_mirrored": [
+    "docs/robot/duckctl.md — read live 2026-09-02 for TEST-PLAN RD-04, not copied into research/raw/",
+    "docs/robot/pair-a-gamepad.md",
+    "docs/design/app-path-design.md"
+   ]
+  },
+  {
+   "ref": "pollen-robotics/microduck_rl",
+   "url": "https://github.com/pollen-robotics/microduck_rl",
+   "what": "where the policies come from: mjlab/MuJoCo Warp + PPO, domain randomisation, BAM actuator physics, and the ONNX export the robot loads",
+   "license": "Apache-2.0",
+   "license_src": "https://api.github.com/repos/pollen-robotics/microduck_rl fetched 2026-09-02: license.spdx_id = Apache-2.0; local copy of the text at research/raw/microduck_rl_main_LICENSE",
+   "default_branch": "develop",
+   "default_branch_note": "NOT main. Our mirrored files are named microduck_rl_main_* from the branch that was fetched; the repository's default is develop (api.github.com, fetched 2026-09-02).",
+   "description": "RL training environments for Microduck (mjlab)",
+   "pushed_at": "2026-09-02T13:39:43Z",
+   "readme_local": "research/raw/microduck_rl_main_README.md",
+   "mjcf_local": [
+    "research/raw/microduck_rl_main_src_mjlab_microduck_robot_microduck_robot_walk.xml",
+    "research/raw/microduck_rl_main_src_mjlab_microduck_robot_microduck_robot_allcollisions_rollers.xml",
+    "research/raw/microduck_rl_main_src_mjlab_microduck_robot_microduck_joints_properties.xml",
+    "research/raw/microduck_rl_main_src_mjlab_microduck_robot_microduck_additional.xml",
+    "research/raw/microduck_rl_main_src_mjlab_microduck_robot_microduck_scene_rollers.xml"
+   ]
+  }
+ ],
+ "daemons": [
+  [
+   "robotd",
+   "owns the 50 Hz control loop and the motor bus",
+   "SW-01 SW-02 SW-03 SW-04 SW-05 SV-03 WK-*",
+   "README 'Under the hood'; architecture.md §1"
+  ],
+  [
+   "updaterd",
+   "installs signed releases and rolls them back when a robot comes up unhealthy",
+   "RD-05",
+   "README; architecture.md §8.3, §10"
+  ],
+  [
+   "configd",
+   "owns wifi and identity",
+   "RD-01 RD-02 RD-03",
+   "README; cheatsheet Wifi / Identity and power"
+  ],
+  [
+   "btd",
+   "the Bluetooth path a phone uses",
+   "RD-04",
+   "README; duckctl.md (the error-14 refusal list)"
+  ],
+  [
+   "padd",
+   "reads the gamepad",
+   "RD-02 SW-05",
+   "README; cheatsheet Gamepad"
+  ],
+  [
+   "mediad",
+   "streams the camera over WebRTC",
+   "SN-07 SN-10 TH-01",
+   "README; media-bringup.md"
+  ],
+  [
+   "tofd",
+   "serves the depth sensor",
+   "SN-06",
+   "README; tof/src/main.rs"
+  ],
+  [
+   "robotctl",
+   "the on-robot CLI every test in this plan is driven from",
+   "every section",
+   "cheatsheet"
+  ],
+  [
+   "duckctl",
+   "the robot from a laptop over Bluetooth, with no network and no ssh",
+   "RD-04",
+   "docs/robot/duckctl.md, fetched 2026-09-02"
+  ]
+ ],
+ "daemons_columns": [
+  "name",
+  "what it owns",
+  "tests that touch it",
+  "source"
+ ],
+ "ipc": {
+  "contract": "one JSON-RPC 2.0 contract over Unix sockets; every client - app, console, gamepad, a script - sends the same calls",
+  "src": "README 'Under the hood'; architecture.md §2.2",
+  "tof_socket": "/run/tofd/tof.sock (robotd.toml [theremin] socket)",
+  "socket_mode": "0o660, group `robot` - whoever may watch the robot may watch what it sees (tof/src/main.rs SOCKET_MODE, GROUP)"
+ },
+ "policies": {
+  "shape": "every alpha policy is obs[1,61] -> actions[1,14]; robotd checks the width at LOAD rather than mid-stride",
+  "refusal": "the legacy 51-D family is refused at load with 'observation width is 51, expected 61'",
+  "files": [
+   "alpha_walking.onnx (the velstand gait)",
+   "alpha_stand.onnx (standing + body pose)",
+   "alpha_sitstand.onnx (sit <-> stand)",
+   "alpha_ground_pick.onnx (A-button pick)",
+   "ball_kick_left.onnx",
+   "ball_kick_right.onnx",
+   "roulade.onnx (X-button forward roll)"
+  ],
+  "src": "research/raw/deploy_robotd.toml [policy]",
+  "runtime_dep": "ONNX Runtime is dlopened, not linked: a missing library is a startup failure, reported through robot.health, and the robot holds its pose (robotd.toml [policy])",
+  "ours": "our own MuJoCo runs drive these same published ONNX files - out/sim/report.json, policy_file BEST_alpha_walking.onnx - which is why TEST-PLAN's walk gate can be derived from a simulation at all"
+ },
+ "config": {
+  "path": "/etc/robot/robotd.toml",
+  "behaviour": "read once at startup, not watched; changing anything needs `systemctl restart robotd`",
+  "durability": "per-robot configuration, so it survives an update AND a rollback; the installer never overwrites it. A board provisioned long ago can therefore differ from the release default - EN-02 step 1 reads the file rather than trusting the default",
+  "local_copy": "research/raw/deploy_robotd.toml"
+ }
+}
