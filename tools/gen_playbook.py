@@ -418,6 +418,10 @@ A('''<!doctype html>
 </header>''' % (E(D["doc"]["title"]), E(D["doc"]["subtitle"]), E(D["doc"]["id"]),
                 E(D["doc"]["rev"]), E(D["doc"]["date"]), E(D["doc"]["units"])))
 
+if D["doc"].get("rev_note"):
+    A('<p class="note" style="font-size:13px"><b>What changed in this revision.</b> %s</p>'
+      % E(D["doc"]["rev_note"]))
+
 if TOT:
     A('''<div class="statbar">
   <div class="stat"><b>%d</b><span>printed slugs / %d pieces</span></div>

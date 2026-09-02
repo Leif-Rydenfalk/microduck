@@ -1,778 +1,779 @@
 {
- "$comment": "Data for tools/gen_playbook.py -> MANUFACTURING-PLAYBOOK.html. Rates, decisions, stations, gates and sources live HERE; every per-part number is COMPUTED by the generator from out/print/slice.json (real slicer grams/seconds), out/dfm/dfm.json (measured overhang and wall) and out/jigs/jigs.json. Nothing in this file is a per-part measurement.",
- "doc": {
-  "id": "MD-MFG-001",
-  "rev": "A",
-  "date": "2026-09-02",
-  "title": "Manufacturing Playbook",
-  "subtitle": "The document the line executes: process per part, DFM finding per part, print profiles, station-by-station assembly with jigs and torque, QA gates, and pack-out.",
-  "units": "mm / g / s / degrees / USD"
- },
- "sources": {
-  "LM3": {
-   "what": "filament price: PLA \"$24.00/kg\" US, TPU \"$44.00/kg\"",
-   "where": "docs/production/process.md \u00a73.2",
-   "date": "2026-04"
+  "$comment": "Data for tools/gen_playbook.py -> MANUFACTURING-PLAYBOOK.html. Rates, decisions, stations, gates and sources live HERE; every per-part number is COMPUTED by the generator from out/print/slice.json (real slicer grams/seconds), out/dfm/dfm.json (measured overhang and wall) and out/jigs/jigs.json. Nothing in this file is a per-part measurement.",
+  "doc": {
+    "id": "MD-MFG-001",
+    "rev": "B",
+    "date": "2026-09-03",
+    "title": "Manufacturing Playbook",
+    "subtitle": "The document the line executes: process per part, DFM finding per part, print profiles, station-by-station assembly with jigs and torque, QA gates, and pack-out.",
+    "units": "mm / g / s / degrees / USD",
+    "rev_note": "Rev B, 2026-09-03: §4.2's orientation note and §3.2's flat-plate risk were hand-typed and one of them was wrong (pre-bed-contact-exclusion figures, making its own premise false for the part it cited); both are now generated from out/dfm/dfm.json. §2.3, §3 and §4.2's tables were wider than the 840 px sheet and were losing their last column to a silent scrollbar; measured with tools/tablefit.py and fixed. Wall thicknesses print to 4 dp. The farm filament basis now names the retail TPU rate it actually charges."
   },
-  "SL": {
-   "what": "Slant 3D membership PLA \"$10/kg\"; \"1000 3D Printers\"; \"No MOQs\"",
-   "where": "docs/production/process.md \u00a73.2, \u00a73.4"
-  },
-  "CC": {
-   "what": "wear = printer price / \"5,000 printing hours\": Ender-3 V3 SE \"$0.04/hour\" ... Prusa MK4S \"$0.20-0.23/hour\"; material default \"$20/kg\" with \"\u00d7 1.10\" waste; labour \"Fifteen minutes at $20/h is $5.00 \u2026 58% of the true cost\"",
-   "where": "docs/production/process.md \u00a73.1-3.3",
-   "date": "2026-06-08"
-  },
-  "LM1": {
-   "what": "Bambu A1 Mini running cost \"\u00a30.188/hr\" = depreciation \"\u00a30.100\" + electricity \"\u00a30.061\" (180 W @ \u00a30.34/kWh) + maintenance \"\u00a30.027\"",
-   "where": "docs/production/process.md \u00a73.1",
-   "date": "2026-03-15"
-  },
-  "LM2": {
-   "what": "what a farm charges: seller \"2.00-4.00/hr\", pro \"5.00-8.00/hr\"",
-   "where": "docs/production/process.md \u00a73.1",
-   "date": "2026-06-09"
-  },
-  "PR2": {
-   "what": "Zac Hartley (70+ printers): \"I aim for $2 per print hour per machine and a 30% gross profit margin\"; success rate 90-95 %; \"1,000 kits every 3 weeks using 50 printers (80,000 total parts)\" \u2248 76 parts/printer-day",
-   "where": "docs/production/process.md \u00a73.1, \u00a73.3"
-  },
-  "GC": {
-   "what": "defaults: failure \"10%\", \"$3 base fee per print hour\", labour \"$20.00/hour\"",
-   "where": "docs/production/process.md \u00a73.1"
-  },
-  "3DP": {
-   "what": "bureau FDM \"$0.05-$0.15 per gram plus $3-$10 setup per part. A 100g part lands at $8-$25\"",
-   "where": "docs/production/process.md \u00a73.4",
-   "date": "2026-05-18"
-  },
-  "HT": {
-   "what": "\"A basic aluminum mold typically costs $2,000 to $10,000\"; steel \"$10,000 to over $100,000\"; per part \"$0.50 to $5.00\"; break-even \"Between 200 and 1,000 units\" - simple small \"~200 Units\", complex large \"~800 Units\"",
-   "where": "docs/production/process.md \u00a75",
-   "date": "2026-02-10"
-  },
-  "PL1": {
-   "what": "\"Mold cost starts at $1,495\"; prototyping tool \"guaranteed for at least 2,000 shots\"; \"as fast as 1 day\", standard \"7 days\"",
-   "where": "docs/production/process.md \u00a75"
-  },
-  "PL4": {
-   "what": "\"If a cam or insert is required, your overall mould size can increase by \u00a31,000-\u00a32,000 per component\"",
-   "where": "docs/production/process.md \u00a75"
-  },
-  "XM1": {
-   "what": "knob 16.8 mm: moulded \"~$0.80 per unit (without tooling, 2,000+ units)\", break-even \"2,000 units\"; junction housing 216 mm: tooling \"~$10,000\", break-even \"250 units\"",
-   "where": "docs/production/process.md \u00a75",
-   "date": "2026-06-29"
-  },
-  "HP": {
-   "what": "MJF PA12 \"0.29 \u20ac/cm3\" raw grey, \"Vapour smoothing \u2026 0.42 \u20ac/cm3\"; MJF TPU 90A \"0.58 \u20ac/cm3\"",
-   "where": "docs/production/process.md \u00a74"
-  },
-  "ML": {
-   "what": "urethane silicone mould \"$500-$3,000\", \"degrade after 20-30 pulls\", best \"50-500 identical parts\", lead \"2-3 weeks\"",
-   "where": "docs/production/process.md \u00a76"
-  },
-  "SLICE": {
-   "what": "every gram and second in this document: BambuStudio 02.08.02.61 driven by ce-slice 0.1.0, the slicer's own result.json, never derived from volume",
-   "where": "out/print/slice.json + out/print/PRINT.md"
-  },
-  "DFM": {
-   "what": "overhang by build direction and ray-cast wall thickness off the exact sliced STL; solid holes/radii/thinnest-wall for the parametric rebuilds",
-   "where": "out/dfm/dfm.json, generated by tools/measure_dfm.py"
-  },
-  "DFMMD": {
-   "what": "the parallel DFM pass on the PARAMETRIC SOLIDS of the 20 parts whose component.json says origin=generated and verdict=PASS: bed fit, exact thinnest wall plus ray p1/p5, every hole, elevated-vs-bed support area in six directions, and the per-part risk list. It reaches the same bed-contact correction independently \u2014 \"a part's flat bottom is a beta = 0 face, so microduck-trunk-base ... scored 43.7% overhang lying flat ... The bed is not support material\" \u2014 from a separate tool (tools/dfm_orient.py) and a separate JSON (out/dfm/dfm-rebuilt.json).",
-   "where": "docs/DFM.md",
-   "date": "2026-09-02"
-  },
-  "S9": {
-   "what": "IATA DGR 67th ed. / ICAO TI 2025-2026 from 1 Jan 2026: PI 967 Section II state of charge \"not mandatory for these items\"; PI 966 Section II \"must be offered for transport at a state of charge not exceeding 30% of their rated capacity\"; the mark is 100 \u00d7 100 mm, reducible to 100 \u00d7 70 mm; F.04 two-package exception; E.08 \"packaged in a manner that prevents unintentional activation\"; D.05 charger-plus-battery packages become UN 3480 PI 965",
-   "where": "docs/production/compliance-and-assembly.md \u00a72.1"
-  },
-  "S10": {
-   "what": "PI 967 Section II: 5 kg net per package, PAX and CAO, \"No requirements \u2026 Maximum 2 packages per shipment\"; PI 966 II 1.2 m drop + stacking test; PI 965 IB Cargo Aircraft Only, 10 kg, Shipper's Declaration",
-   "where": "docs/production/compliance-and-assembly.md \u00a72.1"
-  },
-  "S11": {
-   "what": "49 CFR 173.185: \"may not exceed 20 Wh for a lithium ion cell or 100 Wh for a lithium ion battery\"; mark exception for \"two packages or fewer \u2026 not more than \u2026 two lithium batteries contained in equipment\"",
-   "where": "docs/production/compliance-and-assembly.md \u00a72.3"
-  },
-  "S12": {
-   "what": "USPS Publication 52 \u00a7349: Wh = Ah \u00d7 V; \"Each battery must display the 'Watt-hour' or 'Wh' marking\"; \u2264 8 cells or 2 batteries per mailpiece",
-   "where": "docs/production/compliance-and-assembly.md \u00a71, \u00a72.4"
-  },
-  "S15": {
-   "what": "NP-F550 replacement listings: \"2600 mAh\", 7.2 V, \"Number of cells: 2\", \"3.5 oz\" (99 g)",
-   "where": "docs/production/compliance-and-assembly.md \u00a71"
-  },
-  "S43": {
-   "what": "Boothroyd-Dewhurst handling and insertion times: grasp 1.5 s one-hand / 4.0 s two-hand, press-fit 2.0-3.0 s, machine screw into pre-tapped hole 5.0-8.0 s",
-   "where": "docs/production/compliance-and-assembly.md \u00a77.1"
-  },
-  "S44": {
-   "what": "Boothroyd Dewhurst worked example: 11 parts = 87.64 s, default fully-burdened rate $40/h, plant efficiency 85 %",
-   "where": "docs/production/compliance-and-assembly.md \u00a77.1"
-  },
-  "S42": {
-   "what": "ROBOTIS ships \"PHS M2x6 TAP\" \u00d76 and \"PHS M2x8 TAP\" \u00d710 with every XL330",
-   "where": "docs/production/compliance-and-assembly.md \u00a77.2"
-  },
-  "HILLCO": {
-   "what": "DIN 912 class 12.9 suggested seating torque, M2 row verbatim: \"M2 2.07 2530 0.60 0.43\" = stress area 2.07 mm\u00b2, tensile load 2530 N, 0.60 N\u00b7m self-colour, 0.43 N\u00b7m zinc-plated, into a STEEL nut with anti-rust oil protection (footnote 5)",
-   "where": "https://www.hillcofasteners.com/Home/Page/din-912-torque-guide",
-   "date": "fetched 2026-09-02"
-  },
-  "ROBOTIS_NOTORQUE": {
-   "what": "no tightening torque for the XL330's own M2 tapped holes appears on any ROBOTIS page reachable from search: robotis.us product pages, docs.robotis.com xl330-m288, emanual.robotis.com xl330-m288, the XL-series TDS PDF and forum.robotis.com thread 5999 were all listed and none states one",
-   "where": "WebSearch 2026-09-02, four queries; results listed in this lane's transcript",
-   "date": "2026-09-02"
-  },
-  "TAPPEX": {
-   "what": "Tappex \"ETP51 General Performance Data\" PDF was fetched and is not machine-readable; no M2 torque-to-fail or pull-out figure could be read from it or from the Prusa / Markforged / insertguide pages, which publish dimensions and qualitative guidance only",
-   "where": "https://www.tappex.co.uk/wp-content/uploads/pdfs/ETP51-General-Performance-Data-V1-NON-ISO.pdf",
-   "date": "fetched 2026-09-02"
-  },
-  "CONN22": {
-   "what": "seat inventory verbatim: \"a \u00d816 boss for the inner ring (yaw2roll 'yaw_bearing_seat' \u00d816.0 x 1.95 with its own \u00d819.0 x 0.5 shoulder, hip-bracket 'roll_/pitch_bearing_seat' \u00d816.0 x 1.95, yaw-roll-motion 'roll_bearing_seat' \u00d816.0 x 4.0) or a \u00d822 bore for the outer ring ('housing_bore'/'pocket' - trunk_base for hip-yaw, the head for head-roll)\"",
-   "where": "ce-connections/press-fit-bearing-22x16x4/connection.json"
-  },
-  "CONN15": {
-   "what": "seat inventory verbatim: \"a \u00d810 boss for the inner ring (microduck-shin 'ankle', \u00d810.0 x 3.2) or a \u00d815 pocket for the outer ring (microduck-ankle 'ankle_bearing', \u00d815.0 x 2.3 with \u00d816 x 0.5 lead-in)\"",
-   "where": "ce-connections/press-fit-bearing-15x10x3/connection.json"
-  },
-  "MANUAL": {
-   "what": "the construction manual this playbook turns into a line: step order, servo IDs, bearing positions, per-step fastener counts (all community-derived and flagged)",
-   "where": "ce-assemblies/microduck/current/manual/MANUAL.md"
-  },
-  "CABLES": {
-   "what": "22 cables, 1615 mm total over the 21 with a length, measured off placements.json; voltage-drop PASS at 21 AWG, worst 0.55 V",
-   "where": "wiring/CABLES.md"
-  },
-  "PARTS5": {
-   "what": "\"FDM holes print 0.1-0.3 mm undersize\"",
-   "where": "docs/PARTS.md \u00a75, quoted in ce-assemblies/microduck/current/manual/MANUAL.md"
-  },
-  "PRESET": {
-   "what": "the installed 0.20mm Standard @BBL H2S process profile, inherits chain resolved: wall_loops = 2, support_threshold_angle = 30, enable_support = 0, detect_thin_wall = 0, sparse_infill_density = 15%, wall_generator = classic",
-   "where": "/Applications/BambuStudio.app/Contents/Resources/profiles/BBL/process/0.20mm Standard @BBL H2S.json",
-   "date": "read 2026-09-02"
-  },
-  "STALESTL": {
-   "what": "out/print/stl_manifest.json marks 8 slugs \"our parametric rebuild (latest PASS refcheck ours.stl)\" and 22 \"vendor mesh (Pollen reference asset, loaded as-is)\"; ce-parts/*/component.json now records 20 slugs at origin=generated, verdict=PASS. The 12-slug difference is the set rebuilt AFTER the STLs were exported at 2026-09-02 02:40.",
-   "where": "out/print/stl_manifest.json + ce-parts/*/component.json",
-   "date": "2026-09-02"
-  },
-  "STALEDELTA": {
-   "what": "the twelve stale slugs' parametric rebuilds sliced on the same machine, process, filament and --orient flags as out/print/slice.json; per-part and per-robot deltas",
-   "where": "out/playbook/stale-stl-delta.json, sliced through mcp ce-slice slice_part 2026-09-02",
-   "date": "2026-09-02"
-  }
- },
- "rates": {
-  "material_usd_per_kg": {
-   "PLA": 24.0,
-   "PLA_farm": 10.0,
-   "TPU": 44.0,
-   "src": [
-    "LM3",
-    "SL"
-   ],
-   "waste_factor": 1.1,
-   "waste_src": "CC"
-  },
-  "machine_usd_per_hour_inhouse": {
-   "low": 0.1,
-   "high": 0.31,
-   "why": "wear $0.04-0.23/h (CC) + power ~$0.06-0.08/h (LM1)",
-   "src": [
-    "CC",
-    "LM1"
-   ]
-  },
-  "machine_usd_per_hour_farm": {
-   "low": 2.0,
-   "high": 4.0,
-   "src": [
-    "LM2",
-    "PR2",
-    "GC"
-   ]
-  },
-  "labour_usd_per_hour": 20.0,
-  "labour_src": "CC",
-  "labour_minutes_per_print_job": 15.0,
-  "labour_job_note": "CC's figure is 15 minutes hands-on PER PRINT, and a plate IS one print. Per-piece labour is therefore $5.00 / (pieces on the plate) when plated, and $5.00 when a part is printed alone.",
-  "failure_buffer": {
-   "low": 1.1,
-   "high": 1.3,
-   "src": [
-    "CC",
-    "GC"
-   ]
-  },
-  "mould_piece_usd": {
-   "low": 0.5,
-   "high": 5.0,
-   "src": "HT"
-  },
-  "tool_usd": {
-   "floor": 1495.0,
-   "alu_low": 2000.0,
-   "alu_high": 10000.0,
-   "src": [
-    "PL1",
-    "HT"
-   ]
-  },
-  "plate_pieces": {
-   "PLA": 32,
-   "TPU": 4,
-   "why": "out/print/PRINT.md: one plate never mixes filaments; the PLA plate holds 32 pieces and the TPU plate 4"
-  }
- },
- "visible": {
-  "why": "A moulded part is bought for its SURFACE as much as its cost, so the moulding case is made part by part on whether the customer sees it. `visible` = on the outside of the finished robot. The nine hard visible parts are the same nine docs/production/process.md \u00a75.1 counts as \"visible only (3 shells + 6 trim) = 9 tools\".",
-  "slugs": [
-   "microduck-top-head-shell",
-   "microduck-bottom-head-shell",
-   "microduck-trunk-shell-left",
-   "microduck-trunk-shell-right",
-   "microduck-face-part",
-   "microduck-eye-ring",
-   "microduck-jaw",
-   "microduck-foot-left",
-   "microduck-foot-right",
-   "microduck-jaw-soft",
-   "microduck-soft-mouth-top",
-   "microduck-sole-left",
-   "microduck-sole-right"
-  ]
- },
- "torque": [
-  {
-   "joint": "M2 screw into the XL330's own \u00d81.6 x 6.0 tapped holes (horn face and case), 4 per horn / 8 per case face",
-   "value": null,
-   "verdict": "CANNOT DETERMINE",
-   "why": "ROBOTIS publishes no tightening torque for this part. Four searches over robotis.us, docs.robotis.com, emanual.robotis.com, the XL-series TDS PDF and forum.robotis.com returned specification and dimension pages only; none states a torque. The case material is not stated either (part:xl330-m288-t cad/part.py: MATERIAL = \"PA\" with the note that the vendor's case material is not on the fetched page), so it cannot even be derived.",
-   "do_not_use": "The DIN 912 class 12.9 chart figure for M2 \u2014 0.60 N\u00b7m self-colour, 0.43 N\u00b7m zinc-plated, stress area 2.07 mm\u00b2, tensile load 2530 N (HILLCO). That is a steel screw into a STEEL nut and is far above what a moulded polymer boss or a printed pilot will hold. Using it will strip the servo.",
-   "test": "TORQUE-TO-STRIP, servo case. 5 sacrificial XL330s \u00d7 4 holes. Calibrated 0-0.5 N\u00b7m screwdriver, M2\u00d76 PHS TAP as shipped with the servo (S42). Drive each screw until the thread yields; record peak. Assembly torque = 0.50 \u00d7 the LOWEST peak of the 20, rounded down to the driver's scale division. Re-run whenever the screw source changes.",
-   "interim": "Until that test is run the line uses a slip-limiting screwdriver set to its lowest usable setting and the written instruction is 'seat, then one eighth of a turn' \u2014 recorded as an unmeasured practice, not a specification."
-  },
-  {
-   "joint": "M2 screw self-tapped into a printed PLA pilot (\u00d81.55-1.65 measured on Pollen's meshes, connection:threaded-m2 joins.b)",
-   "value": null,
-   "verdict": "CANNOT DETERMINE",
-   "why": "No source read gives a strip torque for M2 in FDM PLA. The number is not a material constant either: it depends on the pilot diameter as printed, the boss wall, the layer direction across the thread and the print temperature \u2014 all of which are outcomes of the specific machine and profile in \u00a74, not of the model.",
-   "do_not_use": "Any steel-fastener chart, and any figure quoted for injection-moulded PLA \u2014 an FDM boss fails between layers, not through the thread.",
-   "test": "TORQUE-TO-STRIP, printed coupon. Print 10 coupons on the production profile (\u00a74) carrying the same \u00d81.60 x 4.0 blind pilot as power-support, in the same build orientation as the real part, because the layer direction is the variable. Drive an M2\u00d76 to failure; record peak and failure mode (thread shear vs boss split vs delamination). Assembly torque = 0.50 \u00d7 the lowest of the 10. Publish the histogram, not the mean.",
-   "interim": "Same slip-limited driver. docs/DFM.md's standing instruction applies first: these holes print undersize, so drill to tapping size before any screw goes in."
-  },
-  {
-   "joint": "M2 screw into a brass heat-set insert installed in a printed PLA boss (SPEC \u00a76 uses inserts wherever a thread is loaded)",
-   "value": null,
-   "verdict": "CANNOT DETERMINE",
-   "why": "No readable manufacturer figure. Tappex's own \"ETP51 General Performance Data\" PDF was fetched and its text is not extractable; Prusa publishes the M2 insert's dimensions and no performance data; Markforged and the insert-guide pages give qualitative guidance only (TAPPEX). Nothing states a torque-out or pull-out load for M2 in PLA.",
-   "do_not_use": "The insert's own thread rating. The joint fails at the insert-to-plastic interface, not in the M2 thread, so the screw's rating is irrelevant.",
-   "test": "TORQUE-OUT and PULL-OUT, insert in a printed boss. 10 coupons per boss geometry, insert installed with the production soldering-iron tip and depth stop. (a) torque-out: drive an M2 screw until the insert spins in the plastic; record peak. (b) pull-out: tensile test to insert extraction; record load. Assembly torque = 0.50 \u00d7 the lowest torque-out. Both numbers go on the drawing note.",
-   "interim": "Inserts are set with a temperature-controlled iron and a depth stop so the flange finishes flush; a proud insert is a reject at the station gate, because it means the boss did not melt and the interface is the weak one."
-  }
- ],
- "stations": [
-  {
-   "id": "S0",
-   "name": "Incoming inspection",
-   "takt_note": "batch, not per unit",
-   "inputs": "XL330 \u00d715, bearings 22\u00d716\u00d74 \u00d711 and 15\u00d710\u00d73 \u00d73, NP-F550, Radxa Zero 3W, the three custom PCBs, camera, ToF, speaker, fasteners",
-   "steps": [
-    "Count and identify every line against docs/BOM.md. A part with no MPN does not enter the line.",
-    "Bearings: check OD and bore on a sample of 5 per lot against the measured envelope \u2014 22.000/16.000 and 15.000/10.000 with the 0.2 bore and 0.3 OD chamfers (CONN22, CONN15). A bearing outside that envelope will not seat in a printed seat that was modelled to it.",
-    "Servos: power each XL330 on the bench before it reaches S3 and read its model number and firmware. A servo that does not answer never gets built in.",
-    "Battery: read the Wh marking on the case and record the lot. A pack with no Wh marking cannot be shipped (S12) and must not enter stock."
-   ],
-   "gates": [
-    {
-     "gate": "every BOM line identified by MPN",
-     "pass": "100 % of lines",
-     "fail_action": "quarantine the lot"
+  "sources": {
+    "LM3": {
+      "what": "filament price: PLA \"$24.00/kg\" US, TPU \"$44.00/kg\"",
+      "where": "docs/production/process.md §3.2",
+      "date": "2026-04"
     },
-    {
-     "gate": "bearing envelope, 5 per lot",
-     "pass": "OD and bore within the modelled envelope",
-     "fail_action": "reject the lot; the seats are modelled to these numbers"
+    "SL": {
+      "what": "Slant 3D membership PLA \"$10/kg\"; \"1000 3D Printers\"; \"No MOQs\"",
+      "where": "docs/production/process.md §3.2, §3.4"
     },
-    {
-     "gate": "servo answers on the bus",
-     "pass": "model + firmware read back",
-     "fail_action": "return to supplier"
+    "CC": {
+      "what": "wear = printer price / \"5,000 printing hours\": Ender-3 V3 SE \"$0.04/hour\" ... Prusa MK4S \"$0.20-0.23/hour\"; material default \"$20/kg\" with \"× 1.10\" waste; labour \"Fifteen minutes at $20/h is $5.00 … 58% of the true cost\"",
+      "where": "docs/production/process.md §3.1-3.3",
+      "date": "2026-06-08"
     },
-    {
-     "gate": "battery Wh marking present and legible",
-     "pass": "\"18.72 Wh\" or the supplier's printed Wh",
-     "fail_action": "reject \u2014 unshippable (S12)"
+    "LM1": {
+      "what": "Bambu A1 Mini running cost \"£0.188/hr\" = depreciation \"£0.100\" + electricity \"£0.061\" (180 W @ £0.34/kWh) + maintenance \"£0.027\"",
+      "where": "docs/production/process.md §3.1",
+      "date": "2026-03-15"
+    },
+    "LM2": {
+      "what": "what a farm charges: seller \"2.00-4.00/hr\", pro \"5.00-8.00/hr\"",
+      "where": "docs/production/process.md §3.1",
+      "date": "2026-06-09"
+    },
+    "PR2": {
+      "what": "Zac Hartley (70+ printers): \"I aim for $2 per print hour per machine and a 30% gross profit margin\"; success rate 90-95 %; \"1,000 kits every 3 weeks using 50 printers (80,000 total parts)\" ≈ 76 parts/printer-day",
+      "where": "docs/production/process.md §3.1, §3.3"
+    },
+    "GC": {
+      "what": "defaults: failure \"10%\", \"$3 base fee per print hour\", labour \"$20.00/hour\"",
+      "where": "docs/production/process.md §3.1"
+    },
+    "3DP": {
+      "what": "bureau FDM \"$0.05-$0.15 per gram plus $3-$10 setup per part. A 100g part lands at $8-$25\"",
+      "where": "docs/production/process.md §3.4",
+      "date": "2026-05-18"
+    },
+    "HT": {
+      "what": "\"A basic aluminum mold typically costs $2,000 to $10,000\"; steel \"$10,000 to over $100,000\"; per part \"$0.50 to $5.00\"; break-even \"Between 200 and 1,000 units\" - simple small \"~200 Units\", complex large \"~800 Units\"",
+      "where": "docs/production/process.md §5",
+      "date": "2026-02-10"
+    },
+    "PL1": {
+      "what": "\"Mold cost starts at $1,495\"; prototyping tool \"guaranteed for at least 2,000 shots\"; \"as fast as 1 day\", standard \"7 days\"",
+      "where": "docs/production/process.md §5"
+    },
+    "PL4": {
+      "what": "\"If a cam or insert is required, your overall mould size can increase by £1,000-£2,000 per component\"",
+      "where": "docs/production/process.md §5"
+    },
+    "XM1": {
+      "what": "knob 16.8 mm: moulded \"~$0.80 per unit (without tooling, 2,000+ units)\", break-even \"2,000 units\"; junction housing 216 mm: tooling \"~$10,000\", break-even \"250 units\"",
+      "where": "docs/production/process.md §5",
+      "date": "2026-06-29"
+    },
+    "HP": {
+      "what": "MJF PA12 \"0.29 €/cm3\" raw grey, \"Vapour smoothing … 0.42 €/cm3\"; MJF TPU 90A \"0.58 €/cm3\"",
+      "where": "docs/production/process.md §4"
+    },
+    "ML": {
+      "what": "urethane silicone mould \"$500-$3,000\", \"degrade after 20-30 pulls\", best \"50-500 identical parts\", lead \"2-3 weeks\"",
+      "where": "docs/production/process.md §6"
+    },
+    "SLICE": {
+      "what": "every gram and second in this document: BambuStudio 02.08.02.61 driven by ce-slice 0.1.0, the slicer's own result.json, never derived from volume",
+      "where": "out/print/slice.json + out/print/PRINT.md"
+    },
+    "DFM": {
+      "what": "overhang by build direction and ray-cast wall thickness off the exact sliced STL; solid holes/radii/thinnest-wall for the parametric rebuilds",
+      "where": "out/dfm/dfm.json, generated by tools/measure_dfm.py"
+    },
+    "DFMMD": {
+      "what": "the parallel DFM pass on the PARAMETRIC SOLIDS of the 20 parts whose component.json says origin=generated and verdict=PASS: bed fit, exact thinnest wall plus ray p1/p5, every hole, elevated-vs-bed support area in six directions, and the per-part risk list. It reaches the same bed-contact correction independently — \"a part's flat bottom is a beta = 0 face, so microduck-trunk-base ... scored 43.7% overhang lying flat ... The bed is not support material\" — from a separate tool (tools/dfm_orient.py) and a separate JSON (out/dfm/dfm-rebuilt.json).",
+      "where": "docs/DFM.md",
+      "date": "2026-09-02"
+    },
+    "S9": {
+      "what": "IATA DGR 67th ed. / ICAO TI 2025-2026 from 1 Jan 2026: PI 967 Section II state of charge \"not mandatory for these items\"; PI 966 Section II \"must be offered for transport at a state of charge not exceeding 30% of their rated capacity\"; the mark is 100 × 100 mm, reducible to 100 × 70 mm; F.04 two-package exception; E.08 \"packaged in a manner that prevents unintentional activation\"; D.05 charger-plus-battery packages become UN 3480 PI 965",
+      "where": "docs/production/compliance-and-assembly.md §2.1"
+    },
+    "S10": {
+      "what": "PI 967 Section II: 5 kg net per package, PAX and CAO, \"No requirements … Maximum 2 packages per shipment\"; PI 966 II 1.2 m drop + stacking test; PI 965 IB Cargo Aircraft Only, 10 kg, Shipper's Declaration",
+      "where": "docs/production/compliance-and-assembly.md §2.1"
+    },
+    "S11": {
+      "what": "49 CFR 173.185: \"may not exceed 20 Wh for a lithium ion cell or 100 Wh for a lithium ion battery\"; mark exception for \"two packages or fewer … not more than … two lithium batteries contained in equipment\"",
+      "where": "docs/production/compliance-and-assembly.md §2.3"
+    },
+    "S12": {
+      "what": "USPS Publication 52 §349: Wh = Ah × V; \"Each battery must display the 'Watt-hour' or 'Wh' marking\"; ≤ 8 cells or 2 batteries per mailpiece",
+      "where": "docs/production/compliance-and-assembly.md §1, §2.4"
+    },
+    "S15": {
+      "what": "NP-F550 replacement listings: \"2600 mAh\", 7.2 V, \"Number of cells: 2\", \"3.5 oz\" (99 g)",
+      "where": "docs/production/compliance-and-assembly.md §1"
+    },
+    "S43": {
+      "what": "Boothroyd-Dewhurst handling and insertion times: grasp 1.5 s one-hand / 4.0 s two-hand, press-fit 2.0-3.0 s, machine screw into pre-tapped hole 5.0-8.0 s",
+      "where": "docs/production/compliance-and-assembly.md §7.1"
+    },
+    "S44": {
+      "what": "Boothroyd Dewhurst worked example: 11 parts = 87.64 s, default fully-burdened rate $40/h, plant efficiency 85 %",
+      "where": "docs/production/compliance-and-assembly.md §7.1"
+    },
+    "S42": {
+      "what": "ROBOTIS ships \"PHS M2x6 TAP\" ×6 and \"PHS M2x8 TAP\" ×10 with every XL330",
+      "where": "docs/production/compliance-and-assembly.md §7.2"
+    },
+    "HILLCO": {
+      "what": "DIN 912 class 12.9 suggested seating torque, M2 row verbatim: \"M2 2.07 2530 0.60 0.43\" = stress area 2.07 mm², tensile load 2530 N, 0.60 N·m self-colour, 0.43 N·m zinc-plated, into a STEEL nut with anti-rust oil protection (footnote 5)",
+      "where": "https://www.hillcofasteners.com/Home/Page/din-912-torque-guide",
+      "date": "fetched 2026-09-02"
+    },
+    "ROBOTIS_NOTORQUE": {
+      "what": "no tightening torque for the XL330's own M2 tapped holes appears on any ROBOTIS page reachable from search: robotis.us product pages, docs.robotis.com xl330-m288, emanual.robotis.com xl330-m288, the XL-series TDS PDF and forum.robotis.com thread 5999 were all listed and none states one",
+      "where": "WebSearch 2026-09-02, four queries; results listed in this lane's transcript",
+      "date": "2026-09-02"
+    },
+    "TAPPEX": {
+      "what": "Tappex \"ETP51 General Performance Data\" PDF was fetched and is not machine-readable; no M2 torque-to-fail or pull-out figure could be read from it or from the Prusa / Markforged / insertguide pages, which publish dimensions and qualitative guidance only",
+      "where": "https://www.tappex.co.uk/wp-content/uploads/pdfs/ETP51-General-Performance-Data-V1-NON-ISO.pdf",
+      "date": "fetched 2026-09-02"
+    },
+    "CONN22": {
+      "what": "seat inventory verbatim: \"a Ø16 boss for the inner ring (yaw2roll 'yaw_bearing_seat' Ø16.0 x 1.95 with its own Ø19.0 x 0.5 shoulder, hip-bracket 'roll_/pitch_bearing_seat' Ø16.0 x 1.95, yaw-roll-motion 'roll_bearing_seat' Ø16.0 x 4.0) or a Ø22 bore for the outer ring ('housing_bore'/'pocket' - trunk_base for hip-yaw, the head for head-roll)\"",
+      "where": "ce-connections/press-fit-bearing-22x16x4/connection.json"
+    },
+    "CONN15": {
+      "what": "seat inventory verbatim: \"a Ø10 boss for the inner ring (microduck-shin 'ankle', Ø10.0 x 3.2) or a Ø15 pocket for the outer ring (microduck-ankle 'ankle_bearing', Ø15.0 x 2.3 with Ø16 x 0.5 lead-in)\"",
+      "where": "ce-connections/press-fit-bearing-15x10x3/connection.json"
+    },
+    "MANUAL": {
+      "what": "the construction manual this playbook turns into a line: step order, servo IDs, bearing positions, per-step fastener counts (all community-derived and flagged)",
+      "where": "ce-assemblies/microduck/current/manual/MANUAL.md"
+    },
+    "CABLES": {
+      "what": "22 cables, 1615 mm total over the 21 with a length, measured off placements.json; voltage-drop PASS at 21 AWG, worst 0.55 V",
+      "where": "wiring/CABLES.md"
+    },
+    "PARTS5": {
+      "what": "\"FDM holes print 0.1-0.3 mm undersize\"",
+      "where": "docs/PARTS.md §5, quoted in ce-assemblies/microduck/current/manual/MANUAL.md"
+    },
+    "PRESET": {
+      "what": "the installed 0.20mm Standard @BBL H2S process profile, inherits chain resolved: wall_loops = 2, support_threshold_angle = 30, enable_support = 0, detect_thin_wall = 0, sparse_infill_density = 15%, wall_generator = classic",
+      "where": "/Applications/BambuStudio.app/Contents/Resources/profiles/BBL/process/0.20mm Standard @BBL H2S.json",
+      "date": "read 2026-09-02"
+    },
+    "STALESTL": {
+      "what": "out/print/stl_manifest.json marks 8 slugs \"our parametric rebuild (latest PASS refcheck ours.stl)\" and 22 \"vendor mesh (Pollen reference asset, loaded as-is)\"; ce-parts/*/component.json now records 20 slugs at origin=generated, verdict=PASS. The 12-slug difference is the set rebuilt AFTER the STLs were exported at 2026-09-02 02:40.",
+      "where": "out/print/stl_manifest.json + ce-parts/*/component.json",
+      "date": "2026-09-02"
+    },
+    "STALEDELTA": {
+      "what": "the twelve stale slugs' parametric rebuilds sliced on the same machine, process, filament and --orient flags as out/print/slice.json; per-part and per-robot deltas",
+      "where": "out/playbook/stale-stl-delta.json, sliced through mcp ce-slice slice_part 2026-09-02",
+      "date": "2026-09-02"
     }
-   ]
   },
-  {
-   "id": "S1",
-   "name": "Print and post-process",
-   "takt_note": "plate-batched, off the unit clock",
-   "inputs": "two plates: PLA 32 pieces, TPU 4 pieces (\u00a74)",
-   "steps": [
-    "Run the plates on the profile in \u00a74. Supports ON \u2014 eleven parts carry a slicer warning and the stock 0.20 mm Standard preset does not generate them.",
-    "Remove supports; deburr the first layer; check every part against its row in \u00a73 for the named risk.",
-    "Ream every bearing seat and pivot bore named in \u00a73. FDM holes print 0.1-0.3 mm undersize (PARTS5) and a bridged bore is oval as well as small.",
-    "Drill and tap, or heat-set, every M2 hole. Do not expect a threadable hole off the bed.",
-    "Weigh the plate. A plate more than 5 % off the sliced total in \u00a74 means the profile or the filament changed."
-   ],
-   "gates": [
-    {
-     "gate": "piece count per plate",
-     "pass": "32 PLA / 4 TPU",
-     "fail_action": "re-print the missing pieces"
+  "rates": {
+    "material_usd_per_kg": {
+      "PLA": 24.0,
+      "PLA_farm": 10.0,
+      "TPU": 44.0,
+      "src": [
+        "LM3",
+        "SL"
+      ],
+      "waste_factor": 1.1,
+      "waste_src": "CC"
     },
-    {
-     "gate": "plate mass vs the sliced total",
-     "pass": "within \u00b15 % of 218.29 g PLA / 26.20 g TPU",
-     "fail_action": "stop; the profile or the spool changed"
+    "machine_usd_per_hour_inhouse": {
+      "low": 0.1,
+      "high": 0.31,
+      "why": "wear $0.04-0.23/h (CC) + power ~$0.06-0.08/h (LM1)",
+      "src": [
+        "CC",
+        "LM1"
+      ]
     },
-    {
-     "gate": "bearing seats reamed, gauged with the mating bearing",
-     "pass": "bearing enters by hand pressure to 1 mm, then needs the press",
-     "fail_action": "re-ream; a seat that takes the bearing by hand is a loose fit and a reject",
-     "critical": true
+    "machine_usd_per_hour_farm": {
+      "low": 2.0,
+      "high": 4.0,
+      "src": [
+        "LM2",
+        "PR2",
+        "GC"
+      ]
     },
-    {
-     "gate": "power-support's sprung latch tongue",
-     "pass": "flexes and returns, no delamination line",
-     "fail_action": "scrap the part \u2014 docs/DFM.md names this the most fragile printed feature on the robot"
+    "labour_usd_per_hour": 20.0,
+    "labour_src": "CC",
+    "labour_minutes_per_print_job": 15.0,
+    "labour_job_note": "CC's figure is 15 minutes hands-on PER PRINT, and a plate IS one print. Per-piece labour is therefore $5.00 / (pieces on the plate) when plated, and $5.00 when a part is printed alone.",
+    "failure_buffer": {
+      "low": 1.1,
+      "high": 1.3,
+      "src": [
+        "CC",
+        "GC"
+      ]
+    },
+    "mould_piece_usd": {
+      "low": 0.5,
+      "high": 5.0,
+      "src": "HT"
+    },
+    "tool_usd": {
+      "floor": 1495.0,
+      "alu_low": 2000.0,
+      "alu_high": 10000.0,
+      "src": [
+        "PL1",
+        "HT"
+      ]
+    },
+    "plate_pieces": {
+      "PLA": 32,
+      "TPU": 4,
+      "why": "out/print/PRINT.md: one plate never mixes filaments; the PLA plate holds 32 pieces and the TPU plate 4"
     }
-   ]
   },
-  {
-   "id": "S2",
-   "name": "Bearing seating",
-   "takt_note": "14 bearings per robot",
-   "inputs": "11 \u00d7 22\u00d716\u00d74, 3 \u00d7 15\u00d710\u00d73, the four pushers and the anvil from \u00a75.1",
-   "steps": [
-    "Read the seat off \u00a75.2 FIRST: a BORE seat takes the outer-ring pusher, a BOSS seat takes the inner-ring pusher. They are not interchangeable and using the wrong one drives the load across the balls.",
-    "Set the part on the anvil with the seat over its \u00d824 through bore.",
-    "Press square and steadily with an arbor press or a vice. Do not tap a bearing in with a hammer \u2014 a printed seat has no yield to absorb the shock.",
-    "Spin the bearing by hand after seating."
-   ],
-   "gates": [
+  "visible": {
+    "why": "A moulded part is bought for its SURFACE as much as its cost, so the moulding case is made part by part on whether the customer sees it. `visible` = on the outside of the finished robot. The nine hard visible parts are the same nine docs/production/process.md §5.1 counts as \"visible only (3 shells + 6 trim) = 9 tools\".",
+    "slugs": [
+      "microduck-top-head-shell",
+      "microduck-bottom-head-shell",
+      "microduck-trunk-shell-left",
+      "microduck-trunk-shell-right",
+      "microduck-face-part",
+      "microduck-eye-ring",
+      "microduck-jaw",
+      "microduck-foot-left",
+      "microduck-foot-right",
+      "microduck-jaw-soft",
+      "microduck-soft-mouth-top",
+      "microduck-sole-left",
+      "microduck-sole-right"
+    ]
+  },
+  "torque": [
     {
-     "gate": "bearing flush with the seat face",
-     "pass": "no daylight on a straight edge",
-     "fail_action": "press further; if it will not go, the seat was not reamed"
+      "joint": "M2 screw into the XL330's own Ø1.6 x 6.0 tapped holes (horn face and case), 4 per horn / 8 per case face",
+      "value": null,
+      "verdict": "CANNOT DETERMINE",
+      "why": "ROBOTIS publishes no tightening torque for this part. Four searches over robotis.us, docs.robotis.com, emanual.robotis.com, the XL-series TDS PDF and forum.robotis.com returned specification and dimension pages only; none states a torque. The case material is not stated either (part:xl330-m288-t cad/part.py: MATERIAL = \"PA\" with the note that the vendor's case material is not on the fetched page), so it cannot even be derived.",
+      "do_not_use": "The DIN 912 class 12.9 chart figure for M2 — 0.60 N·m self-colour, 0.43 N·m zinc-plated, stress area 2.07 mm², tensile load 2530 N (HILLCO). That is a steel screw into a STEEL nut and is far above what a moulded polymer boss or a printed pilot will hold. Using it will strip the servo.",
+      "test": "TORQUE-TO-STRIP, servo case. 5 sacrificial XL330s × 4 holes. Calibrated 0-0.5 N·m screwdriver, M2×6 PHS TAP as shipped with the servo (S42). Drive each screw until the thread yields; record peak. Assembly torque = 0.50 × the LOWEST peak of the 20, rounded down to the driver's scale division. Re-run whenever the screw source changes.",
+      "interim": "Until that test is run the line uses a slip-limiting screwdriver set to its lowest usable setting and the written instruction is 'seat, then one eighth of a turn' — recorded as an unmeasured practice, not a specification."
     },
     {
-     "gate": "free rotation after seating",
-     "pass": "spins freely by finger, no notch",
-     "fail_action": "the bearing was pressed on the wrong race \u2014 scrap the bearing, not just the assembly",
-     "critical": true
+      "joint": "M2 screw self-tapped into a printed PLA pilot (Ø1.55-1.65 measured on Pollen's meshes, connection:threaded-m2 joins.b)",
+      "value": null,
+      "verdict": "CANNOT DETERMINE",
+      "why": "No source read gives a strip torque for M2 in FDM PLA. The number is not a material constant either: it depends on the pilot diameter as printed, the boss wall, the layer direction across the thread and the print temperature — all of which are outcomes of the specific machine and profile in §4, not of the model.",
+      "do_not_use": "Any steel-fastener chart, and any figure quoted for injection-moulded PLA — an FDM boss fails between layers, not through the thread.",
+      "test": "TORQUE-TO-STRIP, printed coupon. Print 10 coupons on the production profile (§4) carrying the same Ø1.60 x 4.0 blind pilot as power-support, in the same build orientation as the real part, because the layer direction is the variable. Drive an M2×6 to failure; record peak and failure mode (thread shear vs boss split vs delamination). Assembly torque = 0.50 × the lowest of the 10. Publish the histogram, not the mean.",
+      "interim": "Same slip-limited driver. docs/DFM.md's standing instruction applies first: these holes print undersize, so drill to tapping size before any screw goes in."
     },
     {
-     "gate": "pusher land condition",
-     "pass": "land is flat, no print line",
-     "fail_action": "replace the pusher (\u00a75.1: a printed pusher is a consumable)"
+      "joint": "M2 screw into a brass heat-set insert installed in a printed PLA boss (SPEC §6 uses inserts wherever a thread is loaded)",
+      "value": null,
+      "verdict": "CANNOT DETERMINE",
+      "why": "No readable manufacturer figure. Tappex's own \"ETP51 General Performance Data\" PDF was fetched and its text is not extractable; Prusa publishes the M2 insert's dimensions and no performance data; Markforged and the insert-guide pages give qualitative guidance only (TAPPEX). Nothing states a torque-out or pull-out load for M2 in PLA.",
+      "do_not_use": "The insert's own thread rating. The joint fails at the insert-to-plastic interface, not in the M2 thread, so the screw's rating is irrelevant.",
+      "test": "TORQUE-OUT and PULL-OUT, insert in a printed boss. 10 coupons per boss geometry, insert installed with the production soldering-iron tip and depth stop. (a) torque-out: drive an M2 screw until the insert spins in the plastic; record peak. (b) pull-out: tensile test to insert extraction; record load. Assembly torque = 0.50 × the lowest torque-out. Both numbers go on the drawing note.",
+      "interim": "Inserts are set with a temperature-controlled iron and a depth stop so the flange finishes flush; a proud insert is a reject at the station gate, because it means the boss did not melt and the interface is the weak one."
     }
-   ]
-  },
-  {
-   "id": "S3",
-   "name": "Servo ID, EEPROM and horn index",
-   "takt_note": "15 servos per robot, 5-11 min (S43/our estimate)",
-   "inputs": "15 \u00d7 XL330, one servo at a time on a bench bus, the horn-index gauge from \u00a75.1",
-   "steps": [
-    "One servo on the bus at a time. The robot is one daisy chain and a duplicate ID means disassembly (MANUAL).",
-    "Write ID, then baud_rate = 3 (1 Mbps), return_delay_time = 0, pwm_slope = 255, shutdown = 52 \u2014 the values the runtime asserts at boot.",
-    "IDs: 10-14 right leg, 20-24 left leg, 30/31 neck, 32/33/34 head and mouth. 200 is the imu_to_dxl board, not a servo.",
-    "Command Goal Position 2048, fit the horn-index gauge, confirm the foot sits flat on the case through the witness window, then read Present Position(132) back and record it as this unit's horn-zero offset.",
-    "Label the servo with its ID before it leaves the station."
-   ],
-   "gates": [
-    {
-     "gate": "ID and EEPROM read back after writing",
-     "pass": "all five registers match",
-     "fail_action": "re-write; a servo that will not hold EEPROM is scrap"
-    },
-    {
-     "gate": "no duplicate ID in the set of 15",
-     "pass": "15 distinct IDs",
-     "fail_action": "stop the build \u2014 this is the failure that costs a teardown",
-     "critical": true
-    },
-    {
-     "gate": "horn index",
-     "pass": "gauge seats flat; Present Position recorded",
-     "fail_action": "record and flag; a unit outside the fleet band goes to engineering, not to the line"
-    }
-   ]
-  },
-  {
-   "id": "S4",
-   "name": "Trunk",
-   "takt_note": "MANUAL step 1",
-   "inputs": "trunk-base, power-support, banana-pcb-locker, banana contact PCB, 2 \u00d7 XL330 (ID 20, 10), 2 \u00d7 bearing 22\u00d716\u00d74",
-   "steps": [
-    "Press the two hip-yaw idler bearings into trunk_base at (6, \u00b117.5, \u22125) body-frame. These are BORE seats \u2014 outer-ring pusher.",
-    "Bolt the ID-20 and ID-10 servos hanging from trunk_base, horns down, horn axes through world (6, \u00b117.5, 115).",
-    "Bolt power_support to trunk_base.",
-    "Clamp the banana contact PCB onto power_support's \u00d83.9 pins with banana_pcb_locker, 2 \u00d7 M2 through its \u00d82.17 eyes.",
-    "The battery does NOT go in here. It goes in at S9."
-   ],
-   "gates": [
-    {
-     "gate": "both idler bearings free and flush",
-     "pass": "spin by finger",
-     "fail_action": "back to S2"
-    },
-    {
-     "gate": "servo IDs on the labels read 20 and 10",
-     "pass": "visual",
-     "fail_action": "swap before anything closes over them"
-    }
-   ]
-  },
-  {
-   "id": "S5",
-   "name": "Hips and legs, left then right",
-   "takt_note": "MANUAL steps 2-3, the longest station",
-   "inputs": "per side: yaw2roll, bearing-roll, hip-bracket, upper-leg, rigidity-plate, shin, ankle, foot, TPU sole, 5 \u00d7 XL330, 4 \u00d7 bearing 22\u00d716\u00d74, 1 \u00d7 bearing 15\u00d710\u00d73",
-   "steps": [
-    "yaw2roll's \u00d816.0 \u00d7 1.95 seat and the hip bracket's \u00d816.0 \u00d7 1.95 seats are BOSS seats \u2014 inner-ring pusher (CONN22).",
-    "The shin's 'ankle' \u00d810.0 \u00d7 3.2 is a BOSS seat; the ankle's 'ankle_bearing' \u00d815.0 \u00d7 2.3 with its \u00d816 \u00d7 0.5 lead-in is a BORE seat (CONN15). Two different pushers on the same joint.",
-    "Fix each bracket to its servo horn with the horn already indexed at S3; do not rotate a horn by hand once it is indexed.",
-    "Lay the 1 mm rigidity plate flat across the thigh.",
-    "Fit the TPU sole to the hard foot last, friction face down."
-   ],
-   "gates": [
-    {
-     "gate": "hip, knee and ankle each swing through the MJCF range by hand",
-     "pass": "no bind, no over-travel",
-     "fail_action": "a bind is a bearing pressed on the wrong race or an unreamed pivot"
-    },
-    {
-     "gate": "left and right legs are mirror images",
-     "pass": "lay them together",
-     "fail_action": "a mirrored part was fitted to the wrong side \u2014 catch it here, not at S8",
-     "critical": true
-    }
-   ]
-  },
-  {
-   "id": "S6",
-   "name": "Neck",
-   "takt_note": "MANUAL step 4",
-   "inputs": "2 \u00d7 neck-plate, neck-pitch-bracket, 2 \u00d7 XL330 (ID 30, 31), 1 \u00d7 bearing 22\u00d716\u00d74",
-   "steps": [
-    "The two 2 mm neck plates span the 50 mm neck with a servo at each end.",
-    "Press one 22\u00d716\u00d74 into neck_pitch at (0, 20.8, \u221214.5) body-frame \u2014 the head-yaw axis bearing.",
-    "Fix neck_pitch to the ID-31 horn."
-   ],
-   "gates": [
-    {
-     "gate": "neck pitch and head pitch axes parallel",
-     "pass": "square against a flat",
-     "fail_action": "a twisted neck plate; re-print it flat"
-    }
-   ]
-  },
-  {
-   "id": "S7",
-   "name": "Head and electronics",
-   "takt_note": "MANUAL step 5, the densest station",
-   "inputs": "yaw-roll-motion, motor-support, face-part, eye-ring, M12 lens + holder, IMX219, ToF, Radxa Zero 3W, Robot HAT, speaker, top and bottom head shells, jaw, TPU lips, 3 \u00d7 XL330 (ID 32, 33, 34), 2 \u00d7 bearing 22\u00d716\u00d74, 1 \u00d7 bearing 15\u00d710\u00d73",
-   "steps": [
-    "Press two 22\u00d716\u00d74 into yaw_roll_motion at body x = \u221216 and +18. Its 'roll_bearing_seat' is \u00d816.0 \u00d7 4.0 \u2014 a BOSS seat (CONN22).",
-    "Stack the Robot HAT on the Radxa 40-pin header before either goes into the head; the stack cannot be made once the shells are on.",
-    "The camera mounts UPSIDE DOWN behind face_part at world (81.4, 0, 251.1). This is not a mistake to correct on the line.",
-    "Fit the TPU lips: jaw_soft (8.4 mm) on the jaw, soft_mouth_top (3.3 mm) under the top shell.",
-    "Do not close the shells until S8 has dressed the harness."
-   ],
-   "gates": [
-    {
-     "gate": "mouth opens \u22125\u00b0 (closed) to +30\u00b0 (open) by hand",
-     "pass": "full sweep, no rub on the lips",
-     "fail_action": "the TPU lip is proud; trim or re-print"
-    },
-    {
-     "gate": "camera and ToF seated and the CSI ribbon latched",
-     "pass": "tug test on the ribbon",
-     "fail_action": "re-seat before the shell closes",
-     "critical": true
-    }
-   ]
-  },
-  {
-   "id": "S8",
-   "name": "Harness and closing",
-   "takt_note": "22 cables, 1615 mm (CABLES)",
-   "inputs": "the cut set from wiring/CABLES.md",
-   "steps": [
-    "Build the daisy chain in order: HAT \u2192 id34 (35) \u2192 id33 (60) \u2192 id32 (50) \u2192 id31 (165) \u2192 id30 (35) \u2192 imu200 (120), then it splits to id20\u2026id24 and id10\u2026id14.",
-    "The 165 mm run crosses head-yaw and head-pitch; route it at the servo flank so it pays out the full \u00b1170\u00b0 sweep. A short-routed cable here is the classic failure that appears only after a hundred cycles.",
-    "The 340 mm battery lead crosses all four neck and head joints \u2014 bundle it with the bus loom through the neck.",
-    "Sweep every joint through its full range BEFORE any shell closes and watch the loom.",
-    "Close the shells."
-   ],
-   "gates": [
-    {
-     "gate": "full-range sweep of all 14 hinges with the loom fitted",
-     "pass": "no tension, no pinch, nothing rubs a shell edge",
-     "fail_action": "re-route; do not lengthen a cable without re-cutting from CABLES.md",
-     "critical": true
-    },
-    {
-     "gate": "no cable crosses a shell parting line",
-     "pass": "visual before closing",
-     "fail_action": "re-route"
-    }
-   ]
-  },
-  {
-   "id": "S9",
-   "name": "Power-up and functional test",
-   "takt_note": "see TEST-PLAN.html for the full procedure",
-   "inputs": "the closed robot, a charged NP-F550",
-   "steps": [
-    "Fit the battery.",
-    "Scan the bus \u2014 expect IDs 10-14, 20-24, 30-34 and 200.",
-    "Verify each joint's range against the MJCF before loading any policy.",
-    "Run the walk and sit-stand policies at 50 Hz."
-   ],
-   "gates": [
-    {
-     "gate": "bus scan",
-     "pass": "16 devices answer, none missing, none duplicated",
-     "fail_action": "back to S3"
-    },
-    {
-     "gate": "joint ranges match the MJCF",
-     "pass": "every hinge within its published limits",
-     "fail_action": "mechanical, not electrical \u2014 back to S5/S6/S7"
-    },
-    {
-     "gate": "walk policy",
-     "pass": "the robot stands and walks",
-     "fail_action": "record and route to engineering"
-    }
-   ]
-  },
-  {
-   "id": "S10",
-   "name": "Pack-out",
-   "takt_note": "2-5 min (our estimate)",
-   "inputs": "robot, box, insert, battery, USB-C cable, controller, manual",
-   "steps": [
-    "Set the battery's state of charge for the configuration being shipped \u2014 see \u00a77.",
-    "Seat the insert so the pack cannot make contact in transit, or ship the pack unseated (S9 E.08). The robot has no power switch, so the insert IS the safety measure.",
-    "Apply the marks the configuration needs \u2014 \u00a77 says which, and says when none are needed.",
-    "Weigh the finished box against the target."
-   ],
-   "gates": [
-    {
-     "gate": "state of charge for the configuration",
-     "pass": "\u226430 % where \u00a77 makes it mandatory",
-     "fail_action": "discharge before packing"
-    },
-    {
-     "gate": "battery cannot be activated in the box",
-     "pass": "insert holds the pack off its contacts, or the pack is unseated",
-     "fail_action": "re-pack \u2014 this is a regulatory requirement, not a preference (S9 E.08)",
-     "critical": true
-    },
-    {
-     "gate": "marks and documents match the configuration in \u00a77",
-     "pass": "checklist signed",
-     "fail_action": "do not release to the carrier"
-    }
-   ]
-  }
- ],
- "packaging": {
-  "battery": {
-   "pack": "NP-F550, 2S Li-ion, \"2600 mAh\", 7.2 V nominal",
-   "wh": 18.72,
-   "per_cell_wh": 9.36,
-   "mass_g": 99,
-   "envelope_mm": [
-    38.4,
-    20.6,
-    70.8
-   ],
-   "src": [
-    "S15",
-    "S12"
-   ],
-   "classification": "cell 9.36 Wh \u2264 20 Wh and battery 18.72 Wh \u2264 100 Wh, so \"small\" lithium-ion in every regime; > 2.7 Wh so no button-cell exemption"
-  },
-  "configurations": [
-   {
-    "config": "Robot box \u2014 battery installed in the robot",
-    "un": "UN 3481",
-    "pi": "PI 967 Section II",
-    "soc": "state of charge \u226430 % is RECOMMENDED only \u2014 \"not mandatory for these items\" (S9 p.14)",
-    "limits": "5 kg net batteries per package, PAX and CAO (S10)",
-    "marks": "lithium battery mark + the AWB statement, EXCEPT for a consignment of two packages or fewer each holding no more than two batteries installed in equipment (S9 F.04, S10, S11) \u2014 one robot is one battery, so a 1- or 2-box shipment needs neither",
-    "line_action": "no mark, no statement, no declaration for the normal single-robot order. Seat the insert (S9 E.08)."
-   },
-   {
-    "config": "Robot + spare packs in the same outer box",
-    "un": "UN 3481",
-    "pi": "PI 966 Section II",
-    "soc": "\u226430 % is MANDATORY \u2014 \"must be offered for transport at a state of charge not exceeding 30% of their rated capacity\" (S9 p.14)",
-    "limits": "the batteries needed to power the equipment plus 2 spare sets; 5 kg net; the package must pass a 1.2 m drop and a stacking test (S10)",
-    "marks": "lithium battery mark + \"Lithium ion batteries in compliance with Section II of PI966\"",
-    "line_action": "discharge the spares at S10, apply the mark and the statement, and use the drop-tested carton."
-   },
-   {
-    "config": "Charger pack shipped alone (2 batteries + charger, no robot)",
-    "un": "UN 3480",
-    "pi": "PI 965 Section IB",
-    "soc": "\u226430 % mandatory (S10)",
-    "limits": "Cargo Aircraft Only, 10 kg net per package, Shipper's Declaration required (S10)",
-    "marks": "Class 9 label + CAO label + battery mark + Shipper's Declaration",
-    "line_action": "this is fully regulated dangerous goods by air. A trained shipper handles it, or the pack ships in the robot's box under PI 966 instead \u2014 which is the cheaper answer and the one to design the store around."
-   }
   ],
-  "box_requirements": [
-   "A rigid outer box that passes the stacking test (PI 967 II) and, where spares are packed with it, the 1.2 m drop (PI 966 II).",
-   "An insert that physically prevents the pack from making contact, or the pack ships unseated: the robot has no power switch anywhere in the sources, so nothing else prevents unintentional activation (S9 E.08).",
-   "One face clear for a 100 \u00d7 100 mm battery mark, reducible to 100 \u00d7 70 mm, with a red hatched border \u2265 5 mm and the UN number \u2265 12 mm high (S9 F.01-F.02).",
-   "Wh marking legible on the battery case itself \u2014 checked at S0, not at S10 (S12).",
-   "USPS international takes ONLY batteries installed in the equipment, and forbids markings that identify the contents as lithium batteries \u2014 the opposite of the air rule. A store that mails internationally needs a different box artwork from one that ships by air freight.",
-   "Box dimensions, board grade, print and insert design: CANNOT DETERMINE \u2014 nothing is published and no unit has been delivered. Pollen's Shopify shipping weight for a robot is 1200 g against a 780 g robot, so 420 g is box + controller + cable + insert."
-  ]
- },
- "open": [
-  {
-   "item": "The print files are stale for 12 of 30 slugs",
-   "state": "FAIL",
-   "settles": "Re-export the STLs from the current parametric rebuilds and re-slice both plates. The twelve are ankle-left, ankle-right, foot-left, foot-right, hip-bracket, motor-support, neck-pitch-bracket, neck-plate, sole-left, sole-right, upper-leg-rigidity-plate and yaw-roll-motion: each has a PASSed parametric rebuild in ce-parts today, and the STL sitting in out/print/stl/ for it is still Pollen's vendor mesh, exported before those rebuilds landed. The rebuilt STLs already exist at out/dfm/stl-rebuilt/ (another lane's export), so this is a re-slice and a re-plate, not a re-model.",
-   "consequence": "Measured, not assumed: \u00a74.3 slices all twelve rebuilds on the same presets. Across a robot the difference is -4.90 g and -0.19 h (-2.0 % and -1.5 %), so \u00a72's costs and break-evens do not move. But four slugs differ by 5 % or more - foot-left and foot-right at -15.7 % mass, motor-support at -15.5 %, yaw-roll-motion at +12.3 % mass and +21.2 % time, and hip-bracket at -24.1 % time - and for those \u00a73's overhang and wall figures and \u00a74.2's orientation describe a shape the design no longer has."
+  "stations": [
+    {
+      "id": "S0",
+      "name": "Incoming inspection",
+      "takt_note": "batch, not per unit",
+      "inputs": "XL330 ×15, bearings 22×16×4 ×11 and 15×10×3 ×3, NP-F550, Radxa Zero 3W, the three custom PCBs, camera, ToF, speaker, fasteners",
+      "steps": [
+        "Count and identify every line against docs/BOM.md. A part with no MPN does not enter the line.",
+        "Bearings: check OD and bore on a sample of 5 per lot against the measured envelope — 22.000/16.000 and 15.000/10.000 with the 0.2 bore and 0.3 OD chamfers (CONN22, CONN15). A bearing outside that envelope will not seat in a printed seat that was modelled to it.",
+        "Servos: power each XL330 on the bench before it reaches S3 and read its model number and firmware. A servo that does not answer never gets built in.",
+        "Battery: read the Wh marking on the case and record the lot. A pack with no Wh marking cannot be shipped (S12) and must not enter stock."
+      ],
+      "gates": [
+        {
+          "gate": "every BOM line identified by MPN",
+          "pass": "100 % of lines",
+          "fail_action": "quarantine the lot"
+        },
+        {
+          "gate": "bearing envelope, 5 per lot",
+          "pass": "OD and bore within the modelled envelope",
+          "fail_action": "reject the lot; the seats are modelled to these numbers"
+        },
+        {
+          "gate": "servo answers on the bus",
+          "pass": "model + firmware read back",
+          "fail_action": "return to supplier"
+        },
+        {
+          "gate": "battery Wh marking present and legible",
+          "pass": "\"18.72 Wh\" or the supplier's printed Wh",
+          "fail_action": "reject — unshippable (S12)"
+        }
+      ]
+    },
+    {
+      "id": "S1",
+      "name": "Print and post-process",
+      "takt_note": "plate-batched, off the unit clock",
+      "inputs": "two plates: PLA 32 pieces, TPU 4 pieces (§4)",
+      "steps": [
+        "Run the plates on the profile in §4. Supports ON — eleven parts carry a slicer warning and the stock 0.20 mm Standard preset does not generate them.",
+        "Remove supports; deburr the first layer; check every part against its row in §3 for the named risk.",
+        "Ream every bearing seat and pivot bore named in §3. FDM holes print 0.1-0.3 mm undersize (PARTS5) and a bridged bore is oval as well as small.",
+        "Drill and tap, or heat-set, every M2 hole. Do not expect a threadable hole off the bed.",
+        "Weigh the plate. A plate more than 5 % off the sliced total in §4 means the profile or the filament changed."
+      ],
+      "gates": [
+        {
+          "gate": "piece count per plate",
+          "pass": "32 PLA / 4 TPU",
+          "fail_action": "re-print the missing pieces"
+        },
+        {
+          "gate": "plate mass vs the sliced total",
+          "pass": "within ±5 % of 218.29 g PLA / 26.20 g TPU",
+          "fail_action": "stop; the profile or the spool changed"
+        },
+        {
+          "gate": "bearing seats reamed, gauged with the mating bearing",
+          "pass": "bearing enters by hand pressure to 1 mm, then needs the press",
+          "fail_action": "re-ream; a seat that takes the bearing by hand is a loose fit and a reject",
+          "critical": true
+        },
+        {
+          "gate": "power-support's sprung latch tongue",
+          "pass": "flexes and returns, no delamination line",
+          "fail_action": "scrap the part — docs/DFM.md names this the most fragile printed feature on the robot"
+        }
+      ]
+    },
+    {
+      "id": "S2",
+      "name": "Bearing seating",
+      "takt_note": "14 bearings per robot",
+      "inputs": "11 × 22×16×4, 3 × 15×10×3, the four pushers and the anvil from §5.1",
+      "steps": [
+        "Read the seat off §5.2 FIRST: a BORE seat takes the outer-ring pusher, a BOSS seat takes the inner-ring pusher. They are not interchangeable and using the wrong one drives the load across the balls.",
+        "Set the part on the anvil with the seat over its Ø24 through bore.",
+        "Press square and steadily with an arbor press or a vice. Do not tap a bearing in with a hammer — a printed seat has no yield to absorb the shock.",
+        "Spin the bearing by hand after seating."
+      ],
+      "gates": [
+        {
+          "gate": "bearing flush with the seat face",
+          "pass": "no daylight on a straight edge",
+          "fail_action": "press further; if it will not go, the seat was not reamed"
+        },
+        {
+          "gate": "free rotation after seating",
+          "pass": "spins freely by finger, no notch",
+          "fail_action": "the bearing was pressed on the wrong race — scrap the bearing, not just the assembly",
+          "critical": true
+        },
+        {
+          "gate": "pusher land condition",
+          "pass": "land is flat, no print line",
+          "fail_action": "replace the pusher (§5.1: a printed pusher is a consumable)"
+        }
+      ]
+    },
+    {
+      "id": "S3",
+      "name": "Servo ID, EEPROM and horn index",
+      "takt_note": "15 servos per robot, 5-11 min (S43/our estimate)",
+      "inputs": "15 × XL330, one servo at a time on a bench bus, the horn-index gauge from §5.1",
+      "steps": [
+        "One servo on the bus at a time. The robot is one daisy chain and a duplicate ID means disassembly (MANUAL).",
+        "Write ID, then baud_rate = 3 (1 Mbps), return_delay_time = 0, pwm_slope = 255, shutdown = 52 — the values the runtime asserts at boot.",
+        "IDs: 10-14 right leg, 20-24 left leg, 30/31 neck, 32/33/34 head and mouth. 200 is the imu_to_dxl board, not a servo.",
+        "Command Goal Position 2048, fit the horn-index gauge, confirm the foot sits flat on the case through the witness window, then read Present Position(132) back and record it as this unit's horn-zero offset.",
+        "Label the servo with its ID before it leaves the station."
+      ],
+      "gates": [
+        {
+          "gate": "ID and EEPROM read back after writing",
+          "pass": "all five registers match",
+          "fail_action": "re-write; a servo that will not hold EEPROM is scrap"
+        },
+        {
+          "gate": "no duplicate ID in the set of 15",
+          "pass": "15 distinct IDs",
+          "fail_action": "stop the build — this is the failure that costs a teardown",
+          "critical": true
+        },
+        {
+          "gate": "horn index",
+          "pass": "gauge seats flat; Present Position recorded",
+          "fail_action": "record and flag; a unit outside the fleet band goes to engineering, not to the line"
+        }
+      ]
+    },
+    {
+      "id": "S4",
+      "name": "Trunk",
+      "takt_note": "MANUAL step 1",
+      "inputs": "trunk-base, power-support, banana-pcb-locker, banana contact PCB, 2 × XL330 (ID 20, 10), 2 × bearing 22×16×4",
+      "steps": [
+        "Press the two hip-yaw idler bearings into trunk_base at (6, ±17.5, −5) body-frame. These are BORE seats — outer-ring pusher.",
+        "Bolt the ID-20 and ID-10 servos hanging from trunk_base, horns down, horn axes through world (6, ±17.5, 115).",
+        "Bolt power_support to trunk_base.",
+        "Clamp the banana contact PCB onto power_support's Ø3.9 pins with banana_pcb_locker, 2 × M2 through its Ø2.17 eyes.",
+        "The battery does NOT go in here. It goes in at S9."
+      ],
+      "gates": [
+        {
+          "gate": "both idler bearings free and flush",
+          "pass": "spin by finger",
+          "fail_action": "back to S2"
+        },
+        {
+          "gate": "servo IDs on the labels read 20 and 10",
+          "pass": "visual",
+          "fail_action": "swap before anything closes over them"
+        }
+      ]
+    },
+    {
+      "id": "S5",
+      "name": "Hips and legs, left then right",
+      "takt_note": "MANUAL steps 2-3, the longest station",
+      "inputs": "per side: yaw2roll, bearing-roll, hip-bracket, upper-leg, rigidity-plate, shin, ankle, foot, TPU sole, 5 × XL330, 4 × bearing 22×16×4, 1 × bearing 15×10×3",
+      "steps": [
+        "yaw2roll's Ø16.0 × 1.95 seat and the hip bracket's Ø16.0 × 1.95 seats are BOSS seats — inner-ring pusher (CONN22).",
+        "The shin's 'ankle' Ø10.0 × 3.2 is a BOSS seat; the ankle's 'ankle_bearing' Ø15.0 × 2.3 with its Ø16 × 0.5 lead-in is a BORE seat (CONN15). Two different pushers on the same joint.",
+        "Fix each bracket to its servo horn with the horn already indexed at S3; do not rotate a horn by hand once it is indexed.",
+        "Lay the 1 mm rigidity plate flat across the thigh.",
+        "Fit the TPU sole to the hard foot last, friction face down."
+      ],
+      "gates": [
+        {
+          "gate": "hip, knee and ankle each swing through the MJCF range by hand",
+          "pass": "no bind, no over-travel",
+          "fail_action": "a bind is a bearing pressed on the wrong race or an unreamed pivot"
+        },
+        {
+          "gate": "left and right legs are mirror images",
+          "pass": "lay them together",
+          "fail_action": "a mirrored part was fitted to the wrong side — catch it here, not at S8",
+          "critical": true
+        }
+      ]
+    },
+    {
+      "id": "S6",
+      "name": "Neck",
+      "takt_note": "MANUAL step 4",
+      "inputs": "2 × neck-plate, neck-pitch-bracket, 2 × XL330 (ID 30, 31), 1 × bearing 22×16×4",
+      "steps": [
+        "The two 2 mm neck plates span the 50 mm neck with a servo at each end.",
+        "Press one 22×16×4 into neck_pitch at (0, 20.8, −14.5) body-frame — the head-yaw axis bearing.",
+        "Fix neck_pitch to the ID-31 horn."
+      ],
+      "gates": [
+        {
+          "gate": "neck pitch and head pitch axes parallel",
+          "pass": "square against a flat",
+          "fail_action": "a twisted neck plate; re-print it flat"
+        }
+      ]
+    },
+    {
+      "id": "S7",
+      "name": "Head and electronics",
+      "takt_note": "MANUAL step 5, the densest station",
+      "inputs": "yaw-roll-motion, motor-support, face-part, eye-ring, M12 lens + holder, IMX219, ToF, Radxa Zero 3W, Robot HAT, speaker, top and bottom head shells, jaw, TPU lips, 3 × XL330 (ID 32, 33, 34), 2 × bearing 22×16×4, 1 × bearing 15×10×3",
+      "steps": [
+        "Press two 22×16×4 into yaw_roll_motion at body x = −16 and +18. Its 'roll_bearing_seat' is Ø16.0 × 4.0 — a BOSS seat (CONN22).",
+        "Stack the Robot HAT on the Radxa 40-pin header before either goes into the head; the stack cannot be made once the shells are on.",
+        "The camera mounts UPSIDE DOWN behind face_part at world (81.4, 0, 251.1). This is not a mistake to correct on the line.",
+        "Fit the TPU lips: jaw_soft (8.4 mm) on the jaw, soft_mouth_top (3.3 mm) under the top shell.",
+        "Do not close the shells until S8 has dressed the harness."
+      ],
+      "gates": [
+        {
+          "gate": "mouth opens −5° (closed) to +30° (open) by hand",
+          "pass": "full sweep, no rub on the lips",
+          "fail_action": "the TPU lip is proud; trim or re-print"
+        },
+        {
+          "gate": "camera and ToF seated and the CSI ribbon latched",
+          "pass": "tug test on the ribbon",
+          "fail_action": "re-seat before the shell closes",
+          "critical": true
+        }
+      ]
+    },
+    {
+      "id": "S8",
+      "name": "Harness and closing",
+      "takt_note": "22 cables, 1615 mm (CABLES)",
+      "inputs": "the cut set from wiring/CABLES.md",
+      "steps": [
+        "Build the daisy chain in order: HAT → id34 (35) → id33 (60) → id32 (50) → id31 (165) → id30 (35) → imu200 (120), then it splits to id20…id24 and id10…id14.",
+        "The 165 mm run crosses head-yaw and head-pitch; route it at the servo flank so it pays out the full ±170° sweep. A short-routed cable here is the classic failure that appears only after a hundred cycles.",
+        "The 340 mm battery lead crosses all four neck and head joints — bundle it with the bus loom through the neck.",
+        "Sweep every joint through its full range BEFORE any shell closes and watch the loom.",
+        "Close the shells."
+      ],
+      "gates": [
+        {
+          "gate": "full-range sweep of all 14 hinges with the loom fitted",
+          "pass": "no tension, no pinch, nothing rubs a shell edge",
+          "fail_action": "re-route; do not lengthen a cable without re-cutting from CABLES.md",
+          "critical": true
+        },
+        {
+          "gate": "no cable crosses a shell parting line",
+          "pass": "visual before closing",
+          "fail_action": "re-route"
+        }
+      ]
+    },
+    {
+      "id": "S9",
+      "name": "Power-up and functional test",
+      "takt_note": "see TEST-PLAN.html for the full procedure",
+      "inputs": "the closed robot, a charged NP-F550",
+      "steps": [
+        "Fit the battery.",
+        "Scan the bus — expect IDs 10-14, 20-24, 30-34 and 200.",
+        "Verify each joint's range against the MJCF before loading any policy.",
+        "Run the walk and sit-stand policies at 50 Hz."
+      ],
+      "gates": [
+        {
+          "gate": "bus scan",
+          "pass": "16 devices answer, none missing, none duplicated",
+          "fail_action": "back to S3"
+        },
+        {
+          "gate": "joint ranges match the MJCF",
+          "pass": "every hinge within its published limits",
+          "fail_action": "mechanical, not electrical — back to S5/S6/S7"
+        },
+        {
+          "gate": "walk policy",
+          "pass": "the robot stands and walks",
+          "fail_action": "record and route to engineering"
+        }
+      ]
+    },
+    {
+      "id": "S10",
+      "name": "Pack-out",
+      "takt_note": "2-5 min (our estimate)",
+      "inputs": "robot, box, insert, battery, USB-C cable, controller, manual",
+      "steps": [
+        "Set the battery's state of charge for the configuration being shipped — see §7.",
+        "Seat the insert so the pack cannot make contact in transit, or ship the pack unseated (S9 E.08). The robot has no power switch, so the insert IS the safety measure.",
+        "Apply the marks the configuration needs — §7 says which, and says when none are needed.",
+        "Weigh the finished box against the target."
+      ],
+      "gates": [
+        {
+          "gate": "state of charge for the configuration",
+          "pass": "≤30 % where §7 makes it mandatory",
+          "fail_action": "discharge before packing"
+        },
+        {
+          "gate": "battery cannot be activated in the box",
+          "pass": "insert holds the pack off its contacts, or the pack is unseated",
+          "fail_action": "re-pack — this is a regulatory requirement, not a preference (S9 E.08)",
+          "critical": true
+        },
+        {
+          "gate": "marks and documents match the configuration in §7",
+          "pass": "checklist signed",
+          "fail_action": "do not release to the carrier"
+        }
+      ]
+    }
+  ],
+  "packaging": {
+    "battery": {
+      "pack": "NP-F550, 2S Li-ion, \"2600 mAh\", 7.2 V nominal",
+      "wh": 18.72,
+      "per_cell_wh": 9.36,
+      "mass_g": 99,
+      "envelope_mm": [
+        38.4,
+        20.6,
+        70.8
+      ],
+      "src": [
+        "S15",
+        "S12"
+      ],
+      "classification": "cell 9.36 Wh ≤ 20 Wh and battery 18.72 Wh ≤ 100 Wh, so \"small\" lithium-ion in every regime; > 2.7 Wh so no button-cell exemption"
+    },
+    "configurations": [
+      {
+        "config": "Robot box — battery installed in the robot",
+        "un": "UN 3481",
+        "pi": "PI 967 Section II",
+        "soc": "state of charge ≤30 % is RECOMMENDED only — \"not mandatory for these items\" (S9 p.14)",
+        "limits": "5 kg net batteries per package, PAX and CAO (S10)",
+        "marks": "lithium battery mark + the AWB statement, EXCEPT for a consignment of two packages or fewer each holding no more than two batteries installed in equipment (S9 F.04, S10, S11) — one robot is one battery, so a 1- or 2-box shipment needs neither",
+        "line_action": "no mark, no statement, no declaration for the normal single-robot order. Seat the insert (S9 E.08)."
+      },
+      {
+        "config": "Robot + spare packs in the same outer box",
+        "un": "UN 3481",
+        "pi": "PI 966 Section II",
+        "soc": "≤30 % is MANDATORY — \"must be offered for transport at a state of charge not exceeding 30% of their rated capacity\" (S9 p.14)",
+        "limits": "the batteries needed to power the equipment plus 2 spare sets; 5 kg net; the package must pass a 1.2 m drop and a stacking test (S10)",
+        "marks": "lithium battery mark + \"Lithium ion batteries in compliance with Section II of PI966\"",
+        "line_action": "discharge the spares at S10, apply the mark and the statement, and use the drop-tested carton."
+      },
+      {
+        "config": "Charger pack shipped alone (2 batteries + charger, no robot)",
+        "un": "UN 3480",
+        "pi": "PI 965 Section IB",
+        "soc": "≤30 % mandatory (S10)",
+        "limits": "Cargo Aircraft Only, 10 kg net per package, Shipper's Declaration required (S10)",
+        "marks": "Class 9 label + CAO label + battery mark + Shipper's Declaration",
+        "line_action": "this is fully regulated dangerous goods by air. A trained shipper handles it, or the pack ships in the robot's box under PI 966 instead — which is the cheaper answer and the one to design the store around."
+      }
+    ],
+    "box_requirements": [
+      "A rigid outer box that passes the stacking test (PI 967 II) and, where spares are packed with it, the 1.2 m drop (PI 966 II).",
+      "An insert that physically prevents the pack from making contact, or the pack ships unseated: the robot has no power switch anywhere in the sources, so nothing else prevents unintentional activation (S9 E.08).",
+      "One face clear for a 100 × 100 mm battery mark, reducible to 100 × 70 mm, with a red hatched border ≥ 5 mm and the UN number ≥ 12 mm high (S9 F.01-F.02).",
+      "Wh marking legible on the battery case itself — checked at S0, not at S10 (S12).",
+      "USPS international takes ONLY batteries installed in the equipment, and forbids markings that identify the contents as lithium batteries — the opposite of the air rule. A store that mails internationally needs a different box artwork from one that ships by air freight.",
+      "Box dimensions, board grade, print and insert design: CANNOT DETERMINE — nothing is published and no unit has been delivered. Pollen's Shopify shipping weight for a robot is 1200 g against a 780 g robot, so 420 g is box + controller + cable + insert."
+    ]
   },
-  {
-   "item": "Torque schedule",
-   "state": "CANNOT DETERMINE",
-   "settles": "the three strip/pull-out tests in \u00a75.3, on the production print profile and the production screw source"
-  },
-  {
-   "item": "Interference at every printed bearing seat",
-   "state": "CANNOT DETERMINE",
-   "settles": "no interference is specified anywhere in the repo \u2014 the seats are modelled at nominal (\u00d816.000 boss, \u00d822.000 bore) and the real fit is whatever the printer delivers. Measure 10 printed seats per machine with a bore gauge, and set the model's seat diameter from that distribution.",
-   "consequence": "until then the press force is unknown, so the printed pushers cannot be graded and the anvil's own strength is unverified."
-  },
-  {
-   "item": "Whether the mesh horn pose is Goal Position 2048",
-   "state": "CANNOT DETERMINE",
-   "settles": "a ROBOTIS drawing or one measured servo. Until then the horn gauge fixes an INDEX and the line records the offset per unit (\u00a75.1)."
-  },
-  {
-   "item": "Fastener count and length schedule",
-   "state": "CANNOT DETERMINE",
-   "settles": "every M2 count in MANUAL and RELEASE \u00a74 is community-derived hole-fitting, not a Pollen BOM. A teardown, or Pollen's screw pack, settles it. The line cannot kit screws from a count nobody measured."
-  },
-  {
-   "item": "Supports on the production plates",
-   "state": "OPEN",
-   "settles": "the sliced numbers in \u00a74 are from the stock 0.20 mm Standard preset, which generates NO supports, while 11 parts carry a slicer support warning. Re-slice the two plates with supports enabled and re-issue \u00a74's grams and hours \u2014 they will both go up."
-  },
-  {
-   "item": "Three custom PCBs",
-   "state": "NOT READY",
-   "settles": "RELEASE \u00a77 item 1. There is nothing to build at S7 until the Robot HAT, imu_to_dxl and the battery-contact board have real design files."
-  },
-  {
-   "item": "Cosmetic acceptance standard for a printed shell",
-   "state": "CANNOT DETERMINE",
-   "settles": "the \u00a72 decision keeps the visible shells on FDM at every quantity a cost model can justify, but nobody has written down what layer-line visibility is acceptable on a consumer product. A limit sample, agreed and kept at S1, settles it \u2014 and it is the argument that moves the shells to a mould, not the arithmetic."
+  "open": [
+    {
+      "item": "The print files are stale for 12 of 30 slugs",
+      "state": "FAIL",
+      "settles": "Re-export the STLs from the current parametric rebuilds and re-slice both plates. The twelve are ankle-left, ankle-right, foot-left, foot-right, hip-bracket, motor-support, neck-pitch-bracket, neck-plate, sole-left, sole-right, upper-leg-rigidity-plate and yaw-roll-motion: each has a PASSed parametric rebuild in ce-parts today, and the STL sitting in out/print/stl/ for it is still Pollen's vendor mesh, exported before those rebuilds landed. The rebuilt STLs already exist at out/dfm/stl-rebuilt/ (another lane's export), so this is a re-slice and a re-plate, not a re-model.",
+      "consequence": "Measured, not assumed: §4.3 slices all twelve rebuilds on the same presets. Across a robot the difference is -4.90 g and -0.19 h (-2.0 % and -1.5 %), so §2's costs and break-evens do not move. But four slugs differ by 5 % or more - foot-left and foot-right at -15.7 % mass, motor-support at -15.5 %, yaw-roll-motion at +12.3 % mass and +21.2 % time, and hip-bracket at -24.1 % time - and for those §3's overhang and wall figures and §4.2's orientation describe a shape the design no longer has."
+    },
+    {
+      "item": "Torque schedule",
+      "state": "CANNOT DETERMINE",
+      "settles": "the three strip/pull-out tests in §5.3, on the production print profile and the production screw source"
+    },
+    {
+      "item": "Interference at every printed bearing seat",
+      "state": "CANNOT DETERMINE",
+      "settles": "no interference is specified anywhere in the repo — the seats are modelled at nominal (Ø16.000 boss, Ø22.000 bore) and the real fit is whatever the printer delivers. Measure 10 printed seats per machine with a bore gauge, and set the model's seat diameter from that distribution.",
+      "consequence": "until then the press force is unknown, so the printed pushers cannot be graded and the anvil's own strength is unverified."
+    },
+    {
+      "item": "Whether the mesh horn pose is Goal Position 2048",
+      "state": "CANNOT DETERMINE",
+      "settles": "a ROBOTIS drawing or one measured servo. Until then the horn gauge fixes an INDEX and the line records the offset per unit (§5.1)."
+    },
+    {
+      "item": "Fastener count and length schedule",
+      "state": "CANNOT DETERMINE",
+      "settles": "every M2 count in MANUAL and RELEASE §4 is community-derived hole-fitting, not a Pollen BOM. A teardown, or Pollen's screw pack, settles it. The line cannot kit screws from a count nobody measured."
+    },
+    {
+      "item": "Supports on the production plates",
+      "state": "OPEN",
+      "settles": "the sliced numbers in §4 are from the stock 0.20 mm Standard preset, which generates NO supports, while 11 parts carry a slicer support warning. Re-slice the two plates with supports enabled and re-issue §4's grams and hours — they will both go up."
+    },
+    {
+      "item": "Three custom PCBs",
+      "state": "NOT READY",
+      "settles": "RELEASE §7 item 1. There is nothing to build at S7 until the Robot HAT, imu_to_dxl and the battery-contact board have real design files."
+    },
+    {
+      "item": "Cosmetic acceptance standard for a printed shell",
+      "state": "CANNOT DETERMINE",
+      "settles": "the §2 decision keeps the visible shells on FDM at every quantity a cost model can justify, but nobody has written down what layer-line visibility is acceptable on a consumer product. A limit sample, agreed and kept at S1, settles it — and it is the argument that moves the shells to a mould, not the arithmetic."
+    }
+  ],
+  "profile": {
+    "$comment": "Read on 2026-09-02 off the installed BambuStudio profile with its `inherits` chain resolved: /Applications/BambuStudio.app/Contents/Resources/profiles/BBL/process/0.20mm Standard @BBL H2S.json. These are the values that produced every gram and second in this document, not a recommendation written afterwards.",
+    "file": "/Applications/BambuStudio.app/Contents/Resources/profiles/BBL/process/0.20mm Standard @BBL H2S.json",
+    "values": [
+      [
+        "layer_height",
+        "0.2 mm",
+        "every part in §2 and §3 was sliced at this height"
+      ],
+      [
+        "initial_layer_print_height",
+        "0.2 mm",
+        "no thick first layer"
+      ],
+      [
+        "wall_loops",
+        "2",
+        "two perimeters. At a 0.4 mm nozzle that is the 0.80 mm wall floor every verdict in §3 is measured against."
+      ],
+      [
+        "sparse_infill_density",
+        "15 %",
+        "grid"
+      ],
+      [
+        "sparse_infill_pattern",
+        "grid",
+        ""
+      ],
+      [
+        "top_shell_layers",
+        "5",
+        "1.0 mm of solid top"
+      ],
+      [
+        "bottom_shell_layers",
+        "3",
+        "0.6 mm of solid bottom"
+      ],
+      [
+        "wall_generator",
+        "classic",
+        "not Arachne — a wall narrower than one extrusion is not thinned to fit, it is dropped"
+      ],
+      [
+        "detect_thin_wall",
+        "0",
+        "THIN WALLS ARE NOT DETECTED. A feature under one extrusion width is silently omitted from the G-code. This is why §3's wall column matters and why a 0.55 mm land in §5.1 is a FAIL and not a warning."
+      ],
+      [
+        "enable_support",
+        "0",
+        "OFF in the stock preset. Eleven parts came back with a slicer support warning anyway — see §4 and §8."
+      ],
+      [
+        "support_threshold_angle",
+        "30",
+        "the slicer's own definition of an overhang: a surface whose slope to the build plate is below 30 deg. That is exactly the beta<30 column in §3, so the two measurements are commensurable."
+      ],
+      [
+        "support_type",
+        "tree(auto)",
+        "what it would build if it were enabled"
+      ],
+      [
+        "seam_position",
+        "aligned",
+        ""
+      ],
+      [
+        "infill_direction",
+        "45 deg",
+        ""
+      ],
+      [
+        "bridge_flow",
+        "1",
+        ""
+      ],
+      [
+        "top_surface_pattern",
+        "monotonicline",
+        ""
+      ]
+    ]
   }
- ],
- "profile": {
-  "$comment": "Read on 2026-09-02 off the installed BambuStudio profile with its `inherits` chain resolved: /Applications/BambuStudio.app/Contents/Resources/profiles/BBL/process/0.20mm Standard @BBL H2S.json. These are the values that produced every gram and second in this document, not a recommendation written afterwards.",
-  "file": "/Applications/BambuStudio.app/Contents/Resources/profiles/BBL/process/0.20mm Standard @BBL H2S.json",
-  "values": [
-   [
-    "layer_height",
-    "0.2 mm",
-    "every part in \u00a72 and \u00a73 was sliced at this height"
-   ],
-   [
-    "initial_layer_print_height",
-    "0.2 mm",
-    "no thick first layer"
-   ],
-   [
-    "wall_loops",
-    "2",
-    "two perimeters. At a 0.4 mm nozzle that is the 0.80 mm wall floor every verdict in \u00a73 is measured against."
-   ],
-   [
-    "sparse_infill_density",
-    "15 %",
-    "grid"
-   ],
-   [
-    "sparse_infill_pattern",
-    "grid",
-    ""
-   ],
-   [
-    "top_shell_layers",
-    "5",
-    "1.0 mm of solid top"
-   ],
-   [
-    "bottom_shell_layers",
-    "3",
-    "0.6 mm of solid bottom"
-   ],
-   [
-    "wall_generator",
-    "classic",
-    "not Arachne \u2014 a wall narrower than one extrusion is not thinned to fit, it is dropped"
-   ],
-   [
-    "detect_thin_wall",
-    "0",
-    "THIN WALLS ARE NOT DETECTED. A feature under one extrusion width is silently omitted from the G-code. This is why \u00a73's wall column matters and why a 0.55 mm land in \u00a75.1 is a FAIL and not a warning."
-   ],
-   [
-    "enable_support",
-    "0",
-    "OFF in the stock preset. Eleven parts came back with a slicer support warning anyway \u2014 see \u00a74 and \u00a78."
-   ],
-   [
-    "support_threshold_angle",
-    "30",
-    "the slicer's own definition of an overhang: a surface whose slope to the build plate is below 30 deg. That is exactly the beta<30 column in \u00a73, so the two measurements are commensurable."
-   ],
-   [
-    "support_type",
-    "tree(auto)",
-    "what it would build if it were enabled"
-   ],
-   [
-    "seam_position",
-    "aligned",
-    ""
-   ],
-   [
-    "infill_direction",
-    "45 deg",
-    ""
-   ],
-   [
-    "bridge_flow",
-    "1",
-    ""
-   ],
-   [
-    "top_surface_pattern",
-    "monotonicline",
-    ""
-   ]
-  ]
- }
 }
