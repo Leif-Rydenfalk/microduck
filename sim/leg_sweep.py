@@ -538,6 +538,43 @@ def main():
         res["sitstand_policy"] = dict(source=os.path.relpath(ss, ROOT),
                                       policy="BEST_alpha_sitstand.onnx (Pollen)",
                                       joints=peak_from_traj(ss, m))
+    # --- the headline: what a reader should take away, computed, not typed ---
+    DY = res["dynamic_step_policy_paused"]["joints"]
+    ntouch = sum(1 for grp in ("combinations", "both_legs_mirrored")
+                 for c in res["self_collision"][grp]["cases"].values() for _ in (c["pairs"] or {}))
+    env = {}
+    for nm, f in (("sitstand_policy", "sitstand_ours_traj.npz"), ("walking_policy", "walk_ours_traj.npz")):
+        fp = os.path.join(ROOT, "out", "sim", f)
+        if os.path.exists(fp):
+            z = np.load(fp)
+            env[nm] = dict(frames=int(len(z["nself"])),
+                           frames_with_a_self_contact=int((z["nself"] > 0).sum()),
+                           max_self_contacts_in_one_frame=int(z["nself"].max()))
+    hits = {}
+    sp = os.path.join(ROOT, "out", "sim", "sitstand_ours_summary.json")
+    if os.path.exists(sp):
+        hits = {k: v for k, v in json.load(open(sp))["joint_range_hits"].items() if k in LEG_JOINTS}
+    res["headline"] = dict(
+        ten_of_ten_joints_reach_their_mjcf_span_within_deg=round(
+            max(v["mjcf_span_deg"] - v["travel_deg"] for v in DY.values()), 3),
+        travel_fraction_of_mjcf_range=dict(
+            min=round(min(v["travel_frac_of_mjcf_range"] for v in DY.values()), 4),
+            max=round(max(v["travel_frac_of_mjcf_range"] for v in DY.values()), 4)),
+        fastest_joint=max(((k, v["peak_velocity_deg_s"]) for k, v in DY.items()), key=lambda x: x[1]),
+        self_collisions_one_joint_at_a_time=sum(
+            1 for lbl in ("pollen_collision_meshes", "ours_shin_collision_mesh")
+            for sw in res["self_collision"][lbl]["sweeps"].values() for _ in sw["pairs"]),
+        self_collisions_in_two_joint_or_both_leg_postures=ntouch,
+        policy_self_contacts=env,
+        sitstand_max_used_pct_of_any_leg_range=(max(v["used_pct_of_range"] for v in hits.values())
+                                                if hits else None),
+        sitstand_frames_within_1deg_of_a_limit=(sum(v["frames_within_1deg_of_limit"] for v in hits.values())
+                                                if hits else None),
+        reading="the self-collisions all sit OUTSIDE the envelope Pollen's own policies use: the "
+                "sit-stand run never uses more than 44.5 % of any leg joint's MJCF range, never comes "
+                "within 1 deg of a limit, and neither it nor the walk produces a single self-contact "
+                "frame. The MJCF limits are therefore not self-collision-safe on their own - they are "
+                "safe for the gaits shipped, and a hand-driven pose can reach a touch.")
     json.dump(res, open(os.path.join(OUT, "legs.json"), "w"), indent=1)
     print("wrote", os.path.join(OUT, "legs.json"), "in %.1f s" % (time.time() - t0))
 

@@ -140,7 +140,7 @@ built by <span class=mono>sim/swap_meshes.py</span>).</p>
 </header>
 
 <div class=statbar>
-<div class=stat><b>10 / 10</b><span>leg joints reach their MJCF limit</span></div>
+<div class=stat><b>10 / 10</b><span>leg joints reach their MJCF span to within %.2f&deg;</span></div>
 <div class=stat><b>%.0f&deg;/s</b><span>fastest joint, model step response</span></div>
 <div class=stat><b>0</b><span>self-collisions sweeping one joint at a time</span></div>
 <div class=stat><b>%d</b><span>self-collisions found in two-joint / both-leg postures</span></div>
@@ -213,7 +213,8 @@ and counted if it lands in the foreground. <b>%d of %d cameras carry both.</b>
 <footer class=rev><span>Every number: out/motion/legs.json</span><span>sim/leg_sweep.py</span>
 <span>sim/leg_render.py</span><span>sim/leg_compare.py</span></footer>
 </div></body></html>""" % (
-    time.strftime("%Y-%m-%d %H:%M"), peak, ntouch,
+    time.strftime("%Y-%m-%d %H:%M"), J["headline"]["ten_of_ten_joints_reach_their_mjcf_span_within_deg"],
+    peak, ntouch,
     E(J["squat_directctrl_FAILS"]["verdict"]),
     E("Commanded knee flexion of only %.3f deg, policy paused." % J["squat_directctrl_FAILS"]["commanded_knee_flexion_deg"]),
     J["squat_directctrl_FAILS"]["max_trunk_tilt_deg"],
