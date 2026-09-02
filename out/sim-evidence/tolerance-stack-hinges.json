@@ -1,0 +1,3337 @@
+{
+ "study": "tolerance-stack-hinges",
+ "what": "Axial play, radial eccentricity, angular misalignment and rotational backlash of all 14 hinges, worst-case and RSS, at two sourced FDM tolerance bands.",
+ "inputs": {
+  "joint_geometry": "out/sim-evidence/joint-geometry.json (sim/joint_geometry.py)",
+  "connections": [
+   "connection:press-fit-bearing-22x16x4",
+   "connection:press-fit-bearing-15x10x3",
+   "connection:spline-xl330-horn",
+   "connection:threaded-m2"
+  ],
+  "part_interfaces": [
+   "microduck-ankle-left",
+   "microduck-ankle-right",
+   "microduck-hip-bracket",
+   "microduck-neck-pitch-bracket",
+   "microduck-shin",
+   "microduck-trunk-shell-left",
+   "microduck-yaw-roll-motion",
+   "microduck-yaw2roll"
+  ],
+  "fdm_bands": {
+   "FDM-A prototyping": "Protolabs Network manufacturing standards, Prototyping FDM, verbatim: '\u00b1 0.5% with a lower limit of \u00b1 0.5 mm (\u00b1 0.02\")'. https://www.hubs.com/manufacturing-standards/ , read 2026-09-02.",
+   "FDM-B industrial": "Same page, Industrial FDM, verbatim: '\u00b1 0.3% with a lower limit: \u00b1 0.3 mm (\u00b10.012\" in)'."
+  },
+  "fdm_band_C": "THIS workshop's printers: CANNOT DETERMINE. ce-cad/cecad/data/print_fits.json is {\"machines\": {}, \"schema\": 1}.",
+  "m2": "ce-cad/cecad/fasteners.py:57 -- (\"M2\", 2.0, 0.40, 1.60, 2.20, 2.40, 2.60, 3.8, 2.0, 4.4, 4.0, 5.0, 0.3): major \u00d82.0, tap drill \u00d81.60, close clearance \u00d82.20, medium \u00d82.40",
+  "iso286": "i = 0.45*cbrt(D) + 0.001*D on the geometric mean of the size step; IT = multiple * i with the standard series 7/10/16/25/40/64/100/160/250/400/640/1000 for IT5..IT16; published IT7 transcribed where the formula drifts 1 um (same treatment as the connection folders')"
+ },
+ "method": "Every hinge is ONE station: sim/joint_geometry.py measures the driven horn face and the bearing mid-plane as coincident to 0.1 mm on 12 of the 14 joints, so no two-support span model is used. Axial play = the sum (worst case) or root-sum-square of the printed axial terms; radial eccentricity likewise over the radial terms; angular misalignment is the SMALLER of the bolted flange's face constraint atan(2t/D) and the bearing's cocking freedom atan(diametral clearance / engaged length); rotational backlash is atan(radial slop / 6.0 mm PCD radius), the pattern's freedom before the screws are torqued. Terms whose tolerance is not published are listed in open_terms and are NOT folded into any number -- so every figure here UNDERSTATES the real stack.",
+ "outputs": {
+  "iso286_selftest": {
+   "rows": [
+    {
+     "nominal_mm": 16.0,
+     "grade": "IT7",
+     "derived_um": 18,
+     "published_iso286_2_um": 18,
+     "verdict": "PASS"
+    },
+    {
+     "nominal_mm": 22.0,
+     "grade": "IT7",
+     "derived_um": 21,
+     "published_iso286_2_um": 21,
+     "verdict": "PASS"
+    },
+    {
+     "nominal_mm": 10.0,
+     "grade": "IT7",
+     "derived_um": 15,
+     "published_iso286_2_um": 15,
+     "verdict": "PASS"
+    },
+    {
+     "nominal_mm": 6.0,
+     "grade": "IT7",
+     "derived_um": 12,
+     "published_iso286_2_um": 12,
+     "verdict": "PASS"
+    }
+   ],
+   "verdict": "PASS",
+   "why": "derived IT7 checked against published ISO 286-2 rows the derivation was not fitted to"
+  },
+  "band_to_iso286_equivalence": {
+   "FDM-A prototyping": {
+    "10.0": {
+     "half_band_mm": 0.5,
+     "total_band_um": 1000.0,
+     "nearest_iso286_grade_at_or_above": "coarser than IT16",
+     "that_grade_band_um": 898
+    },
+    "12.0": {
+     "half_band_mm": 0.5,
+     "total_band_um": 1000.0,
+     "nearest_iso286_grade_at_or_above": "IT16",
+     "that_grade_band_um": 1083
+    },
+    "15.0": {
+     "half_band_mm": 0.5,
+     "total_band_um": 1000.0,
+     "nearest_iso286_grade_at_or_above": "IT16",
+     "that_grade_band_um": 1083
+    },
+    "15.9": {
+     "half_band_mm": 0.5,
+     "total_band_um": 1000.0,
+     "nearest_iso286_grade_at_or_above": "IT16",
+     "that_grade_band_um": 1083
+    },
+    "16.0": {
+     "half_band_mm": 0.5,
+     "total_band_um": 1000.0,
+     "nearest_iso286_grade_at_or_above": "IT16",
+     "that_grade_band_um": 1083
+    },
+    "17.0": {
+     "half_band_mm": 0.5,
+     "total_band_um": 1000.0,
+     "nearest_iso286_grade_at_or_above": "IT16",
+     "that_grade_band_um": 1083
+    },
+    "19.0": {
+     "half_band_mm": 0.5,
+     "total_band_um": 1000.0,
+     "nearest_iso286_grade_at_or_above": "IT16",
+     "that_grade_band_um": 1307
+    },
+    "22.0": {
+     "half_band_mm": 0.5,
+     "total_band_um": 1000.0,
+     "nearest_iso286_grade_at_or_above": "IT16",
+     "that_grade_band_um": 1307
+    }
+   },
+   "FDM-B industrial": {
+    "10.0": {
+     "half_band_mm": 0.3,
+     "total_band_um": 600.0,
+     "nearest_iso286_grade_at_or_above": "IT16",
+     "that_grade_band_um": 898
+    },
+    "12.0": {
+     "half_band_mm": 0.3,
+     "total_band_um": 600.0,
+     "nearest_iso286_grade_at_or_above": "IT15",
+     "that_grade_band_um": 693
+    },
+    "15.0": {
+     "half_band_mm": 0.3,
+     "total_band_um": 600.0,
+     "nearest_iso286_grade_at_or_above": "IT15",
+     "that_grade_band_um": 693
+    },
+    "15.9": {
+     "half_band_mm": 0.3,
+     "total_band_um": 600.0,
+     "nearest_iso286_grade_at_or_above": "IT15",
+     "that_grade_band_um": 693
+    },
+    "16.0": {
+     "half_band_mm": 0.3,
+     "total_band_um": 600.0,
+     "nearest_iso286_grade_at_or_above": "IT15",
+     "that_grade_band_um": 693
+    },
+    "17.0": {
+     "half_band_mm": 0.3,
+     "total_band_um": 600.0,
+     "nearest_iso286_grade_at_or_above": "IT15",
+     "that_grade_band_um": 693
+    },
+    "19.0": {
+     "half_band_mm": 0.3,
+     "total_band_um": 600.0,
+     "nearest_iso286_grade_at_or_above": "IT15",
+     "that_grade_band_um": 837
+    },
+    "22.0": {
+     "half_band_mm": 0.3,
+     "total_band_um": 600.0,
+     "nearest_iso286_grade_at_or_above": "IT15",
+     "that_grade_band_um": 837
+    }
+   }
+  },
+  "per_joint": {
+   "left_hip_yaw": {
+    "FDM-A prototyping": {
+     "flange": {
+      "part": "microduck-yaw2roll",
+      "interface": "yaw_horn",
+      "disc_d_mm": 16.0,
+      "clearance_hole_d_mm": 2.2,
+      "screws": 4,
+      "pcd_mm": 12.0
+     },
+     "bearing": {
+      "connection": "connection:press-fit-bearing-22x16x4",
+      "bore_mm": 16.0,
+      "od_mm": 22.0,
+      "width_mm": 4.0,
+      "seat_part": "microduck-yaw2roll",
+      "seat_interface": "yaw_bearing_seat",
+      "seat_d_mm": 16.0,
+      "seat_length_mm": 1.95,
+      "engagement_fraction": 0.4875,
+      "engagement_pct": 48.75,
+      "role": "inner race on a printed boss"
+     },
+     "band": "FDM-A prototyping",
+     "axial_terms": [
+      {
+       "term": "flange face height, printed",
+       "nominal_mm": 16.0,
+       "half_band_mm": 0.5,
+       "source": "microduck-yaw2roll 'yaw_horn' (printed, FDM-A prototyping)"
+      },
+      {
+       "term": "printed seat length / boss height",
+       "nominal_mm": 1.95,
+       "half_band_mm": 0.5,
+       "source": "microduck-yaw2roll 'yaw_bearing_seat', FDM-A prototyping"
+      },
+      {
+       "term": "shoulder thickness (inner-race thrust face)",
+       "nominal_mm": 0.5,
+       "half_band_mm": 0.5,
+       "source": "microduck-yaw2roll 'yaw_bearing_seat': \u00d819.0 x 0.5 shoulder, FDM-A prototyping"
+      }
+     ],
+     "radial_terms": [
+      {
+       "term": "M2 clearance hole over the screw shank",
+       "nominal_mm": 2.2,
+       "half_band_mm": 0.1,
+       "source": "(2.20 - 2.00)/2, hole \u00d8 off microduck-yaw2roll 'yaw_horn', M2 major \u00d82.0 off ce-cad/cecad/fasteners.py:57"
+      },
+      {
+       "term": "printed bolt-circle position",
+       "nominal_mm": 12.0,
+       "half_band_mm": 0.5,
+       "source": "\u00d812.0 PCD (connection:spline-xl330-horn), FDM-A prototyping"
+      },
+      {
+       "term": "printed bearing seat diameter",
+       "nominal_mm": 16.0,
+       "half_band_mm": 0.5,
+       "source": "microduck-yaw2roll 'yaw_bearing_seat', FDM-A prototyping"
+      }
+     ],
+     "open_terms": [
+      {
+       "term": "bearing ring width tolerance",
+       "nominal_mm": 4.0,
+       "why_open": "the reference names the ring only 'seeed_bearing' -- no designation, no vendor sheet (ce-connections/press-fit-bearing-22x16x4 compat.py 'interference' check)",
+       "what_settles_it": "a micrometer on the actual ring"
+      },
+      {
+       "term": "bearing radial internal clearance",
+       "why_open": "same: no designation, so no ISO 5753 clearance class",
+       "what_settles_it": "the ring's designation from a teardown, or a dial gauge on the assembled joint"
+      },
+      {
+       "term": "XL330 horn disc thickness and its axial run-out",
+       "nominal_mm": 3.0,
+       "why_open": "ROBOTIS's dimension drawing D1 ('XL,XC-330.pdf') is stamped '[FOR REFERENCE ONLY]' / 'Nonescale' and carries no tolerance block (ce-parts/xl330-m288-t/electrical.chip.json 'package')",
+       "what_settles_it": "a dial indicator on a real servo horn"
+      },
+      {
+       "term": "XL330 gearbox backlash at the output",
+       "why_open": "not published anywhere on E1, E2 or D1; the 288.4:1 train is 'Engineering Plastic' (E1 Specifications)",
+       "what_settles_it": "lock the case, load the horn both ways and read Present Position(132) (4096 pulse/rev = 0.0879 deg/count)"
+      },
+      {
+       "term": "this workshop's own printed band",
+       "why_open": "ce-cad/cecad/data/print_fits.json is {\"machines\": {}} -- no machine on the farm has ever been measured, so every number here rests on a published SERVICE tolerance, not on our printer",
+       "what_settles_it": "build cecad.coupon.coupon() with the \u00d810 and \u00d816 rungs, print it, measure with calipers and store it with cecad.coupon.record_measurements(); cecad.coupon.offsets_for() then answers per machine + material instead of returning CANNOT DETERMINE"
+      }
+     ],
+     "axial_play_mm": {
+      "worst_case": 1.5,
+      "rss": 0.866
+     },
+     "radial_eccentricity_mm": {
+      "worst_case": 1.1,
+      "rss": 0.7141
+     },
+     "angular_misalignment_deg": {
+      "bearing_cock_worst_case": 27.1497,
+      "bearing_cock_basis": "atan(diametral clearance / engaged length) = atan(2 x 0.5000 mm / 1.95 mm). Both numbers are sourced: the clearance from the FDM-A prototyping band on the printed \u00d816.0 seat, the engaged length MEASURED on microduck-yaw2roll 'yaw_bearing_seat'. This is the angle the ball bearing ALONE leaves free.",
+      "flange_face_upper_bound_worst_case": 3.5763,
+      "flange_face_upper_bound_rss": 2.5305,
+      "flange_face_verdict": "CANNOT DETERMINE",
+      "flange_face_why": "the bolted flange's angular constraint is a FORM tolerance (face parallelism across the \u00d816.0 disc). No published FDM standard states one -- Protolabs Network's rows are DIMENSIONAL accuracy. The number above applies the dimensional band as if it were parallelism, which is an UPPER BOUND of unknown tightness, not a measurement. Both flange faces come off the same layer stack, so the true parallelism error is expected to be far smaller -- but 'expected' is not measured.",
+      "flange_face_what_settles_it": "print a flange coupon and read face parallelism across \u00d816.0 with a dial indicator on a surface plate; store it beside the bore/pin ladder of cecad.coupon",
+      "governing": "the bolted flange, by an unmeasured margin",
+      "worst_case": 3.5763
+     },
+     "rotational_backlash_deg": {
+      "worst_case": 10.3889,
+      "rss": 6.7876,
+      "basis": "atan(radial slop / PCD radius 6.0 mm) -- the pattern's tangential freedom BEFORE the four M2 screws are torqued; a clamped joint gives this up to friction, and no friction figure exists for a printed PLA face on a plastic horn"
+     },
+     "note": null
+    },
+    "FDM-B industrial": {
+     "flange": {
+      "part": "microduck-yaw2roll",
+      "interface": "yaw_horn",
+      "disc_d_mm": 16.0,
+      "clearance_hole_d_mm": 2.2,
+      "screws": 4,
+      "pcd_mm": 12.0
+     },
+     "bearing": {
+      "connection": "connection:press-fit-bearing-22x16x4",
+      "bore_mm": 16.0,
+      "od_mm": 22.0,
+      "width_mm": 4.0,
+      "seat_part": "microduck-yaw2roll",
+      "seat_interface": "yaw_bearing_seat",
+      "seat_d_mm": 16.0,
+      "seat_length_mm": 1.95,
+      "engagement_fraction": 0.4875,
+      "engagement_pct": 48.75,
+      "role": "inner race on a printed boss"
+     },
+     "band": "FDM-B industrial",
+     "axial_terms": [
+      {
+       "term": "flange face height, printed",
+       "nominal_mm": 16.0,
+       "half_band_mm": 0.3,
+       "source": "microduck-yaw2roll 'yaw_horn' (printed, FDM-B industrial)"
+      },
+      {
+       "term": "printed seat length / boss height",
+       "nominal_mm": 1.95,
+       "half_band_mm": 0.3,
+       "source": "microduck-yaw2roll 'yaw_bearing_seat', FDM-B industrial"
+      },
+      {
+       "term": "shoulder thickness (inner-race thrust face)",
+       "nominal_mm": 0.5,
+       "half_band_mm": 0.3,
+       "source": "microduck-yaw2roll 'yaw_bearing_seat': \u00d819.0 x 0.5 shoulder, FDM-B industrial"
+      }
+     ],
+     "radial_terms": [
+      {
+       "term": "M2 clearance hole over the screw shank",
+       "nominal_mm": 2.2,
+       "half_band_mm": 0.1,
+       "source": "(2.20 - 2.00)/2, hole \u00d8 off microduck-yaw2roll 'yaw_horn', M2 major \u00d82.0 off ce-cad/cecad/fasteners.py:57"
+      },
+      {
+       "term": "printed bolt-circle position",
+       "nominal_mm": 12.0,
+       "half_band_mm": 0.3,
+       "source": "\u00d812.0 PCD (connection:spline-xl330-horn), FDM-B industrial"
+      },
+      {
+       "term": "printed bearing seat diameter",
+       "nominal_mm": 16.0,
+       "half_band_mm": 0.3,
+       "source": "microduck-yaw2roll 'yaw_bearing_seat', FDM-B industrial"
+      }
+     ],
+     "open_terms": [
+      {
+       "term": "bearing ring width tolerance",
+       "nominal_mm": 4.0,
+       "why_open": "the reference names the ring only 'seeed_bearing' -- no designation, no vendor sheet (ce-connections/press-fit-bearing-22x16x4 compat.py 'interference' check)",
+       "what_settles_it": "a micrometer on the actual ring"
+      },
+      {
+       "term": "bearing radial internal clearance",
+       "why_open": "same: no designation, so no ISO 5753 clearance class",
+       "what_settles_it": "the ring's designation from a teardown, or a dial gauge on the assembled joint"
+      },
+      {
+       "term": "XL330 horn disc thickness and its axial run-out",
+       "nominal_mm": 3.0,
+       "why_open": "ROBOTIS's dimension drawing D1 ('XL,XC-330.pdf') is stamped '[FOR REFERENCE ONLY]' / 'Nonescale' and carries no tolerance block (ce-parts/xl330-m288-t/electrical.chip.json 'package')",
+       "what_settles_it": "a dial indicator on a real servo horn"
+      },
+      {
+       "term": "XL330 gearbox backlash at the output",
+       "why_open": "not published anywhere on E1, E2 or D1; the 288.4:1 train is 'Engineering Plastic' (E1 Specifications)",
+       "what_settles_it": "lock the case, load the horn both ways and read Present Position(132) (4096 pulse/rev = 0.0879 deg/count)"
+      },
+      {
+       "term": "this workshop's own printed band",
+       "why_open": "ce-cad/cecad/data/print_fits.json is {\"machines\": {}} -- no machine on the farm has ever been measured, so every number here rests on a published SERVICE tolerance, not on our printer",
+       "what_settles_it": "build cecad.coupon.coupon() with the \u00d810 and \u00d816 rungs, print it, measure with calipers and store it with cecad.coupon.record_measurements(); cecad.coupon.offsets_for() then answers per machine + material instead of returning CANNOT DETERMINE"
+      }
+     ],
+     "axial_play_mm": {
+      "worst_case": 0.9,
+      "rss": 0.5196
+     },
+     "radial_eccentricity_mm": {
+      "worst_case": 0.7,
+      "rss": 0.4359
+     },
+     "angular_misalignment_deg": {
+      "bearing_cock_worst_case": 17.1027,
+      "bearing_cock_basis": "atan(diametral clearance / engaged length) = atan(2 x 0.3000 mm / 1.95 mm). Both numbers are sourced: the clearance from the FDM-B industrial band on the printed \u00d816.0 seat, the engaged length MEASURED on microduck-yaw2roll 'yaw_bearing_seat'. This is the angle the ball bearing ALONE leaves free.",
+      "flange_face_upper_bound_worst_case": 2.1476,
+      "flange_face_upper_bound_rss": 1.5189,
+      "flange_face_verdict": "CANNOT DETERMINE",
+      "flange_face_why": "the bolted flange's angular constraint is a FORM tolerance (face parallelism across the \u00d816.0 disc). No published FDM standard states one -- Protolabs Network's rows are DIMENSIONAL accuracy. The number above applies the dimensional band as if it were parallelism, which is an UPPER BOUND of unknown tightness, not a measurement. Both flange faces come off the same layer stack, so the true parallelism error is expected to be far smaller -- but 'expected' is not measured.",
+      "flange_face_what_settles_it": "print a flange coupon and read face parallelism across \u00d816.0 with a dial indicator on a surface plate; store it beside the bore/pin ladder of cecad.coupon",
+      "governing": "the bolted flange, by an unmeasured margin",
+      "worst_case": 2.1476
+     },
+     "rotational_backlash_deg": {
+      "worst_case": 6.6544,
+      "rss": 4.1551,
+      "basis": "atan(radial slop / PCD radius 6.0 mm) -- the pattern's tangential freedom BEFORE the four M2 screws are torqued; a clamped joint gives this up to friction, and no friction figure exists for a printed PLA face on a plastic horn"
+     },
+     "note": null
+    }
+   },
+   "right_hip_yaw": {
+    "FDM-A prototyping": {
+     "flange": {
+      "part": "microduck-yaw2roll",
+      "interface": "yaw_horn",
+      "disc_d_mm": 16.0,
+      "clearance_hole_d_mm": 2.2,
+      "screws": 4,
+      "pcd_mm": 12.0
+     },
+     "bearing": {
+      "connection": "connection:press-fit-bearing-22x16x4",
+      "bore_mm": 16.0,
+      "od_mm": 22.0,
+      "width_mm": 4.0,
+      "seat_part": "microduck-yaw2roll",
+      "seat_interface": "yaw_bearing_seat",
+      "seat_d_mm": 16.0,
+      "seat_length_mm": 1.95,
+      "engagement_fraction": 0.4875,
+      "engagement_pct": 48.75,
+      "role": "inner race on a printed boss"
+     },
+     "band": "FDM-A prototyping",
+     "axial_terms": [
+      {
+       "term": "flange face height, printed",
+       "nominal_mm": 16.0,
+       "half_band_mm": 0.5,
+       "source": "microduck-yaw2roll 'yaw_horn' (printed, FDM-A prototyping)"
+      },
+      {
+       "term": "printed seat length / boss height",
+       "nominal_mm": 1.95,
+       "half_band_mm": 0.5,
+       "source": "microduck-yaw2roll 'yaw_bearing_seat', FDM-A prototyping"
+      },
+      {
+       "term": "shoulder thickness (inner-race thrust face)",
+       "nominal_mm": 0.5,
+       "half_band_mm": 0.5,
+       "source": "microduck-yaw2roll 'yaw_bearing_seat': \u00d819.0 x 0.5 shoulder, FDM-A prototyping"
+      }
+     ],
+     "radial_terms": [
+      {
+       "term": "M2 clearance hole over the screw shank",
+       "nominal_mm": 2.2,
+       "half_band_mm": 0.1,
+       "source": "(2.20 - 2.00)/2, hole \u00d8 off microduck-yaw2roll 'yaw_horn', M2 major \u00d82.0 off ce-cad/cecad/fasteners.py:57"
+      },
+      {
+       "term": "printed bolt-circle position",
+       "nominal_mm": 12.0,
+       "half_band_mm": 0.5,
+       "source": "\u00d812.0 PCD (connection:spline-xl330-horn), FDM-A prototyping"
+      },
+      {
+       "term": "printed bearing seat diameter",
+       "nominal_mm": 16.0,
+       "half_band_mm": 0.5,
+       "source": "microduck-yaw2roll 'yaw_bearing_seat', FDM-A prototyping"
+      }
+     ],
+     "open_terms": [
+      {
+       "term": "bearing ring width tolerance",
+       "nominal_mm": 4.0,
+       "why_open": "the reference names the ring only 'seeed_bearing' -- no designation, no vendor sheet (ce-connections/press-fit-bearing-22x16x4 compat.py 'interference' check)",
+       "what_settles_it": "a micrometer on the actual ring"
+      },
+      {
+       "term": "bearing radial internal clearance",
+       "why_open": "same: no designation, so no ISO 5753 clearance class",
+       "what_settles_it": "the ring's designation from a teardown, or a dial gauge on the assembled joint"
+      },
+      {
+       "term": "XL330 horn disc thickness and its axial run-out",
+       "nominal_mm": 3.0,
+       "why_open": "ROBOTIS's dimension drawing D1 ('XL,XC-330.pdf') is stamped '[FOR REFERENCE ONLY]' / 'Nonescale' and carries no tolerance block (ce-parts/xl330-m288-t/electrical.chip.json 'package')",
+       "what_settles_it": "a dial indicator on a real servo horn"
+      },
+      {
+       "term": "XL330 gearbox backlash at the output",
+       "why_open": "not published anywhere on E1, E2 or D1; the 288.4:1 train is 'Engineering Plastic' (E1 Specifications)",
+       "what_settles_it": "lock the case, load the horn both ways and read Present Position(132) (4096 pulse/rev = 0.0879 deg/count)"
+      },
+      {
+       "term": "this workshop's own printed band",
+       "why_open": "ce-cad/cecad/data/print_fits.json is {\"machines\": {}} -- no machine on the farm has ever been measured, so every number here rests on a published SERVICE tolerance, not on our printer",
+       "what_settles_it": "build cecad.coupon.coupon() with the \u00d810 and \u00d816 rungs, print it, measure with calipers and store it with cecad.coupon.record_measurements(); cecad.coupon.offsets_for() then answers per machine + material instead of returning CANNOT DETERMINE"
+      }
+     ],
+     "axial_play_mm": {
+      "worst_case": 1.5,
+      "rss": 0.866
+     },
+     "radial_eccentricity_mm": {
+      "worst_case": 1.1,
+      "rss": 0.7141
+     },
+     "angular_misalignment_deg": {
+      "bearing_cock_worst_case": 27.1497,
+      "bearing_cock_basis": "atan(diametral clearance / engaged length) = atan(2 x 0.5000 mm / 1.95 mm). Both numbers are sourced: the clearance from the FDM-A prototyping band on the printed \u00d816.0 seat, the engaged length MEASURED on microduck-yaw2roll 'yaw_bearing_seat'. This is the angle the ball bearing ALONE leaves free.",
+      "flange_face_upper_bound_worst_case": 3.5763,
+      "flange_face_upper_bound_rss": 2.5305,
+      "flange_face_verdict": "CANNOT DETERMINE",
+      "flange_face_why": "the bolted flange's angular constraint is a FORM tolerance (face parallelism across the \u00d816.0 disc). No published FDM standard states one -- Protolabs Network's rows are DIMENSIONAL accuracy. The number above applies the dimensional band as if it were parallelism, which is an UPPER BOUND of unknown tightness, not a measurement. Both flange faces come off the same layer stack, so the true parallelism error is expected to be far smaller -- but 'expected' is not measured.",
+      "flange_face_what_settles_it": "print a flange coupon and read face parallelism across \u00d816.0 with a dial indicator on a surface plate; store it beside the bore/pin ladder of cecad.coupon",
+      "governing": "the bolted flange, by an unmeasured margin",
+      "worst_case": 3.5763
+     },
+     "rotational_backlash_deg": {
+      "worst_case": 10.3889,
+      "rss": 6.7876,
+      "basis": "atan(radial slop / PCD radius 6.0 mm) -- the pattern's tangential freedom BEFORE the four M2 screws are torqued; a clamped joint gives this up to friction, and no friction figure exists for a printed PLA face on a plastic horn"
+     },
+     "note": "body 'bearing_roll' carries the yaw2roll mesh too (spec/mesh-placements.json lists yaw2roll under both bodies), so the right hip-yaw runs on the mirrored copy of the same features"
+    },
+    "FDM-B industrial": {
+     "flange": {
+      "part": "microduck-yaw2roll",
+      "interface": "yaw_horn",
+      "disc_d_mm": 16.0,
+      "clearance_hole_d_mm": 2.2,
+      "screws": 4,
+      "pcd_mm": 12.0
+     },
+     "bearing": {
+      "connection": "connection:press-fit-bearing-22x16x4",
+      "bore_mm": 16.0,
+      "od_mm": 22.0,
+      "width_mm": 4.0,
+      "seat_part": "microduck-yaw2roll",
+      "seat_interface": "yaw_bearing_seat",
+      "seat_d_mm": 16.0,
+      "seat_length_mm": 1.95,
+      "engagement_fraction": 0.4875,
+      "engagement_pct": 48.75,
+      "role": "inner race on a printed boss"
+     },
+     "band": "FDM-B industrial",
+     "axial_terms": [
+      {
+       "term": "flange face height, printed",
+       "nominal_mm": 16.0,
+       "half_band_mm": 0.3,
+       "source": "microduck-yaw2roll 'yaw_horn' (printed, FDM-B industrial)"
+      },
+      {
+       "term": "printed seat length / boss height",
+       "nominal_mm": 1.95,
+       "half_band_mm": 0.3,
+       "source": "microduck-yaw2roll 'yaw_bearing_seat', FDM-B industrial"
+      },
+      {
+       "term": "shoulder thickness (inner-race thrust face)",
+       "nominal_mm": 0.5,
+       "half_band_mm": 0.3,
+       "source": "microduck-yaw2roll 'yaw_bearing_seat': \u00d819.0 x 0.5 shoulder, FDM-B industrial"
+      }
+     ],
+     "radial_terms": [
+      {
+       "term": "M2 clearance hole over the screw shank",
+       "nominal_mm": 2.2,
+       "half_band_mm": 0.1,
+       "source": "(2.20 - 2.00)/2, hole \u00d8 off microduck-yaw2roll 'yaw_horn', M2 major \u00d82.0 off ce-cad/cecad/fasteners.py:57"
+      },
+      {
+       "term": "printed bolt-circle position",
+       "nominal_mm": 12.0,
+       "half_band_mm": 0.3,
+       "source": "\u00d812.0 PCD (connection:spline-xl330-horn), FDM-B industrial"
+      },
+      {
+       "term": "printed bearing seat diameter",
+       "nominal_mm": 16.0,
+       "half_band_mm": 0.3,
+       "source": "microduck-yaw2roll 'yaw_bearing_seat', FDM-B industrial"
+      }
+     ],
+     "open_terms": [
+      {
+       "term": "bearing ring width tolerance",
+       "nominal_mm": 4.0,
+       "why_open": "the reference names the ring only 'seeed_bearing' -- no designation, no vendor sheet (ce-connections/press-fit-bearing-22x16x4 compat.py 'interference' check)",
+       "what_settles_it": "a micrometer on the actual ring"
+      },
+      {
+       "term": "bearing radial internal clearance",
+       "why_open": "same: no designation, so no ISO 5753 clearance class",
+       "what_settles_it": "the ring's designation from a teardown, or a dial gauge on the assembled joint"
+      },
+      {
+       "term": "XL330 horn disc thickness and its axial run-out",
+       "nominal_mm": 3.0,
+       "why_open": "ROBOTIS's dimension drawing D1 ('XL,XC-330.pdf') is stamped '[FOR REFERENCE ONLY]' / 'Nonescale' and carries no tolerance block (ce-parts/xl330-m288-t/electrical.chip.json 'package')",
+       "what_settles_it": "a dial indicator on a real servo horn"
+      },
+      {
+       "term": "XL330 gearbox backlash at the output",
+       "why_open": "not published anywhere on E1, E2 or D1; the 288.4:1 train is 'Engineering Plastic' (E1 Specifications)",
+       "what_settles_it": "lock the case, load the horn both ways and read Present Position(132) (4096 pulse/rev = 0.0879 deg/count)"
+      },
+      {
+       "term": "this workshop's own printed band",
+       "why_open": "ce-cad/cecad/data/print_fits.json is {\"machines\": {}} -- no machine on the farm has ever been measured, so every number here rests on a published SERVICE tolerance, not on our printer",
+       "what_settles_it": "build cecad.coupon.coupon() with the \u00d810 and \u00d816 rungs, print it, measure with calipers and store it with cecad.coupon.record_measurements(); cecad.coupon.offsets_for() then answers per machine + material instead of returning CANNOT DETERMINE"
+      }
+     ],
+     "axial_play_mm": {
+      "worst_case": 0.9,
+      "rss": 0.5196
+     },
+     "radial_eccentricity_mm": {
+      "worst_case": 0.7,
+      "rss": 0.4359
+     },
+     "angular_misalignment_deg": {
+      "bearing_cock_worst_case": 17.1027,
+      "bearing_cock_basis": "atan(diametral clearance / engaged length) = atan(2 x 0.3000 mm / 1.95 mm). Both numbers are sourced: the clearance from the FDM-B industrial band on the printed \u00d816.0 seat, the engaged length MEASURED on microduck-yaw2roll 'yaw_bearing_seat'. This is the angle the ball bearing ALONE leaves free.",
+      "flange_face_upper_bound_worst_case": 2.1476,
+      "flange_face_upper_bound_rss": 1.5189,
+      "flange_face_verdict": "CANNOT DETERMINE",
+      "flange_face_why": "the bolted flange's angular constraint is a FORM tolerance (face parallelism across the \u00d816.0 disc). No published FDM standard states one -- Protolabs Network's rows are DIMENSIONAL accuracy. The number above applies the dimensional band as if it were parallelism, which is an UPPER BOUND of unknown tightness, not a measurement. Both flange faces come off the same layer stack, so the true parallelism error is expected to be far smaller -- but 'expected' is not measured.",
+      "flange_face_what_settles_it": "print a flange coupon and read face parallelism across \u00d816.0 with a dial indicator on a surface plate; store it beside the bore/pin ladder of cecad.coupon",
+      "governing": "the bolted flange, by an unmeasured margin",
+      "worst_case": 2.1476
+     },
+     "rotational_backlash_deg": {
+      "worst_case": 6.6544,
+      "rss": 4.1551,
+      "basis": "atan(radial slop / PCD radius 6.0 mm) -- the pattern's tangential freedom BEFORE the four M2 screws are torqued; a clamped joint gives this up to friction, and no friction figure exists for a printed PLA face on a plastic horn"
+     },
+     "note": "body 'bearing_roll' carries the yaw2roll mesh too (spec/mesh-placements.json lists yaw2roll under both bodies), so the right hip-yaw runs on the mirrored copy of the same features"
+    }
+   },
+   "left_hip_roll": {
+    "FDM-A prototyping": {
+     "flange": {
+      "part": "microduck-hip-bracket",
+      "interface": "roll_horn",
+      "disc_d_mm": 19.0,
+      "clearance_hole_d_mm": 2.4,
+      "screws": 4,
+      "pcd_mm": 12.0
+     },
+     "bearing": {
+      "connection": "connection:press-fit-bearing-22x16x4",
+      "bore_mm": 16.0,
+      "od_mm": 22.0,
+      "width_mm": 4.0,
+      "seat_part": "microduck-hip-bracket",
+      "seat_interface": "roll_bearing_seat",
+      "seat_d_mm": 16.0,
+      "seat_length_mm": 1.95,
+      "engagement_fraction": 0.4875,
+      "engagement_pct": 48.75,
+      "role": "inner race on a printed boss"
+     },
+     "band": "FDM-A prototyping",
+     "axial_terms": [
+      {
+       "term": "flange face height, printed",
+       "nominal_mm": 19.0,
+       "half_band_mm": 0.5,
+       "source": "microduck-hip-bracket 'roll_horn' (printed, FDM-A prototyping)"
+      },
+      {
+       "term": "printed seat length / boss height",
+       "nominal_mm": 1.95,
+       "half_band_mm": 0.5,
+       "source": "microduck-hip-bracket 'roll_bearing_seat', FDM-A prototyping"
+      }
+     ],
+     "radial_terms": [
+      {
+       "term": "M2 clearance hole over the screw shank",
+       "nominal_mm": 2.4,
+       "half_band_mm": 0.2,
+       "source": "(2.40 - 2.00)/2, hole \u00d8 off microduck-hip-bracket 'roll_horn', M2 major \u00d82.0 off ce-cad/cecad/fasteners.py:57"
+      },
+      {
+       "term": "printed bolt-circle position",
+       "nominal_mm": 12.0,
+       "half_band_mm": 0.5,
+       "source": "\u00d812.0 PCD (connection:spline-xl330-horn), FDM-A prototyping"
+      },
+      {
+       "term": "printed bearing seat diameter",
+       "nominal_mm": 16.0,
+       "half_band_mm": 0.5,
+       "source": "microduck-hip-bracket 'roll_bearing_seat', FDM-A prototyping"
+      }
+     ],
+     "open_terms": [
+      {
+       "term": "bearing ring width tolerance",
+       "nominal_mm": 4.0,
+       "why_open": "the reference names the ring only 'seeed_bearing' -- no designation, no vendor sheet (ce-connections/press-fit-bearing-22x16x4 compat.py 'interference' check)",
+       "what_settles_it": "a micrometer on the actual ring"
+      },
+      {
+       "term": "bearing radial internal clearance",
+       "why_open": "same: no designation, so no ISO 5753 clearance class",
+       "what_settles_it": "the ring's designation from a teardown, or a dial gauge on the assembled joint"
+      },
+      {
+       "term": "XL330 horn disc thickness and its axial run-out",
+       "nominal_mm": 3.0,
+       "why_open": "ROBOTIS's dimension drawing D1 ('XL,XC-330.pdf') is stamped '[FOR REFERENCE ONLY]' / 'Nonescale' and carries no tolerance block (ce-parts/xl330-m288-t/electrical.chip.json 'package')",
+       "what_settles_it": "a dial indicator on a real servo horn"
+      },
+      {
+       "term": "XL330 gearbox backlash at the output",
+       "why_open": "not published anywhere on E1, E2 or D1; the 288.4:1 train is 'Engineering Plastic' (E1 Specifications)",
+       "what_settles_it": "lock the case, load the horn both ways and read Present Position(132) (4096 pulse/rev = 0.0879 deg/count)"
+      },
+      {
+       "term": "this workshop's own printed band",
+       "why_open": "ce-cad/cecad/data/print_fits.json is {\"machines\": {}} -- no machine on the farm has ever been measured, so every number here rests on a published SERVICE tolerance, not on our printer",
+       "what_settles_it": "build cecad.coupon.coupon() with the \u00d810 and \u00d816 rungs, print it, measure with calipers and store it with cecad.coupon.record_measurements(); cecad.coupon.offsets_for() then answers per machine + material instead of returning CANNOT DETERMINE"
+      }
+     ],
+     "axial_play_mm": {
+      "worst_case": 1.0,
+      "rss": 0.7071
+     },
+     "radial_eccentricity_mm": {
+      "worst_case": 1.2,
+      "rss": 0.7348
+     },
+     "angular_misalignment_deg": {
+      "bearing_cock_worst_case": 27.1497,
+      "bearing_cock_basis": "atan(diametral clearance / engaged length) = atan(2 x 0.5000 mm / 1.95 mm). Both numbers are sourced: the clearance from the FDM-A prototyping band on the printed \u00d816.0 seat, the engaged length MEASURED on microduck-hip-bracket 'roll_bearing_seat'. This is the angle the ball bearing ALONE leaves free.",
+      "flange_face_upper_bound_worst_case": 3.0128,
+      "flange_face_upper_bound_rss": 2.1313,
+      "flange_face_verdict": "CANNOT DETERMINE",
+      "flange_face_why": "the bolted flange's angular constraint is a FORM tolerance (face parallelism across the \u00d819.0 disc). No published FDM standard states one -- Protolabs Network's rows are DIMENSIONAL accuracy. The number above applies the dimensional band as if it were parallelism, which is an UPPER BOUND of unknown tightness, not a measurement. Both flange faces come off the same layer stack, so the true parallelism error is expected to be far smaller -- but 'expected' is not measured.",
+      "flange_face_what_settles_it": "print a flange coupon and read face parallelism across \u00d819.0 with a dial indicator on a surface plate; store it beside the bore/pin ladder of cecad.coupon",
+      "governing": "the bolted flange, by an unmeasured margin",
+      "worst_case": 3.0128
+     },
+     "rotational_backlash_deg": {
+      "worst_case": 11.3099,
+      "rss": 6.9825,
+      "basis": "atan(radial slop / PCD radius 6.0 mm) -- the pattern's tangential freedom BEFORE the four M2 screws are torqued; a clamped joint gives this up to friction, and no friction figure exists for a printed PLA face on a plastic horn"
+     },
+     "note": null
+    },
+    "FDM-B industrial": {
+     "flange": {
+      "part": "microduck-hip-bracket",
+      "interface": "roll_horn",
+      "disc_d_mm": 19.0,
+      "clearance_hole_d_mm": 2.4,
+      "screws": 4,
+      "pcd_mm": 12.0
+     },
+     "bearing": {
+      "connection": "connection:press-fit-bearing-22x16x4",
+      "bore_mm": 16.0,
+      "od_mm": 22.0,
+      "width_mm": 4.0,
+      "seat_part": "microduck-hip-bracket",
+      "seat_interface": "roll_bearing_seat",
+      "seat_d_mm": 16.0,
+      "seat_length_mm": 1.95,
+      "engagement_fraction": 0.4875,
+      "engagement_pct": 48.75,
+      "role": "inner race on a printed boss"
+     },
+     "band": "FDM-B industrial",
+     "axial_terms": [
+      {
+       "term": "flange face height, printed",
+       "nominal_mm": 19.0,
+       "half_band_mm": 0.3,
+       "source": "microduck-hip-bracket 'roll_horn' (printed, FDM-B industrial)"
+      },
+      {
+       "term": "printed seat length / boss height",
+       "nominal_mm": 1.95,
+       "half_band_mm": 0.3,
+       "source": "microduck-hip-bracket 'roll_bearing_seat', FDM-B industrial"
+      }
+     ],
+     "radial_terms": [
+      {
+       "term": "M2 clearance hole over the screw shank",
+       "nominal_mm": 2.4,
+       "half_band_mm": 0.2,
+       "source": "(2.40 - 2.00)/2, hole \u00d8 off microduck-hip-bracket 'roll_horn', M2 major \u00d82.0 off ce-cad/cecad/fasteners.py:57"
+      },
+      {
+       "term": "printed bolt-circle position",
+       "nominal_mm": 12.0,
+       "half_band_mm": 0.3,
+       "source": "\u00d812.0 PCD (connection:spline-xl330-horn), FDM-B industrial"
+      },
+      {
+       "term": "printed bearing seat diameter",
+       "nominal_mm": 16.0,
+       "half_band_mm": 0.3,
+       "source": "microduck-hip-bracket 'roll_bearing_seat', FDM-B industrial"
+      }
+     ],
+     "open_terms": [
+      {
+       "term": "bearing ring width tolerance",
+       "nominal_mm": 4.0,
+       "why_open": "the reference names the ring only 'seeed_bearing' -- no designation, no vendor sheet (ce-connections/press-fit-bearing-22x16x4 compat.py 'interference' check)",
+       "what_settles_it": "a micrometer on the actual ring"
+      },
+      {
+       "term": "bearing radial internal clearance",
+       "why_open": "same: no designation, so no ISO 5753 clearance class",
+       "what_settles_it": "the ring's designation from a teardown, or a dial gauge on the assembled joint"
+      },
+      {
+       "term": "XL330 horn disc thickness and its axial run-out",
+       "nominal_mm": 3.0,
+       "why_open": "ROBOTIS's dimension drawing D1 ('XL,XC-330.pdf') is stamped '[FOR REFERENCE ONLY]' / 'Nonescale' and carries no tolerance block (ce-parts/xl330-m288-t/electrical.chip.json 'package')",
+       "what_settles_it": "a dial indicator on a real servo horn"
+      },
+      {
+       "term": "XL330 gearbox backlash at the output",
+       "why_open": "not published anywhere on E1, E2 or D1; the 288.4:1 train is 'Engineering Plastic' (E1 Specifications)",
+       "what_settles_it": "lock the case, load the horn both ways and read Present Position(132) (4096 pulse/rev = 0.0879 deg/count)"
+      },
+      {
+       "term": "this workshop's own printed band",
+       "why_open": "ce-cad/cecad/data/print_fits.json is {\"machines\": {}} -- no machine on the farm has ever been measured, so every number here rests on a published SERVICE tolerance, not on our printer",
+       "what_settles_it": "build cecad.coupon.coupon() with the \u00d810 and \u00d816 rungs, print it, measure with calipers and store it with cecad.coupon.record_measurements(); cecad.coupon.offsets_for() then answers per machine + material instead of returning CANNOT DETERMINE"
+      }
+     ],
+     "axial_play_mm": {
+      "worst_case": 0.6,
+      "rss": 0.4243
+     },
+     "radial_eccentricity_mm": {
+      "worst_case": 0.8,
+      "rss": 0.469
+     },
+     "angular_misalignment_deg": {
+      "bearing_cock_worst_case": 17.1027,
+      "bearing_cock_basis": "atan(diametral clearance / engaged length) = atan(2 x 0.3000 mm / 1.95 mm). Both numbers are sourced: the clearance from the FDM-B industrial band on the printed \u00d816.0 seat, the engaged length MEASURED on microduck-hip-bracket 'roll_bearing_seat'. This is the angle the ball bearing ALONE leaves free.",
+      "flange_face_upper_bound_worst_case": 1.8087,
+      "flange_face_upper_bound_rss": 1.2792,
+      "flange_face_verdict": "CANNOT DETERMINE",
+      "flange_face_why": "the bolted flange's angular constraint is a FORM tolerance (face parallelism across the \u00d819.0 disc). No published FDM standard states one -- Protolabs Network's rows are DIMENSIONAL accuracy. The number above applies the dimensional band as if it were parallelism, which is an UPPER BOUND of unknown tightness, not a measurement. Both flange faces come off the same layer stack, so the true parallelism error is expected to be far smaller -- but 'expected' is not measured.",
+      "flange_face_what_settles_it": "print a flange coupon and read face parallelism across \u00d819.0 with a dial indicator on a surface plate; store it beside the bore/pin ladder of cecad.coupon",
+      "governing": "the bolted flange, by an unmeasured margin",
+      "worst_case": 1.8087
+     },
+     "rotational_backlash_deg": {
+      "worst_case": 7.5946,
+      "rss": 4.4699,
+      "basis": "atan(radial slop / PCD radius 6.0 mm) -- the pattern's tangential freedom BEFORE the four M2 screws are torqued; a clamped joint gives this up to friction, and no friction figure exists for a printed PLA face on a plastic horn"
+     },
+     "note": null
+    }
+   },
+   "right_hip_roll": {
+    "FDM-A prototyping": {
+     "flange": {
+      "part": "microduck-hip-bracket",
+      "interface": "roll_horn",
+      "disc_d_mm": 19.0,
+      "clearance_hole_d_mm": 2.4,
+      "screws": 4,
+      "pcd_mm": 12.0
+     },
+     "bearing": {
+      "connection": "connection:press-fit-bearing-22x16x4",
+      "bore_mm": 16.0,
+      "od_mm": 22.0,
+      "width_mm": 4.0,
+      "seat_part": "microduck-hip-bracket",
+      "seat_interface": "roll_bearing_seat",
+      "seat_d_mm": 16.0,
+      "seat_length_mm": 1.95,
+      "engagement_fraction": 0.4875,
+      "engagement_pct": 48.75,
+      "role": "inner race on a printed boss"
+     },
+     "band": "FDM-A prototyping",
+     "axial_terms": [
+      {
+       "term": "flange face height, printed",
+       "nominal_mm": 19.0,
+       "half_band_mm": 0.5,
+       "source": "microduck-hip-bracket 'roll_horn' (printed, FDM-A prototyping)"
+      },
+      {
+       "term": "printed seat length / boss height",
+       "nominal_mm": 1.95,
+       "half_band_mm": 0.5,
+       "source": "microduck-hip-bracket 'roll_bearing_seat', FDM-A prototyping"
+      }
+     ],
+     "radial_terms": [
+      {
+       "term": "M2 clearance hole over the screw shank",
+       "nominal_mm": 2.4,
+       "half_band_mm": 0.2,
+       "source": "(2.40 - 2.00)/2, hole \u00d8 off microduck-hip-bracket 'roll_horn', M2 major \u00d82.0 off ce-cad/cecad/fasteners.py:57"
+      },
+      {
+       "term": "printed bolt-circle position",
+       "nominal_mm": 12.0,
+       "half_band_mm": 0.5,
+       "source": "\u00d812.0 PCD (connection:spline-xl330-horn), FDM-A prototyping"
+      },
+      {
+       "term": "printed bearing seat diameter",
+       "nominal_mm": 16.0,
+       "half_band_mm": 0.5,
+       "source": "microduck-hip-bracket 'roll_bearing_seat', FDM-A prototyping"
+      }
+     ],
+     "open_terms": [
+      {
+       "term": "bearing ring width tolerance",
+       "nominal_mm": 4.0,
+       "why_open": "the reference names the ring only 'seeed_bearing' -- no designation, no vendor sheet (ce-connections/press-fit-bearing-22x16x4 compat.py 'interference' check)",
+       "what_settles_it": "a micrometer on the actual ring"
+      },
+      {
+       "term": "bearing radial internal clearance",
+       "why_open": "same: no designation, so no ISO 5753 clearance class",
+       "what_settles_it": "the ring's designation from a teardown, or a dial gauge on the assembled joint"
+      },
+      {
+       "term": "XL330 horn disc thickness and its axial run-out",
+       "nominal_mm": 3.0,
+       "why_open": "ROBOTIS's dimension drawing D1 ('XL,XC-330.pdf') is stamped '[FOR REFERENCE ONLY]' / 'Nonescale' and carries no tolerance block (ce-parts/xl330-m288-t/electrical.chip.json 'package')",
+       "what_settles_it": "a dial indicator on a real servo horn"
+      },
+      {
+       "term": "XL330 gearbox backlash at the output",
+       "why_open": "not published anywhere on E1, E2 or D1; the 288.4:1 train is 'Engineering Plastic' (E1 Specifications)",
+       "what_settles_it": "lock the case, load the horn both ways and read Present Position(132) (4096 pulse/rev = 0.0879 deg/count)"
+      },
+      {
+       "term": "this workshop's own printed band",
+       "why_open": "ce-cad/cecad/data/print_fits.json is {\"machines\": {}} -- no machine on the farm has ever been measured, so every number here rests on a published SERVICE tolerance, not on our printer",
+       "what_settles_it": "build cecad.coupon.coupon() with the \u00d810 and \u00d816 rungs, print it, measure with calipers and store it with cecad.coupon.record_measurements(); cecad.coupon.offsets_for() then answers per machine + material instead of returning CANNOT DETERMINE"
+      }
+     ],
+     "axial_play_mm": {
+      "worst_case": 1.0,
+      "rss": 0.7071
+     },
+     "radial_eccentricity_mm": {
+      "worst_case": 1.2,
+      "rss": 0.7348
+     },
+     "angular_misalignment_deg": {
+      "bearing_cock_worst_case": 27.1497,
+      "bearing_cock_basis": "atan(diametral clearance / engaged length) = atan(2 x 0.5000 mm / 1.95 mm). Both numbers are sourced: the clearance from the FDM-A prototyping band on the printed \u00d816.0 seat, the engaged length MEASURED on microduck-hip-bracket 'roll_bearing_seat'. This is the angle the ball bearing ALONE leaves free.",
+      "flange_face_upper_bound_worst_case": 3.0128,
+      "flange_face_upper_bound_rss": 2.1313,
+      "flange_face_verdict": "CANNOT DETERMINE",
+      "flange_face_why": "the bolted flange's angular constraint is a FORM tolerance (face parallelism across the \u00d819.0 disc). No published FDM standard states one -- Protolabs Network's rows are DIMENSIONAL accuracy. The number above applies the dimensional band as if it were parallelism, which is an UPPER BOUND of unknown tightness, not a measurement. Both flange faces come off the same layer stack, so the true parallelism error is expected to be far smaller -- but 'expected' is not measured.",
+      "flange_face_what_settles_it": "print a flange coupon and read face parallelism across \u00d819.0 with a dial indicator on a surface plate; store it beside the bore/pin ladder of cecad.coupon",
+      "governing": "the bolted flange, by an unmeasured margin",
+      "worst_case": 3.0128
+     },
+     "rotational_backlash_deg": {
+      "worst_case": 11.3099,
+      "rss": 6.9825,
+      "basis": "atan(radial slop / PCD radius 6.0 mm) -- the pattern's tangential freedom BEFORE the four M2 screws are torqued; a clamped joint gives this up to friction, and no friction figure exists for a printed PLA face on a plastic horn"
+     },
+     "note": null
+    },
+    "FDM-B industrial": {
+     "flange": {
+      "part": "microduck-hip-bracket",
+      "interface": "roll_horn",
+      "disc_d_mm": 19.0,
+      "clearance_hole_d_mm": 2.4,
+      "screws": 4,
+      "pcd_mm": 12.0
+     },
+     "bearing": {
+      "connection": "connection:press-fit-bearing-22x16x4",
+      "bore_mm": 16.0,
+      "od_mm": 22.0,
+      "width_mm": 4.0,
+      "seat_part": "microduck-hip-bracket",
+      "seat_interface": "roll_bearing_seat",
+      "seat_d_mm": 16.0,
+      "seat_length_mm": 1.95,
+      "engagement_fraction": 0.4875,
+      "engagement_pct": 48.75,
+      "role": "inner race on a printed boss"
+     },
+     "band": "FDM-B industrial",
+     "axial_terms": [
+      {
+       "term": "flange face height, printed",
+       "nominal_mm": 19.0,
+       "half_band_mm": 0.3,
+       "source": "microduck-hip-bracket 'roll_horn' (printed, FDM-B industrial)"
+      },
+      {
+       "term": "printed seat length / boss height",
+       "nominal_mm": 1.95,
+       "half_band_mm": 0.3,
+       "source": "microduck-hip-bracket 'roll_bearing_seat', FDM-B industrial"
+      }
+     ],
+     "radial_terms": [
+      {
+       "term": "M2 clearance hole over the screw shank",
+       "nominal_mm": 2.4,
+       "half_band_mm": 0.2,
+       "source": "(2.40 - 2.00)/2, hole \u00d8 off microduck-hip-bracket 'roll_horn', M2 major \u00d82.0 off ce-cad/cecad/fasteners.py:57"
+      },
+      {
+       "term": "printed bolt-circle position",
+       "nominal_mm": 12.0,
+       "half_band_mm": 0.3,
+       "source": "\u00d812.0 PCD (connection:spline-xl330-horn), FDM-B industrial"
+      },
+      {
+       "term": "printed bearing seat diameter",
+       "nominal_mm": 16.0,
+       "half_band_mm": 0.3,
+       "source": "microduck-hip-bracket 'roll_bearing_seat', FDM-B industrial"
+      }
+     ],
+     "open_terms": [
+      {
+       "term": "bearing ring width tolerance",
+       "nominal_mm": 4.0,
+       "why_open": "the reference names the ring only 'seeed_bearing' -- no designation, no vendor sheet (ce-connections/press-fit-bearing-22x16x4 compat.py 'interference' check)",
+       "what_settles_it": "a micrometer on the actual ring"
+      },
+      {
+       "term": "bearing radial internal clearance",
+       "why_open": "same: no designation, so no ISO 5753 clearance class",
+       "what_settles_it": "the ring's designation from a teardown, or a dial gauge on the assembled joint"
+      },
+      {
+       "term": "XL330 horn disc thickness and its axial run-out",
+       "nominal_mm": 3.0,
+       "why_open": "ROBOTIS's dimension drawing D1 ('XL,XC-330.pdf') is stamped '[FOR REFERENCE ONLY]' / 'Nonescale' and carries no tolerance block (ce-parts/xl330-m288-t/electrical.chip.json 'package')",
+       "what_settles_it": "a dial indicator on a real servo horn"
+      },
+      {
+       "term": "XL330 gearbox backlash at the output",
+       "why_open": "not published anywhere on E1, E2 or D1; the 288.4:1 train is 'Engineering Plastic' (E1 Specifications)",
+       "what_settles_it": "lock the case, load the horn both ways and read Present Position(132) (4096 pulse/rev = 0.0879 deg/count)"
+      },
+      {
+       "term": "this workshop's own printed band",
+       "why_open": "ce-cad/cecad/data/print_fits.json is {\"machines\": {}} -- no machine on the farm has ever been measured, so every number here rests on a published SERVICE tolerance, not on our printer",
+       "what_settles_it": "build cecad.coupon.coupon() with the \u00d810 and \u00d816 rungs, print it, measure with calipers and store it with cecad.coupon.record_measurements(); cecad.coupon.offsets_for() then answers per machine + material instead of returning CANNOT DETERMINE"
+      }
+     ],
+     "axial_play_mm": {
+      "worst_case": 0.6,
+      "rss": 0.4243
+     },
+     "radial_eccentricity_mm": {
+      "worst_case": 0.8,
+      "rss": 0.469
+     },
+     "angular_misalignment_deg": {
+      "bearing_cock_worst_case": 17.1027,
+      "bearing_cock_basis": "atan(diametral clearance / engaged length) = atan(2 x 0.3000 mm / 1.95 mm). Both numbers are sourced: the clearance from the FDM-B industrial band on the printed \u00d816.0 seat, the engaged length MEASURED on microduck-hip-bracket 'roll_bearing_seat'. This is the angle the ball bearing ALONE leaves free.",
+      "flange_face_upper_bound_worst_case": 1.8087,
+      "flange_face_upper_bound_rss": 1.2792,
+      "flange_face_verdict": "CANNOT DETERMINE",
+      "flange_face_why": "the bolted flange's angular constraint is a FORM tolerance (face parallelism across the \u00d819.0 disc). No published FDM standard states one -- Protolabs Network's rows are DIMENSIONAL accuracy. The number above applies the dimensional band as if it were parallelism, which is an UPPER BOUND of unknown tightness, not a measurement. Both flange faces come off the same layer stack, so the true parallelism error is expected to be far smaller -- but 'expected' is not measured.",
+      "flange_face_what_settles_it": "print a flange coupon and read face parallelism across \u00d819.0 with a dial indicator on a surface plate; store it beside the bore/pin ladder of cecad.coupon",
+      "governing": "the bolted flange, by an unmeasured margin",
+      "worst_case": 1.8087
+     },
+     "rotational_backlash_deg": {
+      "worst_case": 7.5946,
+      "rss": 4.4699,
+      "basis": "atan(radial slop / PCD radius 6.0 mm) -- the pattern's tangential freedom BEFORE the four M2 screws are torqued; a clamped joint gives this up to friction, and no friction figure exists for a printed PLA face on a plastic horn"
+     },
+     "note": null
+    }
+   },
+   "left_hip_pitch": {
+    "FDM-A prototyping": {
+     "flange": {
+      "part": "microduck-hip-bracket",
+      "interface": "pitch_horn",
+      "disc_d_mm": 19.0,
+      "clearance_hole_d_mm": 2.4,
+      "screws": 4,
+      "pcd_mm": 12.0
+     },
+     "bearing": {
+      "connection": "connection:press-fit-bearing-22x16x4",
+      "bore_mm": 16.0,
+      "od_mm": 22.0,
+      "width_mm": 4.0,
+      "seat_part": "microduck-hip-bracket",
+      "seat_interface": "pitch_bearing_seat",
+      "seat_d_mm": 16.0,
+      "seat_length_mm": 1.95,
+      "engagement_fraction": 0.4875,
+      "engagement_pct": 48.75,
+      "role": "inner race on a printed boss"
+     },
+     "band": "FDM-A prototyping",
+     "axial_terms": [
+      {
+       "term": "flange face height, printed",
+       "nominal_mm": 19.0,
+       "half_band_mm": 0.5,
+       "source": "microduck-hip-bracket 'pitch_horn' (printed, FDM-A prototyping)"
+      },
+      {
+       "term": "printed seat length / boss height",
+       "nominal_mm": 1.95,
+       "half_band_mm": 0.5,
+       "source": "microduck-hip-bracket 'pitch_bearing_seat', FDM-A prototyping"
+      }
+     ],
+     "radial_terms": [
+      {
+       "term": "M2 clearance hole over the screw shank",
+       "nominal_mm": 2.4,
+       "half_band_mm": 0.2,
+       "source": "(2.40 - 2.00)/2, hole \u00d8 off microduck-hip-bracket 'pitch_horn', M2 major \u00d82.0 off ce-cad/cecad/fasteners.py:57"
+      },
+      {
+       "term": "printed bolt-circle position",
+       "nominal_mm": 12.0,
+       "half_band_mm": 0.5,
+       "source": "\u00d812.0 PCD (connection:spline-xl330-horn), FDM-A prototyping"
+      },
+      {
+       "term": "printed bearing seat diameter",
+       "nominal_mm": 16.0,
+       "half_band_mm": 0.5,
+       "source": "microduck-hip-bracket 'pitch_bearing_seat', FDM-A prototyping"
+      }
+     ],
+     "open_terms": [
+      {
+       "term": "bearing ring width tolerance",
+       "nominal_mm": 4.0,
+       "why_open": "the reference names the ring only 'seeed_bearing' -- no designation, no vendor sheet (ce-connections/press-fit-bearing-22x16x4 compat.py 'interference' check)",
+       "what_settles_it": "a micrometer on the actual ring"
+      },
+      {
+       "term": "bearing radial internal clearance",
+       "why_open": "same: no designation, so no ISO 5753 clearance class",
+       "what_settles_it": "the ring's designation from a teardown, or a dial gauge on the assembled joint"
+      },
+      {
+       "term": "XL330 horn disc thickness and its axial run-out",
+       "nominal_mm": 3.0,
+       "why_open": "ROBOTIS's dimension drawing D1 ('XL,XC-330.pdf') is stamped '[FOR REFERENCE ONLY]' / 'Nonescale' and carries no tolerance block (ce-parts/xl330-m288-t/electrical.chip.json 'package')",
+       "what_settles_it": "a dial indicator on a real servo horn"
+      },
+      {
+       "term": "XL330 gearbox backlash at the output",
+       "why_open": "not published anywhere on E1, E2 or D1; the 288.4:1 train is 'Engineering Plastic' (E1 Specifications)",
+       "what_settles_it": "lock the case, load the horn both ways and read Present Position(132) (4096 pulse/rev = 0.0879 deg/count)"
+      },
+      {
+       "term": "this workshop's own printed band",
+       "why_open": "ce-cad/cecad/data/print_fits.json is {\"machines\": {}} -- no machine on the farm has ever been measured, so every number here rests on a published SERVICE tolerance, not on our printer",
+       "what_settles_it": "build cecad.coupon.coupon() with the \u00d810 and \u00d816 rungs, print it, measure with calipers and store it with cecad.coupon.record_measurements(); cecad.coupon.offsets_for() then answers per machine + material instead of returning CANNOT DETERMINE"
+      }
+     ],
+     "axial_play_mm": {
+      "worst_case": 1.0,
+      "rss": 0.7071
+     },
+     "radial_eccentricity_mm": {
+      "worst_case": 1.2,
+      "rss": 0.7348
+     },
+     "angular_misalignment_deg": {
+      "bearing_cock_worst_case": 27.1497,
+      "bearing_cock_basis": "atan(diametral clearance / engaged length) = atan(2 x 0.5000 mm / 1.95 mm). Both numbers are sourced: the clearance from the FDM-A prototyping band on the printed \u00d816.0 seat, the engaged length MEASURED on microduck-hip-bracket 'pitch_bearing_seat'. This is the angle the ball bearing ALONE leaves free.",
+      "flange_face_upper_bound_worst_case": 3.0128,
+      "flange_face_upper_bound_rss": 2.1313,
+      "flange_face_verdict": "CANNOT DETERMINE",
+      "flange_face_why": "the bolted flange's angular constraint is a FORM tolerance (face parallelism across the \u00d819.0 disc). No published FDM standard states one -- Protolabs Network's rows are DIMENSIONAL accuracy. The number above applies the dimensional band as if it were parallelism, which is an UPPER BOUND of unknown tightness, not a measurement. Both flange faces come off the same layer stack, so the true parallelism error is expected to be far smaller -- but 'expected' is not measured.",
+      "flange_face_what_settles_it": "print a flange coupon and read face parallelism across \u00d819.0 with a dial indicator on a surface plate; store it beside the bore/pin ladder of cecad.coupon",
+      "governing": "the bolted flange, by an unmeasured margin",
+      "worst_case": 3.0128
+     },
+     "rotational_backlash_deg": {
+      "worst_case": 11.3099,
+      "rss": 6.9825,
+      "basis": "atan(radial slop / PCD radius 6.0 mm) -- the pattern's tangential freedom BEFORE the four M2 screws are torqued; a clamped joint gives this up to friction, and no friction figure exists for a printed PLA face on a plastic horn"
+     },
+     "note": null
+    },
+    "FDM-B industrial": {
+     "flange": {
+      "part": "microduck-hip-bracket",
+      "interface": "pitch_horn",
+      "disc_d_mm": 19.0,
+      "clearance_hole_d_mm": 2.4,
+      "screws": 4,
+      "pcd_mm": 12.0
+     },
+     "bearing": {
+      "connection": "connection:press-fit-bearing-22x16x4",
+      "bore_mm": 16.0,
+      "od_mm": 22.0,
+      "width_mm": 4.0,
+      "seat_part": "microduck-hip-bracket",
+      "seat_interface": "pitch_bearing_seat",
+      "seat_d_mm": 16.0,
+      "seat_length_mm": 1.95,
+      "engagement_fraction": 0.4875,
+      "engagement_pct": 48.75,
+      "role": "inner race on a printed boss"
+     },
+     "band": "FDM-B industrial",
+     "axial_terms": [
+      {
+       "term": "flange face height, printed",
+       "nominal_mm": 19.0,
+       "half_band_mm": 0.3,
+       "source": "microduck-hip-bracket 'pitch_horn' (printed, FDM-B industrial)"
+      },
+      {
+       "term": "printed seat length / boss height",
+       "nominal_mm": 1.95,
+       "half_band_mm": 0.3,
+       "source": "microduck-hip-bracket 'pitch_bearing_seat', FDM-B industrial"
+      }
+     ],
+     "radial_terms": [
+      {
+       "term": "M2 clearance hole over the screw shank",
+       "nominal_mm": 2.4,
+       "half_band_mm": 0.2,
+       "source": "(2.40 - 2.00)/2, hole \u00d8 off microduck-hip-bracket 'pitch_horn', M2 major \u00d82.0 off ce-cad/cecad/fasteners.py:57"
+      },
+      {
+       "term": "printed bolt-circle position",
+       "nominal_mm": 12.0,
+       "half_band_mm": 0.3,
+       "source": "\u00d812.0 PCD (connection:spline-xl330-horn), FDM-B industrial"
+      },
+      {
+       "term": "printed bearing seat diameter",
+       "nominal_mm": 16.0,
+       "half_band_mm": 0.3,
+       "source": "microduck-hip-bracket 'pitch_bearing_seat', FDM-B industrial"
+      }
+     ],
+     "open_terms": [
+      {
+       "term": "bearing ring width tolerance",
+       "nominal_mm": 4.0,
+       "why_open": "the reference names the ring only 'seeed_bearing' -- no designation, no vendor sheet (ce-connections/press-fit-bearing-22x16x4 compat.py 'interference' check)",
+       "what_settles_it": "a micrometer on the actual ring"
+      },
+      {
+       "term": "bearing radial internal clearance",
+       "why_open": "same: no designation, so no ISO 5753 clearance class",
+       "what_settles_it": "the ring's designation from a teardown, or a dial gauge on the assembled joint"
+      },
+      {
+       "term": "XL330 horn disc thickness and its axial run-out",
+       "nominal_mm": 3.0,
+       "why_open": "ROBOTIS's dimension drawing D1 ('XL,XC-330.pdf') is stamped '[FOR REFERENCE ONLY]' / 'Nonescale' and carries no tolerance block (ce-parts/xl330-m288-t/electrical.chip.json 'package')",
+       "what_settles_it": "a dial indicator on a real servo horn"
+      },
+      {
+       "term": "XL330 gearbox backlash at the output",
+       "why_open": "not published anywhere on E1, E2 or D1; the 288.4:1 train is 'Engineering Plastic' (E1 Specifications)",
+       "what_settles_it": "lock the case, load the horn both ways and read Present Position(132) (4096 pulse/rev = 0.0879 deg/count)"
+      },
+      {
+       "term": "this workshop's own printed band",
+       "why_open": "ce-cad/cecad/data/print_fits.json is {\"machines\": {}} -- no machine on the farm has ever been measured, so every number here rests on a published SERVICE tolerance, not on our printer",
+       "what_settles_it": "build cecad.coupon.coupon() with the \u00d810 and \u00d816 rungs, print it, measure with calipers and store it with cecad.coupon.record_measurements(); cecad.coupon.offsets_for() then answers per machine + material instead of returning CANNOT DETERMINE"
+      }
+     ],
+     "axial_play_mm": {
+      "worst_case": 0.6,
+      "rss": 0.4243
+     },
+     "radial_eccentricity_mm": {
+      "worst_case": 0.8,
+      "rss": 0.469
+     },
+     "angular_misalignment_deg": {
+      "bearing_cock_worst_case": 17.1027,
+      "bearing_cock_basis": "atan(diametral clearance / engaged length) = atan(2 x 0.3000 mm / 1.95 mm). Both numbers are sourced: the clearance from the FDM-B industrial band on the printed \u00d816.0 seat, the engaged length MEASURED on microduck-hip-bracket 'pitch_bearing_seat'. This is the angle the ball bearing ALONE leaves free.",
+      "flange_face_upper_bound_worst_case": 1.8087,
+      "flange_face_upper_bound_rss": 1.2792,
+      "flange_face_verdict": "CANNOT DETERMINE",
+      "flange_face_why": "the bolted flange's angular constraint is a FORM tolerance (face parallelism across the \u00d819.0 disc). No published FDM standard states one -- Protolabs Network's rows are DIMENSIONAL accuracy. The number above applies the dimensional band as if it were parallelism, which is an UPPER BOUND of unknown tightness, not a measurement. Both flange faces come off the same layer stack, so the true parallelism error is expected to be far smaller -- but 'expected' is not measured.",
+      "flange_face_what_settles_it": "print a flange coupon and read face parallelism across \u00d819.0 with a dial indicator on a surface plate; store it beside the bore/pin ladder of cecad.coupon",
+      "governing": "the bolted flange, by an unmeasured margin",
+      "worst_case": 1.8087
+     },
+     "rotational_backlash_deg": {
+      "worst_case": 7.5946,
+      "rss": 4.4699,
+      "basis": "atan(radial slop / PCD radius 6.0 mm) -- the pattern's tangential freedom BEFORE the four M2 screws are torqued; a clamped joint gives this up to friction, and no friction figure exists for a printed PLA face on a plastic horn"
+     },
+     "note": null
+    }
+   },
+   "right_hip_pitch": {
+    "FDM-A prototyping": {
+     "flange": {
+      "part": "microduck-hip-bracket",
+      "interface": "pitch_horn",
+      "disc_d_mm": 19.0,
+      "clearance_hole_d_mm": 2.4,
+      "screws": 4,
+      "pcd_mm": 12.0
+     },
+     "bearing": {
+      "connection": "connection:press-fit-bearing-22x16x4",
+      "bore_mm": 16.0,
+      "od_mm": 22.0,
+      "width_mm": 4.0,
+      "seat_part": "microduck-hip-bracket",
+      "seat_interface": "pitch_bearing_seat",
+      "seat_d_mm": 16.0,
+      "seat_length_mm": 1.95,
+      "engagement_fraction": 0.4875,
+      "engagement_pct": 48.75,
+      "role": "inner race on a printed boss"
+     },
+     "band": "FDM-A prototyping",
+     "axial_terms": [
+      {
+       "term": "flange face height, printed",
+       "nominal_mm": 19.0,
+       "half_band_mm": 0.5,
+       "source": "microduck-hip-bracket 'pitch_horn' (printed, FDM-A prototyping)"
+      },
+      {
+       "term": "printed seat length / boss height",
+       "nominal_mm": 1.95,
+       "half_band_mm": 0.5,
+       "source": "microduck-hip-bracket 'pitch_bearing_seat', FDM-A prototyping"
+      }
+     ],
+     "radial_terms": [
+      {
+       "term": "M2 clearance hole over the screw shank",
+       "nominal_mm": 2.4,
+       "half_band_mm": 0.2,
+       "source": "(2.40 - 2.00)/2, hole \u00d8 off microduck-hip-bracket 'pitch_horn', M2 major \u00d82.0 off ce-cad/cecad/fasteners.py:57"
+      },
+      {
+       "term": "printed bolt-circle position",
+       "nominal_mm": 12.0,
+       "half_band_mm": 0.5,
+       "source": "\u00d812.0 PCD (connection:spline-xl330-horn), FDM-A prototyping"
+      },
+      {
+       "term": "printed bearing seat diameter",
+       "nominal_mm": 16.0,
+       "half_band_mm": 0.5,
+       "source": "microduck-hip-bracket 'pitch_bearing_seat', FDM-A prototyping"
+      }
+     ],
+     "open_terms": [
+      {
+       "term": "bearing ring width tolerance",
+       "nominal_mm": 4.0,
+       "why_open": "the reference names the ring only 'seeed_bearing' -- no designation, no vendor sheet (ce-connections/press-fit-bearing-22x16x4 compat.py 'interference' check)",
+       "what_settles_it": "a micrometer on the actual ring"
+      },
+      {
+       "term": "bearing radial internal clearance",
+       "why_open": "same: no designation, so no ISO 5753 clearance class",
+       "what_settles_it": "the ring's designation from a teardown, or a dial gauge on the assembled joint"
+      },
+      {
+       "term": "XL330 horn disc thickness and its axial run-out",
+       "nominal_mm": 3.0,
+       "why_open": "ROBOTIS's dimension drawing D1 ('XL,XC-330.pdf') is stamped '[FOR REFERENCE ONLY]' / 'Nonescale' and carries no tolerance block (ce-parts/xl330-m288-t/electrical.chip.json 'package')",
+       "what_settles_it": "a dial indicator on a real servo horn"
+      },
+      {
+       "term": "XL330 gearbox backlash at the output",
+       "why_open": "not published anywhere on E1, E2 or D1; the 288.4:1 train is 'Engineering Plastic' (E1 Specifications)",
+       "what_settles_it": "lock the case, load the horn both ways and read Present Position(132) (4096 pulse/rev = 0.0879 deg/count)"
+      },
+      {
+       "term": "this workshop's own printed band",
+       "why_open": "ce-cad/cecad/data/print_fits.json is {\"machines\": {}} -- no machine on the farm has ever been measured, so every number here rests on a published SERVICE tolerance, not on our printer",
+       "what_settles_it": "build cecad.coupon.coupon() with the \u00d810 and \u00d816 rungs, print it, measure with calipers and store it with cecad.coupon.record_measurements(); cecad.coupon.offsets_for() then answers per machine + material instead of returning CANNOT DETERMINE"
+      }
+     ],
+     "axial_play_mm": {
+      "worst_case": 1.0,
+      "rss": 0.7071
+     },
+     "radial_eccentricity_mm": {
+      "worst_case": 1.2,
+      "rss": 0.7348
+     },
+     "angular_misalignment_deg": {
+      "bearing_cock_worst_case": 27.1497,
+      "bearing_cock_basis": "atan(diametral clearance / engaged length) = atan(2 x 0.5000 mm / 1.95 mm). Both numbers are sourced: the clearance from the FDM-A prototyping band on the printed \u00d816.0 seat, the engaged length MEASURED on microduck-hip-bracket 'pitch_bearing_seat'. This is the angle the ball bearing ALONE leaves free.",
+      "flange_face_upper_bound_worst_case": 3.0128,
+      "flange_face_upper_bound_rss": 2.1313,
+      "flange_face_verdict": "CANNOT DETERMINE",
+      "flange_face_why": "the bolted flange's angular constraint is a FORM tolerance (face parallelism across the \u00d819.0 disc). No published FDM standard states one -- Protolabs Network's rows are DIMENSIONAL accuracy. The number above applies the dimensional band as if it were parallelism, which is an UPPER BOUND of unknown tightness, not a measurement. Both flange faces come off the same layer stack, so the true parallelism error is expected to be far smaller -- but 'expected' is not measured.",
+      "flange_face_what_settles_it": "print a flange coupon and read face parallelism across \u00d819.0 with a dial indicator on a surface plate; store it beside the bore/pin ladder of cecad.coupon",
+      "governing": "the bolted flange, by an unmeasured margin",
+      "worst_case": 3.0128
+     },
+     "rotational_backlash_deg": {
+      "worst_case": 11.3099,
+      "rss": 6.9825,
+      "basis": "atan(radial slop / PCD radius 6.0 mm) -- the pattern's tangential freedom BEFORE the four M2 screws are torqued; a clamped joint gives this up to friction, and no friction figure exists for a printed PLA face on a plastic horn"
+     },
+     "note": null
+    },
+    "FDM-B industrial": {
+     "flange": {
+      "part": "microduck-hip-bracket",
+      "interface": "pitch_horn",
+      "disc_d_mm": 19.0,
+      "clearance_hole_d_mm": 2.4,
+      "screws": 4,
+      "pcd_mm": 12.0
+     },
+     "bearing": {
+      "connection": "connection:press-fit-bearing-22x16x4",
+      "bore_mm": 16.0,
+      "od_mm": 22.0,
+      "width_mm": 4.0,
+      "seat_part": "microduck-hip-bracket",
+      "seat_interface": "pitch_bearing_seat",
+      "seat_d_mm": 16.0,
+      "seat_length_mm": 1.95,
+      "engagement_fraction": 0.4875,
+      "engagement_pct": 48.75,
+      "role": "inner race on a printed boss"
+     },
+     "band": "FDM-B industrial",
+     "axial_terms": [
+      {
+       "term": "flange face height, printed",
+       "nominal_mm": 19.0,
+       "half_band_mm": 0.3,
+       "source": "microduck-hip-bracket 'pitch_horn' (printed, FDM-B industrial)"
+      },
+      {
+       "term": "printed seat length / boss height",
+       "nominal_mm": 1.95,
+       "half_band_mm": 0.3,
+       "source": "microduck-hip-bracket 'pitch_bearing_seat', FDM-B industrial"
+      }
+     ],
+     "radial_terms": [
+      {
+       "term": "M2 clearance hole over the screw shank",
+       "nominal_mm": 2.4,
+       "half_band_mm": 0.2,
+       "source": "(2.40 - 2.00)/2, hole \u00d8 off microduck-hip-bracket 'pitch_horn', M2 major \u00d82.0 off ce-cad/cecad/fasteners.py:57"
+      },
+      {
+       "term": "printed bolt-circle position",
+       "nominal_mm": 12.0,
+       "half_band_mm": 0.3,
+       "source": "\u00d812.0 PCD (connection:spline-xl330-horn), FDM-B industrial"
+      },
+      {
+       "term": "printed bearing seat diameter",
+       "nominal_mm": 16.0,
+       "half_band_mm": 0.3,
+       "source": "microduck-hip-bracket 'pitch_bearing_seat', FDM-B industrial"
+      }
+     ],
+     "open_terms": [
+      {
+       "term": "bearing ring width tolerance",
+       "nominal_mm": 4.0,
+       "why_open": "the reference names the ring only 'seeed_bearing' -- no designation, no vendor sheet (ce-connections/press-fit-bearing-22x16x4 compat.py 'interference' check)",
+       "what_settles_it": "a micrometer on the actual ring"
+      },
+      {
+       "term": "bearing radial internal clearance",
+       "why_open": "same: no designation, so no ISO 5753 clearance class",
+       "what_settles_it": "the ring's designation from a teardown, or a dial gauge on the assembled joint"
+      },
+      {
+       "term": "XL330 horn disc thickness and its axial run-out",
+       "nominal_mm": 3.0,
+       "why_open": "ROBOTIS's dimension drawing D1 ('XL,XC-330.pdf') is stamped '[FOR REFERENCE ONLY]' / 'Nonescale' and carries no tolerance block (ce-parts/xl330-m288-t/electrical.chip.json 'package')",
+       "what_settles_it": "a dial indicator on a real servo horn"
+      },
+      {
+       "term": "XL330 gearbox backlash at the output",
+       "why_open": "not published anywhere on E1, E2 or D1; the 288.4:1 train is 'Engineering Plastic' (E1 Specifications)",
+       "what_settles_it": "lock the case, load the horn both ways and read Present Position(132) (4096 pulse/rev = 0.0879 deg/count)"
+      },
+      {
+       "term": "this workshop's own printed band",
+       "why_open": "ce-cad/cecad/data/print_fits.json is {\"machines\": {}} -- no machine on the farm has ever been measured, so every number here rests on a published SERVICE tolerance, not on our printer",
+       "what_settles_it": "build cecad.coupon.coupon() with the \u00d810 and \u00d816 rungs, print it, measure with calipers and store it with cecad.coupon.record_measurements(); cecad.coupon.offsets_for() then answers per machine + material instead of returning CANNOT DETERMINE"
+      }
+     ],
+     "axial_play_mm": {
+      "worst_case": 0.6,
+      "rss": 0.4243
+     },
+     "radial_eccentricity_mm": {
+      "worst_case": 0.8,
+      "rss": 0.469
+     },
+     "angular_misalignment_deg": {
+      "bearing_cock_worst_case": 17.1027,
+      "bearing_cock_basis": "atan(diametral clearance / engaged length) = atan(2 x 0.3000 mm / 1.95 mm). Both numbers are sourced: the clearance from the FDM-B industrial band on the printed \u00d816.0 seat, the engaged length MEASURED on microduck-hip-bracket 'pitch_bearing_seat'. This is the angle the ball bearing ALONE leaves free.",
+      "flange_face_upper_bound_worst_case": 1.8087,
+      "flange_face_upper_bound_rss": 1.2792,
+      "flange_face_verdict": "CANNOT DETERMINE",
+      "flange_face_why": "the bolted flange's angular constraint is a FORM tolerance (face parallelism across the \u00d819.0 disc). No published FDM standard states one -- Protolabs Network's rows are DIMENSIONAL accuracy. The number above applies the dimensional band as if it were parallelism, which is an UPPER BOUND of unknown tightness, not a measurement. Both flange faces come off the same layer stack, so the true parallelism error is expected to be far smaller -- but 'expected' is not measured.",
+      "flange_face_what_settles_it": "print a flange coupon and read face parallelism across \u00d819.0 with a dial indicator on a surface plate; store it beside the bore/pin ladder of cecad.coupon",
+      "governing": "the bolted flange, by an unmeasured margin",
+      "worst_case": 1.8087
+     },
+     "rotational_backlash_deg": {
+      "worst_case": 7.5946,
+      "rss": 4.4699,
+      "basis": "atan(radial slop / PCD radius 6.0 mm) -- the pattern's tangential freedom BEFORE the four M2 screws are torqued; a clamped joint gives this up to friction, and no friction figure exists for a printed PLA face on a plastic horn"
+     },
+     "note": null
+    }
+   },
+   "left_knee": {
+    "FDM-A prototyping": {
+     "flange": {
+      "part": "microduck-shin",
+      "interface": "knee",
+      "disc_d_mm": 15.9,
+      "clearance_hole_d_mm": 2.2,
+      "screws": 4,
+      "pcd_mm": 12.0
+     },
+     "bearing": {
+      "connection": "connection:press-fit-bearing-22x16x4",
+      "bore_mm": 16.0,
+      "od_mm": 22.0,
+      "width_mm": 4.0,
+      "seat_part": null,
+      "seat_interface": null,
+      "seat_d_mm": 16.0,
+      "seat_length_mm": null,
+      "engagement_fraction": null,
+      "engagement_pct": null,
+      "role": "CANNOT DETERMINE"
+     },
+     "band": "FDM-A prototyping",
+     "axial_terms": [
+      {
+       "term": "flange face height, printed",
+       "nominal_mm": 15.9,
+       "half_band_mm": 0.5,
+       "source": "microduck-shin 'knee' (printed, FDM-A prototyping)"
+      },
+      {
+       "term": "printed seat length / boss height",
+       "nominal_mm": null,
+       "half_band_mm": null,
+       "source": "CANNOT DETERMINE '-', FDM-A prototyping"
+      }
+     ],
+     "radial_terms": [
+      {
+       "term": "M2 clearance hole over the screw shank",
+       "nominal_mm": 2.2,
+       "half_band_mm": 0.1,
+       "source": "(2.20 - 2.00)/2, hole \u00d8 off microduck-shin 'knee', M2 major \u00d82.0 off ce-cad/cecad/fasteners.py:57"
+      },
+      {
+       "term": "printed bolt-circle position",
+       "nominal_mm": 12.0,
+       "half_band_mm": 0.5,
+       "source": "\u00d812.0 PCD (connection:spline-xl330-horn), FDM-A prototyping"
+      },
+      {
+       "term": "printed bearing seat diameter",
+       "nominal_mm": 16.0,
+       "half_band_mm": 0.5,
+       "source": "CANNOT DETERMINE '-', FDM-A prototyping"
+      }
+     ],
+     "open_terms": [
+      {
+       "term": "bearing ring width tolerance",
+       "nominal_mm": 4.0,
+       "why_open": "the reference names the ring only 'seeed_bearing' -- no designation, no vendor sheet (ce-connections/press-fit-bearing-22x16x4 compat.py 'interference' check)",
+       "what_settles_it": "a micrometer on the actual ring"
+      },
+      {
+       "term": "bearing radial internal clearance",
+       "why_open": "same: no designation, so no ISO 5753 clearance class",
+       "what_settles_it": "the ring's designation from a teardown, or a dial gauge on the assembled joint"
+      },
+      {
+       "term": "XL330 horn disc thickness and its axial run-out",
+       "nominal_mm": 3.0,
+       "why_open": "ROBOTIS's dimension drawing D1 ('XL,XC-330.pdf') is stamped '[FOR REFERENCE ONLY]' / 'Nonescale' and carries no tolerance block (ce-parts/xl330-m288-t/electrical.chip.json 'package')",
+       "what_settles_it": "a dial indicator on a real servo horn"
+      },
+      {
+       "term": "XL330 gearbox backlash at the output",
+       "why_open": "not published anywhere on E1, E2 or D1; the 288.4:1 train is 'Engineering Plastic' (E1 Specifications)",
+       "what_settles_it": "lock the case, load the horn both ways and read Present Position(132) (4096 pulse/rev = 0.0879 deg/count)"
+      },
+      {
+       "term": "this workshop's own printed band",
+       "why_open": "ce-cad/cecad/data/print_fits.json is {\"machines\": {}} -- no machine on the farm has ever been measured, so every number here rests on a published SERVICE tolerance, not on our printer",
+       "what_settles_it": "build cecad.coupon.coupon() with the \u00d810 and \u00d816 rungs, print it, measure with calipers and store it with cecad.coupon.record_measurements(); cecad.coupon.offsets_for() then answers per machine + material instead of returning CANNOT DETERMINE"
+      }
+     ],
+     "axial_play_mm": {
+      "worst_case": 0.5,
+      "rss": 0.5
+     },
+     "radial_eccentricity_mm": {
+      "worst_case": 1.1,
+      "rss": 0.7141
+     },
+     "angular_misalignment_deg": {
+      "bearing_cock_worst_case": null,
+      "bearing_cock_basis": null,
+      "flange_face_upper_bound_worst_case": 3.5988,
+      "flange_face_upper_bound_rss": 2.5464,
+      "flange_face_verdict": "CANNOT DETERMINE",
+      "flange_face_why": "the bolted flange's angular constraint is a FORM tolerance (face parallelism across the \u00d815.9 disc). No published FDM standard states one -- Protolabs Network's rows are DIMENSIONAL accuracy. The number above applies the dimensional band as if it were parallelism, which is an UPPER BOUND of unknown tightness, not a measurement. Both flange faces come off the same layer stack, so the true parallelism error is expected to be far smaller -- but 'expected' is not measured.",
+      "flange_face_what_settles_it": "print a flange coupon and read face parallelism across \u00d815.9 with a dial indicator on a surface plate; store it beside the bore/pin ladder of cecad.coupon",
+      "governing": "the bolted flange, by an unmeasured margin",
+      "worst_case": 3.5988
+     },
+     "rotational_backlash_deg": {
+      "worst_case": 10.3889,
+      "rss": 6.7876,
+      "basis": "atan(radial slop / PCD radius 6.0 mm) -- the pattern's tangential freedom BEFORE the four M2 screws are torqued; a clamped joint gives this up to friction, and no friction figure exists for a printed PLA face on a plastic horn"
+     },
+     "note": "a 22x16x4 bearing IS on this axis (in upper_leg_left, spec/mesh-placements.json (22, 35.777, -4.0)) but neither microduck-upper-leg-left nor microduck-shin declares a bearing_seat interface for it -- the seat length is unmeasured"
+    },
+    "FDM-B industrial": {
+     "flange": {
+      "part": "microduck-shin",
+      "interface": "knee",
+      "disc_d_mm": 15.9,
+      "clearance_hole_d_mm": 2.2,
+      "screws": 4,
+      "pcd_mm": 12.0
+     },
+     "bearing": {
+      "connection": "connection:press-fit-bearing-22x16x4",
+      "bore_mm": 16.0,
+      "od_mm": 22.0,
+      "width_mm": 4.0,
+      "seat_part": null,
+      "seat_interface": null,
+      "seat_d_mm": 16.0,
+      "seat_length_mm": null,
+      "engagement_fraction": null,
+      "engagement_pct": null,
+      "role": "CANNOT DETERMINE"
+     },
+     "band": "FDM-B industrial",
+     "axial_terms": [
+      {
+       "term": "flange face height, printed",
+       "nominal_mm": 15.9,
+       "half_band_mm": 0.3,
+       "source": "microduck-shin 'knee' (printed, FDM-B industrial)"
+      },
+      {
+       "term": "printed seat length / boss height",
+       "nominal_mm": null,
+       "half_band_mm": null,
+       "source": "CANNOT DETERMINE '-', FDM-B industrial"
+      }
+     ],
+     "radial_terms": [
+      {
+       "term": "M2 clearance hole over the screw shank",
+       "nominal_mm": 2.2,
+       "half_band_mm": 0.1,
+       "source": "(2.20 - 2.00)/2, hole \u00d8 off microduck-shin 'knee', M2 major \u00d82.0 off ce-cad/cecad/fasteners.py:57"
+      },
+      {
+       "term": "printed bolt-circle position",
+       "nominal_mm": 12.0,
+       "half_band_mm": 0.3,
+       "source": "\u00d812.0 PCD (connection:spline-xl330-horn), FDM-B industrial"
+      },
+      {
+       "term": "printed bearing seat diameter",
+       "nominal_mm": 16.0,
+       "half_band_mm": 0.3,
+       "source": "CANNOT DETERMINE '-', FDM-B industrial"
+      }
+     ],
+     "open_terms": [
+      {
+       "term": "bearing ring width tolerance",
+       "nominal_mm": 4.0,
+       "why_open": "the reference names the ring only 'seeed_bearing' -- no designation, no vendor sheet (ce-connections/press-fit-bearing-22x16x4 compat.py 'interference' check)",
+       "what_settles_it": "a micrometer on the actual ring"
+      },
+      {
+       "term": "bearing radial internal clearance",
+       "why_open": "same: no designation, so no ISO 5753 clearance class",
+       "what_settles_it": "the ring's designation from a teardown, or a dial gauge on the assembled joint"
+      },
+      {
+       "term": "XL330 horn disc thickness and its axial run-out",
+       "nominal_mm": 3.0,
+       "why_open": "ROBOTIS's dimension drawing D1 ('XL,XC-330.pdf') is stamped '[FOR REFERENCE ONLY]' / 'Nonescale' and carries no tolerance block (ce-parts/xl330-m288-t/electrical.chip.json 'package')",
+       "what_settles_it": "a dial indicator on a real servo horn"
+      },
+      {
+       "term": "XL330 gearbox backlash at the output",
+       "why_open": "not published anywhere on E1, E2 or D1; the 288.4:1 train is 'Engineering Plastic' (E1 Specifications)",
+       "what_settles_it": "lock the case, load the horn both ways and read Present Position(132) (4096 pulse/rev = 0.0879 deg/count)"
+      },
+      {
+       "term": "this workshop's own printed band",
+       "why_open": "ce-cad/cecad/data/print_fits.json is {\"machines\": {}} -- no machine on the farm has ever been measured, so every number here rests on a published SERVICE tolerance, not on our printer",
+       "what_settles_it": "build cecad.coupon.coupon() with the \u00d810 and \u00d816 rungs, print it, measure with calipers and store it with cecad.coupon.record_measurements(); cecad.coupon.offsets_for() then answers per machine + material instead of returning CANNOT DETERMINE"
+      }
+     ],
+     "axial_play_mm": {
+      "worst_case": 0.3,
+      "rss": 0.3
+     },
+     "radial_eccentricity_mm": {
+      "worst_case": 0.7,
+      "rss": 0.4359
+     },
+     "angular_misalignment_deg": {
+      "bearing_cock_worst_case": null,
+      "bearing_cock_basis": null,
+      "flange_face_upper_bound_worst_case": 2.1611,
+      "flange_face_upper_bound_rss": 1.5285,
+      "flange_face_verdict": "CANNOT DETERMINE",
+      "flange_face_why": "the bolted flange's angular constraint is a FORM tolerance (face parallelism across the \u00d815.9 disc). No published FDM standard states one -- Protolabs Network's rows are DIMENSIONAL accuracy. The number above applies the dimensional band as if it were parallelism, which is an UPPER BOUND of unknown tightness, not a measurement. Both flange faces come off the same layer stack, so the true parallelism error is expected to be far smaller -- but 'expected' is not measured.",
+      "flange_face_what_settles_it": "print a flange coupon and read face parallelism across \u00d815.9 with a dial indicator on a surface plate; store it beside the bore/pin ladder of cecad.coupon",
+      "governing": "the bolted flange, by an unmeasured margin",
+      "worst_case": 2.1611
+     },
+     "rotational_backlash_deg": {
+      "worst_case": 6.6544,
+      "rss": 4.1551,
+      "basis": "atan(radial slop / PCD radius 6.0 mm) -- the pattern's tangential freedom BEFORE the four M2 screws are torqued; a clamped joint gives this up to friction, and no friction figure exists for a printed PLA face on a plastic horn"
+     },
+     "note": "a 22x16x4 bearing IS on this axis (in upper_leg_left, spec/mesh-placements.json (22, 35.777, -4.0)) but neither microduck-upper-leg-left nor microduck-shin declares a bearing_seat interface for it -- the seat length is unmeasured"
+    }
+   },
+   "right_knee": {
+    "FDM-A prototyping": {
+     "flange": {
+      "part": "microduck-shin",
+      "interface": "knee",
+      "disc_d_mm": 15.9,
+      "clearance_hole_d_mm": 2.2,
+      "screws": 4,
+      "pcd_mm": 12.0
+     },
+     "bearing": {
+      "connection": "connection:press-fit-bearing-22x16x4",
+      "bore_mm": 16.0,
+      "od_mm": 22.0,
+      "width_mm": 4.0,
+      "seat_part": null,
+      "seat_interface": null,
+      "seat_d_mm": 16.0,
+      "seat_length_mm": null,
+      "engagement_fraction": null,
+      "engagement_pct": null,
+      "role": "CANNOT DETERMINE"
+     },
+     "band": "FDM-A prototyping",
+     "axial_terms": [
+      {
+       "term": "flange face height, printed",
+       "nominal_mm": 15.9,
+       "half_band_mm": 0.5,
+       "source": "microduck-shin 'knee' (printed, FDM-A prototyping)"
+      },
+      {
+       "term": "printed seat length / boss height",
+       "nominal_mm": null,
+       "half_band_mm": null,
+       "source": "CANNOT DETERMINE '-', FDM-A prototyping"
+      }
+     ],
+     "radial_terms": [
+      {
+       "term": "M2 clearance hole over the screw shank",
+       "nominal_mm": 2.2,
+       "half_band_mm": 0.1,
+       "source": "(2.20 - 2.00)/2, hole \u00d8 off microduck-shin 'knee', M2 major \u00d82.0 off ce-cad/cecad/fasteners.py:57"
+      },
+      {
+       "term": "printed bolt-circle position",
+       "nominal_mm": 12.0,
+       "half_band_mm": 0.5,
+       "source": "\u00d812.0 PCD (connection:spline-xl330-horn), FDM-A prototyping"
+      },
+      {
+       "term": "printed bearing seat diameter",
+       "nominal_mm": 16.0,
+       "half_band_mm": 0.5,
+       "source": "CANNOT DETERMINE '-', FDM-A prototyping"
+      }
+     ],
+     "open_terms": [
+      {
+       "term": "bearing ring width tolerance",
+       "nominal_mm": 4.0,
+       "why_open": "the reference names the ring only 'seeed_bearing' -- no designation, no vendor sheet (ce-connections/press-fit-bearing-22x16x4 compat.py 'interference' check)",
+       "what_settles_it": "a micrometer on the actual ring"
+      },
+      {
+       "term": "bearing radial internal clearance",
+       "why_open": "same: no designation, so no ISO 5753 clearance class",
+       "what_settles_it": "the ring's designation from a teardown, or a dial gauge on the assembled joint"
+      },
+      {
+       "term": "XL330 horn disc thickness and its axial run-out",
+       "nominal_mm": 3.0,
+       "why_open": "ROBOTIS's dimension drawing D1 ('XL,XC-330.pdf') is stamped '[FOR REFERENCE ONLY]' / 'Nonescale' and carries no tolerance block (ce-parts/xl330-m288-t/electrical.chip.json 'package')",
+       "what_settles_it": "a dial indicator on a real servo horn"
+      },
+      {
+       "term": "XL330 gearbox backlash at the output",
+       "why_open": "not published anywhere on E1, E2 or D1; the 288.4:1 train is 'Engineering Plastic' (E1 Specifications)",
+       "what_settles_it": "lock the case, load the horn both ways and read Present Position(132) (4096 pulse/rev = 0.0879 deg/count)"
+      },
+      {
+       "term": "this workshop's own printed band",
+       "why_open": "ce-cad/cecad/data/print_fits.json is {\"machines\": {}} -- no machine on the farm has ever been measured, so every number here rests on a published SERVICE tolerance, not on our printer",
+       "what_settles_it": "build cecad.coupon.coupon() with the \u00d810 and \u00d816 rungs, print it, measure with calipers and store it with cecad.coupon.record_measurements(); cecad.coupon.offsets_for() then answers per machine + material instead of returning CANNOT DETERMINE"
+      }
+     ],
+     "axial_play_mm": {
+      "worst_case": 0.5,
+      "rss": 0.5
+     },
+     "radial_eccentricity_mm": {
+      "worst_case": 1.1,
+      "rss": 0.7141
+     },
+     "angular_misalignment_deg": {
+      "bearing_cock_worst_case": null,
+      "bearing_cock_basis": null,
+      "flange_face_upper_bound_worst_case": 3.5988,
+      "flange_face_upper_bound_rss": 2.5464,
+      "flange_face_verdict": "CANNOT DETERMINE",
+      "flange_face_why": "the bolted flange's angular constraint is a FORM tolerance (face parallelism across the \u00d815.9 disc). No published FDM standard states one -- Protolabs Network's rows are DIMENSIONAL accuracy. The number above applies the dimensional band as if it were parallelism, which is an UPPER BOUND of unknown tightness, not a measurement. Both flange faces come off the same layer stack, so the true parallelism error is expected to be far smaller -- but 'expected' is not measured.",
+      "flange_face_what_settles_it": "print a flange coupon and read face parallelism across \u00d815.9 with a dial indicator on a surface plate; store it beside the bore/pin ladder of cecad.coupon",
+      "governing": "the bolted flange, by an unmeasured margin",
+      "worst_case": 3.5988
+     },
+     "rotational_backlash_deg": {
+      "worst_case": 10.3889,
+      "rss": 6.7876,
+      "basis": "atan(radial slop / PCD radius 6.0 mm) -- the pattern's tangential freedom BEFORE the four M2 screws are torqued; a clamped joint gives this up to friction, and no friction figure exists for a printed PLA face on a plastic horn"
+     },
+     "note": "mirror of left_knee; same missing seat interface"
+    },
+    "FDM-B industrial": {
+     "flange": {
+      "part": "microduck-shin",
+      "interface": "knee",
+      "disc_d_mm": 15.9,
+      "clearance_hole_d_mm": 2.2,
+      "screws": 4,
+      "pcd_mm": 12.0
+     },
+     "bearing": {
+      "connection": "connection:press-fit-bearing-22x16x4",
+      "bore_mm": 16.0,
+      "od_mm": 22.0,
+      "width_mm": 4.0,
+      "seat_part": null,
+      "seat_interface": null,
+      "seat_d_mm": 16.0,
+      "seat_length_mm": null,
+      "engagement_fraction": null,
+      "engagement_pct": null,
+      "role": "CANNOT DETERMINE"
+     },
+     "band": "FDM-B industrial",
+     "axial_terms": [
+      {
+       "term": "flange face height, printed",
+       "nominal_mm": 15.9,
+       "half_band_mm": 0.3,
+       "source": "microduck-shin 'knee' (printed, FDM-B industrial)"
+      },
+      {
+       "term": "printed seat length / boss height",
+       "nominal_mm": null,
+       "half_band_mm": null,
+       "source": "CANNOT DETERMINE '-', FDM-B industrial"
+      }
+     ],
+     "radial_terms": [
+      {
+       "term": "M2 clearance hole over the screw shank",
+       "nominal_mm": 2.2,
+       "half_band_mm": 0.1,
+       "source": "(2.20 - 2.00)/2, hole \u00d8 off microduck-shin 'knee', M2 major \u00d82.0 off ce-cad/cecad/fasteners.py:57"
+      },
+      {
+       "term": "printed bolt-circle position",
+       "nominal_mm": 12.0,
+       "half_band_mm": 0.3,
+       "source": "\u00d812.0 PCD (connection:spline-xl330-horn), FDM-B industrial"
+      },
+      {
+       "term": "printed bearing seat diameter",
+       "nominal_mm": 16.0,
+       "half_band_mm": 0.3,
+       "source": "CANNOT DETERMINE '-', FDM-B industrial"
+      }
+     ],
+     "open_terms": [
+      {
+       "term": "bearing ring width tolerance",
+       "nominal_mm": 4.0,
+       "why_open": "the reference names the ring only 'seeed_bearing' -- no designation, no vendor sheet (ce-connections/press-fit-bearing-22x16x4 compat.py 'interference' check)",
+       "what_settles_it": "a micrometer on the actual ring"
+      },
+      {
+       "term": "bearing radial internal clearance",
+       "why_open": "same: no designation, so no ISO 5753 clearance class",
+       "what_settles_it": "the ring's designation from a teardown, or a dial gauge on the assembled joint"
+      },
+      {
+       "term": "XL330 horn disc thickness and its axial run-out",
+       "nominal_mm": 3.0,
+       "why_open": "ROBOTIS's dimension drawing D1 ('XL,XC-330.pdf') is stamped '[FOR REFERENCE ONLY]' / 'Nonescale' and carries no tolerance block (ce-parts/xl330-m288-t/electrical.chip.json 'package')",
+       "what_settles_it": "a dial indicator on a real servo horn"
+      },
+      {
+       "term": "XL330 gearbox backlash at the output",
+       "why_open": "not published anywhere on E1, E2 or D1; the 288.4:1 train is 'Engineering Plastic' (E1 Specifications)",
+       "what_settles_it": "lock the case, load the horn both ways and read Present Position(132) (4096 pulse/rev = 0.0879 deg/count)"
+      },
+      {
+       "term": "this workshop's own printed band",
+       "why_open": "ce-cad/cecad/data/print_fits.json is {\"machines\": {}} -- no machine on the farm has ever been measured, so every number here rests on a published SERVICE tolerance, not on our printer",
+       "what_settles_it": "build cecad.coupon.coupon() with the \u00d810 and \u00d816 rungs, print it, measure with calipers and store it with cecad.coupon.record_measurements(); cecad.coupon.offsets_for() then answers per machine + material instead of returning CANNOT DETERMINE"
+      }
+     ],
+     "axial_play_mm": {
+      "worst_case": 0.3,
+      "rss": 0.3
+     },
+     "radial_eccentricity_mm": {
+      "worst_case": 0.7,
+      "rss": 0.4359
+     },
+     "angular_misalignment_deg": {
+      "bearing_cock_worst_case": null,
+      "bearing_cock_basis": null,
+      "flange_face_upper_bound_worst_case": 2.1611,
+      "flange_face_upper_bound_rss": 1.5285,
+      "flange_face_verdict": "CANNOT DETERMINE",
+      "flange_face_why": "the bolted flange's angular constraint is a FORM tolerance (face parallelism across the \u00d815.9 disc). No published FDM standard states one -- Protolabs Network's rows are DIMENSIONAL accuracy. The number above applies the dimensional band as if it were parallelism, which is an UPPER BOUND of unknown tightness, not a measurement. Both flange faces come off the same layer stack, so the true parallelism error is expected to be far smaller -- but 'expected' is not measured.",
+      "flange_face_what_settles_it": "print a flange coupon and read face parallelism across \u00d815.9 with a dial indicator on a surface plate; store it beside the bore/pin ladder of cecad.coupon",
+      "governing": "the bolted flange, by an unmeasured margin",
+      "worst_case": 2.1611
+     },
+     "rotational_backlash_deg": {
+      "worst_case": 6.6544,
+      "rss": 4.1551,
+      "basis": "atan(radial slop / PCD radius 6.0 mm) -- the pattern's tangential freedom BEFORE the four M2 screws are torqued; a clamped joint gives this up to friction, and no friction figure exists for a printed PLA face on a plastic horn"
+     },
+     "note": "mirror of left_knee; same missing seat interface"
+    }
+   },
+   "left_ankle": {
+    "FDM-A prototyping": {
+     "flange": {
+      "part": "microduck-ankle-left",
+      "interface": "ankle_horn",
+      "disc_d_mm": 16.0,
+      "clearance_hole_d_mm": 2.2,
+      "screws": 4,
+      "pcd_mm": 12.0
+     },
+     "bearing": {
+      "connection": "connection:press-fit-bearing-15x10x3",
+      "bore_mm": 10.0,
+      "od_mm": 15.0,
+      "width_mm": 3.0,
+      "seat_part": "microduck-shin",
+      "seat_interface": "ankle",
+      "seat_d_mm": 10.0,
+      "seat_length_mm": 3.2,
+      "engagement_fraction": 1.0667,
+      "engagement_pct": 106.67,
+      "role": "inner race on the shin's printed \u00d810 boss; the outer race sits in microduck-ankle-left 'ankle_bearing', a \u00d815.0 x 2.3 pocket -- so BOTH races land on printed features"
+     },
+     "band": "FDM-A prototyping",
+     "axial_terms": [
+      {
+       "term": "flange face height, printed",
+       "nominal_mm": 16.0,
+       "half_band_mm": 0.5,
+       "source": "microduck-ankle-left 'ankle_horn' (printed, FDM-A prototyping)"
+      },
+      {
+       "term": "printed seat length / boss height",
+       "nominal_mm": 3.2,
+       "half_band_mm": 0.5,
+       "source": "microduck-shin 'ankle', FDM-A prototyping"
+      }
+     ],
+     "radial_terms": [
+      {
+       "term": "M2 clearance hole over the screw shank",
+       "nominal_mm": 2.2,
+       "half_band_mm": 0.1,
+       "source": "(2.20 - 2.00)/2, hole \u00d8 off microduck-ankle-left 'ankle_horn', M2 major \u00d82.0 off ce-cad/cecad/fasteners.py:57"
+      },
+      {
+       "term": "printed bolt-circle position",
+       "nominal_mm": 12.0,
+       "half_band_mm": 0.5,
+       "source": "\u00d812.0 PCD (connection:spline-xl330-horn), FDM-A prototyping"
+      },
+      {
+       "term": "printed bearing seat diameter",
+       "nominal_mm": 10.0,
+       "half_band_mm": 0.5,
+       "source": "microduck-shin 'ankle', FDM-A prototyping"
+      },
+      {
+       "term": "printed bearing POCKET diameter (outer race)",
+       "nominal_mm": 15.0,
+       "half_band_mm": 0.5,
+       "source": "microduck-ankle-left 'ankle_bearing', FDM-A prototyping -- this joint lands BOTH races on printed features"
+      }
+     ],
+     "open_terms": [
+      {
+       "term": "bearing ring width tolerance",
+       "nominal_mm": 3.0,
+       "why_open": "the reference names the ring only 'seeed_bearing' -- no designation, no vendor sheet (ce-connections/press-fit-bearing-15x10x3 compat.py 'interference' check)",
+       "what_settles_it": "a micrometer on the actual ring"
+      },
+      {
+       "term": "bearing radial internal clearance",
+       "why_open": "same: no designation, so no ISO 5753 clearance class",
+       "what_settles_it": "the ring's designation from a teardown, or a dial gauge on the assembled joint"
+      },
+      {
+       "term": "XL330 horn disc thickness and its axial run-out",
+       "nominal_mm": 3.0,
+       "why_open": "ROBOTIS's dimension drawing D1 ('XL,XC-330.pdf') is stamped '[FOR REFERENCE ONLY]' / 'Nonescale' and carries no tolerance block (ce-parts/xl330-m288-t/electrical.chip.json 'package')",
+       "what_settles_it": "a dial indicator on a real servo horn"
+      },
+      {
+       "term": "XL330 gearbox backlash at the output",
+       "why_open": "not published anywhere on E1, E2 or D1; the 288.4:1 train is 'Engineering Plastic' (E1 Specifications)",
+       "what_settles_it": "lock the case, load the horn both ways and read Present Position(132) (4096 pulse/rev = 0.0879 deg/count)"
+      },
+      {
+       "term": "this workshop's own printed band",
+       "why_open": "ce-cad/cecad/data/print_fits.json is {\"machines\": {}} -- no machine on the farm has ever been measured, so every number here rests on a published SERVICE tolerance, not on our printer",
+       "what_settles_it": "build cecad.coupon.coupon() with the \u00d810 and \u00d816 rungs, print it, measure with calipers and store it with cecad.coupon.record_measurements(); cecad.coupon.offsets_for() then answers per machine + material instead of returning CANNOT DETERMINE"
+      }
+     ],
+     "axial_play_mm": {
+      "worst_case": 1.0,
+      "rss": 0.7071
+     },
+     "radial_eccentricity_mm": {
+      "worst_case": 1.6,
+      "rss": 0.8718
+     },
+     "angular_misalignment_deg": {
+      "bearing_cock_worst_case": 17.354,
+      "bearing_cock_basis": "atan(diametral clearance / engaged length) = atan(2 x 0.5000 mm / 3.20 mm). Both numbers are sourced: the clearance from the FDM-A prototyping band on the printed \u00d810.0 seat, the engaged length MEASURED on microduck-shin 'ankle'. This is the angle the ball bearing ALONE leaves free.",
+      "flange_face_upper_bound_worst_case": 3.5763,
+      "flange_face_upper_bound_rss": 2.5305,
+      "flange_face_verdict": "CANNOT DETERMINE",
+      "flange_face_why": "the bolted flange's angular constraint is a FORM tolerance (face parallelism across the \u00d816.0 disc). No published FDM standard states one -- Protolabs Network's rows are DIMENSIONAL accuracy. The number above applies the dimensional band as if it were parallelism, which is an UPPER BOUND of unknown tightness, not a measurement. Both flange faces come off the same layer stack, so the true parallelism error is expected to be far smaller -- but 'expected' is not measured.",
+      "flange_face_what_settles_it": "print a flange coupon and read face parallelism across \u00d816.0 with a dial indicator on a surface plate; store it beside the bore/pin ladder of cecad.coupon",
+      "governing": "the bolted flange, by an unmeasured margin",
+      "worst_case": 3.5763
+     },
+     "rotational_backlash_deg": {
+      "worst_case": 14.9314,
+      "rss": 8.267,
+      "basis": "atan(radial slop / PCD radius 6.0 mm) -- the pattern's tangential freedom BEFORE the four M2 screws are torqued; a clamped joint gives this up to friction, and no friction figure exists for a printed PLA face on a plastic horn"
+     },
+     "note": null
+    },
+    "FDM-B industrial": {
+     "flange": {
+      "part": "microduck-ankle-left",
+      "interface": "ankle_horn",
+      "disc_d_mm": 16.0,
+      "clearance_hole_d_mm": 2.2,
+      "screws": 4,
+      "pcd_mm": 12.0
+     },
+     "bearing": {
+      "connection": "connection:press-fit-bearing-15x10x3",
+      "bore_mm": 10.0,
+      "od_mm": 15.0,
+      "width_mm": 3.0,
+      "seat_part": "microduck-shin",
+      "seat_interface": "ankle",
+      "seat_d_mm": 10.0,
+      "seat_length_mm": 3.2,
+      "engagement_fraction": 1.0667,
+      "engagement_pct": 106.67,
+      "role": "inner race on the shin's printed \u00d810 boss; the outer race sits in microduck-ankle-left 'ankle_bearing', a \u00d815.0 x 2.3 pocket -- so BOTH races land on printed features"
+     },
+     "band": "FDM-B industrial",
+     "axial_terms": [
+      {
+       "term": "flange face height, printed",
+       "nominal_mm": 16.0,
+       "half_band_mm": 0.3,
+       "source": "microduck-ankle-left 'ankle_horn' (printed, FDM-B industrial)"
+      },
+      {
+       "term": "printed seat length / boss height",
+       "nominal_mm": 3.2,
+       "half_band_mm": 0.3,
+       "source": "microduck-shin 'ankle', FDM-B industrial"
+      }
+     ],
+     "radial_terms": [
+      {
+       "term": "M2 clearance hole over the screw shank",
+       "nominal_mm": 2.2,
+       "half_band_mm": 0.1,
+       "source": "(2.20 - 2.00)/2, hole \u00d8 off microduck-ankle-left 'ankle_horn', M2 major \u00d82.0 off ce-cad/cecad/fasteners.py:57"
+      },
+      {
+       "term": "printed bolt-circle position",
+       "nominal_mm": 12.0,
+       "half_band_mm": 0.3,
+       "source": "\u00d812.0 PCD (connection:spline-xl330-horn), FDM-B industrial"
+      },
+      {
+       "term": "printed bearing seat diameter",
+       "nominal_mm": 10.0,
+       "half_band_mm": 0.3,
+       "source": "microduck-shin 'ankle', FDM-B industrial"
+      },
+      {
+       "term": "printed bearing POCKET diameter (outer race)",
+       "nominal_mm": 15.0,
+       "half_band_mm": 0.3,
+       "source": "microduck-ankle-left 'ankle_bearing', FDM-B industrial -- this joint lands BOTH races on printed features"
+      }
+     ],
+     "open_terms": [
+      {
+       "term": "bearing ring width tolerance",
+       "nominal_mm": 3.0,
+       "why_open": "the reference names the ring only 'seeed_bearing' -- no designation, no vendor sheet (ce-connections/press-fit-bearing-15x10x3 compat.py 'interference' check)",
+       "what_settles_it": "a micrometer on the actual ring"
+      },
+      {
+       "term": "bearing radial internal clearance",
+       "why_open": "same: no designation, so no ISO 5753 clearance class",
+       "what_settles_it": "the ring's designation from a teardown, or a dial gauge on the assembled joint"
+      },
+      {
+       "term": "XL330 horn disc thickness and its axial run-out",
+       "nominal_mm": 3.0,
+       "why_open": "ROBOTIS's dimension drawing D1 ('XL,XC-330.pdf') is stamped '[FOR REFERENCE ONLY]' / 'Nonescale' and carries no tolerance block (ce-parts/xl330-m288-t/electrical.chip.json 'package')",
+       "what_settles_it": "a dial indicator on a real servo horn"
+      },
+      {
+       "term": "XL330 gearbox backlash at the output",
+       "why_open": "not published anywhere on E1, E2 or D1; the 288.4:1 train is 'Engineering Plastic' (E1 Specifications)",
+       "what_settles_it": "lock the case, load the horn both ways and read Present Position(132) (4096 pulse/rev = 0.0879 deg/count)"
+      },
+      {
+       "term": "this workshop's own printed band",
+       "why_open": "ce-cad/cecad/data/print_fits.json is {\"machines\": {}} -- no machine on the farm has ever been measured, so every number here rests on a published SERVICE tolerance, not on our printer",
+       "what_settles_it": "build cecad.coupon.coupon() with the \u00d810 and \u00d816 rungs, print it, measure with calipers and store it with cecad.coupon.record_measurements(); cecad.coupon.offsets_for() then answers per machine + material instead of returning CANNOT DETERMINE"
+      }
+     ],
+     "axial_play_mm": {
+      "worst_case": 0.6,
+      "rss": 0.4243
+     },
+     "radial_eccentricity_mm": {
+      "worst_case": 1.0,
+      "rss": 0.5292
+     },
+     "angular_misalignment_deg": {
+      "bearing_cock_worst_case": 10.6197,
+      "bearing_cock_basis": "atan(diametral clearance / engaged length) = atan(2 x 0.3000 mm / 3.20 mm). Both numbers are sourced: the clearance from the FDM-B industrial band on the printed \u00d810.0 seat, the engaged length MEASURED on microduck-shin 'ankle'. This is the angle the ball bearing ALONE leaves free.",
+      "flange_face_upper_bound_worst_case": 2.1476,
+      "flange_face_upper_bound_rss": 1.5189,
+      "flange_face_verdict": "CANNOT DETERMINE",
+      "flange_face_why": "the bolted flange's angular constraint is a FORM tolerance (face parallelism across the \u00d816.0 disc). No published FDM standard states one -- Protolabs Network's rows are DIMENSIONAL accuracy. The number above applies the dimensional band as if it were parallelism, which is an UPPER BOUND of unknown tightness, not a measurement. Both flange faces come off the same layer stack, so the true parallelism error is expected to be far smaller -- but 'expected' is not measured.",
+      "flange_face_what_settles_it": "print a flange coupon and read face parallelism across \u00d816.0 with a dial indicator on a surface plate; store it beside the bore/pin ladder of cecad.coupon",
+      "governing": "the bolted flange, by an unmeasured margin",
+      "worst_case": 2.1476
+     },
+     "rotational_backlash_deg": {
+      "worst_case": 9.4623,
+      "rss": 5.04,
+      "basis": "atan(radial slop / PCD radius 6.0 mm) -- the pattern's tangential freedom BEFORE the four M2 screws are torqued; a clamped joint gives this up to friction, and no friction figure exists for a printed PLA face on a plastic horn"
+     },
+     "note": null
+    }
+   },
+   "right_ankle": {
+    "FDM-A prototyping": {
+     "flange": {
+      "part": "microduck-ankle-right",
+      "interface": "ankle_horn",
+      "disc_d_mm": 16.0,
+      "clearance_hole_d_mm": 2.2,
+      "screws": 4,
+      "pcd_mm": 12.0
+     },
+     "bearing": {
+      "connection": "connection:press-fit-bearing-15x10x3",
+      "bore_mm": 10.0,
+      "od_mm": 15.0,
+      "width_mm": 3.0,
+      "seat_part": "microduck-shin",
+      "seat_interface": "ankle",
+      "seat_d_mm": 10.0,
+      "seat_length_mm": 3.2,
+      "engagement_fraction": 1.0667,
+      "engagement_pct": 106.67,
+      "role": "mirror of left_ankle"
+     },
+     "band": "FDM-A prototyping",
+     "axial_terms": [
+      {
+       "term": "flange face height, printed",
+       "nominal_mm": 16.0,
+       "half_band_mm": 0.5,
+       "source": "microduck-ankle-right 'ankle_horn' (printed, FDM-A prototyping)"
+      },
+      {
+       "term": "printed seat length / boss height",
+       "nominal_mm": 3.2,
+       "half_band_mm": 0.5,
+       "source": "microduck-shin 'ankle', FDM-A prototyping"
+      }
+     ],
+     "radial_terms": [
+      {
+       "term": "M2 clearance hole over the screw shank",
+       "nominal_mm": 2.2,
+       "half_band_mm": 0.1,
+       "source": "(2.20 - 2.00)/2, hole \u00d8 off microduck-ankle-right 'ankle_horn', M2 major \u00d82.0 off ce-cad/cecad/fasteners.py:57"
+      },
+      {
+       "term": "printed bolt-circle position",
+       "nominal_mm": 12.0,
+       "half_band_mm": 0.5,
+       "source": "\u00d812.0 PCD (connection:spline-xl330-horn), FDM-A prototyping"
+      },
+      {
+       "term": "printed bearing seat diameter",
+       "nominal_mm": 10.0,
+       "half_band_mm": 0.5,
+       "source": "microduck-shin 'ankle', FDM-A prototyping"
+      },
+      {
+       "term": "printed bearing POCKET diameter (outer race)",
+       "nominal_mm": 15.0,
+       "half_band_mm": 0.5,
+       "source": "microduck-ankle-right 'ankle_bearing', FDM-A prototyping -- this joint lands BOTH races on printed features"
+      }
+     ],
+     "open_terms": [
+      {
+       "term": "bearing ring width tolerance",
+       "nominal_mm": 3.0,
+       "why_open": "the reference names the ring only 'seeed_bearing' -- no designation, no vendor sheet (ce-connections/press-fit-bearing-15x10x3 compat.py 'interference' check)",
+       "what_settles_it": "a micrometer on the actual ring"
+      },
+      {
+       "term": "bearing radial internal clearance",
+       "why_open": "same: no designation, so no ISO 5753 clearance class",
+       "what_settles_it": "the ring's designation from a teardown, or a dial gauge on the assembled joint"
+      },
+      {
+       "term": "XL330 horn disc thickness and its axial run-out",
+       "nominal_mm": 3.0,
+       "why_open": "ROBOTIS's dimension drawing D1 ('XL,XC-330.pdf') is stamped '[FOR REFERENCE ONLY]' / 'Nonescale' and carries no tolerance block (ce-parts/xl330-m288-t/electrical.chip.json 'package')",
+       "what_settles_it": "a dial indicator on a real servo horn"
+      },
+      {
+       "term": "XL330 gearbox backlash at the output",
+       "why_open": "not published anywhere on E1, E2 or D1; the 288.4:1 train is 'Engineering Plastic' (E1 Specifications)",
+       "what_settles_it": "lock the case, load the horn both ways and read Present Position(132) (4096 pulse/rev = 0.0879 deg/count)"
+      },
+      {
+       "term": "this workshop's own printed band",
+       "why_open": "ce-cad/cecad/data/print_fits.json is {\"machines\": {}} -- no machine on the farm has ever been measured, so every number here rests on a published SERVICE tolerance, not on our printer",
+       "what_settles_it": "build cecad.coupon.coupon() with the \u00d810 and \u00d816 rungs, print it, measure with calipers and store it with cecad.coupon.record_measurements(); cecad.coupon.offsets_for() then answers per machine + material instead of returning CANNOT DETERMINE"
+      }
+     ],
+     "axial_play_mm": {
+      "worst_case": 1.0,
+      "rss": 0.7071
+     },
+     "radial_eccentricity_mm": {
+      "worst_case": 1.6,
+      "rss": 0.8718
+     },
+     "angular_misalignment_deg": {
+      "bearing_cock_worst_case": 17.354,
+      "bearing_cock_basis": "atan(diametral clearance / engaged length) = atan(2 x 0.5000 mm / 3.20 mm). Both numbers are sourced: the clearance from the FDM-A prototyping band on the printed \u00d810.0 seat, the engaged length MEASURED on microduck-shin 'ankle'. This is the angle the ball bearing ALONE leaves free.",
+      "flange_face_upper_bound_worst_case": 3.5763,
+      "flange_face_upper_bound_rss": 2.5305,
+      "flange_face_verdict": "CANNOT DETERMINE",
+      "flange_face_why": "the bolted flange's angular constraint is a FORM tolerance (face parallelism across the \u00d816.0 disc). No published FDM standard states one -- Protolabs Network's rows are DIMENSIONAL accuracy. The number above applies the dimensional band as if it were parallelism, which is an UPPER BOUND of unknown tightness, not a measurement. Both flange faces come off the same layer stack, so the true parallelism error is expected to be far smaller -- but 'expected' is not measured.",
+      "flange_face_what_settles_it": "print a flange coupon and read face parallelism across \u00d816.0 with a dial indicator on a surface plate; store it beside the bore/pin ladder of cecad.coupon",
+      "governing": "the bolted flange, by an unmeasured margin",
+      "worst_case": 3.5763
+     },
+     "rotational_backlash_deg": {
+      "worst_case": 14.9314,
+      "rss": 8.267,
+      "basis": "atan(radial slop / PCD radius 6.0 mm) -- the pattern's tangential freedom BEFORE the four M2 screws are torqued; a clamped joint gives this up to friction, and no friction figure exists for a printed PLA face on a plastic horn"
+     },
+     "note": null
+    },
+    "FDM-B industrial": {
+     "flange": {
+      "part": "microduck-ankle-right",
+      "interface": "ankle_horn",
+      "disc_d_mm": 16.0,
+      "clearance_hole_d_mm": 2.2,
+      "screws": 4,
+      "pcd_mm": 12.0
+     },
+     "bearing": {
+      "connection": "connection:press-fit-bearing-15x10x3",
+      "bore_mm": 10.0,
+      "od_mm": 15.0,
+      "width_mm": 3.0,
+      "seat_part": "microduck-shin",
+      "seat_interface": "ankle",
+      "seat_d_mm": 10.0,
+      "seat_length_mm": 3.2,
+      "engagement_fraction": 1.0667,
+      "engagement_pct": 106.67,
+      "role": "mirror of left_ankle"
+     },
+     "band": "FDM-B industrial",
+     "axial_terms": [
+      {
+       "term": "flange face height, printed",
+       "nominal_mm": 16.0,
+       "half_band_mm": 0.3,
+       "source": "microduck-ankle-right 'ankle_horn' (printed, FDM-B industrial)"
+      },
+      {
+       "term": "printed seat length / boss height",
+       "nominal_mm": 3.2,
+       "half_band_mm": 0.3,
+       "source": "microduck-shin 'ankle', FDM-B industrial"
+      }
+     ],
+     "radial_terms": [
+      {
+       "term": "M2 clearance hole over the screw shank",
+       "nominal_mm": 2.2,
+       "half_band_mm": 0.1,
+       "source": "(2.20 - 2.00)/2, hole \u00d8 off microduck-ankle-right 'ankle_horn', M2 major \u00d82.0 off ce-cad/cecad/fasteners.py:57"
+      },
+      {
+       "term": "printed bolt-circle position",
+       "nominal_mm": 12.0,
+       "half_band_mm": 0.3,
+       "source": "\u00d812.0 PCD (connection:spline-xl330-horn), FDM-B industrial"
+      },
+      {
+       "term": "printed bearing seat diameter",
+       "nominal_mm": 10.0,
+       "half_band_mm": 0.3,
+       "source": "microduck-shin 'ankle', FDM-B industrial"
+      },
+      {
+       "term": "printed bearing POCKET diameter (outer race)",
+       "nominal_mm": 15.0,
+       "half_band_mm": 0.3,
+       "source": "microduck-ankle-right 'ankle_bearing', FDM-B industrial -- this joint lands BOTH races on printed features"
+      }
+     ],
+     "open_terms": [
+      {
+       "term": "bearing ring width tolerance",
+       "nominal_mm": 3.0,
+       "why_open": "the reference names the ring only 'seeed_bearing' -- no designation, no vendor sheet (ce-connections/press-fit-bearing-15x10x3 compat.py 'interference' check)",
+       "what_settles_it": "a micrometer on the actual ring"
+      },
+      {
+       "term": "bearing radial internal clearance",
+       "why_open": "same: no designation, so no ISO 5753 clearance class",
+       "what_settles_it": "the ring's designation from a teardown, or a dial gauge on the assembled joint"
+      },
+      {
+       "term": "XL330 horn disc thickness and its axial run-out",
+       "nominal_mm": 3.0,
+       "why_open": "ROBOTIS's dimension drawing D1 ('XL,XC-330.pdf') is stamped '[FOR REFERENCE ONLY]' / 'Nonescale' and carries no tolerance block (ce-parts/xl330-m288-t/electrical.chip.json 'package')",
+       "what_settles_it": "a dial indicator on a real servo horn"
+      },
+      {
+       "term": "XL330 gearbox backlash at the output",
+       "why_open": "not published anywhere on E1, E2 or D1; the 288.4:1 train is 'Engineering Plastic' (E1 Specifications)",
+       "what_settles_it": "lock the case, load the horn both ways and read Present Position(132) (4096 pulse/rev = 0.0879 deg/count)"
+      },
+      {
+       "term": "this workshop's own printed band",
+       "why_open": "ce-cad/cecad/data/print_fits.json is {\"machines\": {}} -- no machine on the farm has ever been measured, so every number here rests on a published SERVICE tolerance, not on our printer",
+       "what_settles_it": "build cecad.coupon.coupon() with the \u00d810 and \u00d816 rungs, print it, measure with calipers and store it with cecad.coupon.record_measurements(); cecad.coupon.offsets_for() then answers per machine + material instead of returning CANNOT DETERMINE"
+      }
+     ],
+     "axial_play_mm": {
+      "worst_case": 0.6,
+      "rss": 0.4243
+     },
+     "radial_eccentricity_mm": {
+      "worst_case": 1.0,
+      "rss": 0.5292
+     },
+     "angular_misalignment_deg": {
+      "bearing_cock_worst_case": 10.6197,
+      "bearing_cock_basis": "atan(diametral clearance / engaged length) = atan(2 x 0.3000 mm / 3.20 mm). Both numbers are sourced: the clearance from the FDM-B industrial band on the printed \u00d810.0 seat, the engaged length MEASURED on microduck-shin 'ankle'. This is the angle the ball bearing ALONE leaves free.",
+      "flange_face_upper_bound_worst_case": 2.1476,
+      "flange_face_upper_bound_rss": 1.5189,
+      "flange_face_verdict": "CANNOT DETERMINE",
+      "flange_face_why": "the bolted flange's angular constraint is a FORM tolerance (face parallelism across the \u00d816.0 disc). No published FDM standard states one -- Protolabs Network's rows are DIMENSIONAL accuracy. The number above applies the dimensional band as if it were parallelism, which is an UPPER BOUND of unknown tightness, not a measurement. Both flange faces come off the same layer stack, so the true parallelism error is expected to be far smaller -- but 'expected' is not measured.",
+      "flange_face_what_settles_it": "print a flange coupon and read face parallelism across \u00d816.0 with a dial indicator on a surface plate; store it beside the bore/pin ladder of cecad.coupon",
+      "governing": "the bolted flange, by an unmeasured margin",
+      "worst_case": 2.1476
+     },
+     "rotational_backlash_deg": {
+      "worst_case": 9.4623,
+      "rss": 5.04,
+      "basis": "atan(radial slop / PCD radius 6.0 mm) -- the pattern's tangential freedom BEFORE the four M2 screws are torqued; a clamped joint gives this up to friction, and no friction figure exists for a printed PLA face on a plastic horn"
+     },
+     "note": null
+    }
+   },
+   "neck_pitch": {
+    "FDM-A prototyping": {
+     "flange": {
+      "part": "microduck-trunk-shell-left",
+      "interface": "neck_horn",
+      "disc_d_mm": 17.0,
+      "clearance_hole_d_mm": 2.2,
+      "screws": 4,
+      "pcd_mm": 12.0
+     },
+     "bearing": {
+      "connection": null,
+      "role": "none -- NO bearing on this axis"
+     },
+     "band": "FDM-A prototyping",
+     "axial_terms": [
+      {
+       "term": "flange face height, printed",
+       "nominal_mm": 17.0,
+       "half_band_mm": 0.5,
+       "source": "microduck-trunk-shell-left 'neck_horn' (printed, FDM-A prototyping)"
+      }
+     ],
+     "radial_terms": [
+      {
+       "term": "M2 clearance hole over the screw shank",
+       "nominal_mm": 2.2,
+       "half_band_mm": 0.1,
+       "source": "(2.20 - 2.00)/2, hole \u00d8 off microduck-trunk-shell-left 'neck_horn', M2 major \u00d82.0 off ce-cad/cecad/fasteners.py:57"
+      },
+      {
+       "term": "printed bolt-circle position",
+       "nominal_mm": 12.0,
+       "half_band_mm": 0.5,
+       "source": "\u00d812.0 PCD (connection:spline-xl330-horn), FDM-A prototyping"
+      }
+     ],
+     "open_terms": [
+      {
+       "term": "XL330 horn disc thickness and its axial run-out",
+       "nominal_mm": 3.0,
+       "why_open": "ROBOTIS's dimension drawing D1 ('XL,XC-330.pdf') is stamped '[FOR REFERENCE ONLY]' / 'Nonescale' and carries no tolerance block (ce-parts/xl330-m288-t/electrical.chip.json 'package')",
+       "what_settles_it": "a dial indicator on a real servo horn"
+      },
+      {
+       "term": "XL330 gearbox backlash at the output",
+       "why_open": "not published anywhere on E1, E2 or D1; the 288.4:1 train is 'Engineering Plastic' (E1 Specifications)",
+       "what_settles_it": "lock the case, load the horn both ways and read Present Position(132) (4096 pulse/rev = 0.0879 deg/count)"
+      },
+      {
+       "term": "this workshop's own printed band",
+       "why_open": "ce-cad/cecad/data/print_fits.json is {\"machines\": {}} -- no machine on the farm has ever been measured, so every number here rests on a published SERVICE tolerance, not on our printer",
+       "what_settles_it": "build cecad.coupon.coupon() with the \u00d810 and \u00d816 rungs, print it, measure with calipers and store it with cecad.coupon.record_measurements(); cecad.coupon.offsets_for() then answers per machine + material instead of returning CANNOT DETERMINE"
+      }
+     ],
+     "axial_play_mm": {
+      "worst_case": 0.5,
+      "rss": 0.5
+     },
+     "radial_eccentricity_mm": {
+      "worst_case": 0.6,
+      "rss": 0.5099
+     },
+     "angular_misalignment_deg": {
+      "bearing_cock_worst_case": null,
+      "bearing_cock_basis": null,
+      "flange_face_upper_bound_worst_case": 3.3665,
+      "flange_face_upper_bound_rss": 2.3818,
+      "flange_face_verdict": "CANNOT DETERMINE",
+      "flange_face_why": "the bolted flange's angular constraint is a FORM tolerance (face parallelism across the \u00d817.0 disc). No published FDM standard states one -- Protolabs Network's rows are DIMENSIONAL accuracy. The number above applies the dimensional band as if it were parallelism, which is an UPPER BOUND of unknown tightness, not a measurement. Both flange faces come off the same layer stack, so the true parallelism error is expected to be far smaller -- but 'expected' is not measured.",
+      "flange_face_what_settles_it": "print a flange coupon and read face parallelism across \u00d817.0 with a dial indicator on a surface plate; store it beside the bore/pin ladder of cecad.coupon",
+      "governing": "the bolted flange, by an unmeasured margin",
+      "worst_case": 3.3665
+     },
+     "rotational_backlash_deg": {
+      "worst_case": 5.7106,
+      "rss": 4.8575,
+      "basis": "atan(radial slop / PCD radius 6.0 mm) -- the pattern's tangential freedom BEFORE the four M2 screws are torqued; a clamped joint gives this up to friction, and no friction figure exists for a printed PLA face on a plastic horn"
+     },
+     "note": "sim/joint_geometry.py finds no bearing geom on the neck-pitch axis; the joint is the servo's own output bearing plus the bolted D17.0 x 1.0 raised disc on each trunk shell half"
+    },
+    "FDM-B industrial": {
+     "flange": {
+      "part": "microduck-trunk-shell-left",
+      "interface": "neck_horn",
+      "disc_d_mm": 17.0,
+      "clearance_hole_d_mm": 2.2,
+      "screws": 4,
+      "pcd_mm": 12.0
+     },
+     "bearing": {
+      "connection": null,
+      "role": "none -- NO bearing on this axis"
+     },
+     "band": "FDM-B industrial",
+     "axial_terms": [
+      {
+       "term": "flange face height, printed",
+       "nominal_mm": 17.0,
+       "half_band_mm": 0.3,
+       "source": "microduck-trunk-shell-left 'neck_horn' (printed, FDM-B industrial)"
+      }
+     ],
+     "radial_terms": [
+      {
+       "term": "M2 clearance hole over the screw shank",
+       "nominal_mm": 2.2,
+       "half_band_mm": 0.1,
+       "source": "(2.20 - 2.00)/2, hole \u00d8 off microduck-trunk-shell-left 'neck_horn', M2 major \u00d82.0 off ce-cad/cecad/fasteners.py:57"
+      },
+      {
+       "term": "printed bolt-circle position",
+       "nominal_mm": 12.0,
+       "half_band_mm": 0.3,
+       "source": "\u00d812.0 PCD (connection:spline-xl330-horn), FDM-B industrial"
+      }
+     ],
+     "open_terms": [
+      {
+       "term": "XL330 horn disc thickness and its axial run-out",
+       "nominal_mm": 3.0,
+       "why_open": "ROBOTIS's dimension drawing D1 ('XL,XC-330.pdf') is stamped '[FOR REFERENCE ONLY]' / 'Nonescale' and carries no tolerance block (ce-parts/xl330-m288-t/electrical.chip.json 'package')",
+       "what_settles_it": "a dial indicator on a real servo horn"
+      },
+      {
+       "term": "XL330 gearbox backlash at the output",
+       "why_open": "not published anywhere on E1, E2 or D1; the 288.4:1 train is 'Engineering Plastic' (E1 Specifications)",
+       "what_settles_it": "lock the case, load the horn both ways and read Present Position(132) (4096 pulse/rev = 0.0879 deg/count)"
+      },
+      {
+       "term": "this workshop's own printed band",
+       "why_open": "ce-cad/cecad/data/print_fits.json is {\"machines\": {}} -- no machine on the farm has ever been measured, so every number here rests on a published SERVICE tolerance, not on our printer",
+       "what_settles_it": "build cecad.coupon.coupon() with the \u00d810 and \u00d816 rungs, print it, measure with calipers and store it with cecad.coupon.record_measurements(); cecad.coupon.offsets_for() then answers per machine + material instead of returning CANNOT DETERMINE"
+      }
+     ],
+     "axial_play_mm": {
+      "worst_case": 0.3,
+      "rss": 0.3
+     },
+     "radial_eccentricity_mm": {
+      "worst_case": 0.4,
+      "rss": 0.3162
+     },
+     "angular_misalignment_deg": {
+      "bearing_cock_worst_case": null,
+      "bearing_cock_basis": null,
+      "flange_face_upper_bound_worst_case": 2.0214,
+      "flange_face_upper_bound_rss": 1.4296,
+      "flange_face_verdict": "CANNOT DETERMINE",
+      "flange_face_why": "the bolted flange's angular constraint is a FORM tolerance (face parallelism across the \u00d817.0 disc). No published FDM standard states one -- Protolabs Network's rows are DIMENSIONAL accuracy. The number above applies the dimensional band as if it were parallelism, which is an UPPER BOUND of unknown tightness, not a measurement. Both flange faces come off the same layer stack, so the true parallelism error is expected to be far smaller -- but 'expected' is not measured.",
+      "flange_face_what_settles_it": "print a flange coupon and read face parallelism across \u00d817.0 with a dial indicator on a surface plate; store it beside the bore/pin ladder of cecad.coupon",
+      "governing": "the bolted flange, by an unmeasured margin",
+      "worst_case": 2.0214
+     },
+     "rotational_backlash_deg": {
+      "worst_case": 3.8141,
+      "rss": 3.017,
+      "basis": "atan(radial slop / PCD radius 6.0 mm) -- the pattern's tangential freedom BEFORE the four M2 screws are torqued; a clamped joint gives this up to friction, and no friction figure exists for a printed PLA face on a plastic horn"
+     },
+     "note": "sim/joint_geometry.py finds no bearing geom on the neck-pitch axis; the joint is the servo's own output bearing plus the bolted D17.0 x 1.0 raised disc on each trunk shell half"
+    }
+   },
+   "head_pitch": {
+    "FDM-A prototyping": {
+     "flange": {
+      "part": "microduck-neck-pitch-bracket",
+      "interface": "pitch_horn_right",
+      "disc_d_mm": 16.0,
+      "clearance_hole_d_mm": 2.2,
+      "screws": 4,
+      "pcd_mm": 12.0
+     },
+     "bearing": {
+      "connection": null,
+      "role": "none -- NO bearing on this axis"
+     },
+     "band": "FDM-A prototyping",
+     "axial_terms": [
+      {
+       "term": "flange face height, printed",
+       "nominal_mm": 16.0,
+       "half_band_mm": 0.5,
+       "source": "microduck-neck-pitch-bracket 'pitch_horn_right' (printed, FDM-A prototyping)"
+      }
+     ],
+     "radial_terms": [
+      {
+       "term": "M2 clearance hole over the screw shank",
+       "nominal_mm": 2.2,
+       "half_band_mm": 0.1,
+       "source": "(2.20 - 2.00)/2, hole \u00d8 off microduck-neck-pitch-bracket 'pitch_horn_right', M2 major \u00d82.0 off ce-cad/cecad/fasteners.py:57"
+      },
+      {
+       "term": "printed bolt-circle position",
+       "nominal_mm": 12.0,
+       "half_band_mm": 0.5,
+       "source": "\u00d812.0 PCD (connection:spline-xl330-horn), FDM-A prototyping"
+      }
+     ],
+     "open_terms": [
+      {
+       "term": "XL330 horn disc thickness and its axial run-out",
+       "nominal_mm": 3.0,
+       "why_open": "ROBOTIS's dimension drawing D1 ('XL,XC-330.pdf') is stamped '[FOR REFERENCE ONLY]' / 'Nonescale' and carries no tolerance block (ce-parts/xl330-m288-t/electrical.chip.json 'package')",
+       "what_settles_it": "a dial indicator on a real servo horn"
+      },
+      {
+       "term": "XL330 gearbox backlash at the output",
+       "why_open": "not published anywhere on E1, E2 or D1; the 288.4:1 train is 'Engineering Plastic' (E1 Specifications)",
+       "what_settles_it": "lock the case, load the horn both ways and read Present Position(132) (4096 pulse/rev = 0.0879 deg/count)"
+      },
+      {
+       "term": "this workshop's own printed band",
+       "why_open": "ce-cad/cecad/data/print_fits.json is {\"machines\": {}} -- no machine on the farm has ever been measured, so every number here rests on a published SERVICE tolerance, not on our printer",
+       "what_settles_it": "build cecad.coupon.coupon() with the \u00d810 and \u00d816 rungs, print it, measure with calipers and store it with cecad.coupon.record_measurements(); cecad.coupon.offsets_for() then answers per machine + material instead of returning CANNOT DETERMINE"
+      }
+     ],
+     "axial_play_mm": {
+      "worst_case": 0.5,
+      "rss": 0.5
+     },
+     "radial_eccentricity_mm": {
+      "worst_case": 0.6,
+      "rss": 0.5099
+     },
+     "angular_misalignment_deg": {
+      "bearing_cock_worst_case": null,
+      "bearing_cock_basis": null,
+      "flange_face_upper_bound_worst_case": 3.5763,
+      "flange_face_upper_bound_rss": 2.5305,
+      "flange_face_verdict": "CANNOT DETERMINE",
+      "flange_face_why": "the bolted flange's angular constraint is a FORM tolerance (face parallelism across the \u00d816.0 disc). No published FDM standard states one -- Protolabs Network's rows are DIMENSIONAL accuracy. The number above applies the dimensional band as if it were parallelism, which is an UPPER BOUND of unknown tightness, not a measurement. Both flange faces come off the same layer stack, so the true parallelism error is expected to be far smaller -- but 'expected' is not measured.",
+      "flange_face_what_settles_it": "print a flange coupon and read face parallelism across \u00d816.0 with a dial indicator on a surface plate; store it beside the bore/pin ladder of cecad.coupon",
+      "governing": "the bolted flange, by an unmeasured margin",
+      "worst_case": 3.5763
+     },
+     "rotational_backlash_deg": {
+      "worst_case": 5.7106,
+      "rss": 4.8575,
+      "basis": "atan(radial slop / PCD radius 6.0 mm) -- the pattern's tangential freedom BEFORE the four M2 screws are torqued; a clamped joint gives this up to friction, and no friction figure exists for a printed PLA face on a plastic horn"
+     },
+     "note": "horn one side, servo idler disc the other (the bracket mesh is x-symmetric; which side is the horn is an assembly choice, microduck-neck-pitch-bracket interfaces)"
+    },
+    "FDM-B industrial": {
+     "flange": {
+      "part": "microduck-neck-pitch-bracket",
+      "interface": "pitch_horn_right",
+      "disc_d_mm": 16.0,
+      "clearance_hole_d_mm": 2.2,
+      "screws": 4,
+      "pcd_mm": 12.0
+     },
+     "bearing": {
+      "connection": null,
+      "role": "none -- NO bearing on this axis"
+     },
+     "band": "FDM-B industrial",
+     "axial_terms": [
+      {
+       "term": "flange face height, printed",
+       "nominal_mm": 16.0,
+       "half_band_mm": 0.3,
+       "source": "microduck-neck-pitch-bracket 'pitch_horn_right' (printed, FDM-B industrial)"
+      }
+     ],
+     "radial_terms": [
+      {
+       "term": "M2 clearance hole over the screw shank",
+       "nominal_mm": 2.2,
+       "half_band_mm": 0.1,
+       "source": "(2.20 - 2.00)/2, hole \u00d8 off microduck-neck-pitch-bracket 'pitch_horn_right', M2 major \u00d82.0 off ce-cad/cecad/fasteners.py:57"
+      },
+      {
+       "term": "printed bolt-circle position",
+       "nominal_mm": 12.0,
+       "half_band_mm": 0.3,
+       "source": "\u00d812.0 PCD (connection:spline-xl330-horn), FDM-B industrial"
+      }
+     ],
+     "open_terms": [
+      {
+       "term": "XL330 horn disc thickness and its axial run-out",
+       "nominal_mm": 3.0,
+       "why_open": "ROBOTIS's dimension drawing D1 ('XL,XC-330.pdf') is stamped '[FOR REFERENCE ONLY]' / 'Nonescale' and carries no tolerance block (ce-parts/xl330-m288-t/electrical.chip.json 'package')",
+       "what_settles_it": "a dial indicator on a real servo horn"
+      },
+      {
+       "term": "XL330 gearbox backlash at the output",
+       "why_open": "not published anywhere on E1, E2 or D1; the 288.4:1 train is 'Engineering Plastic' (E1 Specifications)",
+       "what_settles_it": "lock the case, load the horn both ways and read Present Position(132) (4096 pulse/rev = 0.0879 deg/count)"
+      },
+      {
+       "term": "this workshop's own printed band",
+       "why_open": "ce-cad/cecad/data/print_fits.json is {\"machines\": {}} -- no machine on the farm has ever been measured, so every number here rests on a published SERVICE tolerance, not on our printer",
+       "what_settles_it": "build cecad.coupon.coupon() with the \u00d810 and \u00d816 rungs, print it, measure with calipers and store it with cecad.coupon.record_measurements(); cecad.coupon.offsets_for() then answers per machine + material instead of returning CANNOT DETERMINE"
+      }
+     ],
+     "axial_play_mm": {
+      "worst_case": 0.3,
+      "rss": 0.3
+     },
+     "radial_eccentricity_mm": {
+      "worst_case": 0.4,
+      "rss": 0.3162
+     },
+     "angular_misalignment_deg": {
+      "bearing_cock_worst_case": null,
+      "bearing_cock_basis": null,
+      "flange_face_upper_bound_worst_case": 2.1476,
+      "flange_face_upper_bound_rss": 1.5189,
+      "flange_face_verdict": "CANNOT DETERMINE",
+      "flange_face_why": "the bolted flange's angular constraint is a FORM tolerance (face parallelism across the \u00d816.0 disc). No published FDM standard states one -- Protolabs Network's rows are DIMENSIONAL accuracy. The number above applies the dimensional band as if it were parallelism, which is an UPPER BOUND of unknown tightness, not a measurement. Both flange faces come off the same layer stack, so the true parallelism error is expected to be far smaller -- but 'expected' is not measured.",
+      "flange_face_what_settles_it": "print a flange coupon and read face parallelism across \u00d816.0 with a dial indicator on a surface plate; store it beside the bore/pin ladder of cecad.coupon",
+      "governing": "the bolted flange, by an unmeasured margin",
+      "worst_case": 2.1476
+     },
+     "rotational_backlash_deg": {
+      "worst_case": 3.8141,
+      "rss": 3.017,
+      "basis": "atan(radial slop / PCD radius 6.0 mm) -- the pattern's tangential freedom BEFORE the four M2 screws are torqued; a clamped joint gives this up to friction, and no friction figure exists for a printed PLA face on a plastic horn"
+     },
+     "note": "horn one side, servo idler disc the other (the bracket mesh is x-symmetric; which side is the horn is an assembly choice, microduck-neck-pitch-bracket interfaces)"
+    }
+   },
+   "head_yaw": {
+    "FDM-A prototyping": {
+     "flange": {
+      "part": "microduck-neck-pitch-bracket",
+      "interface": "yaw_horn_top",
+      "disc_d_mm": 16.0,
+      "clearance_hole_d_mm": 2.2,
+      "screws": 4,
+      "pcd_mm": 12.0
+     },
+     "bearing": {
+      "connection": "connection:press-fit-bearing-22x16x4",
+      "bore_mm": 16.0,
+      "od_mm": 22.0,
+      "width_mm": 4.0,
+      "seat_part": "microduck-neck-pitch-bracket",
+      "seat_interface": "yaw_bearing_seat",
+      "seat_d_mm": 16.0,
+      "seat_length_mm": 1.9,
+      "engagement_fraction": 0.475,
+      "engagement_pct": 47.5,
+      "role": "the SAME \u00d816.0 x 1.9 boss is both the horn boss and the inner-race seat"
+     },
+     "band": "FDM-A prototyping",
+     "axial_terms": [
+      {
+       "term": "flange face height, printed",
+       "nominal_mm": 16.0,
+       "half_band_mm": 0.5,
+       "source": "microduck-neck-pitch-bracket 'yaw_horn_top' (printed, FDM-A prototyping)"
+      },
+      {
+       "term": "printed seat length / boss height",
+       "nominal_mm": 1.9,
+       "half_band_mm": 0.5,
+       "source": "microduck-neck-pitch-bracket 'yaw_bearing_seat', FDM-A prototyping"
+      }
+     ],
+     "radial_terms": [
+      {
+       "term": "M2 clearance hole over the screw shank",
+       "nominal_mm": 2.2,
+       "half_band_mm": 0.1,
+       "source": "(2.20 - 2.00)/2, hole \u00d8 off microduck-neck-pitch-bracket 'yaw_horn_top', M2 major \u00d82.0 off ce-cad/cecad/fasteners.py:57"
+      },
+      {
+       "term": "printed bolt-circle position",
+       "nominal_mm": 12.0,
+       "half_band_mm": 0.5,
+       "source": "\u00d812.0 PCD (connection:spline-xl330-horn), FDM-A prototyping"
+      },
+      {
+       "term": "printed bearing seat diameter",
+       "nominal_mm": 16.0,
+       "half_band_mm": 0.5,
+       "source": "microduck-neck-pitch-bracket 'yaw_bearing_seat', FDM-A prototyping"
+      }
+     ],
+     "open_terms": [
+      {
+       "term": "bearing ring width tolerance",
+       "nominal_mm": 4.0,
+       "why_open": "the reference names the ring only 'seeed_bearing' -- no designation, no vendor sheet (ce-connections/press-fit-bearing-22x16x4 compat.py 'interference' check)",
+       "what_settles_it": "a micrometer on the actual ring"
+      },
+      {
+       "term": "bearing radial internal clearance",
+       "why_open": "same: no designation, so no ISO 5753 clearance class",
+       "what_settles_it": "the ring's designation from a teardown, or a dial gauge on the assembled joint"
+      },
+      {
+       "term": "XL330 horn disc thickness and its axial run-out",
+       "nominal_mm": 3.0,
+       "why_open": "ROBOTIS's dimension drawing D1 ('XL,XC-330.pdf') is stamped '[FOR REFERENCE ONLY]' / 'Nonescale' and carries no tolerance block (ce-parts/xl330-m288-t/electrical.chip.json 'package')",
+       "what_settles_it": "a dial indicator on a real servo horn"
+      },
+      {
+       "term": "XL330 gearbox backlash at the output",
+       "why_open": "not published anywhere on E1, E2 or D1; the 288.4:1 train is 'Engineering Plastic' (E1 Specifications)",
+       "what_settles_it": "lock the case, load the horn both ways and read Present Position(132) (4096 pulse/rev = 0.0879 deg/count)"
+      },
+      {
+       "term": "this workshop's own printed band",
+       "why_open": "ce-cad/cecad/data/print_fits.json is {\"machines\": {}} -- no machine on the farm has ever been measured, so every number here rests on a published SERVICE tolerance, not on our printer",
+       "what_settles_it": "build cecad.coupon.coupon() with the \u00d810 and \u00d816 rungs, print it, measure with calipers and store it with cecad.coupon.record_measurements(); cecad.coupon.offsets_for() then answers per machine + material instead of returning CANNOT DETERMINE"
+      }
+     ],
+     "axial_play_mm": {
+      "worst_case": 1.0,
+      "rss": 0.7071
+     },
+     "radial_eccentricity_mm": {
+      "worst_case": 1.1,
+      "rss": 0.7141
+     },
+     "angular_misalignment_deg": {
+      "bearing_cock_worst_case": 27.7585,
+      "bearing_cock_basis": "atan(diametral clearance / engaged length) = atan(2 x 0.5000 mm / 1.90 mm). Both numbers are sourced: the clearance from the FDM-A prototyping band on the printed \u00d816.0 seat, the engaged length MEASURED on microduck-neck-pitch-bracket 'yaw_bearing_seat'. This is the angle the ball bearing ALONE leaves free.",
+      "flange_face_upper_bound_worst_case": 3.5763,
+      "flange_face_upper_bound_rss": 2.5305,
+      "flange_face_verdict": "CANNOT DETERMINE",
+      "flange_face_why": "the bolted flange's angular constraint is a FORM tolerance (face parallelism across the \u00d816.0 disc). No published FDM standard states one -- Protolabs Network's rows are DIMENSIONAL accuracy. The number above applies the dimensional band as if it were parallelism, which is an UPPER BOUND of unknown tightness, not a measurement. Both flange faces come off the same layer stack, so the true parallelism error is expected to be far smaller -- but 'expected' is not measured.",
+      "flange_face_what_settles_it": "print a flange coupon and read face parallelism across \u00d816.0 with a dial indicator on a surface plate; store it beside the bore/pin ladder of cecad.coupon",
+      "governing": "the bolted flange, by an unmeasured margin",
+      "worst_case": 3.5763
+     },
+     "rotational_backlash_deg": {
+      "worst_case": 10.3889,
+      "rss": 6.7876,
+      "basis": "atan(radial slop / PCD radius 6.0 mm) -- the pattern's tangential freedom BEFORE the four M2 screws are torqued; a clamped joint gives this up to friction, and no friction figure exists for a printed PLA face on a plastic horn"
+     },
+     "note": null
+    },
+    "FDM-B industrial": {
+     "flange": {
+      "part": "microduck-neck-pitch-bracket",
+      "interface": "yaw_horn_top",
+      "disc_d_mm": 16.0,
+      "clearance_hole_d_mm": 2.2,
+      "screws": 4,
+      "pcd_mm": 12.0
+     },
+     "bearing": {
+      "connection": "connection:press-fit-bearing-22x16x4",
+      "bore_mm": 16.0,
+      "od_mm": 22.0,
+      "width_mm": 4.0,
+      "seat_part": "microduck-neck-pitch-bracket",
+      "seat_interface": "yaw_bearing_seat",
+      "seat_d_mm": 16.0,
+      "seat_length_mm": 1.9,
+      "engagement_fraction": 0.475,
+      "engagement_pct": 47.5,
+      "role": "the SAME \u00d816.0 x 1.9 boss is both the horn boss and the inner-race seat"
+     },
+     "band": "FDM-B industrial",
+     "axial_terms": [
+      {
+       "term": "flange face height, printed",
+       "nominal_mm": 16.0,
+       "half_band_mm": 0.3,
+       "source": "microduck-neck-pitch-bracket 'yaw_horn_top' (printed, FDM-B industrial)"
+      },
+      {
+       "term": "printed seat length / boss height",
+       "nominal_mm": 1.9,
+       "half_band_mm": 0.3,
+       "source": "microduck-neck-pitch-bracket 'yaw_bearing_seat', FDM-B industrial"
+      }
+     ],
+     "radial_terms": [
+      {
+       "term": "M2 clearance hole over the screw shank",
+       "nominal_mm": 2.2,
+       "half_band_mm": 0.1,
+       "source": "(2.20 - 2.00)/2, hole \u00d8 off microduck-neck-pitch-bracket 'yaw_horn_top', M2 major \u00d82.0 off ce-cad/cecad/fasteners.py:57"
+      },
+      {
+       "term": "printed bolt-circle position",
+       "nominal_mm": 12.0,
+       "half_band_mm": 0.3,
+       "source": "\u00d812.0 PCD (connection:spline-xl330-horn), FDM-B industrial"
+      },
+      {
+       "term": "printed bearing seat diameter",
+       "nominal_mm": 16.0,
+       "half_band_mm": 0.3,
+       "source": "microduck-neck-pitch-bracket 'yaw_bearing_seat', FDM-B industrial"
+      }
+     ],
+     "open_terms": [
+      {
+       "term": "bearing ring width tolerance",
+       "nominal_mm": 4.0,
+       "why_open": "the reference names the ring only 'seeed_bearing' -- no designation, no vendor sheet (ce-connections/press-fit-bearing-22x16x4 compat.py 'interference' check)",
+       "what_settles_it": "a micrometer on the actual ring"
+      },
+      {
+       "term": "bearing radial internal clearance",
+       "why_open": "same: no designation, so no ISO 5753 clearance class",
+       "what_settles_it": "the ring's designation from a teardown, or a dial gauge on the assembled joint"
+      },
+      {
+       "term": "XL330 horn disc thickness and its axial run-out",
+       "nominal_mm": 3.0,
+       "why_open": "ROBOTIS's dimension drawing D1 ('XL,XC-330.pdf') is stamped '[FOR REFERENCE ONLY]' / 'Nonescale' and carries no tolerance block (ce-parts/xl330-m288-t/electrical.chip.json 'package')",
+       "what_settles_it": "a dial indicator on a real servo horn"
+      },
+      {
+       "term": "XL330 gearbox backlash at the output",
+       "why_open": "not published anywhere on E1, E2 or D1; the 288.4:1 train is 'Engineering Plastic' (E1 Specifications)",
+       "what_settles_it": "lock the case, load the horn both ways and read Present Position(132) (4096 pulse/rev = 0.0879 deg/count)"
+      },
+      {
+       "term": "this workshop's own printed band",
+       "why_open": "ce-cad/cecad/data/print_fits.json is {\"machines\": {}} -- no machine on the farm has ever been measured, so every number here rests on a published SERVICE tolerance, not on our printer",
+       "what_settles_it": "build cecad.coupon.coupon() with the \u00d810 and \u00d816 rungs, print it, measure with calipers and store it with cecad.coupon.record_measurements(); cecad.coupon.offsets_for() then answers per machine + material instead of returning CANNOT DETERMINE"
+      }
+     ],
+     "axial_play_mm": {
+      "worst_case": 0.6,
+      "rss": 0.4243
+     },
+     "radial_eccentricity_mm": {
+      "worst_case": 0.7,
+      "rss": 0.4359
+     },
+     "angular_misalignment_deg": {
+      "bearing_cock_worst_case": 17.5256,
+      "bearing_cock_basis": "atan(diametral clearance / engaged length) = atan(2 x 0.3000 mm / 1.90 mm). Both numbers are sourced: the clearance from the FDM-B industrial band on the printed \u00d816.0 seat, the engaged length MEASURED on microduck-neck-pitch-bracket 'yaw_bearing_seat'. This is the angle the ball bearing ALONE leaves free.",
+      "flange_face_upper_bound_worst_case": 2.1476,
+      "flange_face_upper_bound_rss": 1.5189,
+      "flange_face_verdict": "CANNOT DETERMINE",
+      "flange_face_why": "the bolted flange's angular constraint is a FORM tolerance (face parallelism across the \u00d816.0 disc). No published FDM standard states one -- Protolabs Network's rows are DIMENSIONAL accuracy. The number above applies the dimensional band as if it were parallelism, which is an UPPER BOUND of unknown tightness, not a measurement. Both flange faces come off the same layer stack, so the true parallelism error is expected to be far smaller -- but 'expected' is not measured.",
+      "flange_face_what_settles_it": "print a flange coupon and read face parallelism across \u00d816.0 with a dial indicator on a surface plate; store it beside the bore/pin ladder of cecad.coupon",
+      "governing": "the bolted flange, by an unmeasured margin",
+      "worst_case": 2.1476
+     },
+     "rotational_backlash_deg": {
+      "worst_case": 6.6544,
+      "rss": 4.1551,
+      "basis": "atan(radial slop / PCD radius 6.0 mm) -- the pattern's tangential freedom BEFORE the four M2 screws are torqued; a clamped joint gives this up to friction, and no friction figure exists for a printed PLA face on a plastic horn"
+     },
+     "note": null
+    }
+   },
+   "head_roll": {
+    "FDM-A prototyping": {
+     "flange": {
+      "part": "microduck-yaw-roll-motion",
+      "interface": "roll_horn",
+      "disc_d_mm": 16.0,
+      "clearance_hole_d_mm": 2.2,
+      "screws": 4,
+      "pcd_mm": 12.0
+     },
+     "bearing": {
+      "connection": "connection:press-fit-bearing-22x16x4",
+      "bore_mm": 16.0,
+      "od_mm": 22.0,
+      "width_mm": 4.0,
+      "seat_part": "microduck-yaw-roll-motion",
+      "seat_interface": "roll_bearing_seat",
+      "seat_d_mm": 16.0,
+      "seat_length_mm": 4.0,
+      "engagement_fraction": 1.0,
+      "engagement_pct": 100.0,
+      "role": "the only FULL-WIDTH seat on the robot: \u00d816.0 x 4.0 boss for the 4.0 mm ring"
+     },
+     "band": "FDM-A prototyping",
+     "axial_terms": [
+      {
+       "term": "flange face height, printed",
+       "nominal_mm": 16.0,
+       "half_band_mm": 0.5,
+       "source": "microduck-yaw-roll-motion 'roll_horn' (printed, FDM-A prototyping)"
+      },
+      {
+       "term": "printed seat length / boss height",
+       "nominal_mm": 4.0,
+       "half_band_mm": 0.5,
+       "source": "microduck-yaw-roll-motion 'roll_bearing_seat', FDM-A prototyping"
+      }
+     ],
+     "radial_terms": [
+      {
+       "term": "M2 clearance hole over the screw shank",
+       "nominal_mm": 2.2,
+       "half_band_mm": 0.1,
+       "source": "(2.20 - 2.00)/2, hole \u00d8 off microduck-yaw-roll-motion 'roll_horn', M2 major \u00d82.0 off ce-cad/cecad/fasteners.py:57"
+      },
+      {
+       "term": "printed bolt-circle position",
+       "nominal_mm": 12.0,
+       "half_band_mm": 0.5,
+       "source": "\u00d812.0 PCD (connection:spline-xl330-horn), FDM-A prototyping"
+      },
+      {
+       "term": "printed bearing seat diameter",
+       "nominal_mm": 16.0,
+       "half_band_mm": 0.5,
+       "source": "microduck-yaw-roll-motion 'roll_bearing_seat', FDM-A prototyping"
+      }
+     ],
+     "open_terms": [
+      {
+       "term": "bearing ring width tolerance",
+       "nominal_mm": 4.0,
+       "why_open": "the reference names the ring only 'seeed_bearing' -- no designation, no vendor sheet (ce-connections/press-fit-bearing-22x16x4 compat.py 'interference' check)",
+       "what_settles_it": "a micrometer on the actual ring"
+      },
+      {
+       "term": "bearing radial internal clearance",
+       "why_open": "same: no designation, so no ISO 5753 clearance class",
+       "what_settles_it": "the ring's designation from a teardown, or a dial gauge on the assembled joint"
+      },
+      {
+       "term": "XL330 horn disc thickness and its axial run-out",
+       "nominal_mm": 3.0,
+       "why_open": "ROBOTIS's dimension drawing D1 ('XL,XC-330.pdf') is stamped '[FOR REFERENCE ONLY]' / 'Nonescale' and carries no tolerance block (ce-parts/xl330-m288-t/electrical.chip.json 'package')",
+       "what_settles_it": "a dial indicator on a real servo horn"
+      },
+      {
+       "term": "XL330 gearbox backlash at the output",
+       "why_open": "not published anywhere on E1, E2 or D1; the 288.4:1 train is 'Engineering Plastic' (E1 Specifications)",
+       "what_settles_it": "lock the case, load the horn both ways and read Present Position(132) (4096 pulse/rev = 0.0879 deg/count)"
+      },
+      {
+       "term": "this workshop's own printed band",
+       "why_open": "ce-cad/cecad/data/print_fits.json is {\"machines\": {}} -- no machine on the farm has ever been measured, so every number here rests on a published SERVICE tolerance, not on our printer",
+       "what_settles_it": "build cecad.coupon.coupon() with the \u00d810 and \u00d816 rungs, print it, measure with calipers and store it with cecad.coupon.record_measurements(); cecad.coupon.offsets_for() then answers per machine + material instead of returning CANNOT DETERMINE"
+      }
+     ],
+     "axial_play_mm": {
+      "worst_case": 1.0,
+      "rss": 0.7071
+     },
+     "radial_eccentricity_mm": {
+      "worst_case": 1.1,
+      "rss": 0.7141
+     },
+     "angular_misalignment_deg": {
+      "bearing_cock_worst_case": 14.0362,
+      "bearing_cock_basis": "atan(diametral clearance / engaged length) = atan(2 x 0.5000 mm / 4.00 mm). Both numbers are sourced: the clearance from the FDM-A prototyping band on the printed \u00d816.0 seat, the engaged length MEASURED on microduck-yaw-roll-motion 'roll_bearing_seat'. This is the angle the ball bearing ALONE leaves free.",
+      "flange_face_upper_bound_worst_case": 3.5763,
+      "flange_face_upper_bound_rss": 2.5305,
+      "flange_face_verdict": "CANNOT DETERMINE",
+      "flange_face_why": "the bolted flange's angular constraint is a FORM tolerance (face parallelism across the \u00d816.0 disc). No published FDM standard states one -- Protolabs Network's rows are DIMENSIONAL accuracy. The number above applies the dimensional band as if it were parallelism, which is an UPPER BOUND of unknown tightness, not a measurement. Both flange faces come off the same layer stack, so the true parallelism error is expected to be far smaller -- but 'expected' is not measured.",
+      "flange_face_what_settles_it": "print a flange coupon and read face parallelism across \u00d816.0 with a dial indicator on a surface plate; store it beside the bore/pin ladder of cecad.coupon",
+      "governing": "the bolted flange, by an unmeasured margin",
+      "worst_case": 3.5763
+     },
+     "rotational_backlash_deg": {
+      "worst_case": 10.3889,
+      "rss": 6.7876,
+      "basis": "atan(radial slop / PCD radius 6.0 mm) -- the pattern's tangential freedom BEFORE the four M2 screws are torqued; a clamped joint gives this up to friction, and no friction figure exists for a printed PLA face on a plastic horn"
+     },
+     "note": null
+    },
+    "FDM-B industrial": {
+     "flange": {
+      "part": "microduck-yaw-roll-motion",
+      "interface": "roll_horn",
+      "disc_d_mm": 16.0,
+      "clearance_hole_d_mm": 2.2,
+      "screws": 4,
+      "pcd_mm": 12.0
+     },
+     "bearing": {
+      "connection": "connection:press-fit-bearing-22x16x4",
+      "bore_mm": 16.0,
+      "od_mm": 22.0,
+      "width_mm": 4.0,
+      "seat_part": "microduck-yaw-roll-motion",
+      "seat_interface": "roll_bearing_seat",
+      "seat_d_mm": 16.0,
+      "seat_length_mm": 4.0,
+      "engagement_fraction": 1.0,
+      "engagement_pct": 100.0,
+      "role": "the only FULL-WIDTH seat on the robot: \u00d816.0 x 4.0 boss for the 4.0 mm ring"
+     },
+     "band": "FDM-B industrial",
+     "axial_terms": [
+      {
+       "term": "flange face height, printed",
+       "nominal_mm": 16.0,
+       "half_band_mm": 0.3,
+       "source": "microduck-yaw-roll-motion 'roll_horn' (printed, FDM-B industrial)"
+      },
+      {
+       "term": "printed seat length / boss height",
+       "nominal_mm": 4.0,
+       "half_band_mm": 0.3,
+       "source": "microduck-yaw-roll-motion 'roll_bearing_seat', FDM-B industrial"
+      }
+     ],
+     "radial_terms": [
+      {
+       "term": "M2 clearance hole over the screw shank",
+       "nominal_mm": 2.2,
+       "half_band_mm": 0.1,
+       "source": "(2.20 - 2.00)/2, hole \u00d8 off microduck-yaw-roll-motion 'roll_horn', M2 major \u00d82.0 off ce-cad/cecad/fasteners.py:57"
+      },
+      {
+       "term": "printed bolt-circle position",
+       "nominal_mm": 12.0,
+       "half_band_mm": 0.3,
+       "source": "\u00d812.0 PCD (connection:spline-xl330-horn), FDM-B industrial"
+      },
+      {
+       "term": "printed bearing seat diameter",
+       "nominal_mm": 16.0,
+       "half_band_mm": 0.3,
+       "source": "microduck-yaw-roll-motion 'roll_bearing_seat', FDM-B industrial"
+      }
+     ],
+     "open_terms": [
+      {
+       "term": "bearing ring width tolerance",
+       "nominal_mm": 4.0,
+       "why_open": "the reference names the ring only 'seeed_bearing' -- no designation, no vendor sheet (ce-connections/press-fit-bearing-22x16x4 compat.py 'interference' check)",
+       "what_settles_it": "a micrometer on the actual ring"
+      },
+      {
+       "term": "bearing radial internal clearance",
+       "why_open": "same: no designation, so no ISO 5753 clearance class",
+       "what_settles_it": "the ring's designation from a teardown, or a dial gauge on the assembled joint"
+      },
+      {
+       "term": "XL330 horn disc thickness and its axial run-out",
+       "nominal_mm": 3.0,
+       "why_open": "ROBOTIS's dimension drawing D1 ('XL,XC-330.pdf') is stamped '[FOR REFERENCE ONLY]' / 'Nonescale' and carries no tolerance block (ce-parts/xl330-m288-t/electrical.chip.json 'package')",
+       "what_settles_it": "a dial indicator on a real servo horn"
+      },
+      {
+       "term": "XL330 gearbox backlash at the output",
+       "why_open": "not published anywhere on E1, E2 or D1; the 288.4:1 train is 'Engineering Plastic' (E1 Specifications)",
+       "what_settles_it": "lock the case, load the horn both ways and read Present Position(132) (4096 pulse/rev = 0.0879 deg/count)"
+      },
+      {
+       "term": "this workshop's own printed band",
+       "why_open": "ce-cad/cecad/data/print_fits.json is {\"machines\": {}} -- no machine on the farm has ever been measured, so every number here rests on a published SERVICE tolerance, not on our printer",
+       "what_settles_it": "build cecad.coupon.coupon() with the \u00d810 and \u00d816 rungs, print it, measure with calipers and store it with cecad.coupon.record_measurements(); cecad.coupon.offsets_for() then answers per machine + material instead of returning CANNOT DETERMINE"
+      }
+     ],
+     "axial_play_mm": {
+      "worst_case": 0.6,
+      "rss": 0.4243
+     },
+     "radial_eccentricity_mm": {
+      "worst_case": 0.7,
+      "rss": 0.4359
+     },
+     "angular_misalignment_deg": {
+      "bearing_cock_worst_case": 8.5308,
+      "bearing_cock_basis": "atan(diametral clearance / engaged length) = atan(2 x 0.3000 mm / 4.00 mm). Both numbers are sourced: the clearance from the FDM-B industrial band on the printed \u00d816.0 seat, the engaged length MEASURED on microduck-yaw-roll-motion 'roll_bearing_seat'. This is the angle the ball bearing ALONE leaves free.",
+      "flange_face_upper_bound_worst_case": 2.1476,
+      "flange_face_upper_bound_rss": 1.5189,
+      "flange_face_verdict": "CANNOT DETERMINE",
+      "flange_face_why": "the bolted flange's angular constraint is a FORM tolerance (face parallelism across the \u00d816.0 disc). No published FDM standard states one -- Protolabs Network's rows are DIMENSIONAL accuracy. The number above applies the dimensional band as if it were parallelism, which is an UPPER BOUND of unknown tightness, not a measurement. Both flange faces come off the same layer stack, so the true parallelism error is expected to be far smaller -- but 'expected' is not measured.",
+      "flange_face_what_settles_it": "print a flange coupon and read face parallelism across \u00d816.0 with a dial indicator on a surface plate; store it beside the bore/pin ladder of cecad.coupon",
+      "governing": "the bolted flange, by an unmeasured margin",
+      "worst_case": 2.1476
+     },
+     "rotational_backlash_deg": {
+      "worst_case": 6.6544,
+      "rss": 4.1551,
+      "basis": "atan(radial slop / PCD radius 6.0 mm) -- the pattern's tangential freedom BEFORE the four M2 screws are torqued; a clamped joint gives this up to friction, and no friction figure exists for a printed PLA face on a plastic horn"
+     },
+     "note": null
+    }
+   }
+  },
+  "engagement_flags": [
+   {
+    "joint": "left_hip_yaw",
+    "seat_length_mm": 1.95,
+    "ring_width_mm": 4.0,
+    "engagement_pct": 48.75,
+    "why": "the printed boss is shorter than the ring, so part of the ring stands proud and the ring's angular constraint acts over only that length"
+   },
+   {
+    "joint": "right_hip_yaw",
+    "seat_length_mm": 1.95,
+    "ring_width_mm": 4.0,
+    "engagement_pct": 48.75,
+    "why": "the printed boss is shorter than the ring, so part of the ring stands proud and the ring's angular constraint acts over only that length"
+   },
+   {
+    "joint": "left_hip_roll",
+    "seat_length_mm": 1.95,
+    "ring_width_mm": 4.0,
+    "engagement_pct": 48.75,
+    "why": "the printed boss is shorter than the ring, so part of the ring stands proud and the ring's angular constraint acts over only that length"
+   },
+   {
+    "joint": "right_hip_roll",
+    "seat_length_mm": 1.95,
+    "ring_width_mm": 4.0,
+    "engagement_pct": 48.75,
+    "why": "the printed boss is shorter than the ring, so part of the ring stands proud and the ring's angular constraint acts over only that length"
+   },
+   {
+    "joint": "left_hip_pitch",
+    "seat_length_mm": 1.95,
+    "ring_width_mm": 4.0,
+    "engagement_pct": 48.75,
+    "why": "the printed boss is shorter than the ring, so part of the ring stands proud and the ring's angular constraint acts over only that length"
+   },
+   {
+    "joint": "right_hip_pitch",
+    "seat_length_mm": 1.95,
+    "ring_width_mm": 4.0,
+    "engagement_pct": 48.75,
+    "why": "the printed boss is shorter than the ring, so part of the ring stands proud and the ring's angular constraint acts over only that length"
+   },
+   {
+    "joint": "left_knee",
+    "seat_length_mm": null,
+    "engagement_pct": null,
+    "why": "a bearing is on this axis but no part folder declares a bearing_seat interface for it -- CANNOT DETERMINE"
+   },
+   {
+    "joint": "right_knee",
+    "seat_length_mm": null,
+    "engagement_pct": null,
+    "why": "a bearing is on this axis but no part folder declares a bearing_seat interface for it -- CANNOT DETERMINE"
+   },
+   {
+    "joint": "head_yaw",
+    "seat_length_mm": 1.9,
+    "ring_width_mm": 4.0,
+    "engagement_pct": 47.5,
+    "why": "the printed boss is shorter than the ring, so part of the ring stands proud and the ring's angular constraint acts over only that length"
+   }
+  ],
+  "worst_axial_joint": "left_hip_yaw",
+  "worst_angular_joint": "left_knee"
+ },
+ "verdict": "CANNOT DETERMINE",
+ "why": "The stack cannot be closed because the band it rests on is not measured for the machine that will print these parts, and the numbers it gives at the two PUBLISHED bands are not survivable for a bearing fit. At FDM-A (Protolabs prototyping, \u00b10.5 mm floor) the \u00d816 printed seat's total band is 1000 um, which is coarser than ISO 286 IT16 at that size (1100 um is IT16); at FDM-B (industrial, \u00b10.3 mm floor) it is 600 um, between IT14 (430) and IT15 (700). A ball bearing seat is normally an IT6-IT7 feature. The worst joint for angle is left_knee: 3.5988 deg worst-case at FDM-A and 2.1611 deg at FDM-B, governed by the bolted flange, by an unmeasured margin. 7 of 14 joints seat the ring on less than its own width (the \u00d816.0 x 1.95 bosses in a 4.0 mm ring, 48.75 %), and 2 joints (left_knee, right_knee) have a bearing on the axis that NO part folder declares a seat for. What settles it is one printed coupon: cecad.coupon.coupon() at the \u00d810 and \u00d816 rungs, measured and stored -- print_fits.json is empty today.",
+ "script": "sim/tolerance_stack.py",
+ "artifacts": [
+  "out/sim-evidence/tolerance-stack-hinges.json"
+ ],
+ "looked_at": [
+  "out/sim-evidence/joint-geometry.json",
+  "ce-connections/press-fit-bearing-22x16x4/iterations/v0.0.1/compat.py",
+  "ce-connections/press-fit-bearing-15x10x3/iterations/v0.0.1/compat.py",
+  "ce-connections/spline-xl330-horn/iterations/v0.0.1/compat.py",
+  "ce-parts/*/current/cad/interfaces.json (14 parts)",
+  "ce-cad/cecad/fasteners.py",
+  "ce-cad/cecad/coupon.py",
+  "ce-cad/cecad/data/print_fits.json",
+  "https://www.hubs.com/manufacturing-standards/"
+ ]
+}

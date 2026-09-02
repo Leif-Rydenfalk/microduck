@@ -1,0 +1,257 @@
+{
+ "study": "cavity-volumes",
+ "what": "Measured internal free-air volume and outer skin area of the two closed printed cavities, and which one the compute board is in.",
+ "inputs": {
+  "mjcf": "sim/microduck_ours.xml",
+  "meshdir": "reference/pollen-microduck-rl/assets (MJCF compiler meshdir; metres, scaled x1000 to mm here). The swapped `*__ours` meshes resolve through the same <asset> table to sim/meshes_ours/.",
+  "placements_cross_check": "spec/mesh-placements.json",
+  "voxel_step_mm": 1.5
+ },
+ "method": "ENCLOSED by a 3-axis enclosure test on a 1.5 mm voxel grid (the shell union must have material on both sides along x AND y AND z). OCCUPIED by a per-mesh ray-parity point-in-solid test on the same grid, OR-ed. FREE AIR = enclosed AND NOT occupied, so a content that pokes out through the shell (the beak, the jaw, a servo barrel) is not counted rather than subtracted twice. Mesh solid volumes also computed exactly by signed tetrahedra as an independent check on the voxel occupancy.",
+ "outputs": {
+  "cavities": {
+   "head": {
+    "body": "jaw_soft",
+    "why_these_meshes": "top_head_shell + bottom_head_shell are the two printed halves that close the head. Every other geom of body jaw_soft is either inside them (the two PCBs, the speaker, the head-roll and jaw XL330s, the motor support, the lens and its holder) or bolted through them (the face, eye ring, jaw and soft mouth).",
+    "voxel_step_mm": 1.5,
+    "grid": [
+     40,
+     61,
+     82
+    ],
+    "shell_meshes": [
+     "top_head_shell",
+     "bottom_head_shell"
+    ],
+    "shell_bbox_mm": {
+     "min": [
+      -17.4477,
+      -45.8815,
+      -84.19
+     ],
+     "max": [
+      41.8348,
+      45.8816,
+      38.5
+     ],
+     "size": [
+      59.2824,
+      91.763,
+      122.69
+     ]
+    },
+    "shell_triangle_area_mm2": 63664.57,
+    "shell_outer_area_estimate_mm2": 31832.28,
+    "shell_outer_area_basis": "the two printed shell halves are thin walls, so their triangle area counts the inner face, the outer face and the edges. Half the triangle area is the outer skin to within the edge strip.",
+    "enclosure_hull_area_voxel_mm2": 57447.0,
+    "enclosure_hull_area_basis": "staircase area of the voxel enclosure boundary at 1.50 mm; it OVERSTATES a curved surface by up to ~4/pi and is reported as the upper bracket on the skin area.",
+    "shell_solid_volume_exact_mm3": 53669.46,
+    "enclosed_volume_mm3": 341026.88,
+    "enclosed_volume_cm3": 341.0269,
+    "contents_inside_shell_mm3": 94584.38,
+    "free_air_volume_mm3": 194170.5,
+    "free_air_volume_cm3": 194.1705,
+    "free_air_fraction_of_enclosed": 0.5694,
+    "per_mesh": {
+     "lens": {
+      "count": 1,
+      "exact_volume_mm3": 2803.026,
+      "voxel_volume_mm3": 2743.875,
+      "voxel_volume_inside_shell_mm3": 2743.875
+     },
+     "face_part": {
+      "count": 1,
+      "exact_volume_mm3": 5824.178,
+      "voxel_volume_mm3": 6422.625,
+      "voxel_volume_inside_shell_mm3": 6422.625
+     },
+     "xl330": {
+      "count": 2,
+      "exact_volume_mm3": 31352.076,
+      "voxel_volume_mm3": 29703.375,
+      "voxel_volume_inside_shell_mm3": 29703.375
+     },
+     "jaw_soft": {
+      "count": 1,
+      "exact_volume_mm3": 18601.208,
+      "voxel_volume_mm3": 20013.75,
+      "voxel_volume_inside_shell_mm3": 20013.75
+     },
+     "motor_support": {
+      "count": 1,
+      "exact_volume_mm3": 7515.135,
+      "voxel_volume_mm3": 7094.25,
+      "voxel_volume_inside_shell_mm3": 7094.25
+     },
+     "top_head_shell": {
+      "count": 1,
+      "exact_volume_mm3": 29873.171,
+      "voxel_volume_mm3": 29835.0,
+      "voxel_volume_inside_shell_mm3": 29835.0
+     },
+     "seeed_bearing__configuration_default": {
+      "count": 1,
+      "exact_volume_mm3": 189.476,
+      "voxel_volume_mm3": 195.75,
+      "voxel_volume_inside_shell_mm3": 195.75
+     },
+     "elec_rpi_robot_hat_pcb": {
+      "count": 1,
+      "exact_volume_mm3": 1569.234,
+      "voxel_volume_mm3": 0.0,
+      "voxel_volume_inside_shell_mm3": 0.0
+     },
+     "soft_mouth_top": {
+      "count": 1,
+      "exact_volume_mm3": 2699.58,
+      "voxel_volume_mm3": 4357.125,
+      "voxel_volume_inside_shell_mm3": 4357.125
+     },
+     "noenoeil": {
+      "count": 1,
+      "exact_volume_mm3": 4250.218,
+      "voxel_volume_mm3": 3958.875,
+      "voxel_volume_inside_shell_mm3": 3958.875
+     },
+     "jaw": {
+      "count": 1,
+      "exact_volume_mm3": 9360.108,
+      "voxel_volume_mm3": 9709.875,
+      "voxel_volume_inside_shell_mm3": 9709.875
+     },
+     "bottom_head_shell": {
+      "count": 1,
+      "exact_volume_mm3": 23796.287,
+      "voxel_volume_mm3": 23287.5,
+      "voxel_volume_inside_shell_mm3": 23287.5
+     },
+     "m12_lens_holder": {
+      "count": 1,
+      "exact_volume_mm3": 1097.725,
+      "voxel_volume_mm3": 1123.875,
+      "voxel_volume_inside_shell_mm3": 1123.875
+     },
+     "pcb__raspberry_pi_zero_2_w": {
+      "count": 1,
+      "exact_volume_mm3": 3018.389,
+      "voxel_volume_mm3": 2781.0,
+      "voxel_volume_inside_shell_mm3": 2781.0
+     },
+     "speaker": {
+      "count": 1,
+      "exact_volume_mm3": 6125.0,
+      "voxel_volume_mm3": 6480.0,
+      "voxel_volume_inside_shell_mm3": 6480.0
+     }
+    }
+   },
+   "trunk": {
+    "body": "trunk_base",
+    "why_these_meshes": "left_shell + right_shell are the two printed halves that close the trunk. trunk_base__ours is its floor plate and power_support__ours the battery cradle; both are contents of the enclosure, not walls of it.",
+    "voxel_step_mm": 1.5,
+    "grid": [
+     54,
+     43,
+     57
+    ],
+    "shell_meshes": [
+     "left_shell",
+     "right_shell"
+    ],
+    "shell_bbox_mm": {
+     "min": [
+      -46.8329,
+      -32.2645,
+      -43.7075
+     ],
+     "max": [
+      34.5,
+      31.7645,
+      42.0264
+     ],
+     "size": [
+      81.3329,
+      64.029,
+      85.7339
+     ]
+    },
+    "shell_triangle_area_mm2": 22877.01,
+    "shell_outer_area_estimate_mm2": 11438.51,
+    "shell_outer_area_basis": "the two printed shell halves are thin walls, so their triangle area counts the inner face, the outer face and the edges. Half the triangle area is the outer skin to within the edge strip.",
+    "enclosure_hull_area_voxel_mm2": 46242.0,
+    "enclosure_hull_area_basis": "staircase area of the voxel enclosure boundary at 1.50 mm; it OVERSTATES a curved surface by up to ~4/pi and is reported as the upper bracket on the skin area.",
+    "shell_solid_volume_exact_mm3": 22605.24,
+    "enclosed_volume_mm3": 153700.88,
+    "enclosed_volume_cm3": 153.7009,
+    "contents_inside_shell_mm3": 94371.75,
+    "free_air_volume_mm3": 36709.88,
+    "free_air_volume_cm3": 36.7099,
+    "free_air_fraction_of_enclosed": 0.2388,
+    "per_mesh": {
+     "seeed_bearing__configuration__22x16x4": {
+      "count": 2,
+      "exact_volume_mm3": 985.951,
+      "voxel_volume_mm3": 759.375,
+      "voxel_volume_inside_shell_mm3": 759.375
+     },
+     "right_shell": {
+      "count": 1,
+      "exact_volume_mm3": 11216.907,
+      "voxel_volume_mm3": 11869.875,
+      "voxel_volume_inside_shell_mm3": 11869.875
+     },
+     "banana_pcb_locker__ours": {
+      "count": 1,
+      "exact_volume_mm3": 457.917,
+      "voxel_volume_mm3": 482.625,
+      "voxel_volume_inside_shell_mm3": 482.625
+     },
+     "trunk_base__ours": {
+      "count": 1,
+      "exact_volume_mm3": 1414.602,
+      "voxel_volume_mm3": 2102.625,
+      "voxel_volume_inside_shell_mm3": 2102.625
+     },
+     "xl330": {
+      "count": 2,
+      "exact_volume_mm3": 31352.076,
+      "voxel_volume_mm3": 31633.875,
+      "voxel_volume_inside_shell_mm3": 31633.875
+     },
+     "power_support__ours": {
+      "count": 1,
+      "exact_volume_mm3": 10780.719,
+      "voxel_volume_mm3": 8974.125,
+      "voxel_volume_inside_shell_mm3": 8974.125
+     },
+     "np_f970": {
+      "count": 1,
+      "exact_volume_mm3": 51555.515,
+      "voxel_volume_mm3": 50419.125,
+      "voxel_volume_inside_shell_mm3": 50419.125
+     },
+     "left_shell": {
+      "count": 1,
+      "exact_volume_mm3": 11388.333,
+      "voxel_volume_mm3": 10766.25,
+      "voxel_volume_inside_shell_mm3": 10766.25
+     }
+    }
+   }
+  },
+  "compute_board_body": "jaw_soft (the HEAD)",
+  "compute_board_evidence": "sim/microduck_ours.xml body 'jaw_soft' carries <geom type=\"mesh\" class=\"visual\" pos=\"0.015435 -1.13778e-05 -0.06001\" ... mesh=\"pcb__raspberry_pi_zero_2_w\"> and <geom ... pos=\"0.02694 0.0289936 -0.0519\" mesh=\"elec_rpi_robot_hat_pcb\">; spec/mesh-placements.json lists both under body 'jaw_soft'. Body 'trunk_base' carries no compute geom at all -- its only PCB-ish geom is banana_pcb_locker__ours, the battery-contact retainer."
+ },
+ "verdict": "PASS",
+ "why": "HEAD: 341.027 cm3 enclosed by the two head shells, 194.171 cm3 of it free air (56.9 % void), outer skin 31832.3 mm2. TRUNK: 153.701 cm3 enclosed, 36.710 cm3 free air (23.9 % void), outer skin 11438.5 mm2. The compute board is a geom of body jaw_soft, so the compute thermal study is a HEAD study -- the lane brief's 'inside the closed trunk' is contradicted by the model and corrected here.",
+ "script": "sim/cavity_measure.py",
+ "artifacts": [
+  "out/sim-evidence/cavity-volumes.json"
+ ],
+ "looked_at": [
+  "sim/microduck_ours.xml",
+  "spec/mesh-placements.json",
+  "reference/pollen-microduck-rl/assets/*.stl",
+  "sim/meshes_ours/*.stl"
+ ]
+}

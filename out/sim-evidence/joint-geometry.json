@@ -1,0 +1,921 @@
+{
+ "study": "joint-geometry",
+ "what": "For each of the 14 hinges: every geom that lies on that joint's axis, its axial station, and the flange-to-bearing span the tolerance stack needs.",
+ "inputs": {
+  "mjcf": "sim/microduck_ours.xml",
+  "radial_tolerance_mm": 3.0,
+  "disc_half_span_mm": 14.5,
+  "disc_basis": "cecad.meshfeatures.cylinders on xl330.stl: bosses d 16.0 x 3.0 with centres x +/-13.0, quoted as DISC_D/DISC_L in ce-connections/spline-xl330-horn/iterations/v0.0.1/compat.py; outer faces at 13.0 + 3.0/2 = 14.5 from the mesh centre",
+  "bearing_widths_mm": {
+   "seeed_bearing__configuration__22x16x4": 4.0,
+   "seeed_bearing__configuration_default": 3.0
+  },
+  "bearing_basis": "cecad.meshfeatures + numpy bbox on seeed_bearing__configuration__22x16x4.stl (hole 16.0 / boss 22.0 / 4.0 wide) and seeed_bearing__configuration_default.stl (hole 10.0 / boss 15.0 / 3.0 wide), quoted in each connection folder's compat.py header"
+ },
+ "method": "Body tree walked from <worldbody>; every hinge asserted to have axis 0 0 1 in its own child frame; parent geoms transformed into the child frame by R_child^T (p_parent - pos_child); a geom is 'on the axis' when its origin is within 3.0 mm of it radially.",
+ "outputs": {
+  "joints": {
+   "left_hip_yaw": {
+    "child_body": "yaw2roll",
+    "parent_body": "trunk_base",
+    "range_rad": [
+     -0.4363323129985824,
+     0.5235987755982988
+    ],
+    "range_deg": [
+     -25.0,
+     30.0
+    ],
+    "actuator_class": "chosen_actuator",
+    "on_axis": [
+     {
+      "where": "parent:trunk_base",
+      "mesh": "xl330",
+      "axial_mm": -16.5,
+      "radial_off_axis_mm": 0.0,
+      "mesh_z_vs_joint_axis_deg": 90.0,
+      "kind": "servo",
+      "connection": "connection:spline-xl330-horn",
+      "output_axis_alignment": 1.0,
+      "drives_this_joint": true,
+      "disc_face_axial_mm": [
+       -31.0,
+       -2.0
+      ]
+     },
+     {
+      "where": "parent:trunk_base",
+      "mesh": "seeed_bearing__configuration__22x16x4",
+      "axial_mm": 0.0,
+      "radial_off_axis_mm": 0.0,
+      "mesh_z_vs_joint_axis_deg": 0.0,
+      "kind": "bearing",
+      "connection": "connection:press-fit-bearing-22x16x4",
+      "bore_mm": 16.0,
+      "od_mm": 22.0,
+      "width_mm": 4.0,
+      "span_axial_mm": [
+       0.0,
+       -4.0
+      ],
+      "mid_axial_mm": -2.0
+     },
+     {
+      "where": "child:yaw2roll",
+      "mesh": "xl330",
+      "axial_mm": 12.5,
+      "radial_off_axis_mm": 0.0,
+      "mesh_z_vs_joint_axis_deg": 0.0,
+      "kind": "servo",
+      "connection": "connection:spline-xl330-horn",
+      "output_axis_alignment": 0.0,
+      "drives_this_joint": false,
+      "disc_face_axial_mm": [
+       12.5,
+       12.5
+      ]
+     }
+    ],
+    "n_bearings": 1,
+    "n_servos": 1,
+    "flange_to_bearing_span": {
+     "bearing_mid_axial_mm": -2.0,
+     "horn_faces_axial_mm": [
+      -31.0,
+      -2.0
+     ],
+     "nearest_face_span_mm": 0.0,
+     "farthest_face_span_mm": 29.0
+    }
+   },
+   "left_hip_roll": {
+    "child_body": "hip_l",
+    "parent_body": "yaw2roll",
+    "range_rad": [
+     -0.3839724354387525,
+     0.3839724354387525
+    ],
+    "range_deg": [
+     -22.0,
+     22.0
+    ],
+    "actuator_class": "chosen_actuator",
+    "on_axis": [
+     {
+      "where": "parent:yaw2roll",
+      "mesh": "xl330",
+      "axial_mm": -16.5,
+      "radial_off_axis_mm": 0.0,
+      "mesh_z_vs_joint_axis_deg": 90.0,
+      "kind": "servo",
+      "connection": "connection:spline-xl330-horn",
+      "output_axis_alignment": 1.0,
+      "drives_this_joint": true,
+      "disc_face_axial_mm": [
+       -31.0,
+       -2.0
+      ]
+     },
+     {
+      "where": "parent:yaw2roll",
+      "mesh": "seeed_bearing__configuration__22x16x4",
+      "axial_mm": 0.0,
+      "radial_off_axis_mm": 0.0,
+      "mesh_z_vs_joint_axis_deg": 0.0,
+      "kind": "bearing",
+      "connection": "connection:press-fit-bearing-22x16x4",
+      "bore_mm": 16.0,
+      "od_mm": 22.0,
+      "width_mm": 4.0,
+      "span_axial_mm": [
+       0.0,
+       -4.0
+      ],
+      "mid_axial_mm": -2.0
+     }
+    ],
+    "n_bearings": 1,
+    "n_servos": 1,
+    "flange_to_bearing_span": {
+     "bearing_mid_axial_mm": -2.0,
+     "horn_faces_axial_mm": [
+      -31.0,
+      -2.0
+     ],
+     "nearest_face_span_mm": 0.0,
+     "farthest_face_span_mm": 29.0
+    }
+   },
+   "left_hip_pitch": {
+    "child_body": "upper_leg_left",
+    "parent_body": "hip_l",
+    "range_rad": [
+     -1.570796326795005,
+     1.5707963267947882
+    ],
+    "range_deg": [
+     -90.0,
+     90.0
+    ],
+    "actuator_class": "chosen_actuator",
+    "on_axis": [
+     {
+      "where": "child:upper_leg_left",
+      "mesh": "upper_leg_left__ours",
+      "axial_mm": -42.5,
+      "radial_off_axis_mm": 0.0,
+      "mesh_z_vs_joint_axis_deg": 90.0,
+      "kind": "link"
+     },
+     {
+      "where": "child:upper_leg_left",
+      "mesh": "upper_leg_rigidity_plate__ours",
+      "axial_mm": -42.5,
+      "radial_off_axis_mm": 0.0,
+      "mesh_z_vs_joint_axis_deg": 90.0,
+      "kind": "link"
+     },
+     {
+      "where": "parent:hip_l",
+      "mesh": "hip_l",
+      "axial_mm": -42.5,
+      "radial_off_axis_mm": 0.0,
+      "mesh_z_vs_joint_axis_deg": 90.0,
+      "kind": "link"
+     },
+     {
+      "where": "parent:hip_l",
+      "mesh": "seeed_bearing__configuration__22x16x4",
+      "axial_mm": -4.0,
+      "radial_off_axis_mm": 0.0,
+      "mesh_z_vs_joint_axis_deg": 0.0,
+      "kind": "bearing",
+      "connection": "connection:press-fit-bearing-22x16x4",
+      "bore_mm": 16.0,
+      "od_mm": 22.0,
+      "width_mm": 4.0,
+      "span_axial_mm": [
+       -4.0,
+       0.0
+      ],
+      "mid_axial_mm": -2.0
+     },
+     {
+      "where": "child:upper_leg_left",
+      "mesh": "xl330",
+      "axial_mm": 12.5,
+      "radial_off_axis_mm": 0.0,
+      "mesh_z_vs_joint_axis_deg": 90.0,
+      "kind": "servo",
+      "connection": "connection:spline-xl330-horn",
+      "output_axis_alignment": 1.0,
+      "drives_this_joint": true,
+      "disc_face_axial_mm": [
+       -2.0,
+       27.0
+      ]
+     }
+    ],
+    "n_bearings": 1,
+    "n_servos": 1,
+    "flange_to_bearing_span": {
+     "bearing_mid_axial_mm": -2.0,
+     "horn_faces_axial_mm": [
+      -2.0,
+      27.0
+     ],
+     "nearest_face_span_mm": 0.0,
+     "farthest_face_span_mm": 29.0
+    }
+   },
+   "left_knee": {
+    "child_body": "leg",
+    "parent_body": "upper_leg_left",
+    "range_rad": [
+     -1.570796326795012,
+     1.570796326794781
+    ],
+    "range_deg": [
+     -90.0,
+     90.0
+    ],
+    "actuator_class": "chosen_actuator",
+    "on_axis": [
+     {
+      "where": "parent:upper_leg_left",
+      "mesh": "xl330",
+      "axial_mm": -16.5,
+      "radial_off_axis_mm": 0.0,
+      "mesh_z_vs_joint_axis_deg": 90.0,
+      "kind": "servo",
+      "connection": "connection:spline-xl330-horn",
+      "output_axis_alignment": 1.0,
+      "drives_this_joint": true,
+      "disc_face_axial_mm": [
+       -31.0,
+       -2.0
+      ]
+     },
+     {
+      "where": "parent:upper_leg_left",
+      "mesh": "seeed_bearing__configuration__22x16x4",
+      "axial_mm": 0.0,
+      "radial_off_axis_mm": 0.0,
+      "mesh_z_vs_joint_axis_deg": 0.0,
+      "kind": "bearing",
+      "connection": "connection:press-fit-bearing-22x16x4",
+      "bore_mm": 16.0,
+      "od_mm": 22.0,
+      "width_mm": 4.0,
+      "span_axial_mm": [
+       0.0,
+       -4.0
+      ],
+      "mid_axial_mm": -2.0
+     }
+    ],
+    "n_bearings": 1,
+    "n_servos": 1,
+    "flange_to_bearing_span": {
+     "bearing_mid_axial_mm": -2.0,
+     "horn_faces_axial_mm": [
+      -31.0,
+      -2.0
+     ],
+     "nearest_face_span_mm": 0.0,
+     "farthest_face_span_mm": 29.0
+    }
+   },
+   "left_ankle": {
+    "child_body": "ankle_left",
+    "parent_body": "leg",
+    "range_rad": [
+     -1.5707963267949019,
+     1.5707963267948912
+    ],
+    "range_deg": [
+     -90.0,
+     90.0
+    ],
+    "actuator_class": "chosen_actuator",
+    "on_axis": [
+     {
+      "where": "child:ankle_left",
+      "mesh": "seeed_bearing__configuration_default",
+      "axial_mm": -32.2,
+      "radial_off_axis_mm": 0.0,
+      "mesh_z_vs_joint_axis_deg": 0.0,
+      "kind": "bearing",
+      "connection": "connection:press-fit-bearing-15x10x3",
+      "bore_mm": 10.0,
+      "od_mm": 15.0,
+      "width_mm": 3.0,
+      "span_axial_mm": [
+       -32.2,
+       -29.2
+      ],
+      "mid_axial_mm": -30.7
+     },
+     {
+      "where": "parent:leg",
+      "mesh": "xl330",
+      "axial_mm": -14.5,
+      "radial_off_axis_mm": 0.0,
+      "mesh_z_vs_joint_axis_deg": 90.0,
+      "kind": "servo",
+      "connection": "connection:spline-xl330-horn",
+      "output_axis_alignment": 1.0,
+      "drives_this_joint": true,
+      "disc_face_axial_mm": [
+       -29.0,
+       0.0
+      ]
+     }
+    ],
+    "n_bearings": 1,
+    "n_servos": 1,
+    "flange_to_bearing_span": {
+     "bearing_mid_axial_mm": -30.7,
+     "horn_faces_axial_mm": [
+      -29.0,
+      0.0
+     ],
+     "nearest_face_span_mm": 1.7,
+     "farthest_face_span_mm": 30.7
+    }
+   },
+   "neck_pitch": {
+    "child_body": "neck",
+    "parent_body": "trunk_base",
+    "range_rad": [
+     -1.5707963267948966,
+     1.0471975511965976
+    ],
+    "range_deg": [
+     -90.0,
+     60.0
+    ],
+    "actuator_class": "chosen_actuator",
+    "on_axis": [
+     {
+      "where": "child:neck",
+      "mesh": "xl330",
+      "axial_mm": 14.5,
+      "radial_off_axis_mm": 0.0,
+      "mesh_z_vs_joint_axis_deg": 90.0,
+      "kind": "servo",
+      "connection": "connection:spline-xl330-horn",
+      "output_axis_alignment": 1.0,
+      "drives_this_joint": true,
+      "disc_face_axial_mm": [
+       0.0,
+       29.0
+      ]
+     }
+    ],
+    "n_bearings": 0,
+    "n_servos": 1,
+    "flange_to_bearing_span": null
+   },
+   "head_pitch": {
+    "child_body": "neck_pitch",
+    "parent_body": "neck",
+    "range_rad": [
+     -1.5707963267948974,
+     1.5707963267948957
+    ],
+    "range_deg": [
+     -90.0,
+     90.0
+    ],
+    "actuator_class": "chosen_actuator",
+    "on_axis": [
+     {
+      "where": "parent:neck",
+      "mesh": "xl330",
+      "axial_mm": -14.5,
+      "radial_off_axis_mm": 0.0,
+      "mesh_z_vs_joint_axis_deg": 90.0,
+      "kind": "servo",
+      "connection": "connection:spline-xl330-horn",
+      "output_axis_alignment": 1.0,
+      "drives_this_joint": true,
+      "disc_face_axial_mm": [
+       -29.0,
+       0.0
+      ]
+     }
+    ],
+    "n_bearings": 0,
+    "n_servos": 1,
+    "flange_to_bearing_span": null
+   },
+   "head_yaw": {
+    "child_body": "yaw_roll_motion",
+    "parent_body": "neck_pitch",
+    "range_rad": [
+     -2.967059728390373,
+     2.967059728390348
+    ],
+    "range_deg": [
+     -170.0,
+     170.0
+    ],
+    "actuator_class": "chosen_actuator",
+    "on_axis": [
+     {
+      "where": "parent:neck_pitch",
+      "mesh": "seeed_bearing__configuration__22x16x4",
+      "axial_mm": 2.1,
+      "radial_off_axis_mm": 0.0,
+      "mesh_z_vs_joint_axis_deg": 0.0,
+      "kind": "bearing",
+      "connection": "connection:press-fit-bearing-22x16x4",
+      "bore_mm": 16.0,
+      "od_mm": 22.0,
+      "width_mm": 4.0,
+      "span_axial_mm": [
+       2.1,
+       -1.9
+      ],
+      "mid_axial_mm": 0.1
+     },
+     {
+      "where": "child:yaw_roll_motion",
+      "mesh": "yaw_roll_motion",
+      "axial_mm": 10.0,
+      "radial_off_axis_mm": 0.0,
+      "mesh_z_vs_joint_axis_deg": 0.0,
+      "kind": "link"
+     },
+     {
+      "where": "parent:neck_pitch",
+      "mesh": "neck_pitch",
+      "axial_mm": 10.1,
+      "radial_off_axis_mm": 0.0,
+      "mesh_z_vs_joint_axis_deg": 0.0,
+      "kind": "link"
+     },
+     {
+      "where": "child:yaw_roll_motion",
+      "mesh": "xl330",
+      "axial_mm": 14.5,
+      "radial_off_axis_mm": 0.0,
+      "mesh_z_vs_joint_axis_deg": 90.0,
+      "kind": "servo",
+      "connection": "connection:spline-xl330-horn",
+      "output_axis_alignment": 1.0,
+      "drives_this_joint": true,
+      "disc_face_axial_mm": [
+       0.0,
+       29.0
+      ]
+     }
+    ],
+    "n_bearings": 1,
+    "n_servos": 1,
+    "flange_to_bearing_span": {
+     "bearing_mid_axial_mm": 0.1,
+     "horn_faces_axial_mm": [
+      0.0,
+      29.0
+     ],
+     "nearest_face_span_mm": 0.1,
+     "farthest_face_span_mm": 28.9
+    }
+   },
+   "head_roll": {
+    "child_body": "jaw_soft",
+    "parent_body": "yaw_roll_motion",
+    "range_rad": [
+     -0.43633231299859127,
+     0.4363323129985735
+    ],
+    "range_deg": [
+     -25.0,
+     25.0
+    ],
+    "actuator_class": "chosen_actuator",
+    "on_axis": [
+     {
+      "where": "parent:yaw_roll_motion",
+      "mesh": "seeed_bearing__configuration__22x16x4",
+      "axial_mm": -35.9,
+      "radial_off_axis_mm": 0.0,
+      "mesh_z_vs_joint_axis_deg": 0.0,
+      "kind": "bearing",
+      "connection": "connection:press-fit-bearing-22x16x4",
+      "bore_mm": 16.0,
+      "od_mm": 22.0,
+      "width_mm": 4.0,
+      "span_axial_mm": [
+       -35.9,
+       -31.9
+      ],
+      "mid_axial_mm": -33.9
+     },
+     {
+      "where": "parent:yaw_roll_motion",
+      "mesh": "xl330",
+      "axial_mm": -17.9,
+      "radial_off_axis_mm": 0.0,
+      "mesh_z_vs_joint_axis_deg": 90.0,
+      "kind": "servo",
+      "connection": "connection:spline-xl330-horn",
+      "output_axis_alignment": 0.0,
+      "drives_this_joint": false,
+      "disc_face_axial_mm": [
+       -17.9,
+       -17.9
+      ]
+     },
+     {
+      "where": "parent:yaw_roll_motion",
+      "mesh": "seeed_bearing__configuration__22x16x4",
+      "axial_mm": -1.9,
+      "radial_off_axis_mm": 0.0,
+      "mesh_z_vs_joint_axis_deg": 0.0,
+      "kind": "bearing",
+      "connection": "connection:press-fit-bearing-22x16x4",
+      "bore_mm": 16.0,
+      "od_mm": 22.0,
+      "width_mm": 4.0,
+      "span_axial_mm": [
+       -1.9,
+       2.1
+      ],
+      "mid_axial_mm": 0.1
+     },
+     {
+      "where": "child:jaw_soft",
+      "mesh": "xl330",
+      "axial_mm": 14.5,
+      "radial_off_axis_mm": 0.0,
+      "mesh_z_vs_joint_axis_deg": 90.0,
+      "kind": "servo",
+      "connection": "connection:spline-xl330-horn",
+      "output_axis_alignment": 1.0,
+      "drives_this_joint": true,
+      "disc_face_axial_mm": [
+       0.0,
+       29.0
+      ]
+     }
+    ],
+    "n_bearings": 2,
+    "n_servos": 1,
+    "flange_to_bearing_span": {
+     "bearing_mid_axial_mm": 0.1,
+     "horn_faces_axial_mm": [
+      0.0,
+      29.0
+     ],
+     "nearest_face_span_mm": 0.1,
+     "farthest_face_span_mm": 28.9
+    }
+   },
+   "right_hip_yaw": {
+    "child_body": "bearing_roll",
+    "parent_body": "trunk_base",
+    "range_rad": [
+     -0.5235987755982988,
+     0.4363323129985824
+    ],
+    "range_deg": [
+     -30.0,
+     25.0
+    ],
+    "actuator_class": "chosen_actuator",
+    "on_axis": [
+     {
+      "where": "parent:trunk_base",
+      "mesh": "xl330",
+      "axial_mm": -16.5,
+      "radial_off_axis_mm": 0.0,
+      "mesh_z_vs_joint_axis_deg": 90.0,
+      "kind": "servo",
+      "connection": "connection:spline-xl330-horn",
+      "output_axis_alignment": 1.0,
+      "drives_this_joint": true,
+      "disc_face_axial_mm": [
+       -31.0,
+       -2.0
+      ]
+     },
+     {
+      "where": "parent:trunk_base",
+      "mesh": "seeed_bearing__configuration__22x16x4",
+      "axial_mm": 0.0,
+      "radial_off_axis_mm": 0.0,
+      "mesh_z_vs_joint_axis_deg": 0.0,
+      "kind": "bearing",
+      "connection": "connection:press-fit-bearing-22x16x4",
+      "bore_mm": 16.0,
+      "od_mm": 22.0,
+      "width_mm": 4.0,
+      "span_axial_mm": [
+       0.0,
+       -4.0
+      ],
+      "mid_axial_mm": -2.0
+     },
+     {
+      "where": "child:bearing_roll",
+      "mesh": "xl330",
+      "axial_mm": 12.5,
+      "radial_off_axis_mm": 0.0,
+      "mesh_z_vs_joint_axis_deg": 0.0,
+      "kind": "servo",
+      "connection": "connection:spline-xl330-horn",
+      "output_axis_alignment": 0.0,
+      "drives_this_joint": false,
+      "disc_face_axial_mm": [
+       12.5,
+       12.5
+      ]
+     }
+    ],
+    "n_bearings": 1,
+    "n_servos": 1,
+    "flange_to_bearing_span": {
+     "bearing_mid_axial_mm": -2.0,
+     "horn_faces_axial_mm": [
+      -31.0,
+      -2.0
+     ],
+     "nearest_face_span_mm": 0.0,
+     "farthest_face_span_mm": 29.0
+    }
+   },
+   "right_hip_roll": {
+    "child_body": "hip_l_2",
+    "parent_body": "bearing_roll",
+    "range_rad": [
+     -0.3839724354387525,
+     0.3839724354387525
+    ],
+    "range_deg": [
+     -22.0,
+     22.0
+    ],
+    "actuator_class": "chosen_actuator",
+    "on_axis": [
+     {
+      "where": "parent:bearing_roll",
+      "mesh": "xl330",
+      "axial_mm": -16.5,
+      "radial_off_axis_mm": 0.0,
+      "mesh_z_vs_joint_axis_deg": 90.0,
+      "kind": "servo",
+      "connection": "connection:spline-xl330-horn",
+      "output_axis_alignment": 1.0,
+      "drives_this_joint": true,
+      "disc_face_axial_mm": [
+       -31.0,
+       -2.0
+      ]
+     },
+     {
+      "where": "parent:bearing_roll",
+      "mesh": "seeed_bearing__configuration__22x16x4",
+      "axial_mm": 0.0,
+      "radial_off_axis_mm": 0.0,
+      "mesh_z_vs_joint_axis_deg": 0.0,
+      "kind": "bearing",
+      "connection": "connection:press-fit-bearing-22x16x4",
+      "bore_mm": 16.0,
+      "od_mm": 22.0,
+      "width_mm": 4.0,
+      "span_axial_mm": [
+       0.0,
+       -4.0
+      ],
+      "mid_axial_mm": -2.0
+     }
+    ],
+    "n_bearings": 1,
+    "n_servos": 1,
+    "flange_to_bearing_span": {
+     "bearing_mid_axial_mm": -2.0,
+     "horn_faces_axial_mm": [
+      -31.0,
+      -2.0
+     ],
+     "nearest_face_span_mm": 0.0,
+     "farthest_face_span_mm": 29.0
+    }
+   },
+   "right_hip_pitch": {
+    "child_body": "upper_leg_right",
+    "parent_body": "hip_l_2",
+    "range_rad": [
+     -1.5707963267949268,
+     1.5707963267948664
+    ],
+    "range_deg": [
+     -90.0,
+     90.0
+    ],
+    "actuator_class": "chosen_actuator",
+    "on_axis": [
+     {
+      "where": "child:upper_leg_right",
+      "mesh": "upper_leg_right__ours",
+      "axial_mm": -42.5,
+      "radial_off_axis_mm": 0.0,
+      "mesh_z_vs_joint_axis_deg": 90.0,
+      "kind": "link"
+     },
+     {
+      "where": "parent:hip_l_2",
+      "mesh": "hip_l",
+      "axial_mm": -42.5,
+      "radial_off_axis_mm": 0.0,
+      "mesh_z_vs_joint_axis_deg": 90.0,
+      "kind": "link"
+     },
+     {
+      "where": "parent:hip_l_2",
+      "mesh": "seeed_bearing__configuration__22x16x4",
+      "axial_mm": 0.0,
+      "radial_off_axis_mm": 0.0,
+      "mesh_z_vs_joint_axis_deg": 0.0,
+      "kind": "bearing",
+      "connection": "connection:press-fit-bearing-22x16x4",
+      "bore_mm": 16.0,
+      "od_mm": 22.0,
+      "width_mm": 4.0,
+      "span_axial_mm": [
+       0.0,
+       -4.0
+      ],
+      "mid_axial_mm": -2.0
+     },
+     {
+      "where": "child:upper_leg_right",
+      "mesh": "xl330",
+      "axial_mm": 12.5,
+      "radial_off_axis_mm": 0.0,
+      "mesh_z_vs_joint_axis_deg": 90.0,
+      "kind": "servo",
+      "connection": "connection:spline-xl330-horn",
+      "output_axis_alignment": 1.0,
+      "drives_this_joint": true,
+      "disc_face_axial_mm": [
+       -2.0,
+       27.0
+      ]
+     },
+     {
+      "where": "child:upper_leg_right",
+      "mesh": "upper_leg_rigidity_plate__ours",
+      "axial_mm": 43.5,
+      "radial_off_axis_mm": 0.0,
+      "mesh_z_vs_joint_axis_deg": 90.0,
+      "kind": "link"
+     }
+    ],
+    "n_bearings": 1,
+    "n_servos": 1,
+    "flange_to_bearing_span": {
+     "bearing_mid_axial_mm": -2.0,
+     "horn_faces_axial_mm": [
+      -2.0,
+      27.0
+     ],
+     "nearest_face_span_mm": 0.0,
+     "farthest_face_span_mm": 29.0
+    }
+   },
+   "right_knee": {
+    "child_body": "leg_2",
+    "parent_body": "upper_leg_right",
+    "range_rad": [
+     -1.570796326794932,
+     1.570796326794861
+    ],
+    "range_deg": [
+     -90.0,
+     90.0
+    ],
+    "actuator_class": "chosen_actuator",
+    "on_axis": [
+     {
+      "where": "parent:upper_leg_right",
+      "mesh": "xl330",
+      "axial_mm": -16.5,
+      "radial_off_axis_mm": 0.0,
+      "mesh_z_vs_joint_axis_deg": 90.0,
+      "kind": "servo",
+      "connection": "connection:spline-xl330-horn",
+      "output_axis_alignment": 1.0,
+      "drives_this_joint": true,
+      "disc_face_axial_mm": [
+       -31.0,
+       -2.0
+      ]
+     },
+     {
+      "where": "parent:upper_leg_right",
+      "mesh": "seeed_bearing__configuration__22x16x4",
+      "axial_mm": -4.0,
+      "radial_off_axis_mm": 0.0,
+      "mesh_z_vs_joint_axis_deg": 0.0,
+      "kind": "bearing",
+      "connection": "connection:press-fit-bearing-22x16x4",
+      "bore_mm": 16.0,
+      "od_mm": 22.0,
+      "width_mm": 4.0,
+      "span_axial_mm": [
+       -4.0,
+       0.0
+      ],
+      "mid_axial_mm": -2.0
+     }
+    ],
+    "n_bearings": 1,
+    "n_servos": 1,
+    "flange_to_bearing_span": {
+     "bearing_mid_axial_mm": -2.0,
+     "horn_faces_axial_mm": [
+      -31.0,
+      -2.0
+     ],
+     "nearest_face_span_mm": 0.0,
+     "farthest_face_span_mm": 29.0
+    }
+   },
+   "right_ankle": {
+    "child_body": "ankle_right",
+    "parent_body": "leg_2",
+    "range_rad": [
+     -1.5707963267949054,
+     1.5707963267948877
+    ],
+    "range_deg": [
+     -90.0,
+     90.0
+    ],
+    "actuator_class": "chosen_actuator",
+    "on_axis": [
+     {
+      "where": "child:ankle_right",
+      "mesh": "seeed_bearing__configuration_default",
+      "axial_mm": -29.2,
+      "radial_off_axis_mm": 0.0,
+      "mesh_z_vs_joint_axis_deg": 0.0,
+      "kind": "bearing",
+      "connection": "connection:press-fit-bearing-15x10x3",
+      "bore_mm": 10.0,
+      "od_mm": 15.0,
+      "width_mm": 3.0,
+      "span_axial_mm": [
+       -29.2,
+       -32.2
+      ],
+      "mid_axial_mm": -30.7
+     },
+     {
+      "where": "parent:leg_2",
+      "mesh": "xl330",
+      "axial_mm": -14.5,
+      "radial_off_axis_mm": 0.0,
+      "mesh_z_vs_joint_axis_deg": 90.0,
+      "kind": "servo",
+      "connection": "connection:spline-xl330-horn",
+      "output_axis_alignment": 1.0,
+      "drives_this_joint": true,
+      "disc_face_axial_mm": [
+       -29.0,
+       -0.0
+      ]
+     }
+    ],
+    "n_bearings": 1,
+    "n_servos": 1,
+    "flange_to_bearing_span": {
+     "bearing_mid_axial_mm": -30.7,
+     "horn_faces_axial_mm": [
+      -29.0,
+      -0.0
+     ],
+     "nearest_face_span_mm": 1.7,
+     "farthest_face_span_mm": 30.7
+    }
+   }
+  },
+  "n_joints": 14
+ },
+ "verdict": "PASS",
+ "why": "14 hinges found; 12 carry a bearing on the axis, 14 carry a servo.",
+ "script": "sim/joint_geometry.py",
+ "artifacts": [
+  "out/sim-evidence/joint-geometry.json"
+ ],
+ "looked_at": [
+  "sim/microduck_ours.xml",
+  "ce-connections/press-fit-bearing-22x16x4/iterations/v0.0.1/compat.py",
+  "ce-connections/press-fit-bearing-15x10x3/iterations/v0.0.1/compat.py",
+  "ce-connections/spline-xl330-horn/iterations/v0.0.1/compat.py"
+ ]
+}
