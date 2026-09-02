@@ -1,1 +1,136 @@
 cad: proceeding at 5 concurrent freecadcmd (cap 4, waited 16s, 1-min load 8.54; CAD_MAX_JOBS overrides)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+==============================================================================
+PASS 1 — every structural part, every load case, PLA
+==============================================================================
+  microduck-shin               standing  (0, 0, -20.0)
+      -> PASS               SF=7.511  mesh=None
+  microduck-shin               landing   (0, 0, -60.0)
+      -> PASS               SF=2.504  mesh=None
+  microduck-shin               lateral   (0, 15.0, 0.0)
+      -> PASS               SF=4.621  mesh=None
+  microduck-upper-leg-left     standing  (0, 0, -20.0)
+      -> CANNOT DETERMINE   SF=None  mesh=0.8
+  microduck-upper-leg-left     landing   (0, 0, -60.0)
+      -> CANNOT DETERMINE   SF=None  mesh=0.8
+  microduck-upper-leg-left     lateral   (0, 15.0, 0.0)
+      -> CANNOT DETERMINE   SF=None  mesh=0.8
+  microduck-ankle-left         standing  (0, 0, -20.0)
+      -> PASS               SF=2.021  mesh=None
+  microduck-ankle-left         landing   (0, 0, -60.0)
+      -> FAIL               SF=0.674  mesh=None
+  microduck-ankle-left         lateral   (0, 15.0, 0.0)
+      -> PASS               SF=8.717  mesh=None
+  microduck-hip-bracket        standing  (0, 0, -20.0)
+      -> PASS               SF=6.424  mesh=None
+  microduck-hip-bracket        landing   (0, 0, -60.0)
+      -> PASS               SF=2.140  mesh=None
+  microduck-hip-bracket        lateral   (0, 15.0, 0.0)
+      -> PASS               SF=7.209  mesh=None
+
+==============================================================================
+PASS 2 — mesh convergence on the governing case: microduck-ankle-left / landing (SF 0.674)
+==============================================================================
+  size 2.0   -> SF=CANNOT DETERMINE
+  size 1.5   -> SF=CANNOT DETERMINE
+  size 1.0   -> SF=CANNOT DETERMINE
+
+==============================================================================
+PASS 3 — material sweep on microduck-ankle-left / landing
+==============================================================================
+  PLA     -> FAIL               SF=0.674
+  PETG    -> FAIL               SF=0.648
+  ABS     -> FAIL               SF=0.534
+  NYLON   -> FAIL               SF=0.971
+  ASA     -> FAIL               SF=0.587
+
+==============================================================================
+SUMMARY
+==============================================================================
+part                         case      SF        verdict            mesh
+microduck-shin               standing  7.511     PASS               None
+microduck-shin               landing   2.504     PASS               None
+microduck-shin               lateral   4.621     PASS               None
+microduck-upper-leg-left     standing  -         CANNOT DETERMINE   0.8
+microduck-upper-leg-left     landing   -         CANNOT DETERMINE   0.8
+microduck-upper-leg-left     lateral   -         CANNOT DETERMINE   0.8
+microduck-ankle-left         standing  2.021     PASS               None
+microduck-ankle-left         landing   0.674     FAIL               None
+microduck-ankle-left         lateral   8.717     PASS               None
+microduck-hip-bracket        standing  6.424     PASS               None
+microduck-hip-bracket        landing   2.140     PASS               None
+microduck-hip-bracket        lateral   7.209     PASS               None
+
+GOVERNING: microduck-ankle-left / landing at SF 0.674
+
+wrote /Users/leifrydenfalk/dev/ce-workshop/ce-designs/microduck/out/stress/matrix.json
