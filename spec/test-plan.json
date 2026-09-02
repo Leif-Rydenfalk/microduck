@@ -889,6 +889,12 @@
    "kind": "equip"
   },
   {
+   "id": "stack",
+   "kind": "stack",
+   "title": "The software and firmware under test",
+   "lede": "A test result is about a unit AND about what that unit was running, and half of what a Microduck runs is not published. This section says which half is which, and it is generated from `software/upstream.json` and `firmware/upstream.json` so the two files and this page cannot drift apart. Nothing here is a test; every row names the test that touches it."
+  },
+  {
    "id": "electrical",
    "title": "Electrical bring-up",
    "kind": "tests",
@@ -3308,6 +3314,12 @@
    "test": "RD-05",
    "status": "Open by construction. `updaterd`'s auto-rollback is the whole safety net for a robot in someone's home, and a board with a single installed release has nothing to roll back to, so the mechanism ships untested on exactly the units where it matters most",
    "settles": "Installing two releases at the factory - the shipped one and its predecessor - so RD-05 can roll back and return. That is a build decision, not a measurement; record which way each batch was built."
+  },
+  {
+   "q": "Which of the two bodies a joint joins physically carries the servo housing, and which carries the horn?",
+   "test": "SV-02",
+   "status": "CANNOT DETERMINE from the MJCF. A joint declared inside body C joins C to its parent P, and the kinematic file says nothing about which side the actuator is bolted to. Table 5's bodies column used to assert one of the two per row and was measurably inconsistent - nine rows named the parent and five the child - so it now shows both, measured. The mouth (ID 34) is not in the MJCF at all.",
+   "settles": "The mesh placements in spec/mesh-placements.json read against the xl330 body geometry: the housing is the body whose frame the servo case is fixed in, the horn is the body that rotates with the output. Lane B's per-joint drawings settle it visually, and SV-02's jig has to know it anyway - the mechanical zero is measured against whichever body the horn indexes to."
   }
  ],
  "eol_note": "One line per gate, in test order, and it is COMPLETE by construction: the generator refuses to write this document unless every test with a PASS gate is either on this list or on the exemption list below it with a reason. A unit ships when every box is ticked and no row reads CANNOT DETERMINE. SN-10 (the camera-use indicator) IS on the list even though its GPIO is unknown, because a person can see whether the light is on - and it is the only check of a privacy requirement Pollen wrote down for itself. EB-08 is on the list with its RECORD as the gate rather than a verdict, because the four charging cases have never been measured on any unit and the first unit to measure them is the one that settles the open question.",
@@ -3524,6 +3536,15 @@
    "now": "The generator stats the file it just wrote and prints chars and bytes separately, and the rail count in this document is len(rails) rather than a count of table rows.",
    "src": [
     "TESTDESIGN"
+   ]
+  },
+  {
+   "what": "Table 5's 'Body carrying the servo' column was hand-typed and mixed two conventions.",
+   "measured": "Parsed off sim/microduck_ours.xml: nine of the fifteen rows named the joint's MJCF PARENT body (left_hip_yaw -> trunk_base) and five named its CHILD (head_roll -> jaw_soft, whose parent is yaw_roll_motion; also both hip_pitches, neck_pitch and head_yaw). The fifteenth, the mouth, has no MJCF joint at all.",
+   "now": "Both bodies are read off the MJCF and both are shown as parent -> child. Which of the two actually carries the servo housing is a mechanical fact the kinematic file does not contain, and it is now an open question in the table below with what settles it.",
+   "src": [
+    "SIM",
+    "MODEL"
    ]
   }
  ]

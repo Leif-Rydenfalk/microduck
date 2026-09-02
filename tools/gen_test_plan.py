@@ -32,6 +32,8 @@ def _load(rel):
 
 SIMREP  = _load("out/sim/report.json")
 RUNTIME = _load("out/sim-evidence/battery-runtime.json")
+SOFT    = _load("software/upstream.json")
+FIRM    = _load("firmware/upstream.json")
 
 def _mjcf_ranges(rel="sim/microduck_ours.xml"):
     """Joint limits are READ off the MJCF MuJoCo actually loaded, never retyped. The copy in
@@ -43,7 +45,28 @@ def _mjcf_ranges(rel="sim/microduck_ours.xml"):
     return {m.group(1): (float(m.group(2)), float(m.group(3))) for m in
             re.finditer(r'<joint[^>]*name="([^"]+)"[^>]*range="([-\d.eE+]+) ([-\d.eE+]+)"', src)}
 
+def _mjcf_bodies(rel="sim/microduck_ours.xml"):
+    """joint -> (parent body, child body). A joint declared inside body C connects C to its
+    parent P; the MJCF says which two bodies a joint joins and does NOT say which of them the
+    servo housing is bolted to. Both are reported, and the document says so."""
+    src = open(os.path.join(REPO, rel)).read()
+    stack, out = [], {}
+    for m in re.finditer(r"<(/?)(\w+)([^>]*?)(/?)>", src, re.S):
+        close, tag, attrs, selfclose = m.groups()
+        if tag == "body":
+            if close: stack.pop()
+            elif not selfclose:
+                nm = re.search(r'name="([^"]+)"', attrs)
+                stack.append(nm.group(1) if nm else "?")
+        elif tag == "joint" and "range=" in attrs:
+            nm = re.search(r'name="([^"]+)"', attrs)
+            if nm:
+                out[nm.group(1)] = (stack[-2] if len(stack) > 1 else None,
+                                    stack[-1] if stack else None)
+    return out
+
 MJCF_RANGE = _mjcf_ranges()
+MJCF_BODY  = _mjcf_bodies()
 MJCF_FILE  = "sim/microduck_ours.xml"
 # The mouth is the one id_map row with no MJCF joint: the jaw is not actuated in the published
 # model. Its limits are model.rs:63-64 MOUTH_CLOSED / MOUTH_OPEN, in degrees, converted here.
@@ -227,12 +250,15 @@ def idmap_table():
     rows = []
     for sid, joint, body, rng, home in D["id_map"]:
         lo, hi = MJCF_RANGE.get(joint, tuple(rng))
+        par, ch = MJCF_BODY.get(joint, (None, None))
+        bodies = ("<code>%s</code> &rarr; <code>%s</code>" % (E(par), E(ch))) if par else \
+                 ('<span class="cd">%s</span>' % M(body))
         rows.append(
           '<tr><td class="n">%d</td><td><code>%s</code></td><td>%s</td>'
           '<td class="n">%.4f</td><td class="n">%.4f</td>'
           '<td class="n">%.4f</td><td class="n">%.4f</td>'
           '<td class="n">%.4f</td><td class="n">%.4f</td><td class="n">%.1f</td></tr>'
-          % (sid, E(joint), E(body), lo, hi, rad2deg(lo), rad2deg(hi),
+          % (sid, E(joint), bodies, lo, hi, rad2deg(lo), rad2deg(hi),
              home, rad2deg(home), rad2count(home)))
     return "\n".join(rows)
 
@@ -274,6 +300,33 @@ def runtime_table():
                     '<td class="n">%.1f</td><td class="n">%.1f</td><td class="n">%.4f</td></tr>'
                     % (w["compute_and_sensors_W"], w["total_W"], w["runtime_min"],
                        st_["runtime_min"], idl["runtime_min"], w["pack_current_A_at_7.4V"]))
+    return "\n".join(rows)
+
+def repos_rows():
+    return "\n".join(
+      '<tr><td><code>%s</code></td><td>%s</td><td>%s</td><td class="sk">%s</td><td class="sk">%s</td></tr>'
+      % (E(r["ref"]), M(r["what"]), E(r["license"]), E(r["default_branch"]), E(r["pushed_at"]))
+      for r in SOFT["repos"])
+
+def daemon_rows():
+    return "\n".join(
+      '<tr><td><code>%s</code></td><td>%s</td><td class="sk">%s</td><td class="sk">%s</td></tr>'
+      % (E(n), M(w), E(t), E(src)) for n, w, t, src in SOFT["daemons"])
+
+def firmware_rows():
+    """published is True, False, or a sentence saying what part of it is published. A boolean
+    rendered as a word would flatten the third case, which is the interesting one."""
+    rows = []
+    for it in FIRM["items"]:
+        pub = it["published"]
+        if pub is True:   cell, cls = "published", "pass"
+        elif pub is False: cell, cls = "NOT published", "fail"
+        else:              cell, cls = M(pub), "cd"
+        unknown = it.get("size_discrepancy") or it.get("what_would_open_it") or ""
+        rows.append('<tr><td><code>%s</code></td><td>%s</td><td class="v %s">%s</td>'
+                    '<td>%s</td><td class="basis">%s</td></tr>'
+                    % (E(it["id"]), M(it["what"]), cls, cell,
+                       M(it.get("how_it_is_tested", "\u2014")), M(unknown)))
     return "\n".join(rows)
 
 def test_block(t):
@@ -330,6 +383,48 @@ def sections_html():
   <tbody>%s</tbody></table></div>
 </section>""" % (s["id"], SECNUM[s["id"]], E(s["title"]), TN(), equip_table()))
             continue
+        if s["kind"] == "stack":
+            out.append("""
+<section id="%s">
+  <h2><span class="n">%s</span>%s</h2>
+  <p class="lede">%s</p>
+
+  <h3 class="sub">%d.1 Pollen's published software</h3>
+  <div class="tw"><table class="data"><caption>Table %d. The two upstream repositories. The licence,
+  the default branch and the last push were read from the GitHub API on the date in
+  <code>software/upstream.json</code>, not from a README.</caption>
+  <thead><tr><th>Repository</th><th>What it is</th><th>Licence</th><th>Default branch</th><th>Last push</th></tr></thead>
+  <tbody>%s</tbody></table></div>
+
+  <div class="tw"><table class="data"><caption>Table %d. The daemons a built unit runs, and the test in
+  this plan that exercises each. They share one contract: %s.</caption>
+  <thead><tr><th>Daemon</th><th>What it owns</th><th>Tests</th><th>Source</th></tr></thead>
+  <tbody>%s</tbody></table></div>
+
+  <div class="note"><b>The policy shape is checked at load, not mid-stride.</b> %s.
+  <b>%s.</b> And the config file the gates in this document read: %s.</div>
+
+  <h3 class="sub">%d.2 Firmware, and how much of it is anybody's to read</h3>
+  <div class="tw"><table class="data"><caption>Table %d. Everything running below Linux or on a chip this
+  robot talks to. A row that says NOT published is not a gap in this plan - it is the reason that row's
+  test is behavioural.</caption>
+  <thead><tr><th>Item</th><th>What</th><th>Source</th><th>How it is tested</th><th>What stays unknown</th></tr></thead>
+  <tbody>%s</tbody></table></div>
+
+  <div class="note"><b>Four things to write into the unit's log before any gate is judged.</b>
+  The release every daemon is running (<a href="#SW-01">SW-01</a>); each servo's
+  <code>Firmware Version(6)</code> (<a href="#SV-01">SV-01</a>); which ToF generation answered, because
+  both ship and the driver is chosen at runtime (<a href="#SN-06">SN-06</a>); and whether the NPU is
+  switched on in this board's device tree, because Armbian ships the Radxa Zero 3 with it off and
+  <code>duck_detect.rknn</code> silently falls through to the CPU when it is
+  (<a href="#TH-01">TH-01</a>). A result without those four is about a robot nobody can identify later.</div>
+</section>""" % (s["id"], SECNUM[s["id"]], E(s["title"]), M(s.get("lede", "")),
+                 SECNUM[s["id"]], TN(), repos_rows(),
+                 TN(), M(SOFT["ipc"]["contract"]), daemon_rows(),
+                 M(SOFT["policies"]["shape"]), M(SOFT["policies"]["refusal"]),
+                 M(SOFT["config"]["durability"]),
+                 SECNUM[s["id"]], TN(), firmware_rows()))
+            continue
         extra = ""
         if s["id"] == "electrical":
             extra = """
@@ -338,7 +433,7 @@ def sections_html():
 Bands are tightest-part-wins per rail. A band that reads CANNOT DETERMINE is not a pass.</caption>
 <thead><tr><th>Net</th><th>Probe point</th><th>Nominal</th><th>Acceptance band</th><th>Basis</th><th>Src</th></tr></thead>
 <tbody>%s</tbody></table></div>
-<div class="note"><b>Two numbers worth carrying into section 3.</b>
+<div class="note"><b>Two numbers worth carrying into this section.</b>
 Fifteen servos at the vendor's standby current draw <b>%.3f&nbsp;A</b> (15&nbsp;&times;&nbsp;%d&nbsp;mA) with torque off.
 Fifteen servos stalled at 5.0&nbsp;V draw <b>%.2f&nbsp;A</b> (15&nbsp;&times;&nbsp;%.2f&nbsp;A) — a real number the vendor's
 own stall row supports, and nothing in any source says what the pack or the HAT path can deliver.
@@ -356,13 +451,18 @@ Above 6.0&nbsp;V no vendor stall figure exists at all, which is exactly why EB-0
 from the vendor's 4096&nbsp;pulse/rev resolution and <code>bus.rs</code>'s 2048 = 0&nbsp;rad.
 One count is <b>%.4f&nbsp;degrees</b>, so the &plusmn;%.1f&nbsp;degree calibration tolerance is
 <b>&plusmn;%d&nbsp;counts</b>.</p>
-<div class="tw"><table class="data idmap"><caption>Table %d. Servo ID to joint, the joint's MJCF range, and the home pose
+<div class="tw wide"><table class="data idmap"><caption>Table %d. Servo ID to joint, the joint's MJCF range, and the home pose
 in radians, degrees and encoder counts. Home values are <code>DEFAULT_POSITION</code> from <code>model.rs:39-55</code>;
 ranges are read here directly out of <code>sim/microduck_ours.xml</code> at full double precision, and every one of
 them turns out to be an exact whole number of degrees &mdash; which is why the degree columns are here and why the
 data file&rsquo;s 3&nbsp;dp copies were wrong to keep. The mouth (ID&nbsp;34) is the one row with no MJCF joint: the
-jaw is not actuated in the published model, and its limits are <code>model.rs:63-64</code>.</caption>
-<thead><tr><th>ID</th><th>Joint</th><th>Body carrying the servo</th>
+jaw is not actuated in the published model, and its limits are <code>model.rs:63-64</code>, so its body cell is
+the data file&rsquo;s own value and is shown in amber. <b>The bodies column changed in Rev&nbsp;C.</b> It used to
+name one &ldquo;body carrying the servo&rdquo;, hand-typed, and it was inconsistent: nine rows named the MJCF
+parent and five named the child. Both bodies are now read off the MJCF and both are shown, because the MJCF says
+which two bodies a joint joins and does <b>not</b> say which of the two the servo housing is bolted to &mdash; see
+the open question in section {TAILNUM["open"]}.</caption>
+<thead><tr><th>ID</th><th>Joint</th><th>Bodies joined (MJCF parent &rarr; child)</th>
 <th>range lo&nbsp;rad</th><th>range hi&nbsp;rad</th><th>range lo&nbsp;deg</th><th>range hi&nbsp;deg</th>
 <th>home&nbsp;rad</th><th>home&nbsp;deg</th><th>home&nbsp;count</th></tr></thead>
 <tbody>%s</tbody></table></div>
@@ -683,6 +783,8 @@ HTML = f"""<!doctype html>
                      color:var(--ink-2);padding:0 0 7px;max-width:52em}}
   .cd{{color:var(--partial)}}
   .pending{{color:var(--ink-2)}} .pending i{{font-size:.9em}}
+  .tw.wide{{margin-left:calc(50% - 50vw);margin-right:calc(50% - 50vw);
+           padding:0 max(24px, calc(50vw - 580px))}}
   table.idmap th,table.idmap td{{padding:5px 7px;font-size:12.5px}}
   table.idmap td:nth-child(2),table.idmap td:nth-child(3){{font-size:12px}}
   table.idmap th{{font-size:10px;letter-spacing:.03em}}

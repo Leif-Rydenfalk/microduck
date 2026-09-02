@@ -47,6 +47,8 @@
                      color:var(--ink-2);padding:0 0 7px;max-width:52em}
   .cd{color:var(--partial)}
   .pending{color:var(--ink-2)} .pending i{font-size:.9em}
+  .tw.wide{margin-left:calc(50% - 50vw);margin-right:calc(50% - 50vw);
+           padding:0 max(24px, calc(50vw - 580px))}
   table.idmap th,table.idmap td{padding:5px 7px;font-size:12.5px}
   table.idmap td:nth-child(2),table.idmap td:nth-child(3){font-size:12px}
   table.idmap th{font-size:10px;letter-spacing:.03em}
@@ -81,11 +83,11 @@
   <div class="stat"><b>44</b><span>numbered tests</span></div>
   <div class="stat"><b>42</b><span>end-of-line gates</span></div>
   <div class="stat"><b>3</b><span>questions open in Rev&nbsp;A, settled here</span></div>
-  <div class="stat"><b>14</b><span>open questions, each with what settles it</span></div>
+  <div class="stat"><b>15</b><span>open questions, each with what settles it</span></div>
   <div class="stat"><b>36</b><span>cited sources</span></div>
 </div>
 
-<nav class="toc"><a href="#equip"><span class="tn">2</span>Test equipment and fixtures</a><a href="#electrical"><span class="tn">3</span>Electrical bring-up</a><a href="#servo"><span class="tn">4</span>Servo identity and calibration</a><a href="#sensors"><span class="tn">5</span>Sensor checks</a><a href="#software"><span class="tn">6</span>Control-loop and daemon acceptance</a><a href="#radios"><span class="tn">7</span>Radios, identity and provisioning</a><a href="#walk"><span class="tn">8</span>Walk acceptance</a><a href="#endurance"><span class="tn">9</span>Endurance, power and thermal</a><a href="#eol"><span class="tn">10</span>End-of-line checklist</a><a href="#logs"><span class="tn">11</span>Logs</a><a href="#open"><span class="tn">12</span>What this plan cannot test</a><a href="#sources"><span class="tn">13</span>Sources</a></nav>
+<nav class="toc"><a href="#equip"><span class="tn">2</span>Test equipment and fixtures</a><a href="#stack"><span class="tn">3</span>The software and firmware under test</a><a href="#electrical"><span class="tn">4</span>Electrical bring-up</a><a href="#servo"><span class="tn">5</span>Servo identity and calibration</a><a href="#sensors"><span class="tn">6</span>Sensor checks</a><a href="#software"><span class="tn">7</span>Control-loop and daemon acceptance</a><a href="#radios"><span class="tn">8</span>Radios, identity and provisioning</a><a href="#walk"><span class="tn">9</span>Walk acceptance</a><a href="#endurance"><span class="tn">10</span>Endurance, power and thermal</a><a href="#eol"><span class="tn">11</span>End-of-line checklist</a><a href="#logs"><span class="tn">12</span>Logs</a><a href="#open"><span class="tn">13</span>What this plan cannot test</a><a href="#sources"><span class="tn">14</span>Sources</a></nav>
 
 <section id="scope">
   <h2><span class="n">1</span>Scope, verdicts and order</h2>
@@ -109,14 +111,14 @@
   datasheet, from Pollen's own source, from our simulation, or from a decision of this plan.</div>
 
   <h3 class="sub">1.2 Order, and why it is this order</h3>
-  <ol class="steps"><li><b>Section 3 &mdash; electrical bring-up.</b> A meter before a battery. The pack is not fitted until the rails have been surveyed on a current-limited bench supply.</li><li><b>Section 4 &mdash; servo identity and calibration.</b> Fifteen servos share one wire and every unassigned one answers to ID 1, so identity is assigned one servo at a time, off the bus.</li><li><b>Section 5 &mdash; sensor checks.</b> Independent of motion; run before anything moves so a sensor fault is never diagnosed through a gait.</li><li><b>Section 6 &mdash; control-loop and daemon acceptance.</b> The health verdict is the gate every later test rests on.</li><li><b>Section 7 &mdash; radios, identity and provisioning.</b> The radios, the name and the PIN - none of it moves a joint, and the walk test needs a bonded pad.</li><li><b>Section 8 &mdash; walk acceptance.</b> On the floor, with the robot off its stand for the first time.</li><li><b>Section 9 &mdash; endurance, power and thermal.</b> Last, because it costs an hour of bench time and it ends with a flat battery.</li></ol>
+  <ol class="steps"><li><b>Section 4 &mdash; electrical bring-up.</b> A meter before a battery. The pack is not fitted until the rails have been surveyed on a current-limited bench supply.</li><li><b>Section 5 &mdash; servo identity and calibration.</b> Fifteen servos share one wire and every unassigned one answers to ID 1, so identity is assigned one servo at a time, off the bus.</li><li><b>Section 6 &mdash; sensor checks.</b> Independent of motion; run before anything moves so a sensor fault is never diagnosed through a gait.</li><li><b>Section 7 &mdash; control-loop and daemon acceptance.</b> The health verdict is the gate every later test rests on.</li><li><b>Section 8 &mdash; radios, identity and provisioning.</b> The radios, the name and the PIN - none of it moves a joint, and the walk test needs a bonded pad.</li><li><b>Section 9 &mdash; walk acceptance.</b> On the floor, with the robot off its stand for the first time.</li><li><b>Section 10 &mdash; endurance, power and thermal.</b> Last, because it costs an hour of bench time and it ends with a flat battery.</li></ol>
   <div class="note"><b>The stand is not optional.</b> <code>robotctl robot init</code> powers the joints and
   ramps to the home pose over about two seconds &mdash; <b>it moves every joint</b>. Pollen's own cheat sheet
-  says it plainly: have the robot on its stand. Every test before section 8 runs with both feet clear
+  says it plainly: have the robot on its stand. Every test before section 9 runs with both feet clear
   of the bench.</div>
 
   <h3 class="sub" id="corrections">1.3 Corrections in Rev&nbsp;C</h3>
-  <p>An independent read of Rev&nbsp;B found 10 places where a number, a citation or a
+  <p>An independent read of Rev&nbsp;B found 11 places where a number, a citation or a
   claim of completeness did not survive its own source. Each is below with the measurement that settled it.
   A correction is published, never quietly overwritten &mdash; a document whose errors disappear is a document
   nobody can audit.</p>
@@ -181,6 +183,12 @@
   <p><span class="k">Now</span>The generator stats the file it just wrote and prints chars and bytes separately, and the rail count in this document is len(rails) rather than a count of table rows.</p>
   <div class="srcs"><span class="srcitem"><b>TESTDESIGN</b> decision of this test plan</span></div>
 </div>
+<div class="resolved">
+  <h4>Table 5's 'Body carrying the servo' column was hand-typed and mixed two conventions.</h4>
+  <p><span class="k">Measured</span>Parsed off sim/microduck_ours.xml: nine of the fifteen rows named the joint's MJCF PARENT body (left_hip_yaw -&gt; trunk_base) and five named its CHILD (head_roll -&gt; jaw_soft, whose parent is yaw_roll_motion; also both hip_pitches, neck_pitch and head_yaw). The fifteenth, the mouth, has no MJCF joint at all.</p>
+  <p><span class="k">Now</span>Both bodies are read off the MJCF and both are shown as parent -&gt; child. Which of the two actually carries the servo housing is a mechanical fact the kinematic file does not contain, and it is now an open question in the table below with what settles it.</p>
+  <div class="srcs"><span class="srcitem"><b>SIM</b> our MuJoCo simulation report</span><span class="srcitem"><b>MODEL</b> duck-control model.rs</span></div>
+</div>
 
   <h3 class="sub" id="refusals">1.4 What this generator refuses to publish</h3>
   <p><code>tools/gen_test_plan.py</code> runs 12 checks before it writes a byte and exits non-zero,
@@ -202,7 +210,7 @@
   <thead><tr><th>Instrument or fixture</th><th>Used by</th><th>Why this and not something looser, and the gates it serves</th><th>Src</th></tr></thead>
   <tbody><tr><td><b>Assembly stand / test jig</b></td><td>holds the robot with both feet clear of the bench</td><td><code>robotctl robot init</code> MOVES EVERY JOINT and ramps to the home pose over ~2 s. The cheatsheet is explicit: 'have the robot on its stand'. Every test before WK runs on the stand<div class="sk"><a href="#EB-02"><code>EB-02</code></a> <a href="#SV-02"><code>SV-02</code></a> <a href="#SV-04"><code>SV-04</code></a> <a href="#SW-04"><code>SW-04</code></a> <a href="#WK-01"><code>WK-01</code></a></div></td><td class="sk">CHEAT</td></tr>
 <tr><td><b>Bench PSU, 0-15 V, &gt;= 5 A, adjustable current limit</b></td><td>stands in for the pack for every test up to EB-05</td><td>a 2S Li-ion pack into an unproven board is a fire. The pack is not fitted until EB-01..EB-05 have passed<div class="sk"><a href="#EB-02"><code>EB-02</code></a> <a href="#EB-05"><code>EB-05</code></a> <a href="#EN-02"><code>EN-02</code></a></div></td><td class="sk">TESTDESIGN</td></tr>
-<tr><td><b>DMM, 4.5 digit, DC V to 0.001 V, DC A to 10 A</b></td><td>every rail in section 3</td><td>the rail bands are stated to 3 dp; a 3.5-digit meter cannot resolve the 3.130-3.470 V gate<div class="sk"><a href="#EB-01"><code>EB-01</code></a> <a href="#EB-03"><code>EB-03</code></a> <a href="#EB-04"><code>EB-04</code></a> <a href="#EB-06"><code>EB-06</code></a> <a href="#EB-08"><code>EB-08</code></a></div></td><td class="sk">TESTDESIGN</td></tr>
+<tr><td><b>DMM, 4.5 digit, DC V to 0.001 V, DC A to 10 A</b></td><td>every rail in section 4</td><td>the rail bands are stated to 3 dp; a 3.5-digit meter cannot resolve the 3.130-3.470 V gate<div class="sk"><a href="#EB-01"><code>EB-01</code></a> <a href="#EB-03"><code>EB-03</code></a> <a href="#EB-04"><code>EB-04</code></a> <a href="#EB-06"><code>EB-06</code></a> <a href="#EB-08"><code>EB-08</code></a></div></td><td class="sk">TESTDESIGN</td></tr>
 <tr><td><b>DC current clamp or shunt, &gt;= 25 A</b></td><td>servo-rail current during the walk test</td><td>15 x stall at 5.0 V = 22.05 A is a number the vendor rows support. Nothing in any source says what the pack or the HAT path can deliver, so the instrument must not be the limit<div class="sk"><a href="#EB-07"><code>EB-07</code></a> <a href="#EN-01"><code>EN-01</code></a></div></td><td class="sk">XLPART</td></tr>
 <tr><td><b>Dynamixel TTL adapter (U2D2 or equivalent) + 3-pin JST EH lead</b></td><td>SV-01 single-servo ID assignment, off the robot</td><td>EEPROM writes need one servo alone on the bus, because every unassigned servo answers to ID 1<div class="sk"><a href="#SV-01"><code>SV-01</code></a> <a href="#SV-02"><code>SV-02</code></a></div></td><td class="sk">E1</td></tr>
 <tr><td><b>Oscilloscope &gt;= 100 MHz with one 10x probe</b></td><td>optional: bus signal integrity at 1,000,000 bps on a 16-device multidrop line</td><td>only needed when SV-03 finds intermittent devices<div class="sk"><a href="#SV-03"><code>SV-03</code></a></div></td><td class="sk">TESTDESIGN</td></tr>
@@ -211,7 +219,7 @@
 <tr><td><b>Digital inclinometer, 0.1 deg</b></td><td>levelling the walk surface</td><td>the walk gate is a distance in 8 s; a sloped bench moves it<div class="sk"><a href="#WK-01"><code>WK-01</code></a></div></td><td class="sk">TESTDESIGN</td></tr>
 <tr><td><b>Laptop with a microphone and an FFT tool, or a USB measurement mic</b></td><td>SN-08 audio loopback</td><td>the fitted speaker and microphone parts are both CANNOT DETERMINE, so the audio gate is functional (a tone comes out and goes back in), not acoustic<div class="sk"><a href="#SN-08"><code>SN-08</code></a></div></td><td class="sk">EVER</td></tr>
 <tr><td><b>Bluetooth gamepad, Xbox-style</b></td><td>WK-02..WK-04 and SW-05</td><td><code>padd</code> drives whatever pad connects; pairing is once per pad<div class="sk"><a href="#SW-05"><code>SW-05</code></a> <a href="#WK-02"><code>WK-02</code></a> <a href="#WK-03"><code>WK-03</code></a> <a href="#WK-04"><code>WK-04</code></a> <a href="#WK-05"><code>WK-05</code></a></div></td><td class="sk">CHEAT</td></tr>
-<tr><td><b>Flat hard level bench, &gt;= 1200 x 600 mm</b></td><td>WK-02 walk run</td><td>see the surface note in section 8<div class="sk"><a href="#WK-01"><code>WK-01</code></a> <a href="#WK-02"><code>WK-02</code></a></div></td><td class="sk">TESTDESIGN</td></tr>
+<tr><td><b>Flat hard level bench, &gt;= 1200 x 600 mm</b></td><td>WK-02 walk run</td><td>see the surface note in section 9<div class="sk"><a href="#WK-01"><code>WK-01</code></a> <a href="#WK-02"><code>WK-02</code></a></div></td><td class="sk">TESTDESIGN</td></tr>
 <tr><td><b>NFC tag from the shipped pack (and, where fitted, the NFC Polaroid)</b></td><td>SN-09</td><td>Pollen ships 10 NFC tags in both the Dev Pack and the Accessory Pack, and a 1.54-inch NFC E-Ink 'Polaroid' the store page says is tapped on the robot's head. The stimulus is a shipped accessory, so the test needs no reader of its own<div class="sk"><a href="#SN-09"><code>SN-09</code></a></div></td><td class="sk">STORE</td></tr>
 <tr><td><b>IR thermometer with settable emissivity, 0.1 degC resolution, or a K-type thermocouple taped to the shell</b></td><td>TH-02</td><td>the head shell is matte printed plastic; an IR reading without an emissivity setting is not a temperature. Set 0.95 for matte PLA/PETG and record the setting with the reading<div class="sk"><a href="#TH-02"><code>TH-02</code></a></div></td><td class="sk">TESTDESIGN</td></tr>
 <tr><td><b>A Wi-Fi access point with a known SSID and passphrase, within 2 m</b></td><td>RD-01</td><td>the fitted radio is Wi-Fi 6 with a software-selected antenna path, so a weak-signal unit can be a wrong-antenna unit rather than a bad one. A close, known AP separates the two<div class="sk"><a href="#RD-01"><code>RD-01</code></a></div></td><td class="sk">RADXAPART</td></tr>
@@ -219,12 +227,60 @@
 <tr><td><b>Stopwatch or a logging host clock</b></td><td>EN-01</td><td>the endurance gate is a duration and the shutdown is autonomous - the robot stops itself, so the operator's job is to timestamp it<div class="sk"><a href="#EN-01"><code>EN-01</code></a></div></td><td class="sk">TESTDESIGN</td></tr></tbody></table></div>
 </section>
 
+<section id="stack">
+  <h2><span class="n">3</span>The software and firmware under test</h2>
+  <p class="lede">A test result is about a unit AND about what that unit was running, and half of what a Microduck runs is not published. This section says which half is which, and it is generated from <code>software/upstream.json</code> and <code>firmware/upstream.json</code> so the two files and this page cannot drift apart. Nothing here is a test; every row names the test that touches it.</p>
+
+  <h3 class="sub">3.1 Pollen's published software</h3>
+  <div class="tw"><table class="data"><caption>Table 4. The two upstream repositories. The licence,
+  the default branch and the last push were read from the GitHub API on the date in
+  <code>software/upstream.json</code>, not from a README.</caption>
+  <thead><tr><th>Repository</th><th>What it is</th><th>Licence</th><th>Default branch</th><th>Last push</th></tr></thead>
+  <tbody><tr><td><code>pollen-robotics/microduck</code></td><td>the robot's own software: the daemons, robotctl, duckctl, the update machinery</td><td>Apache-2.0</td><td class="sk">main</td><td class="sk">2026-09-02T15:12:16Z</td></tr>
+<tr><td><code>pollen-robotics/microduck_rl</code></td><td>where the policies come from: mjlab/MuJoCo Warp + PPO, domain randomisation, BAM actuator physics, and the ONNX export the robot loads</td><td>Apache-2.0</td><td class="sk">develop</td><td class="sk">2026-09-02T13:39:43Z</td></tr></tbody></table></div>
+
+  <div class="tw"><table class="data"><caption>Table 5. The daemons a built unit runs, and the test in
+  this plan that exercises each. They share one contract: one JSON-RPC 2.0 contract over Unix sockets; every client - app, console, gamepad, a script - sends the same calls.</caption>
+  <thead><tr><th>Daemon</th><th>What it owns</th><th>Tests</th><th>Source</th></tr></thead>
+  <tbody><tr><td><code>robotd</code></td><td>owns the 50 Hz control loop and the motor bus</td><td class="sk">SW-01 SW-02 SW-03 SW-04 SW-05 SV-03 WK-*</td><td class="sk">README 'Under the hood'; architecture.md §1</td></tr>
+<tr><td><code>updaterd</code></td><td>installs signed releases and rolls them back when a robot comes up unhealthy</td><td class="sk">RD-05</td><td class="sk">README; architecture.md §8.3, §10</td></tr>
+<tr><td><code>configd</code></td><td>owns wifi and identity</td><td class="sk">RD-01 RD-02 RD-03</td><td class="sk">README; cheatsheet Wifi / Identity and power</td></tr>
+<tr><td><code>btd</code></td><td>the Bluetooth path a phone uses</td><td class="sk">RD-04</td><td class="sk">README; duckctl.md (the error-14 refusal list)</td></tr>
+<tr><td><code>padd</code></td><td>reads the gamepad</td><td class="sk">RD-02 SW-05</td><td class="sk">README; cheatsheet Gamepad</td></tr>
+<tr><td><code>mediad</code></td><td>streams the camera over WebRTC</td><td class="sk">SN-07 SN-10 TH-01</td><td class="sk">README; media-bringup.md</td></tr>
+<tr><td><code>tofd</code></td><td>serves the depth sensor</td><td class="sk">SN-06</td><td class="sk">README; tof/src/main.rs</td></tr>
+<tr><td><code>robotctl</code></td><td>the on-robot CLI every test in this plan is driven from</td><td class="sk">every section</td><td class="sk">cheatsheet</td></tr>
+<tr><td><code>duckctl</code></td><td>the robot from a laptop over Bluetooth, with no network and no ssh</td><td class="sk">RD-04</td><td class="sk">docs/robot/duckctl.md, fetched 2026-09-02</td></tr></tbody></table></div>
+
+  <div class="note"><b>The policy shape is checked at load, not mid-stride.</b> every alpha policy is obs[1,61] -&gt; actions[1,14]; robotd checks the width at LOAD rather than mid-stride.
+  <b>the legacy 51-D family is refused at load with 'observation width is 51, expected 61'.</b> And the config file the gates in this document read: per-robot configuration, so it survives an update AND a rollback; the installer never overwrites it. A board provisioned long ago can therefore differ from the release default - EN-02 step 1 reads the file rather than trusting the default.</div>
+
+  <h3 class="sub">3.2 Firmware, and how much of it is anybody's to read</h3>
+  <div class="tw"><table class="data"><caption>Table 6. Everything running below Linux or on a chip this
+  robot talks to. A row that says NOT published is not a gap in this plan - it is the reason that row's
+  test is behavioural.</caption>
+  <thead><tr><th>Item</th><th>What</th><th>Source</th><th>How it is tested</th><th>What stays unknown</th></tr></thead>
+  <tbody><tr><td><code>servo</code></td><td>ROBOTIS XL330-M288-T servo firmware, x15</td><td class="v fail">NOT published</td><td>SV-01 reads both per servo and records them; a batch that mixes firmware versions is a fact worth having before a fleet exists</td><td class="basis">ROBOTIS publishes no minimum firmware version for this robot and no changelog mapping a version to a behaviour, so the version is recorded and not gated</td></tr>
+<tr><td><code>imu_to_dxl</code></td><td>the imu_to_dxl v2 board: an unidentified MCU that presents an LSM6DSV16X on the Dynamixel bus as device ID 200</td><td class="v fail">NOT published</td><td>SN-04 only, and behaviourally: gravity z &lt;= -0.98 upright, and zero stale blocks over 30 s (robotd has a StaleImuTracker for a board that answers without refreshing). A chip-level self-test is impossible on a built robot - SN-05 is an INCOMING test for the board, not a unit test</td><td class="basis">Pollen publishing the imu_to_dxl v2 schematic and firmware, or a debug path on the board that exposes the LSM6DSV16X directly</td></tr>
+<tr><td><code>tof_sensor</code></td><td>ST VL53L5CX / VL53L8CX firmware, uploaded into the sensor at every start</td><td class="v cd">the UPLOADER is: ST's two Ultra Lite Drivers are vendored verbatim in Pollen's tof crate under BSD-3-Clause (vendor/LICENSE.txt). The blob itself is ST's.</td><td>SN-06 - and the header line of robotctl monitor's ToF block names the generation that answered, which is the only place a built unit says which sensor it has</td><td class="basis">CANNOT DETERMINE which figure is the wire upload: tof/src/main.rs:7 says 'bringing it up uploads ~90 KB of firmware over I2C, taking seconds', while tof/src/lib.rs:15 says each ULD is '40 KB of register sequences plus a 550 KB firmware blob'. Both are Pollen's own comments in the same crate. WHAT SETTLES IT: the byte count of the blob in the vendored ULD, or an I2C capture of one start-up</td></tr>
+<tr><td><code>board</code></td><td>the Radxa ZERO 3W's own boot chain and the Linux image the daemons run on (RK3566)</td><td class="v cd">Pollen's provisioning is: scripts/setup-board.sh and scripts/install.sh, with the steps written out one by one in docs/robot/install-by-hand.md</td><td>SN-01 (the I2C roll-call proves the overlays took), SN-07, SN-08, TH-01</td><td class="basis">the board's own current draw: no fetched Radxa document states one, only a 5 V/2 A supply requirement. EN-01 measures it by difference</td></tr>
+<tr><td><code>release_payload</code></td><td>the signed release updaterd installs: binaries, policies and models in one artifact</td><td class="v pass">published</td><td>SW-01 (version agreement) and RD-05 (one rollback, then back)</td><td class="basis">nothing - this is the one item in this table whose source, signature and install record are all published and all readable on the unit</td></tr></tbody></table></div>
+
+  <div class="note"><b>Four things to write into the unit's log before any gate is judged.</b>
+  The release every daemon is running (<a href="#SW-01">SW-01</a>); each servo's
+  <code>Firmware Version(6)</code> (<a href="#SV-01">SV-01</a>); which ToF generation answered, because
+  both ship and the driver is chosen at runtime (<a href="#SN-06">SN-06</a>); and whether the NPU is
+  switched on in this board's device tree, because Armbian ships the Radxa Zero 3 with it off and
+  <code>duck_detect.rknn</code> silently falls through to the CPU when it is
+  (<a href="#TH-01">TH-01</a>). A result without those four is about a robot nobody can identify later.</div>
+</section>
+
 <section id="electrical">
-  <h2><span class="n">3</span>Electrical bring-up</h2>
+  <h2><span class="n">4</span>Electrical bring-up</h2>
   <p class="lede">Nothing here assumes a pack. The order is deliberate: find a short with a meter, bring the board up behind a current limit, survey the rails at the pin that needs them, and only then plug in 2S Li-ion. Test EB-04 is the reason this section exists in this form - it is the measurement that settles whether production Microducks run their servos above the vendor's rating.</p>
   
-<h3 class="sub">3.1 Rails — what to measure, where, and against what</h3>
-<div class="tw"><table class="data"><caption>Table 4. Every supply a fitted part needs, at the pin that needs it.
+<h3 class="sub">4.1 Rails — what to measure, where, and against what</h3>
+<div class="tw"><table class="data"><caption>Table 7. Every supply a fitted part needs, at the pin that needs it.
 Bands are tightest-part-wins per rail. A band that reads CANNOT DETERMINE is not a pass.</caption>
 <thead><tr><th>Net</th><th>Probe point</th><th>Nominal</th><th>Acceptance band</th><th>Basis</th><th>Src</th></tr></thead>
 <tbody><tr><td><code>VBAT (pack)</code></td><td>NP-F550 pack terminals, and again at the banana contact PCB output</td><td>7.2 V (Duracell DR5) / 7.4 V (Deity, Viltrox) — the two 2S nominal conventions</td><td class=""><b>6.60 – 8.40 V</b></td><td class="basis">8.40 V = 2 x 4.20 V fully charged off charger; 6.60 V = the runtime's own empty floor, BATTERY_EMPTY_V, which is also 0 % on the gauge and where robotd sits the robot down</td><td class="sk">EVER MODEL TOML</td></tr>
@@ -236,7 +292,7 @@ Bands are tightest-part-wins per rail. A band that reads CANNOT DETERMINE is not
 <tr><td><code>ToF IOVDD</code></td><td>VL53L8CX IOVDD pin</td><td>1.20 V or 1.80 V, per the module's strapping</td><td class=""><b>1.08 – 1.32 V (1.2 V config) or 1.62 – 1.98 V (1.8 V config)</b></td><td class="basis">VL53L8CX Table 12. Which configuration the fitted breakout uses is CANNOT DETERMINE — read the module's own schematic before judging this rail</td><td class="sk">L8</td></tr>
 <tr><td><code>Camera module 3V3</code></td><td>FPC pin 15 at the camera board</td><td>3.30 V</td><td class="cd"><b>CANNOT DETERMINE</b></td><td class="basis">the Seeed IMX219 module datasheet gives a 3.3 V module supply on FPC pin 15 but no tolerance; the bare sensor's internal rails are 2.8 V analog / 1.8 V interface / 1.2 V digital and are generated on the camera board. Record the measured value; no gate is asserted</td><td class="sk">EVER</td></tr>
 <tr><td><code>USB-C VBUS</code></td><td>the Radxa's USB 2.0 OTG Type-C port</td><td>5.00 V</td><td class=""><b>see EB-08</b></td><td class="basis">the overlay disables the FUSB302/ET7301B PD controller at /i2c@fe5c0000/fusb302@22; its power-on defaults present Rd on both CC lines so any charger still supplies 5 V. Whether the pack charges in situ is CANNOT DETERMINE and EB-08 is the measurement</td><td class="sk">I2C3 EVER ELEC</td></tr></tbody></table></div>
-<div class="note"><b>Two numbers worth carrying into section 3.</b>
+<div class="note"><b>Two numbers worth carrying into this section.</b>
 Fifteen servos at the vendor's standby current draw <b>0.255&nbsp;A</b> (15&nbsp;&times;&nbsp;17&nbsp;mA) with torque off.
 Fifteen servos stalled at 5.0&nbsp;V draw <b>22.05&nbsp;A</b> (15&nbsp;&times;&nbsp;1.47&nbsp;A) — a real number the vendor's
 own stall row supports, and nothing in any source says what the pack or the HAT path can deliver.
@@ -286,12 +342,12 @@ Above 6.0&nbsp;V no vendor stall figure exists at all, which is exactly why EB-0
   </div>
   <h4>Preconditions</h4><ul class="pre"><li>EB-02 PASS, supply still at 7.40 V.</li><li>Sensors reconnected one at a time, re-checking the current after each.</li></ul>
   <h4>Procedure</h4>
-  <ol class="steps"><li>Work down the rail table in section 3.1, probing at the stated point with the stated reference.<div class="exp">expect &rarr; each reading inside its band</div></li></ol>
+  <ol class="steps"><li>Work down the rail table in section 4.1, probing at the stated point with the stated reference.<div class="exp">expect &rarr; each reading inside its band</div></li></ol>
   <h4>What is measured</h4>
   <p class="measure">One DC voltage per rail, to 3 dp, plus the reference point used.</p>
   <h4>Gate</h4>
   <div class="tw"><table class="gate"><tbody><tr><td class="v pass">PASS</td><td>every rail with a band is inside it</td></tr><tr><td class="v fail">FAIL</td><td>any rail with a band is outside it</td></tr><tr><td class="v cd">CANNOT DETERMINE</td><td>a rail whose band is CANNOT DETERMINE (camera 3V3, ToF IOVDD) — record the value and say so; it is not a pass</td></tr></tbody></table></div>
-  <div class="basisbox"><span class="k">Basis of the gate</span>Bands come from the fitted parts' own datasheets, tightest-part-wins per rail; see section 3.1 for the basis of each row. The 5 V band is the one decision of this plan on this table.</div>
+  <div class="basisbox"><span class="k">Basis of the gate</span>Bands come from the fitted parts' own datasheets, tightest-part-wins per rail; see section 4.1 for the basis of each row. The 5 V band is the one decision of this plan on this table.</div>
   <div class="srcs"><span class="srcitem"><b>L8</b> ST VL53L8CX datasheet</span><span class="srcitem"><b>BMI</b> Bosch BMI088 datasheet</span><span class="srcitem"><b>TLV</b> TI TLV320AIC3104 datasheet</span><span class="srcitem"><b>LSM</b> ST LSM6DSV16X datasheet</span><span class="srcitem"><b>RADXA</b> Radxa ZERO 3W product brief + schematics</span><span class="srcitem"><b>EVER</b> electronics verification workflow results</span></div>
 </article>
 <article class="test" id="EB-04">
@@ -382,48 +438,53 @@ Above 6.0&nbsp;V no vendor stall figure exists at all, which is exactly why EB-0
 </section>
 
 <section id="servo">
-  <h2><span class="n">4</span>Servo identity and calibration</h2>
+  <h2><span class="n">5</span>Servo identity and calibration</h2>
   <p class="lede">Fifteen servos and one IMU board share one wire. Two EEPROM values must be set per servo at build time, because neither can be assigned over a shared bus; everything else robotd asserts at every boot. Mechanical zero is set by assembly, not by a register - robotd never writes a homing offset.</p>
   
-<h3 class="sub" id="idmap">4.1 The ID map, and the home pose in counts</h3>
+<h3 class="sub" id="idmap">5.1 The ID map, and the home pose in counts</h3>
 <p>Encoder counts are computed here, not typed:
 <code class="formula">count = 2048 + rad &times; 4096 / (2&pi;) = 2048 + rad &times; 651.898647</code>,
 from the vendor's 4096&nbsp;pulse/rev resolution and <code>bus.rs</code>'s 2048 = 0&nbsp;rad.
 One count is <b>0.0879&nbsp;degrees</b>, so the &plusmn;1.0&nbsp;degree calibration tolerance is
 <b>&plusmn;11&nbsp;counts</b>.</p>
-<div class="tw"><table class="data idmap"><caption>Table 5. Servo ID to joint, the joint's MJCF range, and the home pose
+<div class="tw wide"><table class="data idmap"><caption>Table 8. Servo ID to joint, the joint's MJCF range, and the home pose
 in radians, degrees and encoder counts. Home values are <code>DEFAULT_POSITION</code> from <code>model.rs:39-55</code>;
 ranges are read here directly out of <code>sim/microduck_ours.xml</code> at full double precision, and every one of
 them turns out to be an exact whole number of degrees &mdash; which is why the degree columns are here and why the
 data file&rsquo;s 3&nbsp;dp copies were wrong to keep. The mouth (ID&nbsp;34) is the one row with no MJCF joint: the
-jaw is not actuated in the published model, and its limits are <code>model.rs:63-64</code>.</caption>
-<thead><tr><th>ID</th><th>Joint</th><th>Body carrying the servo</th>
+jaw is not actuated in the published model, and its limits are <code>model.rs:63-64</code>, so its body cell is
+the data file&rsquo;s own value and is shown in amber. <b>The bodies column changed in Rev&nbsp;C.</b> It used to
+name one &ldquo;body carrying the servo&rdquo;, hand-typed, and it was inconsistent: nine rows named the MJCF
+parent and five named the child. Both bodies are now read off the MJCF and both are shown, because the MJCF says
+which two bodies a joint joins and does <b>not</b> say which of the two the servo housing is bolted to &mdash; see
+the open question in section {TAILNUM["open"]}.</caption>
+<thead><tr><th>ID</th><th>Joint</th><th>Bodies joined (MJCF parent &rarr; child)</th>
 <th>range lo&nbsp;rad</th><th>range hi&nbsp;rad</th><th>range lo&nbsp;deg</th><th>range hi&nbsp;deg</th>
 <th>home&nbsp;rad</th><th>home&nbsp;deg</th><th>home&nbsp;count</th></tr></thead>
-<tbody><tr><td class="n">20</td><td><code>left_hip_yaw</code></td><td>trunk_base</td><td class="n">-0.4363</td><td class="n">0.5236</td><td class="n">-25.0000</td><td class="n">30.0000</td><td class="n">0.0000</td><td class="n">0.0000</td><td class="n">2048.0</td></tr>
-<tr><td class="n">21</td><td><code>left_hip_roll</code></td><td>yaw2roll</td><td class="n">-0.3840</td><td class="n">0.3840</td><td class="n">-22.0000</td><td class="n">22.0000</td><td class="n">-0.0873</td><td class="n">-5.0019</td><td class="n">1991.1</td></tr>
-<tr><td class="n">22</td><td><code>left_hip_pitch</code></td><td>upper_leg_left</td><td class="n">-1.5708</td><td class="n">1.5708</td><td class="n">-90.0000</td><td class="n">90.0000</td><td class="n">-0.4579</td><td class="n">-26.2357</td><td class="n">1749.5</td></tr>
-<tr><td class="n">23</td><td><code>left_knee</code></td><td>upper_leg_left</td><td class="n">-1.5708</td><td class="n">1.5708</td><td class="n">-90.0000</td><td class="n">90.0000</td><td class="n">-0.0049</td><td class="n">-0.2807</td><td class="n">2044.8</td></tr>
-<tr><td class="n">24</td><td><code>left_ankle</code></td><td>leg</td><td class="n">-1.5708</td><td class="n">1.5708</td><td class="n">-90.0000</td><td class="n">90.0000</td><td class="n">0.4530</td><td class="n">25.9550</td><td class="n">2343.3</td></tr>
-<tr><td class="n">30</td><td><code>neck_pitch</code></td><td>neck</td><td class="n">-1.5708</td><td class="n">1.0472</td><td class="n">-90.0000</td><td class="n">60.0000</td><td class="n">0.3491</td><td class="n">20.0020</td><td class="n">2275.6</td></tr>
-<tr><td class="n">31</td><td><code>head_pitch</code></td><td>neck</td><td class="n">-1.5708</td><td class="n">1.5708</td><td class="n">-90.0000</td><td class="n">90.0000</td><td class="n">0.3491</td><td class="n">20.0020</td><td class="n">2275.6</td></tr>
-<tr><td class="n">32</td><td><code>head_yaw</code></td><td>yaw_roll_motion</td><td class="n">-2.9671</td><td class="n">2.9671</td><td class="n">-170.0000</td><td class="n">170.0000</td><td class="n">0.0000</td><td class="n">0.0000</td><td class="n">2048.0</td></tr>
-<tr><td class="n">33</td><td><code>head_roll</code></td><td>jaw_soft (head)</td><td class="n">-0.4363</td><td class="n">0.4363</td><td class="n">-25.0000</td><td class="n">25.0000</td><td class="n">0.0000</td><td class="n">0.0000</td><td class="n">2048.0</td></tr>
-<tr><td class="n">34</td><td><code>mouth</code></td><td>jaw_soft (head)</td><td class="n">-0.0873</td><td class="n">0.5236</td><td class="n">-5.0000</td><td class="n">30.0000</td><td class="n">0.0000</td><td class="n">0.0000</td><td class="n">2048.0</td></tr>
-<tr><td class="n">10</td><td><code>right_hip_yaw</code></td><td>trunk_base</td><td class="n">-0.5236</td><td class="n">0.4363</td><td class="n">-30.0000</td><td class="n">25.0000</td><td class="n">0.0000</td><td class="n">0.0000</td><td class="n">2048.0</td></tr>
-<tr><td class="n">11</td><td><code>right_hip_roll</code></td><td>bearing_roll</td><td class="n">-0.3840</td><td class="n">0.3840</td><td class="n">-22.0000</td><td class="n">22.0000</td><td class="n">0.0873</td><td class="n">5.0019</td><td class="n">2104.9</td></tr>
-<tr><td class="n">12</td><td><code>right_hip_pitch</code></td><td>upper_leg_right</td><td class="n">-1.5708</td><td class="n">1.5708</td><td class="n">-90.0000</td><td class="n">90.0000</td><td class="n">0.4579</td><td class="n">26.2357</td><td class="n">2346.5</td></tr>
-<tr><td class="n">13</td><td><code>right_knee</code></td><td>upper_leg_right</td><td class="n">-1.5708</td><td class="n">1.5708</td><td class="n">-90.0000</td><td class="n">90.0000</td><td class="n">0.0049</td><td class="n">0.2807</td><td class="n">2051.2</td></tr>
-<tr><td class="n">14</td><td><code>right_ankle</code></td><td>leg_2</td><td class="n">-1.5708</td><td class="n">1.5708</td><td class="n">-90.0000</td><td class="n">90.0000</td><td class="n">-0.4530</td><td class="n">-25.9550</td><td class="n">1752.7</td></tr></tbody></table></div>
+<tbody><tr><td class="n">20</td><td><code>left_hip_yaw</code></td><td><code>trunk_base</code> &rarr; <code>yaw2roll</code></td><td class="n">-0.4363</td><td class="n">0.5236</td><td class="n">-25.0000</td><td class="n">30.0000</td><td class="n">0.0000</td><td class="n">0.0000</td><td class="n">2048.0</td></tr>
+<tr><td class="n">21</td><td><code>left_hip_roll</code></td><td><code>yaw2roll</code> &rarr; <code>hip_l</code></td><td class="n">-0.3840</td><td class="n">0.3840</td><td class="n">-22.0000</td><td class="n">22.0000</td><td class="n">-0.0873</td><td class="n">-5.0019</td><td class="n">1991.1</td></tr>
+<tr><td class="n">22</td><td><code>left_hip_pitch</code></td><td><code>hip_l</code> &rarr; <code>upper_leg_left</code></td><td class="n">-1.5708</td><td class="n">1.5708</td><td class="n">-90.0000</td><td class="n">90.0000</td><td class="n">-0.4579</td><td class="n">-26.2357</td><td class="n">1749.5</td></tr>
+<tr><td class="n">23</td><td><code>left_knee</code></td><td><code>upper_leg_left</code> &rarr; <code>leg</code></td><td class="n">-1.5708</td><td class="n">1.5708</td><td class="n">-90.0000</td><td class="n">90.0000</td><td class="n">-0.0049</td><td class="n">-0.2807</td><td class="n">2044.8</td></tr>
+<tr><td class="n">24</td><td><code>left_ankle</code></td><td><code>leg</code> &rarr; <code>ankle_left</code></td><td class="n">-1.5708</td><td class="n">1.5708</td><td class="n">-90.0000</td><td class="n">90.0000</td><td class="n">0.4530</td><td class="n">25.9550</td><td class="n">2343.3</td></tr>
+<tr><td class="n">30</td><td><code>neck_pitch</code></td><td><code>trunk_base</code> &rarr; <code>neck</code></td><td class="n">-1.5708</td><td class="n">1.0472</td><td class="n">-90.0000</td><td class="n">60.0000</td><td class="n">0.3491</td><td class="n">20.0020</td><td class="n">2275.6</td></tr>
+<tr><td class="n">31</td><td><code>head_pitch</code></td><td><code>neck</code> &rarr; <code>neck_pitch</code></td><td class="n">-1.5708</td><td class="n">1.5708</td><td class="n">-90.0000</td><td class="n">90.0000</td><td class="n">0.3491</td><td class="n">20.0020</td><td class="n">2275.6</td></tr>
+<tr><td class="n">32</td><td><code>head_yaw</code></td><td><code>neck_pitch</code> &rarr; <code>yaw_roll_motion</code></td><td class="n">-2.9671</td><td class="n">2.9671</td><td class="n">-170.0000</td><td class="n">170.0000</td><td class="n">0.0000</td><td class="n">0.0000</td><td class="n">2048.0</td></tr>
+<tr><td class="n">33</td><td><code>head_roll</code></td><td><code>yaw_roll_motion</code> &rarr; <code>jaw_soft</code></td><td class="n">-0.4363</td><td class="n">0.4363</td><td class="n">-25.0000</td><td class="n">25.0000</td><td class="n">0.0000</td><td class="n">0.0000</td><td class="n">2048.0</td></tr>
+<tr><td class="n">34</td><td><code>mouth</code></td><td><span class="cd">jaw_soft (head)</span></td><td class="n">-0.0873</td><td class="n">0.5236</td><td class="n">-5.0000</td><td class="n">30.0000</td><td class="n">0.0000</td><td class="n">0.0000</td><td class="n">2048.0</td></tr>
+<tr><td class="n">10</td><td><code>right_hip_yaw</code></td><td><code>trunk_base</code> &rarr; <code>bearing_roll</code></td><td class="n">-0.5236</td><td class="n">0.4363</td><td class="n">-30.0000</td><td class="n">25.0000</td><td class="n">0.0000</td><td class="n">0.0000</td><td class="n">2048.0</td></tr>
+<tr><td class="n">11</td><td><code>right_hip_roll</code></td><td><code>bearing_roll</code> &rarr; <code>hip_l_2</code></td><td class="n">-0.3840</td><td class="n">0.3840</td><td class="n">-22.0000</td><td class="n">22.0000</td><td class="n">0.0873</td><td class="n">5.0019</td><td class="n">2104.9</td></tr>
+<tr><td class="n">12</td><td><code>right_hip_pitch</code></td><td><code>hip_l_2</code> &rarr; <code>upper_leg_right</code></td><td class="n">-1.5708</td><td class="n">1.5708</td><td class="n">-90.0000</td><td class="n">90.0000</td><td class="n">0.4579</td><td class="n">26.2357</td><td class="n">2346.5</td></tr>
+<tr><td class="n">13</td><td><code>right_knee</code></td><td><code>upper_leg_right</code> &rarr; <code>leg_2</code></td><td class="n">-1.5708</td><td class="n">1.5708</td><td class="n">-90.0000</td><td class="n">90.0000</td><td class="n">0.0049</td><td class="n">0.2807</td><td class="n">2051.2</td></tr>
+<tr><td class="n">14</td><td><code>right_ankle</code></td><td><code>leg_2</code> &rarr; <code>ankle_right</code></td><td class="n">-1.5708</td><td class="n">1.5708</td><td class="n">-90.0000</td><td class="n">90.0000</td><td class="n">-0.4530</td><td class="n">-25.9550</td><td class="n">1752.7</td></tr></tbody></table></div>
 <div class="note"><b>ID 200 is not in this table.</b> The <code>imu_to_dxl</code> v2 board rides the same bus as a
 sixteenth device and is <code>sync_read</code> first on every tick. It has no joint, no range and no home pose —
 but SV-03 fails without it.</div>
 
-<h3 class="sub" id="registers">4.2 The register set</h3>
+<h3 class="sub" id="registers">5.2 The register set</h3>
 <p>Every value below is quoted from the vendor control table in <code>ce-parts/xl330-m288-t/electrical.chip.json</code>.
 <b>EEPROM writes are refused unless Torque&nbsp;Enable(64) is 0</b> — the vendor's own rule, and the reason it is the
 first row of every write sequence.</p>
-<div class="tw"><table class="data reg"><caption>Table 6. The XL330-M288-T registers this plan touches.</caption>
+<div class="tw"><table class="data reg"><caption>Table 9. The XL330-M288-T registers this plan touches.</caption>
 <thead><tr><th>Addr</th><th>Bytes</th><th>Name</th><th>Area</th><th>Vendor initial</th><th>We write</th><th>Meaning</th><th>Why</th></tr></thead>
 <tbody><tr><td class="n">0</td><td class="n">2</td><td><b>Model Number</b></td><td>EEPROM</td><td>1,200</td><td><code>verify = 1200</code></td><td>the model this firmware belongs to</td><td class="basis">proves the fitted servo IS an XL330-M288-T before any of the bands below are applied to it. Every current, torque and voltage figure in this document is that model's; a visually identical XL330-M077-T or XC330 would pass every other read-back in SV-01 and be wrong</td></tr>
 <tr><td class="n">6</td><td class="n">1</td><td><b>Firmware Version</b></td><td>EEPROM</td><td>-</td><td><code>read and record</code></td><td>the servo's own firmware revision</td><td class="basis">recorded per servo, not gated: ROBOTIS publishes no minimum version for this robot and no changelog that maps a version to a behaviour. It is recorded because a batch that mixes versions is a fact worth having BEFORE a fleet exists, not after a fault</td></tr>
@@ -456,9 +517,9 @@ first row of every write sequence.</p>
   </div>
   <h4>Preconditions</h4><ul class="pre"><li>Servo out of the robot, or fitted but with its lead the only one on the adapter.</li><li>Dynamixel TTL adapter connected, servo powered at 5.00 V from the bench supply (the vendor's recommended operating point).</li></ul>
   <h4>Procedure</h4>
-  <ol class="steps"><li>Scan at 57,600 bps (Baud Rate(8) initial value 1). Expect exactly one device at ID 1.<div class="exp">expect &rarr; one device, ID 1</div></li><li>Read Model Number(0) and Firmware Version(6) before writing anything, and record both against the servo's serial position in the build.<div class="exp">expect &rarr; Model Number(0) = 1,200; the firmware version is recorded, whatever it is</div></li><li>Write Torque Enable(64) = 0.<div class="exp">expect &rarr; ack</div></li><li>Write ID(7) = the assigned ID from the map in section 4.1.<div class="exp">expect &rarr; ack</div></li><li>Write Baud Rate(8) = 3.<div class="exp">expect &rarr; ack</div></li><li>Power-cycle the servo, re-scan at 1,000,000 bps.<div class="exp">expect &rarr; one device at the assigned ID</div></li><li>Write, then read back: Return Delay Time(9) = 0, PWM Slope(62) = 255, Shutdown(63) = 52.<div class="exp">expect &rarr; read-back equals written</div></li><li>Read back and record, do not write: Protocol Type(13) = 2, Temperature Limit(31) = 70, Max Voltage Limit(32) = 70, Min Voltage Limit(34) = 35, Current Limit(38) = 1750.<div class="exp">expect &rarr; all at their factory values</div></li><li>Write a label with the ID on the servo case before it goes back in the robot.</li></ol>
+  <ol class="steps"><li>Scan at 57,600 bps (Baud Rate(8) initial value 1). Expect exactly one device at ID 1.<div class="exp">expect &rarr; one device, ID 1</div></li><li>Read Model Number(0) and Firmware Version(6) before writing anything, and record both against the servo's serial position in the build.<div class="exp">expect &rarr; Model Number(0) = 1,200; the firmware version is recorded, whatever it is</div></li><li>Write Torque Enable(64) = 0.<div class="exp">expect &rarr; ack</div></li><li>Write ID(7) = the assigned ID from the map in section 5.1.<div class="exp">expect &rarr; ack</div></li><li>Write Baud Rate(8) = 3.<div class="exp">expect &rarr; ack</div></li><li>Power-cycle the servo, re-scan at 1,000,000 bps.<div class="exp">expect &rarr; one device at the assigned ID</div></li><li>Write, then read back: Return Delay Time(9) = 0, PWM Slope(62) = 255, Shutdown(63) = 52.<div class="exp">expect &rarr; read-back equals written</div></li><li>Read back and record, do not write: Protocol Type(13) = 2, Temperature Limit(31) = 70, Max Voltage Limit(32) = 70, Min Voltage Limit(34) = 35, Current Limit(38) = 1750.<div class="exp">expect &rarr; all at their factory values</div></li><li>Write a label with the ID on the servo case before it goes back in the robot.</li></ol>
   <h4>What is measured</h4>
-  <p class="measure">Per servo: the twelve register values read back after the power cycle (two proved by the re-scan, three written-then-read, seven read-only) - the addresses are listed in the data file and the count is computed from that list, not typed. Torque Enable(64) is RAM, is not read back, and is not one of them; Table 6 lists every register this plan touches, which is a larger set.</p>
+  <p class="measure">Per servo: the twelve register values read back after the power cycle (two proved by the re-scan, three written-then-read, seven read-only) - the addresses are listed in the data file and the count is computed from that list, not typed. Torque Enable(64) is RAM, is not read back, and is not one of them; Table 9 lists every register this plan touches, which is a larger set.</p>
   <h4>Gate</h4>
   <div class="tw"><table class="gate"><tbody><tr><td class="v pass">PASS</td><td>every written register reads back exactly the written value, and every verify-only register is at its factory value</td></tr><tr><td class="v fail">FAIL</td><td>Model Number(0) is not 1,200 - the wrong servo model is fitted and every band in this document is the wrong one for it - or any other read-back differs, or the servo does not answer at 1 Mbps after the power cycle</td></tr><tr><td class="v cd">CANNOT DETERMINE</td><td>a verify-only register differs from factory — the servo has been used elsewhere; restore it and re-run rather than accepting it</td></tr></tbody></table></div>
   <div class="basisbox"><span class="k">Basis of the gate</span>Every value and every initial value here is quoted verbatim from E1's control table in ce-parts/xl330-m288-t/electrical.chip.json. EEPROM writes are gated on Torque Enable(64) = 0 by the vendor's own rule.</div>
@@ -511,7 +572,7 @@ first row of every write sequence.</p>
   <h4>What is measured</h4>
   <p class="measure">Per joint: minimum and maximum reachable position, in counts and degrees, and where a hard stop was met.</p>
   <h4>Gate</h4>
-  <div class="tw"><table class="gate"><tbody><tr><td class="v pass">PASS</td><td>every joint reaches both ends of its MJCF range (section 4.1) and meets no hard stop inside it</td></tr><tr><td class="v fail">FAIL</td><td>a hard stop inside the range, or a discontinuity in the sweep (a slipping horn or a dead encoder segment)</td></tr></tbody></table></div>
+  <div class="tw"><table class="gate"><tbody><tr><td class="v pass">PASS</td><td>every joint reaches both ends of its MJCF range (section 5.1) and meets no hard stop inside it</td></tr><tr><td class="v fail">FAIL</td><td>a hard stop inside the range, or a discontinuity in the sweep (a slipping horn or a dead encoder segment)</td></tr></tbody></table></div>
   <div class="basisbox"><span class="k">Basis of the gate</span>Ranges are the MJCF joint limits read off Pollen's own robot_walk.xml via our simulation (out/sim/report.md, 'Joint range use'), in radians. Section 4.1 states each one in radians, degrees and encoder counts.</div>
   <div class="srcs"><span class="srcitem"><b>SIM</b> our MuJoCo simulation report</span><span class="srcitem"><b>ELEC</b> docs/ELECTRONICS-AND-SOFTWARE.md</span></div>
 </article>
@@ -524,7 +585,7 @@ first row of every write sequence.</p>
   </div>
   <h4>Preconditions</h4><ul class="pre"><li>SV-04 PASS. Robot ON THE STAND - init moves every joint.</li></ul>
   <h4>Procedure</h4>
-  <ol class="steps"><li>Power the joints and ramp to the home pose (about 2 s).<div class="cmd">sudo robotctl robot init</div><div class="exp">expect &rarr; the robot reaches the home pose</div></li><li>Let it settle 3 s, then log 100 ticks.<div class="cmd">robotctl monitor --json --hz 50 &gt; logs/&lt;serial&gt;/SV-05-home.jsonl</div></li><li>Compare the mean Present Position of each joint against the expected counts in section 4.1.<div class="exp">expect &rarr; within gate</div></li></ol>
+  <ol class="steps"><li>Power the joints and ramp to the home pose (about 2 s).<div class="cmd">sudo robotctl robot init</div><div class="exp">expect &rarr; the robot reaches the home pose</div></li><li>Let it settle 3 s, then log 100 ticks.<div class="cmd">robotctl monitor --json --hz 50 &gt; logs/&lt;serial&gt;/SV-05-home.jsonl</div></li><li>Compare the mean Present Position of each joint against the expected counts in section 5.1.<div class="exp">expect &rarr; within gate</div></li></ol>
   <h4>What is measured</h4>
   <p class="measure">Per joint: mean Present Position(132) over 100 ticks, in counts; the deviation from the expected home count.</p>
   <h4>Gate</h4>
@@ -552,7 +613,7 @@ first row of every write sequence.</p>
 </section>
 
 <section id="sensors">
-  <h2><span class="n">5</span>Sensor checks</h2>
+  <h2><span class="n">6</span>Sensor checks</h2>
   <p class="lede">Four devices on one I2C bus, a camera on MIPI CSI, an IMU that is only reachable through the servo bus, and two subsystems that cannot be tested at all. The last two rows are as much a part of this plan as the first eight.</p>
   
   
@@ -729,7 +790,7 @@ first row of every write sequence.</p>
 </section>
 
 <section id="software">
-  <h2><span class="n">6</span>Control-loop and daemon acceptance</h2>
+  <h2><span class="n">7</span>Control-loop and daemon acceptance</h2>
   <p class="lede">Pollen built the control loop before anything that walks, so that health would be a real measurement rather than a ping. These four tests read that measurement back.</p>
   
   
@@ -821,11 +882,11 @@ first row of every write sequence.</p>
 </section>
 
 <section id="radios">
-  <h2><span class="n">7</span>Radios, identity and provisioning</h2>
+  <h2><span class="n">8</span>Radios, identity and provisioning</h2>
   <p class="lede">Everything a customer touches before the robot walks: the two radios, the name and PIN the robot is known by, and the update path that is the only way a fault is ever fixed in the field. None of it moves a joint, and all of it ships broken if nobody looks. One test in this section - RD-03 - is a security gate rather than a functional one: the factory default pairing PIN is <code>000000</code> and Pollen says in its own cheat sheet what that means.</p>
   
-<h3 class="sub">7.1 Gamepad map</h3>
-<div class="tw"><table class="data"><caption>Table 7. Quoted from Pollen's cheat sheet, Gamepad (<code>configd</code>). RD-02 works through every row. There is no stop button: release the sticks and the robot stands, and robotd's deadman stops it if <code>padd</code> dies.</caption>
+<h3 class="sub">8.1 Gamepad map</h3>
+<div class="tw"><table class="data"><caption>Table 10. Quoted from Pollen's cheat sheet, Gamepad (<code>configd</code>). RD-02 works through every row. There is no stop button: release the sticks and the robot stands, and robotd's deadman stops it if <code>padd</code> dies.</caption>
 <thead><tr><th>Control</th><th>What it does</th></tr></thead>
 <tbody><tr><td><b>left stick</b></td><td>drive: forward/back and strafe . head: head yaw and pitch . body pose: up and crouch</td></tr>
 <tr><td><b>right stick</b></td><td>drive: turn . head: neck pitch and head roll . body pose: pitch and roll</td></tr>
@@ -929,11 +990,11 @@ first row of every write sequence.</p>
 </section>
 
 <section id="walk">
-  <h2><span class="n">8</span>Walk acceptance</h2>
+  <h2><span class="n">9</span>Walk acceptance</h2>
   <p class="lede">The thresholds here come from our own MuJoCo runs of Pollen's published policies on Pollen's own physics. Where a gate is a simulation figure it says so; where a gate is an allowance for sim-to-real transfer it says that too, and names the fraction, because no real-robot walk figure exists in any source.</p>
   
-<h3 class="sub">8.1 The surface</h3>
-<div class="tw"><table class="data"><caption>Table 8. The acceptance surface.</caption>
+<h3 class="sub">9.1 The surface</h3>
+<div class="tw"><table class="data"><caption>Table 11. The acceptance surface.</caption>
 <thead><tr><th>Property</th><th>Requirement</th><th>Why</th><th>Src</th></tr></thead>
 <tbody><tr><td><b>Size</b></td><td>at least 1200 x 600 mm clear</td><td>the acceptance run is 0.594 m minimum with a start line and room to stop</td><td class="sk">TESTDESIGN</td></tr><tr><td><b>Level</b></td><td>within 1.0 deg, measured with a digital inclinometer, recorded in the log</td><td>the gate is a distance in a fixed time; a slope moves it and would not be visible in the data</td><td class="sk">TESTDESIGN</td></tr><tr><td><b>Material</b></td><td>hard, flat, dry, matte - laminate or sealed MDF. NOT carpet, NOT glass, NOT a rubber mat</td><td>the simulation's floor is rigid with foot friction 1.0 and condim 3 on the foot collision geoms only (constants.py). The friction coefficient of the real sole against any real surface is measured nowhere in this repository - CANNOT DETERMINE. A hard matte surface is the closest match that can be specified without measuring one</td><td class="sk">CONST</td></tr><tr><td><b>Temperature</b></td><td>record it</td><td>every servo figure and the pack's behaviour move with it, and none of the vendor current figures carries a temperature</td><td class="sk">XLPART</td></tr></tbody></table></div>
 <div class="note"><b>Where the walk gate comes from.</b>
@@ -955,7 +1016,7 @@ robotd itself decides a fall has started; the fall <i>report</i> threshold
     <div><span class="k">Tool</span>robotctl, inclinometer, steel rule</div>
     <div><span class="k">Log</span><code>logs/&lt;serial&gt;/WK-01-stand.jsonl</code></div>
   </div>
-  <h4>Preconditions</h4><ul class="pre"><li>SW-04 PASS. Robot on the FLOOR (off the stand) on the surface defined in section 8.1. Pack charged above 7.5 V.</li></ul>
+  <h4>Preconditions</h4><ul class="pre"><li>SW-04 PASS. Robot on the FLOOR (off the stand) on the surface defined in section 9.1. Pack charged above 7.5 V.</li></ul>
   <h4>Procedure</h4>
   <ol class="steps"><li>Power the joints and ramp to the home pose.<div class="cmd">sudo robotctl robot init</div><div class="exp">expect &rarr; the robot stands</div></li><li>Log 30 s with no command.<div class="cmd">robotctl monitor --json --hz 50 &gt; logs/&lt;serial&gt;/WK-01-stand.jsonl</div></li><li>Mark the start and end position of the mid-foot; measure the drift.<div class="exp">expect &rarr; within gate</div></li></ol>
   <h4>What is measured</h4>
@@ -972,7 +1033,7 @@ robotd itself decides a fall has started; the fall <i>report</i> threshold
     <div><span class="k">Tool</span>gamepad, steel rule or laser distance meter, robotctl monitor --json, current clamp (shared with EB-07)</div>
     <div><span class="k">Log</span><code>logs/&lt;serial&gt;/WK-02-walk-&lt;n&gt;.jsonl</code></div>
   </div>
-  <h4>Preconditions</h4><ul class="pre"><li>WK-01 PASS. Pad paired. Surface per section 8.1, levelled and measured.</li><li>A 1200 mm run marked on the surface with a start line.</li></ul>
+  <h4>Preconditions</h4><ul class="pre"><li>WK-01 PASS. Pad paired. Surface per section 9.1, levelled and measured.</li><li>A 1200 mm run marked on the surface with a start line.</li></ul>
   <h4>Procedure</h4>
   <ol class="steps"><li>Place the robot with the mid-foot on the start line, facing along the run.</li><li>Enable the policy (Start) and hold the left stick fully forward for 8.0 s. The commanded forward velocity is 0.25 m/s - the value the browser simulator uses as VEL_FWD.<div class="exp">expect &rarr; the robot walks</div></li><li>Log the whole run.<div class="cmd">robotctl monitor --json --hz 50 &gt; logs/&lt;serial&gt;/WK-02-walk-&lt;n&gt;.jsonl</div></li><li>Measure the straight-line distance from the start line to the mid-foot at the moment the stick is released.<div class="exp">expect &rarr; within gate</div></li><li>Read the maximum trunk tilt and the fall flag from the log.<div class="exp">expect &rarr; within gate</div></li></ol>
   <h4>What is measured</h4>
@@ -1053,11 +1114,11 @@ robotd itself decides a fall has started; the fall <i>report</i> threshold
 </section>
 
 <section id="endurance">
-  <h2><span class="n">9</span>Endurance, power and thermal</h2>
+  <h2><span class="n">10</span>Endurance, power and thermal</h2>
   <p class="lede">The last three questions, and the only ones that take real time: how long the robot runs, what it does when the pack is spent, and what happens to a computer sealed in a printed head with no vent, no fan and no heatsink. Every gate here also RETURNS a number this repository is missing - the walking draw of an assembled robot is measured nowhere, by us or by Pollen, and EN-01 is where it stops being an assumption.</p>
   
-<h3 class="sub">9.1 What EN-01 should find, and the number it settles</h3>
-<div class="tw"><table class="data"><caption>Table 9. Runtime against compute draw, from
+<h3 class="sub">10.1 What EN-01 should find, and the number it settles</h3>
+<div class="tw"><table class="data"><caption>Table 12. Runtime against compute draw, from
 <code>out/sim-evidence/battery-runtime.json</code> &mdash; the measured MuJoCo torque and speed profile
 through ROBOTIS's published XL330 rows, on a 18.7&nbsp;Wh pack. The compute-and-sensor column is SWEPT,
 not known: no vendor states the Radxa ZERO&nbsp;3W's consumption, so EN-01 is what picks the row.</caption>
@@ -1090,7 +1151,7 @@ servo half from the board half and closes all of it.</div>
     <div><span class="k">Tool</span>DC current clamp or shunt, Stopwatch, <code>robotctl monitor --json</code></div>
     <div><span class="k">Log</span><code>logs/&lt;serial&gt;/EN-01-runtime.csv</code></div>
   </div>
-  <h4>Preconditions</h4><ul class="pre"><li>WK-02 passed.</li><li>A pack straight off the dual charger, open-circuit voltage recorded before fitting.</li><li>The floor of section 8, clear for the whole run.</li></ul>
+  <h4>Preconditions</h4><ul class="pre"><li>WK-02 passed.</li><li>A pack straight off the dual charger, open-circuit voltage recorded before fitting.</li><li>The floor of section 9, clear for the whole run.</li></ul>
   <h4>Procedure</h4>
   <ol class="steps"><li>Record the pack: maker, printed capacity, and open-circuit voltage off the charger, to 3 dp.<div class="exp">expect &rarr; a fully charged 2S reads about 8.4 V open-circuit</div></li><li>Start the log before the first motion and leave it running to the end.<div class="cmd">robotctl monitor --json --hz 50 &gt; logs/&lt;serial&gt;/EN-01-run.jsonl</div><div class="exp">expect &rarr; one line per tick</div></li><li>Drive a repeating circuit: 60 s walking, 30 s standing, one sit-stand, repeat. Note the wall clock at every cycle.</li><li>Every minute, read the clamp on the pack lead and write the row: minutes, Present Input Voltage(144), battery percent, amperes, activity.<div class="exp">expect &rarr; a monotonically falling voltage</div></li><li>Let it run to the automatic shutdown. Timestamp the sit and the power-off separately.<div class="exp">expect &rarr; the robot sits down, then powers off</div></li><li>Compute the compute-and-sensor draw by difference: measured pack power minus the servo power the same run's <code>Present Current(126)</code> readings account for.<div class="exp">expect &rarr; a watt figure this repository has never had</div></li></ol>
   <h4>What is measured</h4>
@@ -1154,9 +1215,9 @@ servo half from the board half and closes all of it.</div>
 </section>
 
 <section id="eol">
-  <h2><span class="n">10</span>End-of-line checklist</h2>
+  <h2><span class="n">11</span>End-of-line checklist</h2>
   <p class="lede">One line per gate, in test order, and it is COMPLETE by construction: the generator refuses to write this document unless every test with a PASS gate is either on this list or on the exemption list below it with a reason. A unit ships when every box is ticked and no row reads CANNOT DETERMINE. SN-10 (the camera-use indicator) IS on the list even though its GPIO is unknown, because a person can see whether the light is on - and it is the only check of a privacy requirement Pollen wrote down for itself. EB-08 is on the list with its RECORD as the gate rather than a verdict, because the four charging cases have never been measured on any unit and the first unit to measure them is the one that settles the open question.</p>
-  <div class="tw"><table class="data"><caption>Table 10. End-of-line gates, 42 of them.</caption>
+  <div class="tw"><table class="data"><caption>Table 13. End-of-line gates, 42 of them.</caption>
   <thead><tr><th></th><th>Test</th><th>Gate</th><th>Instrument</th></tr></thead>
   <tbody><tr><td class="box">&#9744;</td><td><a href="#EB-01"><code>EB-01</code></a></td><td>no short on any rail before power</td><td class="sk">DMM</td></tr>
 <tr><td class="box">&#9744;</td><td><a href="#EB-02"><code>EB-02</code></a></td><td>constant-voltage for 5 s with no pack and no servos; settled current recorded</td><td class="sk">Bench PSU</td></tr>
@@ -1201,23 +1262,23 @@ servo half from the board half and closes all of it.</div>
 <tr><td class="box">&#9744;</td><td><a href="#TH-01"><code>TH-01</code></a></td><td>SoC &lt;= 85 degC at every sample, never pinned at 408 MHz, stream &gt;= 29 fps</td><td class="sk">ssh + sysfs</td></tr>
 <tr><td class="box">&#9744;</td><td><a href="#TH-02"><code>TH-02</code></a></td><td>head skin &lt;= 50.0 degC after the soak</td><td class="sk">IR thermometer</td></tr></tbody></table></div>
 
-  <h3 class="sub" id="eol-exempt">10.1 The gated tests deliberately NOT on the list</h3>
+  <h3 class="sub" id="eol-exempt">11.1 The gated tests deliberately NOT on the list</h3>
   <p>44 tests carry a PASS gate or state why they carry none. 42 of them are on the
   checklist above. The 2 below are not, and the generator will not write this document
   unless each one appears here with its reason &mdash; a test can leave the ship checklist, but it cannot leave
   quietly.</p>
-  <div class="tw"><table class="data"><caption>Table 11. Exemptions, each with what would put it back on the list.</caption>
+  <div class="tw"><table class="data"><caption>Table 14. Exemptions, each with what would put it back on the list.</caption>
   <thead><tr><th>Test</th><th>Why it is not an end-of-line gate</th><th>What would put it back</th></tr></thead>
   <tbody><tr><td><a href="#SN-05"><code>SN-05</code></a></td><td>The LSM6DSV16X sits behind an unidentified MCU on the imu_to_dxl board and is on no host bus, so its chip self-test cannot be run on an assembled robot at all. SN-05 is an incoming-inspection gate for the bare board, not an end-of-line gate for the unit. Putting it on the ship list would put a box on the sheet that no line operator can ever tick.</td><td>an imu_to_dxl board on a bench fixture with SPI or I2C brought out, before the board is fitted</td></tr>
 <tr><td><a href="#SN-09"><code>SN-09</code></a></td><td>On today's published software the expected verdict is CANNOT DETERMINE: no NFC service appears in the release and no reader IC has been identified. A checklist row that is answered CANNOT DETERMINE on every good unit trains people to tick it anyway.</td><td>a teardown that names the reader IC, or a Pollen release that ships an NFC service</td></tr></tbody></table></div>
 </section>
 
 <section id="logs">
-  <h2><span class="n">11</span>The log a unit leaves behind</h2>
+  <h2><span class="n">12</span>The log a unit leaves behind</h2>
   <p class="lede">A unit's record is a directory, and it is the only thing that survives the unit leaving
   the bench. Two of these files outlive a power cut and the rest do not &mdash; copy the volatile ones
   before the next boot.</p>
-  <div class="tw"><table class="data"><caption>Table 12. What is kept, and why it is kept.</caption>
+  <div class="tw"><table class="data"><caption>Table 15. What is kept, and why it is kept.</caption>
   <thead><tr><th>Path</th><th>What it is</th><th>Src</th></tr></thead>
   <tbody><tr><td><code>logs/&lt;serial&gt;/</code></td><td>one directory per built unit, named by the serial the robot derives its own name from (<code>duck-</code> plus four characters from the SoC serial, <code>robotctl system info</code>)</td><td class="sk">CHEAT</td></tr>
 <tr><td><code>*.jsonl</code></td><td>every <code>robotctl monitor --json</code> capture. Redirected or piped, monitor prints one line per tick and the joint angles stay in RADIANS whatever the screen is set to - the on-screen degrees are a display choice, the file is not</td><td class="sk">CHEAT</td></tr>
@@ -1231,12 +1292,12 @@ servo half from the board half and closes all of it.</div>
 </section>
 
 <section id="open">
-  <h2><span class="n">12</span>What this plan cannot test, and what would change that</h2>
-  <p class="lede">These 14 questions are open because a fact is missing, not because a test is
+  <h2><span class="n">13</span>What this plan cannot test, and what would change that</h2>
+  <p class="lede">These 15 questions are open because a fact is missing, not because a test is
   missing. Each names the test that would answer it and exactly what has to exist first. Most are
   answered the first time a real unit is put on a bench &mdash; which is the point of writing them
   down here rather than leaving them out. The rest need a teardown or a Pollen release, and say so.</p>
-  <div class="tw"><table class="data"><caption>Table 13. Open questions, each with the test that closes it.</caption>
+  <div class="tw"><table class="data"><caption>Table 16. Open questions, each with the test that closes it.</caption>
   <thead><tr><th>Question</th><th>Test</th><th>Status today</th><th>What settles it</th></tr></thead>
   <tbody><tr><td>Are the XL330 servos fed the raw 2S pack, above their 6.0 V rating?</td><td><a href="#EB-04"><code>EB-04</code></a></td><td>the test exists; no unit has been measured</td><td>a meter on pin 2 of the servo bus with the pack fitted. Both outcomes are informative and one of them requires docs/ELECTRONICS-AND-SOFTWARE.md 3.4 to be corrected.</td></tr>
 <tr><td>What does a Microduck draw, walking?</td><td><a href="#EB-07"><code>EB-07, EN-01</code></a></td><td>no vendor figure exists between standby 17 mA and stall 1.47 A per servo, and no measured figure exists for the assembled robot</td><td>EB-07 states A/B/C in three instantaneous states; EN-01 integrates a whole pack through a real duty cycle and gets compute-and-sensor watts by difference. Until one of them runs, every rail budget in this repository rests on an assumption, including the 1 A-per-moving-servo basis behind the harness voltage-drop model in wiring/CABLES.md and the 1-5 W compute sweep in out/sim-evidence/battery-runtime.json.</td></tr>
@@ -1245,15 +1306,16 @@ servo half from the board half and closes all of it.</div>
 <tr><td>What is the NFC reader IC, and where are the two antennas?</td><td><a href="#SN-09"><code>SN-09</code></a></td><td>The IC is CANNOT DETERMINE - zero NFC hits in the published runtime. The BEHAVIOUR is now testable: SN-09 presents a shipped tag at each advertised antenna position and records what happens, and on today's software the expected result is no response at either</td><td>a teardown, or a later release of pollen-robotics/microduck exposing an NFC service. Two candidates are datasheeted on our shelf and neither is confirmed: ST25R3916 (two single-ended antenna drives) and PN7150 (one antenna path).</td></tr>
 <tr><td>Which GPIO drives the camera-use indicator LED?</td><td><a href="#SN-10"><code>SN-10</code></a></td><td>The GPIO is CANNOT DETERMINE - zero hits in a source grep. The indicator itself is now gated: SN-10 is on the end-of-line checklist and is answered by looking at the robot, three times</td><td><code>ls /sys/class/leds</code> on a production board with the camera streaming - step 1 and step 4 of SN-10 record it either way - or a teardown tracing the LED to a header pin.</td></tr>
 <tr><td>Does the robot charge in situ over USB-C with the pack fitted, and on which port?</td><td><a href="#EB-08"><code>EB-08</code></a></td><td>CANNOT DETERMINE</td><td>EB-08 on a unit. Note the shelf's reference 2S charger, MCP73213, needs roughly 8.7 V or more at its input, which 5 V USB cannot supply without a boost stage nobody has seen.</td></tr>
-<tr><td>Is any joint's servo-positive direction inverted relative to the MJCF joint sign?</td><td><a href="#SV-05"><code>SV-05</code></a></td><td>CANNOT DETERMINE. No published source gives a per-joint inversion table</td><td>SV-05 on the first unit. A joint that lands the same distance the wrong side of 2048 is an inversion. The measured table becomes a column of section 4.1 and this plan is regenerated.</td></tr>
+<tr><td>Is any joint's servo-positive direction inverted relative to the MJCF joint sign?</td><td><a href="#SV-05"><code>SV-05</code></a></td><td>CANNOT DETERMINE. No published source gives a per-joint inversion table</td><td>SV-05 on the first unit. A joint that lands the same distance the wrong side of 2048 is an inversion. The measured table becomes a column of section 5.1 and this plan is regenerated.</td></tr>
 <tr><td>What does a real Microduck actually walk in 8 s at vx 0.25?</td><td><a href="#WK-02"><code>WK-02</code></a></td><td>CANNOT DETERMINE. The 0.594 m gate is 75 % of our simulated 0.7925 m and the 75 % is a decision, not a measurement</td><td>WK-02 and WK-03 on the first five built units. Replace the fraction with the measured mean minus three standard deviations and regenerate this document.</td></tr>
 <tr><td>What is the friction coefficient of the sole against the acceptance surface?</td><td><a href="#WK-02"><code>WK-02</code></a></td><td>CANNOT DETERMINE. The simulation uses foot friction 1.0, condim 3, on a rigid floor</td><td>a coefficient-of-friction measurement of the printed TPU sole against the chosen bench material. Until then the surface is specified by description (hard, flat, matte) rather than by a number.</td></tr>
 <tr><td>Can a chip-level IMU self-test be run at all on a built robot?</td><td><a href="#SN-05"><code>SN-05</code></a></td><td>No. The LSM6DSV16X sits behind an unidentified MCU on an unpublished board</td><td>Pollen publishing the imu_to_dxl v2 schematic and firmware, or a debug path on the board that exposes the chip. Until then SN-05 is an incoming test for the BOARD, and SN-04 is the only IMU test a finished robot can take.</td></tr>
 <tr><td>Does a unit leave the line with a pairing PIN that is not the published default?</td><td><a href="#RD-03"><code>RD-03</code></a></td><td>A process gap, not a missing fact. The factory default <code>000000</code> 'authenticates anyone who has read this repository' (Pollen's own cheat sheet), and architecture.md §9.7 says the secret must be 'generated, recorded and printed at manufacture' - but MANUFACTURING-PLAYBOOK station S10 (pack-out) carries no PIN step today</td><td>A PIN step in the playbook's pack-out station, with the per-unit record RD-03 already specifies. Until that lands, RD-03 is the only place the requirement lives, and a unit whose RD-03 line is blank shipped with a PIN that is printed in a public repository.</td></tr>
 <tr><td>What touch-temperature limit applies to the head shell?</td><td><a href="#TH-02"><code>TH-02</code></a></td><td>CANNOT DETERMINE. TH-02 gates at 50.0 degC, which is the Radxa board's own maximum ambient - a limit that speaks for the computer, not for a child's hand on a toy-sized robot. No touch-temperature standard is on our shelf</td><td>The applicable IEC 62368-1 touch-temperature table for the material and the contact duration, or a customer requirement stating one. Then TH-02 gets a second gate and the tighter of the two governs.</td></tr>
-<tr><td>Can the rollback path be exercised on a unit that ships with one release?</td><td><a href="#RD-05"><code>RD-05</code></a></td><td>Open by construction. <code>updaterd</code>'s auto-rollback is the whole safety net for a robot in someone's home, and a board with a single installed release has nothing to roll back to, so the mechanism ships untested on exactly the units where it matters most</td><td>Installing two releases at the factory - the shipped one and its predecessor - so RD-05 can roll back and return. That is a build decision, not a measurement; record which way each batch was built.</td></tr></tbody></table></div>
+<tr><td>Can the rollback path be exercised on a unit that ships with one release?</td><td><a href="#RD-05"><code>RD-05</code></a></td><td>Open by construction. <code>updaterd</code>'s auto-rollback is the whole safety net for a robot in someone's home, and a board with a single installed release has nothing to roll back to, so the mechanism ships untested on exactly the units where it matters most</td><td>Installing two releases at the factory - the shipped one and its predecessor - so RD-05 can roll back and return. That is a build decision, not a measurement; record which way each batch was built.</td></tr>
+<tr><td>Which of the two bodies a joint joins physically carries the servo housing, and which carries the horn?</td><td><a href="#SV-02"><code>SV-02</code></a></td><td>CANNOT DETERMINE from the MJCF. A joint declared inside body C joins C to its parent P, and the kinematic file says nothing about which side the actuator is bolted to. Table 5's bodies column used to assert one of the two per row and was measurably inconsistent - nine rows named the parent and five the child - so it now shows both, measured. The mouth (ID 34) is not in the MJCF at all.</td><td>The mesh placements in spec/mesh-placements.json read against the xl330 body geometry: the housing is the body whose frame the servo case is fixed in, the horn is the body that rotates with the output. Lane B's per-joint drawings settle it visually, and SV-02's jig has to know it anyway - the mechanical zero is measured against whichever body the horn indexes to.</td></tr></tbody></table></div>
 
-  <h3 class="sub">12.1 What was open in Rev&nbsp;A and is settled now</h3>
+  <h3 class="sub">13.1 What was open in Rev&nbsp;A and is settled now</h3>
   <p>A question that simply stops appearing looks like a question nobody asked. These were open, and
   each one is closed here by a source rather than by a decision.</p>
   
@@ -1281,11 +1343,11 @@ servo half from the board half and closes all of it.</div>
 </section>
 
 <section id="sources">
-  <h2><span class="n">13</span>Sources</h2>
+  <h2><span class="n">14</span>Sources</h2>
   <p class="lede">Pollen Robotics' firmware and software are Apache-2.0 and are read here line by line;
   their PCBs are not published. Vendor datasheets are stored in the shelf with their provenance.
   Everything below is either in this repository or was fetched on the date named.</p>
-  <div class="tw"><table class="data"><caption>Table 14. All 36 sources on the record.
+  <div class="tw"><table class="data"><caption>Table 17. All 36 sources on the record.
   The <b>cited by</b> column is measured as this page renders, not asserted: it lists the gates and blocks that
   actually name each key, and a source nothing rests on says so.</caption>
   <thead><tr><th>Key</th><th>What</th><th>Cited by</th><th>Where</th></tr></thead>
@@ -1301,25 +1363,25 @@ servo half from the board half and closes all of it.</div>
 <tr><td><code>INSTALL</code></td><td>microduck docs/robot/install-by-hand.md</td><td class="sk">SW-02</td><td class="loc">research/raw/microduck_main_docs_robot_install-by-hand.md</td></tr>
 <tr><td><code>I2C3</code></td><td>deploy/audio/i2c3-pihat.dts</td><td class="sk">EB-08, SN-01</td><td class="loc">research/raw/deploy_audio_i2c3-pihat.dts</td></tr>
 <tr><td><code>AIC</code></td><td>deploy/audio/aic3104-i2c3.dts</td><td class="sk">SN-01, SN-08</td><td class="loc">research/raw/deploy_audio_aic3104-i2c3.dts</td></tr>
-<tr><td><code>TOFSRC</code></td><td>tof/src/main.rs</td><td class="sk">SN-01, SN-06, &sect;12.1</td><td class="loc">research/raw/tof_src_main.rs</td></tr>
+<tr><td><code>TOFSRC</code></td><td>tof/src/main.rs</td><td class="sk">SN-01, SN-06, &sect;13.1</td><td class="loc">research/raw/tof_src_main.rs</td></tr>
 <tr><td><code>CONST</code></td><td>microduck_rl constants.py</td><td class="sk">SV-02</td><td class="loc">research/raw/microduck_constants.py</td></tr>
 <tr><td><code>SIM</code></td><td>our MuJoCo simulation report</td><td class="sk">&sect;1.3, SV-04, WK-01, WK-02, WK-03, WK-04</td><td class="loc">out/sim/report.md + out/sim/report.json — MuJoCo 3.12.0, onnxruntime 1.29.0, Pollen's own ONNX policies, generated 2026-09-02T01:55:31</td></tr>
 <tr><td><code>ELEC</code></td><td>docs/ELECTRONICS-AND-SOFTWARE.md</td><td class="sk">EB-04, EB-08, SV-02, SV-04, SN-01, SN-05&hellip;</td><td class="loc">docs/ELECTRONICS-AND-SOFTWARE.md</td></tr>
 <tr><td><code>EVER</code></td><td>electronics verification workflow results</td><td class="sk">EB-01, EB-03, EB-08, SN-05, SN-07, SN-08&hellip;</td><td class="loc">out/handover/elec-verify-wf_969f3a4c.json (14 Opus agents, previous session, wf_969f3a4c-3d1)</td></tr>
 <tr><td><code>BMI</code></td><td>Bosch BMI088 datasheet</td><td class="sk">EB-03, SN-02, SN-03</td><td class="loc">ce-parts/bmi088/datasheet.pdf — BST-BMI088-DS000-19, Revision 1.9, 01/2024</td></tr>
 <tr><td><code>LSM</code></td><td>ST LSM6DSV16X datasheet</td><td class="sk">EB-03, SN-05</td><td class="loc">ce-parts/lsm6dsv16x/datasheet.pdf — DS13510 Rev 4</td></tr>
-<tr><td><code>L8</code></td><td>ST VL53L8CX datasheet</td><td class="sk">&sect;1.3, EB-03, SN-06, &sect;12.1</td><td class="loc">ce-parts/vl53l8cx/datasheet.pdf — DS14161 Rev 12, July 2025</td></tr>
-<tr><td><code>L5</code></td><td>ST VL53L5CX datasheet</td><td class="sk">&sect;1.3, SN-06, &sect;12.1</td><td class="loc">ce-parts/vl53l5cx/datasheet.pdf — DS13754 Rev 13, September 2024</td></tr>
+<tr><td><code>L8</code></td><td>ST VL53L8CX datasheet</td><td class="sk">&sect;1.3, EB-03, SN-06, &sect;13.1</td><td class="loc">ce-parts/vl53l8cx/datasheet.pdf — DS14161 Rev 12, July 2025</td></tr>
+<tr><td><code>L5</code></td><td>ST VL53L5CX datasheet</td><td class="sk">&sect;1.3, SN-06, &sect;13.1</td><td class="loc">ce-parts/vl53l5cx/datasheet.pdf — DS13754 Rev 13, September 2024</td></tr>
 <tr><td><code>TLV</code></td><td>TI TLV320AIC3104 datasheet</td><td class="sk">EB-03</td><td class="loc">ce-parts/tlv320aic3104/datasheet.pdf (verified figures in out/handover/elec-verify-wf_969f3a4c.json)</td></tr>
 <tr><td><code>RADXA</code></td><td>Radxa ZERO 3W product brief + schematics</td><td class="sk">EB-02, EB-03</td><td class="loc">ce-parts/radxa-zero-3w/iterations/*/docs/fetched/radxa_zero_3w_product_brief.pdf, radxa_zero_3w_v1.12_schematic.pdf</td></tr>
 <tr><td><code>CABLES</code></td><td>wiring/CABLES.md</td><td class="sk">EB-04</td><td class="loc">wiring/CABLES.md — generated by wiring/measure.py from ce-assemblies/microduck placements</td></tr>
 <tr><td><code>UP1</code></td><td>upstream github.com/pollen-robotics/microduck</td><td class="sk">SW-01</td><td class="loc">https://github.com/pollen-robotics/microduck — fetched 2026-09-02: description “A tiny biped duck robot powered by reinforcement learning policies.”, licence Apache-2.0</td></tr>
 <tr><td><code>UP2</code></td><td>upstream github.com/pollen-robotics/microduck_rl</td><td class="sk">WK-02</td><td class="loc">https://github.com/pollen-robotics/microduck_rl — fetched 2026-09-02: description “RL training environments for Microduck (mjlab)”, licence Apache-2.0; “trained here at 50 Hz, exported to ONNX, and deployed on the real robot”</td></tr>
 <tr><td><code>TESTDESIGN</code></td><td>decision of this test plan</td><td class="sk">&sect;1.3, EB-01, EB-02, WK-01, WK-02, WK-03</td><td class="loc">a threshold chosen here because no source publishes one. Stated as a decision, never as a measurement. The first built unit's measured value replaces it.</td></tr>
-<tr><td><code>PRESS</code></td><td>Microduck press kit spec sheet</td><td class="sk">SN-09, SN-10, EN-01, &sect;12.1</td><td class="loc">research/raw/presskit.txt (pollen-robotics.com/microduck press kit, fetched 2026-09-02); research/raw/presskit.html is the page it came from</td></tr>
-<tr><td><code>STORE</code></td><td>Pollen store product pages (Microduck, Dev Pack, Accessory Pack, Charger Pack)</td><td class="sk">SN-09, &sect;12.1</td><td class="loc">research/raw/store_microduck.json, store_devpack.json, store_accessory.json, store_charger.json - Shopify product JSON, fetched 2026-09-02</td></tr>
-<tr><td><code>TOFLIB</code></td><td>tof/src/lib.rs (the ToF driver crate)</td><td class="sk">&sect;12.1</td><td class="loc">research/raw/tof_src_lib.rs</td></tr>
-<tr><td><code>ARCH</code></td><td>microduck docs/design/architecture.md</td><td class="sk">SN-10, RD-03, RD-05, &sect;12.1</td><td class="loc">research/raw/microduck_main_docs_design_architecture.md</td></tr>
+<tr><td><code>PRESS</code></td><td>Microduck press kit spec sheet</td><td class="sk">SN-09, SN-10, EN-01, &sect;13.1</td><td class="loc">research/raw/presskit.txt (pollen-robotics.com/microduck press kit, fetched 2026-09-02); research/raw/presskit.html is the page it came from</td></tr>
+<tr><td><code>STORE</code></td><td>Pollen store product pages (Microduck, Dev Pack, Accessory Pack, Charger Pack)</td><td class="sk">SN-09, &sect;13.1</td><td class="loc">research/raw/store_microduck.json, store_devpack.json, store_accessory.json, store_charger.json - Shopify product JSON, fetched 2026-09-02</td></tr>
+<tr><td><code>TOFLIB</code></td><td>tof/src/lib.rs (the ToF driver crate)</td><td class="sk">&sect;13.1</td><td class="loc">research/raw/tof_src_lib.rs</td></tr>
+<tr><td><code>ARCH</code></td><td>microduck docs/design/architecture.md</td><td class="sk">SN-10, RD-03, RD-05, &sect;13.1</td><td class="loc">research/raw/microduck_main_docs_design_architecture.md</td></tr>
 <tr><td><code>DUCKCTL</code></td><td>microduck docs/robot/duckctl.md</td><td class="sk">RD-04</td><td class="loc">https://raw.githubusercontent.com/pollen-robotics/microduck/main/docs/robot/duckctl.md - fetched 2026-09-02 for this document; not mirrored into research/raw/</td></tr>
 <tr><td><code>RUNTIME</code></td><td>our battery-runtime study</td><td class="sk">EN-01</td><td class="loc">out/sim-evidence/battery-runtime.json (lane F2, sim/battery_runtime.py) - the measured MuJoCo torque/speed profile through ROBOTIS's published XL330 rows</td></tr>
 <tr><td><code>THERMAL</code></td><td>our compute-thermal study</td><td class="sk">TH-01, TH-02</td><td class="loc">out/sim-evidence/thermal-compute-head.json (lane F3) + out/sim-evidence/cavity-volumes.json</td></tr>

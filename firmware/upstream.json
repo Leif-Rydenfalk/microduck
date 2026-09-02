@@ -10,7 +10,8 @@
    "identity_registers": "Model Number(0), R, 2 bytes, value 1,200; Firmware Version(6), R, 1 byte",
    "identity_src": "the fetched e-manual control table, ce-parts/xl330-m288-t/iterations/v0.0.1/docs/fetched/robotis-docs-xl330-m288.html: '0|2|Model Number|R|1,200' and '6|1|Firmware Version|R'",
    "how_it_is_tested": "SV-01 reads both per servo and records them; a batch that mixes firmware versions is a fact worth having before a fleet exists",
-   "upgrade_path": "ROBOTIS's own tooling. Nothing in Pollen's runtime updates servo firmware."
+   "upgrade_path": "ROBOTIS's own tooling. Nothing in Pollen's runtime updates servo firmware.",
+   "what_would_open_it": "ROBOTIS publishes no minimum firmware version for this robot and no changelog mapping a version to a behaviour, so the version is recorded and not gated"
   },
   {
    "id": "imu_to_dxl",
@@ -46,7 +47,8 @@
     "research/raw/deploy_audio_aic3104-i2c3.dts"
    ],
    "npu": "the NPU is switched OFF in the device tree as Armbian ships the Radxa Zero 3; sudo sh /opt/robot/daemon/current/scripts/setup-npu.sh turns it on and needs a reboot. models/duck_detect.rknn runs on the NPU, models/duck_detect.onnx on the CPU (robotd.toml [detect])",
-   "how_it_is_tested": "SN-01 (the I2C roll-call proves the overlays took), SN-07, SN-08, TH-01"
+   "how_it_is_tested": "SN-01 (the I2C roll-call proves the overlays took), SN-07, SN-08, TH-01",
+   "what_would_open_it": "the board's own current draw: no fetched Radxa document states one, only a 5 V/2 A supply requirement. EN-01 measures it by difference"
   },
   {
    "id": "release_payload",
@@ -54,7 +56,8 @@
    "published": true,
    "verification": "every release is downloaded, hashed and signature-verified before it is applied - the cheat sheet's own update-log excerpt reads 'manifest 0.1.4 . 184.2 MB . sha256 3f9a1c2b... . signed by release.pub . rev 88efc03' then 'hash matches; signature verifies against release.pub'",
    "durable_record": "/var/lib/robot/updater/runs/*.jsonl, fsync'ed per entry, OUTLIVES a power cut - which the journal on this board does not, because /var/log is zram",
-   "how_it_is_tested": "SW-01 (version agreement) and RD-05 (one rollback, then back)"
+   "how_it_is_tested": "SW-01 (version agreement) and RD-05 (one rollback, then back)",
+   "what_would_open_it": "nothing - this is the one item in this table whose source, signature and install record are all published and all readable on the unit"
   }
  ],
  "not_firmware_but_often_confused_with_it": [
