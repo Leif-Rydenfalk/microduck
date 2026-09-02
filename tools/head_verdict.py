@@ -323,14 +323,23 @@ def main():
                verdict=dict(head=head, head_why=head_why, eye_bezel=eye, eye_bezel_parts=eye_parts,
                             basis=("head: %d photographs admitted (%s), each scaled by the XL330-M288-T case in the same frame (20.000 mm), posed and fitted "
                                    "with a perspective camera, size ratio product/mesh = k * W_render / W_photo; combined length deviation "
-                                   "%s; per-axis %s / %s. Front view: ring OD / beak width, photo %.4f vs mesh %.4f (%s). Eye bezel: profile ring diameter at the head's "
-                                   "length scale %s mm vs the noenoeil mesh 30.000 mm." % (
+                                   "%s; per-axis %s / %s. Front view (RE-MEASURED on the head's OUTER silhouette, one estimator both sides, pose gated): "
+                                   "ring OD / head width, photo %.4f vs mesh %.4f (%s). Eye bezel: profile ring diameter at the head's "
+                                   "length scale %s mm vs the noenoeil mesh 30.000 mm. The one FAIL is the accent trim band, %s of the head's "
+                                   "own widest row on the product against %s on the mesh (%s mm). Head width %s mm on 91.763 (%s); ring OD %s mm on 30.000 (%s)." % (
                                        combined["n_photos"], ", ".join(combined["photos_used"]) or "none",
                                        ("%+.3f ± %.3f mm" % (L[0], L[1])) if L[0] is not None else "CANNOT DETERMINE",
                                        ("%+.3f ± %.3f" % (MA[0], MA[1])) if MA[0] is not None else "—",
                                        ("%+.3f ± %.3f" % (MI[0], MI[1])) if MI[0] is not None else "—",
-                                       fe["photo"], fe["mesh"], fe["verdict"],
-                                       ("%+.2f ± %.2f" % (EY[0], EY[1])) if EY[0] is not None else "CANNOT DETERMINE")),
+                                       pair["ratio_photo"], pair["ratio_mesh"], pair["verdict"],
+                                       ("%+.2f ± %.2f" % (EY[0], EY[1])) if EY[0] is not None else "CANNOT DETERMINE",
+                                       ("%.4f ± %.4f" % (combined["band_over_shell"]["photo"], combined["band_over_shell"]["photo_unc"])) if combined.get("band_over_shell") else "—",
+                                       ("%.4f" % combined["band_over_shell"]["mesh"]) if combined.get("band_over_shell") else "—",
+                                       ("%+.3f ± %.3f" % (combined["band_over_shell"]["dev_mm"], combined["band_over_shell"]["dev_unc_mm"])) if combined.get("band_over_shell") else "—",
+                                       ("%+.3f ± %.3f" % (combined["head_width"]["dev_mm"], combined["head_width"]["unc_mm"])) if combined.get("head_width") else "—",
+                                       (combined["head_width"]["verdict"]) if combined.get("head_width") else "—",
+                                       ("%+.3f ± %.3f" % (combined["ring_od"]["dev_mm"], combined["ring_od"]["unc_mm"])) if combined.get("ring_od") else "—",
+                                       (combined["ring_od"]["verdict"]) if combined.get("ring_od") else "—")),
                             what_would_settle=settle,
                             remodel=(REMODEL(pair, combined) if head == "FAIL" else None)))
     json.dump(out, open(os.path.join(OUT, "head.json"), "w"), indent=1, default=float)
