@@ -260,7 +260,9 @@ def sec_loads(L, drop):
     if drop and drop["inputs"].get("stand_height_m"):
         rows.append(("Standing height (top of the robot, STAND keyframe)", drop["inputs"]["stand_height_m"]["stand_top_z_m"], "m", "drop_impact.json inputs.stand_height_m (%s)" % drop["inputs"]["stand_height_m"]["how"]))
     for name, v, u, where in rows:
-        s.append('<tr><td>%s</td><td class="n">%s</td><td>%s</td><td><code>%s</code></td></tr>' % (esc(name), f(v, 4), esc(u), esc(where)))
+        # print at the SOURCE's own precision (a dropped digit is a rounding the reader cannot undo), never fewer than 4 dp
+        dp = max(4, len(repr(float(v)).split(".")[1])) if isinstance(v, (int, float)) and "e" not in repr(float(v)) else 4
+        s.append('<tr><td>%s</td><td class="n">%s</td><td>%s</td><td><code>%s</code></td></tr>' % (esc(name), f(v, dp), esc(u), esc(where)))
     s.append('</tbody></table></div>')
     dfoot = next((d for d in L["drops"] if d["label"] == "drop_foot_rollm10_default_contact_dt5ms"), {})
     dhead = next((d for d in L["drops"] if d["label"] == "drop_head_default_contact_dt5ms"), {})
@@ -524,22 +526,22 @@ def sec_drop(D):
         s.append('</tbody></table></div>')
         s.append('<p class="note">Heights: %s.</p>' % esc("; ".join("%.3f m — %s" % (row["height_m"], row["what_it_is"]) for row in i["height_sensitivity"])))
     s.append('<div class="tw"><table class="data"><caption>Table 8. Peak contact force by model. A: rigid body on a linear spring, F = v√(Km). B: Hertz on the struck curvature with the bottoming-out check. C: MuJoCo (solref, timestep).</caption>'
-             '<thead><tr><th>Model</th><th>Case</th><th class="n">K N/m · E* MPa · solref</th><th class="n">δ mm</th><th class="n">F peak N</th><th class="n">Impulse N·s</th></tr></thead><tbody>')
+             '<thead><tr><th>Model</th><th>Case</th><th class="n">K N/m · E* MPa · solref, Δt</th><th class="n">δ mm</th><th class="n">F peak N</th><th class="n">Impulse N·s</th></tr></thead><tbody>')
     notes = []
     for k, v in o["model_A_rigid_spring"].items():
-        s.append('<tr><td>A rigid-spring</td><td><code>%s</code></td><td class="n">%s</td><td class="n">—</td><td class="n">%s</td><td class="n">—</td></tr>' % (
+        s.append('<tr><td>A rigid-spring</td><td><code class="brk">%s</code></td><td class="n">%s</td><td class="n">—</td><td class="n">%s</td><td class="n">—</td></tr>' % (
             esc(k), f(v.get("K_N_per_m"), 0), f(v.get("F_peak_N"), 1)))
         if "patch_mm2_ASSUMED" in v:
             notes.append("%s: first-contact patch %s mm² ASSUMED (through-thickness of the %s mm apex wall)" % (k, v["patch_mm2_ASSUMED"], f(i["head_shell"]["apex_wall_thickness_mm"], 3)))
         if v.get("why"):
             notes.append("%s: %s" % (k, v["why"]))
     for k, v in o["model_B_hertz"].items():
-        s.append('<tr><td>B Hertz</td><td><code>%s</code></td><td class="n">%s</td><td class="n">%s</td><td class="n">%s</td><td class="n">—</td></tr>' % (
+        s.append('<tr><td>B Hertz</td><td><code class="brk">%s</code></td><td class="n">%s</td><td class="n">%s</td><td class="n">%s</td><td class="n">—</td></tr>' % (
             esc(k), f(v.get("E_star_MPa"), 2), f(v.get("delta_mm"), 3), f(v.get("F_peak_N"), 1)))
         notes.append("%s: %s" % (k, v.get("note") or v.get("why", "")))
     for k, v in o["model_C_mujoco"].items():
-        s.append('<tr><td>C MuJoCo</td><td><code>%s</code></td><td class="n">%s</td><td class="n">—</td><td class="n">%s</td><td class="n">%s</td></tr>' % (
-            esc(k), esc("default 0.02 s / 1" if isinstance(v["solref"], str) else "%.3g s / %g" % (v["solref"][0], v["solref"][1])) + " · Δt %g s" % v["timestep_s"],
+        s.append('<tr><td>C MuJoCo</td><td><code class="brk">%s</code></td><td class="n">%s</td><td class="n">—</td><td class="n">%s</td><td class="n">%s</td></tr>' % (
+            esc(k), esc("default 0.02 s / 1" if isinstance(v["solref"], str) else "%.3g s / %g" % (v["solref"][0], v["solref"][1])) + ", %g s" % v["timestep_s"],
             f(v["peak_normal_force_N"], 2), f(v["impulse_Ns"], 4)))
         notes.append("%s: struck %s, peak knee torque %s N·m, saturated steps %d" % (k, v["struck"], f(v["peak_knee_torque_Nm"], 4), v["knee_saturated_steps"]))
     s.append('</tbody></table></div>')
@@ -715,6 +717,7 @@ STYLE = """
   .stat b{display:block;font-weight:700;font-size:22px;font-variant-numeric:tabular-nums}
   .stat span{font-family:var(--sans);font-size:12px;color:var(--ink-2)}
   table.data td code{font-size:12px}
+  table.data td code.brk{word-break:break-all}
   @media(max-width:640px){.pair{grid-template-columns:1fr}}
 """
 

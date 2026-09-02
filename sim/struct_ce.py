@@ -47,11 +47,13 @@ def fea_vector(slug, case="drop"):
     return r["inputs"]["force_N_part_frame"], r["inputs"]["force_source"], r["inputs"]["force_magnitude_N"]
 
 
-# member: (slug, mesh file, long axis, held end, loaded end, material, printNormal (ASSUMED flat = thickness axis), share, cells mm)
+# member: (slug, mesh file, long axis, held end, loaded end, material, printNormal (ASSUMED flat = thickness axis), share, cells mm, FEA case whose measured vector loads it)
+# The neck plate is in TENSION at the foot-drop peak (measured: +7.6216 N along its axis away from the held end) — the compressive case on the neck
+# chain is the HEAD drop (the trunk decelerating through the neck), so that is the vector its buckling study takes.
 MEMBERS = [
-    ("microduck-shin", "leg.stl", "z", "max", "min", "PLA", "x", 1.0, [1.0, 0.7, 0.5]),
-    ("microduck-neck-plate", "../../out/sim-evidence/fea/microduck-neck-plate_ours.stl", "y", "min", "max", "PLA", "x", 0.5, [0.4, 0.3]),
-    ("microduck-upper-leg-rigidity-plate", "upper_leg_rigidity_plate.stl", "z", "min", "max", "PLA", "x", 1.0, [0.33]),
+    ("microduck-shin", "leg.stl", "z", "max", "min", "PLA", "x", 1.0, [1.0, 0.7, 0.5], "drop"),
+    ("microduck-neck-plate", "../../out/sim-evidence/fea/microduck-neck-plate_ours.stl", "y", "min", "max", "PLA", "x", 0.5, [0.4, 0.3], "head_drop"),
+    ("microduck-upper-leg-rigidity-plate", "upper_leg_rigidity_plate.stl", "z", "min", "max", "PLA", "x", 1.0, [0.33], "drop"),
 ]
 
 
@@ -73,10 +75,10 @@ def spec_for(slug, cell, axis, held, loaded, mat, pn, vec):
             "studies": ["buckle", "frequency"]}
 
 
-def run_member(slug, stl, axis, held, loaded, mat, pn, share, cells):
+def run_member(slug, stl, axis, held, loaded, mat, pn, share, cells, case="drop"):
     path = os.path.normpath(os.path.join(ROOT, "sim", "meshes_ours", stl))
     ai = "xyz".index(axis)
-    vec_full, src, mag = fea_vector(slug)          # the static study's vector already carries the share (stress_all.py scaled it)
+    vec_full, src, mag = fea_vector(slug, case)    # the static study's vector already carries the share (stress_all.py scaled it)
     axial = vec_full[ai]
     # compression is the load pushing the loaded end TOWARD the held end
     toward_held = (+1.0 if loaded == "min" else -1.0)
@@ -84,7 +86,7 @@ def run_member(slug, stl, axis, held, loaded, mat, pn, share, cells):
     vec_axial = [0.0, 0.0, 0.0]
     vec_axial[ai] = axial
     rec = {"study": "buckling_" + slug, "part": "part:" + slug, "generated": time.strftime("%Y-%m-%dT%H:%M:%S"), "script": "sim/struct_ce.py",
-           "inputs": {"mesh": os.path.relpath(path, ROOT), "cells_mm": cells, "long_axis": axis, "held_face": axis + "=" + held, "loaded_face": axis + "=" + loaded,
+           "inputs": {"mesh": os.path.relpath(path, ROOT), "cells_mm": cells, "load_case": case, "long_axis": axis, "held_face": axis + "=" + held, "loaded_face": axis + "=" + loaded,
                       "force_vector_part_frame_N": [round(x, 5) for x in vec_full], "force_magnitude_N": round(mag, 4),
                       "axial_component_N": round(axial, 5), "axial_is_compressive": compressive, "share": share,
                       "force_source": src + (" (already x %g: two identical plates share it — stress_all.py)" % share if share != 1.0 else ""),
@@ -97,7 +99,7 @@ def run_member(slug, stl, axis, held, loaded, mat, pn, share, cells):
         rec.update(verdict="CANNOT DETERMINE", why="no rebuilt mesh at %s" % rec["inputs"]["mesh"])
         return rec
     if not compressive:
-        rec.update(verdict="CANNOT DETERMINE", why="the measured axial component %.4f N is TENSILE on this member at the drop peak (loaded %s, held %s) — no buckling case exists for it" % (axial, loaded, held))
+        rec.update(verdict="CANNOT DETERMINE", why="the measured axial component %.4f N is TENSILE on this member at the %s peak (loaded %s, held %s) — no buckling case exists for it" % (axial, case, loaded, held))
         return rec
     b64 = base64.b64encode(open(path, "rb").read()).decode()
     rows = []
@@ -200,7 +202,7 @@ def judge(rec):
 
 def main():
     only = [a for a in sys.argv[1:] if not a.startswith("--")]
-    for slug, stl, axis, held, loaded, mat, pn, share, cells in MEMBERS:
+    for slug, stl, axis, held, loaded, mat, pn, share, cells, case in MEMBERS:
         if only and slug not in only:
             continue
         prev = os.path.join(EVID, "buckling_" + slug + ".json")
@@ -212,7 +214,7 @@ def main():
         if os.path.exists(prev) and "--force" not in sys.argv and (json.load(open(prev)).get("outputs") or {}).get("rows"):
             print("exists (v2 rows present)", slug); continue
         print("===", slug); sys.stdout.flush()
-        rec = run_member(slug, stl, axis, held, loaded, mat, pn, share, cells)
+        rec = run_member(slug, stl, axis, held, loaded, mat, pn, share, cells, case)
         json.dump(rec, open(prev, "w"), indent=1)
         print("  ->", rec["verdict"], rec["why"][:300]); sys.stdout.flush()
 
