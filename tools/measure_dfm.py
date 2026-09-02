@@ -159,6 +159,22 @@ def wall_rays(V, N, A, n_rays=SAMPLE_N, seed=SEED):
     }
 
 
+def _j(v):
+    """JSON-safe, precision-preserving: round floats to 4 dp, recurse, else str."""
+    if isinstance(v, float):
+        return round(v, 4)
+    if isinstance(v, (int, bool, str)) or v is None:
+        return v
+    if isinstance(v, (tuple, list)):
+        return [_j(x) for x in v]
+    if isinstance(v, dict):
+        return {str(k): _j(x) for k, x in v.items()}
+    try:
+        return round(float(v), 4)
+    except Exception:
+        return str(v)
+
+
 def solid_dfm(slug):
     """Parametric part: what the kernel can measure that a mesh cannot."""
     import FreeCAD
@@ -179,10 +195,7 @@ def solid_dfm(slug):
         hs = []
         for h in insp.holes(part):
             d = h._asdict() if hasattr(h, "_asdict") else dict(vars(h))
-            hs.append({k: (round(v, 4) if isinstance(v, float) else
-                           ([round(float(x), 4) for x in v]
-                            if isinstance(v, (tuple, list)) else v))
-                       for k, v in d.items() if not k.startswith("_")})
+            hs.append({k: _j(v) for k, v in d.items() if not k.startswith("_")})
         out["holes"] = hs
     except Exception as e:
         out["holes"] = {"reason": "inspect.holes raised: %s" % e}
@@ -202,7 +215,7 @@ def solid_dfm(slug):
     return out
 
 
-def main():
+def main(solid_only=False):
     man = json.load(open(os.path.join(ROOT, "out/print/stl_manifest.json")))
     sl = {p["slug"]: p for p in json.load(open(os.path.join(ROOT, "out/print/slice.json")))["parts"]}
     res = {
@@ -231,6 +244,9 @@ def main():
                               "seconds_total", "layer_mm", "machine_preset",
                               "process_preset", "filament_preset", "density",
                               "slicer_warning", "orientation") if k in s}
+        if solid_only:
+            res["parts"][slug] = rec
+            continue
         V, N, A = read_stl(p)
         mn = V.reshape(-1, 3).min(axis=0)
         mx = V.reshape(-1, 3).max(axis=0)
@@ -266,8 +282,14 @@ def main():
 
     outp = os.path.join(ROOT, "out/dfm/dfm.json")
     os.makedirs(os.path.dirname(outp), exist_ok=True)
+    if solid_only and os.path.exists(outp):
+        prev = json.load(open(outp))
+        for slug, rec in res["parts"].items():
+            prev["parts"][slug]["solid_dfm"] = rec["solid_dfm"]
+        prev["generated_solid"] = res["generated"]
+        res = prev
     json.dump(res, open(outp, "w"), indent=1)
     print("wrote", outp, os.path.getsize(outp), "bytes")
 
 
-main()
+main(solid_only="--solid-only" in sys.argv)
