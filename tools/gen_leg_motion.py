@@ -27,6 +27,7 @@ SQ = J["squat"]["joints"]
 LL = J["leg_lift"]["joints"]
 ORDER = list(R.keys())
 CT = J["self_collision"]["controls"]
+FR = J.get("framing_check")
 
 
 def vid(v):
@@ -79,6 +80,17 @@ for k, v in J["self_collision"]["both_legs_mirrored"]["cases"].items():
                         ("%.1f … %.1f" % tuple(pp["contact_interval_deg"])) if pp else "—",
                         ("%.3f" % pp["max_penetration_mm"]) if pp else "—"))
 ct = "".join(rows)
+
+ft = "".join(
+    "<tr><td class=mono>%s</td><td class=n>%d / %d / %.2f m</td><td class=%s>%s</td>"
+    "<td class=mono>%s</td><td class=mono>%s</td></tr>" % (
+        E(k), v["azimuth"], v["elevation"], v["distance_m"],
+        "ok" if v["verdict"].startswith("PASS") else "bad", E(v["verdict"]),
+        E("%s %s @ %.3f m" % (v["nearest_servo"]["mesh"], v["nearest_servo"]["body"],
+                              v["nearest_servo"]["range_m"])) if v["nearest_servo"] else "—",
+        E("%s %s @ %.3f m" % (v["nearest_bearing"]["mesh"], v["nearest_bearing"]["body"],
+                              v["nearest_bearing"]["range_m"])) if v["nearest_bearing"] else "—")
+    for k, v in (FR["cameras"].items() if FR else []))
 
 cmp_html = "".join(
     "<figure><img src=\"%s\" alt=\"%s\"><figcaption>%s</figcaption></figure>" %
@@ -162,10 +174,20 @@ first touches as the joint leaves neutral:</p>
 <div class=tw><table class=data><thead><tr><th>case</th><th>verdict</th><th>pair</th><th>onset (deg)</th>
 <th>contact interval (deg)</th><th>max penetration (mm)</th></tr></thead><tbody>%s</tbody></table></div>
 
-<h2>4 · The clips</h2>
+<h2>4 · The close-ups really do contain the servo and the bearing</h2>
+<p>“With the servo and the bearing side both visible” is a claim about a camera, so it is checked as
+one. For every close-up camera the renderer uses, the world position of every
+<span class=mono>xl330</span> geom and every <span class=mono>22&times;16&times;4</span> bearing geom is
+projected into that camera's frustum (fovy %.1f&deg;, panel %d&times;%d px, half-FOV %.2f&deg; &times; %.2f&deg;)
+and counted if it lands in the foreground. <b>%d of %d cameras carry both.</b>
+%s</p>
+<div class=tw><table class=data><thead><tr><th>camera</th><th>az / el / d</th><th>verdict</th>
+<th>nearest servo</th><th>nearest bearing</th></tr></thead><tbody>%s</tbody></table></div>
+
+<h2>5 · The clips</h2>
 %s
 
-<h2>5 · Beside the real product</h2>
+<h2>6 · Beside the real product</h2>
 %s
 
 <footer class=rev><span>Every number: out/motion/legs.json</span><span>sim/leg_sweep.py</span>
@@ -186,7 +208,10 @@ first touches as the joint leaves neutral:</p>
     E(CT["why"]), E(CT["negative_control"]["pose"]), CT["negative_control"]["self_contacts"],
     E("; ".join("%s -> %d contacts" % (c["pose"], c["self_contacts"]) for c in CT["positive_controls"])),
     E(CT["measured_with"]),
-    st, ct, "".join(vid(v) for v in V), cmp_html or "<p>No product photo exists of these motions.</p>")
+    st, ct,
+    FR["fovy_deg"], FR["panel_px"][0], FR["panel_px"][1], FR["half_fov_deg"][0], FR["half_fov_deg"][1],
+    FR["summary"]["both"], FR["summary"]["cameras"], E(FR["limitation"]), ft,
+    "".join(vid(v) for v in V), cmp_html or "<p>No product photo exists of these motions.</p>")
 
 doc = doc.replace("每 step", "every step")
 p = os.path.join(ROOT, "LEG-MOTION.html")
