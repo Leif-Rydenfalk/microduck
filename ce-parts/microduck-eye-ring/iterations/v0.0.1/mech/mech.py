@@ -13,6 +13,6 @@ def mech():
         "mass_g": None,
         "mass_why": "the MJCF lumps the whole head (body jaw_soft) into one inertial; no per-geom mass is published and no ring has been weighed",
         "bbox_mm": [30.0000, 9.5000, 30.0000],
-        "bbox_source": "noenoeil.stl x/y/z extents, cecad.meshslice at scale 1000 (tools/head_eye_ring_shelve.py, 2026-09-02)",
+        "bbox_source": "noenoeil.stl x/y/z extents, cecad.meshslice at scale 1000 (tools/head_eye_ring_shelve.py, 2026-09-03)",
         "joints": [],
     }

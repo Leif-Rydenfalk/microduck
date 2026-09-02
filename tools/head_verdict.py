@@ -72,27 +72,85 @@ def main():
                    pictures=dict(pair="out/head/%s_pair.png" % p["id"], measure="out/head/%s_measure.png" % p["id"],
                                  overlay="out/head/%s_overlay.png" % p["id"], ours="out/head/%s_ours.png" % p["id"],
                                  real="out/head/%s_real.png" % p["id"], render_servo="out/head/%s_render_servo.png" % p["id"]))
-        if s:
+        # Is the scale trustworthy? Two tests, both measured, neither loosened:
+        #  (a) when two servos were read in the same photo their size ratios must agree within 3 sigma;
+        #  (b) the render's analytic case width must agree with the segmentation-mask read of the same geom within 5 %
+        #      (when the geom is inside the frame) — a larger gap means the dark run in the PHOTO is not the case face alone
+        #      (a 3/4 view merges the label face, the side face and the connectors into one dark run).
+        reasons = []
+        svs = [x for x in p["scale"]["servos"] if x.get("size_ratio")]
+        if len(svs) >= 2:
+            a, b = svs[0]["size_ratio"], svs[1]["size_ratio"]
+            gap = abs(a["product_over_mesh"] - b["product_over_mesh"]); sig = math.sqrt(a["unc"] ** 2 + b["unc"] ** 2)
+            if gap > 3 * sig:
+                reasons.append("the two servos read in this photo give size ratios %.4f and %.4f — %.1f sigma apart (their dark runs are not the same face)" % (a["product_over_mesh"], b["product_over_mesh"], gap / sig))
+        for x in svs:
+            pct = x.get("render_mask_vs_analytic_pct")
+            if pct is not None and abs(pct) > 5.0:
+                reasons.append("%s: the render's mask read of the case is %.1f %% off the analytic width, so the case silhouette at this azimuth is not the 20 x 26 box the photo scan assumes" % (x["what"], pct))
+        row["scale_verdict"] = "CANNOT DETERMINE" if reasons else "PASS"
+        row["scale_why"] = "; ".join(reasons) if reasons else "servos agree; render mask and analytic width agree"
+        if s and not reasons:
             row["verdicts"] = dict(length=grade(s["head_length_dev_mm"], s["head_length_dev_unc_mm"]),
                                    major=grade(s["dev_major_mm"], s["dev_major_unc_mm"]),
                                    minor=grade(s["dev_minor_mm"], s["dev_minor_unc_mm"]))
-        if "dev_mm" in p["eye"]:
-            e = p["eye"]
-            row["verdicts_eye"] = grade(e["dev_mm"], e["diameter_unc_mm"])
+        elif s:
+            row["size_excluded"] = s; row["size"] = {}
+            row["verdicts"] = dict(length="CANNOT DETERMINE", major="CANNOT DETERMINE", minor="CANNOT DETERMINE")
+        e = p["eye"]; t = p["fit"]
+        if "major_px" in e and t.get("render_eye") and t.get("render_head_pca") and t.get("photo_head_pca"):
+            # SCALE-FREE: ring diameter over head extent, photo vs render at the fitted pose. Independent of the servo,
+            # of mm/px and of the camera distance (ring and head are at the same depth to within the head's own size).
+            q = (e["major_px"] / t["photo_head_pca"]["major_px"]) / (t["render_eye"]["major_px"] / t["render_head_pca"]["major_px"])
+            e["ring_over_head_photo"] = e["major_px"] / t["photo_head_pca"]["major_px"]
+            e["ring_over_head_render"] = t["render_eye"]["major_px"] / t["render_head_pca"]["major_px"]
+            e["ring_over_head_ratio"] = q
+            e["dev_scale_free_mm"] = 30.0 * (q - 1)
+            # unc: 2 px on the photo ring, 1 px on the render ring, 2 px on each head extent
+            e["dev_scale_free_unc_mm"] = 30.0 * q * math.sqrt((2.0 / e["major_px"]) ** 2 + (1.0 / t["render_eye"]["major_px"]) ** 2
+                                                              + (2.0 / t["photo_head_pca"]["major_px"]) ** 2 + (2.0 / t["render_head_pca"]["major_px"]) ** 2)
+            e["dev_scale_free_how"] = "30.000 mm * ((photo ring major / photo head major) / (render ring major / render head major) - 1): the ring at the head's own scale"
+            # the ring must be seen whole on both sides: the ellipse axis ratio (minor/major) of the photo ring and of the render
+            # ring at the fitted pose must agree within 0.10 (the same object at the same pose, read by the same estimator, differs
+            # by a few hundredths from mask thresholds) — a rounder or flatter render ring means the shell's edge hides part
+            # of the noenoeil geom at that yaw (a 7.5 mm cylinder seen at 60 deg is 0.7, not 0.98)
+            ar_p = e["minor_px"] / e["major_px"]; ar_r = t["render_eye"]["minor_px"] / t["render_eye"]["major_px"]
+            e["axis_ratio_photo"] = ar_p; e["axis_ratio_render"] = ar_r
+            if abs(ar_p - ar_r) > 0.10:
+                e["ring_read_verdict"] = "CANNOT DETERMINE"
+                e["ring_read_why"] = "ring axis ratio photo %.3f vs render %.3f: the render's ring is partly hidden at this pose, the two extents are not the same feature" % (ar_p, ar_r)
+                row["verdicts_eye"] = "CANNOT DETERMINE"
+            else:
+                e["ring_read_verdict"] = "PASS"; e["ring_read_why"] = "ring axis ratio photo %.3f vs render %.3f agree" % (ar_p, ar_r)
+                row["verdicts_eye"] = grade(e["dev_scale_free_mm"], e["dev_scale_free_unc_mm"])
+        elif "dev_mm" in e:
+            row["verdicts_eye"] = "CANNOT DETERMINE"
         photos.append(row)
     # combined
     L = combine([(p["size"]["head_length_dev_mm"], p["size"]["head_length_dev_unc_mm"]) for p in photos if p.get("size")])
+    # If the photographs disagree by more than their own uncertainties, the per-photo u is NOT the whole error — a
+    # systematic (pose fit, mask edge, the servo read at a different depth) is in play — and a per-photo verdict at that u
+    # is not a verdict. The photos then grade CANNOT DETERMINE individually and only the combined row (whose uncertainty
+    # carries the spread) grades.
+    if L[2] is not None and L[2] > max([p["size"]["head_length_dev_unc_mm"] for p in photos if p.get("size")] + [0]):
+        for p in photos:
+            if p.get("size"):
+                p["verdicts"] = dict(length="CANNOT DETERMINE", major="CANNOT DETERMINE", minor="CANNOT DETERMINE")
+                p["verdict_why"] = ("the photographs disagree by %.2f mm rms, more than this photo's own ±%.2f mm — a systematic error "
+                                    "the per-photo uncertainty does not contain; only the combined row grades" % (L[2], p["size"]["head_length_dev_unc_mm"]))
     MA = combine([(p["size"]["dev_major_mm"], p["size"]["dev_major_unc_mm"]) for p in photos if p.get("size")])
     MI = combine([(p["size"]["dev_minor_mm"], p["size"]["dev_minor_unc_mm"]) for p in photos if p.get("size")])
     R = combine([(p["size"]["product_over_mesh"], p["size"]["unc"]) for p in photos if p.get("size")])
-    EY = combine([(p["eye"]["dev_mm"], p["eye"]["diameter_unc_mm"]) for p in photos if "dev_mm" in p["eye"]])
+    EY = combine([(p["eye"]["dev_scale_free_mm"], p["eye"]["dev_scale_free_unc_mm"]) for p in photos if p["eye"].get("ring_read_verdict") == "PASS"])
+    EYS = combine([(p["eye"]["dev_mm"], p["eye"]["diameter_unc_mm"]) for p in photos if "dev_mm" in p["eye"]])   # via the servo: inherits the camera-distance question
     EYR = combine([(p["eye"]["diameter_via_render_mm"] - 30.0, p["eye"]["diameter_unc_mm"]) for p in photos if "diameter_via_render_mm" in p["eye"]])
     fv = front["comparison"]
     combined = dict(n_photos=len([p for p in photos if p.get("size")]),
                     product_over_mesh=R[0], product_over_mesh_unc=R[1],
                     head_length_dev_mm=L[0], head_length_dev_unc_mm=L[1], head_length_spread_mm=L[2],
                     dev_major_mm=MA[0], dev_major_unc_mm=MA[1], dev_minor_mm=MI[0], dev_minor_unc_mm=MI[1],
-                    eye_dev_mm=EY[0], eye_dev_unc_mm=EY[1], eye_dev_via_render_mm=EYR[0], eye_dev_via_render_unc_mm=EYR[1],
+                    eye_dev_mm=EY[0], eye_dev_unc_mm=EY[1], eye_dev_how="scale-free ring/head ratio, profiles (see photos[].eye.dev_scale_free_how)",
+                    eye_dev_via_servo_mm=EYS[0], eye_dev_via_servo_unc_mm=EYS[1], eye_dev_via_render_mm=EYR[0], eye_dev_via_render_unc_mm=EYR[1],
                     eye_front_view_dev_mm=fv["eye_od_over_width"]["dev_mm"],
                     eye_front_view_unc_mm=0.02 * 30.0,   # the flat-lay pose uncertainty (front_view.json 'uncertainty'), 2 % of the ring
                     verdicts=dict(length=grade(L[0], L[1]), major=grade(MA[0], MA[1]), minor=grade(MI[0], MI[1]),

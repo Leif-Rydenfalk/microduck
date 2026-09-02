@@ -98,7 +98,8 @@ PHOTOS = [
          eye_box=(735, 335, 1000, 585), eye_hue=(20, 55), eye_hue_note="orange-yellow ring on the cream unit",
          head_ycut=985,
          neck_poly=[(1120, 1150), (1120, 815), (1200, 790), (1280, 762), (1340, 745), (1420, 745), (1420, 1150)],
-         jaw_open=True, note="head yawed towards the camera, jaw open"),
+         jaw_open=True, note="head yawed towards the camera, jaw open",
+         x0=dict(el=2.5, pitch=-2.2, yaw=55.3, roll=-21.8, jaw=26.7)),   # the IoU 0.936 solution of run 2 (out/head/run_quick_cream2.log)
     dict(id="sky-three-quarter-front-left",
          path="images/store/store_microduck-sky-standing-three-quarter-left-02.jpg",
          title="Sky, standing, three-quarter front-left (store)", colourway="sky",
@@ -441,8 +442,13 @@ def fit_photo(ph, hr, rgb, eye, quick=False, w_eye=10.0):
               (k0 * 0.7, k0 * 1.4), (tx0 - 120, tx0 + 120), (ty0 - 120, ty0 + 120)]
     lo_b = np.array([b[0] for b in bounds]); hi_b = np.array([b[1] for b in bounds])
     t0 = time.time()
-    res = optimize.differential_evolution(eval_params, bounds, maxiter=10 if quick else 22, popsize=6 if quick else 10,
-                                          tol=1e-5, seed=1, polish=False, updating="immediate")
+    x0 = None
+    if ph.get("x0"):   # a known good pose (from an earlier run) seeds the population; DE still explores the whole box
+        x0 = np.array([ph["x0"].get("el", ph["el0"]), ph["x0"].get("az", ph["cam_az"]), ph["x0"]["pitch"], ph["x0"]["yaw"], ph["x0"]["roll"],
+                       ph["x0"].get("jaw", 20.0) if ph["jaw_open"] else 0.0, k0 * ph["x0"].get("k_rel", 1.0), tx0, ty0])
+        x0 = np.clip(x0, [b[0] for b in bounds], [b[1] for b in bounds])
+    res = optimize.differential_evolution(eval_params, bounds, maxiter=10 if quick else 25, popsize=6 if quick else 12,
+                                          tol=1e-6, seed=1, polish=False, updating="immediate", x0=x0)
     res2 = optimize.minimize(eval_params, res.x, method="Nelder-Mead",
                              options=dict(xatol=0.01, fatol=1e-6, maxfev=500 if quick else 1500))
     p = res2.x if res2.fun < res.fun else res.x
@@ -452,10 +458,16 @@ def fit_photo(ph, hr, rgb, eye, quick=False, w_eye=10.0):
     for i in range(2 if quick else 5):
         p1 = p.copy(); p1[6] *= 1 + rng.normal(0, 0.03); p1[2] += rng.normal(0, 3); p1[3] += rng.normal(0, 3)
         r3 = optimize.minimize(eval_params, p1, method="Nelder-Mead", options=dict(xatol=0.01, fatol=1e-6, maxfev=250 if quick else 600))
-        ks.append((float(r3.fun), float(r3.x[7]), r3.x))
-    best = min([(float(res2.fun if res2.fun < res.fun else res.fun), float(p[6]), p)] + ks, key=lambda t: t[0])
+        x3 = np.clip(r3.x, lo_b, hi_b)
+        ks.append((float(r3.fun), float(x3[6]), x3))
+    base = (float(res2.fun if res2.fun < res.fun else res.fun), float(p[6]), p)
+    best = min([base] + ks, key=lambda t: t[0])
     p = np.clip(best[2], lo_b, hi_b)
-    k_spread = float(np.std([t[1] for t in ks] + [best[1]]))
+    # the fit spread of k: over the polishes that reached (within 0.01 of) the best objective — a polish that wandered
+    # into a worse basin says nothing about the precision of the best one
+    good_ks = [t[1] for t in [base] + ks if t[0] <= best[0] + 0.01]
+    k_spread = float(np.std(good_ks)) if len(good_ks) > 1 else float(abs(best[1]) * 0.01)
+    fit_polishes = [(round(t[0], 5), round(t[1], 4)) for t in [base] + ks]
     best_iou, et, mr, eyem, tm = eval_params(p, True)
     el, az, pitch, yaw, roll, jaw, k, tx, ty = [float(x) for x in p]
     pys, pxs = np.nonzero(crop); rys, rxs = np.nonzero(mr)
@@ -463,7 +475,7 @@ def fit_photo(ph, hr, rgb, eye, quick=False, w_eye=10.0):
                n_eval=int(res.nfev + res2.nfev),
                cam_el_deg=el, cam_az_deg=az, cam_distance_mm=D_mm, cam_distance_source=ph.get("D_source", ""),
                head_pitch_deg=pitch, head_yaw_deg=yaw, head_roll_deg=roll, jaw_open_deg=jaw if ph["jaw_open"] else 0.0,
-               k_photo_px_per_render_px=k * ds, k_fit_spread=k_spread * ds, tx=tx * ds + bx0, ty=ty * ds + by0,
+               k_photo_px_per_render_px=k * ds, k_fit_spread=k_spread * ds, polishes=fit_polishes, tx=tx * ds + bx0, ty=ty * ds + by0,
                crop_box=[int(bx0), int(by0), int(bx1), int(by1)],
                photo_head_extent_px=[int(pxs.max() - pxs.min() + 1), int(pys.max() - pys.min() + 1)],
                photo_head_area_px=int(crop.sum()),
@@ -480,7 +492,7 @@ def fit_photo(ph, hr, rgb, eye, quick=False, w_eye=10.0):
 
 
 # ----------------------------------------------------------------------------
-def overlay_pictures(ph, rgb, fit, servo, eye, hr, mm_per_px, rservo):
+def overlay_pictures(ph, rgb, fit, servo, eye, hr, mm_per_px, rservo, tag=""):
     pm_full, mr, tm, crop, small, eyem = fit["_masks"]
     bx0, by0, bx1, by1 = fit["crop_box"]
     H, W = pm_full.shape
@@ -506,7 +518,7 @@ def overlay_pictures(ph, rgb, fit, servo, eye, hr, mm_per_px, rservo):
         d.text((cx - 70, cy + b + 10), "eye major %.1f px = %.2f mm" % (eye["major_px"], eye["major_px"] * mm_per_px), fill=(30, 160, 60))
     ys, xs = np.nonzero(pm_full)
     d.rectangle([xs.min(), ys.min(), xs.max(), ys.max()], outline=(120, 60, 200), width=3)
-    ann.crop((max(0, bx0 - 200), max(0, by0 - 100), min(W, bx1 + 300), min(H, by1 + 400))).save(os.path.join(OUT, "%s_measure.png" % ph["id"]))
+    ann.crop((max(0, bx0 - 200), max(0, by0 - 100), min(W, bx1 + 300), min(H, by1 + 400))).save(os.path.join(OUT, "%s%s_measure.png" % (ph["id"], tag)))
     # 2) real | ours | overlay at the crop
     realc = real.crop((bx0, by0, bx1, by1))
     cw, chh = realc.size
@@ -541,17 +553,17 @@ def overlay_pictures(ph, rgb, fit, servo, eye, hr, mm_per_px, rservo):
     for i, (im, lab) in enumerate(zip([realc, ours, ov], labs)):
         sheet.paste(im.resize((tw, tile_h), Image.LANCZOS), (10 + i * (tw + 10), 40))
         dd.text((12 + i * (tw + 10), 12), lab, fill=(0, 0, 0))
-    sheet.save(os.path.join(OUT, "%s_pair.png" % ph["id"]))
-    ours.save(os.path.join(OUT, "%s_ours.png" % ph["id"]))
-    realc.save(os.path.join(OUT, "%s_real.png" % ph["id"]))
-    ov.save(os.path.join(OUT, "%s_overlay.png" % ph["id"]))
+    sheet.save(os.path.join(OUT, "%s%s_pair.png" % (ph["id"], tag)))
+    ours.save(os.path.join(OUT, "%s%s_ours.png" % (ph["id"], tag)))
+    realc.save(os.path.join(OUT, "%s%s_real.png" % (ph["id"], tag)))
+    ov.save(os.path.join(OUT, "%s%s_overlay.png" % (ph["id"], tag)))
     # 3) the render's servo measurement, drawn
     if rservo and "centre_px" in rservo:
         sh = Image.fromarray(hr.shaded()); dd = ImageDraw.Draw(sh)
         cx, cy = rservo["centre_px"]; w = rservo["width_px"]
         dd.rectangle([cx - w / 2, cy - 30, cx + w / 2, cy + 30], outline=(30, 120, 220), width=2)
         dd.text((cx + w / 2 + 6, cy - 10), "%.1f px (render) = 20.000 mm" % w, fill=(30, 120, 220))
-        sh.save(os.path.join(OUT, "%s_render_servo.png" % ph["id"]))
+        sh.save(os.path.join(OUT, "%s%s_render_servo.png" % (ph["id"], tag)))
 
 
 # ----------------------------------------------------------------------------
@@ -642,7 +654,7 @@ def main():
                     r["eye"]["diameter_via_render_mm"] = EYE_RING_D_MM * eye["major_px"] / (k_servo * re_["major_px"])
                     c_r = k * np.array(re_["centre"]) + np.array([fit["tx"], fit["ty"]])
                     r["eye"]["centre_offset_photo_minus_render_mm"] = [float((eye["centre"][0] - c_r[0]) * mmpp), float((eye["centre"][1] - c_r[1]) * mmpp)]
-        overlay_pictures(ph, rgb, fit, servo, eye, hr, mmpp or 0.0, next((s.get("render") for s in servo if s.get("render")), None))
+        overlay_pictures(ph, rgb, fit, servo, eye, hr, mmpp or 0.0, next((s.get("render") for s in servo if s.get("render")), None), tag=args.tag)
         results.append(r)
         print(json.dumps({k: v for k, v in r.items() if k in ("scale", "size", "eye")}, indent=1, default=float)[:4000])
         print("fit:", json.dumps(r["fit"], default=float)); sys.stdout.flush()

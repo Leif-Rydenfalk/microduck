@@ -28,6 +28,8 @@ SECTIONS = [
          "The master document: readiness matrix, BOM, full assembly sequence, wiring, power-up, and what still blocks a factory release."),
         ("COMPARISON.html", "Reference match",
          "Our CAD beside the real product photographs at matched camera angles, plus the measured dimension table for all 47 meshes and the head-conformance measurement."),
+        ("HEAD-RECONSTRUCTION.html", "Head conformance",
+         "Is the simulation head the product head? Every store photograph scaled by the XL330 in frame, our model posed to it with a perspective camera, the head measured in mm against the mesh under the 1.5 mm rule; the eye bezel settled (it is the noenoeil mesh). Generated from out/head/head.json."),
     ]),
     ("Specification & parts", "What the machine is, measured.", [
         ("SPEC.html", "Specification", "Envelope, the 15-joint table, and every mesh with its measured bounding box."),
@@ -95,6 +97,7 @@ SECTIONS = [
 
 TOOLS = [
     ("tools/gen_comparison.py", "Builds COMPARISON.html from the measured data."),
+    ("tools/gen_head.py", "Builds HEAD-RECONSTRUCTION.html from out/head/head.json (tools/head_verdict.py merges tools/head_photomatch.py, head_frontview.py and head_profile_frame.py)."),
     ("tools/gen_index.py", "Builds this index, checking every link."),
     ("tools/gen_test_plan.py", "Builds TEST-PLAN.html from spec/test-plan.json; computes every derived figure (degrees, encoder counts, tilt thresholds, the walk reference read out of out/sim/report.json) rather than carrying it as text, and REFUSES to publish \u2014 exiting non-zero having written nothing \u2014 on any of 15 self-checks: a gated test missing from the end-of-line checklist, an unresolved source key, an ID-map range that disagrees with the MJCF, an unfilled token. Each was broken on purpose and watched to fire."),
     ("tools/gen_sourcing.py", "Builds SOURCING.html and RFQ.html from spec/sourcing.json; refuses to publish a verdict the data does not support."),

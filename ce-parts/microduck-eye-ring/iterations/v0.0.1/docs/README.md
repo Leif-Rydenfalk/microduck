@@ -13,8 +13,8 @@ photographs. Measured with cecad.meshfeatures / meshslice on `reference/pollen-m
   → **+1.16 mm** on the Ø30.000 ring if the head is the mesh's 91.763 mm wide. Ring centre +0.93 mm below the
   shell top and -2.13 mm off the mid-line against the mesh; ToF window +0.13 mm from the MJCF site.
 - Profile photographs, ring diameter over head extent, photograph against the render at the fitted pose
-  (scale-free): cream-profile-left: ring/head 0.3119 (photo) vs 0.3134 (render) → -0.14 ± 0.42 mm → combined **-0.14 ± 0.42 mm**.
-- Verdict at the 1.5 mm rule: **CANNOT DETERMINE**. The eye ring: a calliper across the ring's outer edge (mesh noenoeil 30.000 mm), or Pollen's part drawing; the front-view photograph already puts it at +1.16 mm (implied) and the profiles at -0.14 ± 0.42 mm.
+  (scale-free): cream-profile-left: ring/head 0.3119 (photo) vs 0.2663 (render) → +5.15 ± 0.49 mm; sky-three-quarter-front-left: ring/head 0.2796 (photo) vs 0.2804 (render) → -0.09 ± 0.44 mm; graphite-profile-right: ring/head 0.2421 (photo) vs 0.2417 (render) → +0.05 ± 0.46 mm → combined **-0.02 ± 0.32 mm**.
+- Verdict at the 1.5 mm rule: **CANNOT DETERMINE**. The eye ring: a calliper across the ring's outer edge (mesh noenoeil 30.000 mm), or Pollen's part drawing; the front-view photograph already puts it at +1.16 mm (implied) and the profiles at -0.02 ± 0.32 mm.
 
 **Radial profile of the mesh (y = const cuts, r about the axis), mm.** y -63.25: r 14.75; y -62.75: r 15.00; y -62.25: r 15.00; y -61.75: r 15.00; y -61.25: r 15.00; y -60.75: r 15.00; y -60.25: r 15.00; y -59.75: r 15.00; y -59.25: r 15.00; y -58.75: r 15.00; y -58.25: r 15.00; y -57.75: r 15.00; y -57.25: r 15.00; y -56.75: r 15.00; y -56.25: r 15.00; y -55.75: r 15.00; y -55.25: r 9.50; y -54.75: r 9.50; y -54.25: r 9.50
 

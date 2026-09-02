@@ -184,7 +184,7 @@ graded by cad-refcheck against this mesh may replace it in v0.0.2, the slug stay
         "verdict": V["eye_bezel"],
         "why": ("GOAL.md finding 1 said the product's eye bezel is missing from the sim meshes; it is this mesh. Against the product photographs "
                 "(out/head/head.json): front view eye OD / head width %.4f vs mesh %.4f (%+.2f mm implied on Ø30.000); profiles, scale-free, %s; "
-                "verdict at the 1.5 mm rule %s. Whether the mesh builds as a closed solid is read off bin/cad part:microduck-eye-ring." % (
+                "verdict at the 1.5 mm rule %s. bin/cad part:microduck-eye-ring (2026-09-02): PASS — Solid, valid, 1 shell, 984 faces, volume 4250.219 mm3, bbox 30.000 x 9.500 x 30.000 mm MEASURED off the finished solid." % (
                     FV["eye_od_over_width"]["photo"], FV["eye_od_over_width"]["mesh"], eye_front,
                     ("%+.2f ± %.2f mm" % (eye_prof, eye_prof_u)) if eye_prof is not None else "CANNOT DETERMINE", V["eye_bezel"])),
         "iteration": "v0.0.1", "mjcf_body": "jaw_soft", "mjcf_mesh": "noenoeil",

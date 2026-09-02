@@ -68,14 +68,17 @@ def dim_rows():
     for p in D["photos"]:
         s = p.get("size")
         if not s:
-            rows.append("<tr><td>%s</td><td colspan=8>%s — no scale feature measured</td></tr>" % (esc(p["title"]), chip("CANNOT DETERMINE"))); continue
+            x = p.get("size_excluded")
+            rows.append("<tr><td>%s</td><td colspan=8>%s — scale excluded: %s%s</td></tr>" % (
+                esc(p["title"]), chip("CANNOT DETERMINE"), esc(p.get("scale_why", "no scale feature measured")),
+                (" (the excluded read would have been r = %s, %s mm)" % (pm(x["product_over_mesh"], x["unc"], 4), pm(x["head_length_dev_mm"], x["head_length_dev_unc_mm"], 2))) if x else "")); continue
         v = p["verdicts"]
         rows.append("<tr><td>%s</td><td class=n>%s</td><td class=n>%s</td><td class=n>%s</td><td class=n>%s</td>"
                     "<td class=n>%s</td><td class=n>%s</td><td class=n>%s</td><td>%s</td></tr>" % (
                         esc(p["title"]), pm(s["product_over_mesh"], s["unc"], 4), pm(s["head_length_dev_mm"], s["head_length_dev_unc_mm"]),
                         f(s["photo_head_extent_major_mm"]), f(s["mesh_head_extent_major_mm"]), pm(s["dev_major_mm"], s["dev_major_unc_mm"]),
                         f(s["photo_head_extent_minor_mm"]), f(s["mesh_head_extent_minor_mm"]), pm(s["dev_minor_mm"], s["dev_minor_unc_mm"]) + " " +
-                        chip(v["length"])))
+                        chip(v["length"]) + (("<br><small>%s</small>" % esc(p["verdict_why"])) if p.get("verdict_why") else "")))
     rows.append("<tr class=total><td><b>Combined (inverse-variance; spread %s mm)</b></td><td class=n><b>%s</b></td><td class=n><b>%s</b></td>"
                 "<td class=n>—</td><td class=n>—</td><td class=n><b>%s</b></td><td class=n>—</td><td class=n>—</td><td><b>%s</b> %s</td></tr>" % (
                     f(C["head_length_spread_mm"]), pm(C["product_over_mesh"], C["product_over_mesh_unc"], 4),
@@ -91,10 +94,11 @@ def eye_rows():
         if "diameter_mm" not in e:
             rows.append("<tr><td>%s</td><td colspan=6>%s</td></tr>" % (esc(p["title"]), chip("CANNOT DETERMINE"))); continue
         off = e.get("centre_offset_photo_minus_render_mm")
-        rows.append("<tr><td>%s</td><td class=n>%s × %s</td><td class=n>%s</td><td class=n>%s</td><td class=n>%s</td><td class=n>%s</td><td>%s</td></tr>" % (
-            esc(p["title"]), f(e["major_px"], 1), f(e["minor_px"], 1), f(e["view_angle_deg"], 1),
-            pm(e["diameter_mm"], e["diameter_unc_mm"]), f(e.get("diameter_via_render_mm")),
-            ("%s / %s" % (f(off[0], 2, True), f(off[1], 2, True))) if off else "—", chip(p.get("verdicts_eye", "CANNOT DETERMINE"))))
+        rows.append("<tr><td>%s</td><td class=n>%s × %s</td><td class=n>%s / %s</td><td class=n>%s</td><td class=n>%s</td><td class=n>%s</td><td>%s</td></tr>" % (
+            esc(p["title"]), f(e["major_px"], 1), f(e["minor_px"], 1), f(e.get("ring_over_head_photo"), 4), f(e.get("ring_over_head_render"), 4),
+            pm(e.get("dev_scale_free_mm"), e.get("dev_scale_free_unc_mm"), 2), pm(e["diameter_mm"], e["diameter_unc_mm"], 2),
+            ("%s / %s" % (f(off[0], 2, True), f(off[1], 2, True))) if off else "—",
+            chip(p.get("verdicts_eye", "CANNOT DETERMINE")) + ("<br><small>%s</small>" % esc(e.get("ring_read_why", "")))))
     return "\n".join(rows)
 
 
@@ -130,11 +134,11 @@ def photo_sections():
   <div class="pair">
     <figure><span class="tag">Real · the measurements drawn</span><img src="{p["pictures"]["measure"]}" alt="{esc(p["id"])} measurement">
       <figcaption>Blue lines: the servo-case scan lines that set the scale; green: the eye-ring ellipse; red: the neck cut; purple: the head region.</figcaption></figure>
-    <figure><span class="tag ours">Ours · the same servo in the render</span><img src="{p["pictures"]["render_servo"]}" alt="{esc(p["id"])} render servo">
+    <figure><span class="tag ours">Ours · the same servo in the render</span>{('<img src="%s" alt="%s render servo">' % (p["pictures"]["render_servo"], esc(p["id"]))) if os.path.exists(os.path.join(REPO, p["pictures"]["render_servo"])) else '<p class="note">The scale servo of this photograph (the ankle) lies outside the head-centred render frame, so there is no mask read to draw; its render width is the analytic value in Table 2 (case 20.000 mm × frame px/mm × depth ratio from the posed model).</p>'}
       <figcaption>The render at the fitted camera; the box is the servo width the size ratio divides by.</figcaption></figure>
   </div>
-  <p class="note">Size ratio product/mesh <b>{pm(s.get("product_over_mesh"), s.get("unc"), 4)}</b> → head length {pm(s.get("head_length_dev_mm"), s.get("head_length_dev_unc_mm"))} mm
-    {chip(p.get("verdicts", {}).get("length", "CANNOT DETERMINE"))}; along the head's own axes: major {pm(s.get("dev_major_mm"), s.get("dev_major_unc_mm"))} mm, minor {pm(s.get("dev_minor_mm"), s.get("dev_minor_unc_mm"))} mm.</p>""")
+  <p class="note">Scale {chip(p.get("scale_verdict", "CANNOT DETERMINE"))} — {esc(p.get("scale_why", ""))}. Size ratio product/mesh <b>{pm(s.get("product_over_mesh"), s.get("unc"), 4)}</b> → head length {pm(s.get("head_length_dev_mm"), s.get("head_length_dev_unc_mm"))} mm
+    {chip(p.get("verdicts", {}).get("length", "CANNOT DETERMINE"))}{(" — " + esc(p["verdict_why"])) if p.get("verdict_why") else ""}; along the head's own axes: major {pm(s.get("dev_major_mm"), s.get("dev_major_unc_mm"))} mm, minor {pm(s.get("dev_minor_mm"), s.get("dev_minor_unc_mm"))} mm.</p>""")
     return "\n".join(out)
 
 
@@ -229,8 +233,7 @@ HTML = f"""<!doctype html>
   <div class="verdict {'warn' if V['eye_bezel']=='FAIL' else ('cd' if V['eye_bezel']=='CANNOT DETERMINE' else '')}">
     <b>Eye bezel: {esc(V["eye_bezel"])}.</b> The bezel is <em>not</em> missing from the mesh: <code>noenoeil.stl</code> is a Ø30.000 mm ring,
     7.5 mm long, standing proud of the face panel (whose only opening is the Ø14.5 mm lens hole) — exactly the accent-colour ring in the
-    photographs. Measured against it, the product ring reads {pm(C["eye_dev_mm"], C["eye_dev_unc_mm"], 2)} mm in the profile shots
-    (via the servo scale) and {f(C["eye_front_view_dev_mm"], 2, True)} mm implied by the true front view (ratio to head width). The ring's
+    photographs. Measured against it at the head's own scale (ring diameter over head extent, photograph against render), the product ring reads {pm(C["eye_dev_mm"], C["eye_dev_unc_mm"], 2)} mm in the profile shots and {f(C["eye_front_view_dev_mm"], 2, True)} mm implied by the true front view (ratio to head width). The ring's
     position on the face — {f(FV["comparison"]["eye_below_top_over_width"]["dev_mm"], 2, True)} mm below the shell top,
     {f(FV["comparison"]["eye_x_offset_over_width"]["dev_mm"], 2, True)} mm off the mid-line, the ToF window {f(FV["comparison"]["tof_x_from_eye_over_width"]["dev_mm"], 2, True)} mm from
     the MJCF site — matches the mesh (§6).
@@ -316,8 +319,8 @@ HTML = f"""<!doctype html>
   (b) the flat-lay <em>inside-the-box</em> photograph is a true front view, so every face feature is a scale-free ratio to the head width, compared
   with our mesh rendered in a true front view with the head level.</p>
   <div class="tw"><table class="data">
-    <caption>Table 5. Eye ring in the profile photographs (mesh 30.000 mm). Centre offset = photo ring centre − render ring centre at the fitted pose, mm (x right, y down).</caption>
-    <thead><tr><th>Photograph</th><th class=n>Ellipse major × minor (px)</th><th class=n>View angle (°)</th><th class=n>Ø via servo (mm)</th><th class=n>Ø via render (mm)</th><th class=n>Centre offset (mm)</th><th>Verdict</th></tr></thead>
+    <caption>Table 5. Eye ring in the profile photographs (mesh 30.000 mm). The scale-free column is the ring's diameter over the head's extent, photograph against render at the fitted pose — independent of the servo, of mm/px and of the camera distance; Δ Ø = 30 × (ratio − 1). Centre offset = photo ring centre − render ring centre, mm (x right, y down).</caption>
+    <thead><tr><th>Photograph</th><th class=n>Ellipse major × minor (px)</th><th class=n>ring / head extent, photo / render</th><th class=n>Δ Ø scale-free (mm)</th><th class=n>Ø via servo (mm, carries the D question)</th><th class=n>Centre offset (mm)</th><th>Verdict</th></tr></thead>
     <tbody>
 {eye_rows()}
     </tbody>

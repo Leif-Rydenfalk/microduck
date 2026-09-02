@@ -67,18 +67,16 @@
     <b>0.7193&nbsp;mm</b> — 9 of 9 inside 1&nbsp;mm, six of them exact to
     the fourth decimal. The full table is in §4.
   </div>
-  <div class="verdict warn">
-    <b>The head — CANNOT DETERMINE, and the first eyeball answer was wrong.</b> By eye the
-    simulation head looks too long and flat against the product photographs, so we measured it
-    (§5.1). Head <em>length</em> as a fraction of robot height agrees to
-    <b>3.76&nbsp;%</b> (product 0.4233, ours 0.4392) — the head is <em>not</em> markedly longer,
-    which is the opposite of the visual impression. Head <em>aspect ratio</em> differs by
-    <b>+69&nbsp;%</b> (product 1.206, ours 2.042), but that measurement is confounded: in the
-    reference photograph the beak is <em>open</em> and the head is <em>tilted</em>, both of which
-    inflate the product's apparent head height. We therefore cannot yet conclude a geometry
-    mismatch. §5.1 states exactly what would settle it.
+  <div class="verdict cd">
+    <b>The head — CANNOT DETERMINE, measured in millimetres.</b> Lane A scaled 2 product photographs by the
+    XL330-M288-T case in the same frame (20.000 mm), posed our model to each with a perspective camera and compared the head shell
+    against the mesh: product/mesh size ratio <b>+1.0064&nbsp;±&nbsp;0.0431</b>, head-length deviation
+    <b>+0.79&nbsp;±&nbsp;5.29&nbsp;mm</b> on 122.690&nbsp;mm; along the head's own axes
+    -0.44&nbsp;±&nbsp;4.75 / +0.27&nbsp;±&nbsp;2.79&nbsp;mm. The eye bezel is
+    <b>CANNOT DETERMINE</b>: it is the <code>noenoeil</code> mesh (Ø30.000&nbsp;×&nbsp;7.5&nbsp;mm ring proud of the face); the product ring
+    reads -0.02&nbsp;±&nbsp;0.32&nbsp;mm against it in the profiles and +1.16&nbsp;mm in the true front view.
+    Full evidence, every overlay real-beside-ours: <a href="HEAD-RECONSTRUCTION.html">HEAD-RECONSTRUCTION.html</a>.
   </div>
-
   <div class="verdict">
     <b>Colour is schematic, not product paint.</b> The yellow beak and teal soles are the
     material colours inside the simulation model. Pollen's own simulator renders these same
@@ -251,15 +249,13 @@
   <div class="tw"><table class="data">
     <thead><tr><th>#</th><th>Finding</th><th>Evidence</th><th>Consequence</th><th>Action</th></tr></thead>
     <tbody>
-      <tr><td class="n">1</td><td><b>Head conformance unresolved.</b> Length ratio agrees to
-        3.76&nbsp;%; aspect ratio differs by 69&nbsp;% but the measurement is confounded by an
-        open beak and a tilted head in the reference photograph.</td>
-        <td>§5.1, <code>out/verify/head_analysis.json</code> + annotated silhouettes</td>
-        <td>Head tooling cannot be committed on present evidence — neither confirmed nor refuted.</td>
-        <td>Re-shoot the comparison with the beak closed and head levelled, <em>or</em> scale a
-        product photograph against the XL330 servo visible in frame (20.000&nbsp;×&nbsp;34.000&nbsp;mm)
-        and measure the head shell directly in mm.</td></tr>
-
+      <tr><td class="n">1</td><td><b>Head conformance — CANNOT DETERMINE.</b> Product/mesh size ratio
+        +1.0064&nbsp;±&nbsp;0.0431 over 2 servo-scaled photographs; head length
+        +0.79&nbsp;±&nbsp;5.29&nbsp;mm; eye bezel CANNOT DETERMINE
+        (-0.02&nbsp;±&nbsp;0.32&nbsp;mm profile, +1.16&nbsp;mm front view).</td>
+        <td><a href="HEAD-RECONSTRUCTION.html">HEAD-RECONSTRUCTION.html</a>, <code>out/head/head.json</code></td>
+        <td>Tooling waits on one calliper reading of a product head (or one purpose-shot photograph); the 1.5 mm rule cannot be decided from the store photographs alone.</td>
+        <td>The camera distance of the store photographs: a 1 mm ruler in the frame, or the EXIF focal length + sensor (stripped from the published files), would fix D and remove the ±0.0105 the sensitivity runs put on r. A calliper on one product head: top_head_shell length (mesh 122.690 mm), width (91.760) and height (46.336) to 0.1 mm — a 0.1 mm reading beats every photograph here by an order of magnitude and settles the 1.5 mm rule outright. Or one more photograph taken for the purpose: pure profile, beak closed, head level, a ruler or the XL330 label face in the focal plane of the head, 4000+ px on the long side — the scale uncertainty then drops below 0.5 % (0.6 mm on the length). The eye ring: a calliper across the ring&#x27;s outer edge (mesh noenoeil 30.000 mm), or Pollen&#x27;s part drawing; the front-view photograph already puts it at +1.16 mm (implied) and the profiles at -0.02 ± 0.32 mm.</td></tr>
       <tr><td class="n">2</td><td><b>Battery mesh is an NP-F970, not the NP-F550 class cell the
         documentation calls out.</b></td>
         <td><code>np_f970</code> 38.600&nbsp;×&nbsp;20.600&nbsp;×&nbsp;70.800&nbsp;mm in Table 1</td>
@@ -279,43 +275,32 @@
   </table></div>
 </section>
 
-  <h3 id="head">5.1 Head conformance — the measurement that corrected the eyeball</h3>
-  <p>Both views are near-orthographic side views on white, so scale-free silhouette ratios can be
-  compared without camera calibration. The red box is the head band, ended where the silhouette
-  pinches at the neck; the blue box is the whole robot. Generated by
-  <code>tools/head_analysis.py</code>.</p>
-  <div class="pair">
-    <figure><span class="tag">Real · measured silhouette</span>
-      <img src="out/verify/head-product-photo.png" alt="product head measurement"></figure>
-    <figure><span class="tag ours">Ours · measured silhouette</span>
-      <img src="out/verify/head-our-render.png" alt="our head measurement"></figure>
-  </div>
+  <h3 id="head">5.1 Head conformance — settled by measurement (lane A)</h3>
+  <p>The scale-free ratio analysis that stood here (<code>tools/head_analysis.py</code>, +3.76&nbsp;% length ratio, +69&nbsp;% confounded aspect)
+  is superseded by <a href="HEAD-RECONSTRUCTION.html">HEAD-RECONSTRUCTION.html</a>, which scales each photograph by the servo in frame, poses the
+  model (jaw open, head yawed as shot, perspective camera) and measures the head in millimetres. Its numbers, from the same data file:</p>
   <div class="tw"><table class="data">
-    <caption>Table 2. Scale-free head ratios. Source: <code>out/verify/head_analysis.json</code>.</caption>
-    <thead><tr><th>Ratio</th><th class="n">Product photo</th><th class="n">Our render</th>
-      <th class="n">Difference</th><th>Reading</th></tr></thead>
+    <caption>Table 2. Head against the product, mm (product − mesh) ± uncertainty. Source: <code>out/head/head.json</code>.</caption>
+    <thead><tr><th>Quantity</th><th class="n">Value</th><th>Verdict at the 1.5 mm rule</th></tr></thead>
     <tbody>
-      <tr><td>head length / total height</td><td class="n">0.4233</td><td class="n">0.4392</td>
-        <td class="n">+3.76 %</td><td>Agrees. The head is <b>not</b> markedly longer.</td></tr>
-      <tr><td>head height / total height</td><td class="n">0.3511</td><td class="n">0.2151</td>
-        <td class="n">−38.7 %</td><td>Confounded — the open beak adds height to the product.</td></tr>
-      <tr><td>head aspect (length / height)</td><td class="n">1.2059</td><td class="n">2.0422</td>
-        <td class="n">+69.4 %</td><td>Confounded by beak state and head tilt.</td></tr>
+      <tr><td>size ratio product / mesh</td><td class="n">+1.0064&nbsp;±&nbsp;0.0431</td><td>—</td></tr>
+      <tr><td>head length deviation (122.690 mm mesh)</td><td class="n">+0.79&nbsp;±&nbsp;5.29 mm</td><td><span class="chip cd">CANNOT DETERMINE</span></td></tr>
+      <tr><td>head silhouette, major axis</td><td class="n">-0.44&nbsp;±&nbsp;4.75 mm</td><td><span class="chip cd">CANNOT DETERMINE</span></td></tr>
+      <tr><td>head silhouette, minor axis</td><td class="n">+0.27&nbsp;±&nbsp;2.79 mm</td><td><span class="chip cd">CANNOT DETERMINE</span></td></tr>
+      <tr><td>eye ring Ø (30.000 mm mesh), profile photographs</td><td class="n">-0.02&nbsp;±&nbsp;0.32 mm</td><td><span class="chip pass">PASS</span></td></tr>
+      <tr><td>eye ring Ø, true front view (ratio to head width)</td><td class="n">+1.16 mm</td><td><span class="chip cd">CANNOT DETERMINE</span></td></tr>
+      <tr><td>eye centre below shell top / off mid-line (front view)</td><td class="n">+0.93 / -2.13 mm</td><td>—</td></tr>
+      <tr><td>ToF window centre from the eye (front view vs MJCF site 22.4 mm)</td><td class="n">+0.13 mm</td><td>—</td></tr>
     </tbody>
   </table></div>
-  <p><b>Why this is not yet a finding.</b> In the reference photograph the beak is open and hangs
-  well below the head shell, and the head is pitched forward; our render has the beak closed and
-  the head levelled. Both differences inflate the product's measured head height and therefore
-  depress its aspect ratio. The honest verdict is <b>CANNOT DETERMINE</b>.</p>
-  <p><b>What would settle it.</b> Either (a) re-render with the beak posed open at the same angle
-  as the photograph — note the jaw is <em>not</em> an actuated joint in the published model, so
-  this requires posing the <code>jaw_soft</code> body by hand; or (b) photogrammetric scaling: the
-  XL330-M288-T servo is visible in the same frame with a known 20.000&nbsp;×&nbsp;34.000&nbsp;mm
-  body face, giving mm-per-pixel, after which the head shell can be measured directly in
-  millimetres and compared with the mesh's 91.751&nbsp;×&nbsp;122.688&nbsp;×&nbsp;46.339&nbsp;mm.
-  Option (b) is the stronger evidence and is the recommended next step.</p>
-</section>
-
+  <div class="pair">
+    <figure><span class="tag">Real · flat-lay, true front view — beside ours</span>
+      <img src="out/head/front_pair.png" alt="front view real beside ours" style="aspect-ratio:auto"></figure>
+    <figure><span class="tag ours">Profile fit: real | ours | overlay</span>
+      <img src="out/head/cream-profile-left_pair.png" alt="profile fit" style="aspect-ratio:auto"></figure>
+  </div>
+  <p><b>Verdict basis.</b> head: 2 photographs, each scaled by the XL330-M288-T case in the same frame (20.000 mm), posed and fitted with a perspective camera, size ratio product/mesh = k * W_render / W_photo; combined length deviation +0.791 ± 5.132 mm; per-axis -0.437 ± 4.752 / +0.267 ± 2.794. Eye bezel: profile ring diameter vs the noenoeil mesh 30.000 mm, and the true-front-view ratio eye OD / head width (photo 0.3353 vs mesh 0.3226).</p>
+  <p><b>What would settle the rest.</b> The camera distance of the store photographs: a 1 mm ruler in the frame, or the EXIF focal length + sensor (stripped from the published files), would fix D and remove the ±0.0105 the sensitivity runs put on r. A calliper on one product head: top_head_shell length (mesh 122.690 mm), width (91.760) and height (46.336) to 0.1 mm — a 0.1 mm reading beats every photograph here by an order of magnitude and settles the 1.5 mm rule outright. Or one more photograph taken for the purpose: pure profile, beak closed, head level, a ruler or the XL330 label face in the focal plane of the head, 4000+ px on the long side — the scale uncertainty then drops below 0.5 % (0.6 mm on the length). The eye ring: a calliper across the ring&#x27;s outer edge (mesh noenoeil 30.000 mm), or Pollen&#x27;s part drawing; the front-view photograph already puts it at +1.16 mm (implied) and the profiles at -0.02 ± 0.32 mm.</p>
 
 </section>
 

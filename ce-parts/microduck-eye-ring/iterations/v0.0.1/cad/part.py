@@ -1,4 +1,4 @@
-# WRITTEN by tools/head_eye_ring_shelve.py on 2026-09-02 — a LOADER for a published mesh (the cecad.meshshelve shape).
+# WRITTEN by tools/head_eye_ring_shelve.py on 2026-09-03 — a LOADER for a published mesh (the cecad.meshshelve shape).
 """part:microduck-eye-ring — cad/part.py, the TRIAD build contract.
 
     def build(doc, params=None) -> Part
