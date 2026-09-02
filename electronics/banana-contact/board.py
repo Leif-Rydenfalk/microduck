@@ -324,6 +324,24 @@ def build(self_test=None, publish=True, verbose=True):
         f"board was 5.100 mm tall because it used the head plate's top edge "
         f"as the ceiling; the plate is BEHIND the board, not above it.")
     b.notes.append(
+        "WHAT IS ON EITHER SIDE OF THIS BOARD, MEASURED 2026-09-02. Placing "
+        "this board's own box into the trunk_base body frame (x -24.600.."
+        "-23.000, y -22.900..22.900, z 33.409..38.009 mm) and comparing it "
+        "with every mesh placed in that body:\n"
+        "  np_f970, the pack ....... 0.476 mm in x, 1.737 mm in z\n"
+        "  banana_pcb_locker ....... 3.900 mm in x, on the other side\n"
+        "  power_support ........... boxes overlap — the board is in its "
+        "pocket, which is the point\n"
+        "  left_shell / right_shell  boxes overlap — they enclose the trunk\n"
+        "  xl330 (both hip yaws) ... 7.409 mm in z\n"
+        "  trunk_base plate ........ 31.409 mm in z\n"
+        "THE PACK IS 0.476 mm AWAY. That turns decision B4 from a preference "
+        "into a requirement: the face toward the battery carries FLAT PADS "
+        "and nothing else — no paste, no component, no protruding solder. "
+        "The three tail wires must leave on the LOCKER side, where there is "
+        "3.900 mm. Bounding boxes, not solids: a separation is a lower bound "
+        "and an overlap is not proof of a collision.")
+    b.notes.append(
         "CONTACT PITCH IS DERIVED, NOT MEASURED. 4.000 mm = the 12.000 mm "
         "window of the power_support head plate divided into three cells. "
         "Sony publishes no NP-F terminal drawing; a caliper across a "

@@ -530,9 +530,10 @@
 <tr><td><code>B1</code></td><td>Outline 45.800 x 4.600 mm — CORRECTED from 45.800 x 5.100</td><td>RAY-CASTING the power_support solid at y = 31.000 (mid-gap) instead of reading section outlines: above z = 51.000 the only material is the two screw posts, so the pocket is bounded in x by their inner faces (x +/-23.146, clear 46.292) and is OPEN UPWARD. What bounds the top is the locker bar's own silhouette (x +/-27.025, z 48.974..55.626) — a board taller than that is a board the retainer does not cover. Floor is the rib top at z 50.930, so 4.696 clear</td><td>45.800 x 5.100, which used the head plate's top edge (z 56.944 at x ~ +4, curved down to 55.51 at x +/-24) as the ceiling. The plate is BEHIND the board, not above it; it was the wrong constraint and the board would have stood 0.404 mm proud of its own retainer</td></tr>
 <tr><td><code>B2</code></td><td>No mounting holes</td><td>the two screw posts are at x = +/-25.198, OUTSIDE the 45.860 mm clear width</td><td>holes over the posts, which would need a board the pocket cannot accept</td></tr>
 <tr><td><code>B3</code></td><td>Three contact pads at 4.000 mm pitch — DERIVED, NOT MEASURED</td><td>the head plate's window is 12.000 mm wide (x -9.990..+1.990) and is the only opening the terminals reach through; three equal cells give 4.000</td><td>3.500 mm — nothing supports it either, and 4.000 is what the window implies</td></tr>
-<tr><td><code>B4</code></td><td>Flat gold pads 2.400 x 2.400 mm, ENIG, no paste</td><td>the pack's own springs land on them; the pocket is 5.150 mm tall</td><td>spring fingers on the PCB — no through-hole spring contact fits a 5.100 mm strip</td></tr>
+<tr><td><code>B4</code></td><td>Flat gold pads 2.400 x 2.400 mm, ENIG, no paste</td><td>the pack's own springs land on them; the pocket is 5.150 mm tall AND MEASURED: placing this board's box into the trunk_base body frame puts the NP-F pack 0.476 mm away in x and the locker 3.900 mm away on the other side, so the battery-facing surface can carry flat pads and nothing else</td><td>spring fingers on the PCB — no through-hole spring contact fits a 5.100 mm strip</td></tr>
 <tr><td><code>B5</code></td><td>Soldered three-wire tail on 0.800 mm holes, not a connector</td><td>every vertical JST header confirmed in this project is deeper than this board is tall: B2B-XH-A body 5.75, B3B-EH-A housing 10.0, B2B-PH-K-S 4.5 mm</td><td>a board-mounted connector — it does not fit, measured</td></tr>
 <tr><td><code>B6</code></td><td>The 'C' terminal is fitted on its own net and goes nowhere</td><td>nothing in Pollen's published source reads it; netlist.py wires the pack as {BAT+: VBAT, BAT-: GND}</td><td>omitting the terminal — a board that ignores it cannot later be told to read it</td></tr>
+<tr><td><code>B7</code></td><td>The three tail wires leave on the LOCKER side, not the pack side</td><td>measured clearances in the trunk_base body frame: pack 0.476 mm in x on one face, banana_pcb_locker 3.900 mm in x on the other, both hip-yaw XL330s 7.409 mm in z, the trunk baseplate 31.409 mm in z</td><td>leaving it unsaid. 0.476 mm is not enough for a soldered lead, and a board that does not say which way its wires go is a board somebody will build backwards</td></tr>
 </tbody></table>
 <h3>5.2 Schematic — every component, every pin, every net</h3>
 <div class="schem"><img src="electronics/banana-contact/out/schematic.svg" alt="net-label schematic of microduck_banana_contact"></div>
@@ -568,7 +569,7 @@
 <p class="fig-cap">Designators, quantities and footprints are read out of <code>electronics/banana-contact/out/fab/microduck_banana_contact-bom.csv</code>; the MPN, package and note columns come from <code>electronics/pcb-package.json</code>. A commodity passive carries a SPECIFICATION rather than a manufacturer part number, and says so — naming one 100&nbsp;nF 0603 would be a false precision.</p>
 <h3>5.6 Files a fab receives</h3>
 <table class="tight"><thead><tr><th>File</th><th>Bytes</th></tr></thead><tbody>
-<tr><td><code><a href="electronics/banana-contact/out/fab/ORDER-NOTES.txt">ORDER-NOTES.txt</a></code></td><td class="n">2,690</td></tr>
+<tr><td><code><a href="electronics/banana-contact/out/fab/ORDER-NOTES.txt">ORDER-NOTES.txt</a></code></td><td class="n">3,673</td></tr>
 <tr><td><code><a href="electronics/banana-contact/out/fab/README.txt">README.txt</a></code></td><td class="n">5,994</td></tr>
 <tr><td><code><a href="electronics/banana-contact/out/fab/microduck_banana_contact-B.Cu.GBL">microduck_banana_contact-B.Cu.GBL</a></code></td><td class="n">419</td></tr>
 <tr><td><code><a href="electronics/banana-contact/out/fab/microduck_banana_contact-B.Mask.GBS">microduck_banana_contact-B.Mask.GBS</a></code></td><td class="n">422</td></tr>
@@ -582,7 +583,7 @@
 <tr><td><code><a href="electronics/banana-contact/out/fab/microduck_banana_contact-NPTH.drl">microduck_banana_contact-NPTH.drl</a></code></td><td class="n">145</td></tr>
 <tr><td><code><a href="electronics/banana-contact/out/fab/microduck_banana_contact-PTH.drl">microduck_banana_contact-PTH.drl</a></code></td><td class="n">195</td></tr>
 <tr><td><code><a href="electronics/banana-contact/out/fab/microduck_banana_contact-bom.csv">microduck_banana_contact-bom.csv</a></code></td><td class="n">708</td></tr>
-<tr><td><code><a href="electronics/banana-contact/out/fab/microduck_banana_contact-fab.zip">microduck_banana_contact-fab.zip</a></code></td><td class="n">12,352</td></tr>
+<tr><td><code><a href="electronics/banana-contact/out/fab/microduck_banana_contact-fab.zip">microduck_banana_contact-fab.zip</a></code></td><td class="n">12,814</td></tr>
 <tr><td><code><a href="electronics/banana-contact/out/fab/microduck_banana_contact-positions.csv">microduck_banana_contact-positions.csv</a></code></td><td class="n">183</td></tr>
 <tr><td><code><a href="electronics/banana-contact/out/fab/microduck_banana_contact.kicad_pcb">microduck_banana_contact.kicad_pcb</a></code></td><td class="n">5,816</td></tr>
 </tbody></table>

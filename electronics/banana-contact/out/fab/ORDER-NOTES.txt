@@ -13,8 +13,17 @@ DRC verdict: CANNOT DETERMINE
 
 3. POCKET, MEASURED 2026-09-02 off Pollen's own meshes by RAY-CASTING the power_support solid at y = 31.000 (mid-gap), not by reading section outlines: clear width 46.292 mm between the screw posts' inner faces (x -23.146..+23.146), clear height 4.696 mm from the rib top z 50.930 to the locker bar's top z 55.626, clear depth 8.000 mm (y 27.000 plate face .. 35.000 locker bar). This board is 45.800 x 4.600 x 1.6 mm, so it enters with 0.246 mm per side in x and 0.048 mm per side in z. The first cut of this board was 5.100 mm tall because it used the head plate's top edge as the ceiling; the plate is BEHIND the board, not above it.
 
-4. CONTACT PITCH IS DERIVED, NOT MEASURED. 4.000 mm = the 12.000 mm window of the power_support head plate divided into three cells. Sony publishes no NP-F terminal drawing; a caliper across a physical NP-F550 pack settles it and nothing else does. Every document that repeats this number must repeat that sentence.
+4. WHAT IS ON EITHER SIDE OF THIS BOARD, MEASURED 2026-09-02. Placing this board's own box into the trunk_base body frame (x -24.600..-23.000, y -22.900..22.900, z 33.409..38.009 mm) and comparing it with every mesh placed in that body:
+  np_f970, the pack ....... 0.476 mm in x, 1.737 mm in z
+  banana_pcb_locker ....... 3.900 mm in x, on the other side
+  power_support ........... boxes overlap — the board is in its pocket, which is the point
+  left_shell / right_shell  boxes overlap — they enclose the trunk
+  xl330 (both hip yaws) ... 7.409 mm in z
+  trunk_base plate ........ 31.409 mm in z
+THE PACK IS 0.476 mm AWAY. That turns decision B4 from a preference into a requirement: the face toward the battery carries FLAT PADS and nothing else — no paste, no component, no protruding solder. The three tail wires must leave on the LOCKER side, where there is 3.900 mm. Bounding boxes, not solids: a separation is a lower bound and an overlap is not proof of a collision.
 
-5. COPPER CAPACITY: the two power tracks are 1.500 mm wide on 1 oz outer copper. IPC-2221 §6.2 I = 0.048 * dT^0.44 * A^0.725 (A in mil^2) gives 3.21 A at a 10 degC rise (4.35 A at 20 degC). The DEMAND is CANNOT DETERMINE: wiring/CABLES.md's own worst case is an assumed 1 A per moving servo (the vendor publishes only 17 mA standby and 1.47 A stall at 5 V) and Sony publishes no maximum continuous discharge current for the pack.
+5. CONTACT PITCH IS DERIVED, NOT MEASURED. 4.000 mm = the 12.000 mm window of the power_support head plate divided into three cells. Sony publishes no NP-F terminal drawing; a caliper across a physical NP-F550 pack settles it and nothing else does. Every document that repeats this number must repeat that sentence.
 
-6. SURFACE FINISH: ENIG, not the HASL default. A sliding spring contact on a solder-coated pad cold-flows and oxidises. JLCPCB publishes 'HASL (leaded / lead-free), ENIG, OSP' for this process (jlcpcb.com/capabilities/pcb-capabilities, re-read 2026-09-02), so this is an order option, not a special process. THE GERBERS DO NOT CARRY THE FINISH — it is an order-form field, and it is in the BOM and in the fab README because of that.
+6. COPPER CAPACITY: the two power tracks are 1.500 mm wide on 1 oz outer copper. IPC-2221 §6.2 I = 0.048 * dT^0.44 * A^0.725 (A in mil^2) gives 3.21 A at a 10 degC rise (4.35 A at 20 degC). The DEMAND is CANNOT DETERMINE: wiring/CABLES.md's own worst case is an assumed 1 A per moving servo (the vendor publishes only 17 mA standby and 1.47 A stall at 5 V) and Sony publishes no maximum continuous discharge current for the pack.
+
+7. SURFACE FINISH: ENIG, not the HASL default. A sliding spring contact on a solder-coated pad cold-flows and oxidises. JLCPCB publishes 'HASL (leaded / lead-free), ENIG, OSP' for this process (jlcpcb.com/capabilities/pcb-capabilities, re-read 2026-09-02), so this is an order option, not a special process. THE GERBERS DO NOT CARRY THE FINISH — it is an order-form field, and it is in the BOM and in the fab README because of that.
