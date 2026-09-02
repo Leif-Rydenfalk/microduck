@@ -17,7 +17,7 @@ a cached result can itself be empty.
 
 | script | what it produces | last run id | state at handover |
 |---|---|---|---|
-| `elec-verify.js` | Every electronic component: exact MPN, package, physical dimensions (mm), pinout, voltage, and real sourcing (>=2 distributors, price at 1/100/1000, MOQ, lead time), each cited. Plus the 3 custom PCBs and what must be done to make them fabricable. | `wf_969f3a4c-3d1` | launched 2026-09-02 ~21:04, died with the launching session — **relaunch** |
+| `elec-verify.js` | Every electronic component: exact MPN, package, physical dimensions (mm), pinout, voltage, and real sourcing (>=2 distributors, price at 1/100/1000, MOQ, lead time), each cited. Plus the 3 custom PCBs and what must be done to make them fabricable. | `wf_969f3a4c-3d1` | **COMPLETED** 2026-09-02 21:25 — 15/15 agents, 0 errors, 891k tokens. Results rescued to `out/verify/electronics_verify.json` (+ `.journal.jsonl`). Do NOT relaunch; write it into a document. |
 | `manufacturing.js` | DFM over 5 part groups, process/break-even economics, assembly line with jigs + torque, QA/EOL test plan, 3 sourcing agents, consolidated execution plan. | `wf_7f8b1690-71f` | launched 2026-09-02 ~21:12, died with the launching session — **relaunch** |
 | `drawings-mfg-grade.js` | Manufacturing-grade dimensioned drawings. | `wf_e0ce4a43-34e` | earlier run |
 | `simulate.js` | Simulation lane. | `wf_e980841f-3aa` | earlier run |
@@ -38,3 +38,30 @@ reparented to init (PPID 1), so it survives session close. Check it with:
     ls out/stress/                 # per-case directories appear as it goes
 
 Its output is buffered — read the file, never tail a pipe.
+
+
+## What elec-verify found (2026-09-02) — `out/verify/electronics_verify.json`
+
+11 components + 3 custom boards. 22 line items: 2 fully VERIFIED, 10 PARTIAL, 10 CANNOT DETERMINE.
+Electronics BOM **$465.64 at qty 1**; qty-100 CANNOT DETERMINE because the dominant line has no
+published volume price.
+
+Findings that change the design, not just the paperwork:
+
+1. **Servo supply may exceed the datasheet maximum.** XL330-M288-T is rated 3.7–6.0 V (recommended
+   5.0 V), but the runtime appears to feed the servos from the raw 2S pack at ~6.6–8.2 V. Resolve
+   with a meter on a production unit's servo VDD before committing the power path.
+2. **Servos are 77 % of electronics cost** — $358.50 of $465.64 at qty 1 (15 × $23.90). No
+   distributor publishes a volume break; an OEM quote from ROBOTIS for SKU 902-0163-000 at qty
+   100/1000 is the single biggest lever on unit cost.
+3. **The Radxa build does not exist as a catalog SKU.** Pollen's press kit says 1 GB RAM / 32 GB
+   eMMC; 1 GB boards top out at 8 GB eMMC and 32 GB ships only on 4 GB/8 GB boards. Either the
+   press kit rounded or the robot fits a different board. A teardown settles it.
+4. **Our Robot HAT reconstruction is electrically non-functional.** It fails its own DRC (10 fails)
+   and the 1.8 V codec rail dead-ends on TP1. It is a stand-in, not a manufacturable board.
+5. Radxa module **height and mass are CANNOT DETERMINE** — the datasheet has no side view. The
+   "12.5 mm" figure on third-party pages is a misread connector dimension; do not cite it.
+
+All three custom boards: design CANNOT DETERMINE (unpublished), action plan VERIFIED with real
+quick-turn fab quotes (JLCPCB from $2/5 pcs 24 h, PCBWay from $5/10 pcs 24 h, OSH Park
+$15.11/set-of-3 at 9–12 days).
