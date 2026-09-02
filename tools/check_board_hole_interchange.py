@@ -54,6 +54,7 @@ PATTERNS = {
         "hole_d_mm": MH["measured_diameter_mm"],
         "hole_d_sd_mm": MH["measured_diameter_sd_mm"],
         "sigma_mm": MH["measured_edge_inset_sd_mm"],
+        "is_board": True,
         "source": ("MEASURED off the RAD-DOC-0084 Rev 1.10 §4 raster by "
                    "tools/measure_radxa_drawing.py; out/measure/radxa-zero-3w-mechanical.json"),
     },
@@ -64,6 +65,7 @@ PATTERNS = {
         "hole_d_mm": 2.800,             # Radxa prints "4 X Ø2. 8"
         "hole_d_sd_mm": None,
         "sigma_mm": MH["measured_edge_inset_sd_mm"],
+        "is_board": True,
         "sigma_basis": ("the SAME 0.0396 mm as radxa_measured: this nominal is a "
                         "reconstruction anchored on the same raster ink, so it inherits that "
                         "ink's uncertainty rather than being exact."),
@@ -71,11 +73,33 @@ PATTERNS = {
                    "outline '65. 0' x '30. 0', hole '4 X Ø2. 8' (RAD-DOC-0084 §4). "
                    "This is the drawing's intent; radxa_measured is the drawing's ink."),
     },
+    # THE PRINTED PART THAT ACTUALLY HOLDS THE BOARD, found 2026-09-03. Its
+    # pilots are the posts, so it can only be the POST side of a case; it has no
+    # board hole and `hole_d_mm` is None on purpose rather than borrowed.
+    "face_part_measured": {
+        "pitch_long_mm": 57.840,
+        "pitch_wide_mm": 22.870,
+        "hole_d_mm": None,
+        "hole_d_sd_mm": None,
+        "sigma_mm": None,
+        "is_board": False,
+        "sigma_basis": ("UNKNOWN and not taken as zero — same reason as the Pi-Zero mesh: this is a "
+                        "cylinder fit on Pollen's decimated export and no residual is published. The "
+                        "interface does record 'Residual 0.0000 mm at 355.0 deg throughout' for the "
+                        "fit itself, which bounds the CIRCLE fit, not the mesh's fidelity to the part."),
+        "source": ("MEASURED off Pollen's face_part.stl by cecad.meshfeatures.cylinders, frozen "
+                   "2026-09-02 by tools/measure_mesh_features.py into out/laneT/features/face_part.json; "
+                   "carried in ce-parts/microduck-face-part/iterations/v0.0.1/cad/interfaces.json "
+                   "interface 'shell_screws': 4 x Ø2.0500 x 4.0000 pilots at (x, z) = (±28.9200, 8.5650) "
+                   "and (±28.9200, 31.4350), each on a Ø6.0000 x 10.7000 boss with a Ø2.7000 x 1.0000 "
+                   "counterbore."),
+    },
     "pi_zero_2w_mesh": {
         "pitch_long_mm": 58.000,
         "pitch_wide_mm": 23.000,
         "hole_d_mm": 2.700,
         "hole_d_sd_mm": None,
+        "is_board": True,
         "sigma_mm": None,
         "sigma_basis": ("UNKNOWN and not taken as zero. cecad.meshfeatures published no "
                         "residual for this cylinder fit, and SPEC.md §8 puts Pollen's mesh "
@@ -145,12 +169,51 @@ def case(post_key, board_key, screw_key):
 
 def main():
     rows = []
-    for post in ("pi_zero_2w_mesh", "radxa_measured", "radxa_nominal_3p6"):
-        for board in ("pi_zero_2w_mesh", "radxa_measured", "radxa_nominal_3p6"):
+    posts = [k for k in PATTERNS]
+    boards = [k for k, v in PATTERNS.items() if v.get("is_board")]
+    for post in posts:
+        for board in boards:
             if post == board:
                 continue
             for screw in ("M2", "M2.5"):
                 rows.append(case(post, board, screw))
+    # WHICH BOARD IS THE PRINTED PART DRILLED FOR? Finding 3's actual question,
+    # answered by distance between drill patterns rather than by argument.
+    fp = PATTERNS["face_part_measured"]
+    ident = []
+    for k in ("radxa_measured", "radxa_nominal_3p6", "pi_zero_2w_mesh"):
+        q = PATTERNS[k]
+        dl = fp["pitch_long_mm"] - q["pitch_long_mm"]
+        dw = fp["pitch_wide_mm"] - q["pitch_wide_mm"]
+        ident.append({"candidate": k, "d_long_mm": round(dl, 4), "d_wide_mm": round(dw, 4),
+                      "distance_mm": round(math.hypot(dl, dw), 4)})
+    ident.sort(key=lambda r: r["distance_mm"])
+    identification = {
+        "question": ("Pollen's MJCF carries a Raspberry Pi Zero 2 W mesh as the compute placeholder "
+                     "while every document names a Radxa ZERO 3W. Which board is the PRINTED part "
+                     "actually drilled for?"),
+        "measured_on": ("part:microduck-face-part interface 'shell_screws' — 4 x Ø2.0500 x 4.0000 "
+                        "pilots at (x, z) = (±28.9200, 8.5650) and (±28.9200, 31.4350), i.e. a "
+                        "57.8400 x 22.8700 mm rectangle, each on a Ø6.0000 x 10.7000 boss with a "
+                        "Ø2.7000 x 1.0000 counterbore. MEASURED off Pollen's own face_part.stl by "
+                        "cecad.meshfeatures.cylinders (lane T, out/laneT/features/face_part.json)."),
+        "ranked": ident,
+        "answer": ("THE RADXA. face_part's drill is %0.4f mm from the Radxa's measured pattern and "
+                   "%0.4f mm from the Pi Zero 2 W's — a factor of %0.0f. The placeholder mesh is a "
+                   "placeholder; the printed part was drilled for the real board."
+                   % (ident[0]["distance_mm"], ident[-1]["distance_mm"],
+                      ident[-1]["distance_mm"] / ident[0]["distance_mm"])),
+        "and_the_screw": ("M2.5, independently. The pilot is Ø2.0500 — exactly the M2.5 tap drill in "
+                          "ce-cad/cecad/fasteners.py line 58 (2.05), where the M2 tap drill on line 57 "
+                          "is 1.60 — and the lead-in counterbore is Ø2.7000, exactly that row's M2.5 "
+                          "CLOSE clearance. Two features of the printed part land on the M2.5 row and "
+                          "neither lands on the M2 row."),
+        "consequence": ("ce-parts/microduck-face-part's shell_screws interface declares "
+                        "accepts: ['connection:threaded-m2'] and calls the pattern 'shell_screws'. On "
+                        "this measurement it is neither: it is the COMPUTE BOARD's mount, and it is "
+                        "M2.5. That folder belongs to another lane and was NOT edited from here — this "
+                        "is the evidence for whoever owns it. ELECTRONICS-DATASHEET.html section 13 row E10."),
+    }
     worst = max(rows, key=lambda r: {"PASS": 0, "CANNOT DETERMINE": 1, "FAIL": 2}[r["verdict"]])
     out = {
         "$about": __doc__.strip().splitlines()[0],
@@ -164,6 +227,7 @@ def main():
         "patterns": PATTERNS,
         "screws": SCREWS,
         "cases": rows,
+        "which_board_is_the_printed_part_drilled_for": identification,
         "roll_up": {
             "counts": {v: sum(1 for r in rows if r["verdict"] == v)
                        for v in ("PASS", "CANNOT DETERMINE", "FAIL")},
@@ -180,12 +244,14 @@ def main():
                 "short by 0.0032 or 0.0414 mm of radius. The reverse direction — a Radxa board "
                 "on Pi-Zero posts — fits by 0.0538 mm against the measured pattern but by only "
                 "0.0086 mm against the nominal one, which is INSIDE the drawing's own 0.0396 mm "
-                "1 sigma and is therefore CANNOT DETERMINE. THE CONSEQUENCE FOR THIS PROJECT: "
-                "the printed head part must be drilled on the RADXA pattern (that is the board "
-                "we specify), and if it is, a Pi Zero 2 W will not bolt into it on M2.5. Nothing "
-                "here is a reason to change the Radxa record; it is a reason to stop calling the "
-                "two patterns interchangeable. WHAT SETTLES IT: a calipered production board, or "
-                "a Radxa DXF/STEP — neither published as of 2026-09-03."),
+                "1 sigma and is therefore CANNOT DETERMINE. AND IT IS NOT HYPOTHETICAL: the printed "
+                "part that holds the board — part:microduck-face-part, interface 'shell_screws' — "
+                "measures 57.8400 x 22.8700 mm, which is 0.0048 mm from the Radxa's measured pattern "
+                "and 0.2061 mm from the Pi Zero 2 W's, so it is drilled for the RADXA; its Ø2.0500 "
+                "pilot is the M2.5 tap drill and its Ø2.7000 counterbore the M2.5 close clearance; and "
+                "a Pi Zero 2 W bolted to it on M2.5 FAILS by 0.0031 mm of radius. See "
+                "which_board_is_the_printed_part_drilled_for. WHAT REMAINS OPEN: a calipered "
+                "production board, or a Radxa DXF/STEP — neither published as of 2026-09-03."),
         },
     }
     p = os.path.join(REPO, "out/measure/board-mount-interchange.json")
