@@ -205,9 +205,10 @@ def main():
                 implied_ring_od_mm_if_width_is_mesh=fe["photo_mm_if_width_is_mesh"],
                 implied_head_width_mm_if_ring_is_mesh=(30.0 / fe["photo"]) * (fe["mesh"] * front["mesh_head_width_mm"] / 30.0) if fe["photo"] else None,
                 attribution="CANNOT DETERMINE",
-                attribution_why=("the front view fixes only the RATIO ring/width; the profiles' scale-free ring/head-length ratio reads %s mm against the mesh, "
+                attribution_why=("the front view fixes only the RATIO ring/width; the store photographs' scale-free ring/head-length ratio (those in which the ring is seen whole: %s) reads %s mm against the mesh, "
                                  "which supports the ring being the mesh's 30.000 mm and puts the excess on the head width (implied %s mm, i.e. %s mm); the "
-                                 "alternative — a %s mm ring on a mesh-width head — would make the profiles' ring/length ratio %+.1f %% off, which they do not show" % (
+                                 "alternative — a %s mm ring on a mesh-width head — would make that ring/length ratio %+.1f %% off, which those photographs do not show" % (
+                                     ", ".join(p["id"] for p in photos if p["eye"].get("ring_read_verdict") == "PASS") or "none",
                                      ("%+.2f ± %.2f" % (EY[0], EY[1])) if EY[0] is not None else "CANNOT DETERMINE",
                                      fmt((30.0 / fe["photo"]) * (fe["mesh"] * front["mesh_head_width_mm"] / 30.0), 2, False) if fe["photo"] else "—",
                                      fmt((30.0 / fe["photo"]) * (fe["mesh"] * front["mesh_head_width_mm"] / 30.0) - front["mesh_head_width_mm"], 2) if fe["photo"] else "—",

@@ -136,7 +136,8 @@ PHOTOS = [
          eye_box=(1270, 320, 1480, 535), eye_hue=(255, 300), eye_hue_note="lavender ring on the graphite unit", eye_smin=0.12,
          head_ycut=1000,
          neck_poly=[(1150, 1300), (1150, 800), (1200, 780), (1260, 758), (1320, 740), (1400, 720), (1520, 690), (1700, 600), (1700, 1300)],
-         jaw_open=False, note="head yawed towards the camera, jaw closed; scale from the ankle servo (44 mm nearer the camera than the head — the perspective camera carries that)"),
+         jaw_open=False, note="head yawed towards the camera, jaw closed; scale from the ankle servo (44 mm nearer the camera than the head — the perspective camera carries that)",
+         x0=dict(el=1.3, pitch=-23.7, yaw=-46.4, roll=13.8)),   # the IoU 0.957 solution of the first full run (out/head/superseded/run_full.log); the unseeded rerun in the wider roll box stopped in a worse basin (IoU 0.942, roll 34.5)
 ]
 
 HEAD_GEOM_MESHES = ["top_head_shell", "bottom_head_shell", "face_part", "noenoeil", "lens", "m12_lens_holder",

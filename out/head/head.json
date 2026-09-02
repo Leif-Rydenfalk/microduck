@@ -1,11 +1,12 @@
 {
- "generated": "2026-09-03 02:47",
+ "generated": "2026-09-03 04:02",
  "rule_mm": 1.5,
  "rule_source": "docs/REBUILD-PROTOCOL.md \u00a73: PASS = p95 <= 1.0 mm both ways AND bbox within 1.5 mm per axis AND 0 unmatched reference features",
- "method": "head_verdict.py \u2014 merge the head measurements into ONE data file with the\nverdict, out/head/head.json, which tools/gen_head.py and tools/gen_comparison.py\nboth render (so HEAD-RECONSTRUCTION.html and COMPARISON.html \u00a75 cannot disagree).\n\nInputs\n  out/head/head_fit.json      tools/head_photomatch.py \u2014 per-photo scale, pose fit, size\n  out/head/front_view.json    tools/head_frontview.py \u2014 scale-free face layout, true front view\n\nThe rule (docs/REBUILD-PROTOCOL.md \u00a73, never loosened): a rebuilt part PASSES\nwhen its bounding box is within 1.5 mm per axis of the reference and the p95\nsurface distance is <= 1.0 mm. Here the \"reference\" is the PRODUCT, measured\nfrom photographs, and the candidate is Pollen's simulation mesh. A photograph\ngives a deviation d with an uncertainty u, so the verdict is decided the only\nhonest way:\n    PASS               |d| + u <= 1.5 mm     (inside the rule even at the edge of the uncertainty)\n    FAIL               |d| - u >  1.5 mm     (outside the rule even at the edge of the uncertainty)\n    CANNOT DETERMINE   otherwise             (the measurement cannot discriminate at the rule's level)\nThe per-photo deviations are combined inverse-variance weighted; a photo's\nsystematic errors (mask edges, pose) are inside its u, and the photos share no\nscale feature measurement, so the combination is legitimate but the spread\nbetween photos is also reported and, if larger than the combined u, replaces it.\n\n    /Applications/FreeCAD.app/Contents/Resources/bin/python tools/head_verdict.py\n",
+ "xc_pct": 5.0,
+ "method": "head_verdict.py \u2014 merge the head measurements into ONE data file with the\nverdict, out/head/head.json, which tools/gen_head.py and tools/gen_comparison.py\nboth render (so HEAD-RECONSTRUCTION.html and COMPARISON.html \u00a75 cannot disagree).\n\nInputs\n  out/head/head_fit.json         tools/head_photomatch.py \u2014 per-photo scale, pose fit, size\n  out/head/head_fit_D*.json      the same at other camera distances (sensitivity runs)\n  out/head/front_view.json       tools/head_frontview.py \u2014 face layout, true front view, per-row verdicts\n  out/head/profile_frame.json    tools/head_profile_frame.py \u2014 the README pure-profile frame\n\nThe rule (docs/REBUILD-PROTOCOL.md \u00a73, never loosened): a rebuilt part PASSES\nwhen its bounding box is within 1.5 mm per axis of the reference and the p95\nsurface distance is <= 1.0 mm. Here the \"reference\" is the PRODUCT, measured\nfrom photographs, and the candidate is Pollen's simulation mesh. A photograph\ngives a deviation d with an uncertainty u, so the verdict is decided the only\nhonest way:\n    PASS               |d| + u <= 1.5 mm     (inside the rule even at the edge of the uncertainty)\n    FAIL               |d| - u >  1.5 mm     (outside the rule even at the edge of the uncertainty)\n    CANNOT DETERMINE   otherwise             (the measurement cannot discriminate at the rule's level)\n\nA photograph's SCALE is admitted only when every test on it was RUN and none\nfailed: (a) the render-mask-vs-analytic cross-check of the servo (measured for\nevery servo in a frame wide enough to hold it \u2014 a servo without that read is\nCANNOT DETERMINE, never PASS); (b) when two servos were read, their size ratios\nagree within 3 sigma; (c) no fitted pose parameter sits on its search bound.\nThe per-photo deviations are combined inverse-variance weighted; the spread\nbetween photos is also reported and, if larger than the combined u, replaces it.\n\n    /Applications/FreeCAD.app/Contents/Resources/bin/python tools/head_verdict.py\n",
  "profile_frame": {
-  "generated": "2026-09-02 23:29",
-  "method": "head_profile_frame.py \u2014 the one published PURE-PROFILE view with the head un-yawed:\nimages/github/gh_readme_7.png (Pollen's README, 2215 x 884), Pollen's own simulator\nrender on the left and the real sky unit on the right, both in profile, jaw closed,\neye ring not visible (so head yaw ~ 0). Why it matters: in the store photographs the\nhead is yawed 50 deg towards the camera, and the head-to-servo size ratio then depends\non the camera distance (the face is ~45 mm nearer than the servo) \u2014 a distance the\nstore frames do not reveal (HEAD-RECONSTRUCTION.html \u00a73). In a pure profile the head's\nsilhouette extremes (crest of the dome, front face, rear) and the neck servos all sit\non the robot's centre plane, so ONE mm/px serves both, to first order independent of\nthe camera distance.\n\nMeasured, both halves with the same estimators:\n  servo width   mode of the dark-run widths across the upper neck servo case (20.000 mm,\n                the horn/label face \u2014 the same face as in the store photographs)\n  head extents  principal-axis extents of the head silhouette (colour-segmented: sky\n                blue + orange on the real unit; white + yellow on the render), 0.5/99.5\n                percentile; the major axis is the head length (shell + closed beak), the\n                minor the head height at that pitch.\nResult: head length in mm for the real unit; the same for Pollen's render (which uses\nthese very meshes, so it must read ~122.7 mm \u2014 that is the method's check); and the\nratio real/sim, which is scale-free.\n\nLimits (stated, not hidden): a video frame \u2014 the servo is ~45 px wide, so +-1.5 px is\n+-3.3 %, i.e. +-4 mm on the head; motion blur; a residual head yaw of 10 deg would\nlengthen the silhouette by ~11 % (yaw only ever makes it LONGER), so the real value is an\nupper bound on the product head length if any yaw remains.\n\nWrites out/head/profile_frame.json and out/head/profile_frame_pair.png.\n    /Applications/FreeCAD.app/Contents/Resources/bin/python tools/head_profile_frame.py\n",
+  "generated": "2026-09-03 03:30",
+  "method": "head_profile_frame.py \u2014 the one published PURE-PROFILE view with the head un-yawed:\nimages/github/gh_readme_7.png (Pollen's README, 2215 x 884), Pollen's own simulator\nrender on the left and the real sky unit on the right, both in profile, jaw closed,\neye ring not visible (so head yaw ~ 0). Why it matters: in the store photographs the\nhead is yawed 50 deg towards the camera, and the head-to-servo size ratio then depends\non the camera distance (the face is ~45 mm nearer than the servo) \u2014 a distance the\nstore frames do not reveal (HEAD-RECONSTRUCTION.html \u00a73). In a pure profile the head's\nsilhouette extremes (crest of the dome, front face, rear) and the neck servos all sit\non the robot's centre plane, so ONE mm/px serves both, to first order independent of\nthe camera distance.\n\nMeasured, both halves with the same estimators:\n  servo width   mode of the dark-run widths across the upper neck servo case (20.000 mm,\n                the horn/label face \u2014 the same face as in the store photographs). The\n                scan is BOUNDED to the half's region and a run that reaches the bound is\n                refused (it measured the region, not a case). On the simulator half the\n                background is a saturated blue, darker than the luminance threshold, so\n                saturated pixels are forced bright before the scan (the servo is grey).\n  head extents  principal-axis extents of the head silhouette (colour-segmented: sky\n                blue + orange on the real unit; white + yellow on the render), 0.5/99.5\n                percentile; the major axis is the head length (shell + closed beak), the\n                minor the head height at that pitch.\nResult: head length in mm for the real unit; the same for Pollen's render (which uses\nthese very meshes, so it must read ~122.7 mm \u2014 that is the method's check); and the\nratio real/sim, which is scale-free.\n\nLimits (stated, not hidden): a video frame \u2014 the servo is ~45 px wide, so +-1.5 px is\n+-3.3 %, i.e. +-4 mm on the head; motion blur; a residual head yaw of 10 deg would\nlengthen the silhouette by ~11 % (yaw only ever makes it LONGER), so the real value is an\nupper bound on the product head length if any yaw remains. Every refusal below names\nwhat the scan met, and out/head/profile_frame_servo_zoom.png shows both servo regions at\n4x with the scan lines drawn, so a reader can see it.\n\nWrites out/head/profile_frame.json, out/head/profile_frame_pair.png and\nout/head/profile_frame_servo_zoom.png.\n    /Applications/FreeCAD.app/Contents/Resources/bin/python tools/head_profile_frame.py\n",
   "image": "images/github/gh_readme_7.png",
   "size_px": [
    2215,
@@ -51,6 +52,8 @@
      ],
      "seed_x": 1930,
      "tilt_deg": -8.0,
+     "face_mm": 20.0,
+     "face_evidence": "CANNOT DETERMINE: no face evidence recorded for this scan",
      "n_lines": 60,
      "n_accepted": 23,
      "width_px_mode": 85,
@@ -58,6 +61,7 @@
      "width_px_unc": 1.5856158720704756,
      "width_px_min": 71.0,
      "width_px_max": 99.0,
+     "n_hit_boundary": 0,
      "lines": [
       [
        1931.9484234134409,
@@ -201,9 +205,17 @@
      "mm_per_px": 0.23553507424475165,
      "mm_per_px_unc": 0.004398242447255939
     },
+    "servo_region": [
+     1880,
+     240,
+     2010,
+     345
+    ],
+    "servo_region_mean_luminance": 62.17531135531136,
+    "scan_image": "luminance",
     "aspect_major_over_minor": 2.5290924900647296,
     "scale_verdict": "CANNOT DETERMINE",
-    "scale_why": "dark run 84.9 px is the servo + horn bracket + cables merged (a 20 mm case would be ~45 px at this frame's scale); the frame cannot resolve the case edge"
+    "scale_why": "the dark run of 84.9 px ends on bright pixels inside the region, but a 20 mm case is ~45 px at this frame's scale (head 317 px ~ 123 mm): the run is more than the case \u2014 out/head/profile_frame_servo_zoom.png shows what it spans \u2014 at 4x the left case edge is visible at x ~1905 but the right edge is behind the grey horn bracket (x ~1950-1995) and the cables, so the run is case + bracket"
    },
    "sim": {
     "note": "Pollen's own simulator render, left half of the frame (same meshes)",
@@ -239,101 +251,142 @@
       235,
       300
      ],
-     "seed_x": 505,
+     "seed_x": 545,
      "tilt_deg": -12.0,
+     "face_mm": 20.0,
+     "face_evidence": "CANNOT DETERMINE: no face evidence recorded for this scan",
      "n_lines": 65,
-     "n_accepted": 62,
-     "width_px_mode": 962,
-     "width_px": 962.0322580645161,
-     "width_px_unc": 1.425207873185453,
-     "width_px_min": 574.0,
-     "width_px_max": 963.0,
+     "n_accepted": 35,
+     "width_px_mode": 103,
+     "width_px": 102.25714285714285,
+     "width_px_unc": 1.6791640291331558,
+     "width_px_min": 75.0,
+     "width_px_max": 104.0,
+     "n_hit_boundary": 0,
      "lines": [
       [
-       511.75712995157716,
+       551.7571299515772,
        235.71020297615132,
-       523.0,
-       438.0
+       35.0,
+       66.0
       ],
       [
-       510.7175714974884,
-       240.60094097982034,
-       522.0,
-       439.0
+       551.3413065699417,
+       237.66649817761893,
+       34.0,
+       66.0
       ],
       [
-       509.6780130433996,
+       550.9254831883061,
+       239.62279337908654,
+       34.0,
+       67.0
+      ],
+      [
+       550.5096598066706,
+       241.57908858055416,
+       33.0,
+       67.0
+      ],
+      [
+       550.0938364250351,
+       243.53538378202177,
+       33.0,
+       67.0
+      ],
+      [
+       549.6780130433996,
        245.49167898348938,
-       521.0,
-       440.0
+       32.0,
+       68.0
       ],
       [
-       508.6384545893108,
-       250.3824169871584,
-       520.0,
-       441.0
+       549.2621896617641,
+       247.447974184957,
+       33.0,
+       68.0
       ],
       [
-       507.598896135222,
+       548.8463662801286,
+       249.4042693864246,
+       33.0,
+       69.0
+      ],
+      [
+       548.4305428984931,
+       251.3605645878922,
+       33.0,
+       68.0
+      ],
+      [
+       548.0147195168576,
+       253.31685978935982,
+       33.0,
+       68.0
+      ],
+      [
+       547.598896135222,
        255.27315499082744,
-       519.0,
-       442.0
+       32.0,
+       69.0
       ],
       [
-       506.5593376811332,
-       260.16389299449645,
-       518.0,
-       443.0
+       547.1830727535864,
+       257.229450192295,
+       33.0,
+       69.0
       ],
       [
-       505.5197792270444,
+       546.7672493719509,
+       259.18574539376266,
+       32.0,
+       70.0
+      ],
+      [
+       546.3514259903154,
+       261.14204059523024,
+       32.0,
+       70.0
+      ],
+      [
+       545.9356026086799,
+       263.0983357966979,
+       32.0,
+       71.0
+      ],
+      [
+       545.5197792270444,
        265.05463099816546,
-       517.0,
-       444.0
+       31.0,
+       71.0
       ],
       [
-       504.4802207729556,
-       269.94536900183454,
-       516.0,
-       445.0
+       545.1039558454089,
+       267.0109261996331,
+       31.0,
+       71.0
       ],
       [
-       503.4406623188668,
-       274.83610700550355,
-       515.0,
-       446.0
-      ],
-      [
-       502.401103864778,
-       279.72684500917256,
-       514.0,
-       447.0
-      ],
-      [
-       501.3615454106892,
-       284.6175830128416,
-       513.0,
-       448.0
-      ],
-      [
-       500.3219869566004,
-       289.50832101651065,
-       512.0,
-       450.0
-      ],
-      [
-       499.2824285025116,
-       294.39905902017966,
-       510.0,
-       451.0
+       544.6881324637734,
+       268.9672214011007,
+       30.0,
+       70.0
       ]
      ],
-     "mm_per_px": 0.020789323676357174,
-     "mm_per_px_unc": 3.079845559581849e-05
+     "mm_per_px": 0.19558535903883767,
+     "mm_per_px_unc": 0.003211706198186319
     },
+    "servo_region": [
+     480,
+     215,
+     620,
+     320
+    ],
+    "servo_region_mean_luminance": 66.33882086167802,
+    "scan_image": "luminance; saturated (s > 0.30) pixels forced to 255 so the blue background ends a run",
     "aspect_major_over_minor": 2.438685345252084,
     "scale_verdict": "CANNOT DETERMINE",
-    "scale_why": "dark run 962.0 px is the servo + horn bracket + cables merged (a 20 mm case would be ~45 px at this frame's scale); the frame cannot resolve the case edge"
+    "scale_why": "the dark run of 102.3 px ends on bright pixels inside the region, but a 20 mm case is ~45 px at this frame's scale (head 293 px ~ 123 mm): the run is more than the case \u2014 out/head/profile_frame_servo_zoom.png shows what it spans \u2014 at 4x the run spans the servo case AND the grey neck plate beside it: both are unsaturated greys of the same luminance in this render, so no threshold separates them"
    }
   },
   "aspect_real": 2.5290924900647296,
@@ -343,26 +396,56 @@
  },
  "sensitivity": [
   {
-   "file": "out/head/head_fit_cream-profile-left_D2000.json",
+   "file": "out/head/head_fit_D2000.json",
    "photo": "cream-profile-left",
    "D_mm": 2000.0,
-   "iou": 0.9136898204974874,
-   "product_over_mesh": 1.0559524597965324,
-   "unc": 0.008757028584388654,
-   "head_length_dev_mm": 6.864807292436561,
-   "yaw": 66.29516456370962,
-   "k": 2.0422027647111807
+   "iou": 0.8441624884886934,
+   "product_over_mesh": 1.0600225233314384,
+   "unc": 0.00857909404340671,
+   "head_length_dev_mm": 7.36416338753418,
+   "yaw": 60.81195927345319,
+   "roll": -3.064281035684247,
+   "k": 2.0482812128698007,
+   "at_bound": []
   },
   {
-   "file": "out/head/head_fit_cream-profile-left_D600.json",
+   "file": "out/head/head_fit_D600.json",
    "photo": "cream-profile-left",
    "D_mm": 600.0,
-   "iou": 0.8976808484298271,
-   "product_over_mesh": 1.0577570784080819,
-   "unc": 0.0086004645109587,
-   "head_length_dev_mm": 7.086215949887563,
-   "yaw": 72.6198823062749,
-   "k": 2.003538086316329
+   "iou": 0.9413774693005873,
+   "product_over_mesh": 1.0025866563662862,
+   "unc": 0.00812063815788712,
+   "head_length_dev_mm": 0.3173568695796525,
+   "yaw": 58.08232541564176,
+   "roll": -29.074026396315283,
+   "k": 1.9037342415101188,
+   "at_bound": []
+  },
+  {
+   "file": "out/head/head_fit_graphite-profile-right_D2000.json",
+   "photo": "graphite-profile-right",
+   "D_mm": 2000.0,
+   "iou": 0.8990322925577416,
+   "product_over_mesh": 0.9735154910496081,
+   "unc": 0.01189660287634644,
+   "head_length_dev_mm": -3.2493844031235812,
+   "yaw": -50.40941104174239,
+   "roll": -2.229953873241083,
+   "k": 1.9145421094690354,
+   "at_bound": []
+  },
+  {
+   "file": "out/head/head_fit_graphite-profile-right_D600.json",
+   "photo": "graphite-profile-right",
+   "D_mm": 600.0,
+   "iou": 0.9529713439780058,
+   "product_over_mesh": 1.0089928632415168,
+   "unc": 0.01589502515336953,
+   "head_length_dev_mm": 1.103334391101699,
+   "yaw": -50.11276511013432,
+   "roll": 11.952819061514845,
+   "k": 1.8703499053393857,
+   "at_bound": []
   }
  ],
  "mesh": {
@@ -390,7 +473,7 @@
   "eye_ring_source": "reference/pollen-microduck-rl/assets/noenoeil.stl via cecad.meshfeatures.cylinders(scale=1000): boss d_mm 30.0 length 7.5 axis y; hole d 14.4 length 6.0. face_part.stl: hole d 14.5 length 1.3 at the same axis, no 30 mm opening \u2014 the ring stands proud of the face panel (noenoeil y -63.5..-54.0, face_part front at y -55.5)."
  },
  "servo_source": "ROBOTIS e-manual, XL330-M288-T, Specifications table: 'Dimensions (W x H x D) 20.0 x 34.0 x 26.0 [mm]', https://emanual.robotis.com/docs/en/dxl/x/xl330-m288/ (fetched 2026-09-02; the same table at https://docs.robotis.com/docs/dxl/model_reference/x_series/xl_series/xl330-m288/, which links XL330.pdf/.dwg/.stp). Face seen: the 20.000 x 34.0 horn/label face \u2014 the servo mesh in Pollen's MJCF is 20.000 (mesh x) x 34.06 (mesh z) x 29.04 (mesh y = 26.0 case + 3.04 horn) and in the neck body mesh x = world -x, mesh z = world -z (tools/head_probe.py).",
- "fit_method": "head_photomatch.py \u2014 SETTLE the head question by measurement (GOAL.md handover\ncorrection 1; Leif: \"im not sure that the simulation meshes are the same as their\nproduct meshes! you have to use the images as references\").\n\nFor every usable product photograph the answer is built from four measurements,\neach of which is drawn on the annotated picture so a reader can check it:\n\n  1. SCALE  \u2014 mm per pixel from a feature of known size IN THE SAME FRAME: the\n     XL330-M288-T servo case. ROBOTIS's specification table gives the case as\n     \"Dimensions (W x H x D) 20.0 x 34.0 x 26.0 [mm]\" (XL330_SRC below). Which\n     face the camera sees is READ off the published MJCF, not assumed: the servo\n     mesh is 20.000 wide (mesh x) x 34.06 tall (mesh z) x 29.04 (mesh y = 26 case\n     + 3.04 horn), and in the neck body mesh x = world -x, mesh z = world -z, so a\n     profile camera sees the 20.000 x 34.0 horn/label face (tools/head_probe.py\n     output, quoted in head.json). The case width is read as the MODE of the\n     dark-run widths across many rows (label text and cables break single rows;\n     the mode is the case). Uncertainty: +-1 px per edge plus the spread of the\n     accepted rows.\n  2. POSE   \u2014 our model (Pollen's published meshes in Pollen's kinematic tree,\n     sim/microduck_ours.xml) is posed to the photograph with a PERSPECTIVE camera\n     (MuJoCo free camera; distance D is a fitted parameter because the store shots\n     are taken close enough that the near and far edges of the head differ in\n     scale \u2014 4 % at 0.5 m, measured below). Fitted: camera elevation, azimuth (for\n     a 3/4 shot), distance, head pitch / yaw / roll, the jaw opening (the jaw is\n     NOT a joint in the published model, so the jaw + jaw_soft geoms are rotated\n     about the measured hinge line \u2014 body-frame y through (3.2, *, -18.0) mm, the\n     15x10x3 bearing centre), and a similarity (k, tx, ty) between render pixels\n     and photo pixels. The objective is silhouette IoU of the head region PLUS\n     the eye-ring ellipse (centre, major, minor) \u2014 a circle's image pins yaw and\n     pitch far better than a silhouette does.\n  3. SIZE   \u2014 the same servo is measured in the RENDER at the fitted camera (the\n     segmentation mask of that xl330 geom, same mode-of-runs estimator), so the\n     product/mesh size ratio needs no px-per-mm calibration of the renderer:\n        r = k * W_render / W_photo\n     (one render px = k photo px; the servo is W_render render px and W_photo\n     photo px; if the product head were the mesh head, W_photo would be\n     k * W_render). The perspective camera puts the servo and the head at their\n     real depths, so the depth difference is modelled, not assumed away.\n     Head-length deviation = 122.690 * (r - 1) mm; per-axis deviations are the\n     photo head extents along its own principal axes minus the render extents at\n     the servo-anchored scale, in mm.\n  4. EYE    \u2014 the eye ring is a circle in 3D, so its image is an ellipse whose\n     MAJOR axis is the true diameter whatever the viewing angle. Measured from the\n     accent-hue pixels (HSV hue + saturation, so the shaded rim counts) against\n     the noenoeil mesh: a 30.000 mm cylinder 7.5 mm long standing proud of the\n     face panel (cecad.meshfeatures on reference/pollen-microduck-rl/assets/\n     noenoeil.stl: boss d 30.0 length 7.5; face_part carries only a 14.5 mm lens\n     hole, so the whole 30 mm ring is visible).\n\nWrites out/head/head.json and the overlays out/head/<id>_{pair,measure,overlay,\nours,real}.png (real beside ours, always). FreeCAD's python has mujoco, numpy,\nPIL, scipy:\n    /Applications/FreeCAD.app/Contents/Resources/bin/python tools/head_photomatch.py [--quick] [--only ID]\n",
+ "fit_method": "head_photomatch.py \u2014 SETTLE the head question by measurement (GOAL.md handover\ncorrection 1; Leif: \"im not sure that the simulation meshes are the same as their\nproduct meshes! you have to use the images as references\").\n\nFor every usable product photograph the answer is built from four measurements,\neach of which is drawn on the annotated picture so a reader can check it:\n\n  1. SCALE  \u2014 mm per pixel from a feature of known size IN THE SAME FRAME: the\n     XL330-M288-T servo case. ROBOTIS's specification table gives the case as\n     \"Dimensions (W x H x D) 20.0 x 34.0 x 26.0 [mm]\" (XL330_SRC below). Which\n     face the camera sees is READ off the published MJCF, not assumed: the servo\n     mesh is 20.000 wide (mesh x) x 34.06 tall (mesh z) x 29.04 (mesh y = 26 case\n     + 3.04 horn), and in the neck body mesh x = world -x, mesh z = world -z, so a\n     profile camera sees the 20.000 x 34.0 horn/label face (tools/head_probe.py\n     output, quoted in head.json). The case width is read as the MODE of the\n     dark-run widths across many rows (label text and cables break single rows;\n     the mode is the case). Uncertainty: +-1 px per edge plus the spread of the\n     accepted rows.\n  2. POSE   \u2014 our model (Pollen's published meshes in Pollen's kinematic tree,\n     sim/microduck_ours.xml) is posed to the photograph with a PERSPECTIVE camera\n     (MuJoCo free camera; distance D is a fitted parameter because the store shots\n     are taken close enough that the near and far edges of the head differ in\n     scale \u2014 4 % at 0.5 m, measured below). Fitted: camera elevation, azimuth (for\n     a 3/4 shot), distance, head pitch / yaw / roll, the jaw opening (the jaw is\n     NOT a joint in the published model, so the jaw + jaw_soft geoms are rotated\n     about the measured hinge line \u2014 body-frame y through (3.2, *, -18.0) mm, the\n     15x10x3 bearing centre), and a similarity (k, tx, ty) between render pixels\n     and photo pixels. The objective is silhouette IoU of the head region PLUS\n     the eye-ring ellipse (centre, major, minor) \u2014 a circle's image pins yaw and\n     pitch far better than a silhouette does.\n  3. SIZE   \u2014 W_render is the width a 20.000 mm face has in the render at the\n     servo's depth: 20.000 * f / z through the exact pinhole the frame was drawn\n     with (f from its fovy, z = the servo geom's mean vertex depth in the fitted\n     camera, MuJoCo's stereo pair averaged as the mono render does), so the\n     product/mesh size ratio needs no px-per-mm calibration of the renderer:\n        r = k * W_render / W_photo\n     (one render px = k photo px; if the product head were the mesh head,\n     W_photo would be k * W_render). The perspective camera puts the servo and\n     the head at their real depths, so the depth difference is modelled, not\n     assumed away. The model's servo fixes the DEPTH; the face the photograph\n     shows is identified on the photograph (face_evidence per scan). The\n     projection is CROSS-CHECKED, for every servo, in a second +-250 mm / 1600 px\n     frame that holds even the ankle: the geom's segmentation mask read across\n     its own axis against its projected-vertex extent (servo_crosscheck) \u2014 a\n     servo without that read is never graded PASS by tools/head_verdict.py.\n     Head-length deviation = 122.690 * (r - 1) mm; per-axis deviations are the\n     photo head extents along its own principal axes minus the render extents at\n     the servo-anchored scale, in mm.\n  4. EYE    \u2014 the eye ring is a circle in 3D, so its image is an ellipse whose\n     MAJOR axis is the true diameter whatever the viewing angle. Measured from the\n     accent-hue pixels (HSV hue + saturation, so the shaded rim counts) against\n     the noenoeil mesh: a 30.000 mm cylinder 7.5 mm long standing proud of the\n     face panel (cecad.meshfeatures on reference/pollen-microduck-rl/assets/\n     noenoeil.stl: boss d 30.0 length 7.5; face_part carries only a 14.5 mm lens\n     hole, so the whole 30 mm ring is visible).\n\nWrites out/head/head.json and the overlays out/head/<id>_{pair,measure,overlay,\nours,real}.png (real beside ours, always). FreeCAD's python has mujoco, numpy,\nPIL, scipy:\n    /Applications/FreeCAD.app/Contents/Resources/bin/python tools/head_photomatch.py [--quick] [--only ID]\n",
  "front_method": "head_frontview.py \u2014 the face layout, scale-free, from the one true FRONT view.\n\nimages/store/store_microduck-inside-the-box.png is a flat-lay: the robot lies on\nits back and the camera looks straight at the face. The photo is a composite\n(the battery in the same frame measures 268 px across = 70.8 mm and the gamepad\n485 px = ~152 mm \u2014 two different mm/px, so it is NOT one scale), so nothing here\nuses mm/px from another object. Instead every number is a RATIO inside the head\nitself (one object, one depth), compared with the same ratio measured on our\nmesh rendered in a true front view with the head LEVEL (eye-ring axis\nhorizontal: pitch_total = 40.000 deg, bisected on the noenoeil geom axis).\n\nMeasured on both sides with the same estimators:\n  head width       widest row of the head silhouette (shell + beak), px\n  eye ring OD      principal-axis extent of the accent-hue ring pixels, px\n  eye centre       ring centroid; offset from the head's mid-column, and depth\n                   below the shell's top edge, px\n  ToF window       dark pill right of the eye (photo only; the mesh has no\n                   separate ToF geom \u2014 its site is at y = +22.4 mm, PROPORTIONS.md)\nRatios: eyeOD/width, eye-below-top/width, eye-x-offset/width, tof-offset/width.\nConverted to mm through the MESH head width (91.763 mm) so a reader sees the\nimplied product dimension if the head width is the mesh's.\n\nWrites out/head/front_view.json and out/head/front_pair.png (real beside ours).\n    /Applications/FreeCAD.app/Contents/Resources/bin/python tools/head_frontview.py\n",
  "quick": false,
  "photos": [
@@ -417,6 +500,8 @@
       ],
       "seed_x": 1222,
       "tilt_deg": 0.0,
+      "face_mm": 20.0,
+      "face_evidence": "the 20 x 34 label face: 'DYNAMIXEL XL330-M288-T' printed across it (visible in the pair picture), the neck pitch axes are lateral so the horn faces a profile camera; the model's neck servo geom shows the same 20 mm face (render_silhouette_mm)",
       "n_lines": 129,
       "n_accepted": 30,
       "width_px_mode": 131,
@@ -518,27 +603,59 @@
       ],
       "mm_per_px": 0.15232292460015232,
       "mm_per_px_unc": 0.0017246329542258015,
+      "crosscheck": {
+       "frame_half_mm": 250.0,
+       "frame_px": 1600,
+       "n_mask_px": 2949,
+       "tilt_render_deg": 0.021434005365318615,
+       "mask": {
+        "n_lines": 35,
+        "n_accepted": 35,
+        "width_px_mode": 65,
+        "width_px": 64.9999955217186,
+        "width_px_unc": 1.4142135623730951,
+        "width_px_min": 64.9999955217186,
+        "width_px_max": 64.9999955217186,
+        "centre_px": [
+         762.3106137673788,
+         948.5812139708376
+        ]
+       },
+       "analytic_px": 65.70380537126994,
+       "servo_depth_mm": 1085.2623233596853,
+       "mask_fill_of_projected_bbox": 0.3883576066037538,
+       "mask_vs_analytic_pct": -1.0711858248914852,
+       "how": "mask: mode of run widths across the servo geom's own axis (0.0 deg from image-down) in a 1600 px frame spanning +-250 mm at the head; analytic: extent of the geom's projected mesh vertices along the same direction",
+       "picture": "out/head/cream-profile-left_render_servo_wide.png"
+      },
+      "render_mask_vs_analytic_pct": -1.0711858248914852,
+      "render_tilt_deg": 0.021434005365318615,
+      "tilt_photo_minus_render_deg": -0.021434005365318615,
       "render": {
-       "n_lines": 38,
-       "n_accepted": 38,
+       "n_lines": 37,
+       "n_accepted": 37,
        "width_px_mode": 69,
-       "width_px": 69.0,
+       "width_px": 68.99999524182603,
        "width_px_unc": 1.4142135623730951,
-       "width_px_min": 69.0,
-       "width_px_max": 69.0,
+       "width_px_min": 68.99999524182601,
+       "width_px_max": 68.99999524182601,
        "centre_px": [
-        284.1504424778761,
-        474.3197640117994
+        280.49743434953217,
+        476.3009357078177
        ]
       },
-      "render_width_px_analytic": 68.37434917452907,
-      "render_width_analytic_how": "(20.000*|sin az| + 26.000*|cos az|) mm * 640 px / 190.0 mm * D_head/D_servo (1.0147)",
-      "render_mask_vs_analytic_pct": 0.9150373393301603,
+      "render_width_px_analytic": 68.2832715853381,
+      "render_width_analytic_how": "20.000 mm * f / z: f = 3705.3 px (fovy 9.872 deg, 640 px frame, +-95 mm at the head, D 1100 mm), z = 1085.3 mm (the servo geom's mean vertex depth in the fitted camera)",
+      "render_silhouette_px": 69.16189878065447,
+      "render_silhouette_mm": 20.257347714869894,
+      "render_silhouette_how": "extent of the model servo geom's projected vertices across its own axis (0.0 deg from image-down) in the head frame, and in mm at its depth",
+      "render_width_px_box_formula": 68.29920934320977,
+      "render_mask_vs_silhouette_pct_headframe": -0.23409354237354796,
       "size_ratio": {
-       "product_over_mesh": 1.037446812032534,
-       "unc": 0.011995710209850758,
-       "servo_depth_mm": 1084.0626825851862,
-       "head_depth_mm": 1100.0000653893605,
+       "product_over_mesh": 1.0440337803728468,
+       "unc": 0.01220444997089054,
+       "servo_depth_mm": 1085.2551734028723,
+       "head_depth_mm": 1099.9999153959468,
        "how": "k * W_render_analytic / W_photo; unc = photo width + fit spread of k (the analytic width is exact)"
       }
      },
@@ -551,6 +668,8 @@
       ],
       "seed_x": 1218,
       "tilt_deg": 0.0,
+      "face_mm": 20.0,
+      "face_evidence": "as the upper servo: label text across the scanned face, lateral pitch axis",
       "n_lines": 63,
       "n_accepted": 46,
       "width_px_mode": 131,
@@ -658,27 +777,59 @@
       ],
       "mm_per_px": 0.15214155779725483,
       "mm_per_px_unc": 0.0017352995966826914,
+      "crosscheck": {
+       "frame_half_mm": 250.0,
+       "frame_px": 1600,
+       "n_mask_px": 3275,
+       "tilt_render_deg": 0.024707615156882284,
+       "mask": {
+        "n_lines": 49,
+        "n_accepted": 34,
+        "width_px_mode": 65,
+        "width_px": 64.99999404932318,
+        "width_px_unc": 1.4142135623730951,
+        "width_px_min": 5.999999535103374,
+        "width_px_max": 64.99999404932319,
+        "centre_px": [
+         756.6635114503816,
+         1037.3841221374046
+        ]
+       },
+       "analytic_px": 65.62570791027713,
+       "servo_depth_mm": 1086.9479202606822,
+       "mask_fill_of_projected_bbox": 0.4240153049049318,
+       "mask_vs_analytic_pct": -0.9534584553501868,
+       "how": "mask: mode of run widths across the servo geom's own axis (0.0 deg from image-down) in a 1600 px frame spanning +-250 mm at the head; analytic: extent of the geom's projected mesh vertices along the same direction",
+       "picture": "out/head/cream-profile-left_render_servo_wide_1.png"
+      },
+      "render_mask_vs_analytic_pct": -0.9534584553501868,
+      "render_tilt_deg": 0.024707615156882284,
+      "tilt_photo_minus_render_deg": -0.024707615156882284,
       "render": {
-       "n_lines": 57,
-       "n_accepted": 37,
+       "n_lines": 52,
+       "n_accepted": 36,
        "width_px_mode": 69,
-       "width_px": 69.0,
+       "width_px": 68.99999367740593,
        "width_px_unc": 1.4142135623730951,
-       "width_px_min": 6.0,
-       "width_px_max": 69.0,
+       "width_px_min": 6.99999944212405,
+       "width_px_max": 68.9999936774059,
        "centre_px": [
-        278.1512649800266,
-        569.2351531291611
+        274.3297091600979,
+        570.0065235118238
        ]
       },
-      "render_width_px_analytic": 68.37465985275583,
-      "render_width_analytic_how": "(20.000*|sin az| + 26.000*|cos az|) mm * 640 px / 190.0 mm * D_head/D_servo (1.0147)",
-      "render_mask_vs_analytic_pct": 0.9145788053510406,
+      "render_width_px_analytic": 68.17738052208774,
+      "render_width_analytic_how": "20.000 mm * f / z: f = 3705.3 px (fovy 9.872 deg, 640 px frame, +-95 mm at the head, D 1100 mm), z = 1086.9 mm (the servo geom's mean vertex depth in the fitted camera)",
+      "render_silhouette_px": 69.07969092889172,
+      "render_silhouette_mm": 20.26469494717875,
+      "render_silhouette_how": "extent of the model servo geom's projected vertices across its own axis (0.0 deg from image-down) in the head frame, and in mm at its depth",
+      "render_width_px_box_formula": 68.21500978712291,
+      "render_mask_vs_silhouette_pct_headframe": -0.11537001745973718,
       "size_ratio": {
-       "product_over_mesh": 1.0362162603819618,
-       "unc": 0.01206632750365536,
-       "servo_depth_mm": 1084.0577568616413,
-       "head_depth_mm": 1100.0000653893605,
+       "product_over_mesh": 1.0411735579233163,
+       "unc": 0.01225534685410852,
+       "servo_depth_mm": 1086.59473201507,
+       "head_depth_mm": 1099.9999153959468,
        "how": "k * W_render_analytic / W_photo; unc = photo width + fit spread of k (the analytic width is exact)"
       }
      }
@@ -687,49 +838,90 @@
     "mm_per_px_unc": 0.0017376674507929948
    },
    "fit": {
-    "objective": 0.05980319186876855,
-    "iou": 0.9557515469233413,
-    "eye_term": 0.001555473879210985,
-    "seconds": 848.2,
-    "n_eval": 3195,
-    "cam_el_deg": 0.007800519688842893,
+    "objective": 0.06099449656703736,
+    "iou": 0.9544009963709764,
+    "eye_term": 0.0015395492938013776,
+    "seconds": 463.5,
+    "n_eval": 3257,
+    "cam_el_deg": -2.1218490044348144,
     "cam_az_deg": 269.99,
     "cam_distance_mm": 1100.0,
-    "cam_distance_source": "camera distance to the head: not measurable from this frame to better than a factor 2 (the near ankle servo, 44.1 mm nearer than the neck servos, reads 136.2-145.5 px against the neck's 131.4 px depending on the scan tilt, i.e. D 700-1650 mm); 1100 mm is the centre of that range and the sensitivity runs at 700 and 1600 mm bracket it (out/head/head_fit_*_D700.json / _D1600.json)",
-    "head_pitch_deg": -3.539252167134216,
-    "head_yaw_deg": 61.95140650653866,
-    "head_roll_deg": -25.0,
-    "jaw_open_deg": 24.86903051962014,
-    "k_photo_px_per_render_px": 1.9922202999281406,
-    "k_fit_spread": 0.004673871525805252,
+    "cam_distance_source": "camera distance to the head: not measurable from this frame to better than a factor 2 (the near ankle servo, 44.1 mm nearer than the neck servos, reads 136.2-145.5 px against the neck's 131.4 px depending on the scan tilt, i.e. D 700-1650 mm); its centre is 1175 mm; 1100 mm is used, inside that range, and the sensitivity runs at 600 and 2000 mm bracket the whole range (out/head/head_fit_cream-profile-left_D600.json / _D2000.json)",
+    "head_pitch_deg": -6.812084937202351,
+    "head_yaw_deg": 63.81275405016774,
+    "head_roll_deg": -30.57473780875575,
+    "jaw_open_deg": 23.510656868869617,
+    "k_photo_px_per_render_px": 2.00754346094321,
+    "k_fit_spread": 0.005838021776680773,
     "polishes": [
      [
-      0.0653,
-      0.9954
+      0.06156,
+      1.0043
      ],
      [
-      0.06424,
-      1.0008
+      0.06195,
+      1.0086
      ],
      [
-      0.0598,
-      0.9961
+      0.06406,
+      1.0085
      ],
      [
-      0.06139,
-      0.9954
+      0.06099,
+      1.0038
      ],
      [
-      0.08043,
-      0.9992
+      0.06625,
+      1.0075
      ],
      [
-      0.06471,
-      0.994
+      0.06321,
+      1.0006
      ]
     ],
-    "tx": 563.7245387317075,
-    "ty": -45.66730633100792,
+    "tx": 554.6165380801325,
+    "ty": -54.977592918946016,
+    "bounds": {
+     "cam_el": [
+      -20.0,
+      4.0
+     ],
+     "cam_az": [
+      269.99,
+      270.01
+     ],
+     "head_pitch": [
+      -40.0,
+      40.0
+     ],
+     "head_yaw": [
+      0.0,
+      90.0
+     ],
+     "head_roll": [
+      -45.0,
+      45.0
+     ],
+     "jaw": [
+      0.0,
+      40.0
+     ],
+     "k": [
+      0.6872672821264145,
+      1.374534564252829
+     ],
+     "tx": [
+      -131.2739349533688,
+      108.72606504663119
+     ],
+     "ty": [
+      -261.454749159128,
+      -21.454749159128
+     ]
+    },
+    "at_bound": [],
+    "head_roll_joint_range_deg": 25.0,
+    "head_roll_within_joint_range": false,
     "crop_box": [
      616,
      212,
@@ -742,10 +934,10 @@
     ],
     "photo_head_area_px": 364402,
     "render_head_extent_px": [
-     414,
+     409,
      344
     ],
-    "render_head_area_px": 91784,
+    "render_head_area_px": 90306,
     "photo_head_pca": {
      "centre": [
       417.81093407829815,
@@ -760,26 +952,26 @@
     },
     "render_head_pca": {
      "centre": [
-      235.46882898980215,
-      303.5601847816613
+      238.04917724182224,
+      304.9582087568932
      ],
-     "major_px": 393.4235822253055,
-     "minor_px": 316.5534632998335,
+     "major_px": 386.92310437251626,
+     "minor_px": 312.7566234041859,
      "major_axis_dir": [
-      -0.9971760195061035,
-      0.07509984102488737
+      -0.992877651405229,
+      0.11913844610383577
      ]
     },
     "render_eye": {
      "centre": [
-      173.6908344733242,
-      260.196853625171
+      180.0707002039429,
+      263.52658055744394
      ],
-     "major_px": 104.75399013684216,
-     "minor_px": 102.69529169637744,
+     "major_px": 104.93152184964103,
+     "minor_px": 103.91441752930469,
      "major_axis_dir": [
-      -0.09221628901075093,
-      0.9957389999598718
+      -0.008570523975706165,
+      0.999963272384932
      ]
     }
    },
@@ -811,39 +1003,56 @@
     "diameter_unc_mm": 0.5209703879248668,
     "mesh_diameter_mm": 30.0,
     "dev_mm": 7.035333029959261,
-    "render_major_px": 104.75399013684216,
-    "render_minor_px": 102.69529169637744,
-    "diameter_via_render_mm": 36.260404384466,
+    "render_major_px": 104.93152184964103,
+    "render_minor_px": 103.91441752930469,
+    "diameter_via_render_mm": 36.122821767483636,
     "centre_offset_photo_minus_render_mm": [
-     -0.2615461201564559,
-     -1.1646778063952565
+     -1.2299486422037391,
+     -1.3719150919915895
     ],
     "ring_over_head_photo": 0.3119442050175139,
-    "ring_over_head_render": 0.26626261075740937,
-    "ring_over_head_ratio": 1.1715659368401703,
-    "dev_scale_free_mm": 5.146978105205109,
-    "dev_scale_free_unc_mm": 0.48590905132970175,
-    "dev_scale_free_how": "30.000 mm * ((photo ring major / photo head major) / (render ring major / render head major) - 1): the ring at the head's own scale",
+    "ring_over_head_render": 0.2711947688412439,
+    "ring_over_head_ratio": 1.150258931432872,
+    "dev_scale_free_mm": 4.507767942986158,
+    "dev_scale_free_unc_mm": 0.477779699814661,
+    "dev_scale_free_how": "30.000 mm * ((photo ring major / photo head major) / (render ring major / render head major) - 1): the ring at the head's own scale (the head's major axis, its LENGTH in these yawed profiles)",
     "axis_ratio_photo": 0.8318967686262732,
-    "axis_ratio_render": 0.980347302878149,
+    "axis_ratio_render": 0.9903069706565986,
     "ring_read_verdict": "CANNOT DETERMINE",
-    "ring_read_why": "ring axis ratio photo 0.832 vs render 0.980: the render's ring is partly hidden at this pose, the two extents are not the same feature"
+    "ring_read_why": "ring axis ratio photo 0.832 vs render 0.990: the render's ring is partly hidden at this pose, the two extents are not the same feature"
    },
    "size": {
-    "product_over_mesh": 1.036835147600432,
-    "unc": 0.008507105109050337,
+    "product_over_mesh": 1.0426096207828683,
+    "unc": 0.029991731188288108,
     "n_servos": 2,
-    "head_length_dev_mm": 4.519304259097008,
-    "head_length_dev_unc_mm": 1.043736725829386,
+    "head_length_dev_mm": 5.227774373850116,
+    "head_length_dev_unc_mm": 3.6796854994910677,
     "photo_head_extent_major_mm": 118.72422194180507,
     "photo_head_extent_minor_mm": 96.15145535844566,
-    "mesh_head_extent_major_mm": 115.07862915433357,
-    "mesh_head_extent_minor_mm": 92.59368338967442,
-    "dev_major_mm": 3.645592787471495,
-    "dev_major_unc_mm": 1.7765789088134525,
-    "dev_minor_mm": 3.5577719687712364,
-    "dev_minor_unc_mm": 1.482479048313795,
-    "how": "major/minor = principal axes of the photo head region (silhouette PCA, 0.5/99.5 percentile extents); mesh extents = the render head mask at the fitted pose scaled by k/r (the servo-anchored scale); unc = scale + 2 px edge on each mask + mm/px"
+    "mesh_head_extent_major_mm": 113.4160538827914,
+    "mesh_head_extent_minor_mm": 91.67615386973168,
+    "dev_major_mm": 5.308168059013671,
+    "dev_major_unc_mm": 3.712893819812672,
+    "dev_minor_mm": 4.475301488713983,
+    "dev_minor_unc_mm": 3.023700668286354,
+    "how": "major/minor = principal axes of the photo head region (silhouette PCA, 0.5/99.5 percentile extents); mesh extents = the render head mask at the fitted pose scaled by k/r (the servo-anchored scale); unc = scale + 2 px edge on each mask + mm/px",
+    "D_sensitivity_half_range": 0.02871793348257612,
+    "D_runs": [
+     [
+      2000.0,
+      1.0600225233314384
+     ],
+     [
+      600.0,
+      1.0025866563662862
+     ],
+     [
+      1100.0,
+      1.0426096207828683
+     ]
+    ],
+    "unc_fit_only": 0.008647787934545285,
+    "D_note": "camera distance is CANNOT DETERMINE from the store frame; the half-range of r over this photo's runs at D = 2000, 600, 1100 mm (0.0287) is added in quadrature"
    },
    "inputs": {
     "head_ycut": 985,
@@ -895,7 +1104,8 @@
       ],
       "seed_x": 1222,
       "what": "upper neck servo (head_pitch), horn/label face",
-      "geom": "neck_upper"
+      "geom": "neck_upper",
+      "face_evidence": "the 20 x 34 label face: 'DYNAMIXEL XL330-M288-T' printed across it (visible in the pair picture), the neck pitch axes are lateral so the horn faces a profile camera; the model's neck servo geom shows the same 20 mm face (render_silhouette_mm)"
      },
      {
       "rows": [
@@ -904,7 +1114,8 @@
       ],
       "seed_x": 1218,
       "what": "lower neck servo (neck_pitch), horn/label face",
-      "geom": "neck_lower"
+      "geom": "neck_lower",
+      "face_evidence": "as the upper servo: label text across the scanned face, lateral pitch axis"
      }
     ],
     "cam_az": 270.0,
@@ -916,17 +1127,45 @@
     "overlay": "out/head/cream-profile-left_overlay.png",
     "ours": "out/head/cream-profile-left_ours.png",
     "real": "out/head/cream-profile-left_real.png",
-    "render_servo": "out/head/cream-profile-left_render_servo.png"
+    "render_servo": "out/head/cream-profile-left_render_servo.png",
+    "render_servo_wide": "out/head/cream-profile-left_render_servo_wide.png"
    },
+   "scale_tests": [
+    {
+     "test": "render mask vs analytic width (upper neck servo (head_pitch), horn/label face)",
+     "verdict": "PASS",
+     "value": "-1.07 % (mask 65.0 px, analytic 65.7 px, 39 % of the projected box visible, frame \u00b1250 mm at 1600 px)"
+    },
+    {
+     "test": "render mask vs analytic width (lower neck servo (neck_pitch), horn/label face)",
+     "verdict": "PASS",
+     "value": "-0.95 % (mask 65.0 px, analytic 65.6 px, 42 % of the projected box visible, frame \u00b1250 mm at 1600 px)"
+    },
+    {
+     "test": "two servos agree",
+     "verdict": "PASS",
+     "value": "1.0440 vs 1.0412, 0.2 sigma apart"
+    },
+    {
+     "test": "no fitted parameter on its search bound",
+     "verdict": "PASS",
+     "value": "all 9 free parameters inside their boxes"
+    },
+    {
+     "test": "fitted head roll vs the MJCF joint range",
+     "verdict": "NOTE",
+     "value": "roll -30.57 deg exceeds the head_roll joint's \u00b125 deg (sim/microduck_ours.xml:215): the photographed pose includes a camera roll or a hand-posed unit; a geometric fit parameter, not a joint command"
+    }
+   ],
    "scale_verdict": "PASS",
-   "scale_why": "servos agree; render mask and analytic width agree",
+   "scale_why": "every scale test ran and passed: render mask vs analytic width (upper neck servo (head_pitch), horn/label face) -1.07 % (mask 65.0 px, analytic 65.7 px, 39 % of the projected box visible, frame \u00b1250 mm at 1600 px); render mask vs analytic width (lower neck servo (neck_pitch), horn/label face) -0.95 % (mask 65.0 px, analytic 65.6 px, 42 % of the projected box visible, frame \u00b1250 mm at 1600 px); two servos agree 1.0440 vs 1.0412, 0.2 sigma apart; no fitted parameter on its search bound all 9 free parameters inside their boxes",
    "verdicts": {
     "length": "CANNOT DETERMINE",
     "major": "CANNOT DETERMINE",
     "minor": "CANNOT DETERMINE"
    },
    "verdicts_eye": "CANNOT DETERMINE",
-   "verdict_why": "the photographs disagree by 5.13 mm rms, more than this photo's own \u00b11.04 mm \u2014 a systematic error the per-photo uncertainty does not contain; only the combined row grades"
+   "verdict_why": "the photographs disagree by 4.74 mm rms, more than this photo's own \u00b13.68 mm \u2014 a systematic error the per-photo uncertainty does not contain; only the combined row grades"
   },
   {
    "id": "sky-three-quarter-front-left",
@@ -951,6 +1190,8 @@
       ],
       "seed_x": 1200,
       "tilt_deg": 0.0,
+      "face_mm": 20.0,
+      "face_evidence": "CANNOT DETERMINE: no face evidence recorded for this scan",
       "n_lines": 83,
       "n_accepted": 32,
       "width_px_mode": 151,
@@ -1058,27 +1299,60 @@
       ],
       "mm_per_px": 0.1322587311427981,
       "mm_per_px_unc": 0.0014624445345318541,
+      "crosscheck": {
+       "frame_half_mm": 250.0,
+       "frame_px": 1600,
+       "n_mask_px": 5175,
+       "tilt_render_deg": 0.17649449582234114,
+       "mask": {
+        "n_lines": 57,
+        "n_accepted": 22,
+        "width_px_mode": 91,
+        "width_px": 90.9995729986604,
+        "width_px_unc": 1.4142135623730951,
+        "width_px_min": 27.999871899598123,
+        "width_px_max": 90.99957299866041,
+        "centre_px": [
+         736.328502415459,
+         931.799806763285
+        ]
+       },
+       "analytic_px": 90.89878959654379,
+       "servo_depth_mm": 1082.4532265101445,
+       "mask_fill_of_projected_bbox": 0.459569304338535,
+       "mask_vs_analytic_pct": 0.11087430598792913,
+       "how": "mask: mode of run widths across the servo geom's own axis (0.2 deg from image-down) in a 1600 px frame spanning +-250 mm at the head; analytic: extent of the geom's projected mesh vertices along the same direction",
+       "picture": "out/head/sky-three-quarter-front-left_render_servo_wide.png"
+      },
+      "render_mask_vs_analytic_pct": 0.11087430598792913,
+      "render_tilt_deg": 0.17649449582234114,
+      "tilt_photo_minus_render_deg": -0.17649449582234114,
       "render": {
-       "n_lines": 69,
-       "n_accepted": 16,
-       "width_px_mode": 94,
-       "width_px": 94.0625,
-       "width_px_unc": 1.5995604865087159,
-       "width_px_min": 78.0,
-       "width_px_max": 100.0,
+       "n_lines": 60,
+       "n_accepted": 23,
+       "width_px_mode": 95,
+       "width_px": 94.99955402082311,
+       "width_px_unc": 1.4142135623730951,
+       "width_px_min": 28.999867155138794,
+       "width_px_max": 94.9995540208231,
        "centre_px": [
-        275.25717838571103,
-        458.93432059687996
+        252.95913714486144,
+        458.6671343388285
        ]
       },
-      "render_width_px_analytic": 109.61161742040579,
-      "render_width_analytic_how": "(20.000*|sin az| + 26.000*|cos az|) mm * 640 px / 190.0 mm * D_head/D_servo (1.0177)",
-      "render_mask_vs_analytic_pct": -14.18564727566104,
+      "render_width_px_analytic": 68.46047492160153,
+      "render_width_analytic_how": "20.000 mm * f / z: f = 3705.3 px (fovy 9.872 deg, 640 px frame, +-95 mm at the head, D 1100 mm), z = 1082.5 mm (the servo geom's mean vertex depth in the fitted camera)",
+      "render_silhouette_px": 95.68293418982299,
+      "render_silhouette_mm": 27.952752095101776,
+      "render_silhouette_how": "extent of the model servo geom's projected vertices across its own axis (0.2 deg from image-down) in the head frame, and in mm at its depth",
+      "render_face_note": "the model's servo geom presents a 27.95 mm silhouette across its axis at this camera \u2014 a 20 x 26 case turned 20.9 deg about its long axis (leg pose + hip yaw in the model's keyframe), not the square-on 20.000 mm label face the photograph shows; the geom fixes the depth only, the face width comes from the photograph's face_evidence",
+      "render_width_px_box_formula": 100.72351455892681,
+      "render_mask_vs_silhouette_pct_headframe": -0.7142132239006505,
       "size_ratio": {
-       "product_over_mesh": 1.410924080837403,
-       "unc": 0.017708023718611084,
-       "servo_depth_mm": 1080.8694496784794,
-       "head_depth_mm": 1100.0000026713694,
+       "product_over_mesh": 0.8721352052342997,
+       "unc": 0.010290985525538459,
+       "servo_depth_mm": 1082.8466884138463,
+       "head_depth_mm": 1099.9999844214478,
        "how": "k * W_render_analytic / W_photo; unc = photo width + fit spread of k (the analytic width is exact)"
       }
      },
@@ -1091,6 +1365,8 @@
       ],
       "seed_x": 1160,
       "tilt_deg": 0.0,
+      "face_mm": 20.0,
+      "face_evidence": "CANNOT DETERMINE: no face evidence recorded for this scan",
       "n_lines": 57,
       "n_accepted": 11,
       "width_px_mode": 166,
@@ -1168,27 +1444,60 @@
       ],
       "mm_per_px": 0.12087912087912087,
       "mm_per_px_unc": 0.0012601758578137483,
+      "crosscheck": {
+       "frame_half_mm": 250.0,
+       "frame_px": 1600,
+       "n_mask_px": 6313,
+       "tilt_render_deg": 0.04431549963829038,
+       "mask": {
+        "n_lines": 69,
+        "n_accepted": 20,
+        "width_px_mode": 79,
+        "width_px": 79.14997662427979,
+        "width_px_unc": 1.492481110065845,
+        "width_px_min": 39.9999883345734,
+        "width_px_max": 90.99997307978478,
+        "centre_px": [
+         733.7635038808808,
+         1028.4815460161572
+        ]
+       },
+       "analytic_px": 90.5650042553342,
+       "servo_depth_mm": 1087.8502934279331,
+       "mask_fill_of_projected_bbox": 0.5532532134673458,
+       "mask_vs_analytic_pct": -12.604236840613936,
+       "how": "mask: mode of run widths across the servo geom's own axis (0.0 deg from image-down) in a 1600 px frame spanning +-250 mm at the head; analytic: extent of the geom's projected mesh vertices along the same direction",
+       "picture": "out/head/sky-three-quarter-front-left_render_servo_wide_1.png"
+      },
+      "render_mask_vs_analytic_pct": -12.604236840613936,
+      "render_tilt_deg": 0.04431549963829038,
+      "tilt_photo_minus_render_deg": -0.04431549963829038,
       "render": {
-       "n_lines": 77,
-       "n_accepted": 30,
-       "width_px_mode": 94,
-       "width_px": 93.73333333333333,
-       "width_px_unc": 1.8061622912192088,
-       "width_px_min": 84.0,
-       "width_px_max": 101.0,
+       "n_lines": 73,
+       "n_accepted": 22,
+       "width_px_mode": 83,
+       "width_px": 83.22724813198518,
+       "width_px_unc": 1.5353949989171793,
+       "width_px_min": 42.999987437232896,
+       "width_px_max": 94.99997188333077,
        "centre_px": [
-        275.55822282450873,
-        569.698383505953
+        250.1048630038732,
+        560.7374838617128
        ]
       },
-      "render_width_px_analytic": 108.90227479088048,
-      "render_width_analytic_how": "(20.000*|sin az| + 26.000*|cos az|) mm * 640 px / 190.0 mm * D_head/D_servo (1.0111)",
-      "render_mask_vs_analytic_pct": -13.92894821221623,
+      "render_width_px_analytic": 68.12082730040984,
+      "render_width_analytic_how": "20.000 mm * f / z: f = 3705.3 px (fovy 9.872 deg, 640 px frame, +-95 mm at the head, D 1100 mm), z = 1087.9 mm (the servo geom's mean vertex depth in the fitted camera)",
+      "render_silhouette_px": 95.33158120725582,
+      "render_silhouette_mm": 27.988967540528463,
+      "render_silhouette_how": "extent of the model servo geom's projected vertices across its own axis (0.0 deg from image-down) in the head frame, and in mm at its depth",
+      "render_face_note": "the model's servo geom presents a 27.99 mm silhouette across its axis at this camera \u2014 a 20 x 26 case turned 21.0 deg about its long axis (leg pose + hip yaw in the model's keyframe), not the square-on 20.000 mm label face the photograph shows; the geom fixes the depth only, the face width comes from the photograph's face_evidence",
+      "render_width_px_box_formula": 100.3261282543577,
+      "render_mask_vs_silhouette_pct_headframe": -12.697086235205933,
       "size_ratio": {
-       "product_over_mesh": 1.2811823649689187,
-       "unc": 0.015370679161157029,
-       "servo_depth_mm": 1087.9097688920199,
-       "head_depth_mm": 1100.0000026713694,
+       "product_over_mesh": 0.7931416654735974,
+       "unc": 0.008890605375887704,
+       "servo_depth_mm": 1087.135784897593,
+       "head_depth_mm": 1099.9999844214478,
        "how": "k * W_render_analytic / W_photo; unc = photo width + fit spread of k (the analytic width is exact)"
       }
      }
@@ -1197,49 +1506,90 @@
     "mm_per_px_unc": 0.005874744799127801
    },
    "fit": {
-    "objective": 0.06945400014981795,
-    "iou": 0.9381395294692851,
-    "eye_term": 0.0007593529619103094,
-    "seconds": 551.7,
-    "n_eval": 3267,
-    "cam_el_deg": -11.22084429446608,
-    "cam_az_deg": 204.6722802160114,
+    "objective": 0.044053090424079004,
+    "iou": 0.9585150515902564,
+    "eye_term": 0.00025681420143354114,
+    "seconds": 459.6,
+    "n_eval": 3244,
+    "cam_el_deg": -6.808349694129477,
+    "cam_az_deg": 243.7538039163894,
     "cam_distance_mm": 1100.0,
-    "cam_distance_source": "camera distance to the head: not measurable from this frame either; same store shoot, same value assumed to better than a factor 2 (the near ankle servo, 44.1 mm nearer than the neck servos, reads 136.2-145.5 px against the neck's 131.4 px depending on the scan tilt, i.e. D 700-1650 mm); 1100 mm is the centre of that range and the sensitivity runs at 700 and 1600 mm bracket it (out/head/head_fit_*_D700.json / _D1600.json)",
-    "head_pitch_deg": -19.835986291014123,
-    "head_yaw_deg": 2.1791949104391035,
-    "head_roll_deg": -4.461291975798966,
-    "jaw_open_deg": 20.732274602881244,
-    "k_photo_px_per_render_px": 1.9464923597542985,
-    "k_fit_spread": 0.011556943973767046,
+    "cam_distance_source": "camera distance to the head: not measurable from this frame either; same store shoot, same value assumed to better than a factor 2 (the near ankle servo, 44.1 mm nearer than the neck servos, reads 136.2-145.5 px against the neck's 131.4 px depending on the scan tilt, i.e. D 700-1650 mm); its centre is 1175 mm; 1100 mm is used, inside that range, and the sensitivity runs at 600 and 2000 mm bracket the whole range (out/head/head_fit_cream-profile-left_D600.json / _D2000.json)",
+    "head_pitch_deg": -21.11993556785268,
+    "head_yaw_deg": 38.60022703455107,
+    "head_roll_deg": -19.595628700198425,
+    "jaw_open_deg": 21.519032187651487,
+    "k_photo_px_per_render_px": 1.926413682019474,
+    "k_fit_spread": 0.007935113244564739,
     "polishes": [
      [
-      0.08544,
-      0.9708
+      0.04405,
+      0.9632
      ],
      [
-      0.08848,
-      0.9726
+      0.04463,
+      0.9645
      ],
      [
-      0.07774,
-      0.9789
+      0.04542,
+      0.9645
      ],
      [
-      0.06945,
-      0.9732
+      0.05302,
+      0.9734
      ],
      [
-      0.0869,
-      0.9705
+      0.04505,
+      0.9632
      ],
      [
-      0.07336,
-      0.9648
+      0.04618,
+      0.9609
      ]
     ],
-    "tx": 521.5991553904983,
-    "ty": 40.89010070541673,
+    "tx": 532.5341613714946,
+    "ty": 47.215404748218674,
+    "bounds": {
+     "cam_el": [
+      -22.0,
+      2.0
+     ],
+     "cam_az": [
+      200.0,
+      250.0
+     ],
+     "head_pitch": [
+      -40.0,
+      40.0
+     ],
+     "head_yaw": [
+      0.0,
+      90.0
+     ],
+     "head_roll": [
+      -45.0,
+      45.0
+     ],
+     "jaw": [
+      0.0,
+      40.0
+     ],
+     "k": [
+      0.7162243972733807,
+      1.4324487945467614
+     ],
+     "tx": [
+      -231.57070528502217,
+      8.429294714977829
+     ],
+     "ty": [
+      -308.1408064262632,
+      -68.14080642626323
+     ]
+    },
+    "at_bound": [],
+    "head_roll_joint_range_deg": 25.0,
+    "head_roll_within_joint_range": true,
     "crop_box": [
      626,
      236,
@@ -1252,10 +1602,10 @@
     ],
     "photo_head_area_px": 334242,
     "render_head_extent_px": [
-     381,
-     287
+     387,
+     294
     ],
-    "render_head_area_px": 87563,
+    "render_head_area_px": 88525,
     "photo_head_pca": {
      "centre": [
       393.91053787375614,
@@ -1270,26 +1620,26 @@
     },
     "render_head_pca": {
      "centre": [
-      255.1584801799847,
-      277.0038143964917
+      251.640033888732,
+      274.55944648404403
      ],
-     "major_px": 377.3821736479238,
-     "minor_px": 298.6587476158022,
+     "major_px": 382.0211313628027,
+     "minor_px": 306.15286154292437,
      "major_axis_dir": [
-      -0.9621381912916804,
-      -0.27256210458897917
+      -0.9699684528790288,
+      -0.24323075549663417
      ]
     },
     "render_eye": {
      "centre": [
-      225.04279157667386,
-      219.8570464362851
+      216.59442263435764,
+      217.0349262217409
      ],
-     "major_px": 105.80722798930124,
-     "minor_px": 105.39323009935788,
+     "major_px": 105.09456811659265,
+     "minor_px": 104.80496962767126,
      "major_axis_dir": [
-      -0.20951746922700618,
-      0.9778049038988866
+      -0.5535142779517486,
+      0.8328396869167286
      ]
     }
    },
@@ -1321,23 +1671,23 @@
     "diameter_unc_mm": 1.2349488913637032,
     "mesh_diameter_mm": 30.0,
     "dev_mm": -3.9584896432200445,
-    "render_major_px": 105.80722798930124,
-    "render_minor_px": 105.39323009935788,
-    "diameter_via_render_mm": 40.068339853430516,
+    "render_major_px": 105.09456811659265,
+    "render_minor_px": 104.80496962767126,
+    "diameter_via_render_mm": 25.210678378064223,
     "centre_offset_photo_minus_render_mm": [
-     -2.504948515539151,
-     -1.3723622525617512
+     -1.2571549334827203,
+     -0.926117464388289
     ],
     "ring_over_head_photo": 0.2795718134368993,
-    "ring_over_head_render": 0.2803715580058463,
-    "ring_over_head_ratio": 0.9971475545713866,
-    "dev_scale_free_mm": -0.08557336285840211,
-    "dev_scale_free_unc_mm": 0.4429811994221593,
-    "dev_scale_free_how": "30.000 mm * ((photo ring major / photo head major) / (render ring major / render head major) - 1): the ring at the head's own scale",
+    "ring_over_head_render": 0.27510145248165635,
+    "ring_over_head_ratio": 1.016249863150181,
+    "dev_scale_free_mm": 0.48749589450543196,
+    "dev_scale_free_unc_mm": 0.4520204072189416,
+    "dev_scale_free_how": "30.000 mm * ((photo ring major / photo head major) / (render ring major / render head major) - 1): the ring at the head's own scale (the head's major axis, its LENGTH in these yawed profiles)",
     "axis_ratio_photo": 0.9960321799628844,
-    "axis_ratio_render": 0.9960872437752057,
+    "axis_ratio_render": 0.9972444009798859,
     "ring_read_verdict": "PASS",
-    "ring_read_why": "ring axis ratio photo 0.996 vs render 0.996 agree"
+    "ring_read_why": "ring axis ratio photo 0.996 vs render 0.997 agree"
    },
    "size": {},
    "inputs": {
@@ -1415,25 +1765,59 @@
     "overlay": "out/head/sky-three-quarter-front-left_overlay.png",
     "ours": "out/head/sky-three-quarter-front-left_ours.png",
     "real": "out/head/sky-three-quarter-front-left_real.png",
-    "render_servo": "out/head/sky-three-quarter-front-left_render_servo.png"
+    "render_servo": "out/head/sky-three-quarter-front-left_render_servo.png",
+    "render_servo_wide": "out/head/sky-three-quarter-front-left_render_servo_wide.png"
    },
+   "scale_tests": [
+    {
+     "test": "render mask vs analytic width (upper neck servo (head_pitch), label face + side face)",
+     "verdict": "PASS",
+     "value": "+0.11 % (mask 91.0 px, analytic 90.9 px, 46 % of the projected box visible, frame \u00b1250 mm at 1600 px)"
+    },
+    {
+     "test": "face the model's servo presents (upper neck servo (head_pitch), label face + side face)",
+     "verdict": "NOTE",
+     "value": "the model's servo geom presents a 27.95 mm silhouette across its axis at this camera \u2014 a 20 x 26 case turned 20.9 deg about its long axis (leg pose + hip yaw in the model's keyframe), not the square-on 20.000 mm label face the photograph shows; the geom fixes the depth only, the face width comes from the photograph's face_evidence"
+    },
+    {
+     "test": "render mask vs analytic width (lower neck servo (neck_pitch), label face + side face)",
+     "verdict": "FAIL",
+     "value": "-12.60 % (mask 79.1 px, analytic 90.6 px, 55 % of the projected box visible, frame \u00b1250 mm at 1600 px)"
+    },
+    {
+     "test": "face the model's servo presents (lower neck servo (neck_pitch), label face + side face)",
+     "verdict": "NOTE",
+     "value": "the model's servo geom presents a 27.99 mm silhouette across its axis at this camera \u2014 a 20 x 26 case turned 21.0 deg about its long axis (leg pose + hip yaw in the model's keyframe), not the square-on 20.000 mm label face the photograph shows; the geom fixes the depth only, the face width comes from the photograph's face_evidence"
+    },
+    {
+     "test": "two servos agree",
+     "verdict": "FAIL",
+     "value": "0.8721 vs 0.7931, 5.8 sigma apart"
+    },
+    {
+     "test": "no fitted parameter on its search bound",
+     "verdict": "PASS",
+     "value": "all 9 free parameters inside their boxes"
+    }
+   ],
    "scale_verdict": "CANNOT DETERMINE",
-   "scale_why": "the two servos read in this photo give size ratios 1.4109 and 1.2812 \u2014 5.5 sigma apart (their dark runs are not the same face); upper neck servo (head_pitch), label face + side face: the render's mask read of the case is -14.2 % off the analytic width, so the case silhouette at this azimuth is not the 20 x 26 box the photo scan assumes; lower neck servo (neck_pitch), label face + side face: the render's mask read of the case is -13.9 % off the analytic width, so the case silhouette at this azimuth is not the 20 x 26 box the photo scan assumes",
+   "scale_why": "lower neck servo (neck_pitch), label face + side face: the render's mask read of the servo is -12.6 % off its projected width, so what the render shows at this azimuth is not the clean case face the photo scan assumes; the two servos read in this photo give size ratios 0.8721 and 0.7931 \u2014 5.8 sigma apart (their dark runs are not the same face)",
    "size_excluded": {
-    "product_over_mesh": 1.3369312047473838,
-    "unc": 0.011607753931992301,
+    "product_over_mesh": 0.8269019712703071,
+    "unc": 0.006727665118889822,
     "n_servos": 2,
-    "head_length_dev_mm": 41.33808951045652,
-    "head_length_dev_unc_mm": 1.4241553299161354,
+    "head_length_dev_mm": -21.237397144846025,
+    "head_length_dev_unc_mm": 0.8254172334365922,
     "photo_head_extent_major_mm": 93.14783932128282,
     "photo_head_extent_minor_mm": 76.64484698200879,
-    "mesh_head_extent_major_mm": 69.54279154009424,
-    "mesh_head_extent_minor_mm": 55.0358879602198,
-    "dev_major_mm": 23.605047781188574,
-    "dev_major_unc_mm": 4.42752421585093,
-    "dev_minor_mm": 21.60895902178898,
-    "dev_minor_unc_mm": 3.6544433901300692,
-    "how": "major/minor = principal axes of the photo head region (silhouette PCA, 0.5/99.5 percentile extents); mesh extents = the render head mask at the fitted pose scaled by k/r (the servo-anchored scale); unc = scale + 2 px edge on each mask + mm/px"
+    "mesh_head_extent_major_mm": 112.64450429706034,
+    "mesh_head_extent_minor_mm": 90.27363801736335,
+    "dev_major_mm": -19.496664975777524,
+    "dev_major_unc_mm": 4.418510784129085,
+    "dev_minor_mm": -13.628791035354567,
+    "dev_minor_unc_mm": 3.6470499342360907,
+    "how": "major/minor = principal axes of the photo head region (silhouette PCA, 0.5/99.5 percentile extents); mesh extents = the render head mask at the fitted pose scaled by k/r (the servo-anchored scale); unc = scale + 2 px edge on each mask + mm/px",
+    "D_note": "no sensitivity run at another camera distance for this photo (or its runs sat on a bound): the D term is not in its uncertainty"
    },
    "verdicts": {
     "length": "CANNOT DETERMINE",
@@ -1465,6 +1849,8 @@
       ],
       "seed_x": 950,
       "tilt_deg": 35.0,
+      "face_mm": 20.0,
+      "face_evidence": "the 20 x 34 label face: 'DYNAMIXEL XL330-M288-T' is printed across the scanned face (read at 4x zoom, rows 1700-2100 x 780-1180 of the photograph); the ankle joint's bearing at (1030, 1850) is seen face-on, so the joint axis \u2014 the servo's horn axis \u2014 points at the camera and the horn/label faces are what a profile sees; and the run (136.8 px) is 20.8 mm at the cream shoot's neck-servo scale (0.1523 mm/px), not the 26 mm side face (171 px)",
       "n_lines": 65,
       "n_accepted": 42,
       "width_px_mode": 137,
@@ -1472,6 +1858,7 @@
       "width_px_unc": 1.6653055666710201,
       "width_px_min": 3.0,
       "width_px_max": 143.0,
+      "n_hit_boundary": 0,
       "lines": [
        [
         928.7776718550112,
@@ -1560,17 +1947,50 @@
       ],
       "mm_per_px": 0.1461886529759833,
       "mm_per_px_unc": 0.0017794724431903597,
+      "crosscheck": {
+       "frame_half_mm": 250.0,
+       "frame_px": 1600,
+       "n_mask_px": 6361,
+       "tilt_render_deg": 26.09316763140928,
+       "mask": {
+        "n_lines": 64,
+        "n_accepted": 33,
+        "width_px_mode": 73,
+        "width_px": 73.31598804533117,
+        "width_px_unc": 1.515199249339216,
+        "width_px_min": 72.11191644006571,
+        "width_px_max": 77.02373280186822,
+        "centre_px": [
+         771.4232038987581,
+         1437.6392076717498
+        ]
+       },
+       "analytic_px": 76.05729437954014,
+       "servo_depth_mm": 1030.645426184101,
+       "mask_fill_of_projected_bbox": 0.3727505214194845,
+       "mask_vs_analytic_pct": -3.6042648592380155,
+       "how": "mask: mode of run widths across the servo geom's own axis (26.1 deg from image-down) in a 1600 px frame spanning +-250 mm at the head; analytic: extent of the geom's projected mesh vertices along the same direction",
+       "picture": "out/head/graphite-profile-right_render_servo_wide.png"
+      },
+      "render_mask_vs_analytic_pct": -3.6042648592380155,
+      "render_tilt_deg": 26.09316763140928,
+      "tilt_photo_minus_render_deg": 8.90683236859072,
       "render": {
        "verdict": "CANNOT DETERMINE",
        "why": "servo not visible in the render (0 px)"
       },
-      "render_width_px_analytic": 71.36648796268584,
-      "render_width_analytic_how": "(20.000*|sin az| + 26.000*|cos az|) mm * 640 px / 190.0 mm * D_head/D_servo (1.0591)",
+      "render_width_px_analytic": 71.90180064318959,
+      "render_width_analytic_how": "20.000 mm * f / z: f = 3705.3 px (fovy 9.872 deg, 640 px frame, +-95 mm at the head, D 1100 mm), z = 1030.6 mm (the servo geom's mean vertex depth in the fitted camera)",
+      "render_silhouette_px": 80.06030800931848,
+      "render_silhouette_mm": 22.2693471632554,
+      "render_silhouette_how": "extent of the model servo geom's projected vertices across its own axis (26.1 deg from image-down) in the head frame, and in mm at its depth",
+      "render_face_note": "the model's servo geom presents a 22.27 mm silhouette across its axis at this camera \u2014 a 20 x 26 case turned 5.2 deg about its long axis (leg pose + hip yaw in the model's keyframe), not the square-on 20.000 mm label face the photograph shows; the geom fixes the depth only, the face width comes from the photograph's face_evidence",
+      "render_width_px_box_formula": 71.93821750642408,
       "size_ratio": {
-       "product_over_mesh": 0.9488719588613856,
-       "unc": 0.011710227574421032,
-       "servo_depth_mm": 1038.6117472939898,
-       "head_depth_mm": 1099.9999522315056,
+       "product_over_mesh": 0.9643527350140706,
+       "unc": 0.012299363835184695,
+       "servo_depth_mm": 1030.357426015167,
+       "head_depth_mm": 1100.0000095284097,
        "how": "k * W_render_analytic / W_photo; unc = photo width + fit spread of k (the analytic width is exact)"
       }
      }
@@ -1579,49 +1999,90 @@
     "mm_per_px_unc": 0.0017794724431903597
    },
    "fit": {
-    "objective": 0.04658205221288018,
-    "iou": 0.9571308451773896,
-    "eye_term": 0.0003712897390269735,
-    "seconds": 445.0,
-    "n_eval": 3182,
-    "cam_el_deg": 1.2599388190277523,
-    "cam_az_deg": 89.99,
+    "objective": 0.045215427305009756,
+    "iou": 0.9610687126377574,
+    "eye_term": 0.0006284139942767151,
+    "seconds": 143.7,
+    "n_eval": 3134,
+    "cam_el_deg": 3.5247715515384717,
+    "cam_az_deg": 90.01,
     "cam_distance_mm": 1100.0,
-    "cam_distance_source": "camera distance to the head: not measurable from this frame either; same store shoot, same value assumed to better than a factor 2 (the near ankle servo, 44.1 mm nearer than the neck servos, reads 136.2-145.5 px against the neck's 131.4 px depending on the scan tilt, i.e. D 700-1650 mm); 1100 mm is the centre of that range and the sensitivity runs at 700 and 1600 mm bracket it (out/head/head_fit_*_D700.json / _D1600.json)",
-    "head_pitch_deg": -23.712416760747114,
-    "head_yaw_deg": -46.35353560320206,
-    "head_roll_deg": 13.769202772251862,
+    "cam_distance_source": "camera distance to the head: not measurable from this frame either; same store shoot, same value assumed to better than a factor 2 (the near ankle servo, 44.1 mm nearer than the neck servos, reads 136.2-145.5 px against the neck's 131.4 px depending on the scan tilt, i.e. D 700-1650 mm); its centre is 1175 mm; 1100 mm is used, inside that range, and the sensitivity runs at 600 and 2000 mm bracket the whole range (out/head/head_fit_cream-profile-left_D600.json / _D2000.json)",
+    "head_pitch_deg": -21.07432078536267,
+    "head_yaw_deg": -49.05239774022917,
+    "head_roll_deg": 9.43276614783832,
     "jaw_open_deg": 0.0,
-    "k_photo_px_per_render_px": 1.8189870982009118,
-    "k_fit_spread": 0.0036998314418102795,
+    "k_photo_px_per_render_px": 1.8349003402070334,
+    "k_fit_spread": 0.006986245923104739,
     "polishes": [
      [
-      0.04786,
-      0.9068
+      0.04613,
+      0.92
      ],
      [
-      0.04658,
-      0.9095
+      0.04632,
+      0.9202
      ],
      [
-      0.04718,
-      0.911
+      0.04522,
+      0.9175
      ],
      [
-      0.04841,
-      0.9102
+      0.04947,
+      0.9129
      ],
      [
-      0.04928,
-      0.9058
+      0.04681,
+      0.9146
      ],
      [
-      0.04665,
-      0.9086
+      0.04728,
+      0.9232
      ]
     ],
-    "tx": 548.9154175670777,
-    "ty": 93.35026590574938,
+    "tx": 546.0124274666532,
+    "ty": 88.68420391043799,
+    "bounds": {
+     "cam_el": [
+      -20.0,
+      4.0
+     ],
+     "cam_az": [
+      89.99,
+      90.01
+     ],
+     "head_pitch": [
+      -40.0,
+      40.0
+     ],
+     "head_yaw": [
+      -90.0,
+      0.0
+     ],
+     "head_roll": [
+      -45.0,
+      45.0
+     ],
+     "jaw": [
+      0.0,
+      0.01
+     ],
+     "k": [
+      0.6563415130415652,
+      1.3126830260831304
+     ],
+     "tx": [
+      -293.46868710596925,
+      -53.46868710596928
+     ],
+     "ty": [
+      -239.13048702578422,
+      0.8695129742157803
+     ]
+    },
+    "at_bound": [],
+    "head_roll_joint_range_deg": 25.0,
+    "head_roll_within_joint_range": true,
     "crop_box": [
      849,
      222,
@@ -1634,10 +2095,10 @@
     ],
     "photo_head_area_px": 292502,
     "render_head_extent_px": [
-     424,
-     313
+     422,
+     310
     ],
-    "render_head_area_px": 86023,
+    "render_head_area_px": 84969,
     "photo_head_pca": {
      "centre": [
       426.36933080799446,
@@ -1652,26 +2113,26 @@
     },
     "render_head_pca": {
      "centre": [
-      399.65154667937645,
-      250.0764214221778
+      397.9205828007862,
+      250.6733749955866
      ],
-     "major_px": 429.56446098676196,
-     "minor_px": 237.02889919818432,
+     "major_px": 426.7914173878197,
+     "minor_px": 234.6941489067446,
      "major_axis_dir": [
-      -0.9098868049441857,
-      0.4148566043688608
+      -0.9102435953679577,
+      0.41407317842576297
      ]
     },
     "render_eye": {
      "centre": [
-      477.110502283105,
-      187.94870624048707
+      471.42583445591976,
+      190.8105074090705
      ],
-     "major_px": 103.84228822704824,
-     "minor_px": 88.45228685120162,
+     "major_px": 103.94682031218906,
+     "minor_px": 90.45187989862845,
      "major_axis_dir": [
-      0.4298268858876919,
-      0.902911317997559
+      0.4309971331402304,
+      0.9023532962342977
      ]
     }
    },
@@ -1703,39 +2164,56 @@
     "diameter_unc_mm": 0.4462943572340259,
     "mesh_diameter_mm": 30.0,
     "dev_mm": -2.299252774103966,
-    "render_major_px": 103.84228822704824,
-    "render_minor_px": 88.45228685120162,
-    "diameter_via_render_mm": 28.556358067705503,
+    "render_major_px": 103.94682031218906,
+    "render_minor_px": 90.45187989862845,
+    "diameter_via_render_mm": 28.74162382343996,
     "centre_offset_photo_minus_render_mm": [
-     -0.2395088829973508,
-     0.5958450493363046
+     0.5998207168908566,
+     0.07308448558370396
     ],
     "ring_over_head_photo": 0.24210780595982268,
-    "ring_over_head_render": 0.24173854603453424,
-    "ring_over_head_ratio": 1.001527517772179,
-    "dev_scale_free_mm": 0.04582553316536897,
-    "dev_scale_free_unc_mm": 0.45798839480308656,
-    "dev_scale_free_how": "30.000 mm * ((photo ring major / photo head major) / (render ring major / render head major) - 1): the ring at the head's own scale",
+    "ring_over_head_render": 0.24355414864805952,
+    "ring_over_head_ratio": 0.9940615148776347,
+    "dev_scale_free_mm": -0.17815455367095834,
+    "dev_scale_free_unc_mm": 0.4546683453070228,
+    "dev_scale_free_how": "30.000 mm * ((photo ring major / photo head major) / (render ring major / render head major) - 1): the ring at the head's own scale (the head's major axis, its LENGTH in these yawed profiles)",
     "axis_ratio_photo": 0.7663168113728513,
-    "axis_ratio_render": 0.8517944698772737,
-    "ring_read_verdict": "PASS",
-    "ring_read_why": "ring axis ratio photo 0.766 vs render 0.852 agree"
+    "axis_ratio_render": 0.870174572218462,
+    "ring_read_verdict": "CANNOT DETERMINE",
+    "ring_read_why": "ring axis ratio photo 0.766 vs render 0.870: the render's ring is partly hidden at this pose, the two extents are not the same feature"
    },
    "size": {
-    "product_over_mesh": 0.9488719588613856,
-    "unc": 0.011710227574421032,
+    "product_over_mesh": 0.9643527350140706,
+    "unc": 0.02548449749928296,
     "n_servos": 1,
-    "head_length_dev_mm": -6.272899367296595,
-    "head_length_dev_unc_mm": 1.4367278211057164,
+    "head_length_dev_mm": -4.373562941123678,
+    "head_length_dev_unc_mm": 3.126692998187026,
     "photo_head_extent_major_mm": 114.41492816011443,
     "photo_head_extent_minor_mm": 64.32020109237047,
-    "mesh_head_extent_major_mm": 120.38268191405491,
-    "mesh_head_extent_minor_mm": 66.42582701340592,
-    "dev_major_mm": -5.967753753940491,
-    "dev_major_unc_mm": 2.067697278806845,
-    "dev_minor_mm": -2.1056259210354584,
-    "dev_minor_unc_mm": 1.258977463125747,
-    "how": "major/minor = principal axes of the photo head region (silhouette PCA, 0.5/99.5 percentile extents); mesh extents = the render head mask at the fitted pose scaled by k/r (the servo-anchored scale); unc = scale + 2 px edge on each mask + mm/px"
+    "mesh_head_extent_major_mm": 118.71508462097034,
+    "mesh_head_extent_minor_mm": 65.28185575529794,
+    "dev_major_mm": -4.300156460855917,
+    "dev_major_unc_mm": 3.381130497395822,
+    "dev_minor_mm": -0.961654662927466,
+    "dev_minor_unc_mm": 1.9367519333133656,
+    "how": "major/minor = principal axes of the photo head region (silhouette PCA, 0.5/99.5 percentile extents); mesh extents = the render head mask at the fitted pose scaled by k/r (the servo-anchored scale); unc = scale + 2 px edge on each mask + mm/px",
+    "D_sensitivity_half_range": 0.022320064113723115,
+    "D_runs": [
+     [
+      2000.0,
+      0.9735154910496081
+     ],
+     [
+      600.0,
+      1.0089928632415168
+     ],
+     [
+      1100.0,
+      0.9643527350140706
+     ]
+    ],
+    "unc_fit_only": 0.012299363835184695,
+    "D_note": "camera distance is CANNOT DETERMINE from the store frame; the half-range of r over this photo's runs at D = 2000, 600, 1100 mm (0.0223) is added in quadrature"
    },
    "inputs": {
     "head_ycut": 1000,
@@ -1796,7 +2274,8 @@
       "seed_x": 950,
       "what": "near (right) ankle servo, label face; tilted with the shin",
       "geom": "ankle_right",
-      "tilt_deg": 35.0
+      "tilt_deg": 35.0,
+      "face_evidence": "the 20 x 34 label face: 'DYNAMIXEL XL330-M288-T' is printed across the scanned face (read at 4x zoom, rows 1700-2100 x 780-1180 of the photograph); the ankle joint's bearing at (1030, 1850) is seen face-on, so the joint axis \u2014 the servo's horn axis \u2014 points at the camera and the horn/label faces are what a profile sees; and the run (136.8 px) is 20.8 mm at the cream shoot's neck-servo scale (0.1523 mm/px), not the 26 mm side face (171 px)"
      }
     ],
     "cam_az": 90.0,
@@ -1808,21 +2287,44 @@
     "overlay": "out/head/graphite-profile-right_overlay.png",
     "ours": "out/head/graphite-profile-right_ours.png",
     "real": "out/head/graphite-profile-right_real.png",
-    "render_servo": "out/head/graphite-profile-right_render_servo.png"
+    "render_servo": "out/head/graphite-profile-right_render_servo.png",
+    "render_servo_wide": "out/head/graphite-profile-right_render_servo_wide.png"
    },
+   "scale_tests": [
+    {
+     "test": "render mask vs analytic width (near (right) ankle servo, label face; tilted with the shin)",
+     "verdict": "PASS",
+     "value": "-3.60 % (mask 73.3 px, analytic 76.1 px, 37 % of the projected box visible, frame \u00b1250 mm at 1600 px)"
+    },
+    {
+     "test": "face the model's servo presents (near (right) ankle servo, label face; tilted with the shin)",
+     "verdict": "NOTE",
+     "value": "the model's servo geom presents a 22.27 mm silhouette across its axis at this camera \u2014 a 20 x 26 case turned 5.2 deg about its long axis (leg pose + hip yaw in the model's keyframe), not the square-on 20.000 mm label face the photograph shows; the geom fixes the depth only, the face width comes from the photograph's face_evidence"
+    },
+    {
+     "test": "two servos agree",
+     "verdict": "CANNOT DETERMINE",
+     "value": "one servo readable in this photograph \u2014 nothing to compare; the cross-check above is the only test of its scale"
+    },
+    {
+     "test": "no fitted parameter on its search bound",
+     "verdict": "PASS",
+     "value": "all 9 free parameters inside their boxes"
+    }
+   ],
    "scale_verdict": "PASS",
-   "scale_why": "servos agree; render mask and analytic width agree",
+   "scale_why": "every scale test ran and passed: render mask vs analytic width (near (right) ankle servo, label face; tilted with the shin) -3.60 % (mask 73.3 px, analytic 76.1 px, 37 % of the projected box visible, frame \u00b1250 mm at 1600 px); no fitted parameter on its search bound all 9 free parameters inside their boxes",
    "verdicts": {
     "length": "CANNOT DETERMINE",
     "major": "CANNOT DETERMINE",
     "minor": "CANNOT DETERMINE"
    },
-   "verdicts_eye": "PASS",
-   "verdict_why": "the photographs disagree by 5.13 mm rms, more than this photo's own \u00b11.44 mm \u2014 a systematic error the per-photo uncertainty does not contain; only the combined row grades"
+   "verdicts_eye": "CANNOT DETERMINE",
+   "verdict_why": "the photographs disagree by 4.74 mm rms, more than this photo's own \u00b13.13 mm \u2014 a systematic error the per-photo uncertainty does not contain; only the combined row grades"
   }
  ],
  "front_view": {
-  "generated": "2026-09-02 22:57",
+  "generated": "2026-09-03 03:42",
   "method": "head_frontview.py \u2014 the face layout, scale-free, from the one true FRONT view.\n\nimages/store/store_microduck-inside-the-box.png is a flat-lay: the robot lies on\nits back and the camera looks straight at the face. The photo is a composite\n(the battery in the same frame measures 268 px across = 70.8 mm and the gamepad\n485 px = ~152 mm \u2014 two different mm/px, so it is NOT one scale), so nothing here\nuses mm/px from another object. Instead every number is a RATIO inside the head\nitself (one object, one depth), compared with the same ratio measured on our\nmesh rendered in a true front view with the head LEVEL (eye-ring axis\nhorizontal: pitch_total = 40.000 deg, bisected on the noenoeil geom axis).\n\nMeasured on both sides with the same estimators:\n  head width       widest row of the head silhouette (shell + beak), px\n  eye ring OD      principal-axis extent of the accent-hue ring pixels, px\n  eye centre       ring centroid; offset from the head's mid-column, and depth\n                   below the shell's top edge, px\n  ToF window       dark pill right of the eye (photo only; the mesh has no\n                   separate ToF geom \u2014 its site is at y = +22.4 mm, PROPORTIONS.md)\nRatios: eyeOD/width, eye-below-top/width, eye-x-offset/width, tof-offset/width.\nConverted to mm through the MESH head width (91.763 mm) so a reader sees the\nimplied product dimension if the head width is the mesh's.\n\nWrites out/head/front_view.json and out/head/front_pair.png (real beside ours).\n    /Applications/FreeCAD.app/Contents/Resources/bin/python tools/head_frontview.py\n",
   "photo": {
    "image": "images/store/store_microduck-inside-the-box.png",
@@ -1834,13 +2336,261 @@
     100,
     180,
     600,
-    480
+    500
    ],
    "head_top_row": 195,
-   "head_bottom_row": 479,
-   "widest_row": 467,
-   "head_width_px": 440,
-   "head_mid_x": 355.5,
+   "head_top_row_unc_px": 25.0,
+   "head_bottom_row": 499,
+   "widest_row": 443,
+   "head_width_px": 419,
+   "head_width_px_unc": 1.4142135623730951,
+   "head_width_feature": "beak band (jaw + bottom shell) x extent at its widest row, saturation-thresholded accent hue",
+   "head_mid_x": 346.0,
+   "head_mid_x_unc": 0.7071067811865476,
+   "shell_silhouette": {
+    "widest_row": 467,
+    "x": [
+     136,
+     575
+    ],
+    "width_px": 440,
+    "mid_x": 355.5,
+    "top_row": 195,
+    "bottom_row": 499,
+    "widest_row_on_window_edge": false,
+    "sweep": [
+     {
+      "threshold": 200,
+      "widest_row": 408,
+      "x": [
+       129,
+       561
+      ],
+      "width_px": 433,
+      "mid_x": 345.0,
+      "top_row": 215
+     },
+     {
+      "threshold": 210,
+      "widest_row": 404,
+      "x": [
+       129,
+       561
+      ],
+      "width_px": 433,
+      "mid_x": 345.0,
+      "top_row": 215
+     },
+     {
+      "threshold": 220,
+      "widest_row": 399,
+      "x": [
+       128,
+       561
+      ],
+      "width_px": 434,
+      "mid_x": 344.5,
+      "top_row": 213
+     },
+     {
+      "threshold": 228,
+      "widest_row": 467,
+      "x": [
+       136,
+       575
+      ],
+      "width_px": 440,
+      "mid_x": 355.5,
+      "top_row": 195
+     },
+     {
+      "threshold": 235,
+      "widest_row": 495,
+      "x": [
+       135,
+       597
+      ],
+      "width_px": 463,
+      "mid_x": 366.0,
+      "top_row": 191
+     },
+     {
+      "threshold": 240,
+      "widest_row": 459,
+      "x": [
+       100,
+       599
+      ],
+      "width_px": 500,
+      "mid_x": 349.5,
+      "top_row": 190
+     }
+    ],
+    "width_px_range": [
+     433,
+     500
+    ],
+    "mid_x_range": [
+     344.5,
+     366.0
+    ]
+   },
+   "beak": {
+    "smin": 0.45,
+    "bands": [
+     [
+      420,
+      445,
+      136,
+      555
+     ],
+     [
+      442,
+      480,
+      136,
+      555
+     ]
+    ],
+    "widest_row": 443,
+    "x": [
+     137,
+     555
+    ],
+    "width_px": 419,
+    "mid_x": 346.0,
+    "sweep": [
+     {
+      "smin": 0.35,
+      "bands": [
+       [
+        420,
+        445,
+        136,
+        555
+       ],
+       [
+        442,
+        480,
+        136,
+        555
+       ]
+      ],
+      "widest_row": 443,
+      "x": [
+       137,
+       555
+      ],
+      "width_px": 419,
+      "mid_x": 346.0
+     },
+     {
+      "smin": 0.4,
+      "bands": [
+       [
+        420,
+        445,
+        136,
+        555
+       ],
+       [
+        442,
+        480,
+        136,
+        555
+       ]
+      ],
+      "widest_row": 443,
+      "x": [
+       137,
+       555
+      ],
+      "width_px": 419,
+      "mid_x": 346.0
+     },
+     {
+      "smin": 0.45,
+      "bands": [
+       [
+        420,
+        445,
+        136,
+        555
+       ],
+       [
+        442,
+        480,
+        136,
+        555
+       ]
+      ],
+      "widest_row": 443,
+      "x": [
+       137,
+       555
+      ],
+      "width_px": 419,
+      "mid_x": 346.0
+     },
+     {
+      "smin": 0.5,
+      "bands": [
+       [
+        420,
+        445,
+        136,
+        555
+       ],
+       [
+        442,
+        480,
+        136,
+        555
+       ]
+      ],
+      "widest_row": 443,
+      "x": [
+       137,
+       555
+      ],
+      "width_px": 419,
+      "mid_x": 346.0
+     },
+     {
+      "smin": 0.55,
+      "bands": [
+       [
+        421,
+        445,
+        136,
+        555
+       ],
+       [
+        442,
+        480,
+        136,
+        555
+       ]
+      ],
+      "widest_row": 443,
+      "x": [
+       137,
+       555
+      ],
+      "width_px": 419,
+      "mid_x": 346.0
+     }
+    ],
+    "width_px_range": [
+     419,
+     419
+    ],
+    "mid_x_range": [
+     346.0,
+     346.0
+    ],
+    "width_px_unc": 1.4142135623730951,
+    "mid_x_unc": 0.7071067811865476
+   },
    "beak_bands_rows": [
     [
      420,
@@ -1850,7 +2600,7 @@
     ],
     [
      442,
-     479,
+     480,
      136,
      555
     ]
@@ -1896,21 +2646,99 @@
     "w_px": 47,
     "h_px": 26
    },
+   "foreshortening": {
+    "ring_minor_over_major": 0.9819821715538721,
+    "view_angle_deg": 10.892889692454277,
+    "minor_axis_dir": [
+     -0.9855240531980407,
+     0.16953566164115874
+    ],
+    "scale_horizontal": 0.9825046582065885,
+    "scale_vertical": 0.9994866591666008,
+    "how": "a length along image direction d is foreshortened by sqrt(1 - (1 - c^2)(d.m)^2), c = ring minor/major, m = ring minor-axis direction"
+   },
    "ratios": {
-    "eye_od_over_width": 0.3352543506073171,
+    "eye_od_over_width": 0.35205707462343566,
     "eye_minor_over_major": 0.9819821715538721,
-    "eye_below_top_over_width": 0.3060869565217392,
-    "eye_x_offset_over_width": -0.024195130136475545,
-    "tof_x_from_eye_over_width": 0.24547840487278902,
-    "tof_y_from_eye_over_width": 0.0017273746351334424,
-    "tof_w_over_width": 0.10681818181818181,
-    "tof_h_over_width": 0.05909090909090909,
-    "first_beak_band_top_below_top_over_width": 0.5113636363636364
+    "eye_below_top_over_width": 0.32142783023762583,
+    "eye_x_offset_over_width": -0.0027347428640793325,
+    "tof_x_from_eye_over_width": 0.2577816184821651,
+    "tof_y_from_eye_over_width": 0.0018139494975148323,
+    "tof_w_over_width": 0.11217183770883055,
+    "tof_h_over_width": 0.06205250596658711,
+    "first_beak_band_top_below_top_over_width": 0.5369928400954654
+   },
+   "ratios_unc": {
+    "eye_od_over_width": {
+     "value": 0.35205707462343566,
+     "unc": 0.007968495288239775,
+     "unc_stat": 0.004918951320023421,
+     "unc_foreshortening": 0.006269037810536743
+    },
+    "eye_minor_over_major": {
+     "value": 0.9819821715538721,
+     "unc": 0.019174228324516634,
+     "dimensionless": true,
+     "unc_stat": 0.019174228324516634,
+     "unc_foreshortening": 0.0
+    },
+    "eye_below_top_over_width": {
+     "value": 0.32142783023762583,
+     "unc": 0.06012356368856474,
+     "unc_stat": 0.05986632826352768,
+     "unc_foreshortening": 0.0055556863533183344
+    },
+    "eye_x_offset_over_width": {
+     "value": -0.0027347428640793325,
+     "unc": 0.005062825463259139,
+     "unc_stat": 0.005062825463259139,
+     "unc_foreshortening": 0.0
+    },
+    "tof_x_from_eye_over_width": {
+     "value": 0.2577816184821651,
+     "unc": 0.005407138501917941,
+     "unc_stat": 0.005407138501917941,
+     "unc_foreshortening": 0.0
+    },
+    "tof_y_from_eye_over_width": {
+     "value": 0.0018139494975148323,
+     "unc": 0.0053367733613461045,
+     "unc_stat": 0.005336681262569536,
+     "unc_foreshortening": 3.1353023978980025e-05
+    },
+    "tof_w_over_width": {
+     "value": 0.11217183770883055,
+     "unc": 0.0035999165224674646,
+     "unc_stat": 0.0035999165224674646,
+     "unc_foreshortening": 0.0
+    },
+    "tof_h_over_width": {
+     "value": 0.06205250596658711,
+     "unc": 0.00374302897497871,
+     "unc_stat": 0.0035860735471051207,
+     "unc_foreshortening": 0.001072540172806161
+    },
+    "first_beak_band_top_below_top_over_width": {
+     "value": 0.5369928400954654,
+     "unc": 0.06045779754914748,
+     "unc_stat": 0.05974108493800984,
+     "unc_foreshortening": 0.009281597649284086
+    }
    }
   },
   "mesh": {
-   "level_pitch_total_deg": 39.999998836371695,
+   "level_pitch_total_deg": 3.552713678800501e-14,
    "level_how": "bisection on the noenoeil geom's thin axis (ring axis) elevation = 0 in world",
+   "depths": {
+    "ring_front_face": -72.29899542756334,
+    "ring_outer_edge": -68.04899426527275,
+    "beak_width_edge": -67.94491549488376,
+    "shell_width_edge": -67.52066186719097,
+    "shell_top": -73.63220235180684,
+    "bottom_shell_top_edge": -8.998993186855614,
+    "face_front": -64.29899426171613,
+    "how": "mean camera-axis depth (mm, negative = nearer) of the vertices within 0.5 mm of each feature's extreme in the level front view; jaw: its nearest generator"
+   },
    "render_px": 1400,
    "px_per_mm": 7.541163624159692,
    "px_per_mm_how": "head-mask widest row (px) / head vertices' extent along the camera right axis (mm)",
@@ -1918,7 +2746,7 @@
    "head_width_mm": 91.7630268335557,
    "head_top_row": 375,
    "head_bottom_row": 829,
-   "widest_row": 716,
+   "widest_row": 734,
    "head_mid_x": 699.5,
    "parts_rows": {
     "top_head_shell": [
@@ -1966,6 +2794,7 @@
    },
    "eye_od_mm": 29.607247254206836,
    "eye_below_top_mm": 27.15626424853234,
+   "head_width_feature": "bottom_head_shell + jaw masks' x extent at their widest row (the beak band, as in the photograph)",
    "ratios": {
     "eye_od_over_width": 0.3226489826660788,
     "eye_minor_over_major": 0.9997678511983714,
@@ -1977,124 +2806,383 @@
     "tof_h_over_width": null,
     "first_beak_band_top_below_top_over_width": 0.5158959537572254
    },
+   "ratios_unc": {
+    "eye_od_over_width": {
+     "value": 0.3226489826660788,
+     "unc": 0.0021474030897345744
+    },
+    "eye_minor_over_major": {
+     "value": 0.9997678511983714,
+     "unc": 0.0028898379547300608
+    },
+    "eye_below_top_over_width": {
+     "value": 0.2959390637559255,
+     "unc": 0.0021312750240273445
+    },
+    "eye_x_offset_over_width": {
+     "value": -0.0009973249646166925,
+     "unc": 0.002043662233672962
+    },
+    "tof_x_from_eye_over_width": {
+     "value": 0.24410710199099853,
+     "unc": 0.002103669332429887
+    },
+    "first_beak_band_top_below_top_over_width": {
+     "value": 0.5158959537572254,
+     "unc": 0.002299594434836867
+    }
+   },
    "ratios_note": "tof_x_from_eye: the MJCF 'tof' site sits 22.4 mm to the right of the eye axis (PROPORTIONS.md, from the MJCF); the mesh has no ToF window geom, so its size and vertical offset are CANNOT DETERMINE on the mesh side"
   },
   "comparison": {
    "eye_od_over_width": {
-    "photo": 0.3352543506073171,
+    "photo": 0.35205707462343566,
+    "photo_unc": 0.007968495288239775,
+    "photo_unc_stat": 0.004918951320023421,
+    "photo_unc_foreshortening": 0.006269037810536743,
     "mesh": 0.3226489826660788,
-    "diff": 0.012605367941238343,
-    "diff_pct": 3.906836413082418,
-    "photo_mm_if_width_is_mesh": 30.763944974779243,
+    "mesh_unc": 0.0021474030897345744,
+    "diff": 0.029408091957356886,
+    "diff_pct": 9.114577617556723,
+    "photo_mm_if_width_is_mesh": 32.305813338670326,
     "mesh_mm": 29.60723859638739,
-    "dev_mm": 1.156706378391854
+    "dev_mm": 2.6985747422829403,
+    "dev_unc_mm": 0.7572991809956585,
+    "verdict_at_infinite_D": "FAIL",
+    "perspective": {
+     "numerator_depth": "ring_front_face",
+     "numerator_depth_mm": -72.29899542756334,
+     "width_depth": "beak_width_edge",
+     "width_depth_mm": -67.94491549488376,
+     "bracket": [
+      {
+       "D_mm": 400.0,
+       "photo_corrected": 0.348266128223115,
+       "dev_mm": 2.350706127750313,
+       "verdict": "FAIL"
+      },
+      {
+       "D_mm": 800.0,
+       "photo_corrected": 0.35015134096456735,
+       "dev_mm": 2.523698904544207,
+       "verdict": "FAIL"
+      },
+      {
+       "D_mm": 1500.0,
+       "photo_corrected": 0.3510381092985672,
+       "dev_mm": 2.6050714271770365,
+       "verdict": "FAIL"
+      },
+      {
+       "D_mm": 1000000000.0,
+       "photo_corrected": 0.35205707309055106,
+       "dev_mm": 2.6985746016208507,
+       "verdict": "FAIL"
+      }
+     ],
+     "note": "photo ratio corrected by (D + z_num - z_ring)/(D + z_w - z_ring) for D from 400 mm (a product flat-lay cannot be nearer) to infinity"
+    },
+    "dev_mm_range": [
+     2.350706127750313,
+     2.6985746016208507
+    ],
+    "verdict": "FAIL",
+    "verdict_why": "the same verdict at every camera distance from 400 mm to infinity"
    },
    "eye_minor_over_major": {
     "photo": 0.9819821715538721,
+    "photo_unc": 0.019174228324516634,
     "mesh": 0.9997678511983714,
     "diff": -0.017785679644499286,
-    "diff_pct": -1.7789809527462286,
-    "photo_mm_if_width_is_mesh": 90.10963000829797,
-    "mesh_mm": 91.74169732951616,
-    "dev_mm": -1.632067321218188
+    "dimensionless": true,
+    "verdict": "n/a",
+    "why": "a unitless axis ratio \u2014 the view tilt of each picture (photo 10.9 deg, render 1.2 deg off-axis), not a length; carries no mm"
    },
    "eye_below_top_over_width": {
-    "photo": 0.3060869565217392,
+    "photo": 0.32142783023762583,
+    "photo_unc": 0.06012356368856474,
+    "photo_unc_stat": 0.05986632826352768,
+    "photo_unc_foreshortening": 0.0055556863533183344,
     "mesh": 0.2959390637559255,
-    "diff": 0.010147892765813682,
-    "diff_pct": 3.429048073958602,
-    "photo_mm_if_width_is_mesh": 28.087457391304355,
+    "mesh_unc": 0.0021312750240273445,
+    "diff": 0.025488766481700342,
+    "diff_pct": 8.612842846161769,
+    "photo_mm_if_width_is_mesh": 29.49518198609526,
     "mesh_mm": 27.156256307434994,
-    "dev_mm": 0.931201083869361
+    "dev_mm": 2.3389256786602686,
+    "dev_unc_mm": 5.520583832295828,
+    "verdict_at_infinite_D": "CANNOT DETERMINE",
+    "perspective": {
+     "numerator_depth": "shell_top",
+     "numerator_depth_mm": -73.63220235180684,
+     "width_depth": "beak_width_edge",
+     "width_depth_mm": -67.94491549488376,
+     "bracket": [
+      {
+       "D_mm": 400.0,
+       "photo_corrected": 0.3169069106647008,
+       "dev_mm": 1.924072535889947,
+       "verdict": "CANNOT DETERMINE"
+      },
+      {
+       "D_mm": 800.0,
+       "photo_corrected": 0.3191551342695607,
+       "dev_mm": 2.130376278542709,
+       "verdict": "CANNOT DETERMINE"
+      },
+      {
+       "D_mm": 1500.0,
+       "photo_corrected": 0.3202126560318022,
+       "dev_mm": 2.2274176480112757,
+       "verdict": "CANNOT DETERMINE"
+      },
+      {
+       "D_mm": 1000000000.0,
+       "photo_corrected": 0.32142782840957357,
+       "dev_mm": 2.3389255109127087,
+       "verdict": "CANNOT DETERMINE"
+      }
+     ],
+     "note": "photo ratio corrected by (D + z_num - z_ring)/(D + z_w - z_ring) for D from 400 mm (a product flat-lay cannot be nearer) to infinity"
+    },
+    "dev_mm_range": [
+     1.924072535889947,
+     2.3389255109127087
+    ],
+    "verdict": "CANNOT DETERMINE",
+    "verdict_why": "the same verdict at every camera distance from 400 mm to infinity"
    },
    "eye_x_offset_over_width": {
-    "photo": -0.024195130136475545,
+    "photo": -0.0027347428640793325,
+    "photo_unc": 0.005062825463259139,
+    "photo_unc_stat": 0.005062825463259139,
+    "photo_unc_foreshortening": 0.0,
     "mesh": -0.0009973249646166925,
-    "diff": -0.023197805171858852,
-    "diff_pct": 2326.002656593941,
-    "photo_mm_if_width_is_mesh": -2.2202177267134053,
+    "mesh_unc": 0.002043662233672962,
+    "diff": -0.00173741789946264,
+    "diff_pct": 174.20780198061036,
+    "photo_mm_if_width_is_mesh": -0.2509482094365118,
     "mesh_mm": -0.09151753072812156,
-    "dev_mm": -2.128700195985284
+    "dev_mm": -0.15943067870839026,
+    "dev_unc_mm": 0.5010020890910402,
+    "verdict_at_infinite_D": "PASS",
+    "verdict": "PASS",
+    "verdict_why": "numerator and width features at the same depth: no perspective term"
    },
    "tof_x_from_eye_over_width": {
-    "photo": 0.24547840487278902,
+    "photo": 0.2577816184821651,
+    "photo_unc": 0.005407138501917941,
+    "photo_unc_stat": 0.005407138501917941,
+    "photo_unc_foreshortening": 0.0,
     "mesh": 0.24410710199099853,
-    "diff": 0.0013713028817904926,
-    "diff_pct": 0.5617627961684866,
-    "photo_mm_if_width_is_mesh": 22.52583486634174,
+    "mesh_unc": 0.002103669332429887,
+    "diff": 0.01367451649116655,
+    "diff_pct": 5.601851146334448,
+    "photo_mm_if_width_is_mesh": 23.654814656778914,
     "mesh_mm": 22.4,
-    "dev_mm": 0.125834866341741
+    "dev_mm": 1.2548146567789162,
+    "dev_unc_mm": 0.5324039237631978,
+    "verdict_at_infinite_D": "CANNOT DETERMINE",
+    "perspective": {
+     "numerator_depth": "face_front",
+     "numerator_depth_mm": -64.29899426171613,
+     "width_depth": "beak_width_edge",
+     "width_depth_mm": -67.94491549488376,
+     "bracket": [
+      {
+       "D_mm": 400.0,
+       "photo_corrected": 0.2601059463991751,
+       "dev_mm": 1.4681019594275084,
+       "verdict": "CANNOT DETERMINE"
+      },
+      {
+       "D_mm": 800.0,
+       "photo_corrected": 0.25895007339498544,
+       "dev_mm": 1.3620355849440509,
+       "verdict": "CANNOT DETERMINE"
+      },
+      {
+       "D_mm": 1500.0,
+       "photo_corrected": 0.258406372646681,
+       "dev_mm": 1.3121439731773892,
+       "verdict": "CANNOT DETERMINE"
+      },
+      {
+       "D_mm": 1000000000.0,
+       "photo_corrected": 0.25778161942201655,
+       "dev_mm": 1.254814743022507,
+       "verdict": "CANNOT DETERMINE"
+      }
+     ],
+     "note": "photo ratio corrected by (D + z_num - z_ring)/(D + z_w - z_ring) for D from 400 mm (a product flat-lay cannot be nearer) to infinity"
+    },
+    "dev_mm_range": [
+     1.254814743022507,
+     1.4681019594275084
+    ],
+    "verdict": "CANNOT DETERMINE",
+    "verdict_why": "the same verdict at every camera distance from 400 mm to infinity"
    },
    "tof_y_from_eye_over_width": {
-    "photo": 0.0017273746351334424,
+    "photo": 0.0018139494975148323,
+    "photo_unc": 0.0053367733613461045,
     "mesh": null,
     "verdict": "CANNOT DETERMINE",
-    "why": "no mesh-side value"
+    "why": "no mesh-side value: the mesh has no ToF window geom"
    },
    "tof_w_over_width": {
-    "photo": 0.10681818181818181,
+    "photo": 0.11217183770883055,
+    "photo_unc": 0.0035999165224674646,
     "mesh": null,
     "verdict": "CANNOT DETERMINE",
-    "why": "no mesh-side value"
+    "why": "no mesh-side value: the mesh has no ToF window geom"
    },
    "tof_h_over_width": {
-    "photo": 0.05909090909090909,
+    "photo": 0.06205250596658711,
+    "photo_unc": 0.00374302897497871,
     "mesh": null,
     "verdict": "CANNOT DETERMINE",
-    "why": "no mesh-side value"
+    "why": "no mesh-side value: the mesh has no ToF window geom"
    },
    "first_beak_band_top_below_top_over_width": {
-    "photo": 0.5113636363636364,
+    "photo": 0.5369928400954654,
+    "photo_unc": 0.06045779754914748,
+    "photo_unc_stat": 0.05974108493800984,
+    "photo_unc_foreshortening": 0.009281597649284086,
     "mesh": 0.5158959537572254,
-    "diff": -0.004532317393589058,
-    "diff_pct": -0.8785332314744057,
-    "photo_mm_if_width_is_mesh": 46.92426136363637,
+    "mesh_unc": 0.002299594434836867,
+    "diff": 0.02109688633824003,
+    "diff_pct": 4.089368444275098,
+    "photo_mm_if_width_is_mesh": 49.2760739856802,
     "mesh_mm": 47.34016040462428,
-    "dev_mm": -0.41589904098791275
+    "dev_mm": 1.9359135810559198,
+    "dev_unc_mm": 5.551800598117427,
+    "verdict_at_infinite_D": "CANNOT DETERMINE",
+    "perspective": {
+     "numerator_depth": "beak_width_edge",
+     "numerator_depth_mm": -67.94491549488376,
+     "width_depth": "beak_width_edge",
+     "width_depth_mm": -67.94491549488376,
+     "bracket": [
+      {
+       "D_mm": 400.0,
+       "photo_corrected": 0.5369928400954654,
+       "dev_mm": 1.9359135810559198,
+       "verdict": "CANNOT DETERMINE"
+      },
+      {
+       "D_mm": 800.0,
+       "photo_corrected": 0.5369928400954654,
+       "dev_mm": 1.9359135810559198,
+       "verdict": "CANNOT DETERMINE"
+      },
+      {
+       "D_mm": 1500.0,
+       "photo_corrected": 0.5369928400954654,
+       "dev_mm": 1.9359135810559198,
+       "verdict": "CANNOT DETERMINE"
+      },
+      {
+       "D_mm": 1000000000.0,
+       "photo_corrected": 0.5369928400954654,
+       "dev_mm": 1.9359135810559198,
+       "verdict": "CANNOT DETERMINE"
+      }
+     ],
+     "note": "photo ratio corrected by (D + z_num - z_ring)/(D + z_w - z_ring) for D from 400 mm (a product flat-lay cannot be nearer) to infinity"
+    },
+    "dev_mm_range": [
+     1.9359135810559198,
+     1.9359135810559198
+    ],
+    "verdict": "CANNOT DETERMINE",
+    "verdict_why": "the same verdict at every camera distance from 400 mm to infinity"
    }
   },
   "mesh_head_width_mm": 91.763,
-  "uncertainty": "the flat-lay ring is seen 11 deg off-axis (minor/major 0.9820), so ratios along the face are good to ~2 %; the photo's mm values assume the head width is the mesh's 91.763 mm \u2014 they are the implied product dimension, not an independent measurement"
+  "rule_mm": 1.5,
+  "uncertainty": "every ratio carries a propagated uncertainty: the head width from the beak band's saturation sweep 419-419 px (half-range) plus 1 px per edge, +-2 px on the ring ellipse, the shell top row's threshold spread, and the flat-lay foreshortening \u2014 the ring is seen 10.9 deg off-axis (minor/major 0.9820), which scales vertical lengths by 0.9995 and horizontal by 0.9825, taken as a systematic on every ratio whose numerator and denominator run along different axes. The shell silhouette's own width sweeps 433-500 px over min-channel thresholds [200, 210, 220, 228, 235, 240] (the soft shadow to the right of the shell), which is why the saturated beak band is the width used. The photo's mm values assume the head width is the mesh's 91.763 mm \u2014 they are the implied product dimension, not an independent measurement."
  },
  "combined": {
   "n_photos": 2,
-  "product_over_mesh": 1.006448696501912,
-  "product_over_mesh_unc": 0.043115942757942755,
-  "head_length_dev_mm": 0.7911905738195745,
-  "head_length_dev_unc_mm": 5.289895016971997,
-  "head_length_spread_mm": 5.1318349918431565,
-  "dev_major_mm": -0.43723445354259405,
-  "dev_major_unc_mm": 4.751858042557533,
-  "dev_minor_mm": 0.26740412015362713,
-  "dev_minor_unc_mm": 2.794305235891793,
-  "eye_dev_mm": -0.022061981975131997,
-  "eye_dev_unc_mm": 0.31840830937859577,
-  "eye_dev_how": "scale-free ring/head ratio, profiles (see photos[].eye.dev_scale_free_how)",
-  "eye_dev_via_servo_mm": 1.2586751864805177,
-  "eye_dev_via_servo_unc_mm": 4.672332055420332,
-  "eye_dev_via_render_mm": 2.395101132651102,
-  "eye_dev_via_render_unc_mm": 4.231849872060568,
-  "eye_front_view_dev_mm": 1.156706378391854,
-  "eye_front_view_unc_mm": 0.6,
+  "photos_used": [
+   "cream-profile-left",
+   "graphite-profile-right"
+  ],
+  "photos_excluded": [
+   {
+    "id": "sky-three-quarter-front-left",
+    "why": "lower neck servo (neck_pitch), label face + side face: the render's mask read of the servo is -12.6 % off its projected width, so what the render shows at this azimuth is not the clean case face the photo scan assumes; the two servos read in this photo give size ratios 0.8721 and 0.7931 \u2014 5.8 sigma apart (their dark runs are not the same face)"
+   }
+  ],
+  "product_over_mesh": 0.9971647961170339,
+  "product_over_mesh_unc": 0.03861526076240862,
+  "head_length_dev_mm": -0.3478511644011019,
+  "head_length_dev_unc_mm": 4.737706342939913,
+  "head_length_spread_mm": 4.737706342939913,
+  "dev_major_mm": 0.05563786320043648,
+  "dev_major_unc_mm": 4.783193620778683,
+  "dev_minor_mm": 0.6200441199634366,
+  "dev_minor_unc_mm": 2.4693837060861807,
+  "eye_dev_mm": 0.48749589450543196,
+  "eye_dev_unc_mm": 0.45202040721894166,
+  "eye_dev_how": "scale-free ring/head-length ratio, profiles (see photos[].eye.dev_scale_free_how)",
+  "eye_dev_via_servo_mm": 1.6516492361089752,
+  "eye_dev_via_servo_unc_mm": 4.6119851608037425,
+  "eye_dev_via_render_mm": 1.86574635089134,
+  "eye_dev_via_render_unc_mm": 3.6468651208997933,
+  "eye_front_view_dev_mm": 2.6985747422829403,
+  "eye_front_view_unc_mm": 0.7572991809956585,
+  "eye_front_view_dev_range_mm": [
+   2.350706127750313,
+   2.6985746016208507
+  ],
+  "eye_front_view_how": "true front view: ring OD / beak width, photo vs mesh, propagated u (out/head/front_view.json), perspective bracketed over D",
+  "D_sensitivity_note": "per photo: the half-range of r over that photo's runs at other camera distances is in its own uncertainty (photos[].size.D_note); the combined row inherits it",
   "verdicts": {
    "length": "CANNOT DETERMINE",
    "major": "CANNOT DETERMINE",
    "minor": "CANNOT DETERMINE",
    "eye_profile": "PASS",
-   "eye_front": "CANNOT DETERMINE"
+   "eye_front": "FAIL"
   },
-  "D_sensitivity_half_range": 0.010460965403824907,
-  "D_sensitivity_note": "camera distance is CANNOT DETERMINE from the store frames; the half-range of r over the sensitivity runs (2000 mm: 1.0560, 600 mm: 1.0578) is added in quadrature to the length uncertainty"
+  "front_pair": {
+   "verdict": "FAIL",
+   "dev_mm": 2.6985747422829403,
+   "unc_mm": 0.7572991809956585,
+   "dev_range_mm": [
+    2.350706127750313,
+    2.6985746016208507
+   ],
+   "ratio_photo": 0.35205707462343566,
+   "ratio_mesh": 0.3226489826660788,
+   "excess_pct": 9.114577617556723,
+   "implied_ring_od_mm_if_width_is_mesh": 32.305813338670326,
+   "implied_head_width_mm_if_ring_is_mesh": 84.097837340879,
+   "attribution": "CANNOT DETERMINE",
+   "attribution_why": "the front view fixes only the RATIO ring/width; the store photographs' scale-free ring/head-length ratio (those in which the ring is seen whole: sky-three-quarter-front-left) reads +0.49 \u00b1 0.45 mm against the mesh, which supports the ring being the mesh's 30.000 mm and puts the excess on the head width (implied 84.10 mm, i.e. -7.67 mm); the alternative \u2014 a 32.31 mm ring on a mesh-width head \u2014 would make that ring/length ratio +9.1 % off, which those photographs do not show"
+  }
  },
  "verdict": {
-  "head": "CANNOT DETERMINE",
+  "head": "FAIL",
+  "head_why": [
+   "the true front view rules the mesh out at every camera distance: ring OD / head width is 0.3521 \u00b1 0.0080 in the photograph against 0.3226 on the mesh (+9.1 %, +2.70 mm at the mesh width, bracket +2.35..+2.70 mm over D) \u2014 at least one of {ring OD, head width} is more than 1.5 mm from the mesh; which one is CANNOT DETERMINE (see front_pair)",
+   "head length from the servo-scaled profiles: -0.35 \u00b1 4.74 mm (CANNOT DETERMINE), per-axis major +0.06 \u00b1 4.78 / minor +0.62 \u00b1 2.47"
+  ],
   "eye_bezel": "CANNOT DETERMINE",
-  "basis": "head: 2 photographs, each scaled by the XL330-M288-T case in the same frame (20.000 mm), posed and fitted with a perspective camera, size ratio product/mesh = k * W_render / W_photo; combined length deviation +0.791 \u00b1 5.132 mm; per-axis -0.437 \u00b1 4.752 / +0.267 \u00b1 2.794. Eye bezel: profile ring diameter vs the noenoeil mesh 30.000 mm, and the true-front-view ratio eye OD / head width (photo 0.3353 vs mesh 0.3226).",
+  "eye_bezel_parts": {
+   "exists_in_mesh": "PASS",
+   "diameter_vs_length_profiles": "PASS",
+   "ring_width_pair": "FAIL",
+   "attribution_to_ring": "CANNOT DETERMINE"
+  },
+  "basis": "head: 2 photographs admitted (cream-profile-left, graphite-profile-right), each scaled by the XL330-M288-T case in the same frame (20.000 mm), posed and fitted with a perspective camera, size ratio product/mesh = k * W_render / W_photo; combined length deviation -0.348 \u00b1 4.738 mm; per-axis +0.056 \u00b1 4.783 / +0.620 \u00b1 2.469. Front view: ring OD / beak width, photo 0.3521 vs mesh 0.3226 (FAIL). Eye bezel: profile ring diameter at the head's length scale +0.49 \u00b1 0.45 mm vs the noenoeil mesh 30.000 mm.",
   "what_would_settle": [
-   "The camera distance of the store photographs: a 1 mm ruler in the frame, or the EXIF focal length + sensor (stripped from the published files), would fix D and remove the \u00b10.0105 the sensitivity runs put on r.",
-   "A calliper on one product head: top_head_shell length (mesh 122.690 mm), width (91.760) and height (46.336) to 0.1 mm \u2014 a 0.1 mm reading beats every photograph here by an order of magnitude and settles the 1.5 mm rule outright.",
-   "Or one more photograph taken for the purpose: pure profile, beak closed, head level, a ruler or the XL330 label face in the focal plane of the head, 4000+ px on the long side \u2014 the scale uncertainty then drops below 0.5 % (0.6 mm on the length).",
-   "The eye ring: a calliper across the ring's outer edge (mesh noenoeil 30.000 mm), or Pollen's part drawing; the front-view photograph already puts it at +1.16 mm (implied) and the profiles at -0.02 \u00b1 0.32 mm."
-  ]
+   "A calliper on one product head: top_head_shell length (mesh 122.690 mm), WIDTH across the beak and across the shell rim (mesh 91.763 / 91.760) and height (46.336) to 0.1 mm, and the eye ring's outer diameter (mesh 30.000) \u2014 a 0.1 mm reading beats every photograph here by an order of magnitude, settles the 1.5 mm rule outright and attributes the front-view ring/width excess to the ring or to the width.",
+   "Or one photograph taken for the purpose: a true front view with a ruler in the plane of the face (fixes the ring/width pair in mm), and one pure profile, beak closed, head level, the XL330 label face in the focal plane of the head, 4000+ px on the long side (the length to 0.6 mm).",
+   "The camera distance of the store photographs (EXIF focal length + sensor, stripped from the published files, or a ruler in the frame) would remove the D term from every servo-scaled ratio (photos[].size.D_note).",
+   "A cleaner pure-profile frame from Pollen's video (the README frame's neck servo is merged with its horn bracket and cables at 4x, out/head/profile_frame_servo_zoom.png)."
+  ],
+  "remodel": "a FAIL under the rule calls for a re-model, but the front view fixes a RATIO, not a dimension: re-modelling the width to the implied 84.10 mm (or the ring to 32.31 mm) would be a plausible default written into tooling \u2014 refused; the calliper reading above is the prerequisite, and the parametric head is prepared to take it (ce-parts/microduck-eye-ring carries the ring; the shells stay Pollen's mesh until measured)"
  }
 }

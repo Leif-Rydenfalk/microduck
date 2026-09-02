@@ -39,18 +39,20 @@ def scale_rows():
                 continue
             sr = s.get("size_ratio", {}); xc = s.get("crosscheck") or {}
             if "mask_vs_analytic_pct" in xc:
-                cross = "%s px vs %s px: %s %% (%s %% of the box visible)" % (f(xc["mask"]["width_px"], 1), f(xc["analytic_px"], 1), f(xc["mask_vs_analytic_pct"], 2, True), f(100 * (xc.get("mask_fill_of_projected_bbox") or 0), 0))
+                cross = "%s / %s px: <b>%s %%</b>, %s %% of the box visible" % (f(xc["mask"]["width_px"], 1), f(xc["analytic_px"], 1), f(xc["mask_vs_analytic_pct"], 2, True), f(100 * (xc.get("mask_fill_of_projected_bbox") or 0), 0))
                 cross_chip = chip("PASS" if abs(xc["mask_vs_analytic_pct"]) <= D.get("xc_pct", 5.0) else "FAIL")
             else:
                 cross = esc(xc.get("why", "not read")); cross_chip = chip("CANNOT DETERMINE")
-            face = "%s mm" % f(s.get("render_silhouette_mm"), 2) + ("<br><small>%s</small>" % esc(s["render_face_note"]) if s.get("render_face_note") else "")
             rows.append(
-                "<tr><td>%s</td><td>%s<br><small>%s</small></td><td class=n>%s<br><small>%d of %d lines</small></td><td class=n>%s</td>"
+                "<tr><td>%s</td><td>%s</td><td class=n>%s<br><small>%d of %d lines</small></td><td class=n>%s</td>"
                 "<td class=n>%s</td><td class=n>%s</td><td>%s %s</td><td class=n>%s</td></tr>" % (
-                    esc(p["title"]), esc(s["what"]), esc(s.get("face_evidence", "")), f(s["width_px"], 2), s["n_accepted"], s["n_lines"],
+                    esc(p["title"]), esc(s["what"]), f(s["width_px"], 2), s["n_accepted"], s["n_lines"],
                     pm(s["mm_per_px"], s["mm_per_px_unc"], 5),
-                    f(s.get("render_width_px_analytic"), 2), face, cross_chip, cross,
+                    f(s.get("render_width_px_analytic"), 2), f(s.get("render_silhouette_mm"), 2), cross_chip, cross,
                     pm(sr.get("product_over_mesh"), sr.get("unc"), 4) if sr else "—"))
+            notes = ["<b>face evidence:</b> " + esc(s.get("face_evidence", ""))]
+            if s.get("render_face_note"): notes.append("<b>model servo:</b> " + esc(s["render_face_note"]))
+            rows.append('<tr class="sub"><td></td><td colspan=7><small>%s</small></td></tr>' % " · ".join(notes))
     return "\n".join(rows)
 
 
@@ -122,7 +124,7 @@ def front_rows():
                 names.get(k, k), pm(c["photo"], c.get("photo_unc") or 0, 4), f(c["photo"] * FV["mesh_head_width_mm"], 2), chip("CANNOT DETERMINE"), esc(c["why"]))); continue
         rng = c.get("dev_mm_range")
         rows.append("<tr><td>%s</td><td class=n>%s</td><td class=n>%s</td><td class=n>%s</td><td class=n>%s</td><td class=n>%s</td><td class=n>%s%s</td><td>%s<br><small>%s</small></td></tr>" % (
-            names.get(k, k), pm(c["photo"], c.get("photo_unc") or 0, 4), f(c["mesh"], 4), f(c["diff_pct"], 2, True) + " %", f(c["photo_mm_if_width_is_mesh"], 2),
+            names.get(k, k), pm(c["photo"], c.get("photo_unc") or 0, 4), f(c["mesh"], 4), (f(c["diff_pct"], 2, True) + " %") if abs(c["mesh"]) > 0.01 else "— (mesh ≈ 0)", f(c["photo_mm_if_width_is_mesh"], 2),
             f(c["mesh_mm"], 2), pm(c["dev_mm"], c["dev_unc_mm"], 2),
             ("<br><small>D bracket %s..%s</small>" % (f(rng[0], 2, True), f(rng[1], 2, True))) if rng else "",
             chip(c["verdict"]), esc(c.get("verdict_why", ""))))
@@ -209,8 +211,10 @@ HTML = f"""<!doctype html>
   .stat b{{display:block;font-weight:700;font-size:22px;font-variant-numeric:tabular-nums}}
   .stat span{{font-family:var(--sans);font-size:12px;color:var(--ink-2)}}
   table.data td.n,table.data th.n{{text-align:right;font-variant-numeric:tabular-nums}}
-  table.data{{font-size:12px;table-layout:auto}} table.data th{{white-space:normal;padding:6px 8px 5px;font-size:10.5px}} table.data td{{padding:5px 8px;word-break:break-word;overflow-wrap:anywhere}}
-  table.data td code{{word-break:break-all}} table.data small{{font-size:11px;color:var(--ink-2)}}
+  table.data{{font-size:12px;table-layout:auto}} table.data th{{white-space:normal;padding:6px 8px 5px;font-size:10.5px}} table.data td{{padding:5px 8px}}
+  table.data td code,table.data td a{{overflow-wrap:anywhere}}
+  table.data td:first-child code{{white-space:nowrap}} table.data small{{font-size:11px;color:var(--ink-2)}}
+  table.data td.n{{white-space:normal;overflow-wrap:normal;word-break:keep-all}} table.data tr.sub td{{border-bottom:1px solid var(--hair);padding-top:0;line-height:1.35}}
   ul.tests{{font-size:13px;margin:0 0 10px 0;padding-left:22px;max-width:70em}} ul.tests li{{margin:3px 0}}
   .chip{{white-space:nowrap}}
   tr.total td{{border-top:2px solid var(--rule)}}
@@ -251,7 +255,7 @@ HTML = f"""<!doctype html>
 <section id="answer">
   <h2><span class="n">1</span>Verdict</h2>
   <div class="verdict {'warn' if V['head']=='FAIL' else ('cd' if V['head']=='CANNOT DETERMINE' else '')}">
-    <b>Head: {esc(V["head"])}.</b>{quick} {" ".join(esc(x) + "." for x in V["head_why"])}
+    <b>Head: {esc(V["head"])}.</b>{quick} {" ".join(esc(x[0].upper() + x[1:]) + "." for x in V["head_why"])}
     Across {n_photos} admitted profile photograph{"s" if n_photos != 1 else ""} ({esc(", ".join(C["photos_used"]) or "none")}) the product head is
     <b>{pm(C["product_over_mesh"], C["product_over_mesh_unc"], 4)}</b> times the simulation mesh in length (a deviation of
     <b>{pm(C["head_length_dev_mm"], C["head_length_dev_unc_mm"], 2)} mm</b> on 122.690 mm; along the head's own principal axes
@@ -272,7 +276,7 @@ HTML = f"""<!doctype html>
     <b>Eye bezel: {esc(V["eye_bezel"])}.</b> The bezel is <em>not</em> missing from the mesh: <code>noenoeil.stl</code> is a Ø30.000 mm ring,
     7.5 mm long, standing proud of the face panel (whose only opening is the Ø14.5 mm lens hole) — exactly the accent-colour ring in the
     photographs ({chip(V["eye_bezel_parts"]["exists_in_mesh"])} exists). Its diameter at the head's own length scale (ring over head extent, photograph
-    against render, scale-free) reads {pm(C["eye_dev_mm"], C["eye_dev_unc_mm"], 2)} mm in the profiles {chip(V["eye_bezel_parts"]["diameter_vs_length_profiles"])};
+    against render, scale-free) reads {pm(C["eye_dev_mm"], C["eye_dev_unc_mm"], 2)} mm in the store photographs whose ring is seen whole (Table 5) {chip(V["eye_bezel_parts"]["diameter_vs_length_profiles"])};
     the front view's ring/width pair is {chip(V["eye_bezel_parts"]["ring_width_pair"])} and its attribution to the ring {chip(V["eye_bezel_parts"]["attribution_to_ring"])}.
     Face layout in the front view (Table 6, each graded): {", ".join("%s %s mm %s" % (esc(nm), f(FV["comparison"][k]["dev_mm"], 2, True), chip(FV["comparison"][k]["verdict"])) for k, nm in (("eye_below_top_over_width", "eye centre below the shell top"), ("eye_x_offset_over_width", "eye centre off the mid-line"), ("tof_x_from_eye_over_width", "ToF window from the MJCF site")))}.
   </div>
@@ -318,7 +322,7 @@ HTML = f"""<!doctype html>
   term of §6b.</p>
   <div class="tw"><table class="data">
     <caption>Table 2. Scale features. mm/px is at the servo's depth. W<sub>render</sub> = 20.000 mm × f / z through the head frame's pinhole (Table 3's D). The cross-check reads the servo geom's segmentation mask across its own axis in a frame wide enough to hold it (the ankle included) against the geom's projected-vertex width; a servo without that read is never graded PASS.</caption>
-    <thead><tr><th>Photograph</th><th>Feature · face evidence</th><th class=n>Width in photo (px)</th><th class=n>mm / px</th><th class=n>W<sub>render</sub> (px): 20.000 mm at the servo's depth</th><th class=n>Model servo silhouette (mm)</th><th>Cross-check: mask vs projected width, ±250 mm frame</th><th class=n>Size ratio product/mesh</th></tr></thead>
+    <thead><tr><th>Photograph</th><th>Feature</th><th class=n>Width in photo (px)</th><th class=n>mm / px</th><th class=n>W<sub>render</sub> (px): 20.000 mm at the servo's depth</th><th class=n>Model servo silhouette (mm)</th><th>Cross-check: mask vs projected width, ±250 mm frame</th><th class=n>Size ratio product/mesh</th></tr></thead>
     <tbody>
 {scale_rows()}
     </tbody>
@@ -356,8 +360,8 @@ HTML = f"""<!doctype html>
 
 <section id="eye">
   <h2><span class="n">6</span>Eye bezel — does the product have a part the mesh lacks?</h2>
-  <p>No. The mesh has it: <code>noenoeil</code> is a Ø30.000 mm × 7.5 mm ring in front of the face panel (Table 1). The shelf folder
-  <code>ce-parts/microduck-eye-ring</code> was created empty ("nothing measured yet"); the numbers below are what it should carry. Two independent
+  <p>No. The mesh has it: <code>noenoeil</code> is a Ø30.000 mm × 7.5 mm ring in front of the face panel (Table 1). The shelf part
+  <code>ce-parts/microduck-eye-ring</code> (v0.0.1, the noenoeil mesh loaded unchanged by <code>tools/head_eye_ring_shelve.py</code>) carries the numbers below in its evidence ledger. Two independent
   reads of the product ring: (a) in each profile photograph the accent-hue ring pixels give an ellipse whose major axis is the ring diameter,
   scaled by the servo (and, more robustly, by the same ring in the render through the fitted similarity — "via render", which needs no mm/px);
   (b) the flat-lay <em>inside-the-box</em> photograph is a true front view, so every face feature is a scale-free ratio to the head width, compared
@@ -394,9 +398,9 @@ HTML = f"""<!doctype html>
 {sens_rows()}
     </tbody>
   </table></div>
-  <p class="note">{esc(C.get("D_sensitivity_note", "no sensitivity runs found"))} {" ".join("%s: %s." % (esc(p["id"]), esc(p["size"].get("D_note", ""))) for p in D["photos"] if p.get("size"))}</p>
+  <p class="note">{esc(C.get("D_sensitivity_note", "no sensitivity runs found"))}. {" ".join("<b>%s</b>: %s." % (esc(p["id"]), esc(p["size"].get("D_note", ""))) for p in D["photos"] if p.get("size"))}</p>
   <h3>The pure-profile frame — scale-free check</h3>
-  <p>{esc(PF["aspect_reading"]) if PF else "images/github/gh_readme_7.png not analysed"}. Neither half yields a mm/px: {esc(PF["halves"]["real"]["scale_why"]) if PF else ""} On the simulator half: {esc(PF["halves"]["sim"]["scale_why"]) if PF else ""} Both scans are bounded to the drawn region and a run that reaches the bound is refused; the zoom below shows every accepted run. The frame is kept because it is the only published view with the head un-yawed, real beside Pollen's own render.</p>
+  <p>{esc(PF["aspect_reading"]) if PF else "images/github/gh_readme_7.png not analysed"}. Neither half yields a mm/px. Real half: {esc(PF["halves"]["real"]["scale_why"]) if PF else ""}. Simulator half: {esc(PF["halves"]["sim"]["scale_why"]) if PF else ""}. Both scans are bounded to the drawn region and a run that reaches the bound is refused; the zoom below shows every accepted run. The frame is kept because it is the only published view with the head un-yawed, real beside Pollen's own render.</p>
   <figure class="wide"><img src="out/head/profile_frame_pair.png" alt="pure profile frame, sim beside real"><figcaption>Pollen's README frame: their simulator render (left) beside the real unit (right); blue = the head silhouette's principal-axis box on each; orange = the bounded servo scan region and its accepted runs.</figcaption></figure>
   <figure class="wide"><img src="out/head/profile_frame_servo_zoom.png" alt="the two servo regions at 4x"><figcaption>The two servo regions at 4×, real (left) and simulator (right): the accepted scan runs in blue span the case plus the horn bracket (real) and the case plus the grey neck plate (simulator) — the reason each half is CANNOT DETERMINE, visible rather than asserted.</figcaption></figure>
 </section>
