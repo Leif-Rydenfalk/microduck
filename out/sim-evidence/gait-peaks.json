@@ -1,0 +1,1529 @@
+{
+ "study": "gait-peaks",
+ "inputs": {
+  "model": "sim/microduck_ours.xml (walking cells) and sim/microduck_ours_allcollisions.xml (sit-stand and the self-collision census) \u2014 OUR rebuilt meshes on Pollen's stock collision geoms and inertials (sim/swap_meshes.py, out/sim/swap_report.json)",
+  "policies": "sim/policies/BEST_alpha_walking.onnx, BEST_alpha_sitstand.onnx, BEST_alpha_stand.onnx \u2014 Pollen's published policies (sim/README.md)",
+  "actuator_model": "MuJoCo <position> actuator, gear 1, kp 0.55, kv 0.0, forcerange +/-0.96 N.m, joint damping 0.053, frictionloss 0.0048, armature 0.0018 (class 'chosen_actuator', reference/pollen-microduck-rl/robot_walk.xml:44-47 default class 'chosen_actuator': <position kp=\"0.55\" kv=\"0.0\" forcerange=\"-0.96 0.96\" ctrlrange=\"-10.0 10.0\"/>). data.actuator_force is therefore the joint torque in N.m.",
+  "total_mass_kg": 0.737243,
+  "total_mass_source": "model.body_mass.sum() of the compiled scene, measured in sim/gait_sweep.py; Pollen's inertials, unchanged by the mesh swap",
+  "weight_N": 7.2324,
+  "servo": {
+   "part": "XL330-M288-T",
+   "source": "ROBOTIS e-Manual, https://emanual.robotis.com/docs/en/dxl/x/xl330-m288/ , Specifications table; fetched 2026-09-02, sha256 in ce-parts/xl330-m288-t/PROVENANCE.json, local copy ce-parts/xl330-m288-t/iterations/v0.0.1/docs/fetched/robotis-emanual-xl330-m288.html. The same table on the successor host https://docs.robotis.com/docs/dxl/model_reference/x_series/xl_series/xl330-m288/ reads identically.",
+   "stall_torque_Nm_quote": "0.42 [N.m] (at 3.7 [V], 1.11 [A], 0.378 [Nm/A]) / 0.52 [N.m] (at 5.0 [V], 1.47 [A], 0.354 [Nm/A]) / 0.60 [N.m] (at 6.0 [V], 1.74 [A], 0.345 [Nm/A])",
+   "stall_torque_Nm": {
+    "3.7": 0.42,
+    "5.0": 0.52,
+    "6.0": 0.6
+   },
+   "no_load_speed_rpm_quote": "76 [rev/min] (at 3.7 [V]) / 103 [rev/min] (at 5.0 [V]) / 123 [rev/min] (at 6.0 [V])",
+   "no_load_speed_rpm": {
+    "3.7": 76,
+    "5.0": 103,
+    "6.0": 123
+   },
+   "standby_current_mA_quote": "Standby Current | 17 [mA]",
+   "standby_current_mA": 17,
+   "gear_ratio_quote": "Gear Ratio | 288.4 : 1",
+   "note": "ROBOTIS publishes NO no-load CURRENT and NO continuous-torque rating for this actuator; the only currents on the page are the three stall rows and the 17 mA standby. Above 6.0 V the vendor states nothing at all, and the Microduck runs the servos on the raw 6.6-8.2 V pack (docs/ELECTRONICS-AND-SOFTWARE.md 3.4), outside the 3.7-6.0 V input band."
+  },
+  "cells": 34,
+  "upright_locomotion_cells": 22,
+  "disturbance_cells": 6,
+  "posture_cells": 6
+ },
+ "method": "sim/gait_sweep.py records data.actuator_force (N.m), data.qvel per actuated joint (rad/s) and mj_contactForce on every contact touching left_foot_collision / right_foot_collision at each of the 50 Hz control frames of every cell. This file takes, per joint, the maximum over cells of the per-cell peak, and names the cell it came from. The ground-reaction check is validated against statics: in the standing cells the median summed vertical GRF is 7.2425 N (vx_0.00) and 7.2289 N (stand_hold) against a computed weight of 7.2324 N \u2014 0.14 % and 0.05 %.",
+ "outputs": {
+  "per_joint_locomotion_upright": {
+   "left_hip_yaw": {
+    "peak_abs_torque_Nm": 0.257,
+    "peak_signed_torque_Nm": 0.257,
+    "peak_cell": "slope5_up",
+    "peak_at_s": 11.7,
+    "p99_abs_torque_Nm": 0.20455,
+    "p95_abs_torque_Nm": 0.11502,
+    "rms_torque_Nm_in_peak_cell": 0.0556,
+    "peak_abs_speed_rad_s": 3.2891,
+    "peak_abs_speed_rpm_output": 31.409,
+    "peak_speed_cell": "slope5_up",
+    "range_deg": [
+     -25.0,
+     30.0
+    ],
+    "max_range_utilisation_pct": 45.12,
+    "cells_with_frames_beyond_limit": [],
+    "max_overshoot_beyond_limit_deg": 0.0,
+    "cells_saturating_mjcf_forcerange": [],
+    "vs_xl330_stall_at_5V_pct": 49.42,
+    "vs_xl330_stall_at_6V_pct": 42.83
+   },
+   "left_hip_roll": {
+    "peak_abs_torque_Nm": 0.30251,
+    "peak_signed_torque_Nm": -0.30251,
+    "peak_cell": "vx_0.80",
+    "peak_at_s": 0.7,
+    "p99_abs_torque_Nm": 0.23124,
+    "p95_abs_torque_Nm": 0.20037,
+    "rms_torque_Nm_in_peak_cell": 0.11543,
+    "peak_abs_speed_rad_s": 3.0891,
+    "peak_abs_speed_rpm_output": 29.499,
+    "peak_speed_cell": "vx_0.80",
+    "range_deg": [
+     -22.0,
+     22.0
+    ],
+    "max_range_utilisation_pct": 38.63,
+    "cells_with_frames_beyond_limit": [],
+    "max_overshoot_beyond_limit_deg": 0.0,
+    "cells_saturating_mjcf_forcerange": [],
+    "vs_xl330_stall_at_5V_pct": 58.17,
+    "vs_xl330_stall_at_6V_pct": 50.42
+   },
+   "left_hip_pitch": {
+    "peak_abs_torque_Nm": 0.52286,
+    "peak_signed_torque_Nm": 0.52286,
+    "peak_cell": "slope5_up",
+    "peak_at_s": 0.56,
+    "p99_abs_torque_Nm": 0.44589,
+    "p95_abs_torque_Nm": 0.28542,
+    "rms_torque_Nm_in_peak_cell": 0.14748,
+    "peak_abs_speed_rad_s": 7.8117,
+    "peak_abs_speed_rpm_output": 74.597,
+    "peak_speed_cell": "slope5_side_left",
+    "range_deg": [
+     -90.0,
+     90.0
+    ],
+    "max_range_utilisation_pct": 21.47,
+    "cells_with_frames_beyond_limit": [],
+    "max_overshoot_beyond_limit_deg": 0.0,
+    "cells_saturating_mjcf_forcerange": [],
+    "vs_xl330_stall_at_5V_pct": 100.55,
+    "vs_xl330_stall_at_6V_pct": 87.14
+   },
+   "left_knee": {
+    "peak_abs_torque_Nm": 0.71519,
+    "peak_signed_torque_Nm": 0.71519,
+    "peak_cell": "vx_0.80",
+    "peak_at_s": 10.72,
+    "p99_abs_torque_Nm": 0.69498,
+    "p95_abs_torque_Nm": 0.64335,
+    "rms_torque_Nm_in_peak_cell": 0.39291,
+    "peak_abs_speed_rad_s": 9.5363,
+    "peak_abs_speed_rpm_output": 91.065,
+    "peak_speed_cell": "vx_0.80",
+    "range_deg": [
+     -90.0,
+     90.0
+    ],
+    "max_range_utilisation_pct": 36.37,
+    "cells_with_frames_beyond_limit": [],
+    "max_overshoot_beyond_limit_deg": 0.0,
+    "cells_saturating_mjcf_forcerange": [],
+    "vs_xl330_stall_at_5V_pct": 137.54,
+    "vs_xl330_stall_at_6V_pct": 119.2
+   },
+   "left_ankle": {
+    "peak_abs_torque_Nm": 0.35751,
+    "peak_signed_torque_Nm": 0.35751,
+    "peak_cell": "vx_0.80",
+    "peak_at_s": 5.28,
+    "p99_abs_torque_Nm": 0.3497,
+    "p95_abs_torque_Nm": 0.32943,
+    "rms_torque_Nm_in_peak_cell": 0.21707,
+    "peak_abs_speed_rad_s": 6.3164,
+    "peak_abs_speed_rpm_output": 60.317,
+    "peak_speed_cell": "vx_0.80",
+    "range_deg": [
+     -90.0,
+     90.0
+    ],
+    "max_range_utilisation_pct": 21.3,
+    "cells_with_frames_beyond_limit": [],
+    "max_overshoot_beyond_limit_deg": 0.0,
+    "cells_saturating_mjcf_forcerange": [],
+    "vs_xl330_stall_at_5V_pct": 68.75,
+    "vs_xl330_stall_at_6V_pct": 59.59
+   },
+   "neck_pitch": {
+    "peak_abs_torque_Nm": 0.27931,
+    "peak_signed_torque_Nm": -0.27931,
+    "peak_cell": "slope5_up",
+    "peak_at_s": 0.94,
+    "p99_abs_torque_Nm": 0.19726,
+    "p95_abs_torque_Nm": 0.10609,
+    "rms_torque_Nm_in_peak_cell": 0.06411,
+    "peak_abs_speed_rad_s": 3.5225,
+    "peak_abs_speed_rpm_output": 33.637,
+    "peak_speed_cell": "slope5_up",
+    "range_deg": [
+     -90.0,
+     60.0
+    ],
+    "max_range_utilisation_pct": 23.25,
+    "cells_with_frames_beyond_limit": [],
+    "max_overshoot_beyond_limit_deg": 0.0,
+    "cells_saturating_mjcf_forcerange": [],
+    "vs_xl330_stall_at_5V_pct": 53.71,
+    "vs_xl330_stall_at_6V_pct": 46.55
+   },
+   "head_pitch": {
+    "peak_abs_torque_Nm": 0.22239,
+    "peak_signed_torque_Nm": -0.22239,
+    "peak_cell": "slope5_down",
+    "peak_at_s": 1.42,
+    "p99_abs_torque_Nm": 0.1978,
+    "p95_abs_torque_Nm": 0.16697,
+    "rms_torque_Nm_in_peak_cell": 0.07906,
+    "peak_abs_speed_rad_s": 2.0291,
+    "peak_abs_speed_rpm_output": 19.377,
+    "peak_speed_cell": "slope5_up",
+    "range_deg": [
+     -90.0,
+     90.0
+    ],
+    "max_range_utilisation_pct": 10.78,
+    "cells_with_frames_beyond_limit": [],
+    "max_overshoot_beyond_limit_deg": 0.0,
+    "cells_saturating_mjcf_forcerange": [],
+    "vs_xl330_stall_at_5V_pct": 42.77,
+    "vs_xl330_stall_at_6V_pct": 37.07
+   },
+   "head_yaw": {
+    "peak_abs_torque_Nm": 0.52548,
+    "peak_signed_torque_Nm": 0.52548,
+    "peak_cell": "slope5_side_left",
+    "peak_at_s": 5.6,
+    "p99_abs_torque_Nm": 0.46113,
+    "p95_abs_torque_Nm": 0.39393,
+    "rms_torque_Nm_in_peak_cell": 0.22378,
+    "peak_abs_speed_rad_s": 7.894,
+    "peak_abs_speed_rpm_output": 75.382,
+    "peak_speed_cell": "slope5_down",
+    "range_deg": [
+     -170.0,
+     170.0
+    ],
+    "max_range_utilisation_pct": 13.97,
+    "cells_with_frames_beyond_limit": [],
+    "max_overshoot_beyond_limit_deg": 0.0,
+    "cells_saturating_mjcf_forcerange": [],
+    "vs_xl330_stall_at_5V_pct": 101.05,
+    "vs_xl330_stall_at_6V_pct": 87.58
+   },
+   "head_roll": {
+    "peak_abs_torque_Nm": 0.24885,
+    "peak_signed_torque_Nm": -0.24885,
+    "peak_cell": "slope5_up",
+    "peak_at_s": 0.7,
+    "p99_abs_torque_Nm": 0.12001,
+    "p95_abs_torque_Nm": 0.09795,
+    "rms_torque_Nm_in_peak_cell": 0.05285,
+    "peak_abs_speed_rad_s": 3.337,
+    "peak_abs_speed_rpm_output": 31.866,
+    "peak_speed_cell": "slope5_up",
+    "range_deg": [
+     -25.0,
+     25.0
+    ],
+    "max_range_utilisation_pct": 31.29,
+    "cells_with_frames_beyond_limit": [],
+    "max_overshoot_beyond_limit_deg": 0.0,
+    "cells_saturating_mjcf_forcerange": [],
+    "vs_xl330_stall_at_5V_pct": 47.86,
+    "vs_xl330_stall_at_6V_pct": 41.48
+   },
+   "right_hip_yaw": {
+    "peak_abs_torque_Nm": 0.17589,
+    "peak_signed_torque_Nm": 0.17589,
+    "peak_cell": "vx_0.80",
+    "peak_at_s": 0.7,
+    "p99_abs_torque_Nm": 0.15575,
+    "p95_abs_torque_Nm": 0.14667,
+    "rms_torque_Nm_in_peak_cell": 0.07647,
+    "peak_abs_speed_rad_s": 2.2853,
+    "peak_abs_speed_rpm_output": 21.823,
+    "peak_speed_cell": "slope5_side_left",
+    "range_deg": [
+     -30.0,
+     25.0
+    ],
+    "max_range_utilisation_pct": 24.98,
+    "cells_with_frames_beyond_limit": [],
+    "max_overshoot_beyond_limit_deg": 0.0,
+    "cells_saturating_mjcf_forcerange": [],
+    "vs_xl330_stall_at_5V_pct": 33.82,
+    "vs_xl330_stall_at_6V_pct": 29.31
+   },
+   "right_hip_roll": {
+    "peak_abs_torque_Nm": 0.23958,
+    "peak_signed_torque_Nm": -0.23958,
+    "peak_cell": "slope5_side_left",
+    "peak_at_s": 1.66,
+    "p99_abs_torque_Nm": 0.18115,
+    "p95_abs_torque_Nm": 0.13292,
+    "rms_torque_Nm_in_peak_cell": 0.07363,
+    "peak_abs_speed_rad_s": 2.4139,
+    "peak_abs_speed_rpm_output": 23.051,
+    "peak_speed_cell": "slope5_side_left",
+    "range_deg": [
+     -22.0,
+     22.0
+    ],
+    "max_range_utilisation_pct": 27.2,
+    "cells_with_frames_beyond_limit": [],
+    "max_overshoot_beyond_limit_deg": 0.0,
+    "cells_saturating_mjcf_forcerange": [],
+    "vs_xl330_stall_at_5V_pct": 46.07,
+    "vs_xl330_stall_at_6V_pct": 39.93
+   },
+   "right_hip_pitch": {
+    "peak_abs_torque_Nm": 0.74179,
+    "peak_signed_torque_Nm": 0.74179,
+    "peak_cell": "slope5_side_left",
+    "peak_at_s": 5.74,
+    "p99_abs_torque_Nm": 0.65838,
+    "p95_abs_torque_Nm": 0.55339,
+    "rms_torque_Nm_in_peak_cell": 0.30458,
+    "peak_abs_speed_rad_s": 10.6506,
+    "peak_abs_speed_rpm_output": 101.706,
+    "peak_speed_cell": "slope5_side_left",
+    "range_deg": [
+     -90.0,
+     90.0
+    ],
+    "max_range_utilisation_pct": 27.85,
+    "cells_with_frames_beyond_limit": [],
+    "max_overshoot_beyond_limit_deg": 0.0,
+    "cells_saturating_mjcf_forcerange": [],
+    "vs_xl330_stall_at_5V_pct": 142.65,
+    "vs_xl330_stall_at_6V_pct": 123.63
+   },
+   "right_knee": {
+    "peak_abs_torque_Nm": 0.66639,
+    "peak_signed_torque_Nm": 0.66639,
+    "peak_cell": "vx_0.80",
+    "peak_at_s": 10.3,
+    "p99_abs_torque_Nm": 0.64615,
+    "p95_abs_torque_Nm": 0.6274,
+    "rms_torque_Nm_in_peak_cell": 0.34217,
+    "peak_abs_speed_rad_s": 8.9201,
+    "peak_abs_speed_rpm_output": 85.18,
+    "peak_speed_cell": "vx_0.80",
+    "range_deg": [
+     -90.0,
+     90.0
+    ],
+    "max_range_utilisation_pct": 30.15,
+    "cells_with_frames_beyond_limit": [],
+    "max_overshoot_beyond_limit_deg": 0.0,
+    "cells_saturating_mjcf_forcerange": [],
+    "vs_xl330_stall_at_5V_pct": 128.15,
+    "vs_xl330_stall_at_6V_pct": 111.07
+   },
+   "right_ankle": {
+    "peak_abs_torque_Nm": 0.56167,
+    "peak_signed_torque_Nm": 0.56167,
+    "peak_cell": "slope5_up",
+    "peak_at_s": 0.72,
+    "p99_abs_torque_Nm": 0.25462,
+    "p95_abs_torque_Nm": 0.19667,
+    "rms_torque_Nm_in_peak_cell": 0.10804,
+    "peak_abs_speed_rad_s": 7.4809,
+    "peak_abs_speed_rpm_output": 71.438,
+    "peak_speed_cell": "slope5_up",
+    "range_deg": [
+     -90.0,
+     90.0
+    ],
+    "max_range_utilisation_pct": 19.31,
+    "cells_with_frames_beyond_limit": [],
+    "max_overshoot_beyond_limit_deg": 0.0,
+    "cells_saturating_mjcf_forcerange": [],
+    "vs_xl330_stall_at_5V_pct": 108.01,
+    "vs_xl330_stall_at_6V_pct": 93.61
+   }
+  },
+  "per_joint_disturbance_push": {
+   "left_hip_yaw": {
+    "peak_abs_torque_Nm": 0.93764,
+    "peak_signed_torque_Nm": -0.93764,
+    "peak_cell": "push_2N_lat",
+    "peak_at_s": 6.62,
+    "p99_abs_torque_Nm": 0.45354,
+    "p95_abs_torque_Nm": 0.12898,
+    "rms_torque_Nm_in_peak_cell": 0.09438,
+    "peak_abs_speed_rad_s": 8.9277,
+    "peak_abs_speed_rpm_output": 85.253,
+    "peak_speed_cell": "push_5N_fwd",
+    "range_deg": [
+     -25.0,
+     30.0
+    ],
+    "max_range_utilisation_pct": 60.08,
+    "cells_with_frames_beyond_limit": [
+     "push_2N_lat",
+     "push_5N_fwd",
+     "push_5N_lat_neg"
+    ],
+    "max_overshoot_beyond_limit_deg": 2.40629,
+    "cells_saturating_mjcf_forcerange": [],
+    "vs_xl330_stall_at_5V_pct": 180.32,
+    "vs_xl330_stall_at_6V_pct": 156.27
+   },
+   "left_hip_roll": {
+    "peak_abs_torque_Nm": 0.96,
+    "peak_signed_torque_Nm": -0.96,
+    "peak_cell": "push_5N_lat",
+    "peak_at_s": 6.3,
+    "p99_abs_torque_Nm": 0.53142,
+    "p95_abs_torque_Nm": 0.158,
+    "rms_torque_Nm_in_peak_cell": 0.14183,
+    "peak_abs_speed_rad_s": 9.8192,
+    "peak_abs_speed_rpm_output": 93.766,
+    "peak_speed_cell": "push_5N_lat_neg",
+    "range_deg": [
+     -22.0,
+     22.0
+    ],
+    "max_range_utilisation_pct": 106.78,
+    "cells_with_frames_beyond_limit": [
+     "push_2N_lat",
+     "push_5N_fwd",
+     "push_5N_lat",
+     "push_5N_lat_neg"
+    ],
+    "max_overshoot_beyond_limit_deg": 4.0843,
+    "cells_saturating_mjcf_forcerange": [
+     "push_5N_lat"
+    ],
+    "vs_xl330_stall_at_5V_pct": 184.62,
+    "vs_xl330_stall_at_6V_pct": 160.0
+   },
+   "left_hip_pitch": {
+    "peak_abs_torque_Nm": 0.96,
+    "peak_signed_torque_Nm": 0.96,
+    "peak_cell": "push_5N_back",
+    "peak_at_s": 6.36,
+    "p99_abs_torque_Nm": 0.68358,
+    "p95_abs_torque_Nm": 0.18079,
+    "rms_torque_Nm_in_peak_cell": 0.14137,
+    "peak_abs_speed_rad_s": 17.5424,
+    "peak_abs_speed_rpm_output": 167.518,
+    "peak_speed_cell": "push_5N_lat",
+    "range_deg": [
+     -90.0,
+     90.0
+    ],
+    "max_range_utilisation_pct": 77.5,
+    "cells_with_frames_beyond_limit": [],
+    "max_overshoot_beyond_limit_deg": 0.0,
+    "cells_saturating_mjcf_forcerange": [
+     "push_5N_back",
+     "push_5N_lat"
+    ],
+    "vs_xl330_stall_at_5V_pct": 184.62,
+    "vs_xl330_stall_at_6V_pct": 160.0
+   },
+   "left_knee": {
+    "peak_abs_torque_Nm": 0.96,
+    "peak_signed_torque_Nm": 0.96,
+    "peak_cell": "push_5N_fwd",
+    "peak_at_s": 6.36,
+    "p99_abs_torque_Nm": 0.76332,
+    "p95_abs_torque_Nm": 0.41602,
+    "rms_torque_Nm_in_peak_cell": 0.27305,
+    "peak_abs_speed_rad_s": 14.7045,
+    "peak_abs_speed_rpm_output": 140.418,
+    "peak_speed_cell": "push_5N_lat",
+    "range_deg": [
+     -90.0,
+     90.0
+    ],
+    "max_range_utilisation_pct": 49.03,
+    "cells_with_frames_beyond_limit": [],
+    "max_overshoot_beyond_limit_deg": 0.0,
+    "cells_saturating_mjcf_forcerange": [
+     "push_5N_fwd",
+     "push_5N_lat"
+    ],
+    "vs_xl330_stall_at_5V_pct": 184.62,
+    "vs_xl330_stall_at_6V_pct": 160.0
+   },
+   "left_ankle": {
+    "peak_abs_torque_Nm": 0.90416,
+    "peak_signed_torque_Nm": -0.90416,
+    "peak_cell": "push_5N_lat",
+    "peak_at_s": 6.32,
+    "p99_abs_torque_Nm": 0.69732,
+    "p95_abs_torque_Nm": 0.177,
+    "rms_torque_Nm_in_peak_cell": 0.13419,
+    "peak_abs_speed_rad_s": 14.0089,
+    "peak_abs_speed_rpm_output": 133.775,
+    "peak_speed_cell": "push_5N_lat",
+    "range_deg": [
+     -90.0,
+     90.0
+    ],
+    "max_range_utilisation_pct": 56.51,
+    "cells_with_frames_beyond_limit": [],
+    "max_overshoot_beyond_limit_deg": 0.0,
+    "cells_saturating_mjcf_forcerange": [],
+    "vs_xl330_stall_at_5V_pct": 173.88,
+    "vs_xl330_stall_at_6V_pct": 150.69
+   },
+   "neck_pitch": {
+    "peak_abs_torque_Nm": 0.96,
+    "peak_signed_torque_Nm": 0.96,
+    "peak_cell": "push_5N_lat_neg",
+    "peak_at_s": 6.32,
+    "p99_abs_torque_Nm": 0.67042,
+    "p95_abs_torque_Nm": 0.12077,
+    "rms_torque_Nm_in_peak_cell": 0.12266,
+    "peak_abs_speed_rad_s": 17.4121,
+    "peak_abs_speed_rpm_output": 166.274,
+    "peak_speed_cell": "push_5N_lat_neg",
+    "range_deg": [
+     -90.0,
+     60.0
+    ],
+    "max_range_utilisation_pct": 74.58,
+    "cells_with_frames_beyond_limit": [
+     "push_5N_lat",
+     "push_5N_lat_neg"
+    ],
+    "max_overshoot_beyond_limit_deg": 5.85565,
+    "cells_saturating_mjcf_forcerange": [
+     "push_5N_lat_neg"
+    ],
+    "vs_xl330_stall_at_5V_pct": 184.62,
+    "vs_xl330_stall_at_6V_pct": 160.0
+   },
+   "head_pitch": {
+    "peak_abs_torque_Nm": 0.76926,
+    "peak_signed_torque_Nm": 0.76926,
+    "peak_cell": "push_5N_lat_neg",
+    "peak_at_s": 6.38,
+    "p99_abs_torque_Nm": 0.48589,
+    "p95_abs_torque_Nm": 0.06276,
+    "rms_torque_Nm_in_peak_cell": 0.0896,
+    "peak_abs_speed_rad_s": 13.0412,
+    "peak_abs_speed_rpm_output": 124.534,
+    "peak_speed_cell": "push_5N_lat_neg",
+    "range_deg": [
+     -90.0,
+     90.0
+    ],
+    "max_range_utilisation_pct": 43.97,
+    "cells_with_frames_beyond_limit": [],
+    "max_overshoot_beyond_limit_deg": 0.0,
+    "cells_saturating_mjcf_forcerange": [],
+    "vs_xl330_stall_at_5V_pct": 147.93,
+    "vs_xl330_stall_at_6V_pct": 128.21
+   },
+   "head_yaw": {
+    "peak_abs_torque_Nm": 0.96,
+    "peak_signed_torque_Nm": -0.96,
+    "peak_cell": "push_2N_lat",
+    "peak_at_s": 6.6,
+    "p99_abs_torque_Nm": 0.96,
+    "p95_abs_torque_Nm": 0.20585,
+    "rms_torque_Nm_in_peak_cell": 0.15504,
+    "peak_abs_speed_rad_s": 18.3814,
+    "peak_abs_speed_rpm_output": 175.53,
+    "peak_speed_cell": "push_5N_lat",
+    "range_deg": [
+     -170.0,
+     170.0
+    ],
+    "max_range_utilisation_pct": 61.52,
+    "cells_with_frames_beyond_limit": [
+     "push_5N_lat_neg"
+    ],
+    "max_overshoot_beyond_limit_deg": 7.28651,
+    "cells_saturating_mjcf_forcerange": [
+     "push_2N_lat",
+     "push_5N_fwd",
+     "push_5N_lat",
+     "push_5N_lat_neg"
+    ],
+    "vs_xl330_stall_at_5V_pct": 184.62,
+    "vs_xl330_stall_at_6V_pct": 160.0
+   },
+   "head_roll": {
+    "peak_abs_torque_Nm": 0.96,
+    "peak_signed_torque_Nm": 0.96,
+    "peak_cell": "push_5N_lat",
+    "peak_at_s": 6.52,
+    "p99_abs_torque_Nm": 0.75051,
+    "p95_abs_torque_Nm": 0.07393,
+    "rms_torque_Nm_in_peak_cell": 0.11206,
+    "peak_abs_speed_rad_s": 13.2964,
+    "peak_abs_speed_rpm_output": 126.971,
+    "peak_speed_cell": "push_5N_lat",
+    "range_deg": [
+     -25.0,
+     25.0
+    ],
+    "max_range_utilisation_pct": 109.86,
+    "cells_with_frames_beyond_limit": [
+     "push_5N_lat",
+     "push_5N_lat_neg"
+    ],
+    "max_overshoot_beyond_limit_deg": 5.53141,
+    "cells_saturating_mjcf_forcerange": [
+     "push_5N_lat",
+     "push_5N_lat_neg"
+    ],
+    "vs_xl330_stall_at_5V_pct": 184.62,
+    "vs_xl330_stall_at_6V_pct": 160.0
+   },
+   "right_hip_yaw": {
+    "peak_abs_torque_Nm": 0.96,
+    "peak_signed_torque_Nm": 0.96,
+    "peak_cell": "push_5N_lat",
+    "peak_at_s": 6.3,
+    "p99_abs_torque_Nm": 0.96,
+    "p95_abs_torque_Nm": 0.08167,
+    "rms_torque_Nm_in_peak_cell": 0.15742,
+    "peak_abs_speed_rad_s": 15.2951,
+    "peak_abs_speed_rpm_output": 146.058,
+    "peak_speed_cell": "push_5N_lat",
+    "range_deg": [
+     -30.0,
+     25.0
+    ],
+    "max_range_utilisation_pct": 115.52,
+    "cells_with_frames_beyond_limit": [
+     "push_2N_lat",
+     "push_5N_fwd",
+     "push_5N_lat",
+     "push_5N_lat_neg"
+    ],
+    "max_overshoot_beyond_limit_deg": 6.44681,
+    "cells_saturating_mjcf_forcerange": [
+     "push_5N_lat",
+     "push_5N_lat_neg"
+    ],
+    "vs_xl330_stall_at_5V_pct": 184.62,
+    "vs_xl330_stall_at_6V_pct": 160.0
+   },
+   "right_hip_roll": {
+    "peak_abs_torque_Nm": 0.96,
+    "peak_signed_torque_Nm": 0.96,
+    "peak_cell": "push_5N_lat_neg",
+    "peak_at_s": 6.34,
+    "p99_abs_torque_Nm": 0.96,
+    "p95_abs_torque_Nm": 0.13121,
+    "rms_torque_Nm_in_peak_cell": 0.13978,
+    "peak_abs_speed_rad_s": 11.903,
+    "peak_abs_speed_rpm_output": 113.665,
+    "peak_speed_cell": "push_5N_lat_neg",
+    "range_deg": [
+     -22.0,
+     22.0
+    ],
+    "max_range_utilisation_pct": 73.93,
+    "cells_with_frames_beyond_limit": [
+     "push_5N_lat",
+     "push_5N_lat_neg"
+    ],
+    "max_overshoot_beyond_limit_deg": 4.69413,
+    "cells_saturating_mjcf_forcerange": [
+     "push_5N_lat_neg"
+    ],
+    "vs_xl330_stall_at_5V_pct": 184.62,
+    "vs_xl330_stall_at_6V_pct": 160.0
+   },
+   "right_hip_pitch": {
+    "peak_abs_torque_Nm": 0.96,
+    "peak_signed_torque_Nm": -0.96,
+    "peak_cell": "push_5N_fwd",
+    "peak_at_s": 6.38,
+    "p99_abs_torque_Nm": 0.96,
+    "p95_abs_torque_Nm": 0.4939,
+    "rms_torque_Nm_in_peak_cell": 0.22371,
+    "peak_abs_speed_rad_s": 17.2016,
+    "peak_abs_speed_rpm_output": 164.263,
+    "peak_speed_cell": "push_5N_lat",
+    "range_deg": [
+     -90.0,
+     90.0
+    ],
+    "max_range_utilisation_pct": 65.43,
+    "cells_with_frames_beyond_limit": [
+     "push_5N_lat",
+     "push_5N_lat_neg"
+    ],
+    "max_overshoot_beyond_limit_deg": 7.43475,
+    "cells_saturating_mjcf_forcerange": [
+     "push_5N_fwd",
+     "push_5N_lat"
+    ],
+    "vs_xl330_stall_at_5V_pct": 184.62,
+    "vs_xl330_stall_at_6V_pct": 160.0
+   },
+   "right_knee": {
+    "peak_abs_torque_Nm": 0.96,
+    "peak_signed_torque_Nm": 0.96,
+    "peak_cell": "push_5N_fwd",
+    "peak_at_s": 6.3,
+    "p99_abs_torque_Nm": 0.88168,
+    "p95_abs_torque_Nm": 0.40669,
+    "rms_torque_Nm_in_peak_cell": 0.24956,
+    "peak_abs_speed_rad_s": 14.1273,
+    "peak_abs_speed_rpm_output": 134.906,
+    "peak_speed_cell": "push_5N_fwd",
+    "range_deg": [
+     -90.0,
+     90.0
+    ],
+    "max_range_utilisation_pct": 45.86,
+    "cells_with_frames_beyond_limit": [],
+    "max_overshoot_beyond_limit_deg": 0.0,
+    "cells_saturating_mjcf_forcerange": [
+     "push_5N_fwd",
+     "push_5N_lat"
+    ],
+    "vs_xl330_stall_at_5V_pct": 184.62,
+    "vs_xl330_stall_at_6V_pct": 160.0
+   },
+   "right_ankle": {
+    "peak_abs_torque_Nm": 0.96,
+    "peak_signed_torque_Nm": 0.96,
+    "peak_cell": "push_5N_lat",
+    "peak_at_s": 6.32,
+    "p99_abs_torque_Nm": 0.5876,
+    "p95_abs_torque_Nm": 0.16552,
+    "rms_torque_Nm_in_peak_cell": 0.13012,
+    "peak_abs_speed_rad_s": 15.1003,
+    "peak_abs_speed_rpm_output": 144.197,
+    "peak_speed_cell": "push_5N_lat",
+    "range_deg": [
+     -90.0,
+     90.0
+    ],
+    "max_range_utilisation_pct": 78.68,
+    "cells_with_frames_beyond_limit": [],
+    "max_overshoot_beyond_limit_deg": 0.0,
+    "cells_saturating_mjcf_forcerange": [
+     "push_5N_lat"
+    ],
+    "vs_xl330_stall_at_5V_pct": 184.62,
+    "vs_xl330_stall_at_6V_pct": 160.0
+   }
+  },
+  "per_joint_posture_sit_stand": {
+   "left_hip_yaw": {
+    "peak_abs_torque_Nm": 0.44516,
+    "peak_signed_torque_Nm": -0.44516,
+    "peak_cell": "stand_from_SIT",
+    "peak_at_s": 0.06,
+    "p99_abs_torque_Nm": 0.35274,
+    "p95_abs_torque_Nm": 0.04022,
+    "rms_torque_Nm_in_peak_cell": 0.04914,
+    "peak_abs_speed_rad_s": 4.9543,
+    "peak_abs_speed_rpm_output": 47.31,
+    "peak_speed_cell": "stand_from_SIT",
+    "range_deg": [
+     -25.0,
+     30.0
+    ],
+    "max_range_utilisation_pct": 39.3,
+    "cells_with_frames_beyond_limit": [],
+    "max_overshoot_beyond_limit_deg": 0.0,
+    "cells_saturating_mjcf_forcerange": [],
+    "vs_xl330_stall_at_5V_pct": 85.61,
+    "vs_xl330_stall_at_6V_pct": 74.19
+   },
+   "left_hip_roll": {
+    "peak_abs_torque_Nm": 0.38697,
+    "peak_signed_torque_Nm": -0.38697,
+    "peak_cell": "stand_from_SIT",
+    "peak_at_s": 0.1,
+    "p99_abs_torque_Nm": 0.21042,
+    "p95_abs_torque_Nm": 0.12726,
+    "rms_torque_Nm_in_peak_cell": 0.10669,
+    "peak_abs_speed_rad_s": 3.4973,
+    "peak_abs_speed_rpm_output": 33.396,
+    "peak_speed_cell": "sitstand_mu0.40",
+    "range_deg": [
+     -22.0,
+     22.0
+    ],
+    "max_range_utilisation_pct": 38.42,
+    "cells_with_frames_beyond_limit": [],
+    "max_overshoot_beyond_limit_deg": 0.0,
+    "cells_saturating_mjcf_forcerange": [],
+    "vs_xl330_stall_at_5V_pct": 74.42,
+    "vs_xl330_stall_at_6V_pct": 64.49
+   },
+   "left_hip_pitch": {
+    "peak_abs_torque_Nm": 0.96,
+    "peak_signed_torque_Nm": -0.96,
+    "peak_cell": "stand_from_FOLD",
+    "peak_at_s": 0.02,
+    "p99_abs_torque_Nm": 0.73814,
+    "p95_abs_torque_Nm": 0.16796,
+    "rms_torque_Nm_in_peak_cell": 0.12955,
+    "peak_abs_speed_rad_s": 13.8285,
+    "peak_abs_speed_rpm_output": 132.052,
+    "peak_speed_cell": "stand_from_FOLD",
+    "range_deg": [
+     -90.0,
+     90.0
+    ],
+    "max_range_utilisation_pct": 66.27,
+    "cells_with_frames_beyond_limit": [],
+    "max_overshoot_beyond_limit_deg": 0.0,
+    "cells_saturating_mjcf_forcerange": [
+     "stand_from_FOLD"
+    ],
+    "vs_xl330_stall_at_5V_pct": 184.62,
+    "vs_xl330_stall_at_6V_pct": 160.0
+   },
+   "left_knee": {
+    "peak_abs_torque_Nm": 0.96,
+    "peak_signed_torque_Nm": 0.96,
+    "peak_cell": "sitstand_mu0.40",
+    "peak_at_s": 4.84,
+    "p99_abs_torque_Nm": 0.53153,
+    "p95_abs_torque_Nm": 0.11255,
+    "rms_torque_Nm_in_peak_cell": 0.10295,
+    "peak_abs_speed_rad_s": 10.9175,
+    "peak_abs_speed_rpm_output": 104.254,
+    "peak_speed_cell": "sitstand_mu0.40",
+    "range_deg": [
+     -90.0,
+     90.0
+    ],
+    "max_range_utilisation_pct": 49.7,
+    "cells_with_frames_beyond_limit": [],
+    "max_overshoot_beyond_limit_deg": 0.0,
+    "cells_saturating_mjcf_forcerange": [
+     "sitstand_mu0.40"
+    ],
+    "vs_xl330_stall_at_5V_pct": 184.62,
+    "vs_xl330_stall_at_6V_pct": 160.0
+   },
+   "left_ankle": {
+    "peak_abs_torque_Nm": 0.79041,
+    "peak_signed_torque_Nm": 0.79041,
+    "peak_cell": "stand_from_SIT",
+    "peak_at_s": 0.04,
+    "p99_abs_torque_Nm": 0.39306,
+    "p95_abs_torque_Nm": 0.11886,
+    "rms_torque_Nm_in_peak_cell": 0.08617,
+    "peak_abs_speed_rad_s": 10.0356,
+    "peak_abs_speed_rpm_output": 95.833,
+    "peak_speed_cell": "stand_from_SIT",
+    "range_deg": [
+     -90.0,
+     90.0
+    ],
+    "max_range_utilisation_pct": 31.43,
+    "cells_with_frames_beyond_limit": [],
+    "max_overshoot_beyond_limit_deg": 0.0,
+    "cells_saturating_mjcf_forcerange": [],
+    "vs_xl330_stall_at_5V_pct": 152.0,
+    "vs_xl330_stall_at_6V_pct": 131.74
+   },
+   "neck_pitch": {
+    "peak_abs_torque_Nm": 0.96,
+    "peak_signed_torque_Nm": 0.96,
+    "peak_cell": "sitstand_mu0.40",
+    "peak_at_s": 5.08,
+    "p99_abs_torque_Nm": 0.96,
+    "p95_abs_torque_Nm": 0.96,
+    "rms_torque_Nm_in_peak_cell": 0.67773,
+    "peak_abs_speed_rad_s": 6.878,
+    "peak_abs_speed_rpm_output": 65.68,
+    "peak_speed_cell": "stand_from_FOLD",
+    "range_deg": [
+     -90.0,
+     60.0
+    ],
+    "max_range_utilisation_pct": 39.04,
+    "cells_with_frames_beyond_limit": [
+     "sitstand_mu0.40"
+    ],
+    "max_overshoot_beyond_limit_deg": 1.64948,
+    "cells_saturating_mjcf_forcerange": [
+     "sitstand_mu0.40"
+    ],
+    "vs_xl330_stall_at_5V_pct": 184.62,
+    "vs_xl330_stall_at_6V_pct": 160.0
+   },
+   "head_pitch": {
+    "peak_abs_torque_Nm": 0.64737,
+    "peak_signed_torque_Nm": -0.64737,
+    "peak_cell": "stand_from_SIT",
+    "peak_at_s": 0.08,
+    "p99_abs_torque_Nm": 0.55791,
+    "p95_abs_torque_Nm": 0.0721,
+    "rms_torque_Nm_in_peak_cell": 0.09133,
+    "peak_abs_speed_rad_s": 8.8928,
+    "peak_abs_speed_rpm_output": 84.92,
+    "peak_speed_cell": "stand_from_SIT",
+    "range_deg": [
+     -90.0,
+     90.0
+    ],
+    "max_range_utilisation_pct": 48.73,
+    "cells_with_frames_beyond_limit": [
+     "stand_from_SIT"
+    ],
+    "max_overshoot_beyond_limit_deg": 1.67325,
+    "cells_saturating_mjcf_forcerange": [],
+    "vs_xl330_stall_at_5V_pct": 124.49,
+    "vs_xl330_stall_at_6V_pct": 107.89
+   },
+   "head_yaw": {
+    "peak_abs_torque_Nm": 0.62301,
+    "peak_signed_torque_Nm": 0.62301,
+    "peak_cell": "stand_from_SIT",
+    "peak_at_s": 0.3,
+    "p99_abs_torque_Nm": 0.35231,
+    "p95_abs_torque_Nm": 0.10599,
+    "rms_torque_Nm_in_peak_cell": 0.07104,
+    "peak_abs_speed_rad_s": 6.2716,
+    "peak_abs_speed_rpm_output": 59.89,
+    "peak_speed_cell": "stand_from_SIT",
+    "range_deg": [
+     -170.0,
+     170.0
+    ],
+    "max_range_utilisation_pct": 9.5,
+    "cells_with_frames_beyond_limit": [],
+    "max_overshoot_beyond_limit_deg": 0.0,
+    "cells_saturating_mjcf_forcerange": [],
+    "vs_xl330_stall_at_5V_pct": 119.81,
+    "vs_xl330_stall_at_6V_pct": 103.83
+   },
+   "head_roll": {
+    "peak_abs_torque_Nm": 0.38298,
+    "peak_signed_torque_Nm": -0.38298,
+    "peak_cell": "stand_from_SIT",
+    "peak_at_s": 0.28,
+    "p99_abs_torque_Nm": 0.26806,
+    "p95_abs_torque_Nm": 0.0819,
+    "rms_torque_Nm_in_peak_cell": 0.04816,
+    "peak_abs_speed_rad_s": 3.8941,
+    "peak_abs_speed_rpm_output": 37.186,
+    "peak_speed_cell": "stand_from_SIT",
+    "range_deg": [
+     -25.0,
+     25.0
+    ],
+    "max_range_utilisation_pct": 33.6,
+    "cells_with_frames_beyond_limit": [],
+    "max_overshoot_beyond_limit_deg": 0.0,
+    "cells_saturating_mjcf_forcerange": [],
+    "vs_xl330_stall_at_5V_pct": 73.65,
+    "vs_xl330_stall_at_6V_pct": 63.83
+   },
+   "right_hip_yaw": {
+    "peak_abs_torque_Nm": 0.36583,
+    "peak_signed_torque_Nm": 0.36583,
+    "peak_cell": "stand_from_SIT",
+    "peak_at_s": 0.06,
+    "p99_abs_torque_Nm": 0.2841,
+    "p95_abs_torque_Nm": 0.02954,
+    "rms_torque_Nm_in_peak_cell": 0.04502,
+    "peak_abs_speed_rad_s": 4.0015,
+    "peak_abs_speed_rpm_output": 38.211,
+    "peak_speed_cell": "stand_from_SIT",
+    "range_deg": [
+     -30.0,
+     25.0
+    ],
+    "max_range_utilisation_pct": 31.68,
+    "cells_with_frames_beyond_limit": [],
+    "max_overshoot_beyond_limit_deg": 0.0,
+    "cells_saturating_mjcf_forcerange": [],
+    "vs_xl330_stall_at_5V_pct": 70.35,
+    "vs_xl330_stall_at_6V_pct": 60.97
+   },
+   "right_hip_roll": {
+    "peak_abs_torque_Nm": 0.38688,
+    "peak_signed_torque_Nm": 0.38688,
+    "peak_cell": "sitstand_m110",
+    "peak_at_s": 4.56,
+    "p99_abs_torque_Nm": 0.28614,
+    "p95_abs_torque_Nm": 0.11136,
+    "rms_torque_Nm_in_peak_cell": 0.07508,
+    "peak_abs_speed_rad_s": 3.0978,
+    "peak_abs_speed_rpm_output": 29.582,
+    "peak_speed_cell": "sitstand_mu0.40",
+    "range_deg": [
+     -22.0,
+     22.0
+    ],
+    "max_range_utilisation_pct": 59.24,
+    "cells_with_frames_beyond_limit": [],
+    "max_overshoot_beyond_limit_deg": 0.0,
+    "cells_saturating_mjcf_forcerange": [],
+    "vs_xl330_stall_at_5V_pct": 74.4,
+    "vs_xl330_stall_at_6V_pct": 64.48
+   },
+   "right_hip_pitch": {
+    "peak_abs_torque_Nm": 0.96,
+    "peak_signed_torque_Nm": 0.96,
+    "peak_cell": "sitstand_mu0.40",
+    "peak_at_s": 4.86,
+    "p99_abs_torque_Nm": 0.62847,
+    "p95_abs_torque_Nm": 0.16151,
+    "rms_torque_Nm_in_peak_cell": 0.10926,
+    "peak_abs_speed_rad_s": 14.2034,
+    "peak_abs_speed_rpm_output": 135.633,
+    "peak_speed_cell": "stand_from_FOLD",
+    "range_deg": [
+     -90.0,
+     90.0
+    ],
+    "max_range_utilisation_pct": 67.12,
+    "cells_with_frames_beyond_limit": [],
+    "max_overshoot_beyond_limit_deg": 0.0,
+    "cells_saturating_mjcf_forcerange": [
+     "sitstand_mu0.40",
+     "stand_from_FOLD"
+    ],
+    "vs_xl330_stall_at_5V_pct": 184.62,
+    "vs_xl330_stall_at_6V_pct": 160.0
+   },
+   "right_knee": {
+    "peak_abs_torque_Nm": 0.96,
+    "peak_signed_torque_Nm": 0.96,
+    "peak_cell": "sitstand",
+    "peak_at_s": 4.7,
+    "p99_abs_torque_Nm": 0.37563,
+    "p95_abs_torque_Nm": 0.10832,
+    "rms_torque_Nm_in_peak_cell": 0.11899,
+    "peak_abs_speed_rad_s": 12.9156,
+    "peak_abs_speed_rpm_output": 123.335,
+    "peak_speed_cell": "sitstand_mu0.40",
+    "range_deg": [
+     -90.0,
+     90.0
+    ],
+    "max_range_utilisation_pct": 49.51,
+    "cells_with_frames_beyond_limit": [],
+    "max_overshoot_beyond_limit_deg": 0.0,
+    "cells_saturating_mjcf_forcerange": [
+     "sitstand",
+     "sitstand_m110",
+     "sitstand_mu0.40"
+    ],
+    "vs_xl330_stall_at_5V_pct": 184.62,
+    "vs_xl330_stall_at_6V_pct": 160.0
+   },
+   "right_ankle": {
+    "peak_abs_torque_Nm": 0.96,
+    "peak_signed_torque_Nm": -0.96,
+    "peak_cell": "stand_from_SIT",
+    "peak_at_s": 0.04,
+    "p99_abs_torque_Nm": 0.82783,
+    "p95_abs_torque_Nm": 0.11236,
+    "rms_torque_Nm_in_peak_cell": 0.12641,
+    "peak_abs_speed_rad_s": 14.8492,
+    "peak_abs_speed_rpm_output": 141.8,
+    "peak_speed_cell": "stand_from_SIT",
+    "range_deg": [
+     -90.0,
+     90.0
+    ],
+    "max_range_utilisation_pct": 38.72,
+    "cells_with_frames_beyond_limit": [],
+    "max_overshoot_beyond_limit_deg": 0.0,
+    "cells_saturating_mjcf_forcerange": [
+     "stand_from_SIT"
+    ],
+    "vs_xl330_stall_at_5V_pct": 184.62,
+    "vs_xl330_stall_at_6V_pct": 160.0
+   }
+  },
+  "per_joint_all_cells": {
+   "left_hip_yaw": {
+    "peak_abs_torque_Nm": 0.93764,
+    "peak_signed_torque_Nm": -0.93764,
+    "peak_cell": "push_2N_lat",
+    "peak_at_s": 6.62,
+    "p99_abs_torque_Nm": 0.45354,
+    "p95_abs_torque_Nm": 0.12898,
+    "rms_torque_Nm_in_peak_cell": 0.09438,
+    "peak_abs_speed_rad_s": 8.9277,
+    "peak_abs_speed_rpm_output": 85.253,
+    "peak_speed_cell": "push_5N_fwd",
+    "range_deg": [
+     -25.0,
+     30.0
+    ],
+    "max_range_utilisation_pct": 60.08,
+    "cells_with_frames_beyond_limit": [
+     "push_2N_lat",
+     "push_5N_fwd",
+     "push_5N_lat_neg"
+    ],
+    "max_overshoot_beyond_limit_deg": 2.40629,
+    "cells_saturating_mjcf_forcerange": [],
+    "vs_xl330_stall_at_5V_pct": 180.32,
+    "vs_xl330_stall_at_6V_pct": 156.27
+   },
+   "left_hip_roll": {
+    "peak_abs_torque_Nm": 0.96,
+    "peak_signed_torque_Nm": -0.96,
+    "peak_cell": "push_5N_lat",
+    "peak_at_s": 6.3,
+    "p99_abs_torque_Nm": 0.53142,
+    "p95_abs_torque_Nm": 0.158,
+    "rms_torque_Nm_in_peak_cell": 0.14183,
+    "peak_abs_speed_rad_s": 9.8192,
+    "peak_abs_speed_rpm_output": 93.766,
+    "peak_speed_cell": "push_5N_lat_neg",
+    "range_deg": [
+     -22.0,
+     22.0
+    ],
+    "max_range_utilisation_pct": 106.78,
+    "cells_with_frames_beyond_limit": [
+     "push_2N_lat",
+     "push_5N_fwd",
+     "push_5N_lat",
+     "push_5N_lat_neg"
+    ],
+    "max_overshoot_beyond_limit_deg": 4.0843,
+    "cells_saturating_mjcf_forcerange": [
+     "push_5N_lat"
+    ],
+    "vs_xl330_stall_at_5V_pct": 184.62,
+    "vs_xl330_stall_at_6V_pct": 160.0
+   },
+   "left_hip_pitch": {
+    "peak_abs_torque_Nm": 0.96,
+    "peak_signed_torque_Nm": 0.96,
+    "peak_cell": "push_5N_back",
+    "peak_at_s": 6.36,
+    "p99_abs_torque_Nm": 0.68358,
+    "p95_abs_torque_Nm": 0.18079,
+    "rms_torque_Nm_in_peak_cell": 0.14137,
+    "peak_abs_speed_rad_s": 17.5424,
+    "peak_abs_speed_rpm_output": 167.518,
+    "peak_speed_cell": "push_5N_lat",
+    "range_deg": [
+     -90.0,
+     90.0
+    ],
+    "max_range_utilisation_pct": 77.5,
+    "cells_with_frames_beyond_limit": [],
+    "max_overshoot_beyond_limit_deg": 0.0,
+    "cells_saturating_mjcf_forcerange": [
+     "push_5N_back",
+     "push_5N_lat",
+     "stand_from_FOLD"
+    ],
+    "vs_xl330_stall_at_5V_pct": 184.62,
+    "vs_xl330_stall_at_6V_pct": 160.0
+   },
+   "left_knee": {
+    "peak_abs_torque_Nm": 0.96,
+    "peak_signed_torque_Nm": 0.96,
+    "peak_cell": "push_5N_fwd",
+    "peak_at_s": 6.36,
+    "p99_abs_torque_Nm": 0.76332,
+    "p95_abs_torque_Nm": 0.41602,
+    "rms_torque_Nm_in_peak_cell": 0.27305,
+    "peak_abs_speed_rad_s": 14.7045,
+    "peak_abs_speed_rpm_output": 140.418,
+    "peak_speed_cell": "push_5N_lat",
+    "range_deg": [
+     -90.0,
+     90.0
+    ],
+    "max_range_utilisation_pct": 49.7,
+    "cells_with_frames_beyond_limit": [],
+    "max_overshoot_beyond_limit_deg": 0.0,
+    "cells_saturating_mjcf_forcerange": [
+     "push_5N_fwd",
+     "push_5N_lat",
+     "sitstand_mu0.40"
+    ],
+    "vs_xl330_stall_at_5V_pct": 184.62,
+    "vs_xl330_stall_at_6V_pct": 160.0
+   },
+   "left_ankle": {
+    "peak_abs_torque_Nm": 0.90416,
+    "peak_signed_torque_Nm": -0.90416,
+    "peak_cell": "push_5N_lat",
+    "peak_at_s": 6.32,
+    "p99_abs_torque_Nm": 0.69732,
+    "p95_abs_torque_Nm": 0.177,
+    "rms_torque_Nm_in_peak_cell": 0.13419,
+    "peak_abs_speed_rad_s": 14.0089,
+    "peak_abs_speed_rpm_output": 133.775,
+    "peak_speed_cell": "push_5N_lat",
+    "range_deg": [
+     -90.0,
+     90.0
+    ],
+    "max_range_utilisation_pct": 56.51,
+    "cells_with_frames_beyond_limit": [],
+    "max_overshoot_beyond_limit_deg": 0.0,
+    "cells_saturating_mjcf_forcerange": [],
+    "vs_xl330_stall_at_5V_pct": 173.88,
+    "vs_xl330_stall_at_6V_pct": 150.69
+   },
+   "neck_pitch": {
+    "peak_abs_torque_Nm": 0.96,
+    "peak_signed_torque_Nm": 0.96,
+    "peak_cell": "push_5N_lat_neg",
+    "peak_at_s": 6.32,
+    "p99_abs_torque_Nm": 0.67042,
+    "p95_abs_torque_Nm": 0.12077,
+    "rms_torque_Nm_in_peak_cell": 0.12266,
+    "peak_abs_speed_rad_s": 17.4121,
+    "peak_abs_speed_rpm_output": 166.274,
+    "peak_speed_cell": "push_5N_lat_neg",
+    "range_deg": [
+     -90.0,
+     60.0
+    ],
+    "max_range_utilisation_pct": 74.58,
+    "cells_with_frames_beyond_limit": [
+     "push_5N_lat",
+     "push_5N_lat_neg",
+     "sitstand_mu0.40"
+    ],
+    "max_overshoot_beyond_limit_deg": 5.85565,
+    "cells_saturating_mjcf_forcerange": [
+     "push_5N_lat_neg",
+     "sitstand_mu0.40"
+    ],
+    "vs_xl330_stall_at_5V_pct": 184.62,
+    "vs_xl330_stall_at_6V_pct": 160.0
+   },
+   "head_pitch": {
+    "peak_abs_torque_Nm": 0.76926,
+    "peak_signed_torque_Nm": 0.76926,
+    "peak_cell": "push_5N_lat_neg",
+    "peak_at_s": 6.38,
+    "p99_abs_torque_Nm": 0.48589,
+    "p95_abs_torque_Nm": 0.06276,
+    "rms_torque_Nm_in_peak_cell": 0.0896,
+    "peak_abs_speed_rad_s": 13.0412,
+    "peak_abs_speed_rpm_output": 124.534,
+    "peak_speed_cell": "push_5N_lat_neg",
+    "range_deg": [
+     -90.0,
+     90.0
+    ],
+    "max_range_utilisation_pct": 48.73,
+    "cells_with_frames_beyond_limit": [
+     "stand_from_SIT"
+    ],
+    "max_overshoot_beyond_limit_deg": 1.67325,
+    "cells_saturating_mjcf_forcerange": [],
+    "vs_xl330_stall_at_5V_pct": 147.93,
+    "vs_xl330_stall_at_6V_pct": 128.21
+   },
+   "head_yaw": {
+    "peak_abs_torque_Nm": 0.96,
+    "peak_signed_torque_Nm": -0.96,
+    "peak_cell": "push_2N_lat",
+    "peak_at_s": 6.6,
+    "p99_abs_torque_Nm": 0.96,
+    "p95_abs_torque_Nm": 0.20585,
+    "rms_torque_Nm_in_peak_cell": 0.15504,
+    "peak_abs_speed_rad_s": 18.3814,
+    "peak_abs_speed_rpm_output": 175.53,
+    "peak_speed_cell": "push_5N_lat",
+    "range_deg": [
+     -170.0,
+     170.0
+    ],
+    "max_range_utilisation_pct": 61.52,
+    "cells_with_frames_beyond_limit": [
+     "push_5N_lat_neg"
+    ],
+    "max_overshoot_beyond_limit_deg": 7.28651,
+    "cells_saturating_mjcf_forcerange": [
+     "push_2N_lat",
+     "push_5N_fwd",
+     "push_5N_lat",
+     "push_5N_lat_neg"
+    ],
+    "vs_xl330_stall_at_5V_pct": 184.62,
+    "vs_xl330_stall_at_6V_pct": 160.0
+   },
+   "head_roll": {
+    "peak_abs_torque_Nm": 0.96,
+    "peak_signed_torque_Nm": 0.96,
+    "peak_cell": "push_5N_lat",
+    "peak_at_s": 6.52,
+    "p99_abs_torque_Nm": 0.75051,
+    "p95_abs_torque_Nm": 0.07393,
+    "rms_torque_Nm_in_peak_cell": 0.11206,
+    "peak_abs_speed_rad_s": 13.2964,
+    "peak_abs_speed_rpm_output": 126.971,
+    "peak_speed_cell": "push_5N_lat",
+    "range_deg": [
+     -25.0,
+     25.0
+    ],
+    "max_range_utilisation_pct": 109.86,
+    "cells_with_frames_beyond_limit": [
+     "push_5N_lat",
+     "push_5N_lat_neg"
+    ],
+    "max_overshoot_beyond_limit_deg": 5.53141,
+    "cells_saturating_mjcf_forcerange": [
+     "push_5N_lat",
+     "push_5N_lat_neg"
+    ],
+    "vs_xl330_stall_at_5V_pct": 184.62,
+    "vs_xl330_stall_at_6V_pct": 160.0
+   },
+   "right_hip_yaw": {
+    "peak_abs_torque_Nm": 0.96,
+    "peak_signed_torque_Nm": 0.96,
+    "peak_cell": "push_5N_lat",
+    "peak_at_s": 6.3,
+    "p99_abs_torque_Nm": 0.96,
+    "p95_abs_torque_Nm": 0.08167,
+    "rms_torque_Nm_in_peak_cell": 0.15742,
+    "peak_abs_speed_rad_s": 15.2951,
+    "peak_abs_speed_rpm_output": 146.058,
+    "peak_speed_cell": "push_5N_lat",
+    "range_deg": [
+     -30.0,
+     25.0
+    ],
+    "max_range_utilisation_pct": 115.52,
+    "cells_with_frames_beyond_limit": [
+     "push_2N_lat",
+     "push_5N_fwd",
+     "push_5N_lat",
+     "push_5N_lat_neg"
+    ],
+    "max_overshoot_beyond_limit_deg": 6.44681,
+    "cells_saturating_mjcf_forcerange": [
+     "push_5N_lat",
+     "push_5N_lat_neg"
+    ],
+    "vs_xl330_stall_at_5V_pct": 184.62,
+    "vs_xl330_stall_at_6V_pct": 160.0
+   },
+   "right_hip_roll": {
+    "peak_abs_torque_Nm": 0.96,
+    "peak_signed_torque_Nm": 0.96,
+    "peak_cell": "push_5N_lat_neg",
+    "peak_at_s": 6.34,
+    "p99_abs_torque_Nm": 0.96,
+    "p95_abs_torque_Nm": 0.13121,
+    "rms_torque_Nm_in_peak_cell": 0.13978,
+    "peak_abs_speed_rad_s": 11.903,
+    "peak_abs_speed_rpm_output": 113.665,
+    "peak_speed_cell": "push_5N_lat_neg",
+    "range_deg": [
+     -22.0,
+     22.0
+    ],
+    "max_range_utilisation_pct": 73.93,
+    "cells_with_frames_beyond_limit": [
+     "push_5N_lat",
+     "push_5N_lat_neg"
+    ],
+    "max_overshoot_beyond_limit_deg": 4.69413,
+    "cells_saturating_mjcf_forcerange": [
+     "push_5N_lat_neg"
+    ],
+    "vs_xl330_stall_at_5V_pct": 184.62,
+    "vs_xl330_stall_at_6V_pct": 160.0
+   },
+   "right_hip_pitch": {
+    "peak_abs_torque_Nm": 0.96,
+    "peak_signed_torque_Nm": -0.96,
+    "peak_cell": "push_5N_fwd",
+    "peak_at_s": 6.38,
+    "p99_abs_torque_Nm": 0.96,
+    "p95_abs_torque_Nm": 0.4939,
+    "rms_torque_Nm_in_peak_cell": 0.22371,
+    "peak_abs_speed_rad_s": 17.2016,
+    "peak_abs_speed_rpm_output": 164.263,
+    "peak_speed_cell": "push_5N_lat",
+    "range_deg": [
+     -90.0,
+     90.0
+    ],
+    "max_range_utilisation_pct": 67.12,
+    "cells_with_frames_beyond_limit": [
+     "push_5N_lat",
+     "push_5N_lat_neg"
+    ],
+    "max_overshoot_beyond_limit_deg": 7.43475,
+    "cells_saturating_mjcf_forcerange": [
+     "push_5N_fwd",
+     "push_5N_lat",
+     "sitstand_mu0.40",
+     "stand_from_FOLD"
+    ],
+    "vs_xl330_stall_at_5V_pct": 184.62,
+    "vs_xl330_stall_at_6V_pct": 160.0
+   },
+   "right_knee": {
+    "peak_abs_torque_Nm": 0.96,
+    "peak_signed_torque_Nm": 0.96,
+    "peak_cell": "push_5N_fwd",
+    "peak_at_s": 6.3,
+    "p99_abs_torque_Nm": 0.88168,
+    "p95_abs_torque_Nm": 0.40669,
+    "rms_torque_Nm_in_peak_cell": 0.24956,
+    "peak_abs_speed_rad_s": 14.1273,
+    "peak_abs_speed_rpm_output": 134.906,
+    "peak_speed_cell": "push_5N_fwd",
+    "range_deg": [
+     -90.0,
+     90.0
+    ],
+    "max_range_utilisation_pct": 49.51,
+    "cells_with_frames_beyond_limit": [],
+    "max_overshoot_beyond_limit_deg": 0.0,
+    "cells_saturating_mjcf_forcerange": [
+     "push_5N_fwd",
+     "push_5N_lat",
+     "sitstand",
+     "sitstand_m110",
+     "sitstand_mu0.40"
+    ],
+    "vs_xl330_stall_at_5V_pct": 184.62,
+    "vs_xl330_stall_at_6V_pct": 160.0
+   },
+   "right_ankle": {
+    "peak_abs_torque_Nm": 0.96,
+    "peak_signed_torque_Nm": 0.96,
+    "peak_cell": "push_5N_lat",
+    "peak_at_s": 6.32,
+    "p99_abs_torque_Nm": 0.5876,
+    "p95_abs_torque_Nm": 0.16552,
+    "rms_torque_Nm_in_peak_cell": 0.13012,
+    "peak_abs_speed_rad_s": 15.1003,
+    "peak_abs_speed_rpm_output": 144.197,
+    "peak_speed_cell": "push_5N_lat",
+    "range_deg": [
+     -90.0,
+     90.0
+    ],
+    "max_range_utilisation_pct": 78.68,
+    "cells_with_frames_beyond_limit": [],
+    "max_overshoot_beyond_limit_deg": 0.0,
+    "cells_saturating_mjcf_forcerange": [
+     "push_5N_lat",
+     "stand_from_SIT"
+    ],
+    "vs_xl330_stall_at_5V_pct": 184.62,
+    "vs_xl330_stall_at_6V_pct": 160.0
+   }
+  },
+  "group_definitions": {
+   "locomotion_upright": "families baseline/vx/mass/friction/slope/selfcollision that did not fall (22 cells) \u2014 the undisturbed walking envelope; THIS is the table to size structure and thermals against for normal operation.",
+   "disturbance_push": "family push (6 cells) \u2014 an external 0.2 s force on the trunk; the actuator saturates its MJCF +/-0.96 N.m ceiling here, so these torques are the simulation's ceiling, not a measured actuator capability.",
+   "posture_sit_stand": "families sitstand/stand (6 cells) \u2014 commanded sit, stand-up from SIT and from FOLD, and a stand hold."
+  },
+  "worst_locomotion_joint": "right_hip_pitch",
+  "worst_locomotion_torque_Nm": 0.74179,
+  "worst_disturbance_torque_Nm": 0.96,
+  "worst_posture_torque_Nm": 0.96,
+  "joints_over_stall_5V": [
+   "left_hip_pitch",
+   "left_knee",
+   "head_yaw",
+   "right_hip_pitch",
+   "right_knee",
+   "right_ankle"
+  ],
+  "joints_over_stall_6V": [
+   "left_knee",
+   "right_hip_pitch",
+   "right_knee"
+  ],
+  "baseline_walk_vx0.25": {
+   "per_joint_peak_Nm": {
+    "left_hip_yaw": 0.10114,
+    "left_hip_roll": 0.19259,
+    "left_hip_pitch": 0.169,
+    "left_knee": 0.40839,
+    "left_ankle": 0.19536,
+    "neck_pitch": 0.08643,
+    "head_pitch": 0.06817,
+    "head_yaw": 0.14132,
+    "head_roll": 0.07414,
+    "right_hip_yaw": 0.06731,
+    "right_hip_roll": 0.14928,
+    "right_hip_pitch": 0.22465,
+    "right_knee": 0.38194,
+    "right_ankle": 0.19017
+   },
+   "sum_abs_torque_peak_Nm": 1.63034,
+   "walked_m": 1.22324,
+   "mean_speed_m_s": 0.10623
+  },
+  "ground_reaction_force_N": {
+   "static_weight_N": 7.2324,
+   "walking_single_foot_peak_N": 23.1162,
+   "walking_single_foot_peak_body_weights": 3.196,
+   "walking_single_foot_p99_N": 22.4574,
+   "walking_both_feet_p50_N": 6.3996,
+   "worst_upright_walking_cell": "slope5_side_left",
+   "worst_upright_walking_peak_N": 35.264,
+   "worst_any_cell": "push_5N_lat",
+   "worst_any_peak_N": 62.9594,
+   "worst_any_peak_body_weights": 8.705,
+   "for_FEA": "A single-foot design load of 23.1162 N (3.196 x body weight) is what the walk actually produced; the worst case measured anywhere in the matrix is 62.9594 N summed over both feet in cell push_5N_lat (a 5 N lateral push that knocked the robot over)."
+  }
+ },
+ "verdict": "FAIL",
+ "why": "Peak actuator torque over 22 upright LOCOMOTION cells is 0.7418 N.m at right_hip_pitch (cell slope5_side_left). THESE JOINTS EXCEED the XL330-M288-T's published stall torque at 6.0 V (0.60 N.m) in an upright locomotion cell, so the physical servo cannot reproduce the simulated gait there: left_knee 0.7152 N.m in vx_0.80, right_hip_pitch 0.7418 N.m in slope5_side_left, right_knee 0.6664 N.m in vx_0.80 Joints over the 5.0 V stall row (0.52 N.m): left_hip_pitch, left_knee, head_yaw, right_hip_pitch, right_knee, right_ankle. The MJCF's own actuator ceiling is +/-0.96 N.m (reference/pollen-microduck-rl/robot_walk.xml:44-47 default class 'chosen_actuator': <position kp=\"0.55\" kv=\"0.0\" forcerange=\"-0.96 0.96\" ctrlrange=\"-10.0 10.0\"/>), which is ABOVE every published stall row, so the simulation is permitted torques the actuator has no vendor figure for; that ceiling is reached only in the push and sit-stand cells.",
+ "script": "sim/gait_sweep.py + sim/gait_evidence.py",
+ "artifacts": [
+  "out/sim-sweep/base_walk_vx0.25.json",
+  "out/sim-sweep/mass_m090.json",
+  "out/sim-sweep/mass_m110.json",
+  "out/sim-sweep/mu_0.40.json",
+  "out/sim-sweep/mu_0.70.json",
+  "out/sim-sweep/mu_1.00.json",
+  "out/sim-sweep/push_1N_lat.json",
+  "out/sim-sweep/push_2N_lat.json",
+  "out/sim-sweep/push_5N_back.json",
+  "out/sim-sweep/push_5N_fwd.json",
+  "out/sim-sweep/push_5N_lat.json",
+  "out/sim-sweep/push_5N_lat_neg.json",
+  "out/sim-sweep/sitstand.json",
+  "out/sim-sweep/sitstand_m110.json",
+  "out/sim-sweep/sitstand_mu0.40.json",
+  "out/sim-sweep/slope5_down.json",
+  "out/sim-sweep/slope5_side_left.json",
+  "out/sim-sweep/slope5_side_right.json",
+  "out/sim-sweep/slope5_up.json",
+  "out/sim-sweep/stand_from_FOLD.json",
+  "out/sim-sweep/stand_from_SIT.json",
+  "out/sim-sweep/stand_hold.json",
+  "out/sim-sweep/vx_0.00.json",
+  "out/sim-sweep/vx_0.05.json",
+  "out/sim-sweep/vx_0.10.json",
+  "out/sim-sweep/vx_0.15.json",
+  "out/sim-sweep/vx_0.20.json",
+  "out/sim-sweep/vx_0.30.json",
+  "out/sim-sweep/vx_0.35.json",
+  "out/sim-sweep/vx_0.40.json",
+  "out/sim-sweep/vx_0.50.json",
+  "out/sim-sweep/vx_0.60.json",
+  "out/sim-sweep/vx_0.80.json",
+  "out/sim-sweep/walk_allcollisions.json"
+ ],
+ "looked_at": [
+  "reference/pollen-microduck-rl/robot_walk.xml (actuator class chosen_actuator, joint ranges)",
+  "sim/microduck_ours.xml, sim/microduck_ours_allcollisions.xml",
+  "ce-parts/xl330-m288-t/electrical.chip.json (the cited ROBOTIS rows)",
+  "ce-parts/xl330-m288-t/iterations/v0.0.1/docs/fetched/robotis-emanual-xl330-m288.html",
+  "out/sim/report.md (the pre-existing baseline: walk 0.79 m / 8 s, no fall)"
+ ]
+}
