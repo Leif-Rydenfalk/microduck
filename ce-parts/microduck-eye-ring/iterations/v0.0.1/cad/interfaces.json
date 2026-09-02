@@ -1,59 +1,64 @@
 {
   "$triad": 1,
   "kind": "interfaces",
+  "generated_by": "tools/head_eye_ring_shelve.py",
   "record": {
-    "slug": "microduck-eye-ring",
-    "interfaces": [
-      {
-        "name": "face_seat",
-        "frame": {
-          "origin_mm": [
-            0.0,
-            -55.5,
-            20.0
-          ],
-          "z_axis": [
-            0,
-            1,
-            0
-          ],
-          "x_axis": [
-            1,
-            0,
-            0
-          ]
-        },
-        "accepts": [],
-        "role": "seat",
-        "what": "the ring's rear face, plane y -55.5000 — the mesh's own y maximum — where it butts part:microduck-face-part's front face, measured at the SAME y -55.5000 on that mesh (both share the identical MJCF placement, body jaw_soft at [25.9, -0.0914, 231.1146], so the two are directly comparable without any transform). The ring is a Ø30.0000 x 7.5000 outer cylinder centred (0.0000, -59.2500, 20.0000), axis y, residual 0.0000 mm at 355.0 deg, spanning y -63.0000..-55.5000; overall bbox 30.0000 x 9.5000 x 30.0000 mm. `accepts` is EMPTY on purpose: no fastener, groove, barb or thread exists on either mesh at this joint and no connection folder on this shelf describes a butt-bonded bezel. What settles it: a photograph of the bezel's back face, or Pollen's head assembly.",
-        "source": "MEASURED off Pollen's noenoeil.stl by cecad.meshfeatures.cylinders and the mesh bbox, frozen 2026-09-02 by tools/measure_mesh_features.py into out/laneT/features/noenoeil.json (lane T); the MJCF places this mesh in body 'jaw_soft' at world [25.9, -0.0914, 231.1146] mm, quat (wxyz) [0.707107, 0.0, 0.0, 0.707107] (ce-assemblies/microduck/current/placements.json)"
-      },
-      {
-        "name": "bezel_bore",
-        "frame": {
-          "origin_mm": [
-            0.0,
-            -61.5,
-            20.0
-          ],
-          "z_axis": [
-            0,
-            -1,
-            0
-          ],
-          "x_axis": [
-            1,
-            0,
-            0
-          ]
-        },
-        "accepts": [],
-        "role": "aperture",
-        "what": "the Ø14.4000 x 6.0000 bore through the bezel at (0.0000, -58.5000, 20.0000), axis y, residual 0.0000 mm at 355.0 deg — spanning y -61.5000..-55.5000. It is coaxial with part:microduck-face-part's Ø14.5000 aperture (both on the y-line through x 0.0000, z 20.0000), and 0.1000 mm smaller, so the bezel is the aperture-defining part. Frame origin is the front (outboard) end of the bore. This is the orange ring around the camera in every product photograph (images/store/*).",
-        "source": "MEASURED off Pollen's noenoeil.stl by cecad.meshfeatures.cylinders and the mesh bbox, frozen 2026-09-02 by tools/measure_mesh_features.py into out/laneT/features/noenoeil.json (lane T); the MJCF places this mesh in body 'jaw_soft' at world [25.9, -0.0914, 231.1146] mm, quat (wxyz) [0.707107, 0.0, 0.0, 0.707107] (ce-assemblies/microduck/current/placements.json)"
-      }
-    ],
-    "frame": "Pollen's mesh frame for noenoeil.stl: bbox x -15.0000..15.0000, y -63.5000..-54.0000, z 5.0000..35.0000 (30.0000 x 9.5000 x 30.0000 mm); the optical axis is the y-line through (x 0.0000, z 20.0000). Shares its MJCF placement exactly with face_part.stl, so the two meshes' coordinates compare directly.",
+    "ref": "part:microduck-eye-ring@v0.0.1",
+    "frame": "Pollen's mesh frame for noenoeil.stl: bbox x -15.0000..15.0000, y -63.5000..-54.0000, z 5.0000..35.0000 mm; ring axis y; boss centre (0.0000, -59.2500, 20.0000)",
     "units": "mm"
-  }
+  },
+  "interfaces": [
+    {
+      "name": "lens_bore",
+      "frame": {
+        "origin_mm": [
+          0.0,
+          -58.5,
+          20.0
+        ],
+        "z_axis": [
+          0,
+          1,
+          0
+        ],
+        "x_axis": [
+          1,
+          0,
+          0
+        ]
+      },
+      "accepts": [
+        "part:microduck-m12-lens"
+      ],
+      "role": "bore",
+      "what": "\u00d814.400 x 6.000 bore on the ring axis: the M12 lens (part:microduck-m12-lens, \u00d816.94 barrel per its mesh) looks through it; the lens is carried by part:microduck-m12-lens-holder behind the face panel, so this bore is a clearance window, not a seat",
+      "source": "MEASURED off Pollen's noenoeil.stl by cecad.meshfeatures.cylinders(scale=1000) \u2014 hole d 14.400 length 6.000 axis y, residual 0.0000 mm at 355 deg (this script, 2026-09-02)"
+    },
+    {
+      "name": "face_seat",
+      "frame": {
+        "origin_mm": [
+          0.0,
+          -54.0,
+          20.0
+        ],
+        "z_axis": [
+          0,
+          1,
+          0
+        ],
+        "x_axis": [
+          1,
+          0,
+          0
+        ]
+      },
+      "accepts": [
+        "part:microduck-face-part"
+      ],
+      "role": "seat",
+      "what": "the ring's rear face at y = -54.000 sits on/in the face panel (part:microduck-face-part, front face y -55.5): the last 1.5 mm of the ring (y > -55.5) is a spigot of \u00d819.00 that enters the panel. HOW IT IS FIXED IS CANNOT DETERMINE: the decimated face_part.stl registers only the \u00d814.5 lens hole on this axis (cecad.meshfeatures), no recess or screw for the spigot; a glued or press-fit spigot is what the meshes allow",
+      "source": "MEASURED: noenoeil.stl y extent -63.5000..-54.0000 and the radial profile in evidence/ledger.jsonl (cecad.meshslice, 0.5 mm pitch); face_part.stl front face y -55.5 from its bbox (tools/head_probe.py body-frame bbox y -43.917..43.734 \u2192 mesh frame -55.5..-43.0)"
+    }
+  ]
 }

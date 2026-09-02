@@ -4,3 +4,4 @@
 | iteration | date | why it exists |
 |---|---|---|
 | v0.0.1 | 2026-09-01 | created — nothing measured yet |
+| v0.0.1 | 2026-09-02 | filled by lane A: Pollen's `noenoeil` mesh loaded as the eye bezel, measured against the product photographs (out/head/head.json) |
