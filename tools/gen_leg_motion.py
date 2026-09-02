@@ -29,6 +29,7 @@ WK = J.get("walking_policy", {}).get("joints", {})
 ORDER = list(R.keys())
 CT = J["self_collision"]["controls"]
 FR = J.get("framing_check")
+FIG = {os.path.basename(f["png"]): f["png"] for f in J.get("figures", [])}
 
 
 def vid(v):
@@ -162,6 +163,14 @@ max tilt %.2f&deg;, and it does not fall.</p>
 <th>walk travel</th><th>walk peak</th><th>squat travel</th></tr></thead><tbody>%s</tbody></table></div>
 <p class=note><b>Peak velocity is a model number, not a servo number.</b> %s</p>
 <p class=note>%s</p>
+<figure><img src="%s" alt="commanded vs achieved angle and joint velocity, all ten leg joints">
+<figcaption>Commanded (grey) against achieved (blue) for every leg joint, with the MJCF limits drawn as
+red rules, and the joint velocity beside it. The ramp is tracked within a couple of degrees; the spike at
+t &asymp; 5.2 s is the commanded step to the limit, which is where the peak velocity in the table is
+measured. Drawn by <span class=mono>sim/leg_plots.py</span> from the same arrays the table came from.</figcaption></figure>
+<figure><img src="%s" alt="range envelope per motion">
+<figcaption>How much of each joint's MJCF range each motion actually uses. The full sweep reaches the
+limits; Pollen's own policies use a small fraction of them.</figcaption></figure>
 
 <h2>3 · Self-collision</h2>
 <p>The collision set of <span class=mono>microduck_ours_allcollisions.xml</span> is
@@ -178,6 +187,9 @@ reach. The <b>onset</b> is the contact angle nearest the neutral pose, i.e. the 
 first touches as the joint leaves neutral:</p>
 <div class=tw><table class=data><thead><tr><th>case</th><th>verdict</th><th>pair</th><th>onset (deg)</th>
 <th>contact interval (deg)</th><th>max penetration (mm)</th></tr></thead><tbody>%s</tbody></table></div>
+<figure><img src="%s" alt="self-collision onsets"><figcaption>Every self-collision MuJoCo reports, on the
+swept range of its own case. The tick is the onset — the angle at which the pair first touches as the joint
+leaves the neutral pose.</figcaption></figure>
 
 <h2>4 · The close-ups really do contain the servo and the bearing</h2>
 <p>“With the servo and the bearing side both visible” is a claim about a camera, so it is checked as
@@ -208,12 +220,13 @@ and counted if it lands in the foreground. <b>%d of %d cameras carry both.</b>
     J["squat"]["trunk_z_m"]["start"] * 1000, J["squat"]["trunk_z_m"]["min"] * 1000,
     J["squat"]["trunk_drop_mm"], J["squat"]["max_trunk_tilt_deg"],
     jt, E(A["servo_reality_check"]), E(A["peak_velocity_caveat"]),
+    E(FIG.get("legs_sweep_tracking.png", "")), E(FIG.get("legs_envelope.png", "")),
     E(", ".join(J["self_collision"]["pollen_collision_meshes"]["collision_geoms"])),
     E(J["self_collision"]["pollen_collision_meshes"]["note"]),
     E(CT["why"]), E(CT["negative_control"]["pose"]), CT["negative_control"]["self_contacts"],
     E("; ".join("%s -> %d contacts" % (c["pose"], c["self_contacts"]) for c in CT["positive_controls"])),
     E(CT["measured_with"]),
-    st, ct,
+    st, ct, E(FIG.get("legs_selfcollision_plot.png", "")),
     FR["fovy_deg"], FR["panel_px"][0], FR["panel_px"][1], FR["half_fov_deg"][0], FR["half_fov_deg"][1],
     FR["summary"]["both"], FR["summary"]["cameras"], E(FR["limitation"]), ft,
     "".join(vid(v) for v in V), cmp_html or "<p>No product photo exists of these motions.</p>")
