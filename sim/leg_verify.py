@@ -14,32 +14,60 @@ import numpy as np
 import imageio.v3 as iio
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
+def verdict(a):
+    """the one place a clip is judged, so the self-test grades the same code the
+    real check runs."""
+    n = len(a)
+    diffs = [float(np.abs(a[i].astype(int) - a[i - 1].astype(int)).mean()) for i in range(1, n)] or [0.0]
+    stds = [float(a[i].std()) for i in range(0, n, max(1, n // 24))]
+    v = "PASS"
+    if n < 8:
+        v = "FAIL truncated"
+    elif min(stds) < 3.0:
+        v = "FAIL blank frame"
+    elif max(diffs) < 0.05:
+        v = "FAIL frozen"
+    return v, dict(frames=n, mean_interframe_diff=round(float(np.mean(diffs)), 4),
+                   max_interframe_diff=round(float(max(diffs)), 4),
+                   min_sampled_frame_std=round(min(stds), 3))
+
+
+def self_test():
+    """break it on purpose: three clips that MUST be refused, graded by verdict()."""
+    import imageio, tempfile
+    d = tempfile.mkdtemp()
+    blank = [np.full((240, 320, 3), 255, np.uint8) for _ in range(40)]
+    ramp = np.tile(np.linspace(0, 255, 320, dtype=np.uint8), (240, 1))[:, :, None].repeat(3, 2)
+    cases = [("blank", blank, "FAIL blank frame"), ("frozen", [ramp] * 40, "FAIL frozen"),
+             ("truncated", blank[:4], "FAIL truncated")]
+    ok = True
+    for nm, fr, want in cases:
+        p = os.path.join(d, nm + ".mp4")
+        imageio.mimwrite(p, fr, fps=10, quality=8, macro_block_size=8)
+        got, st = verdict(np.asarray(iio.imread(p, index=None)))
+        print("self-test %-10s want %-16s got %-16s %s" % (nm, want, got, "OK" if got == want else "BROKEN"))
+        ok &= (got == want)
+    print("self-test:", "the check fires on all three failure modes" if ok else "THE CHECK IS BROKEN")
+    return ok
 M = os.path.join(ROOT, "out", "motion")
 P = os.path.join(M, "legs_videos.json")
+if "--self-test" in sys.argv:
+    raise SystemExit(0 if self_test() else 1)
+
 V = json.load(open(P))
 bad = []
 for v in V:
     rb = {}
     for key in ("mp4", "gif"):
         a = np.asarray(iio.imread(os.path.join(ROOT, v[key]), index=None))
-        n = len(a)
-        diffs = [float(np.abs(a[i].astype(int) - a[i - 1].astype(int)).mean()) for i in range(1, n)]
-        stds = [float(a[i].std()) for i in range(0, n, max(1, n // 24))]
-        r = dict(frames=n, shape=list(a.shape[1:]),
-                 mean_interframe_diff=round(float(np.mean(diffs)), 4),
-                 max_interframe_diff=round(float(max(diffs)), 4),
-                 min_sampled_frame_std=round(min(stds), 3),
-                 min_pixel=int(a.min()), max_pixel=int(a.max()),
-                 bytes=os.path.getsize(os.path.join(ROOT, v[key])))
-        r["verdict"] = "PASS"
-        if n < 8:
-            r["verdict"] = "FAIL truncated"
-        elif min(stds) < 3.0:
-            r["verdict"] = "FAIL blank frame"
-        elif max(diffs) < 0.05:
-            r["verdict"] = "FAIL frozen"
-        elif key == "gif" and r["bytes"] > 8 * 1024 * 1024:
-            r["verdict"] = "FAIL gif over 8 MB"
+        vd, st = verdict(a)
+        r = dict(shape=list(a.shape[1:]), min_pixel=int(a.min()), max_pixel=int(a.max()),
+                 bytes=os.path.getsize(os.path.join(ROOT, v[key])), **st)
+        if vd == "PASS" and key == "gif" and r["bytes"] > 8 * 1024 * 1024:
+            vd = "FAIL gif over 8 MB"
+        r["verdict"] = vd
         rb[key] = r
         if r["verdict"] != "PASS":
             bad.append((v["name"], key, r["verdict"]))

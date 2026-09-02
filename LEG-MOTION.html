@@ -24,18 +24,18 @@ driven through its whole MJCF range one at a time, then in the postures a one-at
 reach, then by Pollen's own policies. Everything below is read off the simulation — Pollen's MJCF
 verbatim with OUR rebuilt meshes on it (<span class=mono>sim/microduck_ours_allcollisions.xml</span>,
 built by <span class=mono>sim/swap_meshes.py</span>).</p>
-<div class=rev><span>generated 2026-09-02 23:12</span><span>sim/leg_sweep.py + sim/leg_render.py</span>
+<div class=rev><span>generated 2026-09-02 23:44</span><span>sim/leg_sweep.py + sim/leg_render.py</span>
 <span>out/motion/legs.json</span></div>
 </header>
 
 <div class=statbar>
-<div class=stat><b>10 / 10</b><span>leg joints reach their MJCF limit</span></div>
+<div class=stat><b>10 / 10</b><span>leg joints reach their MJCF span to within 0.52&deg;</span></div>
 <div class=stat><b>798&deg;/s</b><span>fastest joint, model step response</span></div>
 <div class=stat><b>0</b><span>self-collisions sweeping one joint at a time</span></div>
 <div class=stat><b>7</b><span>self-collisions found in two-joint / both-leg postures</span></div>
 </div>
 
-<h2>1 · What answers what</h2>
+<h2 id=what>1 · What answers what</h2>
 <p>The stand policy has <b>no leg command slot</b> — the ONNX metadata's
 <span class=mono>command_names</span> is <span class=mono>twist,head_pose</span>, and the 13-slot
 command vector is <span class=mono>[vx vy wz | neck_pitch head_pitch head_yaw head_roll | body x y z roll
@@ -48,7 +48,7 @@ directly, the trunk pinned (the duck held in the hand). That choice is forced, a
 driven through the body-z slot of its command vector: trunk 118.5 mm → 91.1 mm (a <b>27.48 mm</b> drop),
 max tilt 1.45&deg;, and it does not fall.</p>
 
-<h2>2 · Every leg joint, measured</h2>
+<h2 id=joints>2 · Every leg joint, measured</h2>
 <div class=tw><table class=data>
 <thead><tr><th>joint</th><th>MJCF range (deg)</th><th>cite</th><th>travel reached</th><th>of range</th>
 <th>peak vel (deg/s)</th><th>tracking RMS (deg)</th><th>sit-stand travel</th><th>sit-stand peak</th>
@@ -64,12 +64,13 @@ measured. Drawn by <span class=mono>sim/leg_plots.py</span> from the same arrays
 <figcaption>How much of each joint's MJCF range each motion actually uses. The full sweep reaches the
 limits; Pollen's own policies use a small fraction of them.</figcaption></figure>
 
-<h2>3 · Self-collision</h2>
+<h2 id=collision>3 · Self-collision</h2>
 <p>The collision set of <span class=mono>microduck_ours_allcollisions.xml</span> is
 <span class=mono>trunk_base/power_support, trunk_base/np_f970, hip_l/hip_l, leg/leg, ankle_left/left_foot_collision, jaw_soft/top_head_shell, jaw_soft/jaw, jaw_soft/bottom_head_shell, hip_l_2/hip_l, leg_2/leg, ankle_right/right_foot_collision</span>. Two of them (the shins) were also re-pointed to OUR rebuilt mesh
 (<span class=mono>leg__ours</span>) and swept again — same verdicts. MuJoCo collides mesh geoms as their CONVEX HULLS. The trunk power_support geom is class self_collision_only (contype/conaffinity 2) and is the only geom in that group, so it can never produce a contact - stated, not silently passed.</p>
-<p class=note><b>The detector was made to fire before any CLEAR was trusted.</b> a check that cannot fail is not a check - the self-collision detector was broken on purpose and watched to fire, in the same model, before any CLEAR verdict below was trusted Negative control: DEFAULT_POSE, trunk at 0 0 0.12 &rarr;
-<b>0</b> self-contacts. Positive controls: left_hip_roll -22.000 deg and right_hip_roll +22.000 deg (both driven inward) -&gt; 1 contacts; left_knee +90.000 deg with left_hip_pitch -90.000 deg -&gt; 4 contacts. Measured with mujoco 3.12.0, mj_forward on the scene_xml() wrap of sim/microduck_ours_allcollisions.xml; floor contacts excluded by geom id</p>
+<p class=note><b>The detector was made to fire before any CLEAR was trusted.</b> a check that cannot fail is not a check - the self-collision detector was broken on purpose and watched to fire, in the same model, before any CLEAR verdict below was trusted.
+Negative control &mdash; DEFAULT_POSE, trunk at 0 0 0.12 &rarr; <b>0</b> self-contacts. Positive controls &mdash; left_hip_roll -22.000 deg and right_hip_roll +22.000 deg (both driven inward) -&gt; 1 contacts; left_knee +90.000 deg with left_hip_pitch -90.000 deg -&gt; 4 contacts.
+Measured with mujoco 3.12.0, mj_forward on the scene_xml() wrap of sim/microduck_ours_allcollisions.xml; floor contacts excluded by geom id</p>
 <p>One joint at a time, every other joint at DEFAULT_POSE, 0.05&deg; steps, <span class=mono>mj_forward</span>
 every step:</p>
 <div class=tw><table class=data><thead><tr><th>joint</th><th>swept (deg)</th><th>samples</th>
@@ -83,7 +84,7 @@ first touches as the joint leaves neutral:</p>
 swept range of its own case. The tick is the onset — the angle at which the pair first touches as the joint
 leaves the neutral pose.</figcaption></figure>
 
-<h2>4 · The close-ups really do contain the servo and the bearing</h2>
+<h2 id=framing>4 · The close-ups really do contain the servo and the bearing</h2>
 <p>“With the servo and the bearing side both visible” is a claim about a camera, so it is checked as
 one. For every close-up camera the renderer uses, the world position of every
 <span class=mono>xl330</span> geom and every <span class=mono>22&times;16&times;4</span> bearing geom is
@@ -93,10 +94,70 @@ a frustum test, not an occlusion test: it proves the part lies inside the camera
 <div class=tw><table class=data><thead><tr><th>camera</th><th>az / el / d</th><th>verdict</th>
 <th>nearest servo</th><th>nearest bearing</th></tr></thead><tbody><tr><td class=mono>left_hip_yaw/profile</td><td class=n>270 / -4 / 0.20 m</td><td class=ok>PASS both</td><td class=mono>xl330 upper_leg_left @ 0.166 m</td><td class=mono>seeed_bearing__configuration__22x16x4 hip_l @ 0.179 m</td></tr><tr><td class=mono>left_hip_yaw/three_quarter</td><td class=n>225 / -12 / 0.22 m</td><td class=ok>PASS both</td><td class=mono>xl330 upper_leg_left @ 0.208 m</td><td class=mono>seeed_bearing__configuration__22x16x4 hip_l @ 0.210 m</td></tr><tr><td class=mono>left_hip_roll/profile</td><td class=n>270 / -4 / 0.20 m</td><td class=ok>PASS both</td><td class=mono>xl330 upper_leg_left @ 0.166 m</td><td class=mono>seeed_bearing__configuration__22x16x4 hip_l @ 0.178 m</td></tr><tr><td class=mono>left_hip_roll/three_quarter</td><td class=n>225 / -12 / 0.22 m</td><td class=ok>PASS both</td><td class=mono>xl330 upper_leg_left @ 0.217 m</td><td class=mono>seeed_bearing__configuration__22x16x4 hip_l @ 0.219 m</td></tr><tr><td class=mono>left_hip_pitch/profile</td><td class=n>270 / -4 / 0.20 m</td><td class=ok>PASS both</td><td class=mono>xl330 upper_leg_left @ 0.188 m</td><td class=mono>seeed_bearing__configuration__22x16x4 hip_l @ 0.202 m</td></tr><tr><td class=mono>left_hip_pitch/three_quarter</td><td class=n>225 / -12 / 0.22 m</td><td class=ok>PASS both</td><td class=mono>xl330 upper_leg_left @ 0.217 m</td><td class=mono>seeed_bearing__configuration__22x16x4 hip_l @ 0.221 m</td></tr><tr><td class=mono>left_knee/profile</td><td class=n>270 / -4 / 0.20 m</td><td class=ok>PASS both</td><td class=mono>xl330 upper_leg_left @ 0.182 m</td><td class=mono>seeed_bearing__configuration__22x16x4 hip_l @ 0.197 m</td></tr><tr><td class=mono>left_knee/three_quarter</td><td class=n>225 / -12 / 0.22 m</td><td class=ok>PASS both</td><td class=mono>xl330 upper_leg_left @ 0.191 m</td><td class=mono>seeed_bearing__configuration__22x16x4 hip_l @ 0.196 m</td></tr><tr><td class=mono>left_ankle/profile</td><td class=n>270 / -4 / 0.20 m</td><td class=ok>PASS both</td><td class=mono>xl330 upper_leg_left @ 0.209 m</td><td class=mono>seeed_bearing__configuration__22x16x4 upper_leg_left @ 0.222 m</td></tr><tr><td class=mono>left_ankle/three_quarter</td><td class=n>225 / -12 / 0.22 m</td><td class=ok>PASS both</td><td class=mono>xl330 upper_leg_left @ 0.221 m</td><td class=mono>seeed_bearing__configuration__22x16x4 hip_l @ 0.227 m</td></tr><tr><td class=mono>right_hip_yaw/profile</td><td class=n>90 / -4 / 0.20 m</td><td class=ok>PASS both</td><td class=mono>xl330 upper_leg_right @ 0.166 m</td><td class=mono>seeed_bearing__configuration__22x16x4 hip_l_2 @ 0.179 m</td></tr><tr><td class=mono>right_hip_yaw/three_quarter</td><td class=n>45 / -12 / 0.22 m</td><td class=ok>PASS both</td><td class=mono>xl330 upper_leg_right @ 0.194 m</td><td class=mono>seeed_bearing__configuration__22x16x4 hip_l_2 @ 0.207 m</td></tr><tr><td class=mono>right_hip_roll/profile</td><td class=n>90 / -4 / 0.20 m</td><td class=ok>PASS both</td><td class=mono>xl330 upper_leg_right @ 0.166 m</td><td class=mono>seeed_bearing__configuration__22x16x4 hip_l_2 @ 0.178 m</td></tr><tr><td class=mono>right_hip_roll/three_quarter</td><td class=n>45 / -12 / 0.22 m</td><td class=ok>PASS both</td><td class=mono>xl330 upper_leg_right @ 0.178 m</td><td class=mono>seeed_bearing__configuration__22x16x4 upper_leg_right @ 0.192 m</td></tr><tr><td class=mono>right_hip_pitch/profile</td><td class=n>90 / -4 / 0.20 m</td><td class=ok>PASS both</td><td class=mono>xl330 upper_leg_right @ 0.188 m</td><td class=mono>seeed_bearing__configuration__22x16x4 hip_l_2 @ 0.202 m</td></tr><tr><td class=mono>right_hip_pitch/three_quarter</td><td class=n>45 / -12 / 0.22 m</td><td class=ok>PASS both</td><td class=mono>xl330 upper_leg_right @ 0.205 m</td><td class=mono>seeed_bearing__configuration__22x16x4 upper_leg_right @ 0.219 m</td></tr><tr><td class=mono>right_knee/profile</td><td class=n>90 / -4 / 0.20 m</td><td class=ok>PASS both</td><td class=mono>xl330 upper_leg_right @ 0.182 m</td><td class=mono>seeed_bearing__configuration__22x16x4 hip_l_2 @ 0.197 m</td></tr><tr><td class=mono>right_knee/three_quarter</td><td class=n>45 / -12 / 0.22 m</td><td class=ok>PASS both</td><td class=mono>xl330 upper_leg_right @ 0.205 m</td><td class=mono>seeed_bearing__configuration__22x16x4 upper_leg_right @ 0.219 m</td></tr><tr><td class=mono>right_ankle/profile</td><td class=n>90 / -4 / 0.20 m</td><td class=ok>PASS both</td><td class=mono>xl330 upper_leg_right @ 0.209 m</td><td class=mono>seeed_bearing__configuration__22x16x4 upper_leg_right @ 0.222 m</td></tr><tr><td class=mono>right_ankle/three_quarter</td><td class=n>45 / -12 / 0.22 m</td><td class=ok>PASS both</td><td class=mono>xl330 upper_leg_right @ 0.205 m</td><td class=mono>seeed_bearing__configuration__22x16x4 upper_leg_right @ 0.219 m</td></tr></tbody></table></div>
 
-<h2>5 · The clips</h2>
+<h2 id=clips>5 · The clips</h2>
+<figure>
+<video controls preload="metadata" poster="out/motion/legs_hip_yaw_sheet.png" style="width:100%;display:block;border:1px solid var(--hair);background:#fff" src="out/motion/legs_hip_yaw.mp4"></video>
+<figcaption><b>legs_hip_yaw</b> — hip_yaw swept through its full MJCF range, left leg then right leg, policy paused, trunk pinned; close-ups track the joint anchor<br><span class="mono">profile az 270/90 d 0.20 m; three-quarter az 225/45 d 0.22 m; full body d 0.46 m · 9.1 s @ 25 fps · 228 frames · mp4 2.0 MB · gif 3.6 MB</span><br>
+contact sheet <a href="out/motion/legs_hip_yaw_sheet.png">out/motion/legs_hip_yaw_sheet.png</a> · gif <a href="out/motion/legs_hip_yaw.gif">out/motion/legs_hip_yaw.gif</a> · frames <span class=mono>out/motion/frames/legs_hip_yaw_032.png, out/motion/frames/legs_hip_yaw_129.png</span></figcaption></figure>
+<figure><img src="out/motion/legs_hip_yaw_sheet.png" alt="legs_hip_yaw contact sheet"><figcaption>The eight frames of <span class=mono>legs_hip_yaw</span> that were read back after encoding
+(mean inter-frame difference 1.363, min pixel 0 — a blank or frozen clip is refused by
+<span class=mono>sim/leg_render.py check_frames()</span>).</figcaption></figure><figure>
+<video controls preload="metadata" poster="out/motion/legs_hip_roll_sheet.png" style="width:100%;display:block;border:1px solid var(--hair);background:#fff" src="out/motion/legs_hip_roll.mp4"></video>
+<figcaption><b>legs_hip_roll</b> — hip_roll swept through its full MJCF range, left leg then right leg, policy paused, trunk pinned; close-ups track the joint anchor<br><span class="mono">profile az 270/90 d 0.20 m; three-quarter az 225/45 d 0.22 m; full body d 0.46 m · 9.1 s @ 25 fps · 228 frames · mp4 2.1 MB · gif 3.6 MB</span><br>
+contact sheet <a href="out/motion/legs_hip_roll_sheet.png">out/motion/legs_hip_roll_sheet.png</a> · gif <a href="out/motion/legs_hip_roll.gif">out/motion/legs_hip_roll.gif</a> · frames <span class=mono>out/motion/frames/legs_hip_roll_032.png, out/motion/frames/legs_hip_roll_129.png</span></figcaption></figure>
+<figure><img src="out/motion/legs_hip_roll_sheet.png" alt="legs_hip_roll contact sheet"><figcaption>The eight frames of <span class=mono>legs_hip_roll</span> that were read back after encoding
+(mean inter-frame difference 1.525, min pixel 0 — a blank or frozen clip is refused by
+<span class=mono>sim/leg_render.py check_frames()</span>).</figcaption></figure><figure>
+<video controls preload="metadata" poster="out/motion/legs_hip_pitch_sheet.png" style="width:100%;display:block;border:1px solid var(--hair);background:#fff" src="out/motion/legs_hip_pitch.mp4"></video>
+<figcaption><b>legs_hip_pitch</b> — hip_pitch swept through its full MJCF range, left leg then right leg, policy paused, trunk pinned; close-ups track the joint anchor<br><span class="mono">profile az 270/90 d 0.20 m; three-quarter az 225/45 d 0.22 m; full body d 0.46 m · 9.1 s @ 25 fps · 228 frames · mp4 2.7 MB · gif 3.6 MB</span><br>
+contact sheet <a href="out/motion/legs_hip_pitch_sheet.png">out/motion/legs_hip_pitch_sheet.png</a> · gif <a href="out/motion/legs_hip_pitch.gif">out/motion/legs_hip_pitch.gif</a> · frames <span class=mono>out/motion/frames/legs_hip_pitch_032.png, out/motion/frames/legs_hip_pitch_129.png</span></figcaption></figure>
+<figure><img src="out/motion/legs_hip_pitch_sheet.png" alt="legs_hip_pitch contact sheet"><figcaption>The eight frames of <span class=mono>legs_hip_pitch</span> that were read back after encoding
+(mean inter-frame difference 3.136, min pixel 0 — a blank or frozen clip is refused by
+<span class=mono>sim/leg_render.py check_frames()</span>).</figcaption></figure><figure>
+<video controls preload="metadata" poster="out/motion/legs_knee_sheet.png" style="width:100%;display:block;border:1px solid var(--hair);background:#fff" src="out/motion/legs_knee.mp4"></video>
+<figcaption><b>legs_knee</b> — knee swept through its full MJCF range, left leg then right leg, policy paused, trunk pinned; close-ups track the joint anchor<br><span class="mono">profile az 270/90 d 0.20 m; three-quarter az 225/45 d 0.22 m; full body d 0.46 m · 9.1 s @ 25 fps · 228 frames · mp4 2.3 MB · gif 3.4 MB</span><br>
+contact sheet <a href="out/motion/legs_knee_sheet.png">out/motion/legs_knee_sheet.png</a> · gif <a href="out/motion/legs_knee.gif">out/motion/legs_knee.gif</a> · frames <span class=mono>out/motion/frames/legs_knee_032.png, out/motion/frames/legs_knee_129.png</span></figcaption></figure>
+<figure><img src="out/motion/legs_knee_sheet.png" alt="legs_knee contact sheet"><figcaption>The eight frames of <span class=mono>legs_knee</span> that were read back after encoding
+(mean inter-frame difference 2.721, min pixel 0 — a blank or frozen clip is refused by
+<span class=mono>sim/leg_render.py check_frames()</span>).</figcaption></figure><figure>
+<video controls preload="metadata" poster="out/motion/legs_ankle_sheet.png" style="width:100%;display:block;border:1px solid var(--hair);background:#fff" src="out/motion/legs_ankle.mp4"></video>
+<figcaption><b>legs_ankle</b> — ankle swept through its full MJCF range, left leg then right leg, policy paused, trunk pinned; close-ups track the joint anchor<br><span class="mono">profile az 270/90 d 0.20 m; three-quarter az 225/45 d 0.22 m; full body d 0.46 m · 9.1 s @ 25 fps · 228 frames · mp4 1.4 MB · gif 2.9 MB</span><br>
+contact sheet <a href="out/motion/legs_ankle_sheet.png">out/motion/legs_ankle_sheet.png</a> · gif <a href="out/motion/legs_ankle.gif">out/motion/legs_ankle.gif</a> · frames <span class=mono>out/motion/frames/legs_ankle_032.png, out/motion/frames/legs_ankle_129.png</span></figcaption></figure>
+<figure><img src="out/motion/legs_ankle_sheet.png" alt="legs_ankle contact sheet"><figcaption>The eight frames of <span class=mono>legs_ankle</span> that were read back after encoding
+(mean inter-frame difference 0.924, min pixel 0 — a blank or frozen clip is refused by
+<span class=mono>sim/leg_render.py check_frames()</span>).</figcaption></figure><figure>
+<video controls preload="metadata" poster="out/motion/legs_squat_sheet.png" style="width:100%;display:block;border:1px solid var(--hair);background:#fff" src="out/motion/legs_squat.mp4"></video>
+<figcaption><b>legs_squat</b> — squat and rise, twice, under Pollen&#x27;s stand policy driven through its body-z command slot; on the floor, physics on<br><span class="mono">knee profile az 270 d 0.20 m; hip-pitch three-quarter az 225 d 0.22 m; full body d 0.46 m · 4.7 s @ 25 fps · 117 frames · mp4 2.5 MB · gif 2.1 MB</span><br>
+contact sheet <a href="out/motion/legs_squat_sheet.png">out/motion/legs_squat_sheet.png</a> · gif <a href="out/motion/legs_squat.gif">out/motion/legs_squat.gif</a> · frames <span class=mono>out/motion/frames/legs_squat_016.png, out/motion/frames/legs_squat_066.png</span></figcaption></figure>
+<figure><img src="out/motion/legs_squat_sheet.png" alt="legs_squat contact sheet"><figcaption>The eight frames of <span class=mono>legs_squat</span> that were read back after encoding
+(mean inter-frame difference 2.412, min pixel 0 — a blank or frozen clip is refused by
+<span class=mono>sim/leg_render.py check_frames()</span>).</figcaption></figure><figure>
+<video controls preload="metadata" poster="out/motion/legs_sitstand_sheet.png" style="width:100%;display:block;border:1px solid var(--hair);background:#fff" src="out/motion/legs_sitstand.mp4"></video>
+<figcaption><b>legs_sitstand</b> — the sit-stand policy re-rendered with joint close-ups<br><span class="mono">knee profile az 270 d 0.20 m; hip-pitch three-quarter az 225 d 0.22 m; full body d 0.46 m · 5.4 s @ 25 fps · 134 frames · mp4 1.8 MB · gif 2.3 MB</span><br>
+contact sheet <a href="out/motion/legs_sitstand_sheet.png">out/motion/legs_sitstand_sheet.png</a> · gif <a href="out/motion/legs_sitstand.gif">out/motion/legs_sitstand.gif</a> · frames <span class=mono>out/motion/frames/legs_sitstand_019.png, out/motion/frames/legs_sitstand_076.png</span></figcaption></figure>
+<figure><img src="out/motion/legs_sitstand_sheet.png" alt="legs_sitstand contact sheet"><figcaption>The eight frames of <span class=mono>legs_sitstand</span> that were read back after encoding
+(mean inter-frame difference 1.896, min pixel 0 — a blank or frozen clip is refused by
+<span class=mono>sim/leg_render.py check_frames()</span>).</figcaption></figure><figure>
+<video controls preload="metadata" poster="out/motion/legs_leglift_sheet.png" style="width:100%;display:block;border:1px solid var(--hair);background:#fff" src="out/motion/legs_leglift.mp4"></video>
+<figcaption><b>legs_leglift</b> — alternating single-leg lift with the duck held (trunk pinned)<br><span class="mono">knee profile az 270 d 0.20 m; hip-pitch three-quarter az 225 d 0.22 m; full body d 0.46 m · 6.4 s @ 25 fps · 160 frames · mp4 2.7 MB · gif 2.7 MB</span><br>
+contact sheet <a href="out/motion/legs_leglift_sheet.png">out/motion/legs_leglift_sheet.png</a> · gif <a href="out/motion/legs_leglift.gif">out/motion/legs_leglift.gif</a> · frames <span class=mono>out/motion/frames/legs_leglift_022.png, out/motion/frames/legs_leglift_090.png</span></figcaption></figure>
+<figure><img src="out/motion/legs_leglift_sheet.png" alt="legs_leglift contact sheet"><figcaption>The eight frames of <span class=mono>legs_leglift</span> that were read back after encoding
+(mean inter-frame difference 3.156, min pixel 0 — a blank or frozen clip is refused by
+<span class=mono>sim/leg_render.py check_frames()</span>).</figcaption></figure><figure>
+<video controls preload="metadata" poster="out/motion/legs_selfcollision_sheet.png" style="width:100%;display:block;border:1px solid var(--hair);background:#fff" src="out/motion/legs_selfcollision.mp4"></video>
+<figcaption><b>legs_selfcollision</b> — the one self-collision a both-leg sweep finds: the two soles meet when both hip rolls are driven inward together<br><span class="mono">front az 180 d 0.20 m; soles az 180 el -20 d 0.24 m; full body d 0.46 m · 7.1 s @ 25 fps · 177 frames · mp4 2.4 MB · gif 2.9 MB</span><br>
+contact sheet <a href="out/motion/legs_selfcollision_sheet.png">out/motion/legs_selfcollision_sheet.png</a> · gif <a href="out/motion/legs_selfcollision.gif">out/motion/legs_selfcollision.gif</a> · frames <span class=mono>out/motion/frames/legs_selfcollision_025.png, out/motion/frames/legs_selfcollision_100.png</span></figcaption></figure>
+<figure><img src="out/motion/legs_selfcollision_sheet.png" alt="legs_selfcollision contact sheet"><figcaption>The eight frames of <span class=mono>legs_selfcollision</span> that were read back after encoding
+(mean inter-frame difference 0.877, min pixel 0 — a blank or frozen clip is refused by
+<span class=mono>sim/leg_render.py check_frames()</span>).</figcaption></figure><figure>
+<video controls preload="metadata" poster="out/motion/legs_composite_sheet.png" style="width:100%;display:block;border:1px solid var(--hair);background:#fff" src="out/motion/legs_composite.mp4"></video>
+<figcaption><b>legs_composite</b> — four leg motions side by side: knee sweep, hip-pitch sweep, squat, sit-stand<br><span class="mono">full body d 0.46 m, az 270/252 · 4.0 s @ 25 fps · 101 frames · mp4 1.3 MB · gif 1.6 MB</span><br>
+contact sheet <a href="out/motion/legs_composite_sheet.png">out/motion/legs_composite_sheet.png</a> · gif <a href="out/motion/legs_composite.gif">out/motion/legs_composite.gif</a> · frames <span class=mono>out/motion/frames/legs_composite_014.png, out/motion/frames/legs_composite_057.png</span></figcaption></figure>
+<figure><img src="out/motion/legs_composite_sheet.png" alt="legs_composite contact sheet"><figcaption>The eight frames of <span class=mono>legs_composite</span> that were read back after encoding
+(mean inter-frame difference 1.630, min pixel 0 — a blank or frozen clip is refused by
+<span class=mono>sim/leg_render.py check_frames()</span>).</figcaption></figure>
 
-
-<h2>6 · Beside the real product</h2>
+<h2 id=compare>6 · Beside the real product</h2>
 <figure><img src="out/motion/compare_standing_profile.png" alt="standing, left profile: the whole leg chain (hip yaw/roll bracket, thigh, knee servo, shin, ankle servo, foot)"><figcaption>standing, left profile: the whole leg chain (hip yaw/roll bracket, thigh, knee servo, shin, ankle servo, foot)</figcaption></figure><figure><img src="out/motion/compare_sitting.png" alt="sitting: frame 94 of the sit-stand run (t = 1.88 s, trunk z 58.8 mm, the deepest of the run)"><figcaption>sitting: frame 94 of the sit-stand run (t = 1.88 s, trunk z 58.8 mm, the deepest of the run)</figcaption></figure>
 
 <footer class=rev><span>Every number: out/motion/legs.json</span><span>sim/leg_sweep.py</span>

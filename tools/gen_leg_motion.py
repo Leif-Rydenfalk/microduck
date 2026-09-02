@@ -37,13 +37,13 @@ FIG = {os.path.basename(f["png"]): f["png"] for f in J.get("figures", [])}
 
 def vid(v):
     return """<figure>
-<video controls preload="metadata" style="width:100%%;display:block;border:1px solid var(--hair);background:#fff" src="%s"></video>
+<video controls preload="metadata" poster="%s" style="width:100%%;display:block;border:1px solid var(--hair);background:#fff" src="%s"></video>
 <figcaption><b>%s</b> — %s<br><span class="mono">%s · %.1f s @ %d fps · %d frames · mp4 %.1f MB · gif %.1f MB</span><br>
 contact sheet <a href="%s">%s</a> · gif <a href="%s">%s</a> · frames <span class=mono>%s</span></figcaption></figure>
 <figure><img src="%s" alt="%s contact sheet"><figcaption>The eight frames of <span class=mono>%s</span> that were read back after encoding
 (mean inter-frame difference %.3f, min pixel %d — a blank or frozen clip is refused by
 <span class=mono>sim/leg_render.py check_frames()</span>).</figcaption></figure>""" % (
-        E(v["mp4"]), E(v["name"]), E(v["what"]), E(v["camera"]), v["seconds"], v["fps"], v["frames"],
+        E(v["sheet"]), E(v["mp4"]), E(v["name"]), E(v["what"]), E(v["camera"]), v["seconds"], v["fps"], v["frames"],
         v["mp4_bytes"] / 1e6, v["gif_bytes"] / 1e6, E(v["sheet"]), E(v["sheet"]), E(v["gif"]), E(v["gif"]),
         E(", ".join(v["frames_png"])), E(v["sheet"]), E(v["name"]), E(v["name"]),
         v["mean_interframe_diff"], v["min_pixel"])
@@ -146,7 +146,7 @@ built by <span class=mono>sim/swap_meshes.py</span>).</p>
 <div class=stat><b>%d</b><span>self-collisions found in two-joint / both-leg postures</span></div>
 </div>
 
-<h2>1 · What answers what</h2>
+<h2 id=what>1 · What answers what</h2>
 <p>The stand policy has <b>no leg command slot</b> — the ONNX metadata's
 <span class=mono>command_names</span> is <span class=mono>twist,head_pose</span>, and the 13-slot
 command vector is <span class=mono>[vx vy wz | neck_pitch head_pitch head_yaw head_roll | body x y z roll
@@ -159,7 +159,7 @@ directly, the trunk pinned (the duck held in the hand). That choice is forced, a
 driven through the body-z slot of its command vector: trunk %.1f mm → %.1f mm (a <b>%.2f mm</b> drop),
 max tilt %.2f&deg;, and it does not fall.</p>
 
-<h2>2 · Every leg joint, measured</h2>
+<h2 id=joints>2 · Every leg joint, measured</h2>
 <div class=tw><table class=data>
 <thead><tr><th>joint</th><th>MJCF range (deg)</th><th>cite</th><th>travel reached</th><th>of range</th>
 <th>peak vel (deg/s)</th><th>tracking RMS (deg)</th><th>sit-stand travel</th><th>sit-stand peak</th>
@@ -175,12 +175,13 @@ measured. Drawn by <span class=mono>sim/leg_plots.py</span> from the same arrays
 <figcaption>How much of each joint's MJCF range each motion actually uses. The full sweep reaches the
 limits; Pollen's own policies use a small fraction of them.</figcaption></figure>
 
-<h2>3 · Self-collision</h2>
+<h2 id=collision>3 · Self-collision</h2>
 <p>The collision set of <span class=mono>microduck_ours_allcollisions.xml</span> is
 <span class=mono>%s</span>. Two of them (the shins) were also re-pointed to OUR rebuilt mesh
 (<span class=mono>leg__ours</span>) and swept again — same verdicts. %s</p>
-<p class=note><b>The detector was made to fire before any CLEAR was trusted.</b> %s Negative control: %s &rarr;
-<b>%d</b> self-contacts. Positive controls: %s. Measured with %s</p>
+<p class=note><b>The detector was made to fire before any CLEAR was trusted.</b> %s.
+Negative control &mdash; %s &rarr; <b>%d</b> self-contacts. Positive controls &mdash; %s.
+Measured with %s</p>
 <p>One joint at a time, every other joint at DEFAULT_POSE, 0.05&deg; steps, <span class=mono>mj_forward</span>
 every step:</p>
 <div class=tw><table class=data><thead><tr><th>joint</th><th>swept (deg)</th><th>samples</th>
@@ -194,7 +195,7 @@ first touches as the joint leaves neutral:</p>
 swept range of its own case. The tick is the onset — the angle at which the pair first touches as the joint
 leaves the neutral pose.</figcaption></figure>
 
-<h2>4 · The close-ups really do contain the servo and the bearing</h2>
+<h2 id=framing>4 · The close-ups really do contain the servo and the bearing</h2>
 <p>“With the servo and the bearing side both visible” is a claim about a camera, so it is checked as
 one. For every close-up camera the renderer uses, the world position of every
 <span class=mono>xl330</span> geom and every <span class=mono>22&times;16&times;4</span> bearing geom is
@@ -204,10 +205,10 @@ and counted if it lands in the foreground. <b>%d of %d cameras carry both.</b>
 <div class=tw><table class=data><thead><tr><th>camera</th><th>az / el / d</th><th>verdict</th>
 <th>nearest servo</th><th>nearest bearing</th></tr></thead><tbody>%s</tbody></table></div>
 
-<h2>5 · The clips</h2>
+<h2 id=clips>5 · The clips</h2>
 %s
 
-<h2>6 · Beside the real product</h2>
+<h2 id=compare>6 · Beside the real product</h2>
 %s
 
 <footer class=rev><span>Every number: out/motion/legs.json</span><span>sim/leg_sweep.py</span>
