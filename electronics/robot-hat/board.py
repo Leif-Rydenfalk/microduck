@@ -279,6 +279,27 @@ DECOUPLE = "100n"        # OUR practice — no fetched source states the HAT's
                          # the buffer VCC is the one cited figure.
 
 
+POWER_W = 0.8            # D9 — see the autoroute block for why 0.8 and not 1.2
+
+
+def ipc2221_amps(width_mm, oz=1.0, dT=10.0, external=True):
+    """IPC-2221 §6.2 current for a bare trace, in amps.
+
+    I = k * dT^0.44 * A^0.725, A in square mils, k = 0.048 external and
+    0.024 internal. Geometry only: it says nothing about the demand, and the
+    demand on this board's power nets is CANNOT DETERMINE.
+
+    THIS EXISTS BECAUSE THE FIGURES WERE FIRST TYPED BY HAND AND TWO OF THEM
+    WERE WRONG (0.400 mm read 1.29 A when it is 1.231, and 0.800 mm at
+    dT 20 read 3.05 A when it is 2.760). A number in a document is a
+    measurement or it is a guess; this makes them measurements.
+    """
+    thick_mil = 1.378 * oz
+    area_mil2 = (width_mm / 0.0254) * thick_mil
+    k = 0.048 if external else 0.024
+    return k * (dT ** 0.44) * (area_mil2 ** 0.725)
+
+
 # ---------------------------------------------------------------------------
 # footprints that are not in packages.json — every figure cited above
 # ---------------------------------------------------------------------------
@@ -581,17 +602,23 @@ def build(self_test=None, publish=True, verbose=True):
                          "in the overlays or robotd touches it)")
 
     b.notes.append(
-        "POWER PATH: VBAT, SERVO_V and V5_HAT are routed at 0.800 mm on 1 oz "
-        "outer copper, which IPC-2221 §6.2 puts at 2.03 A for a 10 degC rise "
-        "and 3.05 A at 20 degC. They used to be 0.400 mm = 1.29 A. The "
-        "DEMAND is CANNOT DETERMINE: the XL330's published figures are 17 mA "
-        "standby and 1.47 A stall at 5 V with no running current, so the "
-        "16-device bus total has no number behind it, and wiring/CABLES.md's "
-        "own 1 A-per-moving-servo worst case is stated there as an "
-        "assumption. 0.800 mm is the widest track this board's lattice can "
-        "thread between 2.54 mm header pins — measured on this board, run 2: "
-        "1.0 mm gave a 1.56 mm lattice that could not thread the bottom "
-        "connector row.")
+        f"POWER PATH: VBAT, SERVO_V and V5_HAT are routed at {POWER_W:.3f} mm "
+        f"on 1 oz outer copper, which IPC-2221 §6.2 puts at "
+        f"{ipc2221_amps(POWER_W):.3f} A for a 10 degC rise and "
+        f"{ipc2221_amps(POWER_W, dT=20.0):.3f} A at 20 degC. They used to be "
+        f"0.400 mm = {ipc2221_amps(0.4):.3f} A. THE DEMAND IS CANNOT "
+        f"DETERMINE: the XL330's published figures are 17 mA standby and "
+        f"1.47 A stall at 5 V with no running current, so the 16-device bus "
+        f"total has no number behind it, and wiring/CABLES.md's own "
+        f"1 A-per-moving-servo worst case is stated there as an assumption. "
+        f"{POWER_W:.3f} mm is the widest track this board's lattice can "
+        f"thread between 2.54 mm header pins — the lattice pitch is (width + "
+        f"clearance) * sqrt(2), and this board's own run 2 is on record that "
+        f"1.0 mm gave a 1.56 mm lattice that could not thread the bottom "
+        f"connector row. 1.200 mm would carry "
+        f"{ipc2221_amps(1.2):.3f} A and would not route. A supply path that "
+        f"really had to carry ten amps would need 2 oz copper or a plane, "
+        f"and this 2-layer stackup spends its back layer on the GND pour.")
     b.notes.append(
         "POLLEN'S OWN HAT MESH WAS MEASURED (2026-09-02) and this board's "
         "outline follows it: 65.000 x 30.000 mm, corner radius 3.5000 mm "
@@ -722,9 +749,11 @@ def build(self_test=None, publish=True, verbose=True):
     # SERVO_V feeds all 16 bus devices through J3, and V5_HAT feeds the Radxa
     # through header pins 2 and 4. IPC-2221 §6.2 (I = 0.048 * dT^0.44 *
     # A^0.725, A in mil^2) on 1 oz outer copper:
-    #     0.400 mm -> 1.29 A at dT 10 degC     (what this board used to draw)
-    #     0.800 mm -> 2.03 A at dT 10, 3.05 A at dT 20
-    #     1.200 mm -> 2.73 A at dT 10
+    #     0.400 mm -> 1.231 A at dT 10 degC   (what this board used to draw)
+    #     0.800 mm -> 2.034 A at dT 10, 2.760 A at dT 20
+    #     1.200 mm -> 2.730 A at dT 10
+    # (printed by ipc2221_amps() into the board notes; the three lines above
+    # were typed by hand first and two of them were wrong.)
     # 0.800 and not 1.200 because the lattice pitch is (width + clearance) *
     # sqrt(2), and this board's own run 2 is on record: "1.0 mm power tracks
     # -> a 1.56 mm lattice that cannot thread the bottom connector row".
@@ -736,7 +765,7 @@ def build(self_test=None, publish=True, verbose=True):
     # behind it. What is stated here is what the COPPER carries. A supply
     # path that had to carry ten amps would need 2 oz copper or a plane, and
     # this 2-layer stackup spends its back layer on the GND pour.
-    b.autoroute(nets=["VBAT", "SERVO_V", "V5_HAT"], width=0.8,
+    b.autoroute(nets=["VBAT", "SERVO_V", "V5_HAT"], width=POWER_W,
                 effort=10, via_cost=2.0, verbose=verbose)
     rails = ("HAT_3V3", "J5_3V3", "HAT_1V8")
     signals = [n for n in b.net_names()
