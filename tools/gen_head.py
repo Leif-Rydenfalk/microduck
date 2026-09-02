@@ -56,7 +56,7 @@ def fit_rows():
         rows.append("<tr><td>%s</td><td class=n>%s</td><td class=n>%s</td><td class=n>%s</td><td class=n>%s</td><td class=n>%s</td>"
                     "<td class=n>%s</td><td class=n>%s</td><td class=n>%s</td><td class=n>%s</td><td class=n>%s</td></tr>" % (
                         esc(p["title"]), f(t["iou"], 4), f(t["eye_term"], 5), f(t["cam_distance_mm"], 1), f(t["cam_az_deg"], 2), f(t["cam_el_deg"], 2),
-                        f(t["head_pitch_total_deg"], 2), f(t["head_yaw_deg"], 2), f(t["head_roll_deg"], 2), f(t["jaw_open_deg"], 2),
+                        f(t["head_pitch_deg"], 2), f(t["head_yaw_deg"], 2), f(t["head_roll_deg"], 2), f(t["jaw_open_deg"], 2),
                         pm(t["k_photo_px_per_render_px"], t["k_fit_spread"], 4)))
     return "\n".join(rows)
 
@@ -122,7 +122,7 @@ def photo_sections():
   <h3>4.{i} {esc(p["title"])}</h3>
   <p class="paircap">{esc(p["note"])} · <code>{esc(p["path"])}</code> {p["image_size_px"][0]}×{p["image_size_px"][1]} px ·
     fitted camera distance <b>{f(t["cam_distance_mm"], 0)} mm</b>, IoU <b>{f(t["iou"], 3)}</b>,
-    head pitch {f(t["head_pitch_total_deg"], 1)}° yaw {f(t["head_yaw_deg"], 1)}° roll {f(t["head_roll_deg"], 1)}° jaw {f(t["jaw_open_deg"], 1)}°</p>
+    head pitch {f(t["head_pitch_deg"], 1)}° yaw {f(t["head_yaw_deg"], 1)}° roll {f(t["head_roll_deg"], 1)}° jaw {f(t["jaw_open_deg"], 1)}°</p>
   <figure class="wide"><img src="{p["pictures"]["pair"]}" alt="{esc(p["id"])} real | ours | overlay">
     <figcaption>Real (left), ours at the same camera and fitted pose (centre), overlay (right; blue = photograph's head region, orange = our head silhouette and eye ring).</figcaption></figure>
   <div class="pair">
@@ -266,8 +266,7 @@ HTML = f"""<!doctype html>
   <h2><span class="n">4</span>Photographs, posed and overlaid — real beside ours, always</h2>
   <p>For each photograph the model is posed by fitting camera elevation, azimuth (3/4 shots), distance, head pitch / yaw / roll, the jaw opening
   and a similarity transform, maximising silhouette IoU of the head region plus the eye-ring ellipse match. The jaw is not a joint in the
-  published model; its geoms are rotated about the measured hinge (the 15×10×3 bearing centre). Head pitch is given as the neck-pitch +
-  head-pitch total; 40.000° is level (eye-ring axis horizontal, bisected on the mesh).</p>
+  published model; its geoms are rotated about the measured hinge (the 15×10×3 bearing centre). Head pitch is the head's orientation relative to the trunk, 0 = level (eye-ring axis horizontal, bisected on the mesh), positive = face up.</p>
   <div class="tw"><table class="data">
     <caption>Table 3. Fitted pose per photograph. k = photo px per render px (fit spread from re-polishing).</caption>
     <thead><tr><th>Photograph</th><th class=n>IoU</th><th class=n>eye term</th><th class=n>D (mm)</th><th class=n>az (°)</th><th class=n>el (°)</th><th class=n>pitch (°)</th><th class=n>yaw (°)</th><th class=n>roll (°)</th><th class=n>jaw (°)</th><th class=n>k</th></tr></thead>

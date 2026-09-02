@@ -176,11 +176,16 @@ class HeadRenderer:
             self.servo[role] = gs[idx]
 
     def pose(self, pitch_deg, yaw_deg, roll_deg, jaw_deg, neck_pitch_deg=None):
+        """pitch_deg = the head's pitch relative to the trunk, 0 = LEVEL (eye-ring axis horizontal),
+        positive = face up. The neck_pitch and head_pitch hinges have OPPOSITE axes in the MJCF
+        (world -y and +y, tools/head_probe.py), so the head orientation is head_pitch - neck_pitch:
+        with neck_pitch at the STAND value the level head has head_pitch = neck_pitch (STAND: 20/20).
+        Verified by bisection on the noenoeil geom's axis elevation (tools/head_frontview.py)."""
         d = self.data; m = self.model
         d.qpos[:] = self.q0
         npitch = math.radians(neck_pitch_deg) if neck_pitch_deg is not None else float(common.DEFAULT_POSE[5])
         d.qpos[self.jadr["neck_pitch"]] = npitch
-        d.qpos[self.jadr["head_pitch"]] = math.radians(pitch_deg) - npitch
+        d.qpos[self.jadr["head_pitch"]] = npitch + math.radians(pitch_deg)
         d.qpos[self.jadr["head_yaw"]] = math.radians(yaw_deg)
         d.qpos[self.jadr["head_roll"]] = math.radians(roll_deg)
         th = math.radians(jaw_deg)
@@ -423,18 +428,18 @@ def fit_photo(ph, hr, rgb, eye, quick=False, w_eye=10.0):
 
     yaw_sign = 1.0 if ph["cam_az"] >= 180 else -1.0
     lo_b = hi_b = None
-    mr0, _ = render((ph["el0"], ph["cam_az"], 40.0, 40.0 * yaw_sign, 0.0, 20.0))
+    mr0, _ = render((ph["el0"], ph["cam_az"], 0.0, 40.0 * yaw_sign, 0.0, 20.0))
     ry, rx = np.nonzero(mr0)
     k0 = math.sqrt(area_p / max(1, mr0.sum()))
     tx0 = cx_p - k0 * rx.mean(); ty0 = cy_p - k0 * ry.mean()
     bounds = [(ph["el0"] - 12, ph["el0"] + 12),
               (ph["cam_az"] - 25, ph["cam_az"] + 25) if ph["az_free"] else (ph["cam_az"] - 0.01, ph["cam_az"] + 0.01),
-              (0, 80), (0, 90) if yaw_sign > 0 else (-90, 0), (-25, 25),
+              (-40, 40), (0, 90) if yaw_sign > 0 else (-90, 0), (-25, 25),
               (0, 40) if ph["jaw_open"] else (0, 0.01),
               (k0 * 0.7, k0 * 1.4), (tx0 - 120, tx0 + 120), (ty0 - 120, ty0 + 120)]
     lo_b = np.array([b[0] for b in bounds]); hi_b = np.array([b[1] for b in bounds])
     t0 = time.time()
-    res = optimize.differential_evolution(eval_params, bounds, maxiter=12 if quick else 30, popsize=8 if quick else 12,
+    res = optimize.differential_evolution(eval_params, bounds, maxiter=10 if quick else 22, popsize=6 if quick else 10,
                                           tol=1e-5, seed=1, polish=False, updating="immediate")
     res2 = optimize.minimize(eval_params, res.x, method="Nelder-Mead",
                              options=dict(xatol=0.01, fatol=1e-6, maxfev=500 if quick else 1500))
@@ -455,7 +460,7 @@ def fit_photo(ph, hr, rgb, eye, quick=False, w_eye=10.0):
     fit = dict(objective=float(best[0]), iou=float(best_iou), eye_term=float(et), seconds=round(time.time() - t0, 1),
                n_eval=int(res.nfev + res2.nfev),
                cam_el_deg=el, cam_az_deg=az, cam_distance_mm=D_mm, cam_distance_source=ph.get("D_source", ""),
-               head_pitch_total_deg=pitch, head_yaw_deg=yaw, head_roll_deg=roll, jaw_open_deg=jaw if ph["jaw_open"] else 0.0,
+               head_pitch_deg=pitch, head_yaw_deg=yaw, head_roll_deg=roll, jaw_open_deg=jaw if ph["jaw_open"] else 0.0,
                k_photo_px_per_render_px=k * ds, k_fit_spread=k_spread * ds, tx=tx * ds + bx0, ty=ty * ds + by0,
                crop_box=[int(bx0), int(by0), int(bx1), int(by1)],
                photo_head_extent_px=[int(pxs.max() - pxs.min() + 1), int(pys.max() - pys.min() + 1)],
@@ -529,7 +534,7 @@ def overlay_pictures(ph, rgb, fit, servo, eye, hr, mm_per_px, rservo):
     dd = ImageDraw.Draw(sheet)
     labs = ["REAL  " + ph["title"],
             "OURS  same camera (D %.0f mm, el %.1f, az %.1f) + fitted pose (pitch %.1f yaw %.1f roll %.1f jaw %.1f)" % (
-                fit["cam_distance_mm"], fit["cam_el_deg"], fit["cam_az_deg"], fit["head_pitch_total_deg"], fit["head_yaw_deg"], fit["head_roll_deg"], fit["jaw_open_deg"]),
+                fit["cam_distance_mm"], fit["cam_el_deg"], fit["cam_az_deg"], fit["head_pitch_deg"], fit["head_yaw_deg"], fit["head_roll_deg"], fit["jaw_open_deg"]),
             "OVERLAY  blue = photo head region, orange = our head + eye ring   IoU %.3f" % fit["iou"]]
     for i, (im, lab) in enumerate(zip([realc, ours, ov], labs)):
         sheet.paste(im.resize((tw, tile_h), Image.LANCZOS), (10 + i * (tw + 10), 40))
@@ -556,7 +561,7 @@ def main():
     if args.D:
         for ph in PHOTOS: ph["D_mm"] = args.D; ph["D_source"] = "override --D %.0f mm (sensitivity run)" % args.D
     model, data = load_model()
-    hr = HeadRenderer(model, data, size=800)
+    hr = HeadRenderer(model, data, size=640)
     results = []
     for ph in PHOTOS:
         if args.only and ph["id"] != args.only: continue
@@ -566,7 +571,7 @@ def main():
         eye = measure_eye(rgb, ph["eye_box"], ph["eye_hue"], smin=ph.get("eye_smin", 0.35))
         fit = fit_photo(ph, hr, rgb, eye, quick=args.quick)
         # re-pose at the fitted parameters and measure the servo(s) in the render
-        hr.pose(fit["head_pitch_total_deg"], fit["head_yaw_deg"], fit["head_roll_deg"], fit["jaw_open_deg"])
+        hr.pose(fit["head_pitch_deg"], fit["head_yaw_deg"], fit["head_roll_deg"], fit["jaw_open_deg"])
         hr.set_camera(fit["cam_az_deg"], fit["cam_el_deg"], fit["cam_distance_mm"])
         ids, types = hr.seg(); isg = types == int(mujoco.mjtObj.mjOBJ_GEOM)
         ratios = []

@@ -102,7 +102,7 @@ def mesh_side():
         hr.pose(pitch, 0, 0, 0); R = data.geom_xmat[g].reshape(3, 3); ax = R[:, thin]
         if ax[0] > 0: ax = -ax
         return math.degrees(math.atan2(ax[2], -ax[0]))
-    lo, hi = 0.0, 80.0
+    lo, hi = -40.0, 40.0
     for _ in range(50):
         m = (lo + hi) / 2
         if elev(m) > 0: hi = m
