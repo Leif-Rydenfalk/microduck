@@ -335,6 +335,21 @@ def main():
     A('<p class="fig-cap">Table 1. The three boards. The DRC column is read out of each '
       'board&rsquo;s own <code>out/fab/README.txt</code> — the file a fab would receive — '
       'so this document cannot state a verdict the Gerbers do not carry.</p>')
+    corr = d.get("corrections")
+    if corr:
+        A('<h3>1.1 What this lane got wrong, and how it was caught</h3>')
+        A(f'<p class="lede">{esc(corr["$note"])}</p>')
+        A('<table class="tight"><thead><tr><th>Board</th><th>The defect</th>'
+          '<th>What was wrong</th><th>What caught it</th><th>The fix, and what '
+          'proves it</th></tr></thead><tbody>')
+        for board, defect, wrong, caught, fix in corr["rows"]:
+            A(f'<tr><td><code>{esc(board)}</code></td>'
+              f'<td><strong>{esc(defect)}</strong></td><td>{esc(wrong)}</td>'
+              f'<td>{esc(caught)}</td><td>{esc(fix)}</td></tr>')
+        A('</tbody></table>')
+        A('<p class="fig-cap">Table 1.1. Five defects measured in this lane&rsquo;s own '
+          'work and closed. Three were caught by the design-rule check or by a '
+          'measurement; two were caught by asking a question the check does not ask.</p>')
     A('</section>')
 
     # ---- 2 -----------------------------------------------------------------

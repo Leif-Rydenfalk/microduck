@@ -581,5 +581,45 @@
         "Soldered three-wire tail, AWG24. Decision B5: no JST header fits a 5.100 mm strip."
       ]
     }
+  },
+  "corrections": {
+    "$note": "Defects this lane MEASURED in its own earlier work and fixed. Each says what was wrong, how it was caught, and what proves the fix.",
+    "rows": [
+      [
+        "robot-hat",
+        "The i2s3/DIN spine started at the wrong header pad",
+        "board.py claimed a hand-laid track on net i2s3/DIN but took its start point from J1 pad 38. Pad 38 is I2S3_SDI and carries i2s3/DOUT; the DIN pad is 40. The diagonal it then took into the codec also cut across U1.2 (BCLK) and U1.3 (WCLK).",
+        "The DRC, as three 0.000 mm clearance FAILs: 'track i2s3/DIN on F.Cu / pad J1.38', '/ pad U1.3', '/ pad U1.2'.",
+        "Verified against the Radxa ZERO 3W product brief RAD-DOC-0084 40-pin table (fetched 2026-09-02): pin 40 is 'GPIO3_A5 I2S3_SDO_M0' and pin 38 is 'GPIO3_A6 I2S3_SDI_M0'. netlist.py maps the HAT provision I2S3_SDO to net i2s3/DIN ('DIN = SoC SDO, DOUT = SoC SDI'), so the codec's data INPUT belongs on the SoC's data OUTPUT, pin 40. The track now leaves pad 40 and enters the codec's pin 4 horizontally along pin 4's own y, so it crosses neither 2 nor 3."
+      ],
+      [
+        "robot-hat",
+        "The board outline was the Raspberry Pi Zero's, by analogy",
+        "CORNER = 3.0, taken from RPI-ZERO-V1_2's 'CORNER RADIUS = 3.0mm', on the reasoning that the HAT sits on a Pi-Zero footprint.",
+        "Measuring Pollen's OWN mesh instead of reasoning from an analogue. 36 arc points of elec_rpi_robot_hat_pcb.stl fit a 3.5000 mm radius about the mounting-hole centre to r min 3.5000 / r max 3.5001; an R3.0 arc about an offset centre fits the same points at 3.04 with 0.4 mm of scatter.",
+        "CORNER = 3.5, and the full measured hole table published in section 2 so anyone can check the fit themselves."
+      ],
+      [
+        "imu-to-dxl",
+        "The bus power path was autorouted at 0.400 mm",
+        "SERVO_V was left to the router at 0.400 mm. A DYNAMIXEL bus daisy-chains POWER as well as data, so this board's copper carries every device downstream of it \u2014 with wiring/CABLES.md's harness, both leg chains.",
+        "Asking what the copper CARRIES rather than what the DRC checks. The DRC does not fail an under-sized power track when the demand is undocumented; it says CANNOT DETERMINE, which is not the same as fine.",
+        "All three bus ports moved onto one edge (board 34.000 x 24.000 -> 40.000 x 22.000) and SERVO_V hand-laid as a 2.000 mm comb on F.Cu, mirrored on B.Cu with four stitching vias, claimed before the router runs. 3.953 A per layer at dT 10 vs 1.231 A."
+      ],
+      [
+        "robot-hat",
+        "Two IPC-2221 figures were typed by hand and were wrong",
+        "The power-width comment and note read '0.400 mm -> 1.29 A' and '0.800 mm -> 3.05 A at dT 20'. The true values are 1.231 A and 2.760 A.",
+        "Recomputing them. The other two boards already had an ipc2221_amps() in the file and their numbers were right; the HAT's were prose.",
+        "robot-hat/board.py now has the same function and every power figure in its notes is formatted from it, including the 1.200 mm alternative it rejected."
+      ],
+      [
+        "imu-to-dxl",
+        "The connector count was claimed as settled when it is not",
+        "The board file said the wiring lane 'settles' the connector count at three, from the harness rather than from a photograph.",
+        "ce-parts/microduck-imu-to-dxl/component.json record.connector_count, corrected the same night by another lane: a DYNAMIXEL bus is MULTIDROP, so the harness may fork at a Y-splice instead of at a device, and Open Duck Mini v2 does exactly that.",
+        "The file now says the count is CANNOT DETERMINE, fits option A because that is what wiring/cables.json already assumes, and marks J3 as the connector where the open question shows: leave it unstuffed and the board is option B."
+      ]
+    ]
   }
 }
