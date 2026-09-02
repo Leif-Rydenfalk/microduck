@@ -635,5 +635,43 @@
         "SERVO_V is autorouted AFTER the comb at 0.400 mm \u2014 the LDO branch carries this board's own milliamps, not the pass-through, so that is the right width for it \u2014 and GND is back in the router at effort 16, because the LGA's and the MCU's ground pads are too small and too closely spaced to take a stub via."
       ]
     ]
+  },
+  "toolchain": {
+    "read": "2026-09-02",
+    "command": "ce-cad/bin/pcb --doctor",
+    "verdict": "fit to run",
+    "rows": [
+      [
+        "python",
+        "3.14.6 (/opt/homebrew/opt/python@3.14/bin/python3.14)",
+        "the boards run under plain python3 \u2014 nothing in this lane touches the CAD kernel"
+      ],
+      [
+        "modules",
+        "cecad.pcb, cecad.pcbcheck, cecad.pcbroute, cecad.pcbfab, cecad.pcbview, cecad.netlist \u2014 all ok",
+        ""
+      ],
+      [
+        "packages",
+        "22 known, 2 UNCONFIRMED and refusing: jst-sh-6, qfn",
+        "the refusing ones are why the codec's QFN-32 and the Stemma J5 are built from their own datasheets rather than from a family outline"
+      ],
+      [
+        "fab rules",
+        "conservative, jlcpcb_2l_standard, jlcpcb_multilayer_standard",
+        "all three boards use jlcpcb_2l_standard, which is the confirmed one. 'conservative' is the default every Board() gets and is unconfirmed against any live page \u2014 none of these boards uses it"
+      ],
+      [
+        "stackup",
+        "jlcpcb-2layer-1.6mm, cited, read BY REFERENCE from ce-pcb/data/stackups.json",
+        "not copied into this repo, so it cannot drift"
+      ],
+      [
+        "FreeCAD",
+        "absent (fine) \u2014 only board_solid() needs it",
+        "the enclosure-fit check is the one thing in cecad.pcb that needs the kernel, and this lane did not run it"
+      ]
+    ],
+    "not_run": "cecad.pcbview.board_assembly() \u2014 the FreeCAD interference check that answers 'does the connector clear the wall'. It needs the kernel and it is a mechanical question; PCB-PACKAGE.html does not claim any of these three boards has been fitted into the printed parts."
   }
 }

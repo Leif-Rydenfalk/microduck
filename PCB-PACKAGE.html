@@ -41,8 +41,9 @@
 <tr><td><code>robot-hat</code></td><td><strong>Two IPC-2221 figures were typed by hand and were wrong</strong></td><td>The power-width comment and note read '0.400 mm -&gt; 1.29 A' and '0.800 mm -&gt; 3.05 A at dT 20'. The true values are 1.231 A and 2.760 A.</td><td>Recomputing them. The other two boards already had an ipc2221_amps() in the file and their numbers were right; the HAT's were prose.</td><td>robot-hat/board.py now has the same function and every power figure in its notes is formatted from it, including the 1.200 mm alternative it rejected.</td></tr>
 <tr><td><code>imu-to-dxl</code></td><td><strong>The connector count was claimed as settled when it is not</strong></td><td>The board file said the wiring lane 'settles' the connector count at three, from the harness rather than from a photograph.</td><td>ce-parts/microduck-imu-to-dxl/component.json record.connector_count, corrected the same night by another lane: a DYNAMIXEL bus is MULTIDROP, so the harness may fork at a Y-splice instead of at a device, and Open Duck Mini v2 does exactly that.</td><td>The file now says the count is CANNOT DETERMINE, fits option A because that is what wiring/cables.json already assumes, and marks J3 as the connector where the open question shows: leave it unstuffed and the board is option B.</td></tr>
 <tr><td><code>robot-hat</code></td><td><strong>An open question was half-closed by reading the header table</strong></td><td>firmware.json states 'three domains means the HAT carries at least one 1.8 V regulator or uses the Radxa's; neither is published' — two live branches.</td><td>Reading the Radxa ZERO 3W product brief RAD-DOC-0084 §6.1 40-pin table in full instead of only the pins this design uses.</td><td>The header's only supply pins are '+3.3V' (1, 17), '+5.0V' (2, 4) and 'GND' (6, 9, 14, 20, 25, 30, 34, 39); '1.8V' and '1V8' appear nowhere in the document. The second branch is dead: a HAT that runs this codec MUST carry its own 1.8 V regulator. D5 still refuses to invent one — TP1 is the gap — but the gap now has a known shape.</td></tr>
+<tr><td><code>imu-to-dxl</code></td><td><strong>Hand-laying one net's copper dropped the rest of it</strong></td><td>Claiming SERVO_V with a hand-laid comb, the first run of that layout took SERVO_V out of the autoroute call altogether — and the comb only joins the three connector pins. U4.1 (VIN), U4.3 (ON/OFF) and C1.1 were left floating. The same rewrite also dropped GND from the router.</td><td>The DRC, immediately: 'unrouted SERVO_V' and 'unrouted GND', 38 of 53 connections routed.</td><td>SERVO_V is autorouted AFTER the comb at 0.400 mm — the LDO branch carries this board's own milliamps, not the pass-through, so that is the right width for it — and GND is back in the router at effort 16, because the LGA's and the MCU's ground pads are too small and too closely spaced to take a stub via.</td></tr>
 </tbody></table>
-<p class="fig-cap">Table 1.1. Five defects measured in this lane&rsquo;s own work and closed. Three were caught by the design-rule check or by a measurement; two were caught by asking a question the check does not ask.</p>
+<p class="fig-cap">Table 1.1. 7 defects measured in this lane&rsquo;s own work and closed. Most were caught by the design-rule check or by a measurement; the ones that were not were caught by asking a question the check does not ask.</p>
 </section>
 <section id="s2"><h2><span class="n">2</span>What Pollen&rsquo;s own HAT mesh measures</h2>
 <p class="lede">One of the three boards is not entirely unpublished. <code>reference/pollen-microduck-rl/assets/elec_rpi_robot_hat_pcb.stl</code> is Pollen&rsquo;s geometry for the Robot HAT, and it was measured on 2026-09-02. Until then this project&rsquo;s HAT outline came from the Raspberry&nbsp;Pi Zero mechanical drawing <em>by analogy</em>. It no longer does.</p>
@@ -277,7 +278,7 @@
 <tr><td><code>J1</code></td><td class="n">1</td><td>40-pin GPIO</td><td class="cd">2x20 2.54 mm through-hole socket, CANNOT DETERMINE</td><td>header-2x20</td><td>40-pin GPIO socket onto the Radxa Zero 3W. The socket's stack height must clear the codec (VQFN 5x5, 1.0 mm) — a specific part has not been chosen.</td></tr>
 <tr><td><code>U4</code></td><td class="n">1</td><td>74LVC1G125</td><td class="">74LVC1G125GV,125</td><td>SOT753 (SC-74A) 5-lead</td><td>Nexperia. 'Footprint dimensions (mm) 3.45 x 3.3' — SOT753 package information, 31 May 2022.</td></tr>
 <tr><td><code>U3</code></td><td class="n">1</td><td>BMI088 (dormant)</td><td class="">BMI088</td><td>LGA-16 3.0 x 4.5 x 0.95 mm</td><td>Bosch Sensortec. Landing pattern is Bosch's own Fig. 11, BST-BMI088-DS000-19 Rev 1.9 §8.2 p.55. Fitted but dormant — 'unused but still connected' (i2c3-pihat.dts:31).</td></tr>
-<tr><td><code>J3</code></td><td class="n">1</td><td>DXL bus (B3B-EH-A)</td><td class="">B3B-EH-A(LF)(SN)</td><td>JST EH, 3 circuits, 2.5 mm, through-hole vertical</td><td>JST. Named by the servo's own sheet: 'PCB Header | JST B3B-EH-A' (part:xl330-m288-t connector).</td></tr>
+<tr><td><code>J3</code></td><td class="n">1</td><td>DXL bus (B3B-EH-A)</td><td class="">B3B-EH-A(LF)(SN)</td><td>JST EH, 3 circuits, 2.5 mm, through-hole vertical</td><td>JST. Named by the servo's own sheet: 'PCB Header | JST B3B-EH-A' (part:xl330-m288-t connector). Mating parts, from the same page: 'Housing | JST EHR-03', 'Crimp Terminal | JST SEH-001T-P0.6', 'Wire Gauge for DYNAMIXEL | 21 AWG'.</td></tr>
 <tr><td><code>TP1</code></td><td class="n">1</td><td>HAT_1V8 (unsourced)</td><td class="">(bare pad)</td><td>1.5 mm round test point</td><td>HAT_1V8. Decision D5: the codec's 1.525-1.95 V DVDD has no published source and ends here on purpose.</td></tr>
 <tr><td><code>U2</code></td><td class="n">1</td><td>Pololu D30V30F5</td><td class="">Pololu D30V30F5 (item #4892)</td><td>module 17.8 x 20.3 mm, 6 x dia 1.02 through-hole</td><td>Pololu 5V 3.4A Step-Down Voltage Regulator D30V30F5. Dimension drawing docs/d30v30fx-dimensions.pdf (20 Oct 2023, dev code reg32a).</td></tr>
 <tr><td><code>J5</code></td><td class="n">1</td><td>Stemma J5 (SM04B-SRSS-TB)</td><td class="">SM04B-SRSS-TB(LF)(SN)</td><td>JST SH, 4 circuits, 1.0 mm, side entry SMT</td><td>JST. eSH.pdf 'PC board layout' side entry; 'Dimension A' 3.0 for 4 circuits. LAND PATTERN UNCONFIRMED — the figure's 5.55/4.0/1.8 callouts were not fully resolved.</td></tr>
@@ -290,6 +291,7 @@
 <p class="fig-cap">Designators, quantities and footprints are read out of <code>electronics/robot-hat/out/fab/microduck_robot_hat-bom.csv</code>; the MPN, package and note columns come from <code>electronics/pcb-package.json</code>. A commodity passive carries a SPECIFICATION rather than a manufacturer part number, and says so — naming one 100&nbsp;nF 0603 would be a false precision.</p>
 <h3>3.6 Files a fab receives</h3>
 <table class="tight"><thead><tr><th>File</th><th>Bytes</th></tr></thead><tbody>
+<tr><td><code><a href="electronics/robot-hat/out/fab/ORDER-NOTES.txt">ORDER-NOTES.txt</a></code></td><td class="n">7,346</td></tr>
 <tr><td><code><a href="electronics/robot-hat/out/fab/README.txt">README.txt</a></code></td><td class="n">5,709</td></tr>
 <tr><td><code><a href="electronics/robot-hat/out/fab/microduck_robot_hat-B.Cu.GBL">microduck_robot_hat-B.Cu.GBL</a></code></td><td class="n">45,488</td></tr>
 <tr><td><code><a href="electronics/robot-hat/out/fab/microduck_robot_hat-B.Mask.GBS">microduck_robot_hat-B.Mask.GBS</a></code></td><td class="n">2,179</td></tr>
@@ -303,7 +305,7 @@
 <tr><td><code><a href="electronics/robot-hat/out/fab/microduck_robot_hat-NPTH.drl">microduck_robot_hat-NPTH.drl</a></code></td><td class="n">208</td></tr>
 <tr><td><code><a href="electronics/robot-hat/out/fab/microduck_robot_hat-PTH.drl">microduck_robot_hat-PTH.drl</a></code></td><td class="n">1,574</td></tr>
 <tr><td><code><a href="electronics/robot-hat/out/fab/microduck_robot_hat-bom.csv">microduck_robot_hat-bom.csv</a></code></td><td class="n">2,020</td></tr>
-<tr><td><code><a href="electronics/robot-hat/out/fab/microduck_robot_hat-fab.zip">microduck_robot_hat-fab.zip</a></code></td><td class="n">29,822</td></tr>
+<tr><td><code><a href="electronics/robot-hat/out/fab/microduck_robot_hat-fab.zip">microduck_robot_hat-fab.zip</a></code></td><td class="n">31,812</td></tr>
 <tr><td><code><a href="electronics/robot-hat/out/fab/microduck_robot_hat-positions.csv">microduck_robot_hat-positions.csv</a></code></td><td class="n">1,365</td></tr>
 <tr><td><code><a href="electronics/robot-hat/out/fab/microduck_robot_hat.kicad_pcb">microduck_robot_hat.kicad_pcb</a></code></td><td class="n">200,085</td></tr>
 </tbody></table>
@@ -313,12 +315,12 @@
 <p class="lede">An LSM6DSV16X presented on the Dynamixel bus as a Protocol-2 slave, ID 200, serving a 12-byte block at register 124. Three bus ports are fitted so the daisy chain can branch here — which is option A of an open question, not a fact.</p>
 <div class="statbar">
 <div class="stat"><b>40.0&times;22.0</b><span>mm outline</span></div>
-<div class="stat"><b>812.49</b><span>mm&sup2;</span></div>
+<div class="stat"><b>876.49</b><span>mm&sup2;</span></div>
 <div class="stat"><b>24</b><span>parts</span></div>
 <div class="stat"><b>17</b><span>nets</span></div>
-<div class="stat"><b>83</b><span>tracks</span></div>
-<div class="stat"><b>40</b><span>vias</span></div>
-<div class="stat"><b>51</b><span>drills</span></div>
+<div class="stat"><b>154</b><span>tracks</span></div>
+<div class="stat"><b>31</b><span>vias</span></div>
+<div class="stat"><b>42</b><span>drills</span></div>
 </div>
 <p><strong>Stack-up.</strong> JLCPCB 2-layer 1.6 mm, 1 oz — the commodity default · 2 layers · 1.6 mm · corner radius 2.000 mm.<br><strong>Surface finish.</strong> HASL (lead-free) — the fab default<br><strong>Mounting.</strong> 2 x M2 clearance at (3.000, 18.500) and (37.000, 18.500) — OUR choice (E8); nothing measured constrains it<br><strong>Geometry evidence.</strong> NONE — no Pollen mesh exists for this board; the outline is our choice and is marked so.</p>
 <h3>4.1 Reconstruction decisions</h3>
@@ -427,14 +429,14 @@
 <div class="pcbfig"><img src="electronics/imu-to-dxl/out/bottom.svg" alt="microduck_imu_to_dxl bottom layer"></div>
 <p class="fig-cap">imu_to_dxl v2 — bottom side, as plotted from the checked board. DRC findings are circled on the plot.</p>
 <h3>4.4 Design rule check</h3>
-<p>Verdict <span class="no">FAIL</span> — 36 pass, 7 fail, 3 cannot determine.</p>
+<p>Verdict <span class="no">FAIL</span> — 33 pass, 7 fail, 3 cannot determine.</p>
 <table class="tight"><thead><tr><th>Verdict</th><th>Finding</th></tr></thead><tbody>
-<tr><td class="no">FAIL</td><td>clearance pad C4.1 / via GND</td></tr>
-<tr><td class="no">FAIL</td><td>clearance pad C7.1 / via GND</td></tr>
-<tr><td class="no">FAIL</td><td>clearance track GND on F.Cu / pad C4.1</td></tr>
-<tr><td class="no">FAIL</td><td>clearance track GND on F.Cu / pad C7.1</td></tr>
-<tr><td class="no">FAIL</td><td>hole-to-hole via GND / via GND</td></tr>
-<tr><td class="no">FAIL</td><td>hole-to-hole via GND / via GND</td></tr>
+<tr><td class="no">FAIL</td><td>clearance pad U4.1 / via GND</td></tr>
+<tr><td class="no">FAIL</td><td>clearance track GND on F.Cu / pad U4.1</td></tr>
+<tr><td class="no">FAIL</td><td>unrouted GND</td></tr>
+<tr><td class="no">FAIL</td><td>unrouted IMU_INT1</td></tr>
+<tr><td class="no">FAIL</td><td>unrouted SERVO_V</td></tr>
+<tr><td class="no">FAIL</td><td>unrouted SPI_NSS</td></tr>
 <tr><td class="no">FAIL</td><td>unrouted V3V3</td></tr>
 <tr><td class="cd">CANNOT DETERMINE</td><td>binding microduck_imu_to_dxl</td></tr>
 <tr><td class="cd">CANNOT DETERMINE</td><td>current microduck_imu_to_dxl</td></tr>
@@ -452,7 +454,7 @@
 <tr><td><code>TP4</code></td><td class="n">1</td><td>3V3</td><td class="">(bare pad)</td><td>1.5 mm round test point</td><td>3.3 V.</td></tr>
 <tr><td><code>C2</code></td><td class="n">1</td><td>4u7 COUT</td><td class="cd">CANNOT DETERMINE - spec: 4.7 uF X5R/X7R 0805 &gt;= 10 V</td><td>0805</td><td>LDO output. COUT &gt;= 2.2 uF nominal, and the sheet derates ceramics 50%, so 4.7 uF keeps &gt; 1 uF effective.</td></tr>
 <tr><td><code>U3</code></td><td class="n">1</td><td>74LVC1G125</td><td class="">74LVC1G125GV,125</td><td>SOT753 (SC-74A) 5-lead</td><td>Nexperia. Decision E2 - the driver half of ROBOTIS' half-duplex circuit, with OE on an MCU GPIO.</td></tr>
-<tr><td><code>J1 J2 J3</code></td><td class="n">3</td><td>DXL bus (B3B-EH-A)</td><td class="">B3B-EH-A(LF)(SN)</td><td>JST EH, 3 circuits, 2.5 mm, through-hole vertical</td><td>J1 bus in from the head (cable dxl-id30-imu200, 120 mm); J2 branch to the left hip yaw servo ID 20 (dxl-imu200-id20, 40 mm); J3 branch to the right hip yaw servo ID 10 (dxl-imu200-id10, 40 mm). J3 is option A of the open connector-count question — leave it unstuffed and the board becomes option B, with the legs forked at a Y-splice instead.</td></tr>
+<tr><td><code>J1 J2 J3</code></td><td class="n">3</td><td>DXL bus (B3B-EH-A)</td><td class="">B3B-EH-A(LF)(SN)</td><td>JST EH, 3 circuits, 2.5 mm, through-hole vertical</td><td>J1 bus in from the head (cable dxl-id30-imu200, 120 mm); J2 branch to the left hip yaw servo ID 20 (dxl-imu200-id20, 40 mm); J3 branch to the right hip yaw servo ID 10 (dxl-imu200-id10, 40 mm). J3 is option A of the open connector-count question — leave it unstuffed and the board becomes option B, with the legs forked at a Y-splice instead. Mating parts, from the same page: 'Housing | JST EHR-03', 'Crimp Terminal | JST SEH-001T-P0.6', 'Wire Gauge for DYNAMIXEL | 21 AWG'.</td></tr>
 <tr><td><code>TP5</code></td><td class="n">1</td><td>GND</td><td class="">(bare pad)</td><td>1.5 mm round test point</td><td>GND.</td></tr>
 <tr><td><code>U4</code></td><td class="n">1</td><td>LP2985A-33DBVR</td><td class="">LP2985A-33DBVR</td><td>SOT-23-5 (DBV), 2.9 x 2.8 mm</td><td>Texas Instruments, 3.3 V fixed, 150 mA, VIN 2.5-16 V. Decision E3. SLVS522S rev. May 2025.</td></tr>
 <tr><td><code>U1</code></td><td class="n">1</td><td>LSM6DSV16X</td><td class="">LSM6DSV16XTR</td><td>LGA-14L 2.5 x 3.0 x 0.86 mm</td><td>STMicroelectronics. The one part Pollen's source names: 'LSM6DSV16X' (imu.rs:1-6). Land pattern from DS13510 Rev 4 Figure 33 p.175/198.</td></tr>
@@ -464,22 +466,23 @@
 <p class="fig-cap">Designators, quantities and footprints are read out of <code>electronics/imu-to-dxl/out/fab/microduck_imu_to_dxl-bom.csv</code>; the MPN, package and note columns come from <code>electronics/pcb-package.json</code>. A commodity passive carries a SPECIFICATION rather than a manufacturer part number, and says so — naming one 100&nbsp;nF 0603 would be a false precision.</p>
 <h3>4.6 Files a fab receives</h3>
 <table class="tight"><thead><tr><th>File</th><th>Bytes</th></tr></thead><tbody>
-<tr><td><code><a href="electronics/imu-to-dxl/out/fab/README.txt">README.txt</a></code></td><td class="n">4,925</td></tr>
-<tr><td><code><a href="electronics/imu-to-dxl/out/fab/microduck_imu_to_dxl-B.Cu.GBL">microduck_imu_to_dxl-B.Cu.GBL</a></code></td><td class="n">20,231</td></tr>
-<tr><td><code><a href="electronics/imu-to-dxl/out/fab/microduck_imu_to_dxl-B.Mask.GBS">microduck_imu_to_dxl-B.Mask.GBS</a></code></td><td class="n">581</td></tr>
+<tr><td><code><a href="electronics/imu-to-dxl/out/fab/ORDER-NOTES.txt">ORDER-NOTES.txt</a></code></td><td class="n">4,087</td></tr>
+<tr><td><code><a href="electronics/imu-to-dxl/out/fab/README.txt">README.txt</a></code></td><td class="n">4,861</td></tr>
+<tr><td><code><a href="electronics/imu-to-dxl/out/fab/microduck_imu_to_dxl-B.Cu.GBL">microduck_imu_to_dxl-B.Cu.GBL</a></code></td><td class="n">18,686</td></tr>
+<tr><td><code><a href="electronics/imu-to-dxl/out/fab/microduck_imu_to_dxl-B.Mask.GBS">microduck_imu_to_dxl-B.Mask.GBS</a></code></td><td class="n">577</td></tr>
 <tr><td><code><a href="electronics/imu-to-dxl/out/fab/microduck_imu_to_dxl-B.Paste.GBP">microduck_imu_to_dxl-B.Paste.GBP</a></code></td><td class="n">286</td></tr>
 <tr><td><code><a href="electronics/imu-to-dxl/out/fab/microduck_imu_to_dxl-B.Silk.GBO">microduck_imu_to_dxl-B.Silk.GBO</a></code></td><td class="n">286</td></tr>
 <tr><td><code><a href="electronics/imu-to-dxl/out/fab/microduck_imu_to_dxl-Edge.Cuts.GKO">microduck_imu_to_dxl-Edge.Cuts.GKO</a></code></td><td class="n">1,073</td></tr>
-<tr><td><code><a href="electronics/imu-to-dxl/out/fab/microduck_imu_to_dxl-F.Cu.GTL">microduck_imu_to_dxl-F.Cu.GTL</a></code></td><td class="n">9,300</td></tr>
-<tr><td><code><a href="electronics/imu-to-dxl/out/fab/microduck_imu_to_dxl-F.Mask.GTS">microduck_imu_to_dxl-F.Mask.GTS</a></code></td><td class="n">2,707</td></tr>
-<tr><td><code><a href="electronics/imu-to-dxl/out/fab/microduck_imu_to_dxl-F.Paste.GTP">microduck_imu_to_dxl-F.Paste.GTP</a></code></td><td class="n">2,275</td></tr>
-<tr><td><code><a href="electronics/imu-to-dxl/out/fab/microduck_imu_to_dxl-F.Silk.GTO">microduck_imu_to_dxl-F.Silk.GTO</a></code></td><td class="n">12,132</td></tr>
+<tr><td><code><a href="electronics/imu-to-dxl/out/fab/microduck_imu_to_dxl-F.Cu.GTL">microduck_imu_to_dxl-F.Cu.GTL</a></code></td><td class="n">14,498</td></tr>
+<tr><td><code><a href="electronics/imu-to-dxl/out/fab/microduck_imu_to_dxl-F.Mask.GTS">microduck_imu_to_dxl-F.Mask.GTS</a></code></td><td class="n">2,703</td></tr>
+<tr><td><code><a href="electronics/imu-to-dxl/out/fab/microduck_imu_to_dxl-F.Paste.GTP">microduck_imu_to_dxl-F.Paste.GTP</a></code></td><td class="n">2,272</td></tr>
+<tr><td><code><a href="electronics/imu-to-dxl/out/fab/microduck_imu_to_dxl-F.Silk.GTO">microduck_imu_to_dxl-F.Silk.GTO</a></code></td><td class="n">11,872</td></tr>
 <tr><td><code><a href="electronics/imu-to-dxl/out/fab/microduck_imu_to_dxl-NPTH.drl">microduck_imu_to_dxl-NPTH.drl</a></code></td><td class="n">182</td></tr>
-<tr><td><code><a href="electronics/imu-to-dxl/out/fab/microduck_imu_to_dxl-PTH.drl">microduck_imu_to_dxl-PTH.drl</a></code></td><td class="n">868</td></tr>
+<tr><td><code><a href="electronics/imu-to-dxl/out/fab/microduck_imu_to_dxl-PTH.drl">microduck_imu_to_dxl-PTH.drl</a></code></td><td class="n">736</td></tr>
 <tr><td><code><a href="electronics/imu-to-dxl/out/fab/microduck_imu_to_dxl-bom.csv">microduck_imu_to_dxl-bom.csv</a></code></td><td class="n">2,212</td></tr>
-<tr><td><code><a href="electronics/imu-to-dxl/out/fab/microduck_imu_to_dxl-fab.zip">microduck_imu_to_dxl-fab.zip</a></code></td><td class="n">21,288</td></tr>
-<tr><td><code><a href="electronics/imu-to-dxl/out/fab/microduck_imu_to_dxl-positions.csv">microduck_imu_to_dxl-positions.csv</a></code></td><td class="n">1,182</td></tr>
-<tr><td><code><a href="electronics/imu-to-dxl/out/fab/microduck_imu_to_dxl.kicad_pcb">microduck_imu_to_dxl.kicad_pcb</a></code></td><td class="n">44,409</td></tr>
+<tr><td><code><a href="electronics/imu-to-dxl/out/fab/microduck_imu_to_dxl-fab.zip">microduck_imu_to_dxl-fab.zip</a></code></td><td class="n">21,935</td></tr>
+<tr><td><code><a href="electronics/imu-to-dxl/out/fab/microduck_imu_to_dxl-positions.csv">microduck_imu_to_dxl-positions.csv</a></code></td><td class="n">1,181</td></tr>
+<tr><td><code><a href="electronics/imu-to-dxl/out/fab/microduck_imu_to_dxl.kicad_pcb">microduck_imu_to_dxl.kicad_pcb</a></code></td><td class="n">56,137</td></tr>
 </tbody></table>
 <p class="fig-cap">Gerber X2 per layer with <code>.FileFunction</code> attributes, plated and unplated Excellon drill files kept apart (a fab that gets one file cannot tell a mounting hole from a via), pick-and-place, BOM, a <code>.kicad_pcb</code> for anyone who wants to open it, and a README that repeats the DRC verdict on its first page.</p>
 </section>
@@ -538,7 +541,7 @@
 <p class="fig-cap">Designators, quantities and footprints are read out of <code>electronics/banana-contact/out/fab/microduck_banana_contact-bom.csv</code>; the MPN, package and note columns come from <code>electronics/pcb-package.json</code>. A commodity passive carries a SPECIFICATION rather than a manufacturer part number, and says so — naming one 100&nbsp;nF 0603 would be a false precision.</p>
 <h3>5.6 Files a fab receives</h3>
 <table class="tight"><thead><tr><th>File</th><th>Bytes</th></tr></thead><tbody>
-<tr><td><code><a href="electronics/banana-contact/out/fab/ORDER-NOTES.txt">ORDER-NOTES.txt</a></code></td><td class="n">2,018</td></tr>
+<tr><td><code><a href="electronics/banana-contact/out/fab/ORDER-NOTES.txt">ORDER-NOTES.txt</a></code></td><td class="n">2,398</td></tr>
 <tr><td><code><a href="electronics/banana-contact/out/fab/README.txt">README.txt</a></code></td><td class="n">5,994</td></tr>
 <tr><td><code><a href="electronics/banana-contact/out/fab/microduck_banana_contact-B.Cu.GBL">microduck_banana_contact-B.Cu.GBL</a></code></td><td class="n">419</td></tr>
 <tr><td><code><a href="electronics/banana-contact/out/fab/microduck_banana_contact-B.Mask.GBS">microduck_banana_contact-B.Mask.GBS</a></code></td><td class="n">422</td></tr>
@@ -552,7 +555,7 @@
 <tr><td><code><a href="electronics/banana-contact/out/fab/microduck_banana_contact-NPTH.drl">microduck_banana_contact-NPTH.drl</a></code></td><td class="n">145</td></tr>
 <tr><td><code><a href="electronics/banana-contact/out/fab/microduck_banana_contact-PTH.drl">microduck_banana_contact-PTH.drl</a></code></td><td class="n">195</td></tr>
 <tr><td><code><a href="electronics/banana-contact/out/fab/microduck_banana_contact-bom.csv">microduck_banana_contact-bom.csv</a></code></td><td class="n">734</td></tr>
-<tr><td><code><a href="electronics/banana-contact/out/fab/microduck_banana_contact-fab.zip">microduck_banana_contact-fab.zip</a></code></td><td class="n">12,035</td></tr>
+<tr><td><code><a href="electronics/banana-contact/out/fab/microduck_banana_contact-fab.zip">microduck_banana_contact-fab.zip</a></code></td><td class="n">12,221</td></tr>
 <tr><td><code><a href="electronics/banana-contact/out/fab/microduck_banana_contact-positions.csv">microduck_banana_contact-positions.csv</a></code></td><td class="n">183</td></tr>
 <tr><td><code><a href="electronics/banana-contact/out/fab/microduck_banana_contact.kicad_pcb">microduck_banana_contact.kicad_pcb</a></code></td><td class="n">5,816</td></tr>
 </tbody></table>
@@ -569,7 +572,7 @@
 <h3>6.1 Per board, at the published tiers</h3>
 <table class="tight"><thead><tr><th>Board</th><th>Size (mm)</th><th>Area (mm&sup2;)</th><th>Fits the &le;100&times;100 offer</th><th>JLCPCB 5 pcs</th><th>PCBWay 10 pcs</th></tr></thead><tbody>
 <tr><td><code>microduck_robot_hat</code></td><td class="n">65.000 &times; 30.000</td><td class="n">1942.09</td><td class="pass">yes</td><td class="n">$2.00</td><td class="n">$5.00</td></tr>
-<tr><td><code>microduck_imu_to_dxl</code></td><td class="n">40.000 &times; 22.000</td><td class="n">812.49</td><td class="pass">yes</td><td class="n">$2.00</td><td class="n">$5.00</td></tr>
+<tr><td><code>microduck_imu_to_dxl</code></td><td class="n">40.000 &times; 22.000</td><td class="n">876.49</td><td class="pass">yes</td><td class="n">$2.00</td><td class="n">$5.00</td></tr>
 <tr><td><code>microduck_banana_contact</code></td><td class="n">45.800 &times; 5.100</td><td class="n">233.36</td><td class="pass">yes</td><td class="n">$2.00</td><td class="n">$5.00</td></tr>
 </tbody></table>
 <p><strong>One robot needs one of each.</strong> The smallest orderable set is three panels: $6.00 at JLCPCB&rsquo;s published 5-piece price or $15.00 at PCBWay&rsquo;s published 10-piece price, before shipping, before the banana board&rsquo;s ENIG, and before assembly — all three of which are listed as CANNOT DETERMINE below. That buys 5 (or 10) of each board, i.e. spares for 4 (or 9) more robots.</p>
@@ -580,7 +583,18 @@
 <li>Stencils, and the electrical test some fabs charge for above a pin count.</li>
 </ul>
 <p><strong>What would settle the missing tiers.</strong> Uploading each board's out/fab/*-fab.zip to jlcpcb.com/quote or pcbway.com/orderonline.aspx and reading the number back. That needs an account, so it is a human action, not this lane's.</p>
-<h3>6.3 The fab rules these boards were checked against</h3>
+<h3>6.3 The toolchain, and what it refuses</h3>
+<p><code>ce-cad/bin/pcb --doctor</code>, run 2026-09-02 — verdict <span class="pass">fit to run</span>.</p>
+<table class="tight"><thead><tr><th>What</th><th>Reported</th><th>Why it matters here</th></tr></thead><tbody>
+<tr><td><strong>python</strong></td><td>3.14.6 (/opt/homebrew/opt/python@3.14/bin/python3.14)</td><td>the boards run under plain python3 — nothing in this lane touches the CAD kernel</td></tr>
+<tr><td><strong>modules</strong></td><td>cecad.pcb, cecad.pcbcheck, cecad.pcbroute, cecad.pcbfab, cecad.pcbview, cecad.netlist — all ok</td><td></td></tr>
+<tr><td><strong>packages</strong></td><td>22 known, 2 UNCONFIRMED and refusing: jst-sh-6, qfn</td><td>the refusing ones are why the codec's QFN-32 and the Stemma J5 are built from their own datasheets rather than from a family outline</td></tr>
+<tr><td><strong>fab rules</strong></td><td>conservative, jlcpcb_2l_standard, jlcpcb_multilayer_standard</td><td>all three boards use jlcpcb_2l_standard, which is the confirmed one. 'conservative' is the default every Board() gets and is unconfirmed against any live page — none of these boards uses it</td></tr>
+<tr><td><strong>stackup</strong></td><td>jlcpcb-2layer-1.6mm, cited, read BY REFERENCE from ce-pcb/data/stackups.json</td><td>not copied into this repo, so it cannot drift</td></tr>
+<tr><td><strong>FreeCAD</strong></td><td>absent (fine) — only board_solid() needs it</td><td>the enclosure-fit check is the one thing in cecad.pcb that needs the kernel, and this lane did not run it</td></tr>
+</tbody></table>
+<p><strong>Not run.</strong> cecad.pcbview.board_assembly() — the FreeCAD interference check that answers 'does the connector clear the wall'. It needs the kernel and it is a mechanical question; PCB-PACKAGE.html does not claim any of these three boards has been fitted into the printed parts.</p>
+<h3>6.4 The fab rules these boards were checked against</h3>
 <p><strong>JLCPCB</strong> — <a href="https://jlcpcb.com/capabilities/pcb-capabilities">https://jlcpcb.com/capabilities/pcb-capabilities</a><br>2-layer FR-4: track/space 0.10/0.10 mm (4/4 mil) at 1 oz; plated hole 0.15-6.3 mm; PTH annular ring 'Recommended 0.25 mm or above; absolute minimum 0.18 mm'; pad hole-to-hole 0.45 mm; routed edge clearance &gt;= 0.2 mm; max board 670 x 600 mm; outer copper 1/2/2.5/3.5/4.5 oz; finishes HASL (leaded / lead-free), ENIG, OSP; thickness 0.4/0.6/0.8/1.0/1.2/1.6/2.0 mm. RE-READ LIVE 2026-09-02 and every value above was unchanged from the 2026-08-20 transcription in ce-cad's jlcpcb_2l_standard profile.</p>
 <p><strong>PCBWay</strong> — <a href="https://www.pcbway.com/pcb_prototype/2_Layer_pcb/">https://www.pcbway.com/pcb_prototype/2_Layer_pcb/</a><br>The 2-layer prototype page lists '100x100mm 2 layers — US $5' and '150x100mm 2 layers — US $41'.</p>
 </section>

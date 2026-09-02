@@ -579,7 +579,19 @@ def main():
     A('</ul>')
     A(f'<p><strong>What would settle the missing tiers.</strong> {esc(quotes["what_would_settle_it"])}</p>')
 
-    A('<h3>6.3 The fab rules these boards were checked against</h3>')
+    tc = d.get("toolchain")
+    if tc:
+        A('<h3>6.3 The toolchain, and what it refuses</h3>')
+        A(f'<p><code>{esc(tc["command"])}</code>, run {esc(tc["read"])} — '
+          f'verdict <span class="pass">{esc(tc["verdict"])}</span>.</p>')
+        A('<table class="tight"><thead><tr><th>What</th><th>Reported</th>'
+          '<th>Why it matters here</th></tr></thead><tbody>')
+        for a, b_, c in tc["rows"]:
+            A(f'<tr><td><strong>{esc(a)}</strong></td><td>{esc(b_)}</td>'
+              f'<td>{esc(c)}</td></tr>')
+        A('</tbody></table>')
+        A(f'<p><strong>Not run.</strong> {esc(tc["not_run"])}</p>')
+    A('<h3>6.4 The fab rules these boards were checked against</h3>')
     for v in quotes["vendors"]:
         A(f'<p><strong>{esc(v["vendor"])}</strong> — <a href="{esc(v["spec_url"])}">'
           f'{esc(v["spec_url"])}</a><br>{esc(v["spec"])}</p>')
