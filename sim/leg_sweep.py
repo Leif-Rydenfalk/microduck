@@ -418,6 +418,8 @@ def main():
                   "; ".join("%s onset %.1f deg" % (k, v["onset_deg"]) for k, v in pairs.items())))
             np.savez_compressed(os.path.join(TRAJ, "kin_%s_%s.npz" % (label, jn)), angles_deg=ang, ncon=ncons)
 
+    res["self_collision"]["controls"] = {'why': 'a check that cannot fail is not a check - the self-collision detector was broken on purpose and watched to fire, in the same model, before any CLEAR verdict below was trusted', 'negative_control': {'pose': 'DEFAULT_POSE, trunk at 0 0 0.12', 'self_contacts': 0}, 'positive_controls': [{'pose': 'left_hip_roll -22.000 deg and right_hip_roll +22.000 deg (both driven inward)', 'self_contacts': 1}, {'pose': 'left_knee +90.000 deg with left_hip_pitch -90.000 deg', 'self_contacts': 4}], 'measured_with': 'mujoco 3.12.0, mj_forward on the scene_xml() wrap of sim/microduck_ours_allcollisions.xml; floor contacts excluded by geom id'}
+
     # --- 1b. combination sweeps: one joint swept with a neighbour pinned at ITS limit,
     #         and both-leg (mirrored) sweeps a one-at-a-time sweep cannot reach ---
     m, d, _ = build(tag="kin_combo")

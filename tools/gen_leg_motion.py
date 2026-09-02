@@ -26,6 +26,7 @@ SS = J["sitstand_policy"]["joints"]
 SQ = J["squat"]["joints"]
 LL = J["leg_lift"]["joints"]
 ORDER = list(R.keys())
+CT = J["self_collision"]["controls"]
 
 
 def vid(v):
@@ -149,8 +150,10 @@ max tilt %.2f&deg;, and it does not fall.</p>
 <p>The collision set of <span class=mono>microduck_ours_allcollisions.xml</span> is
 <span class=mono>%s</span>. Two of them (the shins) were also re-pointed to OUR rebuilt mesh
 (<span class=mono>leg__ours</span>) and swept again — same verdicts. %s</p>
+<p class=note><b>The detector was made to fire before any CLEAR was trusted.</b> %s Negative control: %s &rarr;
+<b>%d</b> self-contacts. Positive controls: %s. Measured with %s</p>
 <p>One joint at a time, every other joint at DEFAULT_POSE, 0.05&deg; steps, <span class=mono>mj_forward</span>
-每 step:</p>
+every step:</p>
 <div class=tw><table class=data><thead><tr><th>joint</th><th>swept (deg)</th><th>samples</th>
 <th>verdict</th><th>pairs</th></tr></thead><tbody>%s</tbody></table></div>
 <p>Two joints off default, and both legs driven together — the postures a one-at-a-time sweep cannot
@@ -180,6 +183,9 @@ first touches as the joint leaves neutral:</p>
     jt, E(A["servo_reality_check"]), E(A["peak_velocity_caveat"]),
     E(", ".join(J["self_collision"]["pollen_collision_meshes"]["collision_geoms"])),
     E(J["self_collision"]["pollen_collision_meshes"]["note"]),
+    E(CT["why"]), E(CT["negative_control"]["pose"]), CT["negative_control"]["self_contacts"],
+    E("; ".join("%s -> %d contacts" % (c["pose"], c["self_contacts"]) for c in CT["positive_controls"])),
+    E(CT["measured_with"]),
     st, ct, "".join(vid(v) for v in V), cmp_html or "<p>No product photo exists of these motions.</p>")
 
 doc = doc.replace("每 step", "every step")
