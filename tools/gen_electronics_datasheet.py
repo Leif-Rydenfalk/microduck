@@ -68,25 +68,63 @@ def elec_field(sh, *keys):
     return None
 
 
-def dim_str(d):
+def dim_state(d):
+    """'full' | 'partial' | 'none' — how much of an envelope a row actually has.
+
+    THE DEFECT THIS FIXES: the coverage headline used to count a row as
+    dimensioned if ANY of x/y/z was present (`any(...)`), so a package with a
+    length and a width but no thickness was counted as measured and printed as
+    "65 × 30 × ?". A partial measurement counted as a measurement is exactly
+    what the house rules forbid, and it was the page's own coverage number.
+    Measured over electronics/components.json when this was written: 16 rows
+    had SOME dimension, only 9 had all three.
+    """
     if not d:
-        return "—"
+        return "none"
+    v = [d.get(k) for k in "xyz"]
+    if all(x is not None for x in v):
+        return "full"
+    return "partial" if any(x is not None for x in v) else "none"
+
+
+def dim_str(d):
+    """The envelope, at the SOURCE's own precision (components.json precision_rule).
+
+    Numbers are printed with %g, which strips trailing zeros — that is the rule
+    working, not a bug: where a datasheet prints '5 x 5 mm' this page must not
+    invent '5.000 x 5.000'. A missing axis prints '?' and the row is counted as
+    PARTIAL, never as dimensioned.
+    """
+    st = dim_state(d)
+    if st == "none":
+        return '<span class="cd">CANNOT DETERMINE</span>' if d is not None else "—"
     v = [d.get("x"), d.get("y"), d.get("z")]
-    if all(x is None for x in v):
-        return '<span class="cd">CANNOT DETERMINE</span>'
     def f(x):
         return "?" if x is None else ("%g" % x)
     s = " × ".join(f(x) for x in v)
-    return '<span class="mono">%s</span>' % E(s)
+    body = '<span class="mono">%s</span>' % E(s)
+    if st == "partial":
+        body += ' <span class="cd" title="one or more axes unpublished">partial</span>'
+    return body
 
 
-def mass_str(c):
+def mass_str(c, mark=True):
+    """The mass, with a REPRESENTATIVE one marked everywhere it is printed.
+
+    THE DEFECT THIS FIXES: Table 1 printed the battery's 99 g bare, while the
+    same file says of that number "That is a shipping/product weight for THAT
+    pack; the FITTED pack's mass is CANNOT DETERMINE." A caveat that lives only
+    in §8 does not travel with the number.
+    """
     if c.get("mass_g") is None:
         return '<span class="cd">CD</span>'
     s = "%g g" % c["mass_g"]
     if c.get("mass_total_g"):
         s += " (×%s = %g g)" % (c.get("qty"), c["mass_total_g"])
-    return '<span class="mono">%s</span>' % E(s)
+    out = '<span class="mono">%s</span>' % E(s)
+    if mark and c.get("mass_is_representative"):
+        out += ' <span class="cd" title="a representative part, not the fitted one">‡ repr.</span>'
+    return out
 
 
 def _supply_rows(sh):
@@ -168,6 +206,89 @@ def qty_str(c):
     return '<span class="mono">%d</span>' % q
 
 
+PIN_META = {"$about", "verdict", "verdict_why", "cite", "source", "why",
+            "quotes", "descriptions_quotes", "polarity_quote"}
+
+
+def pin_maps(pin):
+    """The (package_name, {pin: signal}) maps inside a folder's `pinout` record.
+
+    Every folder writes its pin map under the PACKAGE's own name — 'DFN-10-3x3',
+    'SOT-23-6', 'VQFN-32 RHB', 'two-wire-lead' — with the prose keys ($about,
+    cite, verdict, quotes) alongside. So the maps are the dict-valued keys that
+    are not prose.
+    """
+    if not isinstance(pin, dict):
+        return []
+    out = []
+    for k, v in pin.items():
+        if k in PIN_META or not isinstance(v, dict):
+            continue
+        if all(isinstance(x, str) for x in v.values()):
+            out.append((k, v))
+    return out
+
+
+def _pin_sort(k):
+    try:
+        return (0, int(k), "")
+    except (TypeError, ValueError):
+        return (1, 0, str(k))
+
+
+def pinout_block(sh):
+    """§4's pinout row. Renders the map when a folder has one and the folder's
+    own refusal when it has not — the brief asked for a pinout per component and
+    the page never emitted one, while 7 of the 24 electrical.*.json records
+    already carried a `pinout` array nobody read."""
+    pin = elec_field(sh, "pinout")
+    if not pin:
+        return None
+    h = []
+    maps = pin_maps(pin) if isinstance(pin, dict) else []
+    for pkg, m in maps:
+        cells = "".join(
+            '<span class="pin"><b>%s</b> %s</span>' % (E(str(k)), E(str(v)))
+            for k, v in sorted(m.items(), key=lambda kv: _pin_sort(kv[0])))
+        h.append('<div class="pinmap"><span class="pkg">%s</span>%s</div>'
+                 % (E(str(pkg)), cells))
+    if isinstance(pin, dict):
+        v = (pin.get("verdict") or "").upper()
+        if v.startswith("CANNOT") and not maps:
+            h.append('<div class="src cd">PINOUT CANNOT DETERMINE — %s</div>'
+                     % E(str(pin.get("why") or pin.get("$about") or "")))
+        elif v:
+            h.append('<div class="src">verdict: %s</div>' % E(str(pin.get("verdict"))))
+        for key in ("$about", "verdict_why", "why"):
+            if pin.get(key) and not (key == "why" and v.startswith("CANNOT")):
+                h.append('<div class="src">%s</div>' % E(str(pin[key])))
+        if pin.get("cite"):
+            h.append('<div class="src">%s</div>' % E(str(pin["cite"])))
+    elif isinstance(pin, list):
+        h.append('<div class="src">%s</div>' % E(json.dumps(pin)[:600]))
+    return "".join(h) or None
+
+
+def _quantity_row(rec, unit):
+    """A folder's {value|rated, quote, cite} number, printed with its quote."""
+    if isinstance(rec, (int, float)):
+        return '<span class="mono">%g %s</span>' % (rec, unit)
+    if not isinstance(rec, dict):
+        return None
+    val = rec.get("value", rec.get("rated"))
+    bits = []
+    if val is not None:
+        tol = rec.get("tolerance_pct")
+        bits.append('<span class="mono">%g %s%s</span>'
+                    % (val, unit, (" ±%g %%" % tol) if tol is not None else ""))
+    if rec.get("max") is not None:
+        bits.append('<span class="mono">max %g %s</span>' % (rec["max"], unit))
+    for k in ("quote", "rated_quote", "max_quote", "cite", "source"):
+        if rec.get(k):
+            bits.append('<div class="src">%s</div>' % E(str(rec[k])))
+    return " ".join(bits) or None
+
+
 # ───────────────────────────────────────────────────────── page pieces
 def table(cols, rows, caption=None, cls="data"):
     # Caption goes ABOVE the scroll container, never inside it: a caption inside
@@ -189,12 +310,18 @@ def roster_table(comps, shelves):
     for c in comps:
         sh = shelves.get(c["slug"])
         mfr = elec_field(sh, "manufacturer") or ""
-        # Some folders put PROSE in `manufacturer` (np-f550 explains there that no
-        # single maker is known). A table cell is not the place for a paragraph:
-        # take the first clause, and let §4 carry the whole sentence.
+        # Some folders put PROSE in `manufacturer` (np-f550 and microduck-speaker
+        # both explain there that no single maker is known). A table cell is not
+        # the place for a paragraph: take the first clause and mark the cut, and
+        # §4's `maker` row carries the WHOLE sentence — which it did not until
+        # 2026-09-03, so the only place a reader met the speaker's refusal was
+        # the mutilated fragment "CANNOT DETERMINE for the fitt…" in this table.
         mfr_cell = mfr.split(".")[0].split(",")[0].strip()
+        cut = len(mfr_cell) < len(mfr.strip())
         if len(mfr_cell) > 30:
-            mfr_cell = mfr_cell[:29] + "…"
+            mfr_cell, cut = mfr_cell[:29].rstrip(), True
+        if cut:
+            mfr_cell += " …"
         rows.append([
             '<b>%s</b><br><span class="tiny">%s · %s</span>'
             % (E(c["name"]), E(c["row"]), E(c["slug"])),
@@ -214,7 +341,18 @@ def roster_table(comps, shelves):
                  "nobody published the number and this document will not invent one. "
                  "Envelope, mass and quantity come from <code>electronics/components.json</code>; "
                  "manufacturer, supply and current are read live out of "
-                 "<code>ce-parts/&lt;slug&gt;/electrical.*.json</code>.",
+                 "<code>ce-parts/&lt;slug&gt;/electrical.*.json</code>. "
+                 "<b>Reading the envelope column:</b> dimensions are printed to the number of "
+                 "decimals the SOURCE states and no further (that file\'s <code>precision_rule</code>), "
+                 "so <span class=\'mono\'>5 × 5</span> is a datasheet that printed \'5 x 5 mm\' and "
+                 "<span class=\'mono\'>38.6085</span> is a mesh measured to 4 dp — trailing zeros are "
+                 "never invented to make a column look uniform. <span class=\'mono\'>?</span> is an "
+                 "axis nobody published, and such a row is marked <b>partial</b> and is NOT counted as "
+                 "dimensioned anywhere on this page. The tolerance basis is per-row and is printed with "
+                 "the source in §4; where a row carries one it is stated there, and where it does not, "
+                 "no tolerance has been published for it. A maker cell ending in \'…\' is a first "
+                 "clause; §4 carries the whole sentence. "
+                 "<b>‡</b> marks a mass that belongs to a REPRESENTATIVE part, not to the one fitted.",
                  cls="data roster")
 
 
@@ -224,6 +362,14 @@ def detail_block(c, sh):
              % (E(c["name"]), E(c["row"]), E(c["slug"])))
     h.append("<p>%s</p>" % E(c["role"]))
     kv = []
+    # THE MAKER, WHOLE. Table 1 truncates this to a cell; §4 is where the
+    # sentence lives. Before 2026-09-03 §4 emitted no manufacturer row at all,
+    # so a folder whose `manufacturer` field is a paragraph of refusal
+    # (microduck-speaker, np-f550) appeared in this document only as a cut-off
+    # fragment in a table cell.
+    mfr = elec_field(sh, "manufacturer")
+    if mfr:
+        kv.append(("maker", E(str(mfr))))
     kv.append(("fitted", E(c.get("fitted_where", "—"))))
     d = c.get("dimensions_mm") or {}
     kv.append(("envelope", dim_str(d) + (
@@ -233,6 +379,8 @@ def detail_block(c, sh):
     if c.get("mount_pattern"):
         kv.append(("mount pattern", '<span class="mono">%s</span>' % E(c["mount_pattern"])))
     m = mass_str(c)
+    if c.get("mass_representative_why"):
+        m += '<div class="src cd">‡ %s</div>' % E(c["mass_representative_why"])
     if c.get("mass_source"):
         m += '<div class="src">%s</div>' % E(c["mass_source"])
     if c.get("mass_why"):
@@ -267,6 +415,26 @@ def detail_block(c, sh):
         kv.append(("connector", '<div class="src">%s</div>'
                    % E("; ".join("%s: %s" % (k, v) for k, v in conn.items()
                                  if isinstance(v, str) and len(v) < 200))))
+    pin = pinout_block(sh)
+    if pin:
+        kv.append(("pinout", pin))
+    for key, unit, label in (("impedance_ohm", "Ω", "impedance"),
+                             ("power_W", "W", "power")):
+        row = _quantity_row(elec_field(sh, key), unit)
+        if row:
+            kv.append((label, row))
+    ce = c.get("electrical")
+    if isinstance(ce, dict):
+        bits = []
+        for k, v in ce.items():
+            if k in ("source", "cite"):
+                continue
+            bits.append('<span class="mono">%s = %s</span>' % (E(str(k)), E(str(v))))
+        for k in ("source", "cite"):
+            if ce.get(k):
+                bits.append('<div class="src">%s</div>' % E(str(ce[k])))
+        if bits:
+            kv.append(("electrical, this roster", " · ".join(bits)))
     url = elec_field(sh, "datasheet_url")
     rev = elec_field(sh, "datasheet_rev")
     if url:
@@ -300,9 +468,19 @@ def build(out_path):
     n_folder = sum(1 for s in shelves.values() if s and s.get("component"))
     n_pass = sum(1 for s in shelves.values()
                  if s and (s.get("component") or {}).get("verdict") == "PASS")
-    n_dim = sum(1 for c in comps
-                if any((c.get("dimensions_mm") or {}).get(k) is not None for k in "xyz"))
-    n_mass = sum(1 for c in comps if c.get("mass_g") is not None)
+    # COVERAGE, COUNTED HONESTLY (corrected 2026-09-03). `any(...)` counted a
+    # row with a length and a width but no thickness as dimensioned; seven rows
+    # were being counted that way. A partial measurement is not a measurement.
+    n_dim = sum(1 for c in comps if dim_state(c.get("dimensions_mm")) == "full")
+    n_part = sum(1 for c in comps if dim_state(c.get("dimensions_mm")) == "partial")
+    n_mass = sum(1 for c in comps
+                 if c.get("mass_g") is not None and not c.get("mass_is_representative"))
+    n_mass_repr = sum(1 for c in comps if c.get("mass_is_representative"))
+    n_pin = sum(1 for sl in shelves
+                if pin_maps(elec_field(shelves.get(sl), "pinout")))
+    n_pin_cd = sum(1 for sl in shelves
+                   if elec_field(shelves.get(sl), "pinout")
+                   and not pin_maps(elec_field(shelves.get(sl), "pinout")))
     n_open = sum(len(c.get("open") or []) for c in comps)
     mb = C["mass_budget"]
 
@@ -333,6 +511,15 @@ def build(out_path):
       "table.data td{font-size:12.5px}\n"
       "table.roster th,table.roster td{padding:5px 7px;font-size:11.5px;line-height:1.4}\n"
       "table.roster .mono{font-size:11px}\n"
+      "p.statnote{font-family:var(--sans);font-size:12px;color:var(--ink-2);line-height:1.55;"
+      "max-width:60em;margin:8px 0 0;border-left:2px solid var(--hair);padding-left:12px}\n"
+      ".pinmap{display:flex;flex-wrap:wrap;gap:3px 5px;align-items:baseline;margin:2px 0 5px}\n"
+      ".pinmap .pkg{font-family:var(--sans);font-size:10.5px;letter-spacing:.06em;"
+      "text-transform:uppercase;color:var(--ink-2);margin-right:4px}\n"
+      ".pinmap .pin{font-family:var(--mono);font-size:11px;border:1px solid var(--hair);"
+      "background:var(--figbg);padding:1px 5px;white-space:nowrap}\n"
+      ".pinmap .pin b{color:var(--ink-2);font-weight:500;margin-right:3px}\n"
+      "td s,.note s{color:var(--ink-2);text-decoration-thickness:1px}\n"
       "figure svg,figure img{width:100%;height:auto}\n"
       ".gen{font-family:var(--mono);font-size:11px;color:var(--ink-2);border:1px solid var(--hair);"
       "background:var(--figbg);padding:9px 13px;margin:14px 0}\n"
@@ -359,12 +546,24 @@ def build(out_path):
     A('<div class="statbar">')
     for val, lab in ((n_total, "components in the roster"),
                      ("%d / %d" % (n_folder, n_total), "with a ce-parts folder"),
-                     (n_dim, "with a dimensioned envelope"),
-                     (n_mass, "with a mass"),
+                     (n_dim, "FULLY dimensioned (x, y and z)"),
+                     (n_part, "partially — an axis nobody published"),
+                     (n_pin, "with a pin map"),
+                     (n_mass, "with a mass of the fitted part"),
                      (n_open, "open items across the roster"),
-                     ("%g g" % mb["unaccounted_g"], "of 780 g unaccounted")):
+                     ("%g g" % mb["unaccounted_g"], "unaccounted, of 780 g")):
         A('<div class="stat"><b>%s</b><span>%s</span></div>' % (E(str(val)), E(lab)))
     A("</div>")
+    A('<p class="statnote">Read those eight numbers with their caveats, because three of them '
+      'used to be flattering. <b>%d fully dimensioned</b> counts a row only when x, y AND z are '
+      'published; the %d <b>partial</b> rows have a package length and width and no thickness, and '
+      'this page prints them as <span class="mono">65 × 30 × ?</span> and counts them nowhere. '
+      '<b>%d with a pin map</b> means a folder carries pin-number → signal for its package; a '
+      'further %d state a pinout record whose verdict is CANNOT DETERMINE and say which table they '
+      'did not transcribe. <b>%d with a mass</b> counts only masses of the part actually fitted — '
+      'the battery\'s 99 g is a vendor shipping weight for a DIFFERENT pack and is marked ‡ '
+      'wherever it appears, so the %g g unaccounted is a floor, not a figure (§8).</p>'
+      % (n_dim, n_part, n_pin, n_pin_cd, n_mass, mb["unaccounted_g"]))
 
     A('<nav class="toc">' + "".join(
         '<a href="#%s">%s</a>' % (i, t) for i, t in [
@@ -458,7 +657,8 @@ def build(out_path):
 
     # §8 mass
     A('<section id="mass"><h2><span class="n">§8</span>Mass budget</h2>')
-    rows = [[E(a["what"]), '<span class="mono">%g</span>' % a["g"], E(a["basis"])]
+    rows = [[E(a["what"]) + (' <span class="cd">‡</span>' if a.get("representative") else ""),
+             '<span class="mono">%g</span>' % a["g"], E(a["basis"])]
             for a in mb["accounted"]]
     rows.append(["<b>accounted</b>", '<b class="mono">%g</b>' % mb["accounted_total_g"], ""])
     rows.append(['<b>unaccounted</b>', '<b class="mono">%g</b>' % mb["unaccounted_g"],
@@ -466,7 +666,11 @@ def build(out_path):
     rows.append(["<b>robot total (vendor claim)</b>",
                  '<b class="mono">%g</b>' % mb["robot_total_g"], E(mb["robot_total_source"])])
     A(table(["line", "g", "basis"], rows,
-            "Table 4. What the roster can weigh and what it cannot."))
+            "Table 4. What the roster can weigh and what it cannot. "
+            "<b>‡</b> marks a line that is NOT a mass of this robot's own part."))
+    if mb.get("representative_note"):
+        A('<div class="note"><b>‡ One of the two accounted lines is borrowed.</b><br>%s</div>'
+          % E(mb["representative_note"]))
     A("<p>%s</p>" % E("What would close it: " + mb["what_would_close_it"]))
     A("</section>")
 
@@ -510,9 +714,33 @@ def build(out_path):
           'wiring lane measures every run off the placements and this page does not restate it. '
           'A length is a ROUTE FLOOR through the crossed hinge origins plus the stated slack, not '
           'a straight line.</p>')
+        # CORRECTIONS THIS DOCUMENT OWES ITS READER. wiring/cables.json belongs
+        # to the wiring lane; a field there that contradicts this document's own
+        # evidence is PRINTED as a contradiction rather than silently rewritten
+        # in someone else's file. Each correction retires itself: it is only
+        # rendered while `stale` still matches the live value, so the day the
+        # wiring lane fixes the row, this note disappears on its own.
+        corr = {k: v for k, v in (N.get("cable_corrections") or {}).items()
+                if not k.startswith("$")}
+        notes, seen_corr = [], []
         rows = []
         for x in cab:
             ln = x.get("cable_mm")
+            pins = x.get("pins", "") or "—"
+            pin_cell = '<span class="tiny">%s</span>' % E(pins)
+            cx = corr.get(x["id"])
+            if cx:
+                live = x.get(cx["field"])
+                if live == cx["stale"]:
+                    n = len(seen_corr) + 1
+                    pin_cell = ('<span class="tiny"><s>%s</s> → <b>%s</b> '
+                                '<span class="cd">†%d</span></span>'
+                                % (E(cx["stale"]), E(cx["correction"]), n))
+                    seen_corr.append((n, x["id"], cx, "applied"))
+                elif cx["correction"] not in str(live):
+                    n = len(seen_corr) + 1
+                    pin_cell += ' <span class="cd">†%d</span>' % n
+                    seen_corr.append((n, x["id"], cx, "stale-correction"))
             rows.append([
                 '<span class="mono">%s</span>' % E(x["id"]),
                 "%s \u2192 %s" % (E(x.get("from", "?")), E(x.get("to", "?"))),
@@ -520,7 +748,7 @@ def build(out_path):
                 else '<span class="cd">CD</span>',
                 ('<span class="mono">%g</span>' % x["floor_mm"])
                 if isinstance(x.get("floor_mm"), (int, float)) else "—",
-                '<span class="tiny">%s</span>' % E(x.get("pins", "") or "—"),
+                pin_cell,
                 '<span class="tiny">%s</span>' % E(x.get("connector", "") or "—"),
                 '<span class="mono">%s</span>' % E(str(x.get("qty", "—"))),
             ])
@@ -533,6 +761,21 @@ def build(out_path):
           'cut to length but cannot terminate is not a cable. Every one of them is a HAT-side or '
           'module-side connector on a board nobody has published — the same wall as §13 row E1.</p>'
           % (len(cab), n_len, W.get("total_length_mm", "?"), n_cd, n_conn_cd))
+        for n, cid, cx, state in seen_corr:
+            if state == "applied":
+                A('<div class="note"><b>† %d — cable <code>%s</code>, field '
+                  '<code>%s</code>: this document corrects the wiring lane\'s file.</b><br>'
+                  '<code>wiring/cables.json</code> still says <s>%s</s>; the current reading is '
+                  '<b>%s</b>. %s<br><span class="src">%s</span></div>'
+                  % (n, E(cid), E(cx["field"]), E(cx["stale"]), E(cx["correction"]),
+                     E(cx["why"]), E(cx["owner"])))
+            else:
+                A('<div class="note"><b>† %d — cable <code>%s</code>: a correction this page '
+                  'carried no longer applies.</b><br>It expected <code>%s</code> to read '
+                  '"%s" and it does not, so the wiring lane has changed the row. Re-check the '
+                  'correction in <code>electronics/datasheet-narrative.json</code> '
+                  '<code>cable_corrections</code> against the new value before trusting either.</div>'
+                  % (n, E(cid), E(cx["field"]), E(cx["stale"])))
         A('<p>Full schedule with the crossed joints and the per-hop voltage drop: '
           '<a href="wiring/CABLES.html">wiring/CABLES.html</a>.</p>')
     else:
@@ -566,9 +809,11 @@ def build(out_path):
     out = os.path.join(REPO, out_path)
     with open(out, "w") as fh:
         fh.write("\n".join(S) + "\n")
-    print("wrote %s  (%d components, %d with a folder, %d dimensioned, %d with a mass, "
+    print("wrote %s  (%d components, %d with a folder, %d FULLY dimensioned + %d partial, "
+          "%d with a pin map + %d pinout-CD, %d with a fitted-part mass + %d representative, "
           "%d per-part open items, %d cross-part open items)"
-          % (out_path, n_total, n_folder, n_dim, n_mass, n_open, len(C["open_items"])))
+          % (out_path, n_total, n_folder, n_dim, n_part, n_pin, n_pin_cd,
+             n_mass, n_mass_repr, n_open, len(C["open_items"])))
     return out
 
 
