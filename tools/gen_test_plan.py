@@ -5,7 +5,13 @@ Lane H of GOAL.md. The JSON is the data; every derived number (degrees,
 encoder counts, the count tolerance) is computed HERE and shown with its
 formula, so no derived figure is hand-maintained anywhere.
 
-    python3 tools/gen_test_plan.py
+    python3 tools/gen_test_plan.py       # exits 0, or non-zero having written nothing
+
+selfcheck() runs before a byte is written and REFUSES to publish a document
+the data does not support: an unresolved source key, an end-of-line row that
+names no test, a gated test on neither the checklist nor the exemption list,
+an @TOKEN@ that nothing filled, an id_map range that disagrees with the MJCF.
+Every one of those was broken on purpose once and watched to fire.
 
 Runs on the system python3 (no numpy, no FreeCAD): this generator does
 arithmetic and string work only.
@@ -27,18 +33,49 @@ def _load(rel):
 SIMREP  = _load("out/sim/report.json")
 RUNTIME = _load("out/sim-evidence/battery-runtime.json")
 
+def _mjcf_ranges(rel="sim/microduck_ours.xml"):
+    """Joint limits are READ off the MJCF MuJoCo actually loaded, never retyped. The copy in
+    spec/test-plan.json is a cross-check, and selfcheck() fails if the two disagree."""
+    fp = os.path.join(REPO, rel)
+    if not os.path.exists(fp):
+        raise SystemExit("gen_test_plan: %s is missing; the ID map has no range source" % rel)
+    src = open(fp).read()
+    return {m.group(1): (float(m.group(2)), float(m.group(3))) for m in
+            re.finditer(r'<joint[^>]*name="([^"]+)"[^>]*range="([-\d.eE+]+) ([-\d.eE+]+)"', src)}
+
+MJCF_RANGE = _mjcf_ranges()
+MJCF_FILE  = "sim/microduck_ours.xml"
+# The mouth is the one id_map row with no MJCF joint: the jaw is not actuated in the published
+# model. Its limits are model.rs:63-64 MOUTH_CLOSED / MOUTH_OPEN, in degrees, converted here.
+RANGE_EXEMPT = {"mouth": ("model.rs:63-64 MOUTH_CLOSED = -5 deg, MOUTH_OPEN = +30 deg; "
+                          "the jaw is not a joint in the published MJCF")}
+
 E = lambda s: html.escape(str(s), quote=False)
+
+# ---- @TOKEN@ substitution -------------------------------------------------
+# A number a gate rests on is never typed into the data file. The data writes @NAME@ and the
+# value is filled here from a measured artifact or a computed constant. An unresolved token is
+# a hard failure, not a literal "@NAME@" shipped to the reader.
+TOK = {}
+_TOKRE = re.compile(r"@([A-Z0-9_]+)@")
+def _fill(t):
+    def sub(m):
+        k = m.group(1)
+        if k not in TOK:
+            raise SystemExit("gen_test_plan: unresolved token @%s@ in the data file" % k)
+        return str(TOK[k])
+    return _TOKRE.sub(sub, str(t))
 
 _CODE = re.compile(r"`([^`]+)`")
 _BOLD = re.compile(r"\*\*([^*]+)\*\*")
 def M(t):
-    """Escape, then render `backticked` spans as <code> and **starred** spans as <b>.
-    Prose in the data file is written the way the source documents write it; this is the
-    one place that turns it into markup, so NO field ever carries raw HTML — a field that
+    """Fill @TOKEN@s, then escape, then render `backticked` spans as <code> and **starred**
+    spans as <b>. Prose in the data file is written the way the source documents write it; this
+    is the one place that turns it into markup, so NO field ever carries raw HTML — a field that
     did would either be escaped and shown as tags to the reader, or trusted and able to
     break the page."""
     return _BOLD.sub(lambda m: "<b>%s</b>" % m.group(1),
-                     _CODE.sub(lambda m: "<code>%s</code>" % m.group(1), E(t)))
+                     _CODE.sub(lambda m: "<code>%s</code>" % m.group(1), E(_fill(t))))
 
 # ---- derived constants, computed not typed -------------------------------
 RESOLUTION_PULSE_REV = 4096          # E1 §Specifications "Resolution | 4096 [pulse/rev]"
@@ -64,7 +101,45 @@ STANDBY_TOTAL_A      = N_SERVOS * STANDBY_MA / 1000.0
 STALL_5V_A           = 1.47
 STALL_TOTAL_A        = N_SERVOS * STALL_5V_A
 
+_SV01 = None
+for _s in D["sections"]:
+    if _s["kind"] == "tests":
+        for _t in _s["tests"]:
+            if _t["id"] == "SV-01": _SV01 = _t
+if _SV01 is None or "readback" not in _SV01:
+    raise SystemExit("gen_test_plan: SV-01 has no readback[] - the read-back count cannot be derived")
+_RB = _SV01["readback"]
+_WORDS = {0:"no",1:"one",2:"two",3:"three",4:"four",5:"five",6:"six",7:"seven",8:"eight",
+          9:"nine",10:"ten",11:"eleven",12:"twelve"}
+
+_WARM = float(_WALK["command"]["warmup_s"])
+TOK.update({
+  "SIM_WALK_POLICY":       SIM_WALK_POLICY,
+  "SIM_WALK_M":            "%.4f" % SIM_WALK_M,
+  "SIM_WALK_S":            "%.1f" % SIM_WALK_S,
+  "SIM_WALK_X":            "%.4f" % _WALK["walked_x_m"],
+  "SIM_WALK_SPEED_WINDOW": "%.4f" % _WALK["mean_speed_m_s_commanded_window"],
+  "SIM_WALK_WARMUP_S":     "%.1f" % _WARM,
+  "SIM_WALK_WINDOW_S":     "%.1f" % (SIM_WALK_S - _WARM),
+  "SIM_WALK_MEAN_ALL":     "%.4f" % (SIM_WALK_M / SIM_WALK_S),
+  "SIM_WALK_TILT":         "%.2f" % SIM_WALK_TILT,
+  "GATE_WALK_M":           "%.3f" % GATE_WALK_M,
+  "GATE_PCT":              "%.0f" % (GATE_FRACTION * 100),
+  "LIMP_TILT_DEG":         "%.3f" % LIMP_TILT_DEG,
+  "TOL_COUNT":             "%d"   % TOL_COUNT,
+  "TOL_DEG_OF_COUNT":      "%.4f" % (TOL_COUNT * DEG_PER_COUNT),
+  "SV01_READBACK_N":       "%d"   % len(_RB),
+  "SV01_READBACK_WORD":    _WORDS[len(_RB)],
+  "SV01_SCAN_N":           _WORDS[len([r for r in _RB if r[1] == "scan"])],
+  "SV01_WRITTEN_N":        _WORDS[len([r for r in _RB if r[1] == "written"])],
+  "SV01_VERIFY_N":         _WORDS[len([r for r in _RB if r[1] == "verify"])],
+  "N_RAILS":               "%d" % len(D["rails"]),
+})
+
 SECNUM = {sec["id"]: i + 2 for i, sec in enumerate(D["sections"])}
+# Section numbers as tokens, so a cross-reference in the data file cannot go stale when a
+# section is inserted: "section @SEC_WALK@.1" survives what "section 7.1" did not.
+TOK.update({("SEC_%s" % sec["id"].upper()): SECNUM[sec["id"]] for sec in D["sections"]})
 TAIL   = [("eol", "End-of-line checklist"), ("logs", "Logs"),
           ("open", "What this plan cannot test"), ("sources", "Sources")]
 TAILNUM = {sid: len(D["sections"]) + 2 + i for i, (sid, _) in enumerate(TAIL)}
@@ -79,47 +154,86 @@ def TN():
 def rad2count(r):  return ZERO_COUNT + r * COUNT_PER_RAD
 def rad2deg(r):    return math.degrees(r)
 
+LINKS = []      # (href, resolved?) — every cross-document link this page tried to make
 def link(href, text, note="not yet in the repository"):
     """A link is only written when the target is on disk. A cross-lane document that has
     not landed yet renders as plain text with the reason, so this page never ships a
-    dead link and heals itself the moment the file appears."""
-    if os.path.exists(os.path.join(REPO, href.split("#")[0])):
+    dead link and heals itself the moment the file appears — but only on the next run, so
+    every one is recorded here and the run prints the tally. A committed page whose tally
+    disagrees with the repository is a page that needs regenerating, and now says so."""
+    ok = os.path.exists(os.path.join(REPO, href.split("#")[0]))
+    LINKS.append((href, ok))
+    if ok:
         return '<a href="%s">%s</a>' % (href, text)
     return '<span class="pending">%s <i>(%s)</i></span>' % (text, E(note))
 
 # ---- source resolution ---------------------------------------------------
-SRC = D["sources"]
+SRC      = D["sources"]
+SRC_USED = {}        # key -> [what cited it], filled as the document renders
+_CITER   = ["the document"]
 def srcline(keys):
     if not keys: return ""
     out = []
     for k in keys:
         s = SRC.get(k)
-        out.append('<span class="srcitem"><b>%s</b> %s</span>' % (E(k), E(s["label"] if s else k)))
+        if s is None:
+            # A citation that renders its own key as its label looks like a source and is not
+            # one. Refuse, name the key, and let selfcheck() list every offender at once.
+            raise SystemExit("gen_test_plan: source key %r is cited but not in sources{}" % k)
+        SRC_USED.setdefault(k, []).append(_CITER[0])
+        out.append('<span class="srcitem"><b>%s</b> %s</span>' % (E(k), E(s["label"])))
     return '<div class="srcs">%s</div>' % "".join(out)
 
 # ---- counters ------------------------------------------------------------
 all_tests = [t for s in D["sections"] if s["kind"] == "tests" for t in s["tests"]]
+TESTBYID  = {t["id"]: t for t in all_tests}
 n_tests   = len(all_tests)
 n_notest  = len([t for t in all_tests if t["gate"]["PASS"] == "—"])
 n_open    = len(D["open"])
 
 # ---- fragments -----------------------------------------------------------
+def tools_of(tid, seen=None):
+    """A test's instruments, resolving an `as WK-02` delegation rather than treating the
+    literal string as an instrument. Used by the equipment cross-check."""
+    seen = seen or set()
+    if tid in seen or tid not in TESTBYID: return []
+    seen.add(tid)
+    out = []
+    for x in TESTBYID[tid]["tool"]:
+        m = re.fullmatch(r"as ([A-Z]{2}-\d{2})", str(x).strip())
+        if m and m.group(1) in TESTBYID: out += tools_of(m.group(1), seen)
+        else: out.append(x)
+    return out
+
 def equip_table():
+    """The 'serves' column is a list of test ids in the data, rendered as links, and
+    selfcheck() requires the row's tool_key to appear literally in each of those tests'
+    tool lists. Prose used to carry the test numbers and three of them had gone stale
+    (the ToF target said SN-05, which is the LSM6DSV16X)."""
     rows = []
-    for name, what, why, sk in D["equipment"]:
-        rows.append('<tr><td><b>%s</b></td><td>%s</td><td>%s</td><td class="sk">%s</td></tr>'
-                    % (E(name), M(what), M(why), E(sk)))
+    for row in D["equipment"]:
+        name, what, why, sk = row[0], row[1], row[2], row[3]
+        serves = row[4] if len(row) > 4 else []
+        links = " ".join('<a href="#%s"><code>%s</code></a>' % (E(i), E(i)) for i in serves)
+        rows.append('<tr><td><b>%s</b></td><td>%s</td><td>%s<div class="sk">%s</div></td>'
+                    '<td class="sk">%s</td></tr>'
+                    % (E(name), M(what), M(why), links, E(sk)))
     return "\n".join(rows)
 
 def idmap_table():
+    """Ranges come from MJCF_RANGE, i.e. off sim/microduck_ours.xml, not from the data file.
+    They are shown in radians AND degrees because every one of them is an exact whole number
+    of degrees, which rounding to 3 dp in radians hid."""
     rows = []
     for sid, joint, body, rng, home in D["id_map"]:
-        lo, hi = rng
+        lo, hi = MJCF_RANGE.get(joint, tuple(rng))
         rows.append(
           '<tr><td class="n">%d</td><td><code>%s</code></td><td>%s</td>'
-          '<td class="n">%.3f</td><td class="n">%.3f</td>'
-          '<td class="n">%.3f</td><td class="n">%.4f</td><td class="n">%.1f</td></tr>'
-          % (sid, E(joint), E(body), lo, hi, home, rad2deg(home), rad2count(home)))
+          '<td class="n">%.4f</td><td class="n">%.4f</td>'
+          '<td class="n">%.4f</td><td class="n">%.4f</td>'
+          '<td class="n">%.4f</td><td class="n">%.4f</td><td class="n">%.1f</td></tr>'
+          % (sid, E(joint), E(body), lo, hi, rad2deg(lo), rad2deg(hi),
+             home, rad2deg(home), rad2count(home)))
     return "\n".join(rows)
 
 def rails_table():
@@ -163,6 +277,7 @@ def runtime_table():
     return "\n".join(rows)
 
 def test_block(t):
+    _CITER[0] = t["id"]          # so the sources table can say who cited what
     steps = []
     for i, s in enumerate(t["steps"], 1):
         cmd = ('<div class="cmd">%s</div>' % E(s["cmd"])) if s.get("cmd") else ""
@@ -211,7 +326,7 @@ def sections_html():
   <p class="lede">Nothing on this list is optional for the test it serves. Where an instrument's
   resolution is named, it is because a gate below is stated to that resolution.</p>
   <div class="tw"><table class="data"><caption>Table %d. Equipment, and the gate each one serves.</caption>
-  <thead><tr><th>Instrument or fixture</th><th>Used by</th><th>Why this and not something looser</th><th>Src</th></tr></thead>
+  <thead><tr><th>Instrument or fixture</th><th>Used by</th><th>Why this and not something looser, and the gates it serves</th><th>Src</th></tr></thead>
   <tbody>%s</tbody></table></div>
 </section>""" % (s["id"], SECNUM[s["id"]], E(s["title"]), TN(), equip_table()))
             continue
@@ -230,8 +345,12 @@ own stall row supports, and nothing in any source says what the pack or the HAT 
 Above 6.0&nbsp;V no vendor stall figure exists at all, which is exactly why EB-04 comes before EB-07.</div>
 """ % (SECNUM["electrical"], TN(), rails_table(), STANDBY_TOTAL_A, STANDBY_MA, STALL_TOTAL_A, STALL_5V_A)
         if s["id"] == "servo":
+            # Table numbers are taken before the string is built so SV-01 can cite the register
+            # table by number through @T_REG@ without anyone typing "Table 5".
+            _t_idmap, _t_reg = TN(), TN()
+            TOK["T_IDMAP"], TOK["T_REG"] = _t_idmap, _t_reg
             extra = """
-<h3 class="sub">%d.1 The ID map, and the home pose in counts</h3>
+<h3 class="sub" id="idmap">%d.1 The ID map, and the home pose in counts</h3>
 <p>Encoder counts are computed here, not typed:
 <code class="formula">count = %d + rad &times; %d / (2&pi;) = %d + rad &times; %.6f</code>,
 from the vendor's 4096&nbsp;pulse/rev resolution and <code>bus.rs</code>'s 2048 = 0&nbsp;rad.
@@ -239,15 +358,19 @@ One count is <b>%.4f&nbsp;degrees</b>, so the &plusmn;%.1f&nbsp;degree calibrati
 <b>&plusmn;%d&nbsp;counts</b>.</p>
 <div class="tw"><table class="data idmap"><caption>Table %d. Servo ID to joint, the joint's MJCF range, and the home pose
 in radians, degrees and encoder counts. Home values are <code>DEFAULT_POSITION</code> from <code>model.rs:39-55</code>;
-ranges are the MJCF limits read back through our own simulation.</caption>
+ranges are read here directly out of <code>sim/microduck_ours.xml</code> at full double precision, and every one of
+them turns out to be an exact whole number of degrees &mdash; which is why the degree columns are here and why the
+data file&rsquo;s 3&nbsp;dp copies were wrong to keep. The mouth (ID&nbsp;34) is the one row with no MJCF joint: the
+jaw is not actuated in the published model, and its limits are <code>model.rs:63-64</code>.</caption>
 <thead><tr><th>ID</th><th>Joint</th><th>Body carrying the servo</th>
-<th>range lo&nbsp;rad</th><th>range hi&nbsp;rad</th><th>home&nbsp;rad</th><th>home&nbsp;deg</th><th>home&nbsp;count</th></tr></thead>
+<th>range lo&nbsp;rad</th><th>range hi&nbsp;rad</th><th>range lo&nbsp;deg</th><th>range hi&nbsp;deg</th>
+<th>home&nbsp;rad</th><th>home&nbsp;deg</th><th>home&nbsp;count</th></tr></thead>
 <tbody>%s</tbody></table></div>
 <div class="note"><b>ID 200 is not in this table.</b> The <code>imu_to_dxl</code> v2 board rides the same bus as a
 sixteenth device and is <code>sync_read</code> first on every tick. It has no joint, no range and no home pose —
 but SV-03 fails without it.</div>
 
-<h3 class="sub">%d.2 The register set</h3>
+<h3 class="sub" id="registers">%d.2 The register set</h3>
 <p>Every value below is quoted from the vendor control table in <code>ce-parts/xl330-m288-t/electrical.chip.json</code>.
 <b>EEPROM writes are refused unless Torque&nbsp;Enable(64) is 0</b> — the vendor's own rule, and the reason it is the
 first row of every write sequence.</p>
@@ -255,8 +378,8 @@ first row of every write sequence.</p>
 <thead><tr><th>Addr</th><th>Bytes</th><th>Name</th><th>Area</th><th>Vendor initial</th><th>We write</th><th>Meaning</th><th>Why</th></tr></thead>
 <tbody>%s</tbody></table></div>
 """ % (SECNUM["servo"], ZERO_COUNT, RESOLUTION_PULSE_REV, ZERO_COUNT, COUNT_PER_RAD,
-       DEG_PER_COUNT, TOL_DEG, TOL_COUNT, TN(), idmap_table(),
-       SECNUM["servo"], TN(), reg_table())
+       DEG_PER_COUNT, TOL_DEG, TOL_COUNT, _t_idmap, idmap_table(),
+       SECNUM["servo"], _t_reg, reg_table())
         if s["id"] == "walk":
             sr = D["surface"]
             rows = "".join('<tr><td><b>%s</b></td><td>%s</td><td>%s</td><td class="sk">%s</td></tr>'
@@ -343,8 +466,42 @@ def open_table():
         for o in D["open"])
 
 def sources_table():
-    return "\n".join('<tr><td><code>%s</code></td><td>%s</td><td class="loc">%s</td></tr>'
-                     % (E(k), M(v["label"]), M(v["loc"])) for k, v in D["sources"].items())
+    """The cited-by column is measured, not claimed: SRC_USED is filled by srcline() as the
+    document renders, so a source nothing rests on says so in its own row."""
+    rows = []
+    for k, v in D["sources"].items():
+        who = SRC_USED.get(k, [])
+        seen, ordered = set(), []
+        for w in who:
+            if w not in seen:
+                seen.add(w); ordered.append(w)
+        if ordered:
+            cite = ", ".join(ordered[:6]) + ("&hellip;" if len(ordered) > 6 else "")
+            cls = "sk"
+        else:
+            cite = "<i>recorded, cited by no gate</i>"
+            cls = "sk cd"
+        rows.append('<tr><td><code>%s</code></td><td>%s</td><td class="%s">%s</td><td class="loc">%s</td></tr>'
+                    % (E(k), M(v["label"]), cls, cite, M(v["loc"])))
+    return "\n".join(rows)
+
+def eol_exempt_table():
+    return "\n".join(
+        '<tr><td><a href="#%s"><code>%s</code></a></td><td>%s</td><td>%s</td></tr>'
+        % (E(i), E(i), M(why), M(what)) for i, why, what in D.get("eol_exempt", []))
+
+def corrections_html():
+    out = []
+    for c in D.get("corrections", []):
+        _CITER[0] = "&sect;1.3"
+        out.append("""
+<div class="resolved">
+  <h4>%s</h4>
+  <p><span class="k">Measured</span>%s</p>
+  <p><span class="k">Now</span>%s</p>
+  %s
+</div>""" % (M(c["what"]), M(c["measured"]), M(c["now"]), srcline(c.get("src", []))))
+    return "".join(out)
 
 TOC = "".join('<a href="#%s"><span class="tn">%s</span>%s</a>' % (sec["id"], SECNUM[sec["id"]], E(sec["title"]))
               for sec in D["sections"])
@@ -361,6 +518,7 @@ def resolved_html():
     settled it. A question that stops appearing looks like a question nobody asked."""
     out = []
     for r in D.get("resolved", []):
+        _CITER[0] = "&sect;%d.1" % TAILNUM["open"]
         out.append("""
 <div class="resolved">
   <h4>%s</h4>
@@ -370,6 +528,110 @@ def resolved_html():
   %s
 </div>""" % (M(r["q"]), M(r["was"]), M(r["now"]), M(r["consequence"]), srcline(r.get("src", []))))
     return "".join(out)
+
+# ---- the refusals ---------------------------------------------------------
+CHECKS = [
+ ("every eol row names a real test",
+  "an end-of-line row that points at no test is a box nobody can tick"),
+ ("every test with a PASS gate is on the eol list or on the exemption list",
+  "this is the check that was missing: 10 gated tests, including the only safety-behaviour "
+  "test in the plan, were absent from the ship checklist and nothing noticed"),
+ ("every eol exemption names a real test, and that test is NOT also on the eol list",
+  "an exemption for a row that is on the list is a contradiction, not a decision"),
+ ("every source key cited anywhere resolves in sources{}",
+  "srcline() used to print the raw key as its own label, so a broken citation rendered as a "
+  "plausible-looking source"),
+ ("every test id is unique",
+  "two tests sharing an id give the checklist an ambiguous anchor"),
+ ("every open-question row names a real test",
+  "section on what cannot be tested must point at the test that would close it"),
+ ("every id_map joint's stored range equals the MJCF range to 1e-9 rad, or is exempt with a reason",
+  "the data file used to carry them rounded to 3 dp, which discarded exact whole-degree limits"),
+ ("every SV-01 read-back address exists in the register table",
+  "the read-back count is derived from that list, so the list has to be real"),
+ ("every equipment row's tool_key appears literally in the tool list of every test it says it serves",
+  "the instrument table named its gates in prose and three had gone stale: the 88 % reflectance "
+  "target said it served SN-05, which is the LSM6DSV16X chip self-test, not the ToF ranging test"),
+ ("every register address is unique",
+  "a duplicated address in Table 5 would be quoted twice with different values"),
+ ("no unfilled at-sign token survives into the finished HTML",
+  "the data file writes a measured number as an at-sign token that this generator fills; an "
+  "unfilled one would ship to the reader as literal punctuation where a number belongs"),
+ ("the finished HTML contains every test id and every eol id as an anchor",
+  "a checklist link that scrolls nowhere is a checklist nobody uses"),
+]
+
+def selfcheck(doc=None):
+    """Refuse to publish what the data does not support. Returns a list of failures; the caller
+    exits non-zero on any. Run twice: once before rendering, once on the finished HTML."""
+    bad = []
+    ids = [t["id"] for t in all_tests]
+    byid = {t["id"]: t for t in all_tests}
+    eol_ids = [e[0] for e in D["eol"]]
+    ex_ids  = [e[0] for e in D.get("eol_exempt", [])]
+
+    if doc is None:
+        for i in eol_ids:
+            if i not in byid: bad.append("eol row %r names no test" % i)
+        gated = [t["id"] for t in all_tests if t["gate"].get("PASS", "—") != "—"]
+        for i in gated:
+            if i not in eol_ids and i not in ex_ids:
+                bad.append("test %s has a PASS gate but is on neither the end-of-line list nor the "
+                           "exemption list" % i)
+        for i in ex_ids:
+            if i not in byid: bad.append("eol_exempt row %r names no test" % i)
+            if i in eol_ids:  bad.append("%s is both exempt and on the checklist" % i)
+        seen = set()
+        for i in ids:
+            if i in seen: bad.append("duplicate test id %s" % i)
+            seen.add(i)
+        for o in D["open"]:
+            for i in [x.strip() for x in o["test"].split(",")]:
+                if i not in byid: bad.append("open question points at %r, which is no test" % i)
+        for t in all_tests:
+            for k in t["src"]:
+                if k not in SRC: bad.append("%s cites unknown source key %r" % (t["id"], k))
+        for r in D.get("resolved", []) + D.get("corrections", []):
+            for k in r.get("src", []):
+                if k not in SRC: bad.append("a section-1.3/11.1 block cites unknown source key %r" % k)
+        for sid, joint, body, rng, home in D["id_map"]:
+            if joint in MJCF_RANGE:
+                lo, hi = MJCF_RANGE[joint]
+                if abs(lo - rng[0]) > 1e-9 or abs(hi - rng[1]) > 1e-9:
+                    bad.append("id_map %s range %r disagrees with %s %r"
+                               % (joint, rng, MJCF_FILE, (lo, hi)))
+            elif joint not in RANGE_EXEMPT:
+                bad.append("id_map %s has no MJCF joint and no stated exemption" % joint)
+        for n, row in enumerate(D["equipment"]):
+            serves = row[4] if len(row) > 4 else []
+            key    = row[5] if len(row) > 5 else None
+            if not serves:
+                bad.append("equipment row %d (%s) names no test it serves" % (n, row[0][:40]))
+            for tid in serves:
+                if tid not in TESTBYID:
+                    bad.append("equipment row %d names no test %r" % (n, tid)); continue
+                if key is not None and key.lower() not in " | ".join(tools_of(tid)).lower():
+                    bad.append("equipment row %d (%s) says it serves %s, but %r is not in that "
+                               "test's tool list %r" % (n, row[0][:40], tid, key, tools_of(tid)))
+        addrs = [r["addr"] for r in D["registers"]]
+        if len(set(addrs)) != len(addrs): bad.append("duplicate register address in registers[]")
+        for a, kind, why in _RB:
+            if a not in addrs: bad.append("SV-01 reads back register %d, which is not in Table 5" % a)
+            if kind not in ("scan", "written", "verify"):
+                bad.append("SV-01 read-back %d has unknown kind %r" % (a, kind))
+    else:
+        left = _TOKRE.findall(doc)
+        if left: bad.append("unfilled tokens in the output: %s" % sorted(set(left)))
+        for i in ids + eol_ids + ex_ids:
+            if ('id="%s"' % i) not in doc: bad.append("no anchor id=%r in the output" % i)
+    return bad
+
+TOK["N_CHECKS"] = len(CHECKS)
+
+_pre = selfcheck()
+if _pre:
+    for b in _pre: print("SELFCHECK FAIL:", b)
+    raise SystemExit("gen_test_plan: %d self-check failure(s); nothing written" % len(_pre))
 
 DOC = D["doc"]
 HTML = f"""<!doctype html>
@@ -486,8 +748,25 @@ HTML = f"""<!doctype html>
   <ol class="steps">{ORDER}</ol>
   <div class="note"><b>The stand is not optional.</b> <code>robotctl robot init</code> powers the joints and
   ramps to the home pose over about two seconds &mdash; <b>it moves every joint</b>. Pollen's own cheat sheet
-  says it plainly: have the robot on its stand. Every test before section 7 runs with both feet clear
+  says it plainly: have the robot on its stand. Every test before section {SECNUM["walk"]} runs with both feet clear
   of the bench.</div>
+
+  <h3 class="sub" id="corrections">1.3 Corrections in Rev&nbsp;C</h3>
+  <p>An independent read of Rev&nbsp;B found {len(D.get("corrections", []))} places where a number, a citation or a
+  claim of completeness did not survive its own source. Each is below with the measurement that settled it.
+  A correction is published, never quietly overwritten &mdash; a document whose errors disappear is a document
+  nobody can audit.</p>
+  {corrections_html()}
+
+  <h3 class="sub" id="refusals">1.4 What this generator refuses to publish</h3>
+  <p><code>tools/gen_test_plan.py</code> runs {len(CHECKS)} checks before it writes a byte and exits non-zero,
+  having written nothing, on any failure. Two of them run again on the finished page. They exist because every
+  correction in 1.3 was possible only in a generator that checked nothing, and each check below was broken on
+  purpose once in a sandbox copy of the repository and watched to fire before it was trusted &mdash;
+  {len(CHECKS)} of {len(CHECKS)} did.</p>
+  <div class="tw"><table class="data"><caption>Table {TN()}. The refusals, and the defect each one exists to catch.</caption>
+  <thead><tr><th>The check</th><th>Why it is there</th></tr></thead>
+  <tbody>{"".join("<tr><td>%s</td><td class='basis'>%s</td></tr>" % (M(a), M(b)) for a, b in CHECKS)}</tbody></table></div>
 </section>
 
 {sections_html()}
@@ -498,6 +777,15 @@ HTML = f"""<!doctype html>
   <div class="tw"><table class="data"><caption>Table {TN()}. End-of-line gates, {len(D['eol'])} of them.</caption>
   <thead><tr><th></th><th>Test</th><th>Gate</th><th>Instrument</th></tr></thead>
   <tbody>{eol_table()}</tbody></table></div>
+
+  <h3 class="sub" id="eol-exempt">{TAILNUM["eol"]}.1 The gated tests deliberately NOT on the list</h3>
+  <p>{len(all_tests)} tests carry a PASS gate or state why they carry none. {len(D["eol"])} of them are on the
+  checklist above. The {len(D.get("eol_exempt", []))} below are not, and the generator will not write this document
+  unless each one appears here with its reason &mdash; a test can leave the ship checklist, but it cannot leave
+  quietly.</p>
+  <div class="tw"><table class="data"><caption>Table {TN()}. Exemptions, each with what would put it back on the list.</caption>
+  <thead><tr><th>Test</th><th>Why it is not an end-of-line gate</th><th>What would put it back</th></tr></thead>
+  <tbody>{eol_exempt_table()}</tbody></table></div>
 </section>
 
 <section id="logs">
@@ -531,9 +819,11 @@ HTML = f"""<!doctype html>
   <p class="lede">Pollen Robotics' firmware and software are Apache-2.0 and are read here line by line;
   their PCBs are not published. Vendor datasheets are stored in the shelf with their provenance.
   Everything below is either in this repository or was fetched on the date named.</p>
-  <div class="tw"><table class="data"><caption>Table {TN()}. Every source cited by a gate in this document.</caption>
-  <thead><tr><th>Key</th><th>What</th><th>Where</th></tr></thead>
-  <tbody>{sources_table()}</tbody></table></div>
+  <div class="tw"><table class="data"><caption>Table {TN()}. All {len(D["sources"])} sources on the record.
+  The <b>cited by</b> column is measured as this page renders, not asserted: it lists the gates and blocks that
+  actually name each key, and a source nothing rests on says so.</caption>
+  <thead><tr><th>Key</th><th>What</th><th>Cited by</th><th>Where</th></tr></thead>
+  <tbody>__SOURCES_TABLE__</tbody></table></div>
 </section>
 
 <footer>
@@ -548,10 +838,31 @@ HTML = f"""<!doctype html>
 </html>
 """
 
+_CITER[0] = "the document"
+HTML = HTML.replace("__SOURCES_TABLE__", sources_table())
+
+_post = selfcheck(HTML)
+if _post:
+    for b in _post: print("SELFCHECK FAIL:", b)
+    raise SystemExit("gen_test_plan: %d self-check failure(s) in the rendered page; nothing written"
+                     % len(_post))
+
 out = os.path.join(REPO, "TEST-PLAN.html")
-open(out, "w").write(HTML)
-print("wrote TEST-PLAN.html  tests=%d eol=%d open=%d sources=%d  bytes=%d"
-      % (n_tests, len(D["eol"]), n_open, len(D["sources"]), len(HTML)))
+open(out, "w", encoding="utf-8").write(HTML)
+# len(HTML) is CHARACTERS. The em dashes and times signs in this page are 2-3 bytes each in
+# UTF-8, so the two differ by ~100 and reporting the character count as "bytes" was itself a
+# number that did not survive its own measurement. Stat the file that was actually written.
+_bytes = os.path.getsize(out)
+print("wrote TEST-PLAN.html  tests=%d eol=%d exempt=%d open=%d sources=%d  chars=%d  bytes=%d (stat)"
+      % (n_tests, len(D["eol"]), len(D.get("eol_exempt", [])), n_open, len(D["sources"]),
+         len(HTML), _bytes))
+print("selfcheck: %d checks, 0 failures" % len(CHECKS))
+_res = [h for h, ok in LINKS if ok]
+_pen = [h for h, ok in LINKS if not ok]
+print("cross-document links: %d resolved (%s)%s"
+      % (len(_res), ", ".join(sorted(set(_res))),
+         ("; %d STILL PENDING: %s — re-run this generator when they land"
+          % (len(_pen), ", ".join(sorted(set(_pen))))) if _pen else "; none pending"))
 print("derived: 1 count = %.6f deg; tol %.1f deg = %d counts; "
       "limp tilt = %.4f deg; fall report tilt = %.4f deg; walk gate = %.3f m (%.0f%% of %.4f m)"
       % (DEG_PER_COUNT, TOL_DEG, TOL_COUNT, LIMP_TILT_DEG, FALL_TILT_DEG,

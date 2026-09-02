@@ -2,7 +2,7 @@
  "$test_plan_version": 1,
  "doc": {
   "id": "MD-TST-001",
-  "rev": "B",
+  "rev": "C",
   "date": "2026-09-02",
   "title": "Test and validation plan",
   "sub": "How a built Microduck is proved to work: electrical bring-up, servo identity and calibration, sensor checks, control-loop acceptance, radios and identity, a walk test, and endurance and thermal soak - each with a pass/fail gate, the tool it needs, and the log it leaves behind.",
@@ -160,103 +160,189 @@
    "Assembly stand / test jig",
    "holds the robot with both feet clear of the bench",
    "`robotctl robot init` MOVES EVERY JOINT and ramps to the home pose over ~2 s. The cheatsheet is explicit: 'have the robot on its stand'. Every test before WK runs on the stand",
-   "CHEAT"
+   "CHEAT",
+   [
+    "EB-02",
+    "SV-02",
+    "SV-04",
+    "SW-04",
+    "WK-01"
+   ],
+   null
   ],
   [
    "Bench PSU, 0-15 V, >= 5 A, adjustable current limit",
    "stands in for the pack for every test up to EB-05",
    "a 2S Li-ion pack into an unproven board is a fire. The pack is not fitted until EB-01..EB-05 have passed",
-   "TESTDESIGN"
+   "TESTDESIGN",
+   [
+    "EB-02",
+    "EB-05",
+    "EN-02"
+   ],
+   "Bench PSU"
   ],
   [
    "DMM, 4.5 digit, DC V to 0.001 V, DC A to 10 A",
-   "every rail in section 3",
+   "every rail in section @SEC_ELECTRICAL@",
    "the rail bands are stated to 3 dp; a 3.5-digit meter cannot resolve the 3.130-3.470 V gate",
-   "TESTDESIGN"
+   "TESTDESIGN",
+   [
+    "EB-01",
+    "EB-03",
+    "EB-04",
+    "EB-06",
+    "EB-08"
+   ],
+   "DMM"
   ],
   [
    "DC current clamp or shunt, >= 25 A",
    "servo-rail current during the walk test",
    "15 x stall at 5.0 V = 22.05 A is a number the vendor rows support. Nothing in any source says what the pack or the HAT path can deliver, so the instrument must not be the limit",
-   "XLPART"
+   "XLPART",
+   [
+    "EB-07",
+    "EN-01"
+   ],
+   null
   ],
   [
    "Dynamixel TTL adapter (U2D2 or equivalent) + 3-pin JST EH lead",
    "SV-01 single-servo ID assignment, off the robot",
    "EEPROM writes need one servo alone on the bus, because every unassigned servo answers to ID 1",
-   "E1"
+   "E1",
+   [
+    "SV-01",
+    "SV-02"
+   ],
+   "Dynamixel TTL adapter"
   ],
   [
    "Oscilloscope >= 100 MHz with one 10x probe",
    "optional: bus signal integrity at 1,000,000 bps on a 16-device multidrop line",
    "only needed when SV-03 finds intermittent devices",
-   "TESTDESIGN"
+   "TESTDESIGN",
+   [
+    "SV-03"
+   ],
+   null
   ],
   [
    "White 88 % reflectance target, >= 200 x 200 mm, matte",
-   "SN-05 ToF ranging",
+   "the ToF ranging distances (SN-06)",
    "88 % white is the reflectance ST's own maximum-range and accuracy tables are stated against; any other target invalidates the +/- 5 % gate",
-   "L8"
+   "L8",
+   [
+    "SN-06"
+   ],
+   "White 88 % reflectance target"
   ],
   [
    "Steel rule or laser distance meter, 1 mm resolution",
-   "SN-05 target distance; WK-02 walked distance",
+   "SN-06 target distance; WK-02 walked distance",
    "the +/- 5 % ToF gate at 500 mm is +/- 25 mm, so the reference distance must be better than that",
-   "TESTDESIGN"
+   "TESTDESIGN",
+   [
+    "SN-06",
+    "WK-02"
+   ],
+   "steel rule or laser distance meter"
   ],
   [
    "Digital inclinometer, 0.1 deg",
    "levelling the walk surface",
    "the walk gate is a distance in 8 s; a sloped bench moves it",
-   "TESTDESIGN"
+   "TESTDESIGN",
+   [
+    "WK-01"
+   ],
+   "inclinometer"
   ],
   [
    "Laptop with a microphone and an FFT tool, or a USB measurement mic",
-   "SN-07 audio",
+   "SN-08 audio loopback",
    "the fitted speaker and microphone parts are both CANNOT DETERMINE, so the audio gate is functional (a tone comes out and goes back in), not acoustic",
-   "EVER"
+   "EVER",
+   [
+    "SN-08"
+   ],
+   "an FFT tool"
   ],
   [
    "Bluetooth gamepad, Xbox-style",
    "WK-02..WK-04 and SW-05",
    "`padd` drives whatever pad connects; pairing is once per pad",
-   "CHEAT"
+   "CHEAT",
+   [
+    "SW-05",
+    "WK-02",
+    "WK-03",
+    "WK-04",
+    "WK-05"
+   ],
+   "gamepad"
   ],
   [
    "Flat hard level bench, >= 1200 x 600 mm",
    "WK-02 walk run",
-   "see the surface note in section 7",
-   "TESTDESIGN"
+   "see the surface note in section @SEC_WALK@",
+   "TESTDESIGN",
+   [
+    "WK-01",
+    "WK-02"
+   ],
+   null
   ],
   [
    "NFC tag from the shipped pack (and, where fitted, the NFC Polaroid)",
    "SN-09",
    "Pollen ships 10 NFC tags in both the Dev Pack and the Accessory Pack, and a 1.54-inch NFC E-Ink 'Polaroid' the store page says is tapped on the robot's head. The stimulus is a shipped accessory, so the test needs no reader of its own",
-   "STORE"
+   "STORE",
+   [
+    "SN-09"
+   ],
+   "NFC tag from the Dev or Accessory Pack"
   ],
   [
    "IR thermometer with settable emissivity, 0.1 degC resolution, or a K-type thermocouple taped to the shell",
    "TH-02",
    "the head shell is matte printed plastic; an IR reading without an emissivity setting is not a temperature. Set 0.95 for matte PLA/PETG and record the setting with the reading",
-   "TESTDESIGN"
+   "TESTDESIGN",
+   [
+    "TH-02"
+   ],
+   "IR thermometer"
   ],
   [
    "A Wi-Fi access point with a known SSID and passphrase, within 2 m",
    "RD-01",
    "the fitted radio is Wi-Fi 6 with a software-selected antenna path, so a weak-signal unit can be a wrong-antenna unit rather than a bad one. A close, known AP separates the two",
-   "RADXAPART"
+   "RADXAPART",
+   [
+    "RD-01"
+   ],
+   "Wi-Fi access point"
   ],
   [
    "A Bluetooth-capable laptop with `duckctl` installed",
    "RD-04",
    "the BLE path is the one a customer uses before the robot has ever seen a network; it is not exercised by any test that goes over ssh",
-   "DUCKCTL"
+   "DUCKCTL",
+   [
+    "RD-04"
+   ],
+   "duckctl"
   ],
   [
    "Stopwatch or a logging host clock",
    "EN-01",
    "the endurance gate is a duration and the shutdown is autonomous - the robot stops itself, so the operator's job is to timestamp it",
-   "TESTDESIGN"
+   "TESTDESIGN",
+   [
+    "EN-01"
+   ],
+   "Stopwatch"
   ]
  ],
  "id_map": [
@@ -265,8 +351,8 @@
    "left_hip_yaw",
    "trunk_base",
    [
-    -0.436,
-    0.524
+    -0.4363323129985824,
+    0.5235987755982988
    ],
    0.0
   ],
@@ -275,8 +361,8 @@
    "left_hip_roll",
    "yaw2roll",
    [
-    -0.384,
-    0.384
+    -0.3839724354387525,
+    0.3839724354387525
    ],
    -0.0873
   ],
@@ -285,8 +371,8 @@
    "left_hip_pitch",
    "upper_leg_left",
    [
-    -1.571,
-    1.571
+    -1.570796326795005,
+    1.5707963267947882
    ],
    -0.4579
   ],
@@ -295,8 +381,8 @@
    "left_knee",
    "upper_leg_left",
    [
-    -1.571,
-    1.571
+    -1.570796326795012,
+    1.570796326794781
    ],
    -0.0049
   ],
@@ -305,8 +391,8 @@
    "left_ankle",
    "leg",
    [
-    -1.571,
-    1.571
+    -1.5707963267949019,
+    1.5707963267948912
    ],
    0.453
   ],
@@ -315,8 +401,8 @@
    "neck_pitch",
    "neck",
    [
-    -1.571,
-    1.047
+    -1.5707963267948966,
+    1.0471975511965976
    ],
    0.3491
   ],
@@ -325,8 +411,8 @@
    "head_pitch",
    "neck",
    [
-    -1.571,
-    1.571
+    -1.5707963267948974,
+    1.5707963267948957
    ],
    0.3491
   ],
@@ -335,8 +421,8 @@
    "head_yaw",
    "yaw_roll_motion",
    [
-    -2.967,
-    2.967
+    -2.967059728390373,
+    2.967059728390348
    ],
    0.0
   ],
@@ -345,8 +431,8 @@
    "head_roll",
    "jaw_soft (head)",
    [
-    -0.436,
-    0.436
+    -0.43633231299859127,
+    0.4363323129985735
    ],
    0.0
   ],
@@ -355,8 +441,8 @@
    "mouth",
    "jaw_soft (head)",
    [
-    -0.0873,
-    0.5236
+    -0.08726646259971647,
+    0.5235987755982988
    ],
    0.0
   ],
@@ -365,8 +451,8 @@
    "right_hip_yaw",
    "trunk_base",
    [
-    -0.524,
-    0.436
+    -0.5235987755982988,
+    0.4363323129985824
    ],
    0.0
   ],
@@ -375,8 +461,8 @@
    "right_hip_roll",
    "bearing_roll",
    [
-    -0.384,
-    0.384
+    -0.3839724354387525,
+    0.3839724354387525
    ],
    0.0873
   ],
@@ -385,8 +471,8 @@
    "right_hip_pitch",
    "upper_leg_right",
    [
-    -1.571,
-    1.571
+    -1.5707963267949268,
+    1.5707963267948664
    ],
    0.4579
   ],
@@ -395,8 +481,8 @@
    "right_knee",
    "upper_leg_right",
    [
-    -1.571,
-    1.571
+    -1.570796326794932,
+    1.570796326794861
    ],
    0.0049
   ],
@@ -405,8 +491,8 @@
    "right_ankle",
    "leg_2",
    [
-    -1.571,
-    1.571
+    -1.5707963267949054,
+    1.5707963267948877
    ],
    -0.453
   ]
@@ -767,6 +853,33 @@
     "E1",
     "BUS"
    ]
+  },
+  {
+   "addr": 0,
+   "size": 2,
+   "name": "Model Number",
+   "area": "EEPROM",
+   "initial": "1,200",
+   "write": "verify = 1200",
+   "means": "the model this firmware belongs to",
+   "why": "proves the fitted servo IS an XL330-M288-T before any of the bands below are applied to it. Every current, torque and voltage figure in this document is that model's; a visually identical XL330-M077-T or XC330 would pass every other read-back in SV-01 and be wrong",
+   "src": [
+    "E1",
+    "XLPART"
+   ]
+  },
+  {
+   "addr": 6,
+   "size": 1,
+   "name": "Firmware Version",
+   "area": "EEPROM",
+   "initial": "-",
+   "write": "read and record",
+   "means": "the servo's own firmware revision",
+   "why": "recorded per servo, not gated: ROBOTIS publishes no minimum version for this robot and no changelog that maps a version to a behaviour. It is recorded because a batch that mixes versions is a fact worth having BEFORE a fleet exists, not after a fault",
+   "src": [
+    "E1"
+   ]
   }
  ],
  "sections": [
@@ -875,7 +988,7 @@
      ],
      "steps": [
       {
-       "do": "Work down the rail table in section 3.1, probing at the stated point with the stated reference.",
+       "do": "Work down the rail table in section @SEC_ELECTRICAL@.1, probing at the stated point with the stated reference.",
        "expect": "each reading inside its band"
       }
      ],
@@ -885,7 +998,7 @@
       "FAIL": "any rail with a band is outside it",
       "CD": "a rail whose band is CANNOT DETERMINE (camera 3V3, ToF IOVDD) — record the value and say so; it is not a pass"
      },
-     "gate_basis": "Bands come from the fitted parts' own datasheets, tightest-part-wins per rail; see section 3.1 for the basis of each row. The 5 V band is the one decision of this plan on this table.",
+     "gate_basis": "Bands come from the fitted parts' own datasheets, tightest-part-wins per rail; see section @SEC_ELECTRICAL@.1 for the basis of each row. The 5 V band is the one decision of this plan on this table.",
      "log": "logs/<serial>/EB-03-rails.csv",
      "src": [
       "L8",
@@ -1126,11 +1239,15 @@
        "expect": "one device, ID 1"
       },
       {
+       "do": "Read Model Number(0) and Firmware Version(6) before writing anything, and record both against the servo's serial position in the build.",
+       "expect": "Model Number(0) = 1,200; the firmware version is recorded, whatever it is"
+      },
+      {
        "do": "Write Torque Enable(64) = 0.",
        "expect": "ack"
       },
       {
-       "do": "Write ID(7) = the assigned ID from the map in section 4.1.",
+       "do": "Write ID(7) = the assigned ID from the map in section @SEC_SERVO@.1.",
        "expect": "ack"
       },
       {
@@ -1154,10 +1271,10 @@
        "expect": "—"
       }
      ],
-     "measure": "Per servo: the eleven register values read back after the power cycle.",
+     "measure": "Per servo: the @SV01_READBACK_WORD@ register values read back after the power cycle (@SV01_SCAN_N@ proved by the re-scan, @SV01_WRITTEN_N@ written-then-read, @SV01_VERIFY_N@ read-only) - the addresses are listed in the data file and the count is computed from that list, not typed. Torque Enable(64) is RAM, is not read back, and is not one of them; Table @T_REG@ lists every register this plan touches, which is a larger set.",
      "gate": {
       "PASS": "every written register reads back exactly the written value, and every verify-only register is at its factory value",
-      "FAIL": "any read-back differs, or the servo does not answer at 1 Mbps after the power cycle",
+      "FAIL": "Model Number(0) is not 1,200 - the wrong servo model is fitted and every band in this document is the wrong one for it - or any other read-back differs, or the servo does not answer at 1 Mbps after the power cycle",
       "CD": "a verify-only register differs from factory — the servo has been used elsewhere; restore it and re-run rather than accepting it"
      },
      "gate_basis": "Every value and every initial value here is quoted verbatim from E1's control table in ce-parts/xl330-m288-t/electrical.chip.json. EEPROM writes are gated on Torque Enable(64) = 0 by the vendor's own rule.",
@@ -1166,6 +1283,68 @@
       "E1",
       "XLPART",
       "MODEL"
+     ],
+     "readback": [
+      [
+       7,
+       "scan",
+       "re-scan at 1 Mbps proves ID(7) took"
+      ],
+      [
+       8,
+       "scan",
+       "re-scan at 1 Mbps proves Baud Rate(8) took"
+      ],
+      [
+       9,
+       "written",
+       "Return Delay Time written then read"
+      ],
+      [
+       62,
+       "written",
+       "PWM Slope written then read"
+      ],
+      [
+       63,
+       "written",
+       "Shutdown written then read"
+      ],
+      [
+       13,
+       "verify",
+       "Protocol Type read only"
+      ],
+      [
+       31,
+       "verify",
+       "Temperature Limit read only"
+      ],
+      [
+       32,
+       "verify",
+       "Max Voltage Limit read only"
+      ],
+      [
+       34,
+       "verify",
+       "Min Voltage Limit read only"
+      ],
+      [
+       38,
+       "verify",
+       "Current Limit read only"
+      ],
+      [
+       0,
+       "verify",
+       "Model Number read only - 1,200 is the XL330-M288-T"
+      ],
+      [
+       6,
+       "verify",
+       "Firmware Version read and recorded, not gated"
+      ]
      ]
     },
     {
@@ -1274,7 +1453,7 @@
      ],
      "measure": "Per joint: minimum and maximum reachable position, in counts and degrees, and where a hard stop was met.",
      "gate": {
-      "PASS": "every joint reaches both ends of its MJCF range (section 4.1) and meets no hard stop inside it",
+      "PASS": "every joint reaches both ends of its MJCF range (section @SEC_SERVO@.1) and meets no hard stop inside it",
       "FAIL": "a hard stop inside the range, or a discontinuity in the sweep (a slipping horn or a dead encoder segment)",
       "CD": "—"
      },
@@ -1307,7 +1486,7 @@
        "expect": "—"
       },
       {
-       "do": "Compare the mean Present Position of each joint against the expected counts in section 4.1.",
+       "do": "Compare the mean Present Position of each joint against the expected counts in section @SEC_SERVO@.1.",
        "expect": "within gate"
       }
      ],
@@ -1634,7 +1813,7 @@
       "FAIL": "fewer than 56 zones, or the mean outside +/- 7 %",
       "CD": "the header says `no sensor:` - tofd is up and nothing answered on the bus. Go back to SN-01"
      },
-     "gate_basis": "+/- 7 % = the vendor's +/- 5 % (8x8 at 15 Hz, 201-4000 mm, white 88 % target, dark) plus the vendor's own stated 'additional 1~2 %' for PCB assembly tilt and mounting in a product housing. BOTH generations give the same +/- 5 % figure at this mode and range - VL53L8CX DS14161 Rev 12 Table 20 page 25, and VL53L5CX DS13754 Rev 13 Table 21 page 23 - so this gate holds even though which generation ships is CANNOT DETERMINE. Both are 45 deg x 45 deg detection volume, 65 deg diagonal. 56/64 is a decision of this plan; ST publishes no zone-yield figure, and Pollen's own example header shows 48/64 ranged in an ordinary room, so a full 64 must not be demanded. Read the last column of the theremin readout for the per-zone ST status codes if zones are missing: robotctl monitor's grid is STRICTER than the theremin - it marks anything outside status 5/9 as `x`, and a grid full of `x` does not mean the sensor is broken.",
+     "gate_basis": "+/- 7 % = the vendor's +/- 5 % (8x8 at 15 Hz, white 88 % target, dark) plus the vendor's own stated 'additional 1~2 %' for PCB assembly tilt and mounting in a product housing. BOTH generations give the same +/- 5 % figure at this mode and reflectance, and each states its own far range: VL53L8CX DS14161 Rev 12 Table 20 'Range accuracy in continuous mode', page 26 of 45, reads 200-4000 mm; VL53L5CX DS13754 Rev 13 Table 21 'Range accuracy', page 23 of 40, reads 201-4000 mm. Both page numbers are the footer of the page that carries the table, read with `pdftotext -layout` on the shelf PDFs. The 1 mm difference is the datasheets', not a transcription: it does not move the gate, and the three test distances (200 mm, 500 mm, 1000 mm) sit inside both. So this gate holds even though which generation ships is CANNOT DETERMINE - but note that 200 mm is the boundary row on the VL53L8CX and is BELOW the VL53L5CX's first accuracy row, where that part's 20-200 mm row gives +/- 15 mm absolute rather than a percentage; at 200 mm +/- 7 % is 14 mm, so the 200 mm point is the tightest of the three on a VL53L5CX and must not be dropped. Both parts are 45 deg x 45 deg detection volume, 65 deg diagonal. 56/64 is a decision of this plan; ST publishes no zone-yield figure, and Pollen's own example header shows 48/64 ranged in an ordinary room, so a full 64 must not be demanded. Read the last column of the theremin readout for the per-zone ST status codes if zones are missing: robotctl monitor's grid is STRICTER than the theremin - it marks anything outside status 5/9 as `x`, and a grid full of `x` does not mean the sensor is broken.",
      "log": "logs/<serial>/SN-06-tof.csv",
      "src": [
       "L8",
@@ -1890,10 +2069,11 @@
       "FAIL": "any disagreement",
       "CD": "—"
      },
-     "gate_basis": "The cheatsheet's first instruction: 'Run this before believing any other diagnosis'. `version` shows the live release per component, never the store - the store is the `ls` above.",
+     "gate_basis": "The cheatsheet's first instruction: 'Run this before believing any other diagnosis'. `version` shows the live release per component, never the store - the store is the `ls` above. Every component `version` names - robotd, robotctl, mediad, the updater - is built from the upstream repository github.com/pollen-robotics/microduck, Apache-2.0; a unit whose components do not all come from one release of it is a unit nobody can reason about, which is why this is the first software gate.",
      "log": "logs/<serial>/SW-01-version.txt",
      "src": [
-      "CHEAT"
+      "CHEAT",
+      "UP1"
      ]
     },
     {
@@ -2316,7 +2496,7 @@
      "title": "Stand and hold",
      "purpose": "Before it walks, it must stand still.",
      "pre": [
-      "SW-04 PASS. Robot on the FLOOR (off the stand) on the surface defined in section 7.1. Pack charged above 7.5 V."
+      "SW-04 PASS. Robot on the FLOOR (off the stand) on the surface defined in section @SEC_WALK@.1. Pack charged above 7.5 V."
      ],
      "tool": [
       "robotctl",
@@ -2358,7 +2538,7 @@
      "title": "Walk acceptance",
      "purpose": "The headline test: does a built unit walk.",
      "pre": [
-      "WK-01 PASS. Pad paired. Surface per section 7.1, levelled and measured.",
+      "WK-01 PASS. Pad paired. Surface per section @SEC_WALK@.1, levelled and measured.",
       "A 1200 mm run marked on the surface with a start line."
      ],
      "tool": [
@@ -2390,18 +2570,19 @@
        "expect": "within gate"
       }
      ],
-     "measure": "Walked distance in 8.0 s (m, 3 dp); mean speed (m/s); maximum trunk tilt (deg); falls; maximum |joint velocity| (rad/s); pack current mean and peak (A).",
+     "measure": "Walked distance in @SIM_WALK_S@ s, measured start-line to mid-foot as a straight line - the same quantity as the simulation's walked_m (m, 3 dp); mean speed over the whole run (m/s); maximum trunk tilt (deg); falls; maximum |joint velocity| (rad/s); pack current mean and peak (A).",
      "gate": {
-      "PASS": "walked >= 0.594 m in 8.0 s AND no fall AND maximum tilt <= 25.842 deg",
+      "PASS": "walked >= @GATE_WALK_M@ m in @SIM_WALK_S@ s AND no fall AND maximum tilt <= @LIMP_TILT_DEG@ deg",
       "FAIL": "any of the three",
       "CD": "the robot walks but the distance cannot be measured to 1 mm because the path curved off the run - re-run with a longer surface; a curved path is a real result and belongs in the log"
      },
-     "gate_basis": "SIMULATION REFERENCE, measured on our own run walk_ours (out/sim/report.md, MuJoCo 3.12.0, Pollen's alpha_walking.onnx, 50 Hz, timestep 0.005 s, decimation 4): 0.7925 m in 8 s, mean 0.1053 m/s, maximum tilt 4.11 deg, no fall, 0 self-contacts, contacts mean 1.92, maximum joint speed 5.74 rad/s at the left knee, 0 frames within 1 deg of any limit. The stock and swapped-mesh models produced BIT-IDENTICAL trajectories, so the reference is Pollen's physics and not ours. THE 0.594 m GATE IS A DECISION OF THIS PLAN: 75 % of the simulated 0.7925 m, an allowance for sim-to-real transfer that NO source measures - no real-robot walk distance exists anywhere in this repository or in Pollen's published material. The 25.842 deg tilt gate IS derived: limp_fall_tilt_z = -0.90 in robotd.toml, and acos(0.90) = 25.842 deg, the tilt at which the daemon itself decides a fall has started. DO NOT TEST AT 0.15 m/s: our own velocity sweep on Pollen's stock model measured vx 0.05 -> 0.003 m, 0.10 -> 0.007 m, 0.15 -> 0.008 m, 0.20 -> 0.011 m, 0.25 -> 0.792 m, 0.30 -> 0.940 m, 0.40 -> 1.281 m in 8 s. Everything below 0.25 sits inside the walking policy's stand-still band and a robot that correctly stands still would read as a failure.",
+     "gate_basis": "SIMULATION REFERENCE, measured on our own run walk_ours (out/sim/report.json runs.walk_ours; MuJoCo 3.12.0, Pollen's @SIM_WALK_POLICY@, 50 Hz, timestep 0.005 s, decimation 4). Three distances, and they are three different quantities - the gate uses the first: walked_m = @SIM_WALK_M@ m, the straight-line trunk displacement over the whole @SIM_WALK_S@ s run; walked_x_m = @SIM_WALK_X@ m, the X component of that same displacement; and mean_speed_m_s_commanded_window = @SIM_WALK_SPEED_WINDOW@ m/s, which is NOT either of them divided by 8 - sim/run_policy.py:270-275 takes the displacement between the first and last sample with t >= the @SIM_WALK_WARMUP_S@ s warm-up and divides by that @SIM_WALK_WINDOW_S@ s window. Averaged over the whole run instead, @SIM_WALK_M@ m / @SIM_WALK_S@ s = @SIM_WALK_MEAN_ALL@ m/s. Also measured: maximum tilt @SIM_WALK_TILT@ deg, no fall, 0 self-contacts, contacts mean 1.92, maximum joint speed 5.74 rad/s at the left knee, 0 frames within 1 deg of any limit. The stock and swapped-mesh models produced BIT-IDENTICAL trajectories, so the reference is Pollen's physics and not ours. THE @GATE_WALK_M@ m GATE IS A DECISION OF THIS PLAN: @GATE_PCT@ % of the simulated walked_m, an allowance for sim-to-real transfer that NO source measures - no real-robot walk distance exists anywhere in this repository or in Pollen's published material. The @LIMP_TILT_DEG@ deg tilt gate IS derived: limp_fall_tilt_z = -0.90 in robotd.toml, and acos(0.90) = @LIMP_TILT_DEG@ deg, the tilt at which the daemon itself decides a fall has started. DO NOT TEST AT 0.15 m/s: our own velocity sweep on Pollen's stock model measured vx 0.05 -> 0.003 m, 0.10 -> 0.007 m, 0.15 -> 0.008 m, 0.20 -> 0.011 m, 0.25 -> 0.792 m, 0.30 -> 0.940 m, 0.40 -> 1.281 m in 8 s. Everything below 0.25 sits inside the walking policy's stand-still band and a robot that correctly stands still would read as a failure. The policy itself is upstream: microduck_rl trains it in mjlab AT 50 Hz and exports to ONNX for deployment on the real robot, which is the same 50 Hz our run drives it at - so the control rate under which this reference distance was produced is the vendor's own, not a choice of ours.",
      "log": "logs/<serial>/WK-02-walk-<n>.jsonl",
      "src": [
       "SIM",
       "TOML",
-      "TESTDESIGN"
+      "TESTDESIGN",
+      "UP2"
      ]
     },
     {
@@ -2569,7 +2750,7 @@
      "pre": [
       "WK-02 passed.",
       "A pack straight off the dual charger, open-circuit voltage recorded before fitting.",
-      "The floor of section 7, clear for the whole run."
+      "The floor of section @SEC_WALK@, clear for the whole run."
      ],
      "tool": [
       "DC current clamp or shunt",
@@ -2791,6 +2972,11 @@
    "DMM"
   ],
   [
+   "EB-02",
+   "constant-voltage for 5 s with no pack and no servos; settled current recorded",
+   "Bench PSU"
+  ],
+  [
    "EB-03",
    "every rail with a band inside it",
    "DMM"
@@ -2799,6 +2985,11 @@
    "EB-04",
    "SERVO_V measured at four points, both supply settings",
    "DMM"
+  ],
+  [
+   "EB-05",
+   "derived servo standby >= 0.255 A AND SV-03 finds all 16 devices",
+   "PSU readout or DMM in series"
   ],
   [
    "EB-06",
@@ -2811,9 +3002,19 @@
    "monitor"
   ],
   [
+   "EB-08",
+   "all four USB-C cases measured and recorded (the verdict may be CANNOT DETERMINE; the RECORD is the gate)",
+   "USB-C supply + DMM"
+  ],
+  [
    "SV-01",
    "every servo's eleven registers read back correct",
    "adapter"
+  ],
+  [
+   "SV-02",
+   "|Present Position - 2048| <= 11 counts (= 0.9668 deg) on every joint at mechanical zero",
+   "adapter + jig"
   ],
   [
    "SV-03",
@@ -2821,14 +3022,29 @@
    "bus scan"
   ],
   [
+   "SV-04",
+   "every joint reaches both ends of its MJCF range and meets no hard stop inside it",
+   "hand + state stream"
+  ],
+  [
    "SV-05",
    "fifteen joints within +/- 11 counts of home",
    "monitor"
   ],
   [
+   "SV-06",
+   "mouth reaches both ends within +/- 11 counts, Present Current below 1750 mA, drift over 10 cycles <= 11 counts",
+   "robotctl + adapter"
+  ],
+  [
    "SN-01",
    "0x18, 0x19, 0x29, 0x68 on I2C3",
    "i2cdetect"
+  ],
+  [
+   "SN-02",
+   "0x1E at 0x19 reg 0x00 and 0x0F at 0x68 reg 0x00 - the BMI088 is the part that is fitted",
+   "i2c-tools"
   ],
   [
    "SN-03",
@@ -2856,6 +3072,11 @@
    "alsa + FFT"
   ],
   [
+   "SN-10",
+   "the indicator is lit whenever the stream runs and out whenever it does not, 3 of 3",
+   "eyes"
+  ],
+  [
    "SW-01",
    "every daemon runs the installed release",
    "robotctl version"
@@ -2871,39 +3092,14 @@
    "monitor --json"
   ],
   [
+   "SW-04",
+   "the monitor border names the configured policies and health is healthy",
+   "robotctl monitor"
+  ],
+  [
    "SW-05",
    "velocity zeroed within 500 ms, robot left standing",
    "gamepad"
-  ],
-  [
-   "WK-01",
-   "no fall in 30 s; tilt <= 10.0 deg; drift <= 50 mm",
-   "floor"
-  ],
-  [
-   "WK-02",
-   "walked >= 0.594 m in 8.0 s; no fall; tilt <= 25.842 deg",
-   "floor + rule"
-  ],
-  [
-   "WK-03",
-   "5 of 5; spread <= 0.150 m",
-   "floor"
-  ],
-  [
-   "WK-04",
-   "9 of 9 get-ups within 6.0 s",
-   "floor"
-  ],
-  [
-   "WK-06",
-   "every servo below 70 degC after five walks",
-   "monitor"
-  ],
-  [
-   "SN-10",
-   "the indicator is lit whenever the stream runs and out whenever it does not, 3 of 3",
-   "eyes"
   ],
   [
    "RD-01",
@@ -2929,6 +3125,36 @@
    "RD-05",
    "every daemon runs the shipped release and one rollback returned healthy",
    "robotctl update"
+  ],
+  [
+   "WK-01",
+   "no fall in 30 s; tilt <= 10.0 deg; drift <= 50 mm",
+   "floor"
+  ],
+  [
+   "WK-02",
+   "walked >= 0.594 m in 8.0 s; no fall; tilt <= 25.842 deg",
+   "floor + rule"
+  ],
+  [
+   "WK-03",
+   "5 of 5; spread <= 0.150 m",
+   "floor"
+  ],
+  [
+   "WK-04",
+   "9 of 9 get-ups within 6.0 s",
+   "floor"
+  ],
+  [
+   "WK-05",
+   "limp_fall arms before ground contact and the robot recovers to standing, 3 of 3",
+   "gamepad + monitor --json"
+  ],
+  [
+   "WK-06",
+   "every servo below 70 degC after five walks",
+   "monitor"
   ],
   [
    "EN-01",
@@ -3045,7 +3271,7 @@
    "q": "Is any joint's servo-positive direction inverted relative to the MJCF joint sign?",
    "test": "SV-05",
    "status": "CANNOT DETERMINE. No published source gives a per-joint inversion table",
-   "settles": "SV-05 on the first unit. A joint that lands the same distance the wrong side of 2048 is an inversion. The measured table becomes a column of section 4.1 and this plan is regenerated."
+   "settles": "SV-05 on the first unit. A joint that lands the same distance the wrong side of 2048 is an inversion. The measured table becomes a column of section @SEC_SERVO@.1 and this plan is regenerated."
   },
   {
    "q": "What does a real Microduck actually walk in 8 s at vx 0.25?",
@@ -3084,7 +3310,7 @@
    "settles": "Installing two releases at the factory - the shipped one and its predecessor - so RD-05 can roll back and return. That is a build decision, not a measurement; record which way each batch was built."
   }
  ],
- "eol_note": "One line per gate, in test order. A unit ships when every box is ticked and no row reads CANNOT DETERMINE. **SN-09 (NFC) is deliberately not on this list**: on today's published software the expected outcome is CANNOT DETERMINE, and a checklist containing a question nobody can answer trains people to tick it anyway. SN-10 (the camera-use indicator) **is** on the list, because although its GPIO is unknown, a person can see whether the light is on - and it is the only check of a privacy requirement Pollen wrote down for itself.",
+ "eol_note": "One line per gate, in test order, and it is COMPLETE by construction: the generator refuses to write this document unless every test with a PASS gate is either on this list or on the exemption list below it with a reason. A unit ships when every box is ticked and no row reads CANNOT DETERMINE. SN-10 (the camera-use indicator) IS on the list even though its GPIO is unknown, because a person can see whether the light is on - and it is the only check of a privacy requirement Pollen wrote down for itself. EB-08 is on the list with its RECORD as the gate rather than a verdict, because the four charging cases have never been measured on any unit and the first unit to measure them is the one that settles the open question.",
  "padmap": {
   "title": "Gamepad map",
   "note": "Quoted from Pollen's cheat sheet, Gamepad (`configd`). RD-02 works through every row. There is no stop button: release the sticks and the robot stands, and robotd's deadman stops it if `padd` dies.",
@@ -3174,7 +3400,7 @@
    "q": "Which ToF generation ships, VL53L5CX or VL53L8CX?",
    "was": "CANNOT DETERMINE in Rev A - the datasheets were read but nothing said which part is fitted.",
    "now": "SETTLED, and the answer is BOTH. `tof/src/lib.rs` lines 8-11, verbatim: 'Both generations, decided at runtime. The two are interchangeable on the board and differ only in firmware and a driver prefix, so which one is fitted is not a build-time choice: an ID read picks the driver before any firmware is uploaded (Generation). Ducks in the field have both.' The daemon also tries two addresses, 0x29 then 0x52 - 0x29 is the factory default for both generations, and 0x52 is where a prototype moved an L5CX when an I2C IMU wanted 0x29, an address that survives power cycles (tofd/src/main.rs, ADDRESS_CANDIDATES).",
-   "consequence": "SN-06 needs no change: the +/- 5 % accuracy figure is identical for both parts at 8x8 / 15 Hz / 201-4000 mm against an 88 % white target. Section 3's rail table does: the ToF CORE_1V8 row is N/A rather than FAIL on a unit that came up as a VL53L5CX, because that part has no separate core rail. Record the generation the header names before judging that row.",
+   "consequence": "SN-06 needs no change: the +/- 5 % accuracy figure is identical for both parts at 8x8 / 15 Hz against an 88 % white target, over each datasheet's own far range - 200-4000 mm on the VL53L8CX (DS14161 Rev 12 Table 20, page 26/45) and 201-4000 mm on the VL53L5CX (DS13754 Rev 13 Table 21, page 23/40). Section 3's rail table does: the ToF CORE_1V8 row is N/A rather than FAIL on a unit that came up as a VL53L5CX, because that part has no separate core rail. Record the generation the header names before judging that row.",
    "src": [
     "TOFLIB",
     "TOFSRC",
@@ -3202,6 +3428,102 @@
     "PRESS",
     "ELEC",
     "MODEL"
+   ]
+  }
+ ],
+ "eol_exempt": [
+  [
+   "SN-05",
+   "The LSM6DSV16X sits behind an unidentified MCU on the imu_to_dxl board and is on no host bus, so its chip self-test cannot be run on an assembled robot at all. SN-05 is an incoming-inspection gate for the bare board, not an end-of-line gate for the unit. Putting it on the ship list would put a box on the sheet that no line operator can ever tick.",
+   "an imu_to_dxl board on a bench fixture with SPI or I2C brought out, before the board is fitted"
+  ],
+  [
+   "SN-09",
+   "On today's published software the expected verdict is CANNOT DETERMINE: no NFC service appears in the release and no reader IC has been identified. A checklist row that is answered CANNOT DETERMINE on every good unit trains people to tick it anyway.",
+   "a teardown that names the reader IC, or a Pollen release that ships an NFC service"
+  ]
+ ],
+ "corrections": [
+  {
+   "what": "WK-02 walk gate basis quoted 'mean 0.1053 m/s' against out/sim/report.md walk_ours.",
+   "measured": "No source carries 0.1053. out/sim/report.json runs.walk_ours gives mean_speed_m_s_commanded_window = 0.1055 and out/sim/report.md:40 gives 0.105. 0.1053 is walked_x_m / 7.5 = 0.7894 / 7.5 - the X component over the commanded window, a third quantity, and it contradicted the 0.7925 m in the same sentence.",
+   "now": "Every distance and speed in the WK-02 basis is a token substituted from out/sim/report.json at generation time, each named with the key it came from, and the three quantities are distinguished in the text.",
+   "src": [
+    "SIM"
+   ]
+  },
+  {
+   "what": "The end-of-line checklist claimed to carry one line per gate.",
+   "measured": "At the commit the review read (27ffea5, 35 tests), 12 were absent from the checklist and 10 of those carried real PASS gates. By the time it was fixed the plan had grown to 44 tests and 11 were absent, every one of them gated - including WK-05, the only safety-behaviour test in the plan, plus SV-02 mechanical zero, SV-04 free travel and SN-02 IMU identity. A unit could tick every box on the ship checklist without any of them.",
+   "now": "Nine rows added, two recorded as deliberate exemptions with reasons, and selfcheck() refuses to write the document if any test with a PASS gate is on neither list.",
+   "src": [
+    "TESTDESIGN"
+   ]
+  },
+  {
+   "what": "The generator had no self-check; a broken source key rendered as a plausible-looking citation.",
+   "measured": "grep for assert/raise/SystemExit in tools/gen_test_plan.py returned nothing but function definitions, and srcline() fell back to printing the raw key as its own label on a miss.",
+   "now": "selfcheck() runs the @N_CHECKS@ checks of section 1.4 before a byte is written and exits non-zero having written nothing on any failure; srcline() raises on an unresolved key rather than printing it as its own label. Each check was broken on purpose once in a sandbox copy and watched to fire: @N_CHECKS@ of @N_CHECKS@ did.",
+   "src": [
+    "TESTDESIGN"
+   ]
+  },
+  {
+   "what": "SN-06 cited 'VL53L8CX DS14161 Rev 12 Table 20 page 25'.",
+   "measured": "pdftotext -layout on ce-parts/vl53l8cx/datasheet.pdf: the footer of the page carrying Table 20 reads 'DS14161 - Rev 12   page 26/45'. Page 25 is the page before it. The companion VL53L5CX citation (DS13754 Rev 13 Table 21 page 23) is correct, verified the same way.",
+   "now": "Page 26 of 45, with the extraction command named in the basis.",
+   "src": [
+    "L8",
+    "L5"
+   ]
+  },
+  {
+   "what": "The ToF accuracy window was restated as '201-4000 mm' for both parts.",
+   "measured": "The two datasheets do not agree with each other: DS14161 Table 20 reads 200-4000 mm and DS13754 Table 21 reads 201-4000 mm, both read with pdftotext -layout. The plan had flattened them to one number.",
+   "now": "Each range is quoted against its own datasheet, and the basis says the 1 mm is the datasheets' and does not move the gate. The 200 mm test point is called out as the tightest of the three on a VL53L5CX.",
+   "src": [
+    "L8",
+    "L5"
+   ]
+  },
+  {
+   "what": "SV-01 measured 'the eleven register values read back'.",
+   "measured": "The steps read back ten distinct addresses: 7 and 8 proved by the re-scan, 9/62/63 written-then-read, and 13/31/32/34/38 verify-only. Torque Enable(64) is RAM and is read back nowhere. Eleven was derivable from nothing on the page.",
+   "now": "The ten addresses are a list in the data file; the word 'ten' and the three sub-counts are computed from that list, and selfcheck() requires every address in it to exist in the register table.",
+   "src": [
+    "E1",
+    "XLPART"
+   ]
+  },
+  {
+   "what": "The ID map stored MJCF joint ranges pre-rounded to 3 decimal places.",
+   "measured": "sim/microduck_ours.xml carries them at full double precision, and every one of them is an exact whole number of degrees: left_hip_yaw is -0.4363323129985824 to 0.5235987755982988 rad, i.e. exactly -25 to +30 degrees. Rounding to -0.436/0.524 discarded that and hid it.",
+   "now": "The ranges are read out of the MJCF by the generator, shown in radians to 4 dp AND in degrees to 4 dp where the whole-degree limits are visible, and selfcheck() fails if the stored copy and the MJCF disagree by more than 1e-9 rad. The mouth (ID 34) has no MJCF joint and is exempt with model.rs:63-64 named.",
+   "src": [
+    "SIM",
+    "MODEL"
+   ]
+  },
+  {
+   "what": "The sources table was captioned 'Every source cited by a gate in this document'.",
+   "measured": "Two of the rows, UP1 and UP2 (the two upstream GitHub repositories), were cited by no gate; 25 of 27 keys were used.",
+   "now": "The table carries a 'cited by' column computed from actual use as the document renders, rows cited by nothing say so in their own row, and the caption counts both groups. Both upstream repositories are now cited by the gates that genuinely rest on them: UP2 on WK-02 (the walking policy is trained in microduck_rl at the same 50 Hz our reference run drives it at) and UP1 on SW-01 (every component SW-01 asks a version of is built from that repository).",
+   "src": []
+  },
+  {
+   "what": "The instrument table named the gates each tool serves in prose, and three of those names had gone stale.",
+   "measured": "The 88 % reflectance target and the steel rule both said they served SN-05, which is the LSM6DSV16X chip self-test; the ToF ranging test is SN-06. The measurement microphone said SN-07, which is the camera; audio loopback is SN-08. All three ids resolved to a real test, so nothing downstream complained - they were simply the wrong test.",
+   "now": "Each row carries a machine-readable list of the tests it serves, rendered as links, plus the exact tool string those tests name it by; selfcheck() requires that string to appear literally in each listed test's tool list, following an `as WK-02` delegation. That check fired on three further mismatches while it was being written and all three were corrected.",
+   "src": [
+    "TESTDESIGN"
+   ]
+  },
+  {
+   "what": "The Rev-B generator printed a character count and called it bytes, and the lane's own report repeated it alongside a rail-table row count that included the header.",
+   "measured": "len(HTML) counts characters; the em dashes and times signs on this page are 2-3 UTF-8 bytes each, so the printed 134739 stood against a file of 134841 bytes - a 102-byte gap that is exactly the multi-byte characters. The rail table has 9 data rows, not 10; the tenth <tr> is the header.",
+   "now": "The generator stats the file it just wrote and prints chars and bytes separately, and the rail count in this document is len(rails) rather than a count of table rows.",
+   "src": [
+    "TESTDESIGN"
    ]
   }
  ]
