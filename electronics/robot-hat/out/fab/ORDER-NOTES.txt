@@ -1,0 +1,47 @@
+Microduck Robot HAT (reconstruction)
+====================================
+
+These are the board author's own notes, shipped WITH the Gerbers
+because the fab README does not carry them. Read them before
+ordering; several are the reason a number is what it is.
+
+DRC verdict: FAIL
+
+1. _resolve_offboard(): 33 netlist terminals resolved as not-pads-of-this-board, each with its reason:
+  - host.5V (net V5_HAT): off-board — the Radxa Zero 3W itself — it plugs onto J1; its pins are the other side of the 40-pin connector, not pads of this board
+  - host.GND (net GND): off-board — the Radxa Zero 3W itself — it plugs onto J1; its pins are the other side of the 40-pin connector, not pads of this board
+  - camera.GND (net GND): off-board — the IMX219 module rides the Radxa's own 22-pin CSI connector (docs §5); no CSI signal touches the HAT
+  - host.SDA (net i2c3/SDA): off-board — the Radxa Zero 3W itself — it plugs onto J1; its pins are the other side of the 40-pin connector, not pads of this board
+  - host.SCL (net i2c3/SCL): off-board — the Radxa Zero 3W itself — it plugs onto J1; its pins are the other side of the 40-pin connector, not pads of this board
+  - host.TX (net uart2/TX): off-board — the Radxa Zero 3W itself — it plugs onto J1; its pins are the other side of the 40-pin connector, not pads of this board
+  - host.RX (net uart2/RX): off-board — the Radxa Zero 3W itself — it plugs onto J1; its pins are the other side of the 40-pin connector, not pads of this board
+  - host.DATA (net dxl/DATA): off-board — the Radxa Zero 3W itself — it plugs onto J1; its pins are the other side of the 40-pin connector, not pads of this board
+  - hat.DXL_DATA (net dxl/DATA): the HAT is THIS BOARD — the provision lands on the board pads already on that net (J3.3)
+  - host.BCLK (net i2s3/BCLK): off-board — the Radxa Zero 3W itself — it plugs onto J1; its pins are the other side of the 40-pin connector, not pads of this board
+  - host.MCLK (net i2s3/MCLK): off-board — the Radxa Zero 3W itself — it plugs onto J1; its pins are the other side of the 40-pin connector, not pads of this board
+  - host.WCLK (net i2s3/WCLK): off-board — the Radxa Zero 3W itself — it plugs onto J1; its pins are the other side of the 40-pin connector, not pads of this board
+  - host.DIN (net i2s3/DIN): off-board — the Radxa Zero 3W itself — it plugs onto J1; its pins are the other side of the 40-pin connector, not pads of this board
+  - host.DOUT (net i2s3/DOUT): off-board — the Radxa Zero 3W itself — it plugs onto J1; its pins are the other side of the 40-pin connector, not pads of this board
+  - host.SDA (net i2c2/SDA): off-board — the Radxa Zero 3W itself — it plugs onto J1; its pins are the other side of the 40-pin connector, not pads of this board
+  - camera.I2C2_SDA (net i2c2/SDA): off-board — the IMX219 module rides the Radxa's own 22-pin CSI connector (docs §5); no CSI signal touches the HAT
+  - host.SCL (net i2c2/SCL): off-board — the Radxa Zero 3W itself — it plugs onto J1; its pins are the other side of the 40-pin connector, not pads of this board
+  - camera.I2C2_SCL (net i2c2/SCL): off-board — the IMX219 module rides the Radxa's own 22-pin CSI connector (docs §5); no CSI signal touches the HAT
+  - host.CLK (net csi/CLK): off-board — the Radxa Zero 3W itself — it plugs onto J1; its pins are the other side of the 40-pin connector, not pads of this board
+  - camera.CSI_CLK (net csi/CLK): off-board — the IMX219 module rides the Radxa's own 22-pin CSI connector (docs §5); no CSI signal touches the HAT
+  - host.D0 (net csi/D0): off-board — the Radxa Zero 3W itself — it plugs onto J1; its pins are the other side of the 40-pin connector, not pads of this board
+  - camera.CSI_D0 (net csi/D0): off-board — the IMX219 module rides the Radxa's own 22-pin CSI connector (docs §5); no CSI signal touches the HAT
+  - host.D1 (net csi/D1): off-board — the Radxa Zero 3W itself — it plugs onto J1; its pins are the other side of the 40-pin connector, not pads of this board
+  - camera.CSI_D1 (net csi/D1): off-board — the IMX219 module rides the Radxa's own 22-pin CSI connector (docs §5); no CSI signal touches the HAT
+  - hat.VBAT (net VBAT): the HAT is THIS BOARD — the provision lands on the board pads already on that net (J2.1)
+  - hat.SERVO_V (net SERVO_V): the HAT is THIS BOARD — the provision lands on the board pads already on that net (J3.2)
+  - hat.J5_3V3 (net J5_3V3): the HAT is THIS BOARD — the provision lands on the board pads already on that net (J5.2)
+  - hat.SPK+ (net SPK_P): the HAT is THIS BOARD — the provision lands on the board pads already on that net (J6.1)
+  - hat.SPK- (net SPK_N): the HAT is THIS BOARD — the provision lands on the board pads already on that net (J6.2)
+  - hat.MIC_IN (net MIC_IN): the HAT is THIS BOARD — the provision lands on the board pads already on that net (J7.2)
+  - hat.MICBIAS (net MICBIAS): the HAT is THIS BOARD — the provision lands on the board pads already on that net (J7.3)
+  - camera.VCC_3V3 (net VCC_3V3_CSI): off-board — the IMX219 module rides the Radxa's own 22-pin CSI connector (docs §5); no CSI signal touches the HAT
+  - camera.PDN (net csi17): off-board — the IMX219 module rides the Radxa's own 22-pin CSI connector (docs §5); no CSI signal touches the HAT
+
+2. POWER PATH: VBAT, SERVO_V and V5_HAT are routed at 0.800 mm on 1 oz outer copper, which IPC-2221 §6.2 puts at 2.034 A for a 10 degC rise and 2.760 A at 20 degC. They used to be 0.400 mm = 1.231 A. THE DEMAND IS CANNOT DETERMINE: the XL330's published figures are 17 mA standby and 1.47 A stall at 5 V with no running current, so the 16-device bus total has no number behind it, and wiring/CABLES.md's own 1 A-per-moving-servo worst case is stated there as an assumption. 0.800 mm is the widest track this board's lattice can thread between 2.54 mm header pins — the lattice pitch is (width + clearance) * sqrt(2), and this board's own run 2 is on record that 1.0 mm gave a 1.56 mm lattice that could not thread the bottom connector row. 1.200 mm would carry 2.730 A and would not route. A supply path that really had to carry ten amps would need 2 oz copper or a plane, and this 2-layer stackup spends its back layer on the GND pour.
+
+3. POLLEN'S OWN HAT MESH WAS MEASURED (2026-09-02) and this board's outline follows it: 65.000 x 30.000 mm, corner radius 3.5000 mm fitted to 36 arc points about the mounting-hole centre (r min 3.5000, r max 3.5001) — NOT the Raspberry Pi Zero drawing's 3.0 mm, which was what this file used until today. The mesh also carries the full 2x20 header (40 x dia 1.0200 at y +/-1.270, x 4.870..53.130 on 2.540, field centre 29.000 = board centre), 4 x dia 2.7000 mounting holes on the 58 x 23 pattern, 2 x dia 2.0000 pegs at (6.140, 0.000) and (51.860, 0.000), 14 x dia 0.9500 connector holes on a 2.500 mm pitch in four groups, and one dia 1.0000 hole at (31.200, -11.900). The mesh's thickness is 0.840 mm; this board is built on the 1.6 mm stackup, because 0.840 is not a thickness JLCPCB lists ('0.4/0.6/0.8/1.0/1.2/1.6/2.0 mm') and a 0.84 mm visual mesh is more likely a modelling simplification than a fab order. THE CONNECTOR HOLES ARE NOT COPIED HERE — see POLLEN_MESH in this file for the full table and for what about them is CANNOT DETERMINE.

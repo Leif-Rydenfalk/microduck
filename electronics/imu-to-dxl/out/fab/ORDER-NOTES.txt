@@ -1,0 +1,26 @@
+Microduck imu_to_dxl v2 (reconstruction)
+========================================
+
+These are the board author's own notes, shipped WITH the Gerbers
+because the fab README does not carry them. Read them before
+ordering; several are the reason a number is what it is.
+
+DRC verdict: FAIL
+
+1. _resolve_offboard(): 118 netlist terminals resolved as not-pads-of-this-board. The robot netlist is the WHOLE robot; this board is one device on it. First ten reasons:
+  - host.5V (net V5_HAT): off-board — net V5_HAT has no pad on the imu_to_dxl board
+  - hat.V5_OUT (net V5_HAT): off-board — net V5_HAT has no pad on the imu_to_dxl board
+  - host.GND (net GND): another device on the same bus node — its terminal lands on this board's own pads on that net (J1.1)
+  - battery.BAT- (net GND): another device on the same bus node — its terminal lands on this board's own pads on that net (J1.1)
+  - hat.GND (net GND): another device on the same bus node — its terminal lands on this board's own pads on that net (J1.1)
+  - codec.GND (net GND): another device on the same bus node — its terminal lands on this board's own pads on that net (J1.1)
+  - bmi088.GND (net GND): another device on the same bus node — its terminal lands on this board's own pads on that net (J1.1)
+  - tof.GND (net GND): another device on the same bus node — its terminal lands on this board's own pads on that net (J1.1)
+  - id20.GND (net GND): another device on the same bus node — its terminal lands on this board's own pads on that net (J1.1)
+  - id21.GND (net GND): another device on the same bus node — its terminal lands on this board's own pads on that net (J1.1)
+
+2. OUTLINE IS NOT MEASURED. 40.000 x 22.000 mm r2.0 with two M2 holes at (3.000, 18.500) and (37.000, 18.500) is decision E8. Pollen ships no mesh, no drawing and no photograph of this board; the MJCF places only an `imu` SITE at trunk_base body (-21, 0.1, -14.7) -> world (-21, 0, 105.3) mm (docs/ELECTRONICS-AND-SOFTWARE.md §4.1). A clearance check of this rectangle against trunk_base is a mechanical task, not a PCB one, and it has not been run.
+
+3. E10 — THE POWER PATH IS A PASS-THROUGH. SERVO_V arrives on J1 and leaves on J2 and J3, so this board's copper carries every device downstream of it: with wiring/CABLES.md's harness that is both leg chains, ten XL330 servos. It is hand-laid at 2.000 mm on F.Cu AND mirrored on B.Cu with four stitching vias, claimed before the router runs. IPC-2221 §6.2 gives 3.95 A per layer at a 10 degC rise (5.36 A at 20 degC); whether the pair carries twice that is NOT something IPC-2221 answers — the two runs are 1.6 mm apart in one thermal mass — so the honest figure is the per-layer one. The first build of this board let the autorouter draw this net at 0.400 mm, which the same equation puts at 1.23 A. GND returns through the B.Cu pour, which is the width of the board.
+
+4. CURRENT: no net on this board has a documented total. The published figures are the chip's alone — 'IddHP | Gyroscope and accelerometer current consumption in high-performance mode | 0.65 | mA' (DS13510 Table 4 p.14/198) — and the record says so explicitly: 'The board's MCU and transceiver draw are unpublished, so the board total is CANNOT DETERMINE; this figure is a floor, not the board' (ce-parts/microduck-imu-to-dxl/electrical.part.json). check_current therefore reports CANNOT DETERMINE and no track is sized from a guess.

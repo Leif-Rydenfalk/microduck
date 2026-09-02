@@ -245,9 +245,27 @@ def main():
             raise SystemExit(
                 f"{bd['slug']}: the pin table has {got} rows for {want} pads. "
                 f"A schematic that drops a pin is worse than no schematic.")
-        built.append({"meta": bd, "verdict": verdict, "counts": counts,
+        built.append({"meta": bd, "mod": mod, "verdict": verdict, "counts": counts,
                       "findings": findings, "header": header, "bom": bom,
                       "pos": pos, "board": b, "report": rep})
+
+    # ORDER-NOTES.txt: the board author's notes, into the fab package and
+    # into the zip. Written HERE as well as by the boards themselves, so a
+    # board whose notes changed after its last routed build still ships the
+    # current ones. The verdict printed into the file is the one READ OUT of
+    # that board's fab README — the routed verdict — never the check this
+    # generator's own no-route load produced.
+    class _V:
+        def __init__(self, v):
+            self.verdict = v or "not built"
+
+    for x in built:
+        mod = x["mod"]
+        if hasattr(mod, "write_order_notes"):
+            p_notes = mod.write_order_notes(
+                x["board"], _V(x["verdict"]),
+                os.path.join(REPO, x["meta"]["dir"], "out", "fab"))
+            x["order_notes"] = os.path.relpath(p_notes, REPO)
 
     # per-board schematic SVGs, written beside the board
     for x in built:
