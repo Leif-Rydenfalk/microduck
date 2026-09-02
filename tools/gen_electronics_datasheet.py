@@ -89,24 +89,49 @@ def mass_str(c):
     return '<span class="mono">%s</span>' % E(s)
 
 
+def _supply_rows(sh):
+    """Every shape a folder states a supply in, in the order they are trusted.
+
+    `supplies` is the chip records' shape (min/typ/max). A HOST folder states
+    `power` instead (an input, one nominal), and a PART that SOURCES power
+    states `provides`. Reading only `supplies` printed CANNOT DETERMINE for the
+    Radxa and for the battery — for the two rows whose voltage is the least
+    uncertain thing on the whole page.
+    """
+    for key in ("supplies", "power", "provides"):
+        v = elec_field(sh, key)
+        if not v:
+            continue
+        rows = [v] if isinstance(v, dict) else list(v)
+        out = []
+        for s in rows:
+            if not isinstance(s, dict):
+                continue
+            lo, ty, hi = s.get("v_min"), s.get("v_typ"), s.get("v_max")
+            nom = s.get("v_nom", s.get("v_nominal"))
+            if lo is None and hi is None and nom is None:
+                continue
+            out.append((s.get("name") or "", lo,
+                        ty if ty is not None else nom, hi, s.get("cite")))
+        if out:
+            return out
+    return []
+
+
 def supply_str(sh):
-    sup = elec_field(sh, "supplies")
-    if not sup:
+    rows = _supply_rows(sh)
+    if not rows:
         return '<span class="cd">CD</span>'
-    if isinstance(sup, dict):
-        sup = [sup]
     bits = []
-    for s in sup[:3]:
-        if not isinstance(s, dict):
-            continue
-        lo, ty, hi = s.get("v_min"), s.get("v_typ"), s.get("v_max")
+    for name, lo, ty, hi, _cite in rows[:3]:
+        n = name.split(" ")[0]
         if lo is None and hi is None:
-            continue
-        name = (s.get("name") or "").split(" ")[0]
-        bits.append("%s %s/%s/%s" % (name, lo if lo is not None else "?",
-                                     ty if ty is not None else "?",
-                                     hi if hi is not None else "?"))
-    return '<span class="mono">%s</span>' % E("; ".join(bits)) if bits else '<span class="cd">CD</span>'
+            bits.append("%s %s" % (n, ty))
+        else:
+            bits.append("%s %s/%s/%s" % (n, "?" if lo is None else lo,
+                                         "?" if ty is None else ty,
+                                         "?" if hi is None else hi))
+    return '<span class="mono">%s</span>' % E("; ".join(bits))
 
 
 def current_str(c, sh):
@@ -226,8 +251,8 @@ def detail_block(c, sh):
         cur += '<div class="src">%s</div>' % E(ec["typical_basis"])
     kv.append(("current", cur))
     kv.append(("supply", supply_str(sh) + "".join(
-        '<div class="src">%s</div>' % E(s.get("cite", ""))
-        for s in (elec_field(sh, "supplies") or []) if isinstance(s, dict) and s.get("cite"))))
+        '<div class="src">%s</div>' % E(cite)
+        for _n, _lo, _ty, _hi, cite in _supply_rows(sh) if cite)))
     pkg = elec_field(sh, "package")
     if pkg:
         kv.append(("package, verbatim", '<div class="src">%s</div>' % E(pkg)))
@@ -376,8 +401,10 @@ def build(out_path):
             ("electronics/3-layout.svg",
              "<b>Layout.</b> Where each device physically is and what cable joins it to what, from spec/mesh-placements.json and wiring/CABLES.md.")]:
         if os.path.exists(os.path.join(REPO, path)):
-            A('<figure><img src="%s" alt="%s"><figcaption>%s <a href="%s">%s</a></figcaption></figure>'
-              % (E(path), E(path), cap, E(path), E(path)))
+            note = (N.get("figure_notes") or {}).get(path)
+            A('<figure><img src="%s" alt="%s"><figcaption>%s <a href="%s">%s</a>%s</figcaption></figure>'
+              % (E(path), E(path), cap, E(path), E(path),
+                 ('<div class="src cd">%s</div>' % E(note)) if note else ""))
     A("</section>")
 
     # §3 roster
