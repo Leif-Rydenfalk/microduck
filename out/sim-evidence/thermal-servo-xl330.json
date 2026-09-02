@@ -1,0 +1,1473 @@
+{
+ "study": "thermal-servo-xl330",
+ "what": "Winding/case heating of the fifteen XL330-M288-T actuators at the measured walking duty, against the vendor's own Temperature Limit(31) = 70 degC shutdown.",
+ "inputs": {
+  "load_basis": {
+   "file": "out/sim-evidence/gait-torque-duty.json",
+   "script": "sim/thermal_duty.py",
+   "statistic": "mean(tau^2) per joint over t >= 0.5 s of an 12.0 s commanded walk at vx = 0.25 m/s, sampled at the 200 Hz physics step",
+   "why_that_statistic": "copper loss is I^2 R and I is proportional to torque, so mean(tau^2) is the only average that maps linearly onto heat",
+   "cross_check": {
+    "file": "out/sim-evidence/gait-peaks.json",
+    "script": "sim/gait_sweep.py (lane F2)",
+    "baseline_walk_vx0.25_peak_Nm": {
+     "left_hip_yaw": 0.10114,
+     "left_hip_roll": 0.19259,
+     "left_hip_pitch": 0.169,
+     "left_knee": 0.40839,
+     "left_ankle": 0.19536,
+     "neck_pitch": 0.08643,
+     "head_pitch": 0.06817,
+     "head_yaw": 0.14132,
+     "head_roll": 0.07414,
+     "right_hip_yaw": 0.06731,
+     "right_hip_roll": 0.14928,
+     "right_hip_pitch": 0.22465,
+     "right_knee": 0.38194,
+     "right_ankle": 0.19017
+    },
+    "note": "F2 samples at the 50 Hz control frame, this lane at the 200 Hz physics step, so this lane's peaks are equal or higher"
+   }
+  },
+  "servo": {
+   "part": "XL330-M288-T",
+   "ref": "part:xl330-m288-t",
+   "datasheet_url": "https://emanual.robotis.com/docs/en/dxl/x/xl330-m288/",
+   "provenance": "ce-parts/xl330-m288-t/PROVENANCE.json (fetched 2026-09-02, sha256 recorded)",
+   "stall_rows_quote": "E1 Specifications, 'Stall Torque' row verbatim: '0.42 [N.m] (at 3.7 [V], 1.11 [A], 0.378 [Nm/A])', '0.52 [N.m] (at 5.0 [V], 1.47 [A], 0.354 [Nm/A])', '0.60 [N.m] (at 6.0 [V], 1.74 [A], 0.345 [Nm/A])'",
+   "torque_constant_Nm_per_A": 0.354,
+   "torque_constant_basis": "the 5.0 V stall row's own third figure, '0.354 [Nm/A]'. It is OUTPUT-shaft torque per INPUT current (E1 Current Limit(38) note: 'XL330 series measures curret at its input power source'), so no gear ratio or gearbox efficiency is applied on top of it.",
+   "terminal_resistance_ohm": 3.401361,
+   "terminal_resistance_basis": "DERIVED, not published: at stall the back-EMF is zero and the full row voltage stands across the winding, so R = V / I_stall. The three published rows give {'3.7': 3.333333, '5.0': 3.401361, '6.0': 3.448276} ohm -- a spread of 3.39 % about their mean, which is the derivation's own consistency check. The 5.0 V row is used.",
+   "envelope_mm": [
+    20.0,
+    34.0,
+    26.0
+   ],
+   "envelope_quote": "E1 Specifications verbatim: 'Dimensions (W x H x D) | 20.0 x 34.0 x 26.0 [mm]'",
+   "surface_area_m2": 0.004168,
+   "mass_kg": 0.018,
+   "mass_quote": "E1 Specifications verbatim: 'Weight | 18 [g]'",
+   "temperature_limit_C": 70.0,
+   "temperature_limit_quote": "E1 Control Table of EEPROM Area verbatim: '31 | 1 | Temperature Limit | RW | 70 | 0 ~ 100 | 1 [degC]'; E1 Specifications 'Operating Temperature | -5 ~ +70 [degC]'; Shutdown(63) Bit 2 'Overheating Error(default)'",
+   "standby_current_mA": 17.0,
+   "standby_quote": "E1 Specifications verbatim: 'Standby Current | 17 [mA]' (no test voltage stated)",
+   "count_on_robot": 15
+  },
+  "air_properties": {
+   "table": "Cengel, TABLE A-9 'Properties of air at 1 atm pressure', p.948",
+   "url": "https://www.me.psu.edu/cimbala/me433/Links/Table_A_9_CC_Properties_of_Air.pdf",
+   "read": "2026-09-02, text extracted with pdftotext -layout",
+   "rows_used_T_C_k_nu_Pr": [
+    [
+     20,
+     0.02514,
+     1.516e-05,
+     0.7309
+    ],
+    [
+     25,
+     0.02551,
+     1.562e-05,
+     0.7296
+    ],
+    [
+     30,
+     0.02588,
+     1.608e-05,
+     0.7282
+    ],
+    [
+     35,
+     0.02625,
+     1.655e-05,
+     0.7268
+    ],
+    [
+     40,
+     0.02662,
+     1.702e-05,
+     0.7255
+    ],
+    [
+     45,
+     0.02699,
+     1.75e-05,
+     0.7241
+    ],
+    [
+     50,
+     0.02735,
+     1.798e-05,
+     0.7228
+    ],
+    [
+     60,
+     0.02808,
+     1.896e-05,
+     0.7202
+    ],
+    [
+     70,
+     0.02881,
+     1.995e-05,
+     0.7177
+    ],
+    [
+     80,
+     0.02953,
+     2.097e-05,
+     0.7154
+    ],
+    [
+     90,
+     0.03024,
+     2.201e-05,
+     0.7132
+    ],
+    [
+     100,
+     0.03095,
+     2.306e-05,
+     0.7111
+    ]
+   ],
+   "table_own_source_line": "Data generated from the EES software developed by S. A. Klein and F. L. Alvarado. Original sources: Keenan, Chao, Keyes, Gas Tables, Wiley, 198; and Thermophysical Properties of Matter, Vol. 3: Thermal Conductivity, Y. S. Touloukian, P. E. Liley, S. C. Saxena, Vol. 11: Viscosity, Y. S. Touloukian, S. C. Saxena, and P. Hestermans, IFI/Plenun, NY, 1970, ISBN 0-306067020-8."
+  },
+  "correlation": {
+   "name": "Churchill-Chu, vertical plate, laminar",
+   "quote": "h = (k/L)(0.68 + 0.67 Ra_L^(1/4) / (1 + (0.492/Pr)^(9/16))^(4/9))",
+   "validity_quote": "10^-1 < Ra_L < 10^9",
+   "url": "https://en.wikipedia.org/wiki/Heat_transfer_coefficient",
+   "read": "2026-09-02",
+   "characteristic_length_m": 0.034,
+   "characteristic_length_basis": "the vendor's H = 34.0 mm; the servo hangs with that dimension vertical in the leg and neck mounts (spec/mesh-placements.json).",
+   "radiation": "bracketed, not assumed: eps = 1 (black body) is the hard physical upper bound on radiative cooling and eps = 0 the hard lower bound. The plastic case's real emissivity is unmeasured and lies inside that bracket, so the bracket is reported and no emissivity is invented. sigma = 5.670374419e-8 W/m2K4 (SI definition)."
+  },
+  "ambients_C": [
+   20.0,
+   25.0,
+   35.0
+  ],
+  "mount_blockage_fractions": [
+   0.0,
+   0.3
+  ]
+ },
+ "method": "P_copper = (tau_rms / kT)^2 * R_terminal per joint, with tau_rms^2 = mean(tau^2) measured. Steady state solves P = (h_conv(Ts) + h_rad(Ts)) * A_eff * (Ts - Ta) by fixed point, h_conv from Churchill-Chu re-evaluated at the film temperature each iteration with air properties interpolated in Cengel Table A-9. Reported as a bracket over emissivity 0..1 and over 0 % / 30 % of the skin blocked by the printed mount. Gearbox friction loss and drive-stage loss are NOT modelled -- both add heat, so every temperature here UNDERSTATES the real one.",
+ "outputs": {
+  "per_joint": {
+   "head_pitch": {
+    "mean_tau_squared_Nm2": 0.00145368,
+    "rms_torque_Nm": 0.038127,
+    "peak_torque_Nm": 0.068777,
+    "i_rms_A": 0.1077,
+    "i_peak_A": 0.19429,
+    "i_peak_vs_current_limit_38_pct": 11.102,
+    "p_copper_W": 0.03946,
+    "p_copper_peak_W": 0.12839,
+    "p_mech_mean_positive_W": 0.002243,
+    "steady_state": {
+     "Ta20C_block0%": {
+      "case_temp_C_eps1_bestcooling": 21.0152,
+      "case_temp_C_eps0_worstcooling": 22.2285,
+      "R_th_K_W_eps1": 25.7296,
+      "R_th_K_W_eps0": 56.4794,
+      "h_conv_W_m2K_eps1": 3.581,
+      "h_rad_W_m2K_eps1": 5.7438,
+      "Ra_L_eps1": 4211.0,
+      "over_limit_even_at_best_cooling": false
+     },
+     "Ta20C_block30%": {
+      "case_temp_C_eps1_bestcooling": 21.4089,
+      "case_temp_C_eps0_worstcooling": 22.9849,
+      "R_th_K_W_eps1": 35.7076,
+      "R_th_K_W_eps0": 75.6504,
+      "h_conv_W_m2K_eps1": 3.8434,
+      "h_rad_W_m2K_eps1": 5.7553,
+      "Ra_L_eps1": 5826.0,
+      "over_limit_even_at_best_cooling": false
+     },
+     "Ta25C_block0%": {
+      "case_temp_C_eps1_bestcooling": 25.9869,
+      "case_temp_C_eps0_worstcooling": 27.2336,
+      "R_th_K_W_eps1": 25.012,
+      "R_th_K_W_eps0": 56.6088,
+      "h_conv_W_m2K_eps1": 3.551,
+      "h_rad_W_m2K_eps1": 6.0413,
+      "Ra_L_eps1": 3786.0,
+      "over_limit_even_at_best_cooling": false
+     },
+     "Ta25C_block30%": {
+      "case_temp_C_eps1_bestcooling": 26.371,
+      "case_temp_C_eps0_worstcooling": 27.992,
+      "R_th_K_W_eps1": 34.7472,
+      "R_th_K_W_eps0": 75.8315,
+      "h_conv_W_m2K_eps1": 3.811,
+      "h_rad_W_m2K_eps1": 6.053,
+      "Ra_L_eps1": 5244.0,
+      "over_limit_even_at_best_cooling": false
+     },
+     "Ta35C_block0%": {
+      "case_temp_C_eps1_bestcooling": 35.9318,
+      "case_temp_C_eps0_worstcooling": 37.2431,
+      "R_th_K_W_eps1": 23.615,
+      "R_th_K_W_eps0": 56.8498,
+      "h_conv_W_m2K_eps1": 3.4928,
+      "h_rad_W_m2K_eps1": 6.667,
+      "Ra_L_eps1": 3071.0,
+      "over_limit_even_at_best_cooling": false
+     },
+     "Ta35C_block30%": {
+      "case_temp_C_eps1_bestcooling": 36.297,
+      "case_temp_C_eps0_worstcooling": 38.0054,
+      "R_th_K_W_eps1": 32.8708,
+      "R_th_K_W_eps0": 76.1709,
+      "h_conv_W_m2K_eps1": 3.7483,
+      "h_rad_W_m2K_eps1": 6.6788,
+      "Ra_L_eps1": 4263.0,
+      "over_limit_even_at_best_cooling": false
+     }
+    },
+    "R_th_needed_to_hold_70C_K_W": {
+     "Ta20C": 1267.2287,
+     "Ta25C": 1140.5058,
+     "Ta35C": 887.0601
+    },
+    "case_band_25C": {
+     "lower_bound_C": 25.9869,
+     "upper_bound_C": 27.992,
+     "limit_C": 70.0,
+     "grade": "PASS"
+    }
+   },
+   "head_roll": {
+    "mean_tau_squared_Nm2": 0.0015217,
+    "rms_torque_Nm": 0.039009,
+    "peak_torque_Nm": 0.081465,
+    "i_rms_A": 0.11019,
+    "i_peak_A": 0.23013,
+    "i_peak_vs_current_limit_38_pct": 13.15,
+    "p_copper_W": 0.0413,
+    "p_copper_peak_W": 0.18013,
+    "p_mech_mean_positive_W": 0.016043,
+    "steady_state": {
+     "Ta20C_block0%": {
+      "case_temp_C_eps1_bestcooling": 21.0589,
+      "case_temp_C_eps0_worstcooling": 22.3136,
+      "R_th_K_W_eps1": 25.6366,
+      "R_th_K_W_eps0": 56.016,
+      "h_conv_W_m2K_eps1": 3.6136,
+      "h_rad_W_m2K_eps1": 5.745,
+      "Ra_L_eps1": 4390.0,
+      "over_limit_even_at_best_cooling": false
+     },
+     "Ta20C_block30%": {
+      "case_temp_C_eps1_bestcooling": 21.4692,
+      "case_temp_C_eps0_worstcooling": 23.0988,
+      "R_th_K_W_eps1": 35.571,
+      "R_th_K_W_eps0": 75.0261,
+      "h_conv_W_m2K_eps1": 3.8785,
+      "h_rad_W_m2K_eps1": 5.7571,
+      "Ra_L_eps1": 6072.0,
+      "over_limit_even_at_best_cooling": false
+     },
+     "Ta25C_block0%": {
+      "case_temp_C_eps1_bestcooling": 26.0295,
+      "case_temp_C_eps0_worstcooling": 27.3189,
+      "R_th_K_W_eps1": 24.9249,
+      "R_th_K_W_eps0": 56.1451,
+      "h_conv_W_m2K_eps1": 3.5832,
+      "h_rad_W_m2K_eps1": 6.0426,
+      "Ra_L_eps1": 3948.0,
+      "over_limit_even_at_best_cooling": false
+     },
+     "Ta25C_block30%": {
+      "case_temp_C_eps1_bestcooling": 26.4298,
+      "case_temp_C_eps0_worstcooling": 28.1062,
+      "R_th_K_W_eps1": 34.6188,
+      "R_th_K_W_eps0": 75.2067,
+      "h_conv_W_m2K_eps1": 3.8458,
+      "h_rad_W_m2K_eps1": 6.0548,
+      "Ra_L_eps1": 5467.0,
+      "over_limit_even_at_best_cooling": false
+     },
+     "Ta35C_block0%": {
+      "case_temp_C_eps1_bestcooling": 35.9722,
+      "case_temp_C_eps0_worstcooling": 37.3289,
+      "R_th_K_W_eps1": 23.5386,
+      "R_th_K_W_eps0": 56.3857,
+      "h_conv_W_m2K_eps1": 3.5245,
+      "h_rad_W_m2K_eps1": 6.6683,
+      "Ra_L_eps1": 3203.0,
+      "over_limit_even_at_best_cooling": false
+     },
+     "Ta35C_block30%": {
+      "case_temp_C_eps1_bestcooling": 36.353,
+      "case_temp_C_eps0_worstcooling": 38.1202,
+      "R_th_K_W_eps1": 32.7577,
+      "R_th_K_W_eps0": 75.5453,
+      "h_conv_W_m2K_eps1": 3.7825,
+      "h_rad_W_m2K_eps1": 6.6806,
+      "Ra_L_eps1": 4445.0,
+      "over_limit_even_at_best_cooling": false
+     }
+    },
+    "R_th_needed_to_hold_70C_K_W": {
+     "Ta20C": 1210.5835,
+     "Ta25C": 1089.5252,
+     "Ta35C": 847.4085
+    },
+    "case_band_25C": {
+     "lower_bound_C": 26.0295,
+     "upper_bound_C": 28.1062,
+     "limit_C": 70.0,
+     "grade": "PASS"
+    }
+   },
+   "head_yaw": {
+    "mean_tau_squared_Nm2": 0.00521699,
+    "rms_torque_Nm": 0.072229,
+    "peak_torque_Nm": 0.150517,
+    "i_rms_A": 0.20404,
+    "i_peak_A": 0.42519,
+    "i_peak_vs_current_limit_38_pct": 24.297,
+    "p_copper_W": 0.1416,
+    "p_copper_peak_W": 0.61492,
+    "p_mech_mean_positive_W": 0.05755,
+    "steady_state": {
+     "Ta20C_block0%": {
+      "case_temp_C_eps1_bestcooling": 23.2575,
+      "case_temp_C_eps0_worstcooling": 26.3397,
+      "R_th_K_W_eps1": 23.005,
+      "R_th_K_W_eps0": 44.7714,
+      "h_conv_W_m2K_eps1": 4.6192,
+      "h_rad_W_m2K_eps1": 5.81,
+      "Ra_L_eps1": 13270.0,
+      "over_limit_even_at_best_cooling": false
+     },
+     "Ta20C_block30%": {
+      "case_temp_C_eps1_bestcooling": 24.4906,
+      "case_temp_C_eps0_worstcooling": 28.4832,
+      "R_th_K_W_eps1": 31.7133,
+      "R_th_K_W_eps0": 59.9091,
+      "h_conv_W_m2K_eps1": 4.961,
+      "h_rad_W_m2K_eps1": 5.8467,
+      "Ra_L_eps1": 18120.0,
+      "over_limit_even_at_best_cooling": false
+     },
+     "Ta25C_block0%": {
+      "case_temp_C_eps1_bestcooling": 28.1784,
+      "case_temp_C_eps0_worstcooling": 31.3562,
+      "R_th_K_W_eps1": 22.4462,
+      "R_th_K_W_eps0": 44.8881,
+      "h_conv_W_m2K_eps1": 4.5806,
+      "h_rad_W_m2K_eps1": 6.1082,
+      "Ra_L_eps1": 11990.0,
+      "over_limit_even_at_best_cooling": false
+     },
+     "Ta25C_block30%": {
+      "case_temp_C_eps1_bestcooling": 29.3861,
+      "case_temp_C_eps0_worstcooling": 33.5058,
+      "R_th_K_W_eps1": 30.975,
+      "R_th_K_W_eps0": 60.0686,
+      "h_conv_W_m2K_eps1": 4.9199,
+      "h_rad_W_m2K_eps1": 6.1454,
+      "Ra_L_eps1": 16390.0,
+      "over_limit_even_at_best_cooling": false
+     },
+     "Ta35C_block0%": {
+      "case_temp_C_eps1_bestcooling": 38.0224,
+      "case_temp_C_eps0_worstcooling": 41.3876,
+      "R_th_K_W_eps1": 21.3448,
+      "R_th_K_W_eps0": 45.1101,
+      "h_conv_W_m2K_eps1": 4.5053,
+      "h_rad_W_m2K_eps1": 6.7351,
+      "Ra_L_eps1": 9808.0,
+      "over_limit_even_at_best_cooling": false
+     },
+     "Ta35C_block30%": {
+      "case_temp_C_eps1_bestcooling": 39.1794,
+      "case_temp_C_eps0_worstcooling": 43.5491,
+      "R_th_K_W_eps1": 29.5152,
+      "R_th_K_W_eps0": 60.3743,
+      "h_conv_W_m2K_eps1": 4.8396,
+      "h_rad_W_m2K_eps1": 6.773,
+      "Ra_L_eps1": 13450.0,
+      "over_limit_even_at_best_cooling": false
+     }
+    },
+    "R_th_needed_to_hold_70C_K_W": {
+     "Ta20C": 353.1049,
+     "Ta25C": 317.7944,
+     "Ta35C": 247.1735
+    },
+    "case_band_25C": {
+     "lower_bound_C": 28.1784,
+     "upper_bound_C": 33.5058,
+     "limit_C": 70.0,
+     "grade": "PASS"
+    }
+   },
+   "left_ankle": {
+    "mean_tau_squared_Nm2": 0.01191806,
+    "rms_torque_Nm": 0.10917,
+    "peak_torque_Nm": 0.201195,
+    "i_rms_A": 0.30839,
+    "i_peak_A": 0.56835,
+    "i_peak_vs_current_limit_38_pct": 32.477,
+    "p_copper_W": 0.32348,
+    "p_copper_peak_W": 1.0987,
+    "p_mech_mean_positive_W": 0.112882,
+    "steady_state": {
+     "Ta20C_block0%": {
+      "case_temp_C_eps1_bestcooling": 26.8286,
+      "case_temp_C_eps0_worstcooling": 32.4446,
+      "R_th_K_W_eps1": 21.1094,
+      "R_th_K_W_eps0": 38.4705,
+      "h_conv_W_m2K_eps1": 5.4489,
+      "h_rad_W_m2K_eps1": 5.9168,
+      "Ra_L_eps1": 27060.0,
+      "over_limit_even_at_best_cooling": false
+     },
+     "Ta20C_block30%": {
+      "case_temp_C_eps1_bestcooling": 29.3619,
+      "case_temp_C_eps0_worstcooling": 36.6502,
+      "R_th_K_W_eps1": 28.9409,
+      "R_th_K_W_eps0": 51.4715,
+      "h_conv_W_m2K_eps1": 5.8494,
+      "h_rad_W_m2K_eps1": 5.9936,
+      "Ra_L_eps1": 36370.0,
+      "over_limit_even_at_best_cooling": false
+     },
+     "Ta25C_block0%": {
+      "case_temp_C_eps1_bestcooling": 31.6786,
+      "case_temp_C_eps0_worstcooling": 37.4789,
+      "R_th_K_W_eps1": 20.6458,
+      "R_th_K_W_eps0": 38.5765,
+      "h_conv_W_m2K_eps1": 5.4045,
+      "h_rad_W_m2K_eps1": 6.2164,
+      "Ra_L_eps1": 24530.0,
+      "over_limit_even_at_best_cooling": false
+     },
+     "Ta25C_block30%": {
+      "case_temp_C_eps1_bestcooling": 34.1654,
+      "case_temp_C_eps0_worstcooling": 41.6976,
+      "R_th_K_W_eps1": 28.3336,
+      "R_th_K_W_eps0": 51.618,
+      "h_conv_W_m2K_eps1": 5.8025,
+      "h_rad_W_m2K_eps1": 6.2943,
+      "Ra_L_eps1": 33030.0,
+      "over_limit_even_at_best_cooling": false
+     },
+     "Ta35C_block0%": {
+      "case_temp_C_eps1_bestcooling": 41.3808,
+      "case_temp_C_eps0_worstcooling": 47.5443,
+      "R_th_K_W_eps1": 19.7254,
+      "R_th_K_W_eps0": 38.7789,
+      "h_conv_W_m2K_eps1": 5.3173,
+      "h_rad_W_m2K_eps1": 6.8458,
+      "Ra_L_eps1": 20200.0,
+      "over_limit_even_at_best_cooling": false
+     },
+     "Ta35C_block30%": {
+      "case_temp_C_eps1_bestcooling": 43.7744,
+      "case_temp_C_eps0_worstcooling": 51.7866,
+      "R_th_K_W_eps1": 27.1248,
+      "R_th_K_W_eps0": 51.8934,
+      "h_conv_W_m2K_eps1": 5.7103,
+      "h_rad_W_m2K_eps1": 6.9257,
+      "Ra_L_eps1": 27290.0,
+      "over_limit_even_at_best_cooling": false
+     }
+    },
+    "R_th_needed_to_hold_70C_K_W": {
+     "Ta20C": 154.5675,
+     "Ta25C": 139.1108,
+     "Ta35C": 108.1973
+    },
+    "case_band_25C": {
+     "lower_bound_C": 31.6786,
+     "upper_bound_C": 41.6976,
+     "limit_C": 70.0,
+     "grade": "PASS"
+    }
+   },
+   "left_hip_pitch": {
+    "mean_tau_squared_Nm2": 0.00815928,
+    "rms_torque_Nm": 0.090329,
+    "peak_torque_Nm": 0.183315,
+    "i_rms_A": 0.25517,
+    "i_peak_A": 0.51784,
+    "i_peak_vs_current_limit_38_pct": 29.591,
+    "p_copper_W": 0.22146,
+    "p_copper_peak_W": 0.9121,
+    "p_mech_mean_positive_W": 0.103131,
+    "steady_state": {
+     "Ta20C_block0%": {
+      "case_temp_C_eps1_bestcooling": 24.8703,
+      "case_temp_C_eps0_worstcooling": 29.1341,
+      "R_th_K_W_eps1": 21.9917,
+      "R_th_K_W_eps0": 41.2447,
+      "h_conv_W_m2K_eps1": 5.0517,
+      "h_rad_W_m2K_eps1": 5.858,
+      "Ra_L_eps1": 19600.0,
+      "over_limit_even_at_best_cooling": false
+     },
+     "Ta20C_block30%": {
+      "case_temp_C_eps1_bestcooling": 26.695,
+      "case_temp_C_eps0_worstcooling": 32.2209,
+      "R_th_K_W_eps1": 30.2311,
+      "R_th_K_W_eps0": 55.1829,
+      "h_conv_W_m2K_eps1": 5.4248,
+      "h_rad_W_m2K_eps1": 5.9128,
+      "Ra_L_eps1": 26560.0,
+      "over_limit_even_at_best_cooling": false
+     },
+     "Ta25C_block0%": {
+      "case_temp_C_eps1_bestcooling": 29.7582,
+      "case_temp_C_eps0_worstcooling": 34.1585,
+      "R_th_K_W_eps1": 21.4853,
+      "R_th_K_W_eps0": 41.3549,
+      "h_conv_W_m2K_eps1": 5.01,
+      "h_rad_W_m2K_eps1": 6.1568,
+      "Ra_L_eps1": 17730.0,
+      "over_limit_even_at_best_cooling": false
+     },
+     "Ta25C_block30%": {
+      "case_temp_C_eps1_bestcooling": 31.5476,
+      "case_temp_C_eps0_worstcooling": 37.2545,
+      "R_th_K_W_eps1": 29.5653,
+      "R_th_K_W_eps0": 55.3346,
+      "h_conv_W_m2K_eps1": 5.3806,
+      "h_rad_W_m2K_eps1": 6.2123,
+      "Ra_L_eps1": 24070.0,
+      "over_limit_even_at_best_cooling": false
+     },
+     "Ta35C_block0%": {
+      "case_temp_C_eps1_bestcooling": 39.5363,
+      "case_temp_C_eps0_worstcooling": 44.2054,
+      "R_th_K_W_eps1": 20.4833,
+      "R_th_K_W_eps0": 41.5668,
+      "h_conv_W_m2K_eps1": 4.9283,
+      "h_rad_W_m2K_eps1": 6.7848,
+      "Ra_L_eps1": 14560.0,
+      "over_limit_even_at_best_cooling": false
+     },
+     "Ta35C_block30%": {
+      "case_temp_C_eps1_bestcooling": 41.2549,
+      "case_temp_C_eps0_worstcooling": 47.3187,
+      "R_th_K_W_eps1": 28.2437,
+      "R_th_K_W_eps0": 55.6245,
+      "h_conv_W_m2K_eps1": 5.2937,
+      "h_rad_W_m2K_eps1": 6.8416,
+      "Ra_L_eps1": 19820.0,
+      "over_limit_even_at_best_cooling": false
+     }
+    },
+    "R_th_needed_to_hold_70C_K_W": {
+     "Ta20C": 225.773,
+     "Ta25C": 203.1957,
+     "Ta35C": 158.0411
+    },
+    "case_band_25C": {
+     "lower_bound_C": 29.7582,
+     "upper_bound_C": 37.2545,
+     "limit_C": 70.0,
+     "grade": "PASS"
+    }
+   },
+   "left_hip_roll": {
+    "mean_tau_squared_Nm2": 0.00783981,
+    "rms_torque_Nm": 0.088543,
+    "peak_torque_Nm": 0.193775,
+    "i_rms_A": 0.25012,
+    "i_peak_A": 0.54739,
+    "i_peak_vs_current_limit_38_pct": 31.279,
+    "p_copper_W": 0.21279,
+    "p_copper_peak_W": 1.01916,
+    "p_mech_mean_positive_W": 0.054186,
+    "steady_state": {
+     "Ta20C_block0%": {
+      "case_temp_C_eps1_bestcooling": 24.6991,
+      "case_temp_C_eps0_worstcooling": 28.8411,
+      "R_th_K_W_eps1": 22.0834,
+      "R_th_K_W_eps0": 41.5484,
+      "h_conv_W_m2K_eps1": 5.0115,
+      "h_rad_W_m2K_eps1": 5.8529,
+      "Ra_L_eps1": 18930.0,
+      "over_limit_even_at_best_cooling": false
+     },
+     "Ta20C_block30%": {
+      "case_temp_C_eps1_bestcooling": 26.4614,
+      "case_temp_C_eps0_worstcooling": 31.8289,
+      "R_th_K_W_eps1": 30.3653,
+      "R_th_K_W_eps0": 55.5895,
+      "h_conv_W_m2K_eps1": 5.3818,
+      "h_rad_W_m2K_eps1": 5.9057,
+      "Ra_L_eps1": 25680.0,
+      "over_limit_even_at_best_cooling": false
+     },
+     "Ta25C_block0%": {
+      "case_temp_C_eps1_bestcooling": 29.5904,
+      "case_temp_C_eps0_worstcooling": 33.8647,
+      "R_th_K_W_eps1": 21.5724,
+      "R_th_K_W_eps0": 41.6592,
+      "h_conv_W_m2K_eps1": 4.9701,
+      "h_rad_W_m2K_eps1": 6.1517,
+      "Ra_L_eps1": 17130.0,
+      "over_limit_even_at_best_cooling": false
+     },
+     "Ta25C_block30%": {
+      "case_temp_C_eps1_bestcooling": 31.3184,
+      "case_temp_C_eps0_worstcooling": 36.8613,
+      "R_th_K_W_eps1": 29.6931,
+      "R_th_K_W_eps0": 55.7418,
+      "h_conv_W_m2K_eps1": 5.3378,
+      "h_rad_W_m2K_eps1": 6.2052,
+      "Ra_L_eps1": 23270.0,
+      "over_limit_even_at_best_cooling": false
+     },
+     "Ta35C_block0%": {
+      "case_temp_C_eps1_bestcooling": 39.3753,
+      "case_temp_C_eps0_worstcooling": 43.91,
+      "R_th_K_W_eps1": 20.5617,
+      "R_th_K_W_eps0": 41.872,
+      "h_conv_W_m2K_eps1": 4.889,
+      "h_rad_W_m2K_eps1": 6.7795,
+      "Ra_L_eps1": 14060.0,
+      "over_limit_even_at_best_cooling": false
+     },
+     "Ta35C_block30%": {
+      "case_temp_C_eps1_bestcooling": 41.0346,
+      "case_temp_C_eps0_worstcooling": 46.9233,
+      "R_th_K_W_eps1": 28.3594,
+      "R_th_K_W_eps0": 56.0331,
+      "h_conv_W_m2K_eps1": 5.2515,
+      "h_rad_W_m2K_eps1": 6.8343,
+      "Ra_L_eps1": 19150.0,
+      "over_limit_even_at_best_cooling": false
+     }
+    },
+    "R_th_needed_to_hold_70C_K_W": {
+     "Ta20C": 234.9732,
+     "Ta25C": 211.4758,
+     "Ta35C": 164.4812
+    },
+    "case_band_25C": {
+     "lower_bound_C": 29.5904,
+     "upper_bound_C": 36.8613,
+     "limit_C": 70.0,
+     "grade": "PASS"
+    }
+   },
+   "left_hip_yaw": {
+    "mean_tau_squared_Nm2": 0.00121523,
+    "rms_torque_Nm": 0.03486,
+    "peak_torque_Nm": 0.106109,
+    "i_rms_A": 0.09847,
+    "i_peak_A": 0.29974,
+    "i_peak_vs_current_limit_38_pct": 17.128,
+    "p_copper_W": 0.03298,
+    "p_copper_peak_W": 0.3056,
+    "p_mech_mean_positive_W": 0.010078,
+    "steady_state": {
+     "Ta20C_block0%": {
+      "case_temp_C_eps1_bestcooling": 20.8606,
+      "case_temp_C_eps0_worstcooling": 21.9239,
+      "R_th_K_W_eps1": 26.0904,
+      "R_th_K_W_eps0": 58.3286,
+      "h_conv_W_m2K_eps1": 3.4566,
+      "h_rad_W_m2K_eps1": 5.7392,
+      "Ra_L_eps1": 3574.0,
+      "over_limit_even_at_best_cooling": false
+     },
+     "Ta20C_block30%": {
+      "case_temp_C_eps1_bestcooling": 21.1953,
+      "case_temp_C_eps0_worstcooling": 22.5775,
+      "R_th_K_W_eps1": 36.2383,
+      "R_th_K_W_eps0": 78.1425,
+      "h_conv_W_m2K_eps1": 3.7091,
+      "h_rad_W_m2K_eps1": 5.7491,
+      "Ra_L_eps1": 4951.0,
+      "over_limit_even_at_best_cooling": false
+     },
+     "Ta25C_block0%": {
+      "case_temp_C_eps1_bestcooling": 25.8361,
+      "case_temp_C_eps0_worstcooling": 26.9282,
+      "R_th_K_W_eps1": 25.3499,
+      "R_th_K_W_eps0": 58.4589,
+      "h_conv_W_m2K_eps1": 3.4277,
+      "h_rad_W_m2K_eps1": 6.0367,
+      "Ra_L_eps1": 3212.0,
+      "over_limit_even_at_best_cooling": false
+     },
+     "Ta25C_block30%": {
+      "case_temp_C_eps1_bestcooling": 26.1625,
+      "case_temp_C_eps0_worstcooling": 27.5835,
+      "R_th_K_W_eps1": 35.2455,
+      "R_th_K_W_eps0": 78.3256,
+      "h_conv_W_m2K_eps1": 3.6779,
+      "h_rad_W_m2K_eps1": 6.0467,
+      "Ra_L_eps1": 4454.0,
+      "over_limit_even_at_best_cooling": false
+     },
+     "Ta35C_block0%": {
+      "case_temp_C_eps1_bestcooling": 35.7887,
+      "case_temp_C_eps0_worstcooling": 36.9362,
+      "R_th_K_W_eps1": 23.9107,
+      "R_th_K_W_eps0": 58.701,
+      "h_conv_W_m2K_eps1": 3.3718,
+      "h_rad_W_m2K_eps1": 6.6623,
+      "Ra_L_eps1": 2602.0,
+      "over_limit_even_at_best_cooling": false
+     },
+     "Ta35C_block30%": {
+      "case_temp_C_eps1_bestcooling": 36.0987,
+      "case_temp_C_eps0_worstcooling": 37.5948,
+      "R_th_K_W_eps1": 33.3092,
+      "R_th_K_W_eps0": 78.6677,
+      "h_conv_W_m2K_eps1": 3.6175,
+      "h_rad_W_m2K_eps1": 6.6724,
+      "Ra_L_eps1": 3617.0,
+      "over_limit_even_at_best_cooling": false
+     }
+    },
+    "R_th_needed_to_hold_70C_K_W": {
+     "Ta20C": 1515.8817,
+     "Ta25C": 1364.2936,
+     "Ta35C": 1061.1172
+    },
+    "case_band_25C": {
+     "lower_bound_C": 25.8361,
+     "upper_bound_C": 27.5835,
+     "limit_C": 70.0,
+     "grade": "PASS"
+    }
+   },
+   "left_knee": {
+    "mean_tau_squared_Nm2": 0.06139675,
+    "rms_torque_Nm": 0.247784,
+    "peak_torque_Nm": 0.430447,
+    "i_rms_A": 0.69995,
+    "i_peak_A": 1.21595,
+    "i_peak_vs_current_limit_38_pct": 69.483,
+    "p_copper_W": 1.66645,
+    "p_copper_peak_W": 5.02905,
+    "p_mech_mean_positive_W": 0.712473,
+    "steady_state": {
+     "Ta20C_block0%": {
+      "case_temp_C_eps1_bestcooling": 48.357,
+      "case_temp_C_eps0_worstcooling": 67.5586,
+      "R_th_K_W_eps1": 17.0164,
+      "R_th_K_W_eps0": 28.5389,
+      "h_conv_W_m2K_eps1": 7.5016,
+      "h_rad_W_m2K_eps1": 6.5979,
+      "Ra_L_eps1": 95290.0,
+      "over_limit_even_at_best_cooling": false
+     },
+     "Ta20C_block30%": {
+      "case_temp_C_eps1_bestcooling": 58.2156,
+      "case_temp_C_eps0_worstcooling": 83.7984,
+      "R_th_K_W_eps1": 22.9324,
+      "R_th_K_W_eps0": 38.2841,
+      "h_conv_W_m2K_eps1": 8.0144,
+      "h_rad_W_m2K_eps1": 6.9316,
+      "Ra_L_eps1": 119400.0,
+      "over_limit_even_at_best_cooling": false
+     },
+     "Ta25C_block0%": {
+      "case_temp_C_eps1_bestcooling": 52.8544,
+      "case_temp_C_eps0_worstcooling": 72.701,
+      "R_th_K_W_eps1": 16.7148,
+      "R_th_K_W_eps0": 28.6244,
+      "h_conv_W_m2K_eps1": 7.4464,
+      "h_rad_W_m2K_eps1": 6.9075,
+      "Ra_L_eps1": 87220.0,
+      "over_limit_even_at_best_cooling": false
+     },
+     "Ta25C_block30%": {
+      "case_temp_C_eps1_bestcooling": 62.5705,
+      "case_temp_C_eps0_worstcooling": 88.9819,
+      "R_th_K_W_eps1": 22.5453,
+      "R_th_K_W_eps0": 38.3942,
+      "h_conv_W_m2K_eps1": 7.9565,
+      "h_rad_W_m2K_eps1": 7.2461,
+      "Ra_L_eps1": 109500.0,
+      "over_limit_even_at_best_cooling": false
+     },
+     "Ta35C_block0%": {
+      "case_temp_C_eps1_bestcooling": 61.8499,
+      "case_temp_C_eps0_worstcooling": 82.97,
+      "R_th_K_W_eps1": 16.1121,
+      "R_th_K_W_eps0": 28.7858,
+      "h_conv_W_m2K_eps1": 7.3352,
+      "h_rad_W_m2K_eps1": 7.5557,
+      "Ra_L_eps1": 73220.0,
+      "over_limit_even_at_best_cooling": false
+     },
+     "Ta35C_block30%": {
+      "case_temp_C_eps1_bestcooling": 71.2793,
+      "case_temp_C_eps0_worstcooling": 99.3222,
+      "R_th_K_W_eps1": 21.7705,
+      "R_th_K_W_eps0": 38.5984,
+      "h_conv_W_m2K_eps1": 7.8401,
+      "h_rad_W_m2K_eps1": 7.9035,
+      "Ra_L_eps1": 92520.0,
+      "over_limit_even_at_best_cooling": true
+     }
+    },
+    "R_th_needed_to_hold_70C_K_W": {
+     "Ta20C": 30.0039,
+     "Ta25C": 27.0036,
+     "Ta35C": 21.0028
+    },
+    "case_band_25C": {
+     "lower_bound_C": 52.8544,
+     "upper_bound_C": 88.9819,
+     "limit_C": 70.0,
+     "grade": "CANNOT DETERMINE"
+    }
+   },
+   "neck_pitch": {
+    "mean_tau_squared_Nm2": 0.000983,
+    "rms_torque_Nm": 0.031353,
+    "peak_torque_Nm": 0.091979,
+    "i_rms_A": 0.08857,
+    "i_peak_A": 0.25983,
+    "i_peak_vs_current_limit_38_pct": 14.847,
+    "p_copper_W": 0.02668,
+    "p_copper_peak_W": 0.22963,
+    "p_mech_mean_positive_W": 0.005877,
+    "steady_state": {
+     "Ta20C_block0%": {
+      "case_temp_C_eps1_bestcooling": 20.7073,
+      "case_temp_C_eps0_worstcooling": 21.6165,
+      "R_th_K_W_eps1": 26.5103,
+      "R_th_K_W_eps0": 60.5876,
+      "h_conv_W_m2K_eps1": 3.3154,
+      "h_rad_W_m2K_eps1": 5.7347,
+      "Ra_L_eps1": 2941.0,
+      "over_limit_even_at_best_cooling": false
+     },
+     "Ta20C_block30%": {
+      "case_temp_C_eps1_bestcooling": 20.9834,
+      "case_temp_C_eps0_worstcooling": 22.1662,
+      "R_th_K_W_eps1": 36.8566,
+      "R_th_K_W_eps0": 81.1887,
+      "h_conv_W_m2K_eps1": 3.5567,
+      "h_rad_W_m2K_eps1": 5.7428,
+      "Ra_L_eps1": 4080.0,
+      "over_limit_even_at_best_cooling": false
+     },
+     "Ta25C_block0%": {
+      "case_temp_C_eps1_bestcooling": 25.6868,
+      "case_temp_C_eps0_worstcooling": 26.62,
+      "R_th_K_W_eps1": 25.7427,
+      "R_th_K_W_eps0": 60.7188,
+      "h_conv_W_m2K_eps1": 3.2878,
+      "h_rad_W_m2K_eps1": 6.0322,
+      "Ra_L_eps1": 2641.0,
+      "over_limit_even_at_best_cooling": false
+     },
+     "Ta25C_block30%": {
+      "case_temp_C_eps1_bestcooling": 25.9558,
+      "case_temp_C_eps0_worstcooling": 27.1711,
+      "R_th_K_W_eps1": 35.8253,
+      "R_th_K_W_eps0": 81.3737,
+      "h_conv_W_m2K_eps1": 3.5268,
+      "h_rad_W_m2K_eps1": 6.0404,
+      "Ra_L_eps1": 3668.0,
+      "over_limit_even_at_best_cooling": false
+     },
+     "Ta35C_block0%": {
+      "case_temp_C_eps1_bestcooling": 35.6471,
+      "case_temp_C_eps0_worstcooling": 36.6265,
+      "R_th_K_W_eps1": 24.2536,
+      "R_th_K_W_eps0": 60.9614,
+      "h_conv_W_m2K_eps1": 3.2345,
+      "h_rad_W_m2K_eps1": 6.6577,
+      "Ra_L_eps1": 2137.0,
+      "over_limit_even_at_best_cooling": false
+     },
+     "Ta35C_block30%": {
+      "case_temp_C_eps1_bestcooling": 35.9023,
+      "case_temp_C_eps0_worstcooling": 37.1803,
+      "R_th_K_W_eps1": 33.8178,
+      "R_th_K_W_eps0": 81.7184,
+      "h_conv_W_m2K_eps1": 3.4691,
+      "h_rad_W_m2K_eps1": 6.666,
+      "Ra_L_eps1": 2975.0,
+      "over_limit_even_at_best_cooling": false
+     }
+    },
+    "R_th_needed_to_hold_70C_K_W": {
+     "Ta20C": 1874.003,
+     "Ta25C": 1686.6027,
+     "Ta35C": 1311.8021
+    },
+    "case_band_25C": {
+     "lower_bound_C": 25.6868,
+     "upper_bound_C": 27.1711,
+     "limit_C": 70.0,
+     "grade": "PASS"
+    }
+   },
+   "right_ankle": {
+    "mean_tau_squared_Nm2": 0.00873349,
+    "rms_torque_Nm": 0.093453,
+    "peak_torque_Nm": 0.190165,
+    "i_rms_A": 0.26399,
+    "i_peak_A": 0.53719,
+    "i_peak_vs_current_limit_38_pct": 30.697,
+    "p_copper_W": 0.23705,
+    "p_copper_peak_W": 0.98154,
+    "p_mech_mean_positive_W": 0.070826,
+    "steady_state": {
+     "Ta20C_block0%": {
+      "case_temp_C_eps1_bestcooling": 25.1759,
+      "case_temp_C_eps0_worstcooling": 29.6555,
+      "R_th_K_W_eps1": 21.8349,
+      "R_th_K_W_eps0": 40.7326,
+      "h_conv_W_m2K_eps1": 5.1209,
+      "h_rad_W_m2K_eps1": 5.8671,
+      "Ra_L_eps1": 20780.0,
+      "over_limit_even_at_best_cooling": false
+     },
+     "Ta20C_block30%": {
+      "case_temp_C_eps1_bestcooling": 27.1119,
+      "case_temp_C_eps0_worstcooling": 32.9184,
+      "R_th_K_W_eps1": 30.0019,
+      "R_th_K_W_eps0": 54.4973,
+      "h_conv_W_m2K_eps1": 5.4989,
+      "h_rad_W_m2K_eps1": 5.9253,
+      "Ra_L_eps1": 28120.0,
+      "over_limit_even_at_best_cooling": false
+     },
+     "Ta25C_block0%": {
+      "case_temp_C_eps1_bestcooling": 30.0577,
+      "case_temp_C_eps0_worstcooling": 34.6814,
+      "R_th_K_W_eps1": 21.3364,
+      "R_th_K_W_eps0": 40.8417,
+      "h_conv_W_m2K_eps1": 5.0787,
+      "h_rad_W_m2K_eps1": 6.1661,
+      "Ra_L_eps1": 18800.0,
+      "over_limit_even_at_best_cooling": false
+     },
+     "Ta25C_block30%": {
+      "case_temp_C_eps1_bestcooling": 31.9566,
+      "case_temp_C_eps0_worstcooling": 37.9542,
+      "R_th_K_W_eps1": 29.3468,
+      "R_th_K_W_eps0": 54.6482,
+      "h_conv_W_m2K_eps1": 5.4541,
+      "h_rad_W_m2K_eps1": 6.2251,
+      "Ra_L_eps1": 25490.0,
+      "over_limit_even_at_best_cooling": false
+     },
+     "Ta35C_block0%": {
+      "case_temp_C_eps1_bestcooling": 39.8237,
+      "case_temp_C_eps0_worstcooling": 44.7312,
+      "R_th_K_W_eps1": 20.3492,
+      "R_th_K_W_eps0": 41.0519,
+      "h_conv_W_m2K_eps1": 4.996,
+      "h_rad_W_m2K_eps1": 6.7943,
+      "Ra_L_eps1": 15450.0,
+      "over_limit_even_at_best_cooling": false
+     },
+     "Ta35C_block30%": {
+      "case_temp_C_eps1_bestcooling": 41.6482,
+      "case_temp_C_eps0_worstcooling": 48.0223,
+      "R_th_K_W_eps1": 28.0458,
+      "R_th_K_W_eps0": 54.9355,
+      "h_conv_W_m2K_eps1": 5.3663,
+      "h_rad_W_m2K_eps1": 6.8547,
+      "Ra_L_eps1": 21000.0,
+      "over_limit_even_at_best_cooling": false
+     }
+    },
+    "R_th_needed_to_hold_70C_K_W": {
+     "Ta20C": 210.9288,
+     "Ta25C": 189.836,
+     "Ta35C": 147.6502
+    },
+    "case_band_25C": {
+     "lower_bound_C": 30.0577,
+     "upper_bound_C": 37.9542,
+     "limit_C": 70.0,
+     "grade": "PASS"
+    }
+   },
+   "right_hip_pitch": {
+    "mean_tau_squared_Nm2": 0.01136216,
+    "rms_torque_Nm": 0.106593,
+    "peak_torque_Nm": 0.247622,
+    "i_rms_A": 0.30111,
+    "i_peak_A": 0.6995,
+    "i_peak_vs_current_limit_38_pct": 39.971,
+    "p_copper_W": 0.30839,
+    "p_copper_peak_W": 1.66427,
+    "p_mech_mean_positive_W": 0.145651,
+    "steady_state": {
+     "Ta20C_block0%": {
+      "case_temp_C_eps1_bestcooling": 26.5447,
+      "case_temp_C_eps0_worstcooling": 31.9687,
+      "R_th_K_W_eps1": 21.2219,
+      "R_th_K_W_eps0": 38.8098,
+      "h_conv_W_m2K_eps1": 5.3972,
+      "h_rad_W_m2K_eps1": 5.9082,
+      "Ra_L_eps1": 25990.0,
+      "over_limit_even_at_best_cooling": false
+     },
+     "Ta20C_block30%": {
+      "case_temp_C_eps1_bestcooling": 28.9759,
+      "case_temp_C_eps0_worstcooling": 36.0134,
+      "R_th_K_W_eps1": 29.1053,
+      "R_th_K_W_eps0": 51.925,
+      "h_conv_W_m2K_eps1": 5.7943,
+      "h_rad_W_m2K_eps1": 5.9818,
+      "Ra_L_eps1": 34980.0,
+      "over_limit_even_at_best_cooling": false
+     },
+     "Ta25C_block0%": {
+      "case_temp_C_eps1_bestcooling": 31.4001,
+      "case_temp_C_eps0_worstcooling": 37.0016,
+      "R_th_K_W_eps1": 20.7529,
+      "R_th_K_W_eps0": 38.9162,
+      "h_conv_W_m2K_eps1": 5.3532,
+      "h_rad_W_m2K_eps1": 6.2078,
+      "Ra_L_eps1": 23550.0,
+      "over_limit_even_at_best_cooling": false
+     },
+     "Ta25C_block30%": {
+      "case_temp_C_eps1_bestcooling": 33.7864,
+      "case_temp_C_eps0_worstcooling": 41.0588,
+      "R_th_K_W_eps1": 28.4908,
+      "R_th_K_W_eps0": 52.0722,
+      "h_conv_W_m2K_eps1": 5.7477,
+      "h_rad_W_m2K_eps1": 6.2824,
+      "Ra_L_eps1": 31750.0,
+      "over_limit_even_at_best_cooling": false
+     },
+     "Ta35C_block0%": {
+      "case_temp_C_eps1_bestcooling": 41.1131,
+      "case_temp_C_eps0_worstcooling": 47.0644,
+      "R_th_K_W_eps1": 19.8224,
+      "R_th_K_W_eps0": 39.1198,
+      "h_conv_W_m2K_eps1": 5.2667,
+      "h_rad_W_m2K_eps1": 6.8369,
+      "Ra_L_eps1": 19390.0,
+      "over_limit_even_at_best_cooling": false
+     },
+     "Ta35C_block30%": {
+      "case_temp_C_eps1_bestcooling": 43.4093,
+      "case_temp_C_eps0_worstcooling": 51.1443,
+      "R_th_K_W_eps1": 27.2681,
+      "R_th_K_W_eps0": 52.3495,
+      "h_conv_W_m2K_eps1": 5.6561,
+      "h_rad_W_m2K_eps1": 6.9134,
+      "Ra_L_eps1": 26230.0,
+      "over_limit_even_at_best_cooling": false
+     }
+    },
+    "R_th_needed_to_hold_70C_K_W": {
+     "Ta20C": 162.1298,
+     "Ta25C": 145.9168,
+     "Ta35C": 113.4909
+    },
+    "case_band_25C": {
+     "lower_bound_C": 31.4001,
+     "upper_bound_C": 41.0588,
+     "limit_C": 70.0,
+     "grade": "PASS"
+    }
+   },
+   "right_hip_roll": {
+    "mean_tau_squared_Nm2": 0.00575996,
+    "rms_torque_Nm": 0.075894,
+    "peak_torque_Nm": 0.15705,
+    "i_rms_A": 0.21439,
+    "i_peak_A": 0.44364,
+    "i_peak_vs_current_limit_38_pct": 25.351,
+    "p_copper_W": 0.15634,
+    "p_copper_peak_W": 0.66946,
+    "p_mech_mean_positive_W": 0.039186,
+    "steady_state": {
+     "Ta20C_block0%": {
+      "case_temp_C_eps1_bestcooling": 23.5619,
+      "case_temp_C_eps0_worstcooling": 26.8737,
+      "R_th_K_W_eps1": 22.7832,
+      "R_th_K_W_eps0": 43.9665,
+      "h_conv_W_m2K_eps1": 4.7117,
+      "h_rad_W_m2K_eps1": 5.819,
+      "Ra_L_eps1": 14480.0,
+      "over_limit_even_at_best_cooling": false
+     },
+     "Ta20C_block30%": {
+      "case_temp_C_eps1_bestcooling": 24.9073,
+      "case_temp_C_eps0_worstcooling": 29.1973,
+      "R_th_K_W_eps1": 31.3889,
+      "R_th_K_W_eps0": 58.8296,
+      "h_conv_W_m2K_eps1": 5.0603,
+      "h_rad_W_m2K_eps1": 5.8591,
+      "Ra_L_eps1": 19740.0,
+      "over_limit_even_at_best_cooling": false
+     },
+     "Ta25C_block0%": {
+      "case_temp_C_eps1_bestcooling": 28.4764,
+      "case_temp_C_eps0_worstcooling": 31.8917,
+      "R_th_K_W_eps1": 22.2362,
+      "R_th_K_W_eps0": 44.0818,
+      "h_conv_W_m2K_eps1": 4.6724,
+      "h_rad_W_m2K_eps1": 6.1174,
+      "Ra_L_eps1": 13080.0,
+      "over_limit_even_at_best_cooling": false
+     },
+     "Ta25C_block30%": {
+      "case_temp_C_eps1_bestcooling": 29.7944,
+      "case_temp_C_eps0_worstcooling": 34.2219,
+      "R_th_K_W_eps1": 30.6669,
+      "R_th_K_W_eps0": 58.9869,
+      "h_conv_W_m2K_eps1": 5.0185,
+      "h_rad_W_m2K_eps1": 6.158,
+      "Ra_L_eps1": 17860.0,
+      "over_limit_even_at_best_cooling": false
+     },
+     "Ta35C_block0%": {
+      "case_temp_C_eps1_bestcooling": 38.3077,
+      "case_temp_C_eps0_worstcooling": 41.9261,
+      "R_th_K_W_eps1": 21.1571,
+      "R_th_K_W_eps0": 44.3017,
+      "h_conv_W_m2K_eps1": 4.5957,
+      "h_rad_W_m2K_eps1": 6.7444,
+      "Ra_L_eps1": 10710.0,
+      "over_limit_even_at_best_cooling": false
+     },
+     "Ta35C_block30%": {
+      "case_temp_C_eps1_bestcooling": 39.571,
+      "case_temp_C_eps0_worstcooling": 44.2692,
+      "R_th_K_W_eps1": 29.2382,
+      "R_th_K_W_eps0": 59.2892,
+      "h_conv_W_m2K_eps1": 4.9367,
+      "h_rad_W_m2K_eps1": 6.7859,
+      "Ra_L_eps1": 14660.0,
+      "over_limit_even_at_best_cooling": false
+     }
+    },
+    "R_th_needed_to_hold_70C_K_W": {
+     "Ta20C": 319.8191,
+     "Ta25C": 287.8371,
+     "Ta35C": 223.8733
+    },
+    "case_band_25C": {
+     "lower_bound_C": 28.4764,
+     "upper_bound_C": 34.2219,
+     "limit_C": 70.0,
+     "grade": "PASS"
+    }
+   },
+   "right_hip_yaw": {
+    "mean_tau_squared_Nm2": 0.00051229,
+    "rms_torque_Nm": 0.022634,
+    "peak_torque_Nm": 0.070072,
+    "i_rms_A": 0.06394,
+    "i_peak_A": 0.19794,
+    "i_peak_vs_current_limit_38_pct": 11.311,
+    "p_copper_W": 0.0139,
+    "p_copper_peak_W": 0.13327,
+    "p_mech_mean_positive_W": 0.003475,
+    "steady_state": {
+     "Ta20C_block0%": {
+      "case_temp_C_eps1_bestcooling": 20.3859,
+      "case_temp_C_eps0_worstcooling": 20.9458,
+      "R_th_K_W_eps1": 27.7509,
+      "R_th_K_W_eps0": 68.0222,
+      "h_conv_W_m2K_eps1": 2.9203,
+      "h_rad_W_m2K_eps1": 5.7253,
+      "Ra_L_eps1": 1609.0,
+      "over_limit_even_at_best_cooling": false
+     },
+     "Ta20C_block30%": {
+      "case_temp_C_eps1_bestcooling": 20.5379,
+      "case_temp_C_eps0_worstcooling": 21.2685,
+      "R_th_K_W_eps1": 38.6878,
+      "R_th_K_W_eps0": 91.2282,
+      "h_conv_W_m2K_eps1": 3.1296,
+      "h_rad_W_m2K_eps1": 5.7298,
+      "Ra_L_eps1": 2240.0,
+      "over_limit_even_at_best_cooling": false
+     },
+     "Ta25C_block0%": {
+      "case_temp_C_eps1_bestcooling": 25.374,
+      "case_temp_C_eps0_worstcooling": 25.9477,
+      "R_th_K_W_eps1": 26.8995,
+      "R_th_K_W_eps0": 68.1533,
+      "h_conv_W_m2K_eps1": 2.8965,
+      "h_rad_W_m2K_eps1": 6.0227,
+      "Ra_L_eps1": 1442.0,
+      "over_limit_even_at_best_cooling": false
+     },
+     "Ta25C_block30%": {
+      "case_temp_C_eps1_bestcooling": 25.5219,
+      "case_temp_C_eps0_worstcooling": 26.2711,
+      "R_th_K_W_eps1": 37.537,
+      "R_th_K_W_eps0": 91.4162,
+      "h_conv_W_m2K_eps1": 3.1037,
+      "h_rad_W_m2K_eps1": 6.0272,
+      "Ra_L_eps1": 2010.0,
+      "over_limit_even_at_best_cooling": false
+     },
+     "Ta35C_block0%": {
+      "case_temp_C_eps1_bestcooling": 35.3512,
+      "case_temp_C_eps0_worstcooling": 35.951,
+      "R_th_K_W_eps1": 25.2579,
+      "R_th_K_W_eps0": 68.3927,
+      "h_conv_W_m2K_eps1": 2.8508,
+      "h_rad_W_m2K_eps1": 6.6481,
+      "Ra_L_eps1": 1163.0,
+      "over_limit_even_at_best_cooling": false
+     },
+     "Ta35C_block30%": {
+      "case_temp_C_eps1_bestcooling": 35.491,
+      "case_temp_C_eps0_worstcooling": 36.2759,
+      "R_th_K_W_eps1": 35.3108,
+      "R_th_K_W_eps0": 91.7622,
+      "h_conv_W_m2K_eps1": 3.0539,
+      "h_rad_W_m2K_eps1": 6.6527,
+      "Ra_L_eps1": 1624.0,
+      "over_limit_even_at_best_cooling": false
+     }
+    },
+    "R_th_needed_to_hold_70C_K_W": {
+     "Ta20C": 3595.9026,
+     "Ta25C": 3236.3124,
+     "Ta35C": 2517.1318
+    },
+    "case_band_25C": {
+     "lower_bound_C": 25.374,
+     "upper_bound_C": 26.2711,
+     "limit_C": 70.0,
+     "grade": "PASS"
+    }
+   },
+   "right_knee": {
+    "mean_tau_squared_Nm2": 0.04318446,
+    "rms_torque_Nm": 0.207809,
+    "peak_torque_Nm": 0.415415,
+    "i_rms_A": 0.58703,
+    "i_peak_A": 1.17349,
+    "i_peak_vs_current_limit_38_pct": 67.056,
+    "p_copper_W": 1.17212,
+    "p_copper_peak_W": 4.68393,
+    "p_mech_mean_positive_W": 0.491786,
+    "steady_state": {
+     "Ta20C_block0%": {
+      "case_temp_C_eps1_bestcooling": 41.0246,
+      "case_temp_C_eps0_worstcooling": 55.6353,
+      "R_th_K_W_eps1": 17.9371,
+      "R_th_K_W_eps0": 30.4024,
+      "h_conv_W_m2K_eps1": 7.0171,
+      "h_rad_W_m2K_eps1": 6.3586,
+      "Ra_L_eps1": 74690.0,
+      "over_limit_even_at_best_cooling": false
+     },
+     "Ta20C_block30%": {
+      "case_temp_C_eps1_bestcooling": 48.472,
+      "case_temp_C_eps0_worstcooling": 67.7465,
+      "R_th_K_W_eps1": 24.291,
+      "R_th_K_W_eps0": 40.735,
+      "h_conv_W_m2K_eps1": 7.5084,
+      "h_rad_W_m2K_eps1": 6.6017,
+      "Ra_L_eps1": 95590.0,
+      "over_limit_even_at_best_cooling": false
+     },
+     "Ta25C_block0%": {
+      "case_temp_C_eps1_bestcooling": 45.6355,
+      "case_temp_C_eps0_worstcooling": 60.7366,
+      "R_th_K_W_eps1": 17.6052,
+      "R_th_K_W_eps0": 30.4888,
+      "h_conv_W_m2K_eps1": 6.9632,
+      "h_rad_W_m2K_eps1": 6.6648,
+      "Ra_L_eps1": 68170.0,
+      "over_limit_even_at_best_cooling": false
+     },
+     "Ta25C_block30%": {
+      "case_temp_C_eps1_bestcooling": 52.9677,
+      "case_temp_C_eps0_worstcooling": 72.8895,
+      "R_th_K_W_eps1": 23.8607,
+      "R_th_K_W_eps0": 40.857,
+      "h_conv_W_m2K_eps1": 7.4531,
+      "h_rad_W_m2K_eps1": 6.9114,
+      "Ra_L_eps1": 87510.0,
+      "over_limit_even_at_best_cooling": false
+     },
+     "Ta35C_block0%": {
+      "case_temp_C_eps1_bestcooling": 54.8542,
+      "case_temp_C_eps0_worstcooling": 70.9429,
+      "R_th_K_W_eps1": 16.9387,
+      "R_th_K_W_eps0": 30.6647,
+      "h_conv_W_m2K_eps1": 6.858,
+      "h_rad_W_m2K_eps1": 7.3062,
+      "Ra_L_eps1": 56930.0,
+      "over_limit_even_at_best_cooling": false
+     },
+     "Ta35C_block30%": {
+      "case_temp_C_eps1_bestcooling": 61.9598,
+      "case_temp_C_eps0_worstcooling": 83.1594,
+      "R_th_K_W_eps1": 23.0008,
+      "R_th_K_W_eps0": 41.0873,
+      "h_conv_W_m2K_eps1": 7.3418,
+      "h_rad_W_m2K_eps1": 7.5597,
+      "Ra_L_eps1": 73460.0,
+      "over_limit_even_at_best_cooling": false
+     }
+    },
+    "R_th_needed_to_hold_70C_K_W": {
+     "Ta20C": 42.6576,
+     "Ta25C": 38.3918,
+     "Ta35C": 29.8603
+    },
+    "case_band_25C": {
+     "lower_bound_C": 45.6355,
+     "upper_bound_C": 72.8895,
+     "limit_C": 70.0,
+     "grade": "CANNOT DETERMINE"
+    }
+   }
+  },
+  "worst_joint": "left_knee",
+  "worst_joint_p_copper_W": 1.66645,
+  "joints_FAIL_over_70C_even_at_best_cooling": [],
+  "joints_CANNOT_DETERMINE_band_straddles_70C": [
+   "left_knee",
+   "right_knee"
+  ],
+  "joints_over_70C_at_best_cooling_30pct_blocked": [],
+  "total_copper_W_15_servos_note": "sum over the 14 actuated joints; the 15th XL330 (jaw) is not an actuated joint in the published model and has no measured duty -- CANNOT DETERMINE",
+  "total_copper_W": 4.594,
+  "total_mech_W": 1.82539,
+  "standby_all_15_at_5V_W": 1.275,
+  "bus_power_lower_bound_W": 6.41939,
+  "pack_current_lower_bound_A": {
+   "6.6 (empty cut-off)": 0.97263,
+   "7.4 (2S nominal)": 0.86748,
+   "8.2 (full)": 0.78285
+  },
+  "time_to_limit_curve": [
+   {
+    "assumed_cp_J_kgK": 500.0,
+    "lumped_C_J_K": 9.0,
+    "eps": "eps1",
+    "tau_thermal_s": 150.43,
+    "steady_rise_K": 27.854,
+    "time_to_70C_s": null,
+    "time_to_70C_min": null
+   },
+   {
+    "assumed_cp_J_kgK": 500.0,
+    "lumped_C_J_K": 9.0,
+    "eps": "eps0",
+    "tau_thermal_s": 257.62,
+    "steady_rise_K": 47.701,
+    "time_to_70C_s": 739.71,
+    "time_to_70C_min": 12.329
+   },
+   {
+    "assumed_cp_J_kgK": 900.0,
+    "lumped_C_J_K": 16.2,
+    "eps": "eps1",
+    "tau_thermal_s": 270.78,
+    "steady_rise_K": 27.854,
+    "time_to_70C_s": null,
+    "time_to_70C_min": null
+   },
+   {
+    "assumed_cp_J_kgK": 900.0,
+    "lumped_C_J_K": 16.2,
+    "eps": "eps0",
+    "tau_thermal_s": 463.72,
+    "steady_rise_K": 47.701,
+    "time_to_70C_s": 1331.48,
+    "time_to_70C_min": 22.191
+   },
+   {
+    "assumed_cp_J_kgK": 1300.0,
+    "lumped_C_J_K": 23.4,
+    "eps": "eps1",
+    "tau_thermal_s": 391.13,
+    "steady_rise_K": 27.854,
+    "time_to_70C_s": null,
+    "time_to_70C_min": null
+   },
+   {
+    "assumed_cp_J_kgK": 1300.0,
+    "lumped_C_J_K": 23.4,
+    "eps": "eps0",
+    "tau_thermal_s": 669.81,
+    "steady_rise_K": 47.701,
+    "time_to_70C_s": 1923.25,
+    "time_to_70C_min": 32.054
+   },
+   {
+    "assumed_cp_J_kgK": 1700.0,
+    "lumped_C_J_K": 30.6,
+    "eps": "eps1",
+    "tau_thermal_s": 511.47,
+    "steady_rise_K": 27.854,
+    "time_to_70C_s": null,
+    "time_to_70C_min": null
+   },
+   {
+    "assumed_cp_J_kgK": 1700.0,
+    "lumped_C_J_K": 30.6,
+    "eps": "eps0",
+    "tau_thermal_s": 875.91,
+    "steady_rise_K": 47.701,
+    "time_to_70C_s": 2515.02,
+    "time_to_70C_min": 41.917
+   }
+  ]
+ },
+ "verdict": "CANNOT DETERMINE",
+ "why": "2 of 14 joints STRADDLE the 70 degC Temperature Limit(31): left_knee, right_knee. Worst is left_knee, whose case sits between 52.85 degC (black-body radiation, free body -- the best cooling physics allows) and 88.98 degC (no radiation, 30 % of the skin blocked by its printed mount). The bracket contains the limit, so the verdict is not a pass. Two unmeasured quantities decide it: the case's emissivity and how much of the skin the printed mount covers -- and on top of both, the winding is hotter than the case by an unpublished amount, so even the lower bound is a lower bound. No other joint exceeds 41.70 degC at its own upper bound.",
+ "cannot_determine": [
+  {
+   "what": "winding-to-case thermal resistance",
+   "why": "ROBOTIS publishes no thermal model, no winding resistance and no continuous-torque rating for the XL330-M288-T; only the three stall rows and the 70 degC limit exist. Every case temperature above is therefore a LOWER BOUND on the winding temperature.",
+   "what_settles_it": "a step test on one servo: hold a known constant torque against a fixture and log Present Temperature(146) (RAM 146, 1 degC) to steady state. The asymptote gives R_th and the knee gives C in the same run."
+  },
+  {
+   "what": "lumped thermal capacitance C, hence time-to-limit",
+   "why": "unpublished. The curve above sweeps cp over 500-1700 J/kgK on the vendor's 18 g and is a PARAMETRIC RESULT, not a measurement.",
+   "what_settles_it": "the same step test."
+  },
+  {
+   "what": "gearbox friction loss at this duty",
+   "why": "no efficiency figure is published for the 288.4:1 engineering-plastic gear train. It is omitted, which makes every temperature here an understatement.",
+   "what_settles_it": "measure Present Current(126) at a known output torque and subtract the copper term."
+  },
+  {
+   "what": "servo-bus regulator temperature",
+   "why": "the Robot HAT's regulator part number is CANNOT DETERMINE (ce-parts/xl330-m288-t/electrical.part.json note: 'the Microduck's Robot HAT is assumed to carry one (transceiver part CANNOT DETERMINE)'; the three custom PCBs have no published design). With no part there is no package, no theta_JA and no dissipation to compute. The bus power lower bound above is what a regulator study would start from.",
+   "what_settles_it": "the Robot HAT schematic (lane D) naming the regulator."
+  },
+  {
+   "what": "current at pack voltage above 6.0 V",
+   "why": "the vendor states nothing above 6.0 V and the design runs the servos on the raw 6.6-8.2 V pack (docs/ELECTRONICS-AND-SOFTWARE.md 3.4). kT and R are taken at the 5.0 V row.",
+   "what_settles_it": "a meter on a servo VDD pin and Present Current(126) logged at a known torque on the real pack."
+  }
+ ],
+ "script": "sim/thermal_servo.py",
+ "artifacts": [
+  "out/sim-evidence/thermal-servo-xl330.json"
+ ],
+ "looked_at": [
+  "out/sim-evidence/gait-torque-duty.json",
+  "out/sim-evidence/gait-peaks.json",
+  "ce-parts/xl330-m288-t/electrical.chip.json",
+  "ce-parts/xl330-m288-t/electrical.part.json",
+  "ce-parts/xl330-m288-t/component.json",
+  "https://emanual.robotis.com/docs/en/dxl/x/xl330-m288/",
+  "https://www.me.psu.edu/cimbala/me433/Links/Table_A_9_CC_Properties_of_Air.pdf",
+  "https://en.wikipedia.org/wiki/Heat_transfer_coefficient"
+ ]
+}
