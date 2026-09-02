@@ -1,25 +1,101 @@
-# GOAL — by the morning of 2026-09-02
+# GOAL — Microduck, night of 2026-09-02 (Leif: "write a good goal … i will give to a claude instance to work on this all night")
 
-Leif, 2026-09-01 (verbatim): *"i want to see it animated and ready for
-production when i come back tomorrow. working using the open source
-simulator for it. fully simulated"* and *"put a workflow on the
-electronics, pcb, datasheet, workflow on wiring, assembly and manufacturing
-and blueprints and production research. use many workflows and orchestrate
-it nicely."*
+Leif, 2026-09-02, verbatim on top of this goal: *"use opus 5 for workflows youre the orcehstrator which use fable 5.1 but to save tokens use opus 5 for workflows."* and *"be token efficent and use opus for as much as possible"*
 
-The goal, as measurable rungs. Each rung is a file that exists and a
-command that exits 0; a rung not reached says so in STATUS.md.
+```
+GOAL — Microduck: drive to a physically manufacturable product, verified end to end.
 
-| # | rung | proof |
-|---|---|---|
-| 1 | **Every part on the shelf** — 38 slugs build through `bin/cad part:<slug>`; MESH-BACKED IS THE PRIMARY FORM (Leif, 2026-09-02: 'use it directly'); parametric rebuilds replace slugs only where they earn it (drawings, licence, changes) | `bin/triad check --all` in this root; `out/render/duck-now_*.png` |
-| 2 | **The whole assembly builds in the kernel** and renders — `bin/cad assembly:microduck --render`, 14/14 joints resolved by measurement | `ce-assemblies/microduck/current/joints.json record.resolved == 14` |
-| 3 | **Animated** — Pollen's MJCF driven by their own published policy (walk, sit/stand) in MuJoCo, with OUR rebuilt meshes swapped in for every PASSed part, rendered to `out/sim/*.mp4` (+ a GIF for the README) | `out/sim/walk.mp4` exists, ≥ 5 s, frames read back; `out/sim/report.json` with joint ranges hit, no self-collision growth vs the stock model |
-| 4 | **Electronics known and checked** — every electronic part on the shelf with its datasheet cited (elec-datasheets), a `cecad.netlist.Design` of the robot that PASSes its checks, the Robot HAT as a ce-pcb board (schematic → layout → DRC → gerbers) | `electronics/README.md`; `bin/pcb` DRC report PASS or a named CANNOT DETERMINE |
-| 5 | **Wiring** — the servo daisy chain, IMU board, ToF, codec, camera as a ce-wire design with cable lengths measured off the placements | `wiring/` + `bin/wire` check |
-| 6 | **Manufacturing package** — drawings for every printed part (autosheet, verified), print plates with real grams/seconds from ce-slice, construction manual, BOM with prices cited, delivered as one `bin/deliver` package | `out/release/` + `report.json` exit 0 (or the named failing rung) |
-| 7 | **Production research** — suppliers, MOQ, moulding vs printing at 1/10/100/1000 units, battery shipping & CE/FCC obligations, packaging, cost roll-up — with sources | `docs/PRODUCTION.md` |
-| 8 | **STATUS.md** written last: what is PASS, what is CANNOT DETERMINE, and why | |
+REPO: /Users/leifrydenfalk/dev/ce-workshop/ce-designs/microduck  (own git repo + triad root)
+WORKSHOP: /Users/leifrydenfalk/dev/ce-workshop  (read its CLAUDE.md + TRIAD.md first)
+RUN CAD/SIM AS: ce-cad/bin/cad <script.py>   (FreeCAD python 3.11; system python3 has no numpy/PIL)
+export CE_TRIAD_ROOT="$REPO:$WORKSHOP"
 
-Rules: nothing claims done without its proof; a rung the tools cannot reach
-tonight is written down as the tool gap it is (P11) rather than faked.
+YOU RUN THIS PROJECT. Do not stop to ask permission. Do not hand work back. If something is
+undetermined, that is YOUR work item — resolve it by measuring, reading, or researching.
+Escalate to the human ONLY for a genuine product preference or spending money.
+
+HOUSE RULES (non-negotiable)
+- MEASURE, never assert. Every number carries a source: a file:line, a datasheet page, a
+  distributor URL, or a measurement you just took.
+- Three verdicts: PASS / FAIL / CANNOT DETERMINE. A missing value stays missing — never a
+  plausible default. Never loosen a check to make it pass.
+- Full engineering precision. Do not round to 1-2 dp. Dimensions in mm to 3-4 dp, and state
+  the tolerance basis. Units mm / g / degrees / volts.
+- LOOK at every artifact you produce (render it, screenshot it, Read the image back). A file
+  that exists is not a file that is correct.
+- Everything is a document in the repo. HTML, not Markdown, in the shared academic style
+  (link tools/doc.css). Regenerate documents from data with a script in tools/ — never
+  hand-maintain a table that a generator could own.
+
+WORKFLOWS: use them aggressively for every lane. Pass {model: 'opus'} on every agent() call.
+Spend tokens freely. Prefer pipeline() over barriers. Adversarially verify findings.
+
+STATE AS OF HANDOFF
+- COMPARISON.html — our CAD beside real product photos at 8 matched camera angles + measured
+  dimension table for all 47 meshes. 9 parametric rebuilds, 9/9 dimensional PASS, worst-axis
+  deviation 0.7193 mm. Generated by tools/gen_comparison.py from out/verify/mech_dims.json.
+- Renders: sim/compare_render.py (MuJoCo studio) and sim/assembly_steps_mj.py (assembly steps).
+- Stress FEA (out/stress/report.json): shin SF 7.51, ankle SF 2.02, hip-bracket SF 6.42 PASS
+  at 20 N design load. upper-leg = CANNOT DETERMINE (connector-name bug in
+  sim/stress_evidence.py) — FIX IT.
+- Electronics/sourcing workflow may still be running or have landed; check /workflows and
+  the transcript dir before re-running.
+- RELEASE.html is the master dossier. It must end up containing everything.
+
+CRITICAL OPEN FINDINGS (from COMPARISON.html §5) — close these
+1. SIM HEAD ≠ PRODUCT HEAD. top_head_shell is 91.751 x 122.688 x 46.339 mm, far longer
+   front-to-back than the compact domed head in every product photo, and the eye bezel is
+   missing. Tooling cut from this mesh is WRONG. Re-model the head from the product
+   photographs (photogrammetry / silhouette fitting against images/store/*), grade it, and
+   replace it. This is the single biggest geometric blocker.
+2. Battery mesh is np_f970 (38.600 x 20.600 x 70.800 mm) but docs say NP-F550 class.
+   Determine the real cell, then re-check the power_support cavity against it.
+3. Compute placeholder mesh is a Pi Zero 2 W; documented host is Radxa Zero 3W. Same
+   65 x 30 mm envelope, different connectors/mounting. Verify against the real board.
+4. Two ankle revisions ship (ankle_left Y=36.500 vs ankle_l_v1 Y=46.500). Determine which
+   is current.
+5. Drawing generator has two measured defects: it merges coaxial holes into a phantom
+   counterbore, and the wall-thickness note reports a section scan rather than the true
+   minimum. Fix the generator, then regenerate every sheet.
+6. Three custom PCBs (Robot HAT, imu_to_dxl, banana contact board) have no published design.
+   They must be schematic-captured, laid out, and quoted before anything is fabricable.
+
+LANES TO COMPLETE (workflow each; produce a document for each)
+A. HEAD RECONSTRUCTION — close finding 1. Deliver a graded head model + before/after
+   photo-match evidence.
+B. MECHANICAL DRAWINGS — fix the generator, regenerate all sheets with ISO views from every
+   angle, full dimensions including radii, hole tables, sections, tolerances, surface finish,
+   and a reference photo on each sheet. Deliver out/drawings/INDEX.html.
+C. ELECTRONICS VERIFICATION — every component: exact MPN, package, physical dimensions,
+   pinout, voltage, current draw, mass. Every value cited. Deliver ELECTRONICS-DATASHEET.html.
+D. CUSTOM PCB DESIGN — schematic + layout + Gerbers + BOM for the three boards, or a
+   fully-specified statement of work with real fab quotes if design is out of scope.
+   Deliver electronics/robot-hat/, and a PCB-PACKAGE.html.
+E. SOURCING & RFQ — every bought line: >=2 real distributors, unit price at 1/100/1000, MOQ,
+   lead time, alternates. Deliver SOURCING.html and a ready-to-send RFQ.html the human can
+   email to suppliers. DO NOT contact anyone yourself.
+F. SIMULATION EVIDENCE — run far more: FEA on every structural part (fix the upper-leg case),
+   drop/impact, fatigue on the ankle (lowest SF at 2.02), thermal on the servos and the
+   compute, battery runtime, gait robustness sweeps, and tolerance stack-up on every joint.
+   Deliver SIMULATION.html with every run's inputs, outputs and verdict.
+G. MANUFACTURING PLAYBOOK — the document the team executes: process selection per part
+   (print vs mould) with break-even quantities, DFM review of every part, print profiles,
+   assembly line steps with jigs and torque specs, QA test plan with pass/fail gates,
+   packaging. Deliver MANUFACTURING-PLAYBOOK.html.
+H. TEST & VALIDATION PLAN — how we prove a built unit works: electrical bring-up, servo ID
+   and calibration, sensor checks, walk acceptance test. Deliver TEST-PLAN.html.
+I. TOOLING (ce-workshop, not just ce-cad) — every capability you needed and had to hand-roll
+   becomes a real tool in the appropriate repo, with docs. Make this whole loop easy to repeat
+   for the next product.
+
+FINAL INTEGRATION
+RELEASE.html must link and summarise every document above, carry the honest readiness matrix
+with what still blocks factory, and open cleanly. Screenshot it and Read it back before you
+call it done. Commit continuously with clear messages. Record entries in ce-changelog.
+
+DEFINITION OF DONE
+A competent shop could take this repo and build a working Microduck: every part has a
+dimensioned drawing or a print file, every bought item has a supplier and a price, every
+custom board has a design or a quoted SOW, the assembly and test procedures are written, and
+every claim in the repo is either measured, cited, or explicitly marked CANNOT DETERMINE.
+```
