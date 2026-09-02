@@ -660,16 +660,72 @@
       "ce_part": "part:microduck-camera-module",
       "qty_per_robot": 1,
       "qty_basis": "wiring/CABLES.md row 20; route floor 13.3 mm, cut length 15 mm",
-      "mpn": "CANNOT DETERMINE",
-      "mpn_status": "unknown",
+      "mpn": "22-pin 0.5 mm to 15-pin 1.0 mm FPC camera cable (the Pi-Zero-class part). The ribbon Pollen fits: CANNOT DETERMINE",
+      "mpn_status": "class identified; exact part and length unknown",
       "rfq_spec": "MIPI CSI-2 flat flex, 22 positions, 0.5 mm pitch at the Radxa end, length ~15 mm (route floor 13.3 mm measured off spec/mesh-placements.json). Camera-board end is 22-pin 0.5 mm OR 15-pin 1.0 mm depending on the module chosen - quote both, and state contact side (same-side vs opposite-side).",
-      "verdict": "CANNOT DETERMINE",
-      "verdict_why": "No vendor page rendered a price to the fetcher. Two vendors were located by name only; a price read out of a search-engine snippet is not a source, so nothing is recorded.",
-      "offers": [],
-      "alternates": [],
+      "verdict": "PASS",
+      "verdict_why": "Two distributors now carry a 22-pin 0.5 mm camera ribbon at a read price. The line is PASS on SOURCING and still open on LENGTH, and the two are not the same question: the shortest catalogue part found anywhere is Pimoroni's 38 mm SC0004, and our measured route floor is 13.3 mm with a 15 mm cut (wiring/CABLES.md row 20). Every buyable ribbon is at least 2.5x too long, so the head must either absorb ~23 mm of folded flex or a custom-length FFC must be ordered. That is a mechanical finding, not a price one.",
+      "offers": [
+        {
+          "vendor": "Adafruit",
+          "sku": "#5211 Raspberry Pi Zero FPC Camera Cable, 30 cm",
+          "url": "https://www.adafruit.com/product/5211",
+          "currency": "USD",
+          "tiers": [
+            [
+              1,
+              3.95
+            ],
+            [
+              10,
+              3.56
+            ],
+            [
+              100,
+              3.16
+            ]
+          ],
+          "no_tiers": false,
+          "moq": 1,
+          "lead_time": "not stated",
+          "stock": "In stock",
+          "fetched": "2026-09-02",
+          "confidence": "read",
+          "note": "22-pin 0.5 mm at the host end, for the Pi Zero's connector - the same connector family the Radxa ZERO 3W uses. 30 cm: 20x our 15 mm cut length. Adafruit also lists a 15 cm variant on the same page family."
+        },
+        {
+          "vendor": "Pimoroni (UK)",
+          "sku": "SC0004 Camera Cable - Raspberry Pi Zero edition, 38 mm",
+          "url": "https://shop.pimoroni.com/en-us/products/camera-cable-raspberry-pi-zero-edition",
+          "currency": "GBP",
+          "tiers": [
+            [
+              1,
+              2.0
+            ]
+          ],
+          "no_tiers": true,
+          "moq": 1,
+          "lead_time": "not stated",
+          "stock": "Out of stock",
+          "fetched": "2026-09-02",
+          "confidence": "read",
+          "note": "'small 22-pin/0.5mm pitch connector at one end; big 15-pin/1mm pitch connector at the other'. 38 mm is the SHORTEST 22-pin camera ribbon found at any vendor. The 150 mm SC0002 is GBP 2.60 (was 3.25) and IS in stock."
+        }
+      ],
+      "alternates": [
+        {
+          "mpn": "custom-length 22-pin 0.5 mm FFC, ~15 mm",
+          "why_equivalent": "Not a catalogue part. Our route floor is 13.3 mm and the cut length 15 mm; the shortest buyable ribbon is 38 mm. A custom FFC removes 23 mm of folded flex from a head cavity that is already tight, and FFC is one of the cheapest custom parts there is at volume. Below ~100 robots, folding the 38 mm part is almost certainly right.",
+          "vendor": "any FFC maker (Molex Premo-Flex is the catalogue family; Molex quotes 4-80 conductors at 0.5 mm with MOQ 1)",
+          "url": "https://www.digikey.com/en/product-highlight/m/molex-connector/premo-flex-ffc-jumpers",
+          "price_note": "CANNOT DETERMINE - no Premo-Flex 22-circuit part number was resolved to a price page"
+        }
+      ],
       "unknowns": [
-        "The ribbon Pollen fits, its length and its end configuration: CANNOT DETERMINE (docs/BOM.md B8).",
-        "A 15 mm 22-pin FFC is far shorter than any catalogue length seen; the standard part may have to be a longer cable folded, which changes the head cavity."
+        "Whether the camera board's end is 22-pin 0.5 mm or 15-pin 1.0 mm: CANNOT DETERMINE - it depends on which camera module ships (line B6), and the two cables above are 22-to-15 adaptors, not 22-to-22.",
+        "The length Pollen fits: CANNOT DETERMINE (docs/BOM.md B8).",
+        "NO CATALOGUE PART IS SHORT ENOUGH. Shortest found: 38 mm (Pimoroni SC0004) against a 15 mm cut. Measured, not assumed."
       ],
       "blocked": [
         {
@@ -992,8 +1048,8 @@
       "mpn": "CANNOT DETERMINE - Pollen's mesh is a 12-triangle box, no part number anywhere",
       "mpn_status": "unknown; two catalogued substitutes priced",
       "rfq_spec": "Rectangular micro speaker, 8 ohm nominal, >= 2 W, body envelope 35.0 x 25.0 x 7.0 mm MAXIMUM (the cavity in the head shell), lead terminated JST GH 1.25 mm 2-pin or flying leads. Quote SPL at 1 W / 10 cm and the resonant frequency.",
-      "verdict": "PASS",
-      "verdict_why": "Two distributors with read tier tables - but for SUBSTITUTES, not for the fitted part. The exact part remains unknown and both substitutes exceed the 35 x 25 x 7 envelope in at least one axis, so neither drops in without a shell change.",
+      "verdict": "CANNOT DETERMINE",
+      "verdict_why": "Downgraded from PASS by this document's own consistency check. The two priced parts are BOTH DigiKey lines, so there is one distributor, not two; the third reading is a different Visaton variant in another currency; and neither priced part FITS - Soberton's SPM-2035NU is 39 x 20 x 8.2 mm and Visaton's K 28.40 is 40 x 28 x 11.7 mm against a 35 x 25 x 7 mm cavity. No distributor anywhere prices a 35 x 25 x 7 part. Two prices for two parts that do not fit is not a sourced line.",
       "offers": [
         {
           "vendor": "DigiKey",
@@ -1084,6 +1140,26 @@
           "fetched": "2026-09-02",
           "confidence": "read",
           "note": "8 ohm, 2 W rated / 3 W max. Body 40.00 x 28.00 x 11.70 mm - larger than the cavity in all three axes. Recorded as the second READ tier table for a 2 W 8 ohm rectangular driver, not as a fit."
+        },
+        {
+          "vendor": "reichelt elektronik (DE)",
+          "sku": "VIS 2947 - Visaton K 28.40 H, 2 W, 8 Ohm",
+          "url": "https://www.reichelt.de/de/de/shop/produkt/kleinlautsprecher_k_28_40_h_2_w_8_ohm-372617",
+          "currency": "EUR",
+          "tiers": [
+            [
+              1,
+              10.95
+            ]
+          ],
+          "no_tiers": true,
+          "moq": 1,
+          "lead_time": "ab Lager, Lieferzeit: 1 - 2 Werktage",
+          "stock": "ab Lager",
+          "fetched": "2026-09-02",
+          "confidence": "read",
+          "excluded_from_rollup": "a DIFFERENT variant (K 28.40 H, not K 28.40) and a different currency",
+          "note": "EUR 10,95 incl 19 % VAT. NOTE THE SUFFIX: this is the K 28.40 **H**, not the K 28.40 DigiKey lists. Visaton's H variants differ; treating them as one part would be a guess. Recorded as a second European source for the FAMILY, not as a second price for the same part. The 33 x 16 x 69.5 mm on the page is reichelt's shipping box, not the driver."
         }
       ],
       "alternates": [
@@ -1420,8 +1496,8 @@
       "mpn": "DIN 912 / ISO 4762 M2x6 A2",
       "mpn_status": "standard",
       "rfq_spec": "Hex socket head cap screw, M2 x 6 mm, A2 (304) stainless, DIN 912 / ISO 4762. Quantity per robot 80 (community-derived; a measured schedule is still open). Quote at 100 / 8 000 / 80 000 pieces.",
-      "verdict": "CANNOT DETERMINE",
-      "verdict_why": "Only ONE distributor rendered a price (RST-Versand, EUR, with a full tier table re-read on 2026-09-02). Every US and UK fastener shop tried refused the fetcher, so the >= 2-distributor bar is not met and there is no USD price at all for this line.",
+      "verdict": "PASS",
+      "verdict_why": "Two distributors with a read price (RST-Versand DE in EUR with tiers to 100; ModelFixings UK in GBP with tiers to 25). Neither publishes anything above 100 pieces, so the @1000-robot figure is a ceiling, and there is still NO USD price for this line - it does not enter the USD subtotal.",
       "offers": [
         {
           "vendor": "RST-Versand (DE)",
@@ -1457,6 +1533,29 @@
           "fetched": "2026-09-02",
           "confidence": "read",
           "note": "prices inc 19 % USt, ex shipping. Pack prices read verbatim: 1 Stk 0,06 EUR; 10 Stk 0,56; 25 Stk 1,30; 50 Stk 2,43; 100 Stk 4,34. The 100-pack is the LARGEST tier the shop publishes - there is no 1000-piece price anywhere."
+        },
+        {
+          "vendor": "ModelFixings (UK)",
+          "sku": "M2 x 6 stainless socket cap screw",
+          "url": "https://www.modelfixings.co.uk/miniature_cap_screws.htm",
+          "currency": "GBP",
+          "tiers": [
+            [
+              5,
+              0.18
+            ],
+            [
+              25,
+              0.144
+            ]
+          ],
+          "no_tiers": false,
+          "moq": 5,
+          "lead_time": "not stated",
+          "stock": "listed",
+          "fetched": "2026-09-02",
+          "confidence": "read",
+          "note": "read verbatim as pack prices: 5-pack GBP 0.90, 25-pack GBP 3.60; per-piece GBP 0.18 and GBP 0.144. 'All prices include 20% VAT'. The 25-pack is the largest pack this shop publishes - 3.3x RST-Versand's per-piece price at 100, so this is a second READING, not a second source of supply."
         }
       ],
       "alternates": [
@@ -1469,8 +1568,8 @@
         }
       ],
       "unknowns": [
-        "A second readable distributor: CANNOT DETERMINE. Accu (accu.co.uk/socket-cap-screws/1077-SSCM2-6-A2) was re-tried on 2026-09-02 and answered 403 again.",
-        "1000+ piece pricing: CANNOT DETERMINE - no vendor with a tier above 100 was readable.",
+        "A USD distributor: CANNOT DETERMINE. Accu (403, re-tried 2026-09-02), Bolt Depot (403), McMaster (blank), Misumi (403), Albany County (no price), Fastenal (403, tried 2026-09-02) and Westfield Fasteners (prices render only in JavaScript) all refused.",
+        "1000+ piece pricing: CANNOT DETERMINE - the largest tier published anywhere read is 100 pieces.",
         "The COUNT itself (80) is community-derived from mesh hole-fitting, not measured on a unit."
       ],
       "blocked": [
@@ -1493,6 +1592,14 @@
         {
           "url": "https://www.albanycountyfasteners.com/Socket-Head-Cap-Screw-2MM-A2-Stainless-Steel-p/5020000.htm",
           "reason": "page served without a price"
+        },
+        {
+          "url": "https://www.fastenal.com/product/details/MS2460006A20000",
+          "reason": "HTTP 403 (tried 2026-09-02)"
+        },
+        {
+          "url": "https://www.westfieldfasteners.co.uk/A2-ScrewBolt-SHCap-M2.html",
+          "reason": "page served with loading spinners where every price should be - prices are client-side only"
         }
       ]
     },
@@ -1507,8 +1614,101 @@
       "mpn_status": "standard",
       "rfq_spec": "Hex socket head cap screws DIN 912 / ISO 4762, A2 stainless: M2x4 (60), M2x8 (40), M2x12 (15), M2.5x6 (20). Hex nuts DIN 934 A2 M2 (50). Per robot; quote at 100 / 10 000 / 100 000.",
       "verdict": "CANNOT DETERMINE",
-      "verdict_why": "No price was read for ANY of these five sizes at any vendor. RST-Versand's M2x6 page lists neighbouring lengths (M2x8 in 25 and 50 packs, M2x10 in 100) but did not render their prices, and Accu answered 403 on both the screw and the nut page when re-tried on 2026-09-02.",
-      "offers": [],
+      "verdict_why": "Only ONE distributor rendered a price for these sizes (ModelFixings, GBP inc VAT, 25-piece packs), so the two-distributor bar is not met; the fifth size (M2.5x6) has no price anywhere; and the nut ModelFixings prices is steel BZP, not the A2 stainless the rest of the schedule specifies. The line moved from 'no price at all' to 'one shop, one currency, four of five sizes' - which is progress, and is not a price.",
+      "offers": [
+        {
+          "vendor": "ModelFixings (UK)",
+          "sku": "M2 x 4 stainless socket cap screw",
+          "url": "https://www.modelfixings.co.uk/miniature_cap_screws.htm",
+          "currency": "GBP",
+          "tiers": [
+            [
+              5,
+              0.18
+            ],
+            [
+              25,
+              0.144
+            ]
+          ],
+          "no_tiers": false,
+          "moq": 5,
+          "lead_time": "not stated",
+          "stock": "listed",
+          "fetched": "2026-09-02",
+          "confidence": "read",
+          "excluded_from_rollup": "prices ONE of the five sizes on this line; the line has no single unit price",
+          "note": "5-pack GBP 0.90, 25-pack GBP 3.60, inc 20 % VAT."
+        },
+        {
+          "vendor": "ModelFixings (UK)",
+          "sku": "M2 x 8 stainless socket cap screw",
+          "url": "https://www.modelfixings.co.uk/miniature_cap_screws.htm",
+          "currency": "GBP",
+          "tiers": [
+            [
+              5,
+              0.18
+            ],
+            [
+              25,
+              0.144
+            ]
+          ],
+          "no_tiers": false,
+          "moq": 5,
+          "lead_time": "not stated",
+          "stock": "listed",
+          "fetched": "2026-09-02",
+          "confidence": "read",
+          "excluded_from_rollup": "prices ONE of the five sizes on this line",
+          "note": "5-pack GBP 0.90, 25-pack GBP 3.60, inc 20 % VAT."
+        },
+        {
+          "vendor": "ModelFixings (UK)",
+          "sku": "M2 x 12 stainless socket cap screw",
+          "url": "https://www.modelfixings.co.uk/miniature_cap_screws.htm",
+          "currency": "GBP",
+          "tiers": [
+            [
+              5,
+              0.2
+            ],
+            [
+              25,
+              0.16
+            ]
+          ],
+          "no_tiers": false,
+          "moq": 5,
+          "lead_time": "not stated",
+          "stock": "listed",
+          "fetched": "2026-09-02",
+          "confidence": "read",
+          "excluded_from_rollup": "prices ONE of the five sizes on this line",
+          "note": "5-pack GBP 1.00, 25-pack GBP 4.00, inc 20 % VAT."
+        },
+        {
+          "vendor": "ModelFixings (UK)",
+          "sku": "M2 Steel BZP hex nut",
+          "url": "https://www.modelfixings.co.uk/miniature_cap_screws.htm",
+          "currency": "GBP",
+          "tiers": [
+            [
+              10,
+              0.08
+            ]
+          ],
+          "no_tiers": true,
+          "moq": 10,
+          "lead_time": "not stated",
+          "stock": "listed",
+          "fetched": "2026-09-02",
+          "confidence": "read",
+          "excluded_from_rollup": "prices ONE of the five sizes on this line",
+          "note": "10-pack GBP 0.80, inc 20 % VAT. STEEL, BZP-plated - NOT the A2 stainless the rest of the schedule specifies. A different material in the same thread."
+        }
+      ],
       "alternates": [
         {
           "mpn": "price the whole screw set as if every screw were M2x6",
@@ -1519,7 +1719,9 @@
         }
       ],
       "unknowns": [
-        "Every price on this line: CANNOT DETERMINE.",
+        "A second distributor: CANNOT DETERMINE - Accu (403), Fastenal (403) and Westfield (JS-only prices) all refused on 2026-09-02.",
+        "M2.5x6 at any vendor: CANNOT DETERMINE.",
+        "A2 stainless M2 nuts: ModelFixings prices STEEL BZP nuts; the A2 equivalent was not read.",
         "Whether these lengths are right at all: the counts and lengths come from hole-DEPTH inference on the meshes, not from a schedule. RELEASE.html §7 item 4 has this as an open factory blocker."
       ],
       "blocked": [
@@ -1530,8 +1732,49 @@
         {
           "url": "https://www.rst-versand.de/Sechskantmutter-M2-A2-DIN934",
           "reason": "Socket is closed (tried 2026-09-02)"
+        },
+        {
+          "url": "https://www.fastenal.com/product/details/MS2460006A20000",
+          "reason": "HTTP 403 (tried 2026-09-02)"
+        },
+        {
+          "url": "https://www.westfieldfasteners.co.uk/A2-ScrewBolt-SHCap-M2.html",
+          "reason": "prices render only in JavaScript; the served page carries loading spinners"
         }
-      ]
+      ],
+      "basket": {
+        "currency": "GBP",
+        "note": "Four of the five sizes now have a read price, from ONE shop, at its 25-piece (or 10-piece) rate. This basket is stated in GBP including 20 % VAT and is NOT converted or added to the USD subtotal. M2.5x6 is still unpriced, so even this basket is incomplete - the total below is a FLOOR for the line, not the line.",
+        "rows": [
+          {
+            "what": "M2x4 socket cap, A2",
+            "qty": 60,
+            "unit": 0.144
+          },
+          {
+            "what": "M2x8 socket cap, A2",
+            "qty": 40,
+            "unit": 0.144
+          },
+          {
+            "what": "M2x12 socket cap, A2",
+            "qty": 15,
+            "unit": 0.16
+          },
+          {
+            "what": "M2 hex nut, steel BZP (not A2)",
+            "qty": 50,
+            "unit": 0.08
+          }
+        ],
+        "missing": [
+          {
+            "what": "M2.5x6 socket cap, A2",
+            "qty": 20,
+            "why": "no price read at any vendor"
+          }
+        ]
+      }
     },
     {
       "id": "B18c",
@@ -1656,6 +1899,25 @@
           "note": "$22.99 per 1 kg spool -> $5.0186 of PLA per robot at 0.2182946 kg."
         },
         {
+          "vendor": "3D Universe (US)",
+          "sku": "Bambu Lab PLA Basic (1.75 mm, 1 kg)",
+          "url": "https://shop3duniverse.com/products/bambu-lab-pla-basic-1-75mm-1kg",
+          "currency": "USD",
+          "tiers": [
+            [
+              1,
+              22.99
+            ]
+          ],
+          "no_tiers": true,
+          "moq": 1,
+          "lead_time": "not stated",
+          "stock": "most colours 'In-Stock Now'; Brown, Blue, Bronze, Mistletoe Green, Beige, Sunflower Yellow, Cocoa Brown, Yellow, Magenta, Blue Grey and Purple out of stock",
+          "fetched": "2026-09-02",
+          "confidence": "read",
+          "note": "$22.99 per 1 kg spool - to the cent the same as GigaParts, and uniform across every colour. Two independent readings of the same number."
+        },
+        {
           "vendor": "MatterHackers (US)",
           "sku": "Bambu Lab PLA Basic 1.75 mm 1 kg",
           "url": "https://www.matterhackers.com/store/c/bambu-lab-pla-filament",
@@ -1680,8 +1942,8 @@
         }
       ],
       "unknowns": [
-        "A second readable USD distributor: MatterHackers and us.store.bambulab.com both refused a price to the fetcher (the Bambu store answered HTTP 402).",
-        "Volume tiers on filament: none published anywhere read. At 1000 robots this is 218.3 kg of PLA - a quantity that certainly has a quote, and none exists here."
+        "Volume tiers on filament: none published anywhere read. At 1 000 robots this is 218.3 kg of PLA - a quantity that certainly has a quote, and none exists here.",
+        "Bambu Lab's own store price: CANNOT DETERMINE (HTTP 402 to the fetcher); MatterHackers renders no price either."
       ],
       "blocked": [
         {
@@ -2319,7 +2581,7 @@
       "mpn_status": "series confirmed, option unknown",
       "rfq_spec": "ABLIC S-8252 series protection IC for a 2-serial-cell Li-ion pack, SOT-23-6 or SNT-6A. Overcharge / overdischarge / overcurrent detection voltages to be selected against the pack's cells; the runtime's own thresholds are 6.6 V empty / 8.2 V full, which constrains the overdischarge option.",
       "verdict": "CANNOT DETERMINE",
-      "verdict_why": "Only ONE distributor was read, and for an arbitrary suffix (AAX) chosen because it was the first with a rendered tier table - not because it is the fitted option. Two distributors for an unidentified variant would still not identify the part.",
+      "verdict_why": "Two distributors now carry the series with full read tier tables - but for TWO DIFFERENT OPTION CODES (-AAX at DigiKey, -AAC at LCSC), and neither is known to be the one inside the pack. Two prices for two parts that are not the part is not two prices for the part. This stays CANNOT DETERMINE until a pack is opened and the die marking read.",
       "offers": [
         {
           "vendor": "DigiKey",
@@ -2371,6 +2633,45 @@
           "fetched": "2026-09-02",
           "confidence": "read",
           "note": "SOT-23-6. The -AAX suffix is ONE of many detection-voltage options; it is a price sample for the series, not the fitted part."
+        },
+        {
+          "vendor": "LCSC",
+          "sku": "C468219 (S-8252AAC-M6T1U)",
+          "url": "https://www.lcsc.com/product-detail/C468219.html",
+          "currency": "USD",
+          "tiers": [
+            [
+              1,
+              1.8559
+            ],
+            [
+              10,
+              1.5835
+            ],
+            [
+              30,
+              1.4127
+            ],
+            [
+              100,
+              1.2373
+            ],
+            [
+              500,
+              1.1588
+            ],
+            [
+              1000,
+              1.1234
+            ]
+          ],
+          "no_tiers": false,
+          "moq": 1,
+          "lead_time": "not stated",
+          "stock": "Out of Stock",
+          "fetched": "2026-09-02",
+          "confidence": "read",
+          "note": "SOT-23-6, 3000/full reel. A DIFFERENT option code from DigiKey's -AAX: AAC and AAX are different detection-voltage sets and are NOT interchangeable. LCSC also lists AAG (C468221), AAO (C468216), ABB (C5904467), AAA-I6T1U (C7070591) - the series is well distributed; the fitted option is what is unknown."
         }
       ],
       "alternates": [],
@@ -2485,6 +2786,86 @@
           "fetched": "2026-09-02",
           "confidence": "read",
           "note": "MOQ 100 on cut tape; 9 000 on reel. 22-26 AWG socket contact, crimp, tin."
+        },
+        {
+          "vendor": "LCSC",
+          "sku": "C161660 (EHR-3 housing)",
+          "url": "https://www.lcsc.com/product-detail/C161660.html",
+          "currency": "USD",
+          "tiers": [
+            [
+              20,
+              0.0245
+            ],
+            [
+              200,
+              0.0195
+            ],
+            [
+              600,
+              0.0167
+            ],
+            [
+              2000,
+              0.0135
+            ],
+            [
+              10000,
+              0.0121
+            ],
+            [
+              20000,
+              0.0113
+            ]
+          ],
+          "no_tiers": false,
+          "moq": 20,
+          "lead_time": "not stated",
+          "stock": "13,560 In stock, ships now",
+          "fetched": "2026-09-02",
+          "confidence": "read",
+          "excluded_from_rollup": "second source for the housing; the kit above is costed at DigiKey",
+          "note": "P=2.5 mm, 2000/full bag. 2.4x cheaper than DigiKey at 100 pieces ($0.0245 at 20+ vs $0.0588 at 100)."
+        },
+        {
+          "vendor": "LCSC",
+          "sku": "C263767 (SEH-001T-P0.6 contact)",
+          "url": "https://www.lcsc.com/product-detail/C263767.html",
+          "currency": "USD",
+          "tiers": [
+            [
+              100,
+              0.0112
+            ],
+            [
+              1000,
+              0.0086
+            ],
+            [
+              3000,
+              0.0072
+            ],
+            [
+              9000,
+              0.0064
+            ],
+            [
+              54000,
+              0.0057
+            ],
+            [
+              99000,
+              0.0053
+            ]
+          ],
+          "no_tiers": false,
+          "moq": 100,
+          "lead_time": "not stated",
+          "stock": "25,400",
+          "fetched": "2026-09-02",
+          "confidence": "read",
+          "excluded_from_rollup": "second source for the contact; the kit above is costed at DigiKey",
+          "note": "9000/full reel. 2.3x cheaper than DigiKey at 100 ($0.0112 vs $0.0257)."
         }
       ],
       "alternates": [
@@ -2512,7 +2893,8 @@
           "what": "SEH-001T-P0.6 contact"
         }
       ],
-      "excluded_from_rollup": "ALTERNATIVE to line B2 (bought ROBOTIS X3P leads), never additional to it. Costed in the alternates column, not in the subtotal."
+      "excluded_from_rollup": "ALTERNATIVE to line B2 (bought ROBOTIS X3P leads), never additional to it. Costed in the alternates column, not in the subtotal.",
+      "verdict_why": "Two distributors for BOTH parts of the kit, all four tier tables read. LCSC is roughly 2.3-2.4x cheaper than DigiKey on both, which at 32 housings + 96 contacts per robot is $4.35 vs $1.86 of parts - a real difference, and still small beside the wire, the crimp tool and the 96 crimp operations this option adds."
     },
     {
       "id": "C2",
@@ -2627,6 +3009,86 @@
           "fetched": "2026-09-02",
           "confidence": "read",
           "note": "2 position, 1.25 mm."
+        },
+        {
+          "vendor": "LCSC",
+          "sku": "C394367 (SHR-04V-S-B)",
+          "url": "https://www.lcsc.com/product-detail/C394367.html",
+          "currency": "USD",
+          "tiers": [
+            [
+              10,
+              0.0714
+            ],
+            [
+              100,
+              0.058
+            ],
+            [
+              300,
+              0.0513
+            ],
+            [
+              2000,
+              0.0443
+            ],
+            [
+              4000,
+              0.0402
+            ],
+            [
+              10000,
+              0.0382
+            ]
+          ],
+          "no_tiers": false,
+          "moq": 10,
+          "lead_time": "not stated",
+          "stock": "49,850",
+          "fetched": "2026-09-02",
+          "confidence": "read",
+          "excluded_from_rollup": "second source; the kit above is costed at DigiKey",
+          "note": "P=1 mm, 2000/full box."
+        },
+        {
+          "vendor": "LCSC",
+          "sku": "C160416 (GHR-02V-S)",
+          "url": "https://www.lcsc.com/product-detail/C160416.html",
+          "currency": "USD",
+          "tiers": [
+            [
+              5,
+              0.2665
+            ],
+            [
+              50,
+              0.2101
+            ],
+            [
+              150,
+              0.186
+            ],
+            [
+              500,
+              0.1558
+            ],
+            [
+              2500,
+              0.1424
+            ],
+            [
+              5000,
+              0.1343
+            ]
+          ],
+          "no_tiers": false,
+          "moq": 5,
+          "lead_time": "not stated",
+          "stock": "1,125",
+          "fetched": "2026-09-02",
+          "confidence": "read",
+          "excluded_from_rollup": "second source; the kit above is costed at DigiKey",
+          "note": "P=1.25 mm, 9000/full bag. Here LCSC is 2.7x MORE expensive than DigiKey ($0.2665 at 5+ vs $0.10 at 1) - the direction is not always the same, which is why both are read."
         }
       ],
       "alternates": [
@@ -2654,7 +3116,8 @@
           "qty_per_robot": 2,
           "what": "GHR-02V-S"
         }
-      ]
+      ],
+      "verdict_why": "Two distributors for both housings, four tier tables read. DigiKey is out of stock on the GHR-02V-S until 16-Dec-2026 and LCSC holds 1,125 - but LCSC is 2.7x dearer on that part, so the two sources are not interchangeable on price or on availability."
     },
     {
       "id": "P1",

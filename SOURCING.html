@@ -61,11 +61,13 @@
 
 <div class="statbar">
   <div class="stat"><b>32</b><span>bought lines</span></div>
-  <div class="stat"><b>19</b><span>PASS &mdash; two or more read</span></div>
-  <div class="stat"><b>12</b><span>CANNOT DETERMINE</span></div>
+  <div class="stat"><b>20</b><span>PASS &mdash; two or more read</span></div>
+  <div class="stat"><b>11</b><span>CANNOT DETERMINE</span></div>
   <div class="stat"><b>1</b><span>FAIL &mdash; unbuyable as specified</span></div>
-  <div class="stat"><b>$583.24</b><span>readable USD / robot @1</span></div>
-  <div class="stat"><b>9</b><span>lines with no price at all</span></div>
+  <div class="stat"><b>$587.19</b><span>readable USD / robot @1</span></div>
+  <div class="stat"><b>8</b><span>lines with no price at all</span></div>
+  <div class="stat"><b>41</b><span>distinct distributors read</span></div>
+  <div class="stat"><b>40</b><span>pages that refused a price</span></div>
 </div>
 
 <nav class="toc">
@@ -83,6 +85,12 @@
   <div class="card"><h3>No currency is converted</h3><p>Left exactly as the vendor states it. NO FX rate was fetched, so no conversion is performed anywhere. Only USD offers enter the USD roll-up; EUR / GBP / NZD / AUD / INR lines are reported beside it, unconverted.</p></div>
   <div class="card"><h3>An unknown is never zero</h3><p>The roll-up publishes TWO subtotals: the readable subtotal (lines with a read USD price) and the CANNOT DETERMINE list (lines with none). An unknown is NEVER summed as zero.</p></div>
   <div class="card"><h3>The three verdicts</h3><p>PASS = two or more distributors with a price read on a page, and a unit price determinable at 1 / 100 / 1000 robots. CANNOT DETERMINE = fewer than two read prices, or none. FAIL = the line as specified cannot be bought from anyone (the part does not exist in the maker&#x27;s own catalogue).</p></div>
+  <div class="card"><h3>The page refuses to publish a verdict it cannot support</h3>
+  <p>Before either page is written, <code>selfcheck()</code> re-derives every PASS from the data: two or
+  more <i>distinct</i> distributors with a price read, and a price at every quantity. It caught four
+  wrong verdicts on the first run (B12, B19a, C1, C2 &mdash; three of them one shop counted twice) and
+  refused to write. Broken on purpose afterwards by forcing PASS onto B13, which has no offers at all:
+  it went red naming the line and wrote nothing. 20 PASS lines survive it now.</p></div>
   <div class="card"><h3>Nothing was sent</h3><p>No supplier was contacted, no order was placed and no
   money was spent producing this document. <a href="RFQ.html">RFQ.html</a> is written and ready; sending it
   is a human decision.</p></div>
@@ -169,6 +177,11 @@ a vendor whose minimum exceeds what one robot needs.</p>
 <td class="n">$5.0186</td><td class="n">$5.0186</td>
 <td class="n">$5.0186</td>
 <td class="sub2">ceiling, MOQ &gt; need</td></tr>
+<tr><td><a href="#line-B8">B8</a> 22-pin 0.5 mm MIPI CSI FFC ribbon, Radxa to camera</td>
+<td class="n">1</td><td>Adafruit</td>
+<td class="n">$3.9500</td><td class="n">$3.1600</td>
+<td class="n">$3.1600</td>
+<td class="sub2">&mdash;</td></tr>
 <tr><td><a href="#line-P2c">P2c</a> LSM6DSV16X 6-axis IMU (on the imu_to_dxl board, Dynamixel…</td>
 <td class="n">1</td><td>LCSC</td>
 <td class="n">$3.6298</td><td class="n">$2.6084</td>
@@ -189,9 +202,9 @@ a vendor whose minimum exceeds what one robot needs.</p>
 <td class="n">$0.4000</td><td class="n">$0.2760</td>
 <td class="n">$0.2285</td>
 <td class="sub2">&mdash;</td></tr>
-<tr class="totalrow"><td>READABLE USD SUBTOTAL &mdash; 18 lines</td><td class="n"></td><td></td>
-<td class="n">$583.24</td><td class="n">$565.46</td>
-<td class="n">$563.24</td><td></td></tr>
+<tr class="totalrow"><td>READABLE USD SUBTOTAL &mdash; 19 lines</td><td class="n"></td><td></td>
+<td class="n">$587.19</td><td class="n">$568.62</td>
+<td class="n">$566.40</td><td></td></tr>
 </tbody></table></div>
 
 <p class="note"><b>Two things this table does on purpose.</b> A line whose need is smaller than the
@@ -214,10 +227,7 @@ from Seeed's @1 to Seeed's 10+ tier. Nothing is blended.</p>
 <p class="lab">Table 3. The second subtotal &mdash; what the readable subtotal does NOT contain</p>
 <div class="tablewrap"><table class="data">
 <thead><tr><th>Line</th><th>Qty/robot</th><th>Why it carries no price</th></tr></thead>
-<tbody><tr><td><a href="#line-B8">B8</a> 22-pin 0.5 mm MIPI CSI FFC ribbon, Radxa to camera</td>
-<td class="n">1</td>
-<td>No vendor page rendered a price to the fetcher. Two vendors were located by name only; a price read out of a search-engine snippet is not a source, so nothing is recorded.</td></tr>
-<tr><td><a href="#line-B13">B13</a> Microphone(s)</td>
+<tbody><tr><td><a href="#line-B13">B13</a> Microphone(s)</td>
 <td class="n">&mdash;</td>
 <td>Nothing about this line is known - not the part, not the type, not the count, not the placement. There is no URL to try because there is no part to look up.</td></tr>
 <tr><td><a href="#line-B15">B15</a> Camera-in-use indicator LED</td>
@@ -231,7 +241,7 @@ from Seeed's @1 to Seeed's 10+ tier. Nothing is blended.</p>
 <td>Included in the retail bundle; no separate price and no specification.</td></tr>
 <tr><td><a href="#line-B18b">B18b</a> M2 socket head cap screws, other lengths (x4, x8, x12) + M2…</td>
 <td class="n">185</td>
-<td>No price was read for ANY of these five sizes at any vendor. RST-Versand&#x27;s M2x6 page lists neighbouring lengths (M2x8 in 25 and 50 packs, M2x10 in 100) but did not render their prices, and Accu answered 403 on both the screw and the nut page when re-tried on 2026-09-02.</td></tr>
+<td>Only ONE distributor rendered a price for these sizes (ModelFixings, GBP inc VAT, 25-piece packs), so the two-distributor bar is not met; the fifth size (M2.5x6) has no price anywhere; and the nut ModelFixings prices is steel BZP, not the A2 stainless the rest of the schedule specifies. The line moved from &#x27;no price at all&#x27; to &#x27;one shop, one currency, four of five sizes&#x27; - which is progress, and is not a price.</td></tr>
 <tr><td><a href="#line-P1">P1</a> Robot HAT - custom PCB, bare board + assembly</td>
 <td class="n">1</td>
 <td>There is nothing to send a fab. A quantity of boards with no Gerbers has no price, and inventing one would put a number in the roll-up that no supplier ever gave.</td></tr>
@@ -241,22 +251,22 @@ from Seeed's @1 to Seeed's 10+ tier. Nothing is blended.</p>
 <tr><td><a href="#line-P3">P3</a> Banana battery-contact PCB - custom, bare board + contacts</td>
 <td class="n">1</td>
 <td>Shape and contacts unknown; nothing to quote.</td></tr>
-<tr class="totalrow"><td>CANNOT DETERMINE SUBTOTAL &mdash; 9 lines</td><td class="n"></td>
+<tr class="totalrow"><td>CANNOT DETERMINE SUBTOTAL &mdash; 8 lines</td><td class="n"></td>
 <td>Not a number. These lines are unpriced, and summing them as zero would state that they are free.</td></tr>
 </tbody></table></div>
 
 <p class="verdict warn"><b>Read this before quoting a unit cost.</b>
-The readable USD subtotal is <b>$583.24</b> at one robot and <b>$563.24</b> at a
-thousand &mdash; it moves by $19.99 across a factor of a thousand in volume,
+The readable USD subtotal is <b>$587.19</b> at one robot and <b>$566.40</b> at a
+thousand &mdash; it moves by $20.78 across a factor of a thousand in volume,
 because the servos are the majority of it and ROBOTIS publishes no tier at any quantity. That
-subtotal excludes 9 unpriced lines (three custom PCBs, the microphones, the camera
+subtotal excludes 8 unpriced lines (three custom PCBs, the microphones, the camera
 ribbon, most of the fasteners) and every non-USD line in Table&nbsp;2. It is a floor, not a cost.</p>
 </section>
 
 <section id="unknown"><h2><span class="n">3</span> What has no price, and what would settle it</h2>
 <p class="lede">Each of these is a work item with a named next step, not a shrug.</p>
 <ul class="tight">
-<li><b>B8 22-pin 0.5 mm MIPI CSI FFC ribbon, Radxa to camera</b> &mdash; No vendor page rendered a price to the fetcher. Two vendors were located by name only; a price read out of a search-engine snippet is not a source, so nothing is recorded. The ribbon Pollen fits, its length and its end configuration: CANNOT DETERMINE (docs/BOM.md B8). A 15 mm 22-pin FFC is far shorter than any catalogue length seen; the standard part may have to be a longer cable folded, which changes the head cavity.</li><li><b>B13 Microphone(s)</b> &mdash; Nothing about this line is known - not the part, not the type, not the count, not the placement. There is no URL to try because there is no part to look up. Part number, type, count, position and connector: all CANNOT DETERMINE (ce-parts/microduck-mic/component.json).</li><li><b>B15 Camera-in-use indicator LED</b> &mdash; Nothing is known beyond the press kit sentence. A 0603 LED is a five-cent part; the reason this stays open is that its placement is a mechanical and regulatory question (a privacy indicator), not a price question. Part, colour, package, GPIO, mounting: CANNOT DETERMINE.</li><li><b>B16 Bluetooth gamepad (Xbox-style)</b> &mdash; The gamepad is INCLUDED in Pollen&#x27;s $399 retail bundle, so no price for it alone exists on any Pollen page; and the model is unnamed, so no third-party price applies to it. Model: CANNOT DETERMINE.</li><li><b>B17 USB-C cable</b> &mdash; Included in the retail bundle; no separate price and no specification. Length, rating, whether it carries data or power only: CANNOT DETERMINE.</li><li><b>B18b M2 socket head cap screws, other lengths (x4, x8, x12) + M2 nuts + M2.5x6</b> &mdash; No price was read for ANY of these five sizes at any vendor. RST-Versand&#x27;s M2x6 page lists neighbouring lengths (M2x8 in 25 and 50 packs, M2x10 in 100) but did not render their prices, and Accu answered 403 on both the screw and the nut page when re-tried on 2026-09-02. Every price on this line: CANNOT DETERMINE. Whether these lengths are right at all: the counts and lengths come from hole-DEPTH inference on the meshes, not from a schedule. RELEASE.html §7 item 4 has this as an open factory blocker.</li><li><b>P1 Robot HAT - custom PCB, bare board + assembly</b> &mdash; There is nothing to send a fab. A quantity of boards with no Gerbers has no price, and inventing one would put a number in the roll-up that no supplier ever gave. Bare-board and turnkey-assembly price at 1 / 100 / 1000: CANNOT DETERMINE until lane D produces Gerbers and a placement BOM.</li><li><b>P2 imu_to_dxl v2 - custom PCB, bare board + assembly</b> &mdash; No design, and two of its three chips are unidentified. Outline, MCU, transceiver, board and assembly price: all CANNOT DETERMINE.</li><li><b>P3 Banana battery-contact PCB - custom, bare board + contacts</b> &mdash; Shape and contacts unknown; nothing to quote. Board outline, contact part, plating, current rating, price: all CANNOT DETERMINE.</li>
+<li><b>B13 Microphone(s)</b> &mdash; Nothing about this line is known - not the part, not the type, not the count, not the placement. There is no URL to try because there is no part to look up. Part number, type, count, position and connector: all CANNOT DETERMINE (ce-parts/microduck-mic/component.json).</li><li><b>B15 Camera-in-use indicator LED</b> &mdash; Nothing is known beyond the press kit sentence. A 0603 LED is a five-cent part; the reason this stays open is that its placement is a mechanical and regulatory question (a privacy indicator), not a price question. Part, colour, package, GPIO, mounting: CANNOT DETERMINE.</li><li><b>B16 Bluetooth gamepad (Xbox-style)</b> &mdash; The gamepad is INCLUDED in Pollen&#x27;s $399 retail bundle, so no price for it alone exists on any Pollen page; and the model is unnamed, so no third-party price applies to it. Model: CANNOT DETERMINE.</li><li><b>B17 USB-C cable</b> &mdash; Included in the retail bundle; no separate price and no specification. Length, rating, whether it carries data or power only: CANNOT DETERMINE.</li><li><b>B18b M2 socket head cap screws, other lengths (x4, x8, x12) + M2 nuts + M2.5x6</b> &mdash; Only ONE distributor rendered a price for these sizes (ModelFixings, GBP inc VAT, 25-piece packs), so the two-distributor bar is not met; the fifth size (M2.5x6) has no price anywhere; and the nut ModelFixings prices is steel BZP, not the A2 stainless the rest of the schedule specifies. The line moved from &#x27;no price at all&#x27; to &#x27;one shop, one currency, four of five sizes&#x27; - which is progress, and is not a price. A second distributor: CANNOT DETERMINE - Accu (403), Fastenal (403) and Westfield (JS-only prices) all refused on 2026-09-02. M2.5x6 at any vendor: CANNOT DETERMINE. A2 stainless M2 nuts: ModelFixings prices STEEL BZP nuts; the A2 equivalent was not read. Whether these lengths are right at all: the counts and lengths come from hole-DEPTH inference on the meshes, not from a schedule. RELEASE.html §7 item 4 has this as an open factory blocker.</li><li><b>P1 Robot HAT - custom PCB, bare board + assembly</b> &mdash; There is nothing to send a fab. A quantity of boards with no Gerbers has no price, and inventing one would put a number in the roll-up that no supplier ever gave. Bare-board and turnkey-assembly price at 1 / 100 / 1000: CANNOT DETERMINE until lane D produces Gerbers and a placement BOM.</li><li><b>P2 imu_to_dxl v2 - custom PCB, bare board + assembly</b> &mdash; No design, and two of its three chips are unidentified. Outline, MCU, transceiver, board and assembly price: all CANNOT DETERMINE.</li><li><b>P3 Banana battery-contact PCB - custom, bare board + contacts</b> &mdash; Shape and contacts unknown; nothing to quote. Board outline, contact part, plating, current rating, price: all CANNOT DETERMINE.</li>
 </ul>
 </section>
 
@@ -268,7 +278,7 @@ date, alternates with the equivalence argument, the open questions, and every pa
   <span class="chip pass">PASS</span></h3>
 <p class="meta">Qty per robot 15  &middot; basis: docs/BOM.md row B1; 15 joints in spec/kinematics-all-models.json &middot; <code>part:xl330-m288-t</code></p>
 <p class="meta">MPN <code>XL330-M288-T (ROBOTIS SKU 902-0163-000)</code> &middot; <i>community-derived sub-variant</i>
-  &middot; 4 distributor(s) with a price read</p>
+  &middot; 4 distinct distributor(s) with a price read</p>
 <p class="note">Pollen never states M288 vs M077 (SPEC.md §5). Both are $23.90 at ROBOTIS intl, so the price line does not depend on it; the gear ratio does.</p>
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
@@ -313,6 +323,7 @@ date, alternates with the equivalence argument, the open questions, and every pa
       <div class="sub2">AUD 38.00 ex GST / 41.80 inc.</div>
       <div class="flag">no tier table published &mdash; @1 is a ceiling</div></td>
 </tr></tbody></table></div>
+
 <div class="tablewrap"><table class="alt">
 <thead><tr><th>Alternate</th><th>Why it is (or is not) equivalent</th><th>Where / price</th></tr></thead>
 <tbody><tr><td><code>XL330-M077-T (902-0162-000)</code></td><td>same body, same bus, same mounting and same $23.90 list; 77.4:1 instead of 288.4:1, i.e. ~3.7x faster and ~3.7x weaker. It is a drop-in MECHANICALLY but NOT dynamically - Pollen&#x27;s trained policies were identified on whatever ratio ships, so this is a substitution only with a re-tuned policy.</td>
@@ -324,7 +335,7 @@ date, alternates with the equivalence argument, the open questions, and every pa
   <span class="chip pass">PASS</span></h3>
 <p class="meta">Qty per robot 2  &middot; basis: 16 leads needed (15 servos daisy-chained + imu_to_dxl, wiring/CABLES.md rows 1-16) -&gt; 2 packs of 10</p>
 <p class="meta">MPN <code>903-0251-000 (Robot Cable-X3P Convertible 180 mm, 10 pcs)</code> &middot; <i>confirmed at vendor</i>
-  &middot; 2 distributor(s) with a price read</p>
+  &middot; 2 distinct distributor(s) with a price read</p>
 
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
@@ -349,6 +360,7 @@ date, alternates with the equivalence argument, the open questions, and every pa
       <div class="sub2">$2.19 per cable.</div>
       <div class="flag">no tier table published &mdash; @1 is a ceiling</div></td>
 </tr></tbody></table></div>
+
 <div class="tablewrap"><table class="alt">
 <thead><tr><th>Alternate</th><th>Why it is (or is not) equivalent</th><th>Where / price</th></tr></thead>
 <tbody><tr><td><code>crimp our own: JST EHR-3 housing + SEH-001T-P0.6 contacts</code></td><td>the X3P lead IS a JST EH 3-pin assembly (wiring/CABLES.md connector column). Crimping to the measured lengths removes the 15-160 mm of dead slack per lead. Costed as line C1 below.</td>
@@ -360,7 +372,7 @@ date, alternates with the equivalence argument, the open questions, and every pa
   <span class="chip rail">FAIL</span></h3>
 <p class="meta">Qty per robot 1  &middot; basis: docs/BOM.md row B3; one compute board in the head (spec/mesh-placements.json) &middot; <code>part:radxa-zero-3w</code></p>
 <p class="meta">MPN <code>SKU as specified by Pollen (1 GB LPDDR4 / 32 GB eMMC) DOES NOT EXIST</code> &middot; <i>FAIL - the specified configuration is absent from the maker&#x27;s own SKU table</i>
-  &middot; 5 distributor(s) with a price read</p>
+  &middot; 5 distinct distributor(s) with a price read</p>
 <p class="note">Radxa&#x27;s product brief RAD-DOC-0084 rev 1.10 §7 &#x27;Models and SKU&#x27; (https://dl.radxa.com/zero3/docs/hw/3w/radxa_zero_3w_product_brief.pdf) lists 1GB/none, 1GB/8GB, 2GB/none, 2GB/16GB, 4GB/none, 4GB/32GB, 8GB/none, 8GB/64GB. There is no 1 GB / 32 GB part. Pollen&#x27;s press-kit figure is therefore either a custom Radxa build or a mis-statement of the 1 GB / 8 GB catalogue part (RS107-D1E8H1W15). What settles it: lsblk on a production unit, or Pollen naming the SKU.</p><p class="verdict warn"><b>FAIL</b> &mdash; The line as specified is unbuyable: the 1 GB / 32 GB SKU is not in Radxa&#x27;s catalogue, and every 1 GB variant read on 2026-09-02 was SOLD OUT at every distributor reached. Two distributors did render prices, so the failure is availability and specification - not readability.</p>
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
@@ -415,6 +427,7 @@ date, alternates with the equivalence argument, the open questions, and every pa
       <div class="sub2">every one of the 16 variants is priced Rs 2,649.99 - the store is not pricing per configuration, so this price does not identify a configuration.</div>
       <div class="flag">no tier table published &mdash; @1 is a ceiling</div><div class="flag">excluded from the roll-up: all 16 configurations carry the same price, so the figure identifies no configuration</div></td>
 </tr></tbody></table></div>
+
 <div class="tablewrap"><table class="alt">
 <thead><tr><th>Alternate</th><th>Why it is (or is not) equivalent</th><th>Where / price</th></tr></thead>
 <tbody><tr><td><code>RS107-D4E32H1W15 (4 GB / 32 GB, header)</code></td><td>same board, same 65 x 30 mm envelope, same 40-pin header and 22-pin CSI; it is the ONLY catalogue SKU that carries 32 GB of eMMC, so if Pollen&#x27;s &#x27;32 GB&#x27; is real and not a custom build this is the part. More DRAM than specified is not a functional risk.</td>
@@ -426,7 +439,7 @@ date, alternates with the equivalence argument, the open questions, and every pa
   <span class="chip pass">PASS</span></h3>
 <p class="meta">Qty per robot 1  &middot; basis: docs/BOM.md row B4; one pack in the trunk on power_support (docs/PARTS.md row 35) &middot; <code>part:np-f550</code></p>
 <p class="meta">MPN <code>CANNOT DETERMINE - the maker of the fitted pack is unidentified</code> &middot; <i>form factor known, part not</i>
-  &middot; 4 distributor(s) with a price read</p>
+  &middot; 4 distinct distributor(s) with a price read</p>
 <p class="note">LANE C&#x27;s finding, read 2026-09-02 from ce-parts/np-f550/component.json: &#x27;NP-F550&#x27; names Sony&#x27;s ORIGINAL L-series pack, which Sony rates 1500 mAh / 10.8 Wh. A 2600 mAh &#x27;NP-F550&#x27; is NECESSARILY a third-party pack in Sony&#x27;s shape, and no source names whose. The mesh envelope is 38.6 x 20.6 x 70.8 mm (Pollen&#x27;s np_f970 mesh); Duracell&#x27;s DR5 page states 70 x 38 x 20 mm - consistent to the millimetre. THIS DOES NOT CHANGE THE SOURCING LINE: the shape, the 7.2 V 2S chemistry and the 2600 mAh capacity are what is bought, and the cradle was checked against 38.6 x 20.6 x 70.8. What it changes is that no MPN can be put on a purchase order - only a specification.</p>
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
@@ -471,6 +484,7 @@ date, alternates with the equivalence argument, the open questions, and every pa
       <div class="sub2">EUR 33 / $39 for 2 packs + dual charger - i.e. Pollen resells at roughly what NextBatteries charges.</div>
       <div class="flag">no tier table published &mdash; @1 is a ceiling</div><div class="flag">excluded from the roll-up: Pollen is the product's own maker, quoted as a reference point, not a supplier to us</div></td>
 </tr></tbody></table></div>
+
 <div class="tablewrap"><table class="alt">
 <thead><tr><th>Alternate</th><th>Why it is (or is not) equivalent</th><th>Where / price</th></tr></thead>
 <tbody><tr><td><code>Duracell DR5 &#x27;Replacement Sony NP-F330/NP-F550 Battery 7.2V 2600mAh&#x27;</code></td><td>identical form factor, identical 7.2 V / 2600 mAh rating, and its published body 70 x 38 x 20 mm matches the cradle envelope in every axis. This is the vendor sheet lane C saved byte-for-byte (ce-parts/np-f550/docs/duracell-dr5-np-f550-2600mah.html, sha256 239e0651...). No price rendered on that page.</td>
@@ -483,7 +497,7 @@ date, alternates with the equivalence argument, the open questions, and every pa
   <span class="chip pass">PASS</span></h3>
 <p class="meta">Qty per robot 1  &middot; basis: docs/BOM.md row B6; camera at world (81.4, 0, 251.1), mounted upside down (RELEASE.html §4 step 5) &middot; <code>part:imx219</code></p>
 <p class="meta">MPN <code>Arducam B0183 (representative). The module Pollen fits: CANNOT DETERMINE</code> &middot; <i>representative substitute</i>
-  &middot; 5 distributor(s) with a price read</p>
+  &middot; 5 distinct distributor(s) with a price read</p>
 
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
@@ -538,6 +552,7 @@ date, alternates with the equivalence argument, the open questions, and every pa
       <div class="sub2">this page says the lens is sold separately, which CONTRADICTS UCTRONICS&#x27; package list for the same SKU. Unresolved.</div>
       <div class="flag">no tier table published &mdash; @1 is a ceiling</div></td>
 </tr></tbody></table></div>
+
 <div class="tablewrap"><table class="alt">
 <thead><tr><th>Alternate</th><th>Why it is (or is not) equivalent</th><th>Where / price</th></tr></thead>
 <tbody><tr><td><code>Arducam B0188 (IMX219 NoIR M12)</code></td><td>same IMX219 sensor and M12 mount, IR-cut filter removed. Cheaper ($13.99 special / $24.99 regular at UCTRONICS) but arducam.com&#x27;s index entry reads &#x27;[Discontinued]&#x27; and &#x27;camera board is not included&#x27; - whether B0188 ships a sensor board at all is CANNOT DETERMINE, so this is a candidate, not a substitute.</td>
@@ -549,7 +564,7 @@ date, alternates with the equivalence argument, the open questions, and every pa
   <span class="chip pass">PASS</span></h3>
 <p class="meta">Qty per robot 1  &middot; basis: docs/BOM.md row B7. Zero if B0183/B0103 is bought (both include a lens). &middot; <code>part:microduck-m12-lens</code></p>
 <p class="meta">MPN <code>Arducam M40180H13L (representative). Required FOV: CANNOT DETERMINE</code> &middot; <i>representative substitute</i>
-  &middot; 2 distributor(s) with a price read</p>
+  &middot; 2 distinct distributor(s) with a price read</p>
 
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
@@ -574,6 +589,7 @@ date, alternates with the equivalence argument, the open questions, and every pa
       <div class="sub2">same collection page also read: M12 75 deg GBP 14.40, 90 deg GBP 17.30, 140 deg GBP 21.20.</div>
       <div class="flag">no tier table published &mdash; @1 is a ceiling</div></td>
 </tr></tbody></table></div>
+
 <div class="tablewrap"><table class="alt">
 <thead><tr><th>Alternate</th><th>Why it is (or is not) equivalent</th><th>Where / price</th></tr></thead>
 <tbody><tr><td><code>Arducam LK001 lens kit (10 lenses, 10-200 deg, 1/4-inch)</code></td><td>not a production part - the instrument that FIXES the open FOV question on a bench before a lens is chosen. Buy one, not one per robot.</td>
@@ -582,24 +598,47 @@ date, alternates with the equivalence argument, the open questions, and every pa
 
 
 <h3 id="line-B8"><span class="lid">B8</span> 22-pin 0.5 mm MIPI CSI FFC ribbon, Radxa to camera
-  <span class="chip cd">CANNOT DETERMINE</span></h3>
+  <span class="chip pass">PASS</span></h3>
 <p class="meta">Qty per robot 1  &middot; basis: wiring/CABLES.md row 20; route floor 13.3 mm, cut length 15 mm &middot; <code>part:microduck-camera-module</code></p>
-<p class="meta">MPN <code>CANNOT DETERMINE</code> &middot; <i>unknown</i>
-  &middot; 0 distributor(s) with a price read</p>
-<p class="verdict warn"><b>CANNOT DETERMINE</b> &mdash; No vendor page rendered a price to the fetcher. Two vendors were located by name only; a price read out of a search-engine snippet is not a source, so nothing is recorded.</p>
+<p class="meta">MPN <code>22-pin 0.5 mm to 15-pin 1.0 mm FPC camera cable (the Pi-Zero-class part). The ribbon Pollen fits: CANNOT DETERMINE</code> &middot; <i>class identified; exact part and length unknown</i>
+  &middot; 2 distinct distributor(s) with a price read</p>
+<p class="verdict "><b>PASS</b> &mdash; Two distributors now carry a 22-pin 0.5 mm camera ribbon at a read price. The line is PASS on SOURCING and still open on LENGTH, and the two are not the same question: the shortest catalogue part found anywhere is Pimoroni&#x27;s 38 mm SC0004, and our measured route floor is 13.3 mm with a 15 mm cut (wiring/CABLES.md row 20). Every buyable ribbon is at least 2.5x too long, so the head must either absorb ~23 mm of folded flex or a custom-length FFC must be ordered. That is a mechanical finding, not a price one.</p>
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
 <th>Lead time (as printed)</th><th>Stock, 2026-09-02</th><th>Read?</th></tr></thead>
-<tbody><tr><td colspan="6" class="cdtxt">No offer with a price read on any page.</td></tr></tbody></table></div>
+<tbody><tr>
+  <td>Adafruit<br><span class="sub2"><a href="https://www.adafruit.com/product/5211">#5211 Raspberry Pi Zero FPC Camera Cable, 30 cm</a></span></td>
+  <td class="n">1+ USD 3.95, 10+ USD 3.56, 100+ USD 3.16</td>
+  <td class="n">1</td>
+  <td>not stated</td>
+  <td>In stock</td>
+  <td><span class="chip pass">read</span> 2026-09-02
+      <div class="sub2">22-pin 0.5 mm at the host end, for the Pi Zero&#x27;s connector - the same connector family the Radxa ZERO 3W uses. 30 cm: 20x our 15 mm cut length. Adafruit also lists a 15 cm variant on the same page family.</div>
+      </td>
+</tr>
+<tr>
+  <td>Pimoroni (UK)<br><span class="sub2"><a href="https://shop.pimoroni.com/en-us/products/camera-cable-raspberry-pi-zero-edition">SC0004 Camera Cable - Raspberry Pi Zero edition, 38 mm</a></span></td>
+  <td class="n">1+ GBP 2</td>
+  <td class="n">1</td>
+  <td>not stated</td>
+  <td>Out of stock</td>
+  <td><span class="chip pass">read</span> 2026-09-02
+      <div class="sub2">&#x27;small 22-pin/0.5mm pitch connector at one end; big 15-pin/1mm pitch connector at the other&#x27;. 38 mm is the SHORTEST 22-pin camera ribbon found at any vendor. The 150 mm SC0002 is GBP 2.60 (was 3.25) and IS in stock.</div>
+      <div class="flag">no tier table published &mdash; @1 is a ceiling</div></td>
+</tr></tbody></table></div>
 
-<p class="lab">Open on this line</p><ul class="tight"><li>The ribbon Pollen fits, its length and its end configuration: CANNOT DETERMINE (docs/BOM.md B8).</li><li>A 15 mm 22-pin FFC is far shorter than any catalogue length seen; the standard part may have to be a longer cable folded, which changes the head cavity.</li></ul>
+<div class="tablewrap"><table class="alt">
+<thead><tr><th>Alternate</th><th>Why it is (or is not) equivalent</th><th>Where / price</th></tr></thead>
+<tbody><tr><td><code>custom-length 22-pin 0.5 mm FFC, ~15 mm</code></td><td>Not a catalogue part. Our route floor is 13.3 mm and the cut length 15 mm; the shortest buyable ribbon is 38 mm. A custom FFC removes 23 mm of folded flex from a head cavity that is already tight, and FFC is one of the cheapest custom parts there is at volume. Below ~100 robots, folding the 38 mm part is almost certainly right.</td>
+        <td><a href="https://www.digikey.com/en/product-highlight/m/molex-connector/premo-flex-ffc-jumpers">any FFC maker (Molex Premo-Flex is the catalogue family; Molex quotes 4-80 conductors at 0.5 mm with MOQ 1)</a><div class="sub2">CANNOT DETERMINE - no Premo-Flex 22-circuit part number was resolved to a price page</div></td></tr></tbody></table></div>
+<p class="lab">Open on this line</p><ul class="tight"><li>Whether the camera board&#x27;s end is 22-pin 0.5 mm or 15-pin 1.0 mm: CANNOT DETERMINE - it depends on which camera module ships (line B6), and the two cables above are 22-to-15 adaptors, not 22-to-22.</li><li>The length Pollen fits: CANNOT DETERMINE (docs/BOM.md B8).</li><li>NO CATALOGUE PART IS SHORT ENOUGH. Shortest found: 38 mm (Pimoroni SC0004) against a 15 mm cut. Measured, not assumed.</li></ul>
 <p class="lab">Pages that refused a price</p><ul class="tight small"><li><a href="https://esp32s.com/product/radxa-camera-fpc-cable-for-radxa-camera-8m-219-and-rpi-camera-for-zero-3w-3e/">https://esp32s.com/product/radxa-camera-fpc-cable-for-radxa-camera-8m-219-and-rpi-camera</a> &mdash; HTTP 403 (a search snippet claims $1.90 - NOT read, so not used)</li><li><a href="https://www.fabtolab.com/radxa-fpc-cable-zero-3-camera-8m-219-zero-3">https://www.fabtolab.com/radxa-fpc-cable-zero-3-camera-8m-219-zero-3</a> &mdash; Socket is closed</li><li><a href="https://docs.radxa.com/en/zero/zero3/accessories/camera">https://docs.radxa.com/en/zero/zero3/accessories/camera</a> &mdash; documentation, carries no price</li></ul>
 
 <h3 id="line-B9"><span class="lid">B9</span> Time-of-Flight 8x8 multizone ranger (module or bare die)
   <span class="chip pass">PASS</span></h3>
 <p class="meta">Qty per robot 1  &middot; basis: docs/BOM.md row B9; ToF at world (81.4, 22.4, 249.1), I2C 0x29 on the HAT&#x27;s Stemma J5 &middot; <code>part:vl53l8cx</code></p>
 <p class="meta">MPN <code>VL53L8CX or VL53L5CX - which generation ships is CANNOT DETERMINE (both drivers are vendored in Pollen&#x27;s source)</code> &middot; <i>generation unresolved</i>
-  &middot; 3 distributor(s) with a price read</p>
+  &middot; 3 distinct distributor(s) with a price read</p>
 
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
@@ -634,6 +673,7 @@ date, alternates with the equivalence argument, the open questions, and every pa
       <div class="sub2">SATEL-VL53L8 (the L8 equivalent) is $32.95 with 0 in stock, 1 past due, lead 13 weeks.</div>
       <div class="flag">no tier table published &mdash; @1 is a ceiling</div></td>
 </tr></tbody></table></div>
+
 <div class="tablewrap"><table class="alt">
 <thead><tr><th>Alternate</th><th>Why it is (or is not) equivalent</th><th>Where / price</th></tr></thead>
 <tbody><tr><td><code>VL53L8CXV0GC/1 (bare optical LGA-16, on our own HAT)</code></td><td>identical silicon to the carrier&#x27;s; removes the $19-25 breakout and the Stemma cable. Costs the HAT two regulators and a level shifter. At &gt;= 100 robots this is the correct part: $6.72 @100 and $6.06 @1000 vs $19.43 for the cheapest carrier.</td>
@@ -647,7 +687,7 @@ date, alternates with the equivalence argument, the open questions, and every pa
   <span class="chip pass">PASS</span></h3>
 <p class="meta">Qty per robot 11  &middot; basis: docs/PARTS.md / RELEASE.html §4: 2 in trunk_base, 2 per hip side (yaw2roll + bracket) x2, 1 in upper leg x2, 1 in neck_pitch, 2 in yaw_roll_motion = 11 &middot; <code>part:bearing-22x16x4</code></p>
 <p class="meta">MPN <code>MR1622-ZZ (aliases ET2216ZZ, SET2216, A2216, DDA2216(ZZ), 1622ZZ)</code> &middot; <i>designation confirmed from dimensions; Pollen&#x27;s own MPN CANNOT DETERMINE</i>
-  &middot; 2 distributor(s) with a price read</p>
+  &middot; 2 distinct distributor(s) with a price read</p>
 <p class="note">16 x 22 x 4 is NOT an ISO 67xx/61xxx size (6700 = 10x15x4, 6702 = 15x21x4). SMB Bearings&#x27; drawing ET2216-thin-section-bearing-16x22x4mm.pdf gives SAE52100 chrome steel, pressed-steel cage, static 62 kgf, dynamic 97 kgf, 11 000 rpm.</p>
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
@@ -672,6 +712,7 @@ date, alternates with the equivalence argument, the open questions, and every pa
       <div class="sub2">the listing states a RANGE US$1.00-4.00 per piece at MOQ 1000. The HIGH end is recorded here because a range is not a price; the low end is what a quote might reach. ZZ / 2RS / open all offered.</div>
       <div class="flag">no tier table published &mdash; @1 is a ceiling</div><div class="flag">vendor states a RANGE; the HIGH end is recorded</div></td>
 </tr></tbody></table></div>
+
 <div class="tablewrap"><table class="alt">
 <thead><tr><th>Alternate</th><th>Why it is (or is not) equivalent</th><th>Where / price</th></tr></thead>
 <tbody><tr><td><code>ET2216-EZO (EZO, Japan)</code></td><td>the same 16x22x4 thin-section bearing under EZO&#x27;s designation; a higher-grade Japanese alternative to the Chinese MR1622. Listed at 123Bearing but the page rendered no price.</td>
@@ -683,7 +724,7 @@ date, alternates with the equivalence argument, the open questions, and every pa
   <span class="chip pass">PASS</span></h3>
 <p class="meta">Qty per robot 3  &middot; basis: one per ankle bracket (x2) + one mouth hinge in the head (RELEASE.html §4 steps 3 and 5) &middot; <code>part:bearing-15x10x3</code></p>
 <p class="meta">MPN <code>MR6700 open (aliases 61700J1, 61700R, 6700E, 6700; ISO 61700)</code> &middot; <i>designation confirmed from dimensions; width community-measured</i>
-  &middot; 2 distributor(s) with a price read</p>
+  &middot; 2 distinct distributor(s) with a price read</p>
 <p class="note">6700 / 6700ZZ is 10 x 15 x 4, NOT x3 - VXB, FastEddy and Bearings Direct all list 6700-ZZ as 10x15x4. The 3 mm-wide part is the OPEN MR6700 / ISO 61700. If a shielded 10x15x3 is wanted the designation is 61700-2Z (FAG lists 61700-2Z-HLC).</p>
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
@@ -708,6 +749,7 @@ date, alternates with the equivalence argument, the open questions, and every pa
       <div class="sub2">$9.99 sale, was $19.99. The same search page also lists &#x27;10x15x3mm Non-Standard Ball Bearing Shielded&#x27; at $19.99 and MR6700-ZZ / -2RS at 10x15x4 for $7.77.</div>
       <div class="flag">no tier table published &mdash; @1 is a ceiling</div></td>
 </tr></tbody></table></div>
+
 <div class="tablewrap"><table class="alt">
 <thead><tr><th>Alternate</th><th>Why it is (or is not) equivalent</th><th>Where / price</th></tr></thead>
 <tbody><tr><td><code>6700-ZZ (10 x 15 x 4, shielded)</code></td><td>NOT dimensionally equivalent - 1 mm wider. Recorded because it is what a shop will ship if the order says &#x27;6700ZZ&#x27;, and because the true fitted width is community-measured &#x27;~3 mm&#x27;, not measured on a unit. If the real part turns out to be 4 mm wide this is the cheapest source read.</td>
@@ -716,11 +758,11 @@ date, alternates with the equivalence argument, the open questions, and every pa
 <p class="lab">Pages that refused a price</p><ul class="tight small"><li><a href="https://www.123bearing.com/bearing-housing/deep-groove-bearing/single-row/6700">https://www.123bearing.com/bearing-housing/deep-groove-bearing/single-row/6700</a> &mdash; no price rendered</li></ul>
 
 <h3 id="line-B12"><span class="lid">B12</span> Speaker, 35 x 25 x 7 mm, 8 ohm, 2 W (head)
-  <span class="chip pass">PASS</span></h3>
+  <span class="chip cd">CANNOT DETERMINE</span></h3>
 <p class="meta">Qty per robot 1  &middot; basis: docs/BOM.md row B12; one speaker in the head, 70 mm lead to the HAT (wiring/CABLES.md row 18) &middot; <code>part:microduck-speaker</code></p>
 <p class="meta">MPN <code>CANNOT DETERMINE - Pollen&#x27;s mesh is a 12-triangle box, no part number anywhere</code> &middot; <i>unknown; two catalogued substitutes priced</i>
-  &middot; 2 distributor(s) with a price read</p>
-<p class="verdict "><b>PASS</b> &mdash; Two distributors with read tier tables - but for SUBSTITUTES, not for the fitted part. The exact part remains unknown and both substitutes exceed the 35 x 25 x 7 envelope in at least one axis, so neither drops in without a shell change.</p>
+  &middot; 2 distinct distributor(s) with a price read</p>
+<p class="verdict warn"><b>CANNOT DETERMINE</b> &mdash; Downgraded from PASS by this document&#x27;s own consistency check. The two priced parts are BOTH DigiKey lines, so there is one distributor, not two; the third reading is a different Visaton variant in another currency; and neither priced part FITS - Soberton&#x27;s SPM-2035NU is 39 x 20 x 8.2 mm and Visaton&#x27;s K 28.40 is 40 x 28 x 11.7 mm against a 35 x 25 x 7 mm cavity. No distributor anywhere prices a 35 x 25 x 7 part. Two prices for two parts that do not fit is not a sourced line.</p>
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
 <th>Lead time (as printed)</th><th>Stock, 2026-09-02</th><th>Read?</th></tr></thead>
@@ -743,7 +785,18 @@ date, alternates with the equivalence argument, the open questions, and every pa
   <td><span class="chip pass">read</span> 2026-09-02
       <div class="sub2">8 ohm, 2 W rated / 3 W max. Body 40.00 x 28.00 x 11.70 mm - larger than the cavity in all three axes. Recorded as the second READ tier table for a 2 W 8 ohm rectangular driver, not as a fit.</div>
       </td>
+</tr>
+<tr>
+  <td>reichelt elektronik (DE)<br><span class="sub2"><a href="https://www.reichelt.de/de/de/shop/produkt/kleinlautsprecher_k_28_40_h_2_w_8_ohm-372617">VIS 2947 - Visaton K 28.40 H, 2 W, 8 Ohm</a></span></td>
+  <td class="n">1+ EUR 10.95</td>
+  <td class="n">1</td>
+  <td>ab Lager, Lieferzeit: 1 - 2 Werktage</td>
+  <td>ab Lager</td>
+  <td><span class="chip pass">read</span> 2026-09-02
+      <div class="sub2">EUR 10,95 incl 19 % VAT. NOTE THE SUFFIX: this is the K 28.40 **H**, not the K 28.40 DigiKey lists. Visaton&#x27;s H variants differ; treating them as one part would be a guess. Recorded as a second European source for the FAMILY, not as a second price for the same part. The 33 x 16 x 69.5 mm on the page is reichelt&#x27;s shipping box, not the driver.</div>
+      <div class="flag">no tier table published &mdash; @1 is a ceiling</div><div class="flag">excluded from the roll-up: a DIFFERENT variant (K 28.40 H, not K 28.40) and a different currency</div></td>
 </tr></tbody></table></div>
+
 <div class="tablewrap"><table class="alt">
 <thead><tr><th>Alternate</th><th>Why it is (or is not) equivalent</th><th>Where / price</th></tr></thead>
 <tbody><tr><td><code>&#x27;3525&#x27; waterproof 8 ohm 2 W cavity speaker</code></td><td>the commodity part that IS 35 x 25 mm - the size class Pollen&#x27;s box mesh represents (35 x 25 x 6.2 mm on the vendor page). This is the right SHAPE; it is a generic Chinese part with no manufacturer designation, so it cannot be put on a purchase order as an MPN.</td>
@@ -756,12 +809,13 @@ date, alternates with the equivalence argument, the open questions, and every pa
   <span class="chip cd">CANNOT DETERMINE</span></h3>
 <p class="meta">Qty per robot <span class='cdtxt'>CANNOT DETERMINE</span> &middot; basis: UNKNOWN - the press kit says &#x27;Microphones&#x27; (plural); the codec input the community names is Mic3R, which is MONO. Count is unresolved. &middot; <code>part:microduck-mic</code></p>
 <p class="meta">MPN <code>CANNOT DETERMINE</code> &middot; <i>unknown</i>
-  &middot; 0 distributor(s) with a price read</p>
+  &middot; 0 distinct distributor(s) with a price read</p>
 <p class="verdict warn"><b>CANNOT DETERMINE</b> &mdash; Nothing about this line is known - not the part, not the type, not the count, not the placement. There is no URL to try because there is no part to look up.</p>
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
 <th>Lead time (as printed)</th><th>Stock, 2026-09-02</th><th>Read?</th></tr></thead>
 <tbody><tr><td colspan="6" class="cdtxt">No offer with a price read on any page.</td></tr></tbody></table></div>
+
 
 <p class="lab">Open on this line</p><ul class="tight"><li>Part number, type, count, position and connector: all CANNOT DETERMINE (ce-parts/microduck-mic/component.json).</li></ul>
 
@@ -770,7 +824,7 @@ date, alternates with the equivalence argument, the open questions, and every pa
   <span class="chip pass">PASS</span></h3>
 <p class="meta">Qty per robot 1  &middot; basis: press kit names one antenna in the head and one in the beak. Nothing in Pollen&#x27;s runtime source mentions NFC (docs/BOM.md B14), so the count of ICs is inferred (one controller drives both antennas through a switch, or there are two). &middot; <code>part:pn7150</code></p>
 <p class="meta">MPN <code>CANNOT DETERMINE which IC ships. Two candidates are fully characterised in ce-parts (both graded PASS there): NXP PN7150 and ST ST25R3916.</code> &middot; <i>candidate set of two</i>
-  &middot; 4 distributor(s) with a price read</p>
+  &middot; 2 distinct distributor(s) with a price read</p>
 <p class="verdict "><b>PASS</b> &mdash; Two distributors with full read tier tables for EACH candidate. Which candidate is fitted is a separate unknown and is stated as such.</p>
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
@@ -815,6 +869,7 @@ date, alternates with the equivalence argument, the open questions, and every pa
       <div class="sub2">Candidate B. Only 91 pieces in stock - not a volume source as read.</div>
       </td>
 </tr></tbody></table></div>
+
 <div class="tablewrap"><table class="alt">
 <thead><tr><th>Alternate</th><th>Why it is (or is not) equivalent</th><th>Where / price</th></tr></thead>
 <tbody><tr><td><code>ST25R3916B-AQWT</code></td><td>ST&#x27;s B revision of the same reader in the same VFQFPN32 package; drop-in at the footprint. Listed at DigiKey (page not fetched for tiers).</td>
@@ -826,12 +881,13 @@ date, alternates with the equivalence argument, the open questions, and every pa
   <span class="chip cd">CANNOT DETERMINE</span></h3>
 <p class="meta">Qty per robot 1  &middot; basis: press kit; GPIO not identified</p>
 <p class="meta">MPN <code>CANNOT DETERMINE</code> &middot; <i>unknown</i>
-  &middot; 0 distributor(s) with a price read</p>
+  &middot; 0 distinct distributor(s) with a price read</p>
 <p class="verdict warn"><b>CANNOT DETERMINE</b> &mdash; Nothing is known beyond the press kit sentence. A 0603 LED is a five-cent part; the reason this stays open is that its placement is a mechanical and regulatory question (a privacy indicator), not a price question.</p>
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
 <th>Lead time (as printed)</th><th>Stock, 2026-09-02</th><th>Read?</th></tr></thead>
 <tbody><tr><td colspan="6" class="cdtxt">No offer with a price read on any page.</td></tr></tbody></table></div>
+
 
 <p class="lab">Open on this line</p><ul class="tight"><li>Part, colour, package, GPIO, mounting: CANNOT DETERMINE.</li></ul>
 
@@ -840,7 +896,7 @@ date, alternates with the equivalence argument, the open questions, and every pa
   <span class="chip cd">CANNOT DETERMINE</span></h3>
 <p class="meta">Qty per robot 1  &middot; basis: Pollen ships one with the robot</p>
 <p class="meta">MPN <code>CANNOT DETERMINE</code> &middot; <i>unknown</i>
-  &middot; 1 distributor(s) with a price read</p>
+  &middot; 1 distinct distributor(s) with a price read</p>
 <p class="verdict warn"><b>CANNOT DETERMINE</b> &mdash; The gamepad is INCLUDED in Pollen&#x27;s $399 retail bundle, so no price for it alone exists on any Pollen page; and the model is unnamed, so no third-party price applies to it.</p>
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
@@ -856,6 +912,7 @@ date, alternates with the equivalence argument, the open questions, and every pa
       <div class="flag">no tier table published &mdash; @1 is a ceiling</div></td>
 </tr></tbody></table></div>
 
+
 <p class="lab">Open on this line</p><ul class="tight"><li>Model: CANNOT DETERMINE.</li></ul>
 
 
@@ -863,22 +920,23 @@ date, alternates with the equivalence argument, the open questions, and every pa
   <span class="chip cd">CANNOT DETERMINE</span></h3>
 <p class="meta">Qty per robot 1  &middot; basis: included with the robot</p>
 <p class="meta">MPN <code>CANNOT DETERMINE</code> &middot; <i>unknown</i>
-  &middot; 0 distributor(s) with a price read</p>
+  &middot; 0 distinct distributor(s) with a price read</p>
 <p class="verdict warn"><b>CANNOT DETERMINE</b> &mdash; Included in the retail bundle; no separate price and no specification.</p>
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
 <th>Lead time (as printed)</th><th>Stock, 2026-09-02</th><th>Read?</th></tr></thead>
 <tbody><tr><td colspan="6" class="cdtxt">No offer with a price read on any page.</td></tr></tbody></table></div>
 
+
 <p class="lab">Open on this line</p><ul class="tight"><li>Length, rating, whether it carries data or power only: CANNOT DETERMINE.</li></ul>
 
 
 <h3 id="line-B18a"><span class="lid">B18a</span> M2 x 6 socket head cap screw, A2 stainless, DIN 912
-  <span class="chip cd">CANNOT DETERMINE</span></h3>
+  <span class="chip pass">PASS</span></h3>
 <p class="meta">Qty per robot 80  &middot; basis: docs/BOM.md §4 buy list - COMMUNITY-DERIVED from hole-fitting on the 47 meshes, NOT a Pollen BOM. Flagged everywhere it appears.</p>
 <p class="meta">MPN <code>DIN 912 / ISO 4762 M2x6 A2</code> &middot; <i>standard</i>
-  &middot; 1 distributor(s) with a price read</p>
-<p class="verdict warn"><b>CANNOT DETERMINE</b> &mdash; Only ONE distributor rendered a price (RST-Versand, EUR, with a full tier table re-read on 2026-09-02). Every US and UK fastener shop tried refused the fetcher, so the &gt;= 2-distributor bar is not met and there is no USD price at all for this line.</p>
+  &middot; 2 distinct distributor(s) with a price read</p>
+<p class="verdict "><b>PASS</b> &mdash; Two distributors with a read price (RST-Versand DE in EUR with tiers to 100; ModelFixings UK in GBP with tiers to 25). Neither publishes anything above 100 pieces, so the @1000-robot figure is a ceiling, and there is still NO USD price for this line - it does not enter the USD subtotal.</p>
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
 <th>Lead time (as printed)</th><th>Stock, 2026-09-02</th><th>Read?</th></tr></thead>
@@ -891,36 +949,93 @@ date, alternates with the equivalence argument, the open questions, and every pa
   <td><span class="chip pass">read</span> 2026-09-02
       <div class="sub2">prices inc 19 % USt, ex shipping. Pack prices read verbatim: 1 Stk 0,06 EUR; 10 Stk 0,56; 25 Stk 1,30; 50 Stk 2,43; 100 Stk 4,34. The 100-pack is the LARGEST tier the shop publishes - there is no 1000-piece price anywhere.</div>
       </td>
+</tr>
+<tr>
+  <td>ModelFixings (UK)<br><span class="sub2"><a href="https://www.modelfixings.co.uk/miniature_cap_screws.htm">M2 x 6 stainless socket cap screw</a></span></td>
+  <td class="n">5+ GBP 0.18, 25+ GBP 0.144</td>
+  <td class="n">5</td>
+  <td>not stated</td>
+  <td>listed</td>
+  <td><span class="chip pass">read</span> 2026-09-02
+      <div class="sub2">read verbatim as pack prices: 5-pack GBP 0.90, 25-pack GBP 3.60; per-piece GBP 0.18 and GBP 0.144. &#x27;All prices include 20% VAT&#x27;. The 25-pack is the largest pack this shop publishes - 3.3x RST-Versand&#x27;s per-piece price at 100, so this is a second READING, not a second source of supply.</div>
+      </td>
 </tr></tbody></table></div>
+
 <div class="tablewrap"><table class="alt">
 <thead><tr><th>Alternate</th><th>Why it is (or is not) equivalent</th><th>Where / price</th></tr></thead>
 <tbody><tr><td><code>DIN 912 M2.5x8 A2 (100-pack)</code></td><td>NOT equivalent - a different thread. Recorded only because der-schraubenladen served a price for it (EUR 4.67/100) while refusing to render the M2x6 price from the same dropdown, and it is the closest read data point at that shop.</td>
         <td><a href="https://shop.der-schraubenladen.de/DIN-912-ISO-4762-Zylinderschraube-Innensechskant-Edelstahl-A2/SW11250.54">der-schraubenladen (DE)</a><div class="sub2">EUR 4.67 / 100, &#x27;Sofort verfuegbar, Lieferzeit: 1-3 Tage&#x27;</div></td></tr></tbody></table></div>
-<p class="lab">Open on this line</p><ul class="tight"><li>A second readable distributor: CANNOT DETERMINE. Accu (accu.co.uk/socket-cap-screws/1077-SSCM2-6-A2) was re-tried on 2026-09-02 and answered 403 again.</li><li>1000+ piece pricing: CANNOT DETERMINE - no vendor with a tier above 100 was readable.</li><li>The COUNT itself (80) is community-derived from mesh hole-fitting, not measured on a unit.</li></ul>
-<p class="lab">Pages that refused a price</p><ul class="tight small"><li><a href="https://www.accu.co.uk/socket-cap-screws/1077-SSCM2-6-A2">https://www.accu.co.uk/socket-cap-screws/1077-SSCM2-6-A2</a> &mdash; HTTP 403 (re-tried 2026-09-02)</li><li><a href="https://www.boltdepot.com/Product-Details?product=15964">https://www.boltdepot.com/Product-Details?product=15964</a> &mdash; HTTP 403</li><li><a href="https://www.mcmaster.com/91292A831/">https://www.mcmaster.com/91292A831/</a> &mdash; blank to the fetcher</li><li><a href="https://us.misumi-ec.com/vona2/detail/221000348314/?HissuCode=SNSS-M2X6">https://us.misumi-ec.com/vona2/detail/221000348314/?HissuCode=SNSS-M2X6</a> &mdash; HTTP 403</li><li><a href="https://www.albanycountyfasteners.com/Socket-Head-Cap-Screw-2MM-A2-Stainless-Steel-p/5020000.htm">https://www.albanycountyfasteners.com/Socket-Head-Cap-Screw-2MM-A2-Stainless-Steel-p/502</a> &mdash; page served without a price</li></ul>
+<p class="lab">Open on this line</p><ul class="tight"><li>A USD distributor: CANNOT DETERMINE. Accu (403, re-tried 2026-09-02), Bolt Depot (403), McMaster (blank), Misumi (403), Albany County (no price), Fastenal (403, tried 2026-09-02) and Westfield Fasteners (prices render only in JavaScript) all refused.</li><li>1000+ piece pricing: CANNOT DETERMINE - the largest tier published anywhere read is 100 pieces.</li><li>The COUNT itself (80) is community-derived from mesh hole-fitting, not measured on a unit.</li></ul>
+<p class="lab">Pages that refused a price</p><ul class="tight small"><li><a href="https://www.accu.co.uk/socket-cap-screws/1077-SSCM2-6-A2">https://www.accu.co.uk/socket-cap-screws/1077-SSCM2-6-A2</a> &mdash; HTTP 403 (re-tried 2026-09-02)</li><li><a href="https://www.boltdepot.com/Product-Details?product=15964">https://www.boltdepot.com/Product-Details?product=15964</a> &mdash; HTTP 403</li><li><a href="https://www.mcmaster.com/91292A831/">https://www.mcmaster.com/91292A831/</a> &mdash; blank to the fetcher</li><li><a href="https://us.misumi-ec.com/vona2/detail/221000348314/?HissuCode=SNSS-M2X6">https://us.misumi-ec.com/vona2/detail/221000348314/?HissuCode=SNSS-M2X6</a> &mdash; HTTP 403</li><li><a href="https://www.albanycountyfasteners.com/Socket-Head-Cap-Screw-2MM-A2-Stainless-Steel-p/5020000.htm">https://www.albanycountyfasteners.com/Socket-Head-Cap-Screw-2MM-A2-Stainless-Steel-p/502</a> &mdash; page served without a price</li><li><a href="https://www.fastenal.com/product/details/MS2460006A20000">https://www.fastenal.com/product/details/MS2460006A20000</a> &mdash; HTTP 403 (tried 2026-09-02)</li><li><a href="https://www.westfieldfasteners.co.uk/A2-ScrewBolt-SHCap-M2.html">https://www.westfieldfasteners.co.uk/A2-ScrewBolt-SHCap-M2.html</a> &mdash; page served with loading spinners where every price should be - prices are client-side only</li></ul>
 
 <h3 id="line-B18b"><span class="lid">B18b</span> M2 socket head cap screws, other lengths (x4, x8, x12) + M2 nuts + M2.5x6
   <span class="chip cd">CANNOT DETERMINE</span></h3>
 <p class="meta">Qty per robot 185  &middot; basis: docs/BOM.md §4: M2x4 x60, M2x8 x40, M2x12 x15, M2 nuts x50, M2.5x6 x20 - all COMMUNITY-DERIVED</p>
 <p class="meta">MPN <code>DIN 912 M2x4 / M2x8 / M2x12 A2; DIN 934 M2 nut A2; DIN 912 M2.5x6 A2</code> &middot; <i>standard</i>
-  &middot; 0 distributor(s) with a price read</p>
-<p class="verdict warn"><b>CANNOT DETERMINE</b> &mdash; No price was read for ANY of these five sizes at any vendor. RST-Versand&#x27;s M2x6 page lists neighbouring lengths (M2x8 in 25 and 50 packs, M2x10 in 100) but did not render their prices, and Accu answered 403 on both the screw and the nut page when re-tried on 2026-09-02.</p>
+  &middot; 1 distinct distributor(s) with a price read</p>
+<p class="verdict warn"><b>CANNOT DETERMINE</b> &mdash; Only ONE distributor rendered a price for these sizes (ModelFixings, GBP inc VAT, 25-piece packs), so the two-distributor bar is not met; the fifth size (M2.5x6) has no price anywhere; and the nut ModelFixings prices is steel BZP, not the A2 stainless the rest of the schedule specifies. The line moved from &#x27;no price at all&#x27; to &#x27;one shop, one currency, four of five sizes&#x27; - which is progress, and is not a price.</p>
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
 <th>Lead time (as printed)</th><th>Stock, 2026-09-02</th><th>Read?</th></tr></thead>
-<tbody><tr><td colspan="6" class="cdtxt">No offer with a price read on any page.</td></tr></tbody></table></div>
+<tbody><tr>
+  <td>ModelFixings (UK)<br><span class="sub2"><a href="https://www.modelfixings.co.uk/miniature_cap_screws.htm">M2 x 4 stainless socket cap screw</a></span></td>
+  <td class="n">5+ GBP 0.18, 25+ GBP 0.144</td>
+  <td class="n">5</td>
+  <td>not stated</td>
+  <td>listed</td>
+  <td><span class="chip pass">read</span> 2026-09-02
+      <div class="sub2">5-pack GBP 0.90, 25-pack GBP 3.60, inc 20 % VAT.</div>
+      <div class="flag">excluded from the roll-up: prices ONE of the five sizes on this line; the line has no single unit price</div></td>
+</tr>
+<tr>
+  <td>ModelFixings (UK)<br><span class="sub2"><a href="https://www.modelfixings.co.uk/miniature_cap_screws.htm">M2 x 8 stainless socket cap screw</a></span></td>
+  <td class="n">5+ GBP 0.18, 25+ GBP 0.144</td>
+  <td class="n">5</td>
+  <td>not stated</td>
+  <td>listed</td>
+  <td><span class="chip pass">read</span> 2026-09-02
+      <div class="sub2">5-pack GBP 0.90, 25-pack GBP 3.60, inc 20 % VAT.</div>
+      <div class="flag">excluded from the roll-up: prices ONE of the five sizes on this line</div></td>
+</tr>
+<tr>
+  <td>ModelFixings (UK)<br><span class="sub2"><a href="https://www.modelfixings.co.uk/miniature_cap_screws.htm">M2 x 12 stainless socket cap screw</a></span></td>
+  <td class="n">5+ GBP 0.2, 25+ GBP 0.16</td>
+  <td class="n">5</td>
+  <td>not stated</td>
+  <td>listed</td>
+  <td><span class="chip pass">read</span> 2026-09-02
+      <div class="sub2">5-pack GBP 1.00, 25-pack GBP 4.00, inc 20 % VAT.</div>
+      <div class="flag">excluded from the roll-up: prices ONE of the five sizes on this line</div></td>
+</tr>
+<tr>
+  <td>ModelFixings (UK)<br><span class="sub2"><a href="https://www.modelfixings.co.uk/miniature_cap_screws.htm">M2 Steel BZP hex nut</a></span></td>
+  <td class="n">10+ GBP 0.08</td>
+  <td class="n">10</td>
+  <td>not stated</td>
+  <td>listed</td>
+  <td><span class="chip pass">read</span> 2026-09-02
+      <div class="sub2">10-pack GBP 0.80, inc 20 % VAT. STEEL, BZP-plated - NOT the A2 stainless the rest of the schedule specifies. A different material in the same thread.</div>
+      <div class="flag">no tier table published &mdash; @1 is a ceiling</div><div class="flag">excluded from the roll-up: prices ONE of the five sizes on this line</div></td>
+</tr></tbody></table></div>
+<p class="lab">Priced size by size &mdash; GBP, outside every subtotal</p>
+<div class="tablewrap"><table class="data">
+<thead><tr><th>Size</th><th>Qty/robot</th><th>Unit</th><th>Per robot</th></tr></thead>
+<tbody><tr><td>M2x4 socket cap, A2</td><td class="n">60</td><td class="n">GBP 0.1440</td><td class="n">GBP 8.6400</td></tr><tr><td>M2x8 socket cap, A2</td><td class="n">40</td><td class="n">GBP 0.1440</td><td class="n">GBP 5.7600</td></tr><tr><td>M2x12 socket cap, A2</td><td class="n">15</td><td class="n">GBP 0.1600</td><td class="n">GBP 2.4000</td></tr><tr><td>M2 hex nut, steel BZP (not A2)</td><td class="n">50</td><td class="n">GBP 0.0800</td><td class="n">GBP 4.0000</td></tr><tr><td>M2.5x6 socket cap, A2</td><td class="n">20</td><td class="cdtxt">CANNOT DETERMINE</td><td class="cdtxt">no price read at any vendor</td></tr>
+<tr class="totalrow"><td>FLOOR for the priced sizes only</td><td class="n"></td><td class="n"></td>
+<td class="n">GBP 20.8000</td></tr></tbody></table></div>
+<p class="note">Four of the five sizes now have a read price, from ONE shop, at its 25-piece (or 10-piece) rate. This basket is stated in GBP including 20 % VAT and is NOT converted or added to the USD subtotal. M2.5x6 is still unpriced, so even this basket is incomplete - the total below is a FLOOR for the line, not the line.</p>
 <div class="tablewrap"><table class="alt">
 <thead><tr><th>Alternate</th><th>Why it is (or is not) equivalent</th><th>Where / price</th></tr></thead>
 <tbody><tr><td><code>price the whole screw set as if every screw were M2x6</code></td><td>NOT a substitution - a COSTING FLOOR. docs/production/components.md §14.3 prices all 195 screws at the RST M2x6 100-pack rate = EUR 8.46 per robot. Longer screws cost more, so this understates; it is recorded as a floor with the direction of the error stated, never as the price.</td>
         <td><a href="https://www.rst-versand.de/Zylinderschraube-Innensechskant-M2-x-6-mm-A2-DIN912_1">RST-Versand (DE)</a><div class="sub2">EUR 8.46 per robot for 195 screws - a FLOOR, understates</div></td></tr></tbody></table></div>
-<p class="lab">Open on this line</p><ul class="tight"><li>Every price on this line: CANNOT DETERMINE.</li><li>Whether these lengths are right at all: the counts and lengths come from hole-DEPTH inference on the meshes, not from a schedule. RELEASE.html §7 item 4 has this as an open factory blocker.</li></ul>
-<p class="lab">Pages that refused a price</p><ul class="tight small"><li><a href="https://www.accu.co.uk/hexagon-nuts/7884-HPN-M2-A2">https://www.accu.co.uk/hexagon-nuts/7884-HPN-M2-A2</a> &mdash; HTTP 403 (tried 2026-09-02)</li><li><a href="https://www.rst-versand.de/Sechskantmutter-M2-A2-DIN934">https://www.rst-versand.de/Sechskantmutter-M2-A2-DIN934</a> &mdash; Socket is closed (tried 2026-09-02)</li></ul>
+<p class="lab">Open on this line</p><ul class="tight"><li>A second distributor: CANNOT DETERMINE - Accu (403), Fastenal (403) and Westfield (JS-only prices) all refused on 2026-09-02.</li><li>M2.5x6 at any vendor: CANNOT DETERMINE.</li><li>A2 stainless M2 nuts: ModelFixings prices STEEL BZP nuts; the A2 equivalent was not read.</li><li>Whether these lengths are right at all: the counts and lengths come from hole-DEPTH inference on the meshes, not from a schedule. RELEASE.html §7 item 4 has this as an open factory blocker.</li></ul>
+<p class="lab">Pages that refused a price</p><ul class="tight small"><li><a href="https://www.accu.co.uk/hexagon-nuts/7884-HPN-M2-A2">https://www.accu.co.uk/hexagon-nuts/7884-HPN-M2-A2</a> &mdash; HTTP 403 (tried 2026-09-02)</li><li><a href="https://www.rst-versand.de/Sechskantmutter-M2-A2-DIN934">https://www.rst-versand.de/Sechskantmutter-M2-A2-DIN934</a> &mdash; Socket is closed (tried 2026-09-02)</li><li><a href="https://www.fastenal.com/product/details/MS2460006A20000">https://www.fastenal.com/product/details/MS2460006A20000</a> &mdash; HTTP 403 (tried 2026-09-02)</li><li><a href="https://www.westfieldfasteners.co.uk/A2-ScrewBolt-SHCap-M2.html">https://www.westfieldfasteners.co.uk/A2-ScrewBolt-SHCap-M2.html</a> &mdash; prices render only in JavaScript; the served page carries loading spinners</li></ul>
 
 <h3 id="line-B18c"><span class="lid">B18c</span> M2 heat-set threaded inserts, brass, ~3.0 mm
   <span class="chip pass">PASS</span></h3>
 <p class="meta">Qty per robot 60  &middot; basis: docs/BOM.md §4 - community-derived; inserts vs tapped plastic on a production part is itself CANNOT DETERMINE</p>
 <p class="meta">MPN <code>M2 x 3.0 mm brass heat-set insert (no single industry designation)</code> &middot; <i>standard class, vendor-specific part</i>
-  &middot; 3 distributor(s) with a price read</p>
+  &middot; 3 distinct distributor(s) with a price read</p>
 
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
@@ -955,6 +1070,7 @@ date, alternates with the equivalence argument, the open questions, and every pa
       <div class="sub2">GBP 9.74 per 100 = GBP 0.0974 each.</div>
       <div class="flag">no tier table published &mdash; @1 is a ceiling</div></td>
 </tr></tbody></table></div>
+
 <div class="tablewrap"><table class="alt">
 <thead><tr><th>Alternate</th><th>Why it is (or is not) equivalent</th><th>Where / price</th></tr></thead>
 <tbody><tr><td><code>tap the plastic instead (no insert)</code></td><td>removes 60 parts and 60 installation operations per robot at the cost of thread life in PLA. docs/DFM.md notes FDM holes print 0.1-0.3 mm undersize and must be reamed. Whether Pollen uses inserts or tapped plastic is CANNOT DETERMINE - the meshes cannot tell the difference.</td>
@@ -966,7 +1082,7 @@ date, alternates with the equivalence argument, the open questions, and every pa
   <span class="chip pass">PASS</span></h3>
 <p class="meta">Qty per robot 0.218295 kg &middot; basis: out/print/slice.json - 218.2946 g summed over every PLA part x its quantity. These are BambuStudio 02.08.02.61&#x27;s OWN filament figures via ce-slice, never derived from volume x density.</p>
 <p class="meta">MPN <code>Bambu Lab PLA Basic, 1.75 mm, 1 kg spool</code> &middot; <i>matches the sliced preset exactly</i>
-  &middot; 1 distributor(s) with a price read</p>
+  &middot; 2 distinct distributor(s) with a price read</p>
 <p class="note">The slice was run with filament preset &#x27;Bambu PLA Basic @BBL H2S&#x27; on a Bambu Lab H2S. Sourcing a DIFFERENT PLA invalidates the 218.2946 g and 9.935 h figures until re-sliced.</p>
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
@@ -982,6 +1098,16 @@ date, alternates with the equivalence argument, the open questions, and every pa
       <div class="flag">no tier table published &mdash; @1 is a ceiling</div></td>
 </tr>
 <tr>
+  <td>3D Universe (US)<br><span class="sub2"><a href="https://shop3duniverse.com/products/bambu-lab-pla-basic-1-75mm-1kg">Bambu Lab PLA Basic (1.75 mm, 1 kg)</a></span></td>
+  <td class="n">1+ USD 22.99</td>
+  <td class="n">1</td>
+  <td>not stated</td>
+  <td>most colours &#x27;In-Stock Now&#x27;; Brown, Blue, Bronze, Mistletoe Green, Beige, Sunflower Yellow, Cocoa Brown, Yellow, Magenta, Blue Grey and Purple out of stock</td>
+  <td><span class="chip pass">read</span> 2026-09-02
+      <div class="sub2">$22.99 per 1 kg spool - to the cent the same as GigaParts, and uniform across every colour. Two independent readings of the same number.</div>
+      <div class="flag">no tier table published &mdash; @1 is a ceiling</div></td>
+</tr>
+<tr>
   <td>MatterHackers (US)<br><span class="sub2"><a href="https://www.matterhackers.com/store/c/bambu-lab-pla-filament">Bambu Lab PLA Basic 1.75 mm 1 kg</a></span></td>
   <td class="n"><span class='cdtxt'>no price read</span></td>
   <td class="n">1</td>
@@ -991,18 +1117,19 @@ date, alternates with the equivalence argument, the open questions, and every pa
       <div class="sub2">PRICE NOT READ. The product page renders no price to the fetcher; a search-engine snippet says &#x27;starts at $29.99&#x27; and that is NOT a source, so no price is recorded here.</div>
       <div class="flag">no tier table published &mdash; @1 is a ceiling</div></td>
 </tr></tbody></table></div>
+
 <div class="tablewrap"><table class="alt">
 <thead><tr><th>Alternate</th><th>Why it is (or is not) equivalent</th><th>Where / price</th></tr></thead>
 <tbody><tr><td><code>Bambu Lab PLA Basic Refill (no spool)</code></td><td>identical filament without the reusable spool; cheaper per kilogram at volume and the correct SKU once the shop has spools. Price not read.</td>
         <td><a href="https://www.gigaparts.com/bambu-lab-pla-basic-black-3d-printer-filament-1-75mm-1kg-spool.html">GigaParts / Bambu Lab</a><div class="sub2">CANNOT DETERMINE</div></td></tr></tbody></table></div>
-<p class="lab">Open on this line</p><ul class="tight"><li>A second readable USD distributor: MatterHackers and us.store.bambulab.com both refused a price to the fetcher (the Bambu store answered HTTP 402).</li><li>Volume tiers on filament: none published anywhere read. At 1000 robots this is 218.3 kg of PLA - a quantity that certainly has a quote, and none exists here.</li></ul>
+<p class="lab">Open on this line</p><ul class="tight"><li>Volume tiers on filament: none published anywhere read. At 1 000 robots this is 218.3 kg of PLA - a quantity that certainly has a quote, and none exists here.</li><li>Bambu Lab&#x27;s own store price: CANNOT DETERMINE (HTTP 402 to the fetcher); MatterHackers renders no price either.</li></ul>
 <p class="lab">Pages that refused a price</p><ul class="tight small"><li><a href="https://us.store.bambulab.com/products/pla-basic-filament">https://us.store.bambulab.com/products/pla-basic-filament</a> &mdash; HTTP 402 Payment Required</li><li><a href="https://www.matterhackers.com/store/l/bambu-lab-pla-basic-3d-printer-filament/sk/M2X0FQ9W">https://www.matterhackers.com/store/l/bambu-lab-pla-basic-3d-printer-filament/sk/M2X0FQ9</a> &mdash; page served without a price</li></ul>
 
 <h3 id="line-B19b"><span class="lid">B19b</span> TPU filament (soft parts: soles x2, jaw_soft, soft_mouth_top)
   <span class="chip pass">PASS</span></h3>
 <p class="meta">Qty per robot 0.0262028 kg &middot; basis: out/print/slice.json - 26.2028 g summed over the 4 TPU parts. Slicer&#x27;s own figure, preset &#x27;Bambu TPU 85A @BBL H2S&#x27;.</p>
 <p class="meta">MPN <code>Bambu Lab TPU 85A, 1.75 mm, 1 kg spool</code> &middot; <i>matches the sliced preset exactly</i>
-  &middot; 2 distributor(s) with a price read</p>
+  &middot; 2 distinct distributor(s) with a price read</p>
 <p class="note">Pollen&#x27;s durometer is CANNOT DETERMINE (docs/BOM.md; community says 90-95A). We sliced 85A because that is the preset the H2S resolves; if the real part is 95A the grams change and the sole friction changes.</p>
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
@@ -1027,6 +1154,7 @@ date, alternates with the equivalence argument, the open questions, and every pa
       <div class="sub2">page states &#x27;AMS &amp; AMS lite NOT Compatible&#x27; and &#x27;MUST Dry out before use&#x27;.</div>
       <div class="flag">no tier table published &mdash; @1 is a ceiling</div></td>
 </tr></tbody></table></div>
+
 <div class="tablewrap"><table class="alt">
 <thead><tr><th>Alternate</th><th>Why it is (or is not) equivalent</th><th>Where / price</th></tr></thead>
 <tbody><tr><td><code>Bambu Lab TPU 90A / 95A</code></td><td>the community durometer for these parts is 90-95A, not 85A. A harder sole changes the friction coefficient the sim uses (1.0 on the foot contact geom) and the sliced grams. Recorded as the alternate BECAUSE the choice is unresolved, not because it is cheaper.</td>
@@ -1038,7 +1166,7 @@ date, alternates with the equivalence argument, the open questions, and every pa
   <span class="chip pass">PASS</span></h3>
 <p class="meta">Qty per robot 1  &middot; basis: one codec on P1, the Robot HAT (docs/ELECTRONICS-AND-SOFTWARE.md) &middot; <code>part:tlv320aic3104</code></p>
 <p class="meta">MPN <code>TLV320AIC3104IRHBR</code> &middot; <i>confirmed</i>
-  &middot; 2 distributor(s) with a price read</p>
+  &middot; 2 distinct distributor(s) with a price read</p>
 
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
@@ -1065,13 +1193,14 @@ date, alternates with the equivalence argument, the open questions, and every pa
 </tr></tbody></table></div>
 
 
+
 <p class="lab">Pages that refused a price</p><ul class="tight small"><li><a href="https://www.mouser.com/ProductDetail/Texas-Instruments/TLV320AIC3104IRHBR">https://www.mouser.com/ProductDetail/Texas-Instruments/TLV320AIC3104IRHBR</a> &mdash; timeout x3</li><li><a href="https://www.ti.com/store/ti/en/p/product/?p=TLV320AIC3104IRHBR">https://www.ti.com/store/ti/en/p/product/?p=TLV320AIC3104IRHBR</a> &mdash; requires login / blocked</li></ul>
 
 <h3 id="line-P2c"><span class="lid">P2c</span> LSM6DSV16X 6-axis IMU (on the imu_to_dxl board, Dynamixel slave ID 200)
   <span class="chip pass">PASS</span></h3>
 <p class="meta">Qty per robot 1  &middot; basis: one IMU on P2 (docs/ELECTRONICS-AND-SOFTWARE.md; the bus scan expects ID 200) &middot; <code>part:lsm6dsv16x</code></p>
 <p class="meta">MPN <code>LSM6DSV16XTR</code> &middot; <i>confirmed</i>
-  &middot; 2 distributor(s) with a price read</p>
+  &middot; 2 distinct distributor(s) with a price read</p>
 
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
@@ -1096,6 +1225,7 @@ date, alternates with the equivalence argument, the open questions, and every pa
       <div class="sub2">LGA-14(2.5x3), 5000/full reel.</div>
       </td>
 </tr></tbody></table></div>
+
 <div class="tablewrap"><table class="alt">
 <thead><tr><th>Alternate</th><th>Why it is (or is not) equivalent</th><th>Where / price</th></tr></thead>
 <tbody><tr><td><code>LSM6DSV16BXTR</code></td><td>same LSM6DSV16 family and same LGA-14 footprint, different option code; ST&#x27;s part-number suffix changes the trimmed feature set, so this is a footprint substitute only after checking the register map against Pollen&#x27;s driver. Listed at DigiKey; tiers not fetched.</td>
@@ -1107,7 +1237,7 @@ date, alternates with the equivalence argument, the open questions, and every pa
   <span class="chip pass">PASS</span></h3>
 <p class="meta">Qty per robot 1  &middot; basis: one footprint on P1. Described as DORMANT in RELEASE.html §1 - populated or not is a board decision, so this line may be zero. &middot; <code>part:bmi088</code></p>
 <p class="meta">MPN <code>BMI088</code> &middot; <i>confirmed</i>
-  &middot; 2 distributor(s) with a price read</p>
+  &middot; 2 distinct distributor(s) with a price read</p>
 
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
@@ -1132,6 +1262,7 @@ date, alternates with the equivalence argument, the open questions, and every pa
       <div class="sub2">no tier published above 100 - unusually, LCSC is the EXPENSIVE source for this part, 52 % above DigiKey at 100.</div>
       </td>
 </tr></tbody></table></div>
+
 <div class="tablewrap"><table class="alt">
 <thead><tr><th>Alternate</th><th>Why it is (or is not) equivalent</th><th>Where / price</th></tr></thead>
 <tbody><tr><td><code>BMI085</code></td><td>Bosch&#x27;s sibling in the same LGA-16 package and the same accel+gyro split; lower g-range (+/-16 g). Footprint-compatible, register-compatible enough that Bosch&#x27;s own driver covers both, but it is a different part and the vibration-robustness claim that makes the BMI088 interesting does not transfer.</td>
@@ -1143,7 +1274,7 @@ date, alternates with the equivalence argument, the open questions, and every pa
   <span class="chip cd">CANNOT DETERMINE</span></h3>
 <p class="meta">Qty per robot 0 <span class='sub2'>(reference line &mdash; arrives inside another purchase)</span> &middot; basis: ZERO per robot: this chip arrives soldered on the Radxa board bought as line B3. Priced here only so a re-spin of the compute board, or a repair, has a number. &middot; <code>part:et7301b</code></p>
 <p class="meta">MPN <code>ET7301B (Radxa&#x27;s U6). Pollen&#x27;s device tree names FUSB302, which is the DRIVER name, not the fitted die (part:fusb302 record.title).</code> &middot; <i>two names, one socket - resolved by lane C in favour of ET7301B on the schematic</i>
-  &middot; 2 distributor(s) with a price read</p>
+  &middot; 2 distinct distributor(s) with a price read</p>
 <p class="verdict warn"><b>CANNOT DETERMINE</b> &mdash; The part actually fitted (ET7301B) has NO distributor with a readable price: LCSC&#x27;s search returns nothing for ET7301B and DigiKey&#x27;s own ETEK Microelectronics supplier centre lists no ET7301 part (both checked 2026-09-02). The FUSB302BMPX below is fully priced at two distributors, but it is the ALTERNATE, not the fitted part.</p>
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
@@ -1168,6 +1299,7 @@ date, alternates with the equivalence argument, the open questions, and every pa
       <div class="sub2">WFQFN-14(2.5x2.5).</div>
       </td>
 </tr></tbody></table></div>
+
 <div class="tablewrap"><table class="alt">
 <thead><tr><th>Alternate</th><th>Why it is (or is not) equivalent</th><th>Where / price</th></tr></thead>
 <tbody><tr><td><code>onsemi FUSB302BMPX</code></td><td>the part Linux&#x27;s fusb302 driver was written for, and the name in Pollen&#x27;s own device tree. Different package (MLP-14 2.5x2.5) from the ET7301B&#x27;s WLCSP9, so it is a schematic-level, not a footprint-level, substitution. Priced above at two distributors.</td>
@@ -1179,7 +1311,7 @@ date, alternates with the equivalence argument, the open questions, and every pa
   <span class="chip pass">PASS</span></h3>
 <p class="meta">Qty per robot 0 <span class='sub2'>(reference line &mdash; arrives inside another purchase)</span> &middot; basis: ZERO per robot. The NP-F550 charger is a separate accessory (line B4 prices it as a shared cost). Priced here so a bespoke charger or dock can be costed. &middot; <code>part:mcp73213</code></p>
 <p class="meta">MPN <code>MCP73213-A6SI/MF (DFN-10 3x3)</code> &middot; <i>family confirmed (part:mcp73213 verdict PASS); the exact option suffix a bespoke charger needs depends on the chosen float voltage (8.2 / 8.4 / 8.7 / 8.8 V)</i>
-  &middot; 2 distributor(s) with a price read</p>
+  &middot; 2 distinct distributor(s) with a price read</p>
 
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
@@ -1205,6 +1337,7 @@ date, alternates with the equivalence argument, the open questions, and every pa
       </td>
 </tr></tbody></table></div>
 
+
 <p class="lab">Open on this line</p><ul class="tight"><li>Which option suffix a Microduck charger would need: depends on a float-voltage choice nobody has made. The two offers above are DIFFERENT suffixes and are not interchangeable on a purchase order.</li></ul>
 
 
@@ -1212,8 +1345,8 @@ date, alternates with the equivalence argument, the open questions, and every pa
   <span class="chip cd">CANNOT DETERMINE</span></h3>
 <p class="meta">Qty per robot 0 <span class='sub2'>(reference line &mdash; arrives inside another purchase)</span> &middot; basis: ZERO per robot - it arrives inside the pack bought as line B4. Priced so a bespoke pack can be costed. &middot; <code>part:s-8252</code></p>
 <p class="meta">MPN <code>S-8252 series; exact suffix CANNOT DETERMINE (the series has ~30 detection-voltage options and the fitted pack is unidentified)</code> &middot; <i>series confirmed, option unknown</i>
-  &middot; 1 distributor(s) with a price read</p>
-<p class="verdict warn"><b>CANNOT DETERMINE</b> &mdash; Only ONE distributor was read, and for an arbitrary suffix (AAX) chosen because it was the first with a rendered tier table - not because it is the fitted option. Two distributors for an unidentified variant would still not identify the part.</p>
+  &middot; 2 distinct distributor(s) with a price read</p>
+<p class="verdict warn"><b>CANNOT DETERMINE</b> &mdash; Two distributors now carry the series with full read tier tables - but for TWO DIFFERENT OPTION CODES (-AAX at DigiKey, -AAC at LCSC), and neither is known to be the one inside the pack. Two prices for two parts that are not the part is not two prices for the part. This stays CANNOT DETERMINE until a pack is opened and the die marking read.</p>
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
 <th>Lead time (as printed)</th><th>Stock, 2026-09-02</th><th>Read?</th></tr></thead>
@@ -1226,7 +1359,18 @@ date, alternates with the equivalence argument, the open questions, and every pa
   <td><span class="chip pass">read</span> 2026-09-02
       <div class="sub2">SOT-23-6. The -AAX suffix is ONE of many detection-voltage options; it is a price sample for the series, not the fitted part.</div>
       </td>
+</tr>
+<tr>
+  <td>LCSC<br><span class="sub2"><a href="https://www.lcsc.com/product-detail/C468219.html">C468219 (S-8252AAC-M6T1U)</a></span></td>
+  <td class="n">1+ USD 1.8559, 10+ USD 1.5835, 30+ USD 1.4127, 100+ USD 1.2373, 500+ USD 1.1588, 1,000+ USD 1.1234</td>
+  <td class="n">1</td>
+  <td>not stated</td>
+  <td>Out of Stock</td>
+  <td><span class="chip pass">read</span> 2026-09-02
+      <div class="sub2">SOT-23-6, 3000/full reel. A DIFFERENT option code from DigiKey&#x27;s -AAX: AAC and AAX are different detection-voltage sets and are NOT interchangeable. LCSC also lists AAG (C468221), AAO (C468216), ABB (C5904467), AAA-I6T1U (C7070591) - the series is well distributed; the fitted option is what is unknown.</div>
+      </td>
 </tr></tbody></table></div>
+
 
 <p class="lab">Open on this line</p><ul class="tight"><li>The suffix: CANNOT DETERMINE until a pack is opened and the marking read.</li><li>A second distributor for whatever suffix is right: not attempted, because there is nothing yet to look up.</li></ul>
 
@@ -1235,8 +1379,8 @@ date, alternates with the equivalence argument, the open questions, and every pa
   <span class="chip pass">PASS</span></h3>
 <p class="meta">Qty per robot 1  &middot; basis: 16 leads x 2 ends = 32 EHR-3 housings and 96 SEH-001T-P0.6 contacts (wiring/CABLES.md rows 1-16, connector column). ALTERNATIVE to line B2, not additional to it.</p>
 <p class="meta">MPN <code>JST EHR-3 (housing) + JST SEH-001T-P0.6 (crimp contact)</code> &middot; <i>confirmed - these are exactly the parts wiring/CABLES.md names</i>
-  &middot; 2 distributor(s) with a price read</p>
-
+  &middot; 2 distinct distributor(s) with a price read</p>
+<p class="verdict "><b>PASS</b> &mdash; Two distributors for BOTH parts of the kit, all four tier tables read. LCSC is roughly 2.3-2.4x cheaper than DigiKey on both, which at 32 housings + 96 contacts per robot is $4.35 vs $1.86 of parts - a real difference, and still small beside the wire, the crimp tool and the 96 crimp operations this option adds.</p>
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
 <th>Lead time (as printed)</th><th>Stock, 2026-09-02</th><th>Read?</th></tr></thead>
@@ -1259,7 +1403,28 @@ date, alternates with the equivalence argument, the open questions, and every pa
   <td><span class="chip pass">read</span> 2026-09-02
       <div class="sub2">MOQ 100 on cut tape; 9 000 on reel. 22-26 AWG socket contact, crimp, tin.</div>
       </td>
+</tr>
+<tr>
+  <td>LCSC<br><span class="sub2"><a href="https://www.lcsc.com/product-detail/C161660.html">C161660 (EHR-3 housing)</a></span></td>
+  <td class="n">20+ USD 0.0245, 200+ USD 0.0195, 600+ USD 0.0167, 2,000+ USD 0.0135, 10,000+ USD 0.0121, 20,000+ USD 0.0113</td>
+  <td class="n">20</td>
+  <td>not stated</td>
+  <td>13,560 In stock, ships now</td>
+  <td><span class="chip pass">read</span> 2026-09-02
+      <div class="sub2">P=2.5 mm, 2000/full bag. 2.4x cheaper than DigiKey at 100 pieces ($0.0245 at 20+ vs $0.0588 at 100).</div>
+      <div class="flag">excluded from the roll-up: second source for the housing; the kit above is costed at DigiKey</div></td>
+</tr>
+<tr>
+  <td>LCSC<br><span class="sub2"><a href="https://www.lcsc.com/product-detail/C263767.html">C263767 (SEH-001T-P0.6 contact)</a></span></td>
+  <td class="n">100+ USD 0.0112, 1,000+ USD 0.0086, 3,000+ USD 0.0072, 9,000+ USD 0.0064, 54,000+ USD 0.0057, 99,000+ USD 0.0053</td>
+  <td class="n">100</td>
+  <td>not stated</td>
+  <td>25,400</td>
+  <td><span class="chip pass">read</span> 2026-09-02
+      <div class="sub2">9000/full reel. 2.3x cheaper than DigiKey at 100 ($0.0112 vs $0.0257).</div>
+      <div class="flag">excluded from the roll-up: second source for the contact; the kit above is costed at DigiKey</div></td>
 </tr></tbody></table></div>
+
 <div class="tablewrap"><table class="alt">
 <thead><tr><th>Alternate</th><th>Why it is (or is not) equivalent</th><th>Where / price</th></tr></thead>
 <tbody><tr><td><code>buy ROBOTIS X3P 180 mm leads instead (line B2)</code></td><td>the same JST EH 3-pin assembly, factory-crimped, at $1.55 per lead. Cheaper than crimping until labour is free: 32 housings + 96 contacts at the 100-piece rate is 32 x $0.0588 + 96 x $0.0257 = $4.35 of parts per robot vs $24.80 for two ROBOTIS packs - but the parts price excludes wire, crimp tooling and 96 crimp operations, and the ROBOTIS leads carry 15-160 mm of dead slack that this option removes.</td>
@@ -1271,8 +1436,8 @@ date, alternates with the equivalence argument, the open questions, and every pa
   <span class="chip pass">PASS</span></h3>
 <p class="meta">Qty per robot 1  &middot; basis: SHR-04V-S-B x2 (both ends of the 35 mm ToF cable, wiring/CABLES.md row 17); GHR-02V-S x2 (speaker lead, row 18 - the HAT end is CANNOT DETERMINE, so one of the two is provisional)</p>
 <p class="meta">MPN <code>JST SHR-04V-S-B (1.00 mm, 4 pos) + JST GHR-02V-S (1.25 mm, 2 pos)</code> &middot; <i>SH 4-pin confirmed at the HAT&#x27;s J5; the ToF-board end and the HAT speaker end are CANNOT DETERMINE</i>
-  &middot; 2 distributor(s) with a price read</p>
-
+  &middot; 2 distinct distributor(s) with a price read</p>
+<p class="verdict "><b>PASS</b> &mdash; Two distributors for both housings, four tier tables read. DigiKey is out of stock on the GHR-02V-S until 16-Dec-2026 and LCSC holds 1,125 - but LCSC is 2.7x dearer on that part, so the two sources are not interchangeable on price or on availability.</p>
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
 <th>Lead time (as printed)</th><th>Stock, 2026-09-02</th><th>Read?</th></tr></thead>
@@ -1295,7 +1460,28 @@ date, alternates with the equivalence argument, the open questions, and every pa
   <td><span class="chip pass">read</span> 2026-09-02
       <div class="sub2">2 position, 1.25 mm.</div>
       </td>
+</tr>
+<tr>
+  <td>LCSC<br><span class="sub2"><a href="https://www.lcsc.com/product-detail/C394367.html">C394367 (SHR-04V-S-B)</a></span></td>
+  <td class="n">10+ USD 0.0714, 100+ USD 0.058, 300+ USD 0.0513, 2,000+ USD 0.0443, 4,000+ USD 0.0402, 10,000+ USD 0.0382</td>
+  <td class="n">10</td>
+  <td>not stated</td>
+  <td>49,850</td>
+  <td><span class="chip pass">read</span> 2026-09-02
+      <div class="sub2">P=1 mm, 2000/full box.</div>
+      <div class="flag">excluded from the roll-up: second source; the kit above is costed at DigiKey</div></td>
+</tr>
+<tr>
+  <td>LCSC<br><span class="sub2"><a href="https://www.lcsc.com/product-detail/C160416.html">C160416 (GHR-02V-S)</a></span></td>
+  <td class="n">5+ USD 0.2665, 50+ USD 0.2101, 150+ USD 0.186, 500+ USD 0.1558, 2,500+ USD 0.1424, 5,000+ USD 0.1343</td>
+  <td class="n">5</td>
+  <td>not stated</td>
+  <td>1,125</td>
+  <td><span class="chip pass">read</span> 2026-09-02
+      <div class="sub2">P=1.25 mm, 9000/full bag. Here LCSC is 2.7x MORE expensive than DigiKey ($0.2665 at 5+ vs $0.10 at 1) - the direction is not always the same, which is why both are read.</div>
+      <div class="flag">excluded from the roll-up: second source; the kit above is costed at DigiKey</div></td>
 </tr></tbody></table></div>
+
 <div class="tablewrap"><table class="alt">
 <thead><tr><th>Alternate</th><th>Why it is (or is not) equivalent</th><th>Where / price</th></tr></thead>
 <tbody><tr><td><code>Qwiic / Stemma QT pre-made 4-conductor cable</code></td><td>the ToF link is a standard Qwiic/Stemma bus (JST-SH 1.0 mm 4-pin, GND/3V3/SDA/SCL) and every ToF breakout in line B9 ships with one. Buying the breakout usually makes this line zero.</td>
@@ -1307,12 +1493,13 @@ date, alternates with the equivalence argument, the open questions, and every pa
   <span class="chip cd">CANNOT DETERMINE</span></h3>
 <p class="meta">Qty per robot 1  &middot; basis: one HAT stacked on the Radxa 40-pin header &middot; <code>part:microduck-robot-hat-pcb</code></p>
 <p class="meta">MPN <code>no published design</code> &middot; <i>not a bought part until a design exists</i>
-  &middot; 0 distributor(s) with a price read</p>
+  &middot; 0 distinct distributor(s) with a price read</p>
 <p class="verdict warn"><b>CANNOT DETERMINE</b> &mdash; There is nothing to send a fab. A quantity of boards with no Gerbers has no price, and inventing one would put a number in the roll-up that no supplier ever gave.</p>
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
 <th>Lead time (as printed)</th><th>Stock, 2026-09-02</th><th>Read?</th></tr></thead>
 <tbody><tr><td colspan="6" class="cdtxt">No offer with a price read on any page.</td></tr></tbody></table></div>
+
 
 <p class="lab">Open on this line</p><ul class="tight"><li>Bare-board and turnkey-assembly price at 1 / 100 / 1000: CANNOT DETERMINE until lane D produces Gerbers and a placement BOM.</li></ul>
 
@@ -1321,12 +1508,13 @@ date, alternates with the equivalence argument, the open questions, and every pa
   <span class="chip cd">CANNOT DETERMINE</span></h3>
 <p class="meta">Qty per robot 1  &middot; basis: one board on the bus at Dynamixel Protocol-2 slave ID 200 &middot; <code>part:microduck-imu-to-dxl</code></p>
 <p class="meta">MPN <code>no published design</code> &middot; <i>not a bought part until a design exists</i>
-  &middot; 0 distributor(s) with a price read</p>
+  &middot; 0 distinct distributor(s) with a price read</p>
 <p class="verdict warn"><b>CANNOT DETERMINE</b> &mdash; No design, and two of its three chips are unidentified.</p>
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
 <th>Lead time (as printed)</th><th>Stock, 2026-09-02</th><th>Read?</th></tr></thead>
 <tbody><tr><td colspan="6" class="cdtxt">No offer with a price read on any page.</td></tr></tbody></table></div>
+
 
 <p class="lab">Open on this line</p><ul class="tight"><li>Outline, MCU, transceiver, board and assembly price: all CANNOT DETERMINE.</li></ul>
 
@@ -1335,12 +1523,13 @@ date, alternates with the equivalence argument, the open questions, and every pa
   <span class="chip cd">CANNOT DETERMINE</span></h3>
 <p class="meta">Qty per robot 1  &middot; basis: one board clamped onto power_support&#x27;s pins by banana_pcb_locker (RELEASE.html §4 step 1)</p>
 <p class="meta">MPN <code>no published design</code> &middot; <i>not a bought part until a design exists</i>
-  &middot; 0 distributor(s) with a price read</p>
+  &middot; 0 distinct distributor(s) with a price read</p>
 <p class="verdict warn"><b>CANNOT DETERMINE</b> &mdash; Shape and contacts unknown; nothing to quote.</p>
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
 <th>Lead time (as printed)</th><th>Stock, 2026-09-02</th><th>Read?</th></tr></thead>
 <tbody><tr><td colspan="6" class="cdtxt">No offer with a price read on any page.</td></tr></tbody></table></div>
+
 
 <p class="lab">Open on this line</p><ul class="tight"><li>Board outline, contact part, plating, current rating, price: all CANNOT DETERMINE.</li></ul>
 
@@ -1354,7 +1543,7 @@ page answered 403, 402, 500, a closed socket or a body with no price, that URL i
 line so the next attempt starts where this one stopped &mdash; a browser session reads most of them.</p>
 <p class="lab">Every blocked URL on this page, collected</p>
 <ul class="tight small">
-<li><b>B1</b> <a href="https://www.robotshop.com/products/robotis-dynamixel-xl330-m288-t-smart-servo-actuator">https://www.robotshop.com/products/robotis-dynamixel-xl330-m288-t-smart-servo-actuator</a> &mdash; HTTP 403 to the fetcher</li><li><b>B1</b> <a href="https://www.aliexpress.com/i/1005004403336577.html">https://www.aliexpress.com/i/1005004403336577.html</a> &mdash; page body blank to the fetcher</li><li><b>B3</b> <a href="https://www.okdo.com/p/okdo-rock-zero-3w-1gb-with-wi-fi-ble-without-gpio/">https://www.okdo.com/p/okdo-rock-zero-3w-1gb-with-wi-fi-ble-without-gpio/</a> &mdash; &#x27;Socket is closed&#x27; x5 (OKdo is Radxa&#x27;s EU/UK distributor)</li><li><b>B3</b> <a href="https://befr.rs-online.com/web/p/rock-sbc-boards/2564694">https://befr.rs-online.com/web/p/rock-sbc-boards/2564694</a> &mdash; hang / timeout</li><li><b>B4</b> <a href="https://www.bhphotovideo.com/c/product/1733125-REG/neewer_66600244_2_2600mah_f550.html">https://www.bhphotovideo.com/c/product/1733125-REG/neewer_66600244_2_2600mah_f550.html</a> &mdash; HTTP 403</li><li><b>B4</b> <a href="https://www.alibaba.com/product-detail/Beston-2600mAh-replacement-NP-F550-NP_60828272766.html">https://www.alibaba.com/product-detail/Beston-2600mAh-replacement-NP-F550-NP_60828272766.html</a> &mdash; page body blank to the fetcher</li><li><b>B4</b> <a href="https://eu.nkon.nl/rechargeable/li-ion/18650-size/samsung-icr18650-26j3.html">https://eu.nkon.nl/rechargeable/li-ion/18650-size/samsung-icr18650-26j3.html</a> &mdash; HTTP 403</li><li><b>B6</b> <a href="https://www.arducam.com/product/arducam-imx219-low-distortion-m12-mount-camera-module-drop-in-replacement-for-raspberry-pi-v2-camera/">https://www.arducam.com/product/arducam-imx219-low-distortion-m12-mount-camera-module-drop-in-re</a> &mdash; HTTP 403 on every arducam.com URL</li><li><b>B8</b> <a href="https://esp32s.com/product/radxa-camera-fpc-cable-for-radxa-camera-8m-219-and-rpi-camera-for-zero-3w-3e/">https://esp32s.com/product/radxa-camera-fpc-cable-for-radxa-camera-8m-219-and-rpi-camera-for-zer</a> &mdash; HTTP 403 (a search snippet claims $1.90 - NOT read, so not used)</li><li><b>B8</b> <a href="https://www.fabtolab.com/radxa-fpc-cable-zero-3-camera-8m-219-zero-3">https://www.fabtolab.com/radxa-fpc-cable-zero-3-camera-8m-219-zero-3</a> &mdash; Socket is closed</li><li><b>B8</b> <a href="https://docs.radxa.com/en/zero/zero3/accessories/camera">https://docs.radxa.com/en/zero/zero3/accessories/camera</a> &mdash; documentation, carries no price</li><li><b>B9</b> <a href="https://www.mouser.com/ProductDetail/STMicroelectronics/VL53L5CX-SATEL">https://www.mouser.com/ProductDetail/STMicroelectronics/VL53L5CX-SATEL</a> &mdash; timeout x3</li><li><b>B10</b> <a href="https://www.bocabearings.com/parts/10x15x3">https://www.bocabearings.com/parts/10x15x3</a> &mdash; HTTP 403</li><li><b>B10</b> <a href="https://vxb.com/search?q=16x22x4">https://vxb.com/search?q=16x22x4</a> &mdash; 0 bearing results</li><li><b>B10</b> <a href="https://bearingsdirect.com/search.php?search_query=16x22x4">https://bearingsdirect.com/search.php?search_query=16x22x4</a> &mdash; 0 results</li><li><b>B10</b> <a href="http://www.zotyindustrial.com/products/1622ZZ-16x22x4-thin-special-bearing-for-jumping-rope.html">http://www.zotyindustrial.com/products/1622ZZ-16x22x4-thin-special-bearing-for-jumping-rope.html</a> &mdash; HTTP 500 (tried 2026-09-02)</li><li><b>B11</b> <a href="https://www.123bearing.com/bearing-housing/deep-groove-bearing/single-row/6700">https://www.123bearing.com/bearing-housing/deep-groove-bearing/single-row/6700</a> &mdash; no price rendered</li><li><b>B12</b> <a href="https://www.amazon.com/CQRobot-Rectangle-Electronic-Application-Components/dp/B0CMQCQQV4">https://www.amazon.com/CQRobot-Rectangle-Electronic-Application-Components/dp/B0CMQCQQV4</a> &mdash; page body not served</li><li><b>B12</b> <a href="https://www.ebay.com/itm/277690727056">https://www.ebay.com/itm/277690727056</a> &mdash; timeout x6 across three eBay 3525 listings</li><li><b>B18a</b> <a href="https://www.accu.co.uk/socket-cap-screws/1077-SSCM2-6-A2">https://www.accu.co.uk/socket-cap-screws/1077-SSCM2-6-A2</a> &mdash; HTTP 403 (re-tried 2026-09-02)</li><li><b>B18a</b> <a href="https://www.boltdepot.com/Product-Details?product=15964">https://www.boltdepot.com/Product-Details?product=15964</a> &mdash; HTTP 403</li><li><b>B18a</b> <a href="https://www.mcmaster.com/91292A831/">https://www.mcmaster.com/91292A831/</a> &mdash; blank to the fetcher</li><li><b>B18a</b> <a href="https://us.misumi-ec.com/vona2/detail/221000348314/?HissuCode=SNSS-M2X6">https://us.misumi-ec.com/vona2/detail/221000348314/?HissuCode=SNSS-M2X6</a> &mdash; HTTP 403</li><li><b>B18a</b> <a href="https://www.albanycountyfasteners.com/Socket-Head-Cap-Screw-2MM-A2-Stainless-Steel-p/5020000.htm">https://www.albanycountyfasteners.com/Socket-Head-Cap-Screw-2MM-A2-Stainless-Steel-p/5020000.htm</a> &mdash; page served without a price</li><li><b>B18b</b> <a href="https://www.accu.co.uk/hexagon-nuts/7884-HPN-M2-A2">https://www.accu.co.uk/hexagon-nuts/7884-HPN-M2-A2</a> &mdash; HTTP 403 (tried 2026-09-02)</li><li><b>B18b</b> <a href="https://www.rst-versand.de/Sechskantmutter-M2-A2-DIN934">https://www.rst-versand.de/Sechskantmutter-M2-A2-DIN934</a> &mdash; Socket is closed (tried 2026-09-02)</li><li><b>B18c</b> <a href="https://www.amazon.com/Heat-Set-Threaded-Inserts-Insert-Tips/dp/B0D4L464XG">https://www.amazon.com/Heat-Set-Threaded-Inserts-Insert-Tips/dp/B0D4L464XG</a> &mdash; HTTP 500</li><li><b>B19a</b> <a href="https://us.store.bambulab.com/products/pla-basic-filament">https://us.store.bambulab.com/products/pla-basic-filament</a> &mdash; HTTP 402 Payment Required</li><li><b>B19a</b> <a href="https://www.matterhackers.com/store/l/bambu-lab-pla-basic-3d-printer-filament/sk/M2X0FQ9W">https://www.matterhackers.com/store/l/bambu-lab-pla-basic-3d-printer-filament/sk/M2X0FQ9W</a> &mdash; page served without a price</li><li><b>B19b</b> <a href="https://us.store.bambulab.com/products/tpu-85a-tpu-90a">https://us.store.bambulab.com/products/tpu-85a-tpu-90a</a> &mdash; HTTP 402 Payment Required</li><li><b>P1c</b> <a href="https://www.mouser.com/ProductDetail/Texas-Instruments/TLV320AIC3104IRHBR">https://www.mouser.com/ProductDetail/Texas-Instruments/TLV320AIC3104IRHBR</a> &mdash; timeout x3</li><li><b>P1c</b> <a href="https://www.ti.com/store/ti/en/p/product/?p=TLV320AIC3104IRHBR">https://www.ti.com/store/ti/en/p/product/?p=TLV320AIC3104IRHBR</a> &mdash; requires login / blocked</li><li><b>P2c</b> <a href="https://www.mouser.com/ProductDetail/STMicroelectronics/LSM6DSV16XTR">https://www.mouser.com/ProductDetail/STMicroelectronics/LSM6DSV16XTR</a> &mdash; product page access restricted; no price served</li><li><b>P1d</b> <a href="https://www.mouser.com/ProductDetail/Bosch-Sensortec/BMI088">https://www.mouser.com/ProductDetail/Bosch-Sensortec/BMI088</a> &mdash; &#x27;Access to this page has been denied&#x27;; no price served</li><li><b>R1</b> <a href="https://www.digikey.com/en/supplier-centers/etek-microelectronics">https://www.digikey.com/en/supplier-centers/etek-microelectronics</a> &mdash; supplier centre lists no ET7301 part number at all (read 2026-09-02)</li><li><b>R1</b> <a href="https://www.lcsc.com/">https://www.lcsc.com/</a> &mdash; site search returns no ET7301B result</li>
+<li><b>B1</b> <a href="https://www.robotshop.com/products/robotis-dynamixel-xl330-m288-t-smart-servo-actuator">https://www.robotshop.com/products/robotis-dynamixel-xl330-m288-t-smart-servo-actuator</a> &mdash; HTTP 403 to the fetcher</li><li><b>B1</b> <a href="https://www.aliexpress.com/i/1005004403336577.html">https://www.aliexpress.com/i/1005004403336577.html</a> &mdash; page body blank to the fetcher</li><li><b>B3</b> <a href="https://www.okdo.com/p/okdo-rock-zero-3w-1gb-with-wi-fi-ble-without-gpio/">https://www.okdo.com/p/okdo-rock-zero-3w-1gb-with-wi-fi-ble-without-gpio/</a> &mdash; &#x27;Socket is closed&#x27; x5 (OKdo is Radxa&#x27;s EU/UK distributor)</li><li><b>B3</b> <a href="https://befr.rs-online.com/web/p/rock-sbc-boards/2564694">https://befr.rs-online.com/web/p/rock-sbc-boards/2564694</a> &mdash; hang / timeout</li><li><b>B4</b> <a href="https://www.bhphotovideo.com/c/product/1733125-REG/neewer_66600244_2_2600mah_f550.html">https://www.bhphotovideo.com/c/product/1733125-REG/neewer_66600244_2_2600mah_f550.html</a> &mdash; HTTP 403</li><li><b>B4</b> <a href="https://www.alibaba.com/product-detail/Beston-2600mAh-replacement-NP-F550-NP_60828272766.html">https://www.alibaba.com/product-detail/Beston-2600mAh-replacement-NP-F550-NP_60828272766.html</a> &mdash; page body blank to the fetcher</li><li><b>B4</b> <a href="https://eu.nkon.nl/rechargeable/li-ion/18650-size/samsung-icr18650-26j3.html">https://eu.nkon.nl/rechargeable/li-ion/18650-size/samsung-icr18650-26j3.html</a> &mdash; HTTP 403</li><li><b>B6</b> <a href="https://www.arducam.com/product/arducam-imx219-low-distortion-m12-mount-camera-module-drop-in-replacement-for-raspberry-pi-v2-camera/">https://www.arducam.com/product/arducam-imx219-low-distortion-m12-mount-camera-module-drop-in-re</a> &mdash; HTTP 403 on every arducam.com URL</li><li><b>B8</b> <a href="https://esp32s.com/product/radxa-camera-fpc-cable-for-radxa-camera-8m-219-and-rpi-camera-for-zero-3w-3e/">https://esp32s.com/product/radxa-camera-fpc-cable-for-radxa-camera-8m-219-and-rpi-camera-for-zer</a> &mdash; HTTP 403 (a search snippet claims $1.90 - NOT read, so not used)</li><li><b>B8</b> <a href="https://www.fabtolab.com/radxa-fpc-cable-zero-3-camera-8m-219-zero-3">https://www.fabtolab.com/radxa-fpc-cable-zero-3-camera-8m-219-zero-3</a> &mdash; Socket is closed</li><li><b>B8</b> <a href="https://docs.radxa.com/en/zero/zero3/accessories/camera">https://docs.radxa.com/en/zero/zero3/accessories/camera</a> &mdash; documentation, carries no price</li><li><b>B9</b> <a href="https://www.mouser.com/ProductDetail/STMicroelectronics/VL53L5CX-SATEL">https://www.mouser.com/ProductDetail/STMicroelectronics/VL53L5CX-SATEL</a> &mdash; timeout x3</li><li><b>B10</b> <a href="https://www.bocabearings.com/parts/10x15x3">https://www.bocabearings.com/parts/10x15x3</a> &mdash; HTTP 403</li><li><b>B10</b> <a href="https://vxb.com/search?q=16x22x4">https://vxb.com/search?q=16x22x4</a> &mdash; 0 bearing results</li><li><b>B10</b> <a href="https://bearingsdirect.com/search.php?search_query=16x22x4">https://bearingsdirect.com/search.php?search_query=16x22x4</a> &mdash; 0 results</li><li><b>B10</b> <a href="http://www.zotyindustrial.com/products/1622ZZ-16x22x4-thin-special-bearing-for-jumping-rope.html">http://www.zotyindustrial.com/products/1622ZZ-16x22x4-thin-special-bearing-for-jumping-rope.html</a> &mdash; HTTP 500 (tried 2026-09-02)</li><li><b>B11</b> <a href="https://www.123bearing.com/bearing-housing/deep-groove-bearing/single-row/6700">https://www.123bearing.com/bearing-housing/deep-groove-bearing/single-row/6700</a> &mdash; no price rendered</li><li><b>B12</b> <a href="https://www.amazon.com/CQRobot-Rectangle-Electronic-Application-Components/dp/B0CMQCQQV4">https://www.amazon.com/CQRobot-Rectangle-Electronic-Application-Components/dp/B0CMQCQQV4</a> &mdash; page body not served</li><li><b>B12</b> <a href="https://www.ebay.com/itm/277690727056">https://www.ebay.com/itm/277690727056</a> &mdash; timeout x6 across three eBay 3525 listings</li><li><b>B18a</b> <a href="https://www.accu.co.uk/socket-cap-screws/1077-SSCM2-6-A2">https://www.accu.co.uk/socket-cap-screws/1077-SSCM2-6-A2</a> &mdash; HTTP 403 (re-tried 2026-09-02)</li><li><b>B18a</b> <a href="https://www.boltdepot.com/Product-Details?product=15964">https://www.boltdepot.com/Product-Details?product=15964</a> &mdash; HTTP 403</li><li><b>B18a</b> <a href="https://www.mcmaster.com/91292A831/">https://www.mcmaster.com/91292A831/</a> &mdash; blank to the fetcher</li><li><b>B18a</b> <a href="https://us.misumi-ec.com/vona2/detail/221000348314/?HissuCode=SNSS-M2X6">https://us.misumi-ec.com/vona2/detail/221000348314/?HissuCode=SNSS-M2X6</a> &mdash; HTTP 403</li><li><b>B18a</b> <a href="https://www.albanycountyfasteners.com/Socket-Head-Cap-Screw-2MM-A2-Stainless-Steel-p/5020000.htm">https://www.albanycountyfasteners.com/Socket-Head-Cap-Screw-2MM-A2-Stainless-Steel-p/5020000.htm</a> &mdash; page served without a price</li><li><b>B18a</b> <a href="https://www.fastenal.com/product/details/MS2460006A20000">https://www.fastenal.com/product/details/MS2460006A20000</a> &mdash; HTTP 403 (tried 2026-09-02)</li><li><b>B18a</b> <a href="https://www.westfieldfasteners.co.uk/A2-ScrewBolt-SHCap-M2.html">https://www.westfieldfasteners.co.uk/A2-ScrewBolt-SHCap-M2.html</a> &mdash; page served with loading spinners where every price should be - prices are client-side only</li><li><b>B18b</b> <a href="https://www.accu.co.uk/hexagon-nuts/7884-HPN-M2-A2">https://www.accu.co.uk/hexagon-nuts/7884-HPN-M2-A2</a> &mdash; HTTP 403 (tried 2026-09-02)</li><li><b>B18b</b> <a href="https://www.rst-versand.de/Sechskantmutter-M2-A2-DIN934">https://www.rst-versand.de/Sechskantmutter-M2-A2-DIN934</a> &mdash; Socket is closed (tried 2026-09-02)</li><li><b>B18b</b> <a href="https://www.fastenal.com/product/details/MS2460006A20000">https://www.fastenal.com/product/details/MS2460006A20000</a> &mdash; HTTP 403 (tried 2026-09-02)</li><li><b>B18b</b> <a href="https://www.westfieldfasteners.co.uk/A2-ScrewBolt-SHCap-M2.html">https://www.westfieldfasteners.co.uk/A2-ScrewBolt-SHCap-M2.html</a> &mdash; prices render only in JavaScript; the served page carries loading spinners</li><li><b>B18c</b> <a href="https://www.amazon.com/Heat-Set-Threaded-Inserts-Insert-Tips/dp/B0D4L464XG">https://www.amazon.com/Heat-Set-Threaded-Inserts-Insert-Tips/dp/B0D4L464XG</a> &mdash; HTTP 500</li><li><b>B19a</b> <a href="https://us.store.bambulab.com/products/pla-basic-filament">https://us.store.bambulab.com/products/pla-basic-filament</a> &mdash; HTTP 402 Payment Required</li><li><b>B19a</b> <a href="https://www.matterhackers.com/store/l/bambu-lab-pla-basic-3d-printer-filament/sk/M2X0FQ9W">https://www.matterhackers.com/store/l/bambu-lab-pla-basic-3d-printer-filament/sk/M2X0FQ9W</a> &mdash; page served without a price</li><li><b>B19b</b> <a href="https://us.store.bambulab.com/products/tpu-85a-tpu-90a">https://us.store.bambulab.com/products/tpu-85a-tpu-90a</a> &mdash; HTTP 402 Payment Required</li><li><b>P1c</b> <a href="https://www.mouser.com/ProductDetail/Texas-Instruments/TLV320AIC3104IRHBR">https://www.mouser.com/ProductDetail/Texas-Instruments/TLV320AIC3104IRHBR</a> &mdash; timeout x3</li><li><b>P1c</b> <a href="https://www.ti.com/store/ti/en/p/product/?p=TLV320AIC3104IRHBR">https://www.ti.com/store/ti/en/p/product/?p=TLV320AIC3104IRHBR</a> &mdash; requires login / blocked</li><li><b>P2c</b> <a href="https://www.mouser.com/ProductDetail/STMicroelectronics/LSM6DSV16XTR">https://www.mouser.com/ProductDetail/STMicroelectronics/LSM6DSV16XTR</a> &mdash; product page access restricted; no price served</li><li><b>P1d</b> <a href="https://www.mouser.com/ProductDetail/Bosch-Sensortec/BMI088">https://www.mouser.com/ProductDetail/Bosch-Sensortec/BMI088</a> &mdash; &#x27;Access to this page has been denied&#x27;; no price served</li><li><b>R1</b> <a href="https://www.digikey.com/en/supplier-centers/etek-microelectronics">https://www.digikey.com/en/supplier-centers/etek-microelectronics</a> &mdash; supplier centre lists no ET7301 part number at all (read 2026-09-02)</li><li><b>R1</b> <a href="https://www.lcsc.com/">https://www.lcsc.com/</a> &mdash; site search returns no ET7301B result</li>
 </ul>
 <p class="note">Regenerate with <code>python3 tools/gen_sourcing.py</code>. The data is
 <code>spec/sourcing.json</code>; this page and <a href="RFQ.html">RFQ.html</a> are both outputs and are

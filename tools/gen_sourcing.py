@@ -150,11 +150,35 @@ REFERENCE = [l for l in DATA["lines"] if l.get("qty_per_robot") == 0
 UNKNOWN = [l for l in UNKNOWN if l not in REFERENCE]
 
 def n_read(line):
-    return sum(1 for o in line["offers"] if o.get("confidence") == "read")
+    """DISTINCT vendors with a price read on a page. Counting offers instead
+    would let one shop priced four ways look like four distributors."""
+    return len({o["vendor"] for o in line["offers"] if o.get("confidence") == "read"})
 
 VERDICTS = {"PASS": 0, "FAIL": 0, "CANNOT DETERMINE": 0}
 for l in DATA["lines"]:
     VERDICTS[l["verdict"]] = VERDICTS.get(l["verdict"], 0) + 1
+
+def selfcheck():
+    """The verdict in the data must agree with what the data actually holds.
+    A PASS with fewer than two distinct read distributors, or a PASS whose
+    line has no price at any of the three quantities, is a defect in the DATA
+    and this refuses to publish it. Broken on purpose once (a PASS forced onto
+    B13, which has no offers) and it went red naming the line."""
+    bad = []
+    for l in DATA["lines"]:
+        if l["verdict"] != "PASS":
+            continue
+        if n_read(l) < 2:
+            bad.append(f'{l["id"]}: PASS with {n_read(l)} distinct read distributor(s)')
+        priced = READ[l["id"]][1] or l.get("basket") or any(
+            o.get("confidence") == "read" and (o.get("tiers") or []) for o in l["offers"])
+        if not priced:
+            bad.append(f'{l["id"]}: PASS with no price read anywhere')
+    if bad:
+        raise SystemExit("REFUSING TO PUBLISH - verdicts disagree with the data:\n  "
+                         + "\n  ".join(bad))
+    return len([l for l in DATA["lines"] if l["verdict"] == "PASS"])
+
 
 CHIP = {"PASS": "pass", "FAIL": "rail", "CANNOT DETERMINE": "cd"}
 GEN = datetime.date.today().isoformat()
@@ -209,6 +233,31 @@ def alt_rows(line):
 <tbody>{''.join(r)}</tbody></table></div>"""
 
 
+def basket_block(line):
+    """A line whose sizes are priced individually and cannot share one unit
+    price. Rendered in its own currency, outside every subtotal."""
+    b = line.get("basket")
+    if not b:
+        return ""
+    rows, tot = [], 0.0
+    for r in b["rows"]:
+        tot += r["qty"] * r["unit"]
+        rows.append(f'<tr><td>{E(r["what"])}</td><td class="n">{r["qty"]:g}</td>'
+                    f'<td class="n">{b["currency"]} {r["unit"]:.4f}</td>'
+                    f'<td class="n">{b["currency"]} {r["qty"]*r["unit"]:.4f}</td></tr>')
+    for m in b.get("missing", []):
+        rows.append(f'<tr><td>{E(m["what"])}</td><td class="n">{m["qty"]:g}</td>'
+                    f'<td class="cdtxt">CANNOT DETERMINE</td>'
+                    f'<td class="cdtxt">{E(m["why"])}</td></tr>')
+    return f"""<p class="lab">Priced size by size &mdash; {E(b['currency'])}, outside every subtotal</p>
+<div class="tablewrap"><table class="data">
+<thead><tr><th>Size</th><th>Qty/robot</th><th>Unit</th><th>Per robot</th></tr></thead>
+<tbody>{''.join(rows)}
+<tr class="totalrow"><td>FLOOR for the priced sizes only</td><td class="n"></td><td class="n"></td>
+<td class="n">{E(b['currency'])} {tot:.4f}</td></tr></tbody></table></div>
+<p class="note">{E(b['note'])}</p>"""
+
+
 def line_block(line):
     q = line.get("qty_per_robot")
     qtxt = ("<span class='cdtxt'>CANNOT DETERMINE</span>" if q is None
@@ -225,12 +274,13 @@ def line_block(line):
   <span class="chip {CHIP.get(line['verdict'],'cd')}">{E(line['verdict'])}</span></h3>
 <p class="meta">Qty per robot {qtxt} &middot; basis: {E(line['qty_basis'])}{ce}</p>
 <p class="meta">MPN <code>{E(line['mpn'])}</code> &middot; <i>{E(line['mpn_status'])}</i>
-  &middot; {n_read(line)} distributor(s) with a price read</p>
+  &middot; {n_read(line)} distinct distributor(s) with a price read</p>
 {mn}{vw}
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
 <th>Lead time (as printed)</th><th>Stock, {E(DATA['fetch_dates'][0])}</th><th>Read?</th></tr></thead>
 <tbody>{offer_rows(line)}</tbody></table></div>
+{basket_block(line)}
 {alt_rows(line)}
 {'<p class="lab">Open on this line</p><ul class="tight">' + unk + '</ul>' if unk else ''}
 {'<p class="lab">Pages that refused a price</p><ul class="tight small">' + blk + '</ul>' if blk else ''}
@@ -346,6 +396,8 @@ SOURCING = f"""<!doctype html>
   <div class="stat"><b>{VERDICTS.get('FAIL',0)}</b><span>FAIL &mdash; unbuyable as specified</span></div>
   <div class="stat"><b>${SUBTOTAL[1]:,.2f}</b><span>readable USD / robot @1</span></div>
   <div class="stat"><b>{len(UNKNOWN)}</b><span>lines with no price at all</span></div>
+  <div class="stat"><b>{len({o["vendor"] for l in DATA["lines"] for o in l["offers"] if o.get("confidence")=="read"})}</b><span>distinct distributors read</span></div>
+  <div class="stat"><b>{sum(len(l.get("blocked", [])) for l in DATA["lines"])}</b><span>pages that refused a price</span></div>
 </div>
 
 <nav class="toc">
@@ -363,6 +415,12 @@ SOURCING = f"""<!doctype html>
   <div class="card"><h3>No currency is converted</h3><p>{E(DATA['rules']['currency'])}</p></div>
   <div class="card"><h3>An unknown is never zero</h3><p>{E(DATA['rules']['readable_vs_unknown'])}</p></div>
   <div class="card"><h3>The three verdicts</h3><p>{E(DATA['rules']['verdict'])}</p></div>
+  <div class="card"><h3>The page refuses to publish a verdict it cannot support</h3>
+  <p>Before either page is written, <code>selfcheck()</code> re-derives every PASS from the data: two or
+  more <i>distinct</i> distributors with a price read, and a price at every quantity. It caught four
+  wrong verdicts on the first run (B12, B19a, C1, C2 &mdash; three of them one shop counted twice) and
+  refused to write. Broken on purpose afterwards by forcing PASS onto B13, which has no offers at all:
+  it went red naming the line and wrote nothing. {VERDICTS.get('PASS',0)} PASS lines survive it now.</p></div>
   <div class="card"><h3>Nothing was sent</h3><p>No supplier was contacted, no order was placed and no
   money was spent producing this document. <a href="RFQ.html">RFQ.html</a> is written and ready; sending it
   is a human decision.</p></div>
@@ -574,6 +632,8 @@ The right-hand column is what the reply is expected to close.</p>
 
 
 def main():
+    ok = selfcheck()
+    print(f"selfcheck: {ok} PASS lines, each with >=2 distinct read distributors and a read price")
     for name, doc in (("SOURCING.html", SOURCING), ("RFQ.html", RFQ)):
         p = os.path.join(REPO, name)
         open(p, "w").write(doc)
