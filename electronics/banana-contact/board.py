@@ -100,9 +100,9 @@ stated basis ... the vendor publishes no running current — only standby
 17 mA and stall 1.47 A at 5 V", i.e. an ASSUMPTION, and Sony publishes no
 maximum continuous discharge current for the NP-F550. So check_current
 reports CANNOT DETERMINE. What IS stated is the capacity of the copper
-actually drawn: the two power tracks are 1.000 mm wide on 1 oz outer copper,
+actually drawn: the two power tracks are 1.500 mm wide on 1 oz outer copper,
 which IPC-2221 §6.2 (I = 0.048 * dT^0.44 * A^0.725, A in mil^2) puts at
-2.39 A for a 10 degC rise — computed in this file, printed in the notes.
+3.21 A for a 10 degC rise — computed in this file, printed in the notes.
 """
 import importlib.util
 import math
@@ -156,7 +156,7 @@ def ipc2221_amps(width_mm, oz=1.0, dT=10.0, external=True):
     return k * (dT ** 0.44) * (area_mil2 ** 0.725)
 
 
-TRACK_W = 1.000
+TRACK_W = 1.500
 TRACK_A = ipc2221_amps(TRACK_W)
 
 

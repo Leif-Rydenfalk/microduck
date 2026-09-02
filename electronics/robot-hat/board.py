@@ -581,6 +581,18 @@ def build(self_test=None, publish=True, verbose=True):
                          "in the overlays or robotd touches it)")
 
     b.notes.append(
+        "POWER PATH: VBAT, SERVO_V and V5_HAT are routed at 0.800 mm on 1 oz "
+        "outer copper, which IPC-2221 §6.2 puts at 2.03 A for a 10 degC rise "
+        "and 3.05 A at 20 degC. They used to be 0.400 mm = 1.29 A. The "
+        "DEMAND is CANNOT DETERMINE: the XL330's published figures are 17 mA "
+        "standby and 1.47 A stall at 5 V with no running current, so the "
+        "16-device bus total has no number behind it, and wiring/CABLES.md's "
+        "own 1 A-per-moving-servo worst case is stated there as an "
+        "assumption. 0.800 mm is the widest track this board's lattice can "
+        "thread between 2.54 mm header pins — measured on this board, run 2: "
+        "1.0 mm gave a 1.56 mm lattice that could not thread the bottom "
+        "connector row.")
+    b.notes.append(
         "POLLEN'S OWN HAT MESH WAS MEASURED (2026-09-02) and this board's "
         "outline follows it: 65.000 x 30.000 mm, corner radius 3.5000 mm "
         "fitted to 36 arc points about the mounting-hole centre (r min "
@@ -705,8 +717,27 @@ def build(self_test=None, publish=True, verbose=True):
     # Pass budgets: one pass makes at most ONE join per net, so a budget is
     # the worst island count in the group plus slack — effort 30 across the
     # board re-proved the same impossible joins for half an hour (run 7).
-    b.autoroute(nets=["VBAT", "SERVO_V", "V5_HAT"], width=0.4,
-                effort=8, via_cost=2.0, verbose=verbose)
+    # POWER WIDTH, raised 0.400 -> 0.800 mm (lane D, 2026-09-02). VBAT,
+    # SERVO_V and V5_HAT are the whole robot's supply path: VBAT is the pack,
+    # SERVO_V feeds all 16 bus devices through J3, and V5_HAT feeds the Radxa
+    # through header pins 2 and 4. IPC-2221 §6.2 (I = 0.048 * dT^0.44 *
+    # A^0.725, A in mil^2) on 1 oz outer copper:
+    #     0.400 mm -> 1.29 A at dT 10 degC     (what this board used to draw)
+    #     0.800 mm -> 2.03 A at dT 10, 3.05 A at dT 20
+    #     1.200 mm -> 2.73 A at dT 10
+    # 0.800 and not 1.200 because the lattice pitch is (width + clearance) *
+    # sqrt(2), and this board's own run 2 is on record: "1.0 mm power tracks
+    # -> a 1.56 mm lattice that cannot thread the bottom connector row".
+    # 0.800 gives 1.27 mm, which fits between 2.54 mm header pins; 1.200
+    # gives 1.84 mm, which does not.
+    # THE DEMAND IS CANNOT DETERMINE and stays that way: ROBOTIS publishes
+    # 17 mA standby and 1.47 A stall at 5 V for the XL330 and no running
+    # figure (part:xl330-m288-t current_mA), so "16 devices" has no number
+    # behind it. What is stated here is what the COPPER carries. A supply
+    # path that had to carry ten amps would need 2 oz copper or a plane, and
+    # this 2-layer stackup spends its back layer on the GND pour.
+    b.autoroute(nets=["VBAT", "SERVO_V", "V5_HAT"], width=0.8,
+                effort=10, via_cost=2.0, verbose=verbose)
     rails = ("HAT_3V3", "J5_3V3", "HAT_1V8")
     signals = [n for n in b.net_names()
                if n not in ("GND", "VBAT", "SERVO_V", "V5_HAT") + rails]

@@ -73,6 +73,12 @@
           "Servo connector JST B3B-EH-A",
           "'PCB Header | JST B3B-EH-A' (part:xl330-m288-t connector)",
           "the name 'X3P', which appears on no vendor page fetched"
+        ],
+        [
+          "D9",
+          "Power nets routed at 0.800 mm, not 0.400 \u2014 and 0.800 and not 1.200",
+          "VBAT, SERVO_V and V5_HAT are the whole robot's supply path. IPC-2221 \u00a76.2 on 1 oz outer copper: 0.400 mm = 1.29 A at dT 10, 0.800 mm = 2.03 A (3.05 A at dT 20), 1.200 mm = 2.73 A. The lattice pitch is (width + clearance) x sqrt(2), and this board's own run 2 is on record: 1.0 mm gave a 1.56 mm lattice that could not thread the bottom connector row. 0.800 gives 1.27 mm and fits between 2.54 mm header pins",
+          "1.200 mm \u2014 more copper, but unroutable on this board, measured. The DEMAND stays CANNOT DETERMINE: ROBOTIS publishes 17 mA standby and 1.47 A stall at 5 V and no running current, so the 16-device total has no number behind it"
         ]
       ]
     },
@@ -83,15 +89,15 @@
       "title": "imu_to_dxl v2",
       "what": "An LSM6DSV16X presented on the Dynamixel bus as a Protocol-2 slave, ID 200, serving a 12-byte block at register 124. Three bus ports are fitted so the daisy chain can branch here \u2014 which is option A of an open question, not a fact.",
       "outline_mm": [
-        34.0,
-        24.0
+        40.0,
+        22.0
       ],
       "corner_r_mm": 2.0,
       "layers": 2,
       "thickness_mm": 1.6,
       "finish": "HASL (lead-free) \u2014 the fab default",
       "mesh_evidence": null,
-      "mount": "2 x M2 clearance at (2.500, 12.000) and (31.500, 12.000) \u2014 OUR choice (E8); nothing measured constrains it",
+      "mount": "2 x M2 clearance at (3.000, 18.500) and (37.000, 18.500) \u2014 OUR choice (E8); nothing measured constrains it",
       "decisions": [
         [
           "E1",
@@ -146,6 +152,12 @@
           "Three bus connectors (J1 in, J2 and J3 out) \u2014 option A, not a settled fact",
           "wiring/CABLES.md rows 6, 7 and 12 cut three EH leads to this board, and wiring/cables.json assumes the fork is here",
           "option B: two connectors and a Y-splice beside the board. ce-parts/microduck-imu-to-dxl/component.json record.connector_count (corrected 2026-09-02) shows the two are indistinguishable without a photograph \u2014 a DYNAMIXEL bus is multidrop, and Open Duck Mini v2 forks its harness at a T, not at a device. Leaving J3 unstuffed converts this board to option B; the consequence of being wrong is one Y-splitter in the assembly BOM and nothing electrical"
+        ],
+        [
+          "E10",
+          "The bus power path is a PASS-THROUGH and is hand-laid 2.000 mm wide on both layers, not autorouted",
+          "a DYNAMIXEL bus daisy-chains power as well as data: SERVO_V arrives on J1 and leaves on J2 and J3 to both leg chains, so this board carries ten servos' supply. IPC-2221 \u00a76.2 puts the 0.400 mm the router first drew it at 1.29 A per layer, and 2.000 mm at 3.95 A",
+          "letting the autorouter own it \u2014 the defect this replaced, found by asking what the copper carries instead of what the DRC checked. The DEMAND is still CANNOT DETERMINE: ROBOTIS publishes only 17 mA standby and 1.47 A stall at 5 V"
         ]
       ]
     },

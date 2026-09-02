@@ -97,13 +97,34 @@ OUR RECONSTRUCTION DECISIONS (E1..E8) — each an unpublished fact
       with GND and 3V3. The firmware is CANNOT DETERMINE, so the board must
       at minimum be PROGRAMMABLE; a board that cannot be flashed is not a
       board.
-  E8  Outline 34.000 x 24.000 mm, r2.0 corners, two M2 holes at
-      (2.500, 12.000) and (31.500, 12.000). Pollen ships no mesh for this board (the only PCB meshes
+  E8  Outline 40.000 x 22.000 mm, r2.0 corners, two M2 holes at
+      (3.000, 18.500) and (37.000, 18.500). It grew from 34.000 x 24.000
+      when E10 put all three bus connectors on one edge. Pollen ships no mesh for this board (the only PCB meshes
       in reference/pollen-microduck-rl/assets are elec_rpi_robot_hat_pcb.stl
       and pcb__raspberry_pi_zero_2_w.stl), so NOTHING measured constrains
       this outline. It is OUR choice, sized to the parts, and it must be
       checked against the trunk cavity before it is cut. Stated as CANNOT
       DETERMINE in the DRC notes rather than presented as Pollen's.
+
+  E10 THE POWER PATH IS A PASS-THROUGH, AND IT IS HAND-LAID, NOT AUTOROUTED.
+      This is a measured defect found and fixed on 2026-09-02. A DYNAMIXEL
+      bus daisy-chains POWER as well as data: SERVO_V and GND arrive on J1
+      and leave on J2 and J3, so this board's copper carries the supply of
+      every device downstream of it — with the harness as
+      wiring/CABLES.md cuts it, that is BOTH LEGS, ten XL330 servos.
+      The first build let the autorouter draw that path at 0.400 mm.
+      IPC-2221 §6.2 (I = 0.048 * dT^0.44 * A^0.725, A in mil^2) puts a
+      0.400 mm 1 oz external trace at 1.29 A for a 10 degC rise, and
+      wiring/CABLES.md's own worst case is an assumed 1 A per moving servo.
+      The fix: all three connectors moved onto one edge and SERVO_V laid by
+      hand as a 2.000 mm comb, mirrored on B.Cu with stitching vias, before
+      the router runs. GND needs no track — it is the B.Cu pour, which is
+      the width of the board.
+      THE DEMAND IS STILL CANNOT DETERMINE. ROBOTIS publishes only 17 mA
+      standby and 1.47 A stall at 5 V for the XL330 (part:xl330-m288-t
+      current_mA), so 'ten servos' has no number behind it; what this file
+      states is what the COPPER carries, computed and printed, not what the
+      load draws.
 
 Decoupling values are the vendor's own where one is published (100 nF on the
 IMU's two supplies, DS13510 §7.1 Figure 28: 'Power supply decoupling
@@ -132,7 +153,7 @@ from cecad.pcbview import plot, publish_pcb                         # noqa: E402
 # ---------------------------------------------------------------------------
 # PARAMETERS — every driving number once, with the sentence it came from
 # ---------------------------------------------------------------------------
-W, H = 34.0, 24.0            # E8 — OUR outline, nothing measured fixes it
+W, H = 40.0, 22.0            # E8 — OUR outline, nothing measured fixes it
 CORNER = 2.0
 MOUNT = "M2"
 
@@ -218,6 +239,12 @@ EH_CITE = ("JST eEH.pdf 'PC board layout' (jst-mfg.com, fetched 2026-09-02): "
            "connector 'PCB Header | JST B3B-EH-A' and by wiring/CABLES.md "
            "rows 6, 7, 12")
 
+# E10: the pass-through power comb. 2.000 mm on 1 oz outer copper is
+# 3.95 A at a 10 degC rise by IPC-2221 §6.2 (I = 0.048 * dT^0.44 * A^0.725,
+# A in mil^2) — computed in ipc2221_amps() below and printed into the board
+# notes, never asserted.
+POWER_W = 2.000
+
 DECOUPLE_VENDOR = "100n"     # DS13510 §7.1 Fig. 28 'C1, C2 = 100 nF ceramic'
 DECOUPLE_OURS = "100n"       # OUR practice on the MCU and the buffer
 
@@ -225,6 +252,14 @@ DECOUPLE_OURS = "100n"       # OUR practice on the MCU and the buffer
 # ---------------------------------------------------------------------------
 # footprints not in packages.json
 # ---------------------------------------------------------------------------
+def ipc2221_amps(width_mm, oz=1.0, dT=10.0, external=True):
+    """IPC-2221 §6.2 current for a bare trace, in amps. Geometry only."""
+    thick_mil = 1.378 * oz                       # 1 oz = 1.378 mil
+    area_mil2 = (width_mm / 0.0254) * thick_mil
+    k = 0.048 if external else 0.024
+    return k * (dT ** 0.44) * (area_mil2 ** 0.725)
+
+
 def fp_lga14():
     """LSM6DSV16X LGA-14L, top view, origin at the package centre."""
     pads = []
@@ -285,59 +320,66 @@ def build(self_test=None, publish=True, verbose=True):
                           "and no drawing for this board")
 
     # -- parts -------------------------------------------------------------
-    b.add("U1", fp_lga14(), value="LSM6DSV16X", at=(24.0, 13.5),
+    b.add("U1", fp_lga14(), value="LSM6DSV16X", at=(25.0, 12.5),
           note="the one published part on this board — imu.rs:1-6")
-    b.add("U2", footprint("tssop-20"), value="STM32G031F6P6", at=(10.0, 13.0),
+    b.add("U2", footprint("tssop-20"), value="STM32G031F6P6", at=(10.5, 12.5),
           note="decision E1")
-    b.add("U3", fp_sot753(), value="74LVC1G125", at=(20.0, 7.6),
+    b.add("U3", fp_sot753(), value="74LVC1G125", at=(31.5, 12.5),
           note="decision E2 — OE driven by the MCU, unlike the HAT's D3")
-    b.add("U4", footprint("sot-23-5"), value="LP2985A-33DBVR", at=(5.0, 19.5),
-          note="decision E3")
-    for ref, at in (("J1", (8.0, 2.6)), ("J2", (25.0, 2.6))):
-        b.add(ref, fp_eh3(), value="DXL bus (B3B-EH-A)", at=at)
-    b.add("J3", fp_eh3(), value="DXL bus (B3B-EH-A)", at=(26.0, 21.4), rot=180,
-          note="the THIRD bus port. Option A of "
-               "ce-parts/microduck-imu-to-dxl/component.json "
-               "record.connector_count; leave it unstuffed and the board is "
-               "option B (two ports, the legs forked at a Y-splice). The "
-               "count is CANNOT DETERMINE and this connector is where that "
-               "shows on the board.")
-    b.add("C1", "0603", value="1u CIN", at=(10.0, 19.5),
+    b.add("U4", footprint("sot-23-5"), value="LP2985A-33DBVR", at=(3.5, 11.0),
+          rot=90, note="decision E3")
+    # E10: all three bus ports on one edge, so the pass-through power path is
+    # one straight comb instead of a diagonal the router has to invent.
+    for ref, at in (("J1", (6.5, 2.6)), ("J2", (18.5, 2.6)),
+                    ("J3", (30.5, 2.6))):
+        b.add(ref, fp_eh3(), value="DXL bus (B3B-EH-A)", at=at,
+              note=("the THIRD bus port. Option A of "
+                    "ce-parts/microduck-imu-to-dxl/component.json "
+                    "record.connector_count; leave it unstuffed and the "
+                    "board is option B (two ports, the legs forked at a "
+                    "Y-splice). The count is CANNOT DETERMINE and this "
+                    "connector is where that shows on the board.")
+                   if ref == "J3" else
+                   ("bus in from the head (cable dxl-id30-imu200, 120 mm)"
+                    if ref == "J1" else
+                    "branch to the left hip yaw servo, ID 20 "
+                    "(cable dxl-imu200-id20, 40 mm)"))
+    b.add("C1", "0603", value="1u CIN", at=(3.5, 15.0),
           note="SLVS522S: 'Use a capacitor with a value of 1 uF or larger "
                "from this pin to ground'")
-    b.add("C2", "0805", value="4u7 COUT", at=(13.5, 19.5),
+    b.add("C2", "0805", value="4u7 COUT", at=(8.0, 19.0),
           note="SLVS522S: COUT >= 2.2 uF nominal; 4u7 0805 gives >1 uF "
                "effective after the sheet's own 50% derating")
-    b.add("C3", "0603", value="10n BYPASS", at=(17.5, 19.5),
+    b.add("C3", "0603", value="10n BYPASS", at=(12.0, 19.0),
           note="SLVS522S p.1: 'Low noise: 30 uVRMS with 10 nF bypass "
                "capacitor'")
-    b.add("C4", "0603", value=DECOUPLE_VENDOR, at=(20.0, 16.5),
+    b.add("C4", "0603", value=DECOUPLE_VENDOR, at=(22.0, 16.5),
           note="IMU Vdd — DS13510 §7.1 Fig. 28 'C1, C2 = 100 nF ceramic ... "
                "as near as possible to the supply pin'")
-    b.add("C5", "0603", value=DECOUPLE_VENDOR, at=(27.5, 16.5),
+    b.add("C5", "0603", value=DECOUPLE_VENDOR, at=(28.0, 16.5),
           note="IMU Vdd_IO — same figure")
-    b.add("C6", "0603", value=DECOUPLE_OURS, at=(17.0, 13.0),
+    b.add("C6", "0603", value=DECOUPLE_OURS, at=(17.0, 12.5),
           note="MCU VDD/VDDA — OUR practice; DS12992 states no value")
-    b.add("C7", "0603", value=DECOUPLE_OURS, at=(24.0, 7.6), rot=90,
+    b.add("C7", "0603", value=DECOUPLE_OURS, at=(35.0, 12.5), rot=90,
           note="U3 VCC — OUR practice, matching ROBOTIS' '0.1uF' on the "
                "buffer VCC in part:xl330-m288-t communication_circuit")
-    b.add("C8", "0603", value="100n NRST", at=(17.0, 10.5),
+    b.add("C8", "0603", value="100n NRST", at=(17.0, 9.5),
           note="NRST filter — OUR practice; AN2586 recommends it, not fetched")
-    b.add("R1", "0603", value="0R DXL_DATA->U3.Y", at=(16.0, 6.2),
+    b.add("R1", "0603", value="0R DXL_DATA->U3.Y", at=(31.5, 8.5),
           note="link so the driver output can be lifted from the bus for a "
                "bench measurement without cutting copper")
-    b.add("R2", "0603", value="0R DXL_DATA->RX", at=(27.0, 7.6), rot=90,
+    b.add("R2", "0603", value="0R DXL_DATA->RX", at=(35.0, 8.5),
           note="decision E5 — the RX tap; the site also takes the 10k "
                "pull-up ROBOTIS puts on the CONTROLLER, if one is ever wanted")
     for i, (ref, val) in enumerate((("TP1", "SWDIO"), ("TP2", "SWCLK"),
                                     ("TP3", "NRST"), ("TP4", "3V3"),
                                     ("TP5", "GND"))):
-        b.add(ref, test_point(1.5), value=val, at=(3.0 + 2.6 * i, 22.5),
+        b.add(ref, test_point(1.5), value=val, at=(16.5 + 2.6 * i, 19.5),
               note="decision E7 — the board must be flashable")
-    b.mount_holes(MOUNT, corners=[(2.5, 12.0), (31.5, 12.0)])
+    b.mount_holes(MOUNT, corners=[(3.0, 18.5), (37.0, 18.5)])
 
     if self_test == "off-board":
-        b.place("J2", at=(33.5, 2.6))       # hangs over the right edge
+        b.place("J2", at=(39.5, 2.6))       # hangs over the right edge
 
     # -- connectivity FROM the netlist ---------------------------------------
     # The robot netlist knows this board as the owner `imu200` with three
@@ -433,9 +475,9 @@ def build(self_test=None, publish=True, verbose=True):
     b.attach("V3V3", "TP4.1")
     b.attach("GND", "TP5.1")
 
-    b.text("microduck imu_to_dxl v2", (10.0, 8.6), size=1.1)
-    b.text("OUR RECONSTRUCTION - NOT POLLEN'S BOARD", (10.0, 17.4), size=0.9)
-    b.text("DXL ID 200", (24.0, 10.6), size=0.9)
+    b.text("microduck imu_to_dxl v2", (7.0, 8.0), size=1.1)
+    b.text("OUR RECONSTRUCTION - NOT POLLEN'S BOARD", (18.0, 8.0), size=0.9)
+    b.text("DXL ID 200", (22.5, 20.6), size=0.9)
 
     # -- land patterns read against documents --------------------------------
     b.confirm("U1", LGA_CITE)
@@ -455,13 +497,28 @@ def build(self_test=None, publish=True, verbose=True):
 
     # -- what nobody has published, said out loud ----------------------------
     b.notes.append(
-        "OUTLINE IS NOT MEASURED. 34.000 x 24.000 mm r2.0 with two M2 holes "
-        "at (2.500, 12.000) and (31.500, 12.000) is decision E8. Pollen ships "
+        "OUTLINE IS NOT MEASURED. 40.000 x 22.000 mm r2.0 with two M2 holes "
+        "at (3.000, 18.500) and (37.000, 18.500) is decision E8. Pollen ships "
         "no mesh, no drawing and no photograph of this board; the MJCF places "
         "only an `imu` SITE at trunk_base body (-21, 0.1, -14.7) -> world "
         "(-21, 0, 105.3) mm (docs/ELECTRONICS-AND-SOFTWARE.md §4.1). A "
         "clearance check of this rectangle against trunk_base is a mechanical "
         "task, not a PCB one, and it has not been run.")
+    b.notes.append(
+        f"E10 — THE POWER PATH IS A PASS-THROUGH. SERVO_V arrives on J1 and "
+        f"leaves on J2 and J3, so this board's copper carries every device "
+        f"downstream of it: with wiring/CABLES.md's harness that is both leg "
+        f"chains, ten XL330 servos. It is hand-laid at {POWER_W:.3f} mm on "
+        f"F.Cu AND mirrored on B.Cu with four stitching vias, claimed before "
+        f"the router runs. IPC-2221 §6.2 gives "
+        f"{ipc2221_amps(POWER_W):.2f} A per layer at a 10 degC rise "
+        f"({ipc2221_amps(POWER_W, dT=20.0):.2f} A at 20 degC); whether the "
+        f"pair carries twice that is NOT something IPC-2221 answers — the "
+        f"two runs are 1.6 mm apart in one thermal mass — so the honest "
+        f"figure is the per-layer one. The first build of this board let the "
+        f"autorouter draw this net at 0.400 mm, which the same equation puts "
+        f"at {ipc2221_amps(0.4):.2f} A. GND returns through the B.Cu pour, "
+        f"which is the width of the board.")
     b.notes.append(
         "CURRENT: no net on this board has a documented total. The published "
         "figures are the chip's alone — 'IddHP | Gyroscope and accelerometer "
@@ -478,10 +535,32 @@ def build(self_test=None, publish=True, verbose=True):
         return b, rep
 
     # -- copper --------------------------------------------------------------
-    # Route first, pour last (the HAT's measured lesson: a zone declared
-    # before autoroute() takes its layer out of routing_layers()).
+    # E10: SERVO_V FIRST, BY HAND, WIDE. This net is a pass-through — it
+    # arrives on J1 and leaves on J2 and J3 to both leg chains — so its
+    # copper carries every downstream servo, and the first build of this
+    # board let the router draw it at 0.400 mm. The comb below claims the
+    # lane between the connector row and the parts before anything else runs.
+    #
+    #   J1.2 (6.500, 2.600) -> up to y 6.500 -> across to x 30.500 -> down to
+    #   J3.2, with a branch down to J2.2. The verticals pass 2.500 mm from
+    #   each connector's pins 1 and 3, which at 2.000 mm wide leaves
+    #   2.500 - 1.000 - 0.750 = 0.750 mm to the nearest pad — 7.5x the rule.
+    def _p(ref, pad):
+        c = b.component(ref)
+        return c.pad_xy(c.fp.pad(pad))
+
+    spine = [_p("J1", "2"), (6.5, 6.5), (30.5, 6.5), _p("J3", "2")]
+    branch = [(18.5, 6.5), _p("J2", "2")]
+    for layer in ("F.Cu", "B.Cu"):
+        b.track("SERVO_V", spine, width=POWER_W, layer=layer)
+        b.track("SERVO_V", branch, width=POWER_W, layer=layer)
+    # Stitching vias tie the two runs together along the horizontal lane.
+    for x in (9.0, 13.0, 22.5, 26.5):
+        b.via("SERVO_V", (x, 6.5), pad=1.0)
     # Surface GND pads bond to the back plane through a stub + via; the
-    # through-hole header GND pins reach B.Cu through their own barrels.
+    # through-hole header GND pins reach B.Cu through their own barrels, and
+    # GND itself is never routed — it is the pour, which is the width of the
+    # board.
     for ref, pad, dx, dy in [
             ("U4", "2", -1.2, 0.0),
             ("U3", "3", 0.0, -1.2),
@@ -498,13 +577,10 @@ def build(self_test=None, publish=True, verbose=True):
     # 13 pads needs at least 12 passes. V3V3 has 13 (measured), so effort 8
     # left it in 9 islands on the first run — that is the number this budget
     # is set from, not a guess.
-    b.autoroute(nets=["SERVO_V"], width=0.4, effort=10, via_cost=2.0,
-                verbose=verbose)
     b.autoroute(nets=["V3V3"], width=0.3, effort=20, via_cost=3.0,
                 verbose=verbose)
     signals = [n for n in b.net_names() if n not in ("GND", "SERVO_V", "V3V3")]
     b.autoroute(nets=signals, effort=14, verbose=verbose)
-    b.autoroute(nets=["GND"], effort=16, via_cost=3.0, verbose=verbose)
     b.pour("GND", "B.Cu")
 
     rep = check(b, verbose=verbose)
@@ -563,6 +639,8 @@ def main():
         sys.exit(0 if ok else 1)
     b, rep = build(publish="--no-publish" not in sys.argv)
     print(b.describe())
+    print(f"IPC-2221: SERVO_V {POWER_W:.3f} mm on 1 oz external = "
+          f"{ipc2221_amps(POWER_W):.2f} A at dT=10 degC, per layer")
     print("verdict:", rep.verdict)
     sys.exit({"PASS": 0, "FAIL": 2}.get(rep.verdict, 3))
 
