@@ -92,7 +92,7 @@ PHOTOS = [
     dict(id="cream-profile-left",
          path="images/store/store_microduck-cream-standing-profile-left.jpg",
          title="Cream, standing, left profile (store)", colourway="cream",
-         cam_az=270.0, az_free=False, el0=-8.0,
+         cam_az=270.0, az_free=False, el0=-8.0, D_mm=1100.0, D_source="camera distance to the head: not measurable from this frame to better than a factor 2 (the near ankle servo, 44.1 mm nearer than the neck servos, reads 136.2-145.5 px against the neck's 131.4 px depending on the scan tilt, i.e. D 700-1650 mm); 1100 mm is the centre of that range and the sensitivity runs at 700 and 1600 mm bracket it (out/head/head_fit_*_D700.json / _D1600.json)",
          servo_scans=[dict(rows=(760, 920), seed_x=1222, what="upper neck servo (head_pitch), horn/label face", geom="neck_upper"),
                       dict(rows=(925, 1070), seed_x=1218, what="lower neck servo (neck_pitch), horn/label face", geom="neck_lower")],
          eye_box=(735, 335, 1000, 585), eye_hue=(20, 55), eye_hue_note="orange-yellow ring on the cream unit",
@@ -102,7 +102,7 @@ PHOTOS = [
     dict(id="sky-three-quarter-front-left",
          path="images/store/store_microduck-sky-standing-three-quarter-left-02.jpg",
          title="Sky, standing, three-quarter front-left (store)", colourway="sky",
-         cam_az=225.0, az_free=True, el0=-10.0,
+         cam_az=225.0, az_free=True, el0=-10.0, D_mm=1100.0, D_source="camera distance to the head: not measurable from this frame either; same store shoot, same value assumed to better than a factor 2 (the near ankle servo, 44.1 mm nearer than the neck servos, reads 136.2-145.5 px against the neck's 131.4 px depending on the scan tilt, i.e. D 700-1650 mm); 1100 mm is the centre of that range and the sensitivity runs at 700 and 1600 mm bracket it (out/head/head_fit_*_D700.json / _D1600.json)",
          servo_scans=[dict(rows=(880, 975), seed_x=1200, what="upper neck servo (head_pitch), label face + side face", geom="neck_upper"),
                       dict(rows=(1015, 1115), seed_x=1160, what="lower neck servo (neck_pitch), label face + side face", geom="neck_lower")],
          eye_box=(800, 320, 1030, 545), eye_hue=(20, 55), eye_hue_note="orange-yellow ring on the sky unit",
@@ -112,7 +112,7 @@ PHOTOS = [
     dict(id="graphite-profile-right",
          path="images/store/store_microduck-graphite-standing-profile-right-02.jpg",
          title="Graphite, standing, right profile (store)", colourway="graphite",
-         cam_az=90.0, az_free=False, el0=-8.0,
+         cam_az=90.0, az_free=False, el0=-8.0, D_mm=1100.0, D_source="camera distance to the head: not measurable from this frame either; same store shoot, same value assumed to better than a factor 2 (the near ankle servo, 44.1 mm nearer than the neck servos, reads 136.2-145.5 px against the neck's 131.4 px depending on the scan tilt, i.e. D 700-1650 mm); 1100 mm is the centre of that range and the sensitivity runs at 700 and 1600 mm bracket it (out/head/head_fit_*_D700.json / _D1600.json)",
          # the neck servos' faces are covered by the horn brackets in this shot; the near ankle servo's label face is clear
          servo_scans=[dict(rows=(1865, 1945), seed_x=950, what="near (right) ankle servo, label face; tilted with the shin",
                            geom="ankle_right", tilt_deg=35.0)],
@@ -379,7 +379,7 @@ def iou(a, b):
     return inter / uni if uni else 0.0
 
 
-def fit_photo(ph, hr, rgb, eye, quick=False, w_eye=3.0):
+def fit_photo(ph, hr, rgb, eye, quick=False, w_eye=10.0):
     pm_full = head_region_mask(rgb, ph)
     ys, xs = np.nonzero(pm_full)
     pad = 40
@@ -394,10 +394,12 @@ def fit_photo(ph, hr, rgb, eye, quick=False, w_eye=3.0):
     if eye_ok:
         ec = np.array(eye["centre"]) - np.array([bx0, by0]); e_maj, e_min = eye["major_px"], eye["minor_px"]
 
+    D_mm = ph["D_mm"]
+
     def render(p):
-        el, az, logD, pitch, yaw, roll, jaw = p
+        el, az, pitch, yaw, roll, jaw = p
         hr.pose(pitch, yaw, roll, jaw if ph["jaw_open"] else 0.0)
-        hr.set_camera(az, el, math.exp(logD))
+        hr.set_camera(az, el, D_mm)
         head, eyem, ids, isg = hr.masks()
         return head, eyem
 
@@ -410,8 +412,9 @@ def fit_photo(ph, hr, rgb, eye, quick=False, w_eye=3.0):
         return (((c - ec) ** 2).sum() + (kf * e["major_px"] - e_maj) ** 2 + (kf * e["minor_px"] - e_min) ** 2) / L_p ** 2
 
     def eval_params(p, return_all=False):
-        el, az, logD, pitch, yaw, roll, jaw, k, tx, ty = p
-        mr, eyem = render((el, az, logD, pitch, yaw, roll, jaw))
+        p = np.clip(p, lo_b, hi_b)          # Nelder-Mead has no bounds: clip, so az stays fixed on a profile shot
+        el, az, pitch, yaw, roll, jaw, k, tx, ty = p
+        mr, eyem = render((el, az, pitch, yaw, roll, jaw))
         tm = transform_mask(mr, k, tx, ty, (WS, HS))
         v = iou(small, tm)
         et = eye_term(eyem, k, tx, ty) if eye_ok else 0.0
@@ -419,18 +422,19 @@ def fit_photo(ph, hr, rgb, eye, quick=False, w_eye=3.0):
         return (1.0 - v) + w_eye * et
 
     yaw_sign = 1.0 if ph["cam_az"] >= 180 else -1.0
-    mr0, _ = render((ph["el0"], ph["cam_az"], math.log(800.0), 20.0, 40.0 * yaw_sign, 0.0, 20.0))
+    lo_b = hi_b = None
+    mr0, _ = render((ph["el0"], ph["cam_az"], 40.0, 40.0 * yaw_sign, 0.0, 20.0))
     ry, rx = np.nonzero(mr0)
     k0 = math.sqrt(area_p / max(1, mr0.sum()))
     tx0 = cx_p - k0 * rx.mean(); ty0 = cy_p - k0 * ry.mean()
     bounds = [(ph["el0"] - 12, ph["el0"] + 12),
               (ph["cam_az"] - 25, ph["cam_az"] + 25) if ph["az_free"] else (ph["cam_az"] - 0.01, ph["cam_az"] + 0.01),
-              (math.log(350.0), math.log(4000.0)),
-              (-20, 60), (0, 90) if yaw_sign > 0 else (-90, 0), (-25, 25),
+              (0, 80), (0, 90) if yaw_sign > 0 else (-90, 0), (-25, 25),
               (0, 40) if ph["jaw_open"] else (0, 0.01),
               (k0 * 0.7, k0 * 1.4), (tx0 - 120, tx0 + 120), (ty0 - 120, ty0 + 120)]
+    lo_b = np.array([b[0] for b in bounds]); hi_b = np.array([b[1] for b in bounds])
     t0 = time.time()
-    res = optimize.differential_evolution(eval_params, bounds, maxiter=12 if quick else 40, popsize=8 if quick else 14,
+    res = optimize.differential_evolution(eval_params, bounds, maxiter=12 if quick else 30, popsize=8 if quick else 12,
                                           tol=1e-5, seed=1, polish=False, updating="immediate")
     res2 = optimize.minimize(eval_params, res.x, method="Nelder-Mead",
                              options=dict(xatol=0.01, fatol=1e-6, maxfev=500 if quick else 1500))
@@ -439,18 +443,18 @@ def fit_photo(ph, hr, rgb, eye, quick=False, w_eye=3.0):
     ks = []
     rng = np.random.default_rng(0)
     for i in range(2 if quick else 5):
-        p1 = p.copy(); p1[7] *= 1 + rng.normal(0, 0.03); p1[3] += rng.normal(0, 3); p1[4] += rng.normal(0, 3); p1[2] += rng.normal(0, 0.2)
+        p1 = p.copy(); p1[6] *= 1 + rng.normal(0, 0.03); p1[2] += rng.normal(0, 3); p1[3] += rng.normal(0, 3)
         r3 = optimize.minimize(eval_params, p1, method="Nelder-Mead", options=dict(xatol=0.01, fatol=1e-6, maxfev=250 if quick else 600))
         ks.append((float(r3.fun), float(r3.x[7]), r3.x))
-    best = min([(float(res2.fun if res2.fun < res.fun else res.fun), float(p[7]), p)] + ks, key=lambda t: t[0])
-    p = best[2]
+    best = min([(float(res2.fun if res2.fun < res.fun else res.fun), float(p[6]), p)] + ks, key=lambda t: t[0])
+    p = np.clip(best[2], lo_b, hi_b)
     k_spread = float(np.std([t[1] for t in ks] + [best[1]]))
     best_iou, et, mr, eyem, tm = eval_params(p, True)
-    el, az, logD, pitch, yaw, roll, jaw, k, tx, ty = [float(x) for x in p]
+    el, az, pitch, yaw, roll, jaw, k, tx, ty = [float(x) for x in p]
     pys, pxs = np.nonzero(crop); rys, rxs = np.nonzero(mr)
     fit = dict(objective=float(best[0]), iou=float(best_iou), eye_term=float(et), seconds=round(time.time() - t0, 1),
                n_eval=int(res.nfev + res2.nfev),
-               cam_el_deg=el, cam_az_deg=az, cam_distance_mm=math.exp(logD),
+               cam_el_deg=el, cam_az_deg=az, cam_distance_mm=D_mm, cam_distance_source=ph.get("D_source", ""),
                head_pitch_total_deg=pitch, head_yaw_deg=yaw, head_roll_deg=roll, jaw_open_deg=jaw if ph["jaw_open"] else 0.0,
                k_photo_px_per_render_px=k * ds, k_fit_spread=k_spread * ds, tx=tx * ds + bx0, ty=ty * ds + by0,
                crop_box=[int(bx0), int(by0), int(bx1), int(by1)],
@@ -546,9 +550,13 @@ def overlay_pictures(ph, rgb, fit, servo, eye, hr, mm_per_px, rservo):
 # ----------------------------------------------------------------------------
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument("--quick", action="store_true"); ap.add_argument("--only")
+    ap.add_argument("--D", type=float, help="override the camera distance (mm) for every photo — sensitivity runs")
+    ap.add_argument("--tag", default="", help="suffix for the output json (sensitivity runs)")
     args = ap.parse_args()
+    if args.D:
+        for ph in PHOTOS: ph["D_mm"] = args.D; ph["D_source"] = "override --D %.0f mm (sensitivity run)" % args.D
     model, data = load_model()
-    hr = HeadRenderer(model, data, size=1000)
+    hr = HeadRenderer(model, data, size=800)
     results = []
     for ph in PHOTOS:
         if args.only and ph["id"] != args.only: continue
@@ -627,7 +635,7 @@ def main():
                          noenoeil_mm=HEAD_MESH_MM["noenoeil"], jaw_mm=HEAD_MESH_MM["jaw"], source="out/verify/mech_dims.json",
                          eye_ring_source=EYE_SRC),
                servo_source=XL330_SRC, photos=results)
-    path = os.path.join(OUT, "head_fit.json" if not args.only else "head_fit_%s.json" % args.only)
+    path = os.path.join(OUT, ("head_fit%s.json" % args.tag) if not args.only else "head_fit_%s%s.json" % (args.only, args.tag))
     json.dump(out, open(path, "w"), indent=1, default=float)
     print("wrote", path)
 
