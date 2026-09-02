@@ -18,7 +18,9 @@ open source the mechanics. … It should match the images exactly."*
 ```
 README.md            this page
 ELECTRONICS-DATASHEET.html  the full electronics datasheet (every IC, the bus, registers, power, pins) with wiring.svg as the graphic
-BUILD-BOOK.html      THE one-page build book over the real repo files — `tools/serve.sh` hosts it at localhost:8842
+RELEASE.html         THE release dossier — readiness, BOM, files, full step-by-step assembly + wiring (start here)
+BUILD-BOOK.html      the build-book overview
+ELECTRONICS-DATASHEET.html  the electronics datasheet — `tools/serve.sh` hosts it at localhost:8842
 SPEC.md              THE specification we design against — every number sourced
 docs/                PARTS.md (every part, one sourced row each) · ELECTRONICS-AND-SOFTWARE.md
                      (boards, bus, IMUs, pins, daemons, wiring diagram) · BOM.md (bought /

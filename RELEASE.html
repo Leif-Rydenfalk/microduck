@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Microduck Release Dossier</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opt_sz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root{
+    --paper:#ffffff; --ink:#1a1a1a; --ink-2:#565656; --rule:#1a1a1a; --hair:#d7d3ca;
+    --accent:#243b53; --ready:#1c6b3c; --partial:#8a5a00; --no:#9a2b1e; --figbg:#fbfaf7;
+    --serif:"Source Serif 4",Georgia,"Times New Roman",serif;
+    --sans:"Source Sans 3",-apple-system,"Segoe UI",sans-serif;
+    --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{background:var(--paper);color:var(--ink);margin:0;font-family:var(--serif);
+       font-size:16px;line-height:1.55;font-feature-settings:"onum" 1,"pnum" 1}
+  .sheet{max-width:920px;margin:0 auto;padding:0 40px 120px}
+  a{color:var(--accent);text-decoration:none;border-bottom:1px solid rgba(36,59,83,.28)}
+  a:hover{border-bottom-color:var(--accent)}
+  p{margin:0 0 12px;max-width:38em}
+  .lead{max-width:40em}
+  h1,h2,h3,.masthead-title{font-family:var(--serif);font-weight:700;line-height:1.15;text-wrap:balance}
+  /* masthead — datasheet style */
+  header.masthead{display:grid;grid-template-columns:1fr auto;gap:24px;align-items:end;
+      padding:46px 0 14px;border-bottom:2.5px solid var(--rule)}
+  .masthead-kicker{font-family:var(--sans);font-size:11px;letter-spacing:.14em;
+      text-transform:uppercase;color:var(--ink-2);margin-bottom:8px}
+  .masthead-title{font-size:40px;letter-spacing:-.01em;margin:0}
+  .masthead-sub{font-size:15.5px;color:var(--ink-2);margin-top:8px;max-width:34em}
+  table.docctl{border-collapse:collapse;font-family:var(--sans);font-size:12px}
+  table.docctl td{border:1px solid var(--hair);padding:4px 10px}
+  table.docctl td.k{color:var(--ink-2);text-transform:uppercase;letter-spacing:.06em;font-size:10.5px}
+  table.docctl td.v{font-family:var(--mono);text-align:right}
+  /* abstract */
+  .abstract{margin:26px 0 6px;padding:16px 20px;background:var(--figbg);border:1px solid var(--hair)}
+  .abstract h2{font-size:12px;font-family:var(--sans);letter-spacing:.12em;text-transform:uppercase;
+      color:var(--ink-2);margin:0 0 6px;font-weight:600}
+  .abstract p{max-width:none;margin:0}
+  /* contents */
+  nav.toc{font-family:var(--sans);font-size:13.5px;margin:22px 0 6px;
+      column-count:2;column-gap:40px}
+  nav.toc a{display:block;padding:3px 0;border:none;color:var(--ink)}
+  nav.toc a:hover{color:var(--accent)}
+  nav.toc .tn{font-family:var(--mono);color:var(--accent);padding-right:9px}
+  /* sections */
+  section{margin-top:38px}
+  h2.sec{font-size:22px;padding-bottom:6px;border-bottom:1px solid var(--hair);margin:0 0 14px}
+  h2.sec .tn{font-family:var(--mono);font-weight:600;color:var(--accent);font-size:18px;padding-right:12px}
+  h3.sub{font-size:16.5px;margin:22px 0 6px}
+  /* booktabs tables */
+  .tw{overflow-x:auto;margin:14px 0 6px}
+  table.data{border-collapse:collapse;width:100%;font-size:13.5px;font-variant-numeric:tabular-nums}
+  table.data caption{caption-side:top;text-align:left;font-style:italic;color:var(--ink-2);
+      font-size:13px;padding-bottom:7px}
+  table.data thead th{font-family:var(--sans);font-weight:600;font-size:11px;letter-spacing:.05em;
+      text-transform:uppercase;color:var(--ink-2);text-align:left;padding:7px 12px 6px;
+      border-bottom:1px solid var(--rule)}
+  table.data tbody td{padding:6px 12px;border-bottom:1px solid var(--hair);vertical-align:top}
+  table.data tbody tr:last-child td{border-bottom:1.5px solid var(--rule)}
+  table.data td.n,table.data th.n{text-align:right;font-family:var(--mono);white-space:nowrap}
+  table.data thead{border-top:1.5px solid var(--rule)}
+  .st{font-family:var(--sans);font-weight:600;font-size:11.5px;letter-spacing:.04em;text-transform:uppercase}
+  .st.ready{color:var(--ready)} .st.partial{color:var(--partial)} .st.no{color:var(--no)}
+  code,.mono{font-family:var(--mono);font-size:.86em}
+  /* figures */
+  figure{margin:18px 0;border:1px solid var(--hair);background:var(--figbg);padding:10px}
+  figure img{display:block;width:100%;height:auto;border:1px solid var(--hair);background:#fff}
+  figure svg{display:block;width:100%;height:auto}
+  figcaption{font-family:var(--sans);font-size:12.5px;color:var(--ink-2);padding:8px 2px 2px;font-style:normal}
+  figcaption b{font-style:italic;font-family:var(--serif);color:var(--ink)}
+  .figrow{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  /* assembly steps */
+  .step{margin:22px 0;padding-left:0}
+  .step > h3{display:flex;align-items:baseline;gap:12px;font-size:17px;margin:0 0 4px;
+      padding-bottom:5px;border-bottom:1px solid var(--hair)}
+  .step > h3 .num{font-family:var(--mono);font-weight:600;color:var(--accent);font-size:14px}
+  .step .partsline{font-family:var(--sans);font-size:12.5px;color:var(--ink-2);margin:4px 0 8px}
+  ol.instr{margin:6px 0 6px 0;padding-left:22px}
+  ol.instr li{margin:4px 0;max-width:40em}
+  .callout{border-left:2px solid var(--accent);background:var(--figbg);padding:9px 15px;margin:12px 0;
+      font-size:14px}
+  .callout .lab{font-family:var(--sans);font-weight:600;font-size:11px;letter-spacing:.06em;
+      text-transform:uppercase;color:var(--accent);display:block;margin-bottom:2px}
+  /* file index */
+  ul.files{list-style:none;margin:10px 0;padding:0;font-size:14px}
+  ul.files li{padding:7px 0;border-bottom:1px solid var(--hair);display:grid;
+      grid-template-columns:auto 1fr;gap:14px;align-items:baseline}
+  ul.files .ft{font-family:var(--mono);font-size:12px;color:var(--ink-2);white-space:nowrap}
+  footer{margin-top:50px;padding-top:14px;border-top:2.5px solid var(--rule);
+      font-family:var(--sans);font-size:12px;color:var(--ink-2);display:flex;flex-wrap:wrap;gap:6px 28px}
+  @media(max-width:680px){.sheet{padding:0 22px 80px}nav.toc,.figrow{column-count:1;grid-template-columns:1fr}
+      header.masthead{grid-template-columns:1fr}}
+  @media print{a{color:inherit}nav.toc{display:none}.sheet{max-width:none}}
+</style>
+</head>
+<body>
+<div class="sheet">
+
+<header class="masthead">
+  <div>
+    <div class="masthead-kicker">Reverse-engineering release dossier · ce-designs/microduck</div>
+    <h1 class="masthead-title">Microduck</h1>
+    <p class="masthead-sub">A bipedal desktop robot reconstructed from Pollen Robotics' open firmware and published simulation model. Mechanics rebuilt parametrically; electronics and assembly derived from the published source.</p>
+  </div>
+  <table class="docctl">
+    <tr><td class="k">Document</td><td class="v">MD-REL-001</td></tr>
+    <tr><td class="k">Revision</td><td class="v">A · 2026-09-02</td></tr>
+    <tr><td class="k">Units</td><td class="v">mm · g · °</td></tr>
+    <tr><td class="k">Status</td><td class="v" style="color:var(--partial)">PROTOTYPE</td></tr>
+  </table>
+</header>
+
+<div class="abstract">
+  <h2>Readiness — the honest answer</h2>
+  <p><b>Not completely factory-ready.</b> Every mechanical part can be printed and every off-the-shelf part can be bought today, and the assembled robot runs Pollen's own trained policies in simulation — so a working <b>prototype</b> is buildable now. Three things block a <b>factory</b> release, all named in §1: the three custom circuit boards have no published design files (we have a footprint-accurate stand-in, not fabricable Gerbers), the mechanical drawing generator has two measured defects still being fixed, and the sim meshes have not yet been reconciled against the product photographs. This dossier states what is done, what is not, and gives the complete build sequence for the prototype.</p>
+</div>
+
+<nav class="toc" aria-label="Contents">
+  <a href="#readiness"><span class="tn">1</span>Manufacturing readiness</a>
+  <a href="#bom"><span class="tn">2</span>Bill of materials</a>
+  <a href="#files"><span class="tn">3</span>Release files &amp; previews</a>
+  <a href="#assembly"><span class="tn">4</span>Assembly — full sequence</a>
+  <a href="#wiring"><span class="tn">5</span>Wiring</a>
+  <a href="#power"><span class="tn">6</span>Power-up &amp; verification</a>
+  <a href="#gap"><span class="tn">7</span>What remains for factory</a>
+</nav>
+
+<section id="readiness">
+  <h2 class="sec"><span class="tn">1</span>Manufacturing readiness</h2>
+  <p class="lead">Each lane graded against what a factory needs, not against what looks finished. Evidence links to the real file in the repository.</p>
+  <div class="tw"><table class="data">
+    <caption>Table 1. Readiness by lane.</caption>
+    <thead><tr><th>Lane</th><th>State</th><th>What exists</th><th>What blocks factory</th></tr></thead>
+    <tbody>
+      <tr><td>Mechanical geometry</td><td><span class="st ready">Ready</span></td><td>20 parts rebuilt parametrically, each graded ≤1&nbsp;mm p95 vs Pollen's mesh; the rest mesh-backed. Assembly builds in the kernel (70 placements).</td><td>Vendor-mesh parts are not dimensioned (loaders, not parametric).</td></tr>
+      <tr><td>Drawings</td><td><span class="st partial">Partial</span></td><td>10 verified sheets (<a href="out/drawings/INDEX.md">INDEX</a>). Third-angle, hole tables, sections.</td><td>Generator merges coaxial holes into a phantom counterbore; wall note reports a section scan, not the true 0.80&nbsp;mm minimum. Fix in progress.</td></tr>
+      <tr><td>Printing</td><td><span class="st ready">Ready</span></td><td>All 30 printed parts sliced with real numbers: <b>218&nbsp;g PLA / 9.9&nbsp;h</b> + <b>26&nbsp;g TPU / 2.4&nbsp;h</b>; two plate files (<a href="out/print/PRINT.md">PRINT.md</a>).</td><td>Shell process (print vs mould) is a volume decision, not a blocker.</td></tr>
+      <tr><td>Electronics — off-the-shelf</td><td><span class="st ready">Ready</span></td><td>11 ICs datasheeted with provenance; full <a href="ELECTRONICS-DATASHEET.html">datasheet</a>, <a href="electronics/2-schematic-hat.svg">schematic</a>, <a href="electronics/3-layout.svg">layout</a>.</td><td>—</td></tr>
+      <tr><td>Electronics — custom PCBs</td><td><span class="st no">Not ready</span></td><td>Robot HAT, imu_to_dxl and battery-contact PCB: footprint-accurate stand-ins; the HAT's connectors/regulators are reconstructed.</td><td>No published schematic/Gerbers. A real board design + fab is required.</td></tr>
+      <tr><td>Assembly definition</td><td><span class="st ready">Ready</span></td><td>Full step-by-step sequence (§4), servo IDs, bearing seats, fastener counts, wiring — from the measured joints.</td><td>Fastener counts are community-derived (flagged); torque unspecified by Pollen.</td></tr>
+      <tr><td>BOM &amp; sourcing</td><td><span class="st partial">Partial</span></td><td>All bought lines with vendors (§2); cost roll-up in <a href="docs/PRODUCTION.md">PRODUCTION.md</a>.</td><td>Several prices and the exact fitted speaker/mic/NFC/camera modules are CANNOT DETERMINE.</td></tr>
+      <tr><td>Simulation / validation</td><td><span class="st ready">Ready</span></td><td>MuJoCo runs Pollen's walk / sit-stand policies on our meshes; stock-vs-ours trajectories bit-identical.</td><td>Mesh-vs-product photo reconciliation not yet complete.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="bom">
+  <h2 class="sec"><span class="tn">2</span>Bill of materials</h2>
+  <p class="lead">Per robot. Full sourced table with URLs: <a href="out/release/bom.csv">out/release/bom.csv</a> and <a href="docs/production/components.md">components.md</a>. A price nobody read is stated CANNOT DETERMINE, never guessed.</p>
+  <div class="tw"><table class="data">
+    <caption>Table 2. Purchased components (abridged).</caption>
+    <thead><tr><th>Item</th><th class="n">Qty</th><th class="n">Unit</th><th>Vendor</th><th>Note</th></tr></thead>
+    <tbody>
+      <tr><td>Dynamixel XL330-M288-T servo</td><td class="n">15</td><td class="n">$23.90</td><td>ROBOTIS</td><td>75% of parts cost; no volume tiers published</td></tr>
+      <tr><td>Radxa Zero 3W (1&nbsp;GB / 32&nbsp;GB)</td><td class="n">1</td><td class="n">CANNOT&nbsp;DET.</td><td>Radxa</td><td>that exact SKU absent from Radxa's table</td></tr>
+      <tr><td>NP-F550 2S pack (+ shared charger)</td><td class="n">1</td><td class="n">$24.95</td><td>NextBatteries</td><td>2600&nbsp;mAh · 18.72&nbsp;Wh</td></tr>
+      <tr><td>IMX219 + M12 camera board</td><td class="n">1</td><td class="n">$23.99</td><td>Arducam</td><td>exact module unknown</td></tr>
+      <tr><td>VL53L8CX 8×8 ToF breakout</td><td class="n">1</td><td class="n">$24.95</td><td>Pololu</td><td>generation L5CX/L8CX unconfirmed</td></tr>
+      <tr><td>Bearing 22×16×4 (MR1622-ZZ)</td><td class="n">11</td><td class="n">NZ$5.90</td><td>NZ Min. Brg.</td><td>US$1–4 at MOQ 1000</td></tr>
+      <tr><td>Bearing 15×10×3 (MR6700)</td><td class="n">3</td><td class="n">$4.86</td><td>Bearings Direct</td><td></td></tr>
+      <tr><td>M2 fasteners + heat-set inserts</td><td class="n">~255</td><td class="n">≈$16</td><td>RST / Prusa</td><td>counts community-derived</td></tr>
+      <tr><td>3 custom PCBs (HAT, imu_to_dxl, contact)</td><td class="n">3</td><td class="n">CANNOT&nbsp;DET.</td><td>—</td><td>no design files published</td></tr>
+      <tr><td>Filament: PLA + TPU</td><td class="n">—</td><td class="n">≈$7</td><td>—</td><td>218&nbsp;g + 26&nbsp;g, sliced</td></tr>
+    </tbody>
+  </table></div>
+  <p>Readable bought cost is <b>$472–481 per robot at every quantity 1–1000</b> — already above Pollen's $399 retail before compute, custom boards and labour. The entire volume question reduces to one ROBOTIS OEM servo quote (§7).</p>
+</section>
+
+<section id="files">
+  <h2 class="sec"><span class="tn">3</span>Release files &amp; previews</h2>
+  <p class="lead">Every deliverable is a real file in this repository. Served live over the repo (<code>tools/serve.sh</code>), each link opens the actual document.</p>
+
+  <h3 class="sub">3.1 The robot as built</h3>
+  <figure>
+    <img src="out/render/duck-now_iso.png" alt="The Microduck assembly, true colours">
+    <figcaption><b>Figure 1.</b> Current build — 20 rebuilt parts plus shelf meshes, placed from the measured kinematic tree. Kernel model: 144 × 150 × 264&nbsp;mm.</figcaption>
+  </figure>
+
+  <h3 class="sub">3.2 Mechanical drawings</h3>
+  <figure>
+    <img src="out/drawings/microduck-shin/microduck-shin.svg" alt="Shin plate engineering drawing">
+    <figcaption><b>Figure 2.</b> Shin plate, third-angle, 2:1 — dimensioned, hole table, section A-A. Full set: <a href="out/drawings/">out/drawings/</a> (DXF · SVG · PDF per part).</figcaption>
+  </figure>
+
+  <h3 class="sub">3.3 Electronics</h3>
+  <figure>
+    <img src="electronics/1-block-diagram.svg" alt="Electronics block diagram">
+    <figcaption><b>Figure 3.</b> System block diagram. Then the per-board <a href="electronics/2-schematic-hat.svg">schematic</a> (every pin, every net) and the <a href="electronics/3-layout.svg">physical layout</a>. Full <a href="ELECTRONICS-DATASHEET.html">electronics datasheet</a>.</figcaption>
+  </figure>
+
+  <h3 class="sub">3.4 Print plates &amp; simulation</h3>
+  <div class="figrow">
+    <figure><img src="out/sim/frames/walk_ours_t04.0s.png" alt="Walk simulation frame"><figcaption><b>Figure 4.</b> MuJoCo, Pollen's walk policy, our meshes. Videos: <a href="out/sim/walk.mp4">walk</a> · <a href="out/sim/sitstand.mp4">sit-stand</a>.</figcaption></figure>
+    <figure><img src="out/sim/frames/sitstand_ours_t04.0s.png" alt="Sit-stand simulation frame"><figcaption><b>Figure 5.</b> Sit-stand policy. Report: <a href="out/sim/report.md">out/sim/report.md</a>.</figcaption></figure>
+  </div>
+
+  <h3 class="sub">3.5 Document index</h3>
+  <ul class="files">
+    <li><span class="ft">spec</span><a href="SPEC.md">SPEC.md</a> — the measured specification (envelope, 15-joint table, every mesh)</li>
+    <li><span class="ft">parts</span><a href="docs/PARTS.md">PARTS.md</a> — every part, quantity, material, body, joint, rebuild status</li>
+    <li><span class="ft">elec</span><a href="docs/ELECTRONICS-AND-SOFTWARE.md">ELECTRONICS-AND-SOFTWARE.md</a> — bus, registers, daemons, pin map</li>
+    <li><span class="ft">bom</span><a href="docs/BOM.md">BOM.md</a> · <a href="docs/PRODUCTION.md">PRODUCTION.md</a> — costs at 1/10/100/1000, print-vs-mould, compliance</li>
+    <li><span class="ft">manual</span><a href="ce-assemblies/microduck/current/manual/MANUAL.md">MANUAL.md</a> — the construction manual (source of §4)</li>
+    <li><span class="ft">wiring</span><a href="wiring/CABLES.md">CABLES.md</a> — 22 cables, lengths, voltage-drop</li>
+    <li><span class="ft">sim</span><a href="docs/SIM-CAPABILITY.md">SIM-CAPABILITY.md</a> — what the simulation can and cannot do</li>
+    <li><span class="ft">tools</span><a href="TOOLCHAIN.md">TOOLCHAIN.md</a> — exact tool + kernel versions to reproduce every file</li>
+  </ul>
+</section>
+
+<section id="assembly">
+  <h2 class="sec"><span class="tn">4</span>Assembly — full sequence</h2>
+  <p class="lead">Build order: trunk → hips → legs → neck → head → wiring → power-up. Every servo ID, bearing seat and joint is called out. Positions are world-frame (mm) unless a body frame is named. Derived from the measured joint tree (14 hinges).</p>
+
+  <div class="callout"><span class="lab">Before you begin — three rules</span>
+    <b>Servo IDs:</b> set each XL330's ID and baud (1&nbsp;Mbps, <code>baud_rate=3</code>) <em>before</em> fitting it — the bus is one daisy chain; a duplicate ID means disassembly.
+    <b>Bearings:</b> all press-fit into printed seats; press the outer race only.
+    <b>Fasteners:</b> M2 throughout; counts marked [community] are derived from hole-fitting on the sim meshes, not a Pollen BOM. FDM holes print 0.1–0.3&nbsp;mm undersize — ream before assembly. Torque is unspecified: snug + a quarter-turn into plastic.</div>
+
+  <div class="step">
+    <h3><span class="num">STEP 1</span>Trunk <span style="font-family:var(--mono);font-size:13px;color:var(--ink-2)">body trunk_base</span></h3>
+    <div class="partsline">Parts: trunk-base ×1 · power-support ×1 · banana-pcb-locker ×1 · banana contact PCB · NP-F550 · XL330 ×2 · bearing 22×16×4 ×2</div>
+    <ol class="instr">
+      <li>Press the two 22×16×4 hip-yaw idler bearings into <code>trunk_base</code> at body-frame (6, ±17.5, −5).</li>
+      <li>Set servo IDs <b>20</b> (left hip yaw) and <b>10</b> (right hip yaw). Bolt both XL330s hanging from <code>trunk_base</code>, horns down (−z), horn axes through world (6, ±17.5, 115). Each XL330 uses its own 4 × Ø2.0 + 8 × Ø1.6 pattern.</li>
+      <li>Bolt <code>power_support</code> (battery cradle) to <code>trunk_base</code> — 8 × Ø1.6 M2 tap [community]; M2×6 into inserts.</li>
+      <li>Clamp the banana contact PCB onto <code>power_support</code>'s Ø3.9 pins with <code>banana_pcb_locker</code> — 2 × M2 through its Ø2.17 eyes.</li>
+      <li>Leave the NP-F550 out until Step 7.</li>
+    </ol>
+  </div>
+
+  <div class="step">
+    <h3><span class="num">STEP 2</span>Hips <span style="font-family:var(--mono);font-size:13px;color:var(--ink-2)">yaw2roll / bearing_roll, hip_l ×2</span></h3>
+    <div class="partsline">Per side: yaw2roll ×1 · bearing-roll ×1 · hip-bracket ×1 · XL330 ×2 · bearing 22×16×4 ×2</div>
+    <ol class="instr">
+      <li>Set IDs <b>21</b> (left hip roll) / <b>11</b> (right).</li>
+      <li>Press one 22×16×4 into <code>yaw2roll</code>/<code>bearing_roll</code> at body (0, 16.5, 12.5) and one into each hip bracket at (21/25, 0, −18.5).</li>
+      <li>Fix <code>yaw2roll</code> to the hip-yaw servo horn (spline joint); the 3&nbsp;mm <code>bearing_roll</code> plate rides the idler bearing opposite the horn — 4 × M2 [community].</li>
+      <li>Mount the hip-roll servo in <code>yaw2roll</code> (8 × M2 + 6 c'bore [community]); roll axis +x at world (22.5, ±17.5, 102.5).</li>
+      <li>Fix <code>hip-bracket</code> to the hip-roll horn — 9 × M2 + 6 c'bore [community]. Hip-pitch axis +y at world (4, ±42.5, 102.5). Mirror for the right side.</li>
+    </ol>
+  </div>
+
+  <div class="step">
+    <h3><span class="num">STEP 3</span>Legs <span style="font-family:var(--mono);font-size:13px;color:var(--ink-2)">upper_leg, leg (shin), ankle ×2</span></h3>
+    <div class="partsline">Per side: upper-leg ×1 · rigidity-plate ×1 · shin ×1 · ankle ×1 · foot ×1 · sole (TPU) ×1 · XL330 ×3 · bearing 22×16×4 ×2 · 15×10×3 ×1</div>
+    <ol class="instr">
+      <li>Set IDs <b>22</b> hip-pitch, <b>23</b> knee, <b>24</b> ankle (left); <b>12/13/14</b> (right).</li>
+      <li>Fit hip-pitch + knee servos into the upper-leg housing (knee axis −y at (−31.8, ±38.5, 80.5)); press one 22×16×4 into the upper leg at body (22, 35.8, −4).</li>
+      <li>Screw the 1&nbsp;mm rigidity plate across the thigh — 4 × M2 [community].</li>
+      <li>Hang the upper leg on the hip bracket: horn side to hip-pitch, idler side on the bracket bearing.</li>
+      <li>Fit the ankle servo into the shin (the 8&nbsp;mm stepped plate) — 6 × M2 + 6 c'bore [community]; join shin to the knee horn + idler bearing.</li>
+      <li>Press the 15×10×3 bearing into the ankle bracket; fix the ankle to the ankle-servo horn (5 × M2 + 5 c'bore [community]).</li>
+      <li>Screw the hard foot to the ankle (fixed, no joint); fit the TPU sole onto the foot, friction surface down.</li>
+    </ol>
+  </div>
+
+  <div class="step">
+    <h3><span class="num">STEP 4</span>Neck <span style="font-family:var(--mono);font-size:13px;color:var(--ink-2)">neck, neck_pitch</span></h3>
+    <div class="partsline">Parts: neck-plate ×2 · neck-pitch-bracket ×1 · XL330 ×2 · bearing 22×16×4 ×1</div>
+    <ol class="instr">
+      <li>Set IDs <b>30</b> (neck pitch, bottom) and <b>31</b> (head pitch, top).</li>
+      <li>The two 2&nbsp;mm neck plates span the 50&nbsp;mm neck with a servo at each end — 4 × M2 per plate [community]. Neck-pitch axis −y at world (26, 14.5, 152.4); head-pitch axis +y at (26, 14.5, 202.4).</li>
+      <li>Bolt the ID-30 servo to the trunk (horn to the neck plates); bolt ID-31 at the top.</li>
+      <li>Press one 22×16×4 into <code>neck_pitch</code> at body (0, 20.8, −14.5) — the head-yaw axis bearing; fix <code>neck_pitch</code> to the ID-31 horn — 12 × M2 + 4 c'bore [community].</li>
+    </ol>
+  </div>
+
+  <div class="step">
+    <h3><span class="num">STEP 5</span>Head <span style="font-family:var(--mono);font-size:13px;color:var(--ink-2)">yaw_roll_motion, jaw_soft (head + electronics)</span></h3>
+    <div class="partsline">Parts: yaw-roll-motion ×1 · motor-support ×1 · face-part ×1 · eye-ring ×1 · M12 lens + holder · IMX219 · ToF · Radxa Zero 3W · Robot HAT · speaker · top/bottom head shells · jaw ×1 · jaw-soft + soft-mouth-top (TPU) · XL330 ×3 · bearing 22×16×4 ×2 · 15×10×3 ×1</div>
+    <ol class="instr">
+      <li>Set IDs <b>32</b> (head yaw), <b>33</b> (head roll), <b>34</b> (mouth).</li>
+      <li>Press two 22×16×4 into <code>yaw_roll_motion</code> at body x = −16 and +18 (straddling the roll axis). Fix it onto the head-yaw axis: ID-32 horn below, <code>neck_pitch</code>'s bearing above — 4 × M2 + 6 c'bore [community]. Head-yaw axis +z at world (26, 0, 221.1).</li>
+      <li>Mount the ID-33 head-roll servo in <code>yaw_roll_motion</code>; roll axis −x at (8.1, 0, 235.6).</li>
+      <li>Fix <code>motor_support</code> (head plate) to the ID-33 horn — it carries the ID-33/34 servos and the electronics.</li>
+      <li>Press the 15×10×3 bearing for the mouth hinge; mount the jaw on the ID-34 horn + that bearing — 5 × M2 [community]. Mouth range −5° (closed) … +30° (open).</li>
+      <li>Electronics: screw the M12 lens holder to the IMX219 board (3 × M2), thread the lens; the camera sits behind <code>face_part</code> at world (81.4, 0, 251.1), <b>mounted upside down</b>. ToF at (81.4, 22.4, 249.1), 22.4&nbsp;mm left of the camera. Fit the eye-ring into <code>face_part</code> (10 × M2 + 4 tap [community]). Stack the Robot HAT on the Radxa 40-pin header.</li>
+      <li>Fit the TPU lips: <code>jaw_soft</code> (8.4&nbsp;mm) on the jaw, <code>soft_mouth_top</code> (3.3&nbsp;mm) under the top shell.</li>
+      <li>Close the shells: bottom head shell (4 × M2), top head shell (3 × M2), trunk shells L/R (7 and 6+1 × M2) [all community].</li>
+    </ol>
+  </div>
+</section>
+
+<section id="wiring">
+  <h2 class="sec"><span class="tn">5</span>Wiring</h2>
+  <p class="lead">One Dynamixel bus, 1&nbsp;Mbps, on <code>/dev/ttyS2</code> via the HAT. Daisy-chain order and cut lengths (JST EH 3-pin, ROBOTIS X3P leads), measured off the placements. Physical map: <a href="electronics/3-layout.svg">3-layout.svg</a>; full table: <a href="wiring/CABLES.md">CABLES.md</a>.</p>
+  <figure><img src="wiring/designs/microduck/wiring.svg" alt="Wiring diagram" style="max-height:520px;object-fit:contain"><figcaption><b>Figure 6.</b> The ce-wire harness — 22 cables, 1615&nbsp;mm total.</figcaption></figure>
+  <div class="callout"><span class="lab">Bus daisy chain — cut lengths (mm)</span>
+    HAT → id34 (35) → id33 (60) → id32 (50) → <b>id31 (165 — crosses head-yaw + head-pitch; route at the servo flank to pay out the full ±170° sweep)</b> → id30 (35) → imu200 board (120, crosses neck-pitch) → then it splits:<br>
+    imu200 → id20 (40) → id21 (65) → id22 (125) → id23 (20) → id24 (95) &nbsp;and&nbsp; imu200 → id10 (40) → id11 (65) → id12 (125) → id13 (20) → id14 (95).</div>
+  <ol class="instr">
+    <li>ToF ↔ HAT: Stemma J5, JST-SH 4-pin, 35&nbsp;mm (I²C 0x29).</li>
+    <li>Speaker ↔ HAT: 70&nbsp;mm.</li>
+    <li>Battery → HAT: 340&nbsp;mm — crosses all four neck/head joints; route bundled with the bus loom through the neck.</li>
+    <li>Camera: CSI ribbon Radxa → camera, 15&nbsp;mm floor, 22-pin 0.5&nbsp;mm FFC.</li>
+    <li>Microphone loom: <span class="st partial">CANNOT DETERMINE</span> — part and placement unpublished.</li>
+    <li>Voltage-drop check at 1&nbsp;A/servo, 21&nbsp;AWG: PASS (worst drop 0.55&nbsp;V, HAT → ankle).</li>
+  </ol>
+</section>
+
+<section id="power">
+  <h2 class="sec"><span class="tn">6</span>Power-up &amp; verification</h2>
+  <ol class="instr">
+    <li>Fit the NP-F550. Servo-bus VDD is battery-direct through the HAT; the runtime reads pack voltage as the servos' own supply.</li>
+    <li>Scan the bus — expect IDs 10–14, 20–24, 30–34 and <b>200</b> (imu_to_dxl). The runtime asserts <code>return_delay_time=0</code>, <code>baud_rate=3</code>, <code>pwm_slope=255</code>, <code>shutdown=52</code> at boot.</li>
+    <li>Verify each joint range against the MJCF (e.g. left hip-yaw −25…+30°) before loading a policy.</li>
+    <li>Load a policy: the shipped ONNX walk / sit-stand policies run at 50&nbsp;Hz. Our meshes have been validated against Pollen's physics in simulation (§3.4).</li>
+  </ol>
+</section>
+
+<section id="gap">
+  <h2 class="sec"><span class="tn">7</span>What remains for a full factory release</h2>
+  <div class="tw"><table class="data">
+    <caption>Table 3. Open items, in priority order.</caption>
+    <thead><tr><th class="n">#</th><th>Item</th><th>What it takes</th></tr></thead>
+    <tbody>
+      <tr><td class="n">1</td><td>Custom PCBs (HAT, imu_to_dxl, contact)</td><td>Design real boards from the reconstructed schematic; fab + assemble. No published files exist to copy.</td></tr>
+      <tr><td class="n">2</td><td>Drawing generator defects</td><td>Fix the phantom-counterbore hole grouping and the wall-note minimum; add an independent counterbore sanity check. In progress.</td></tr>
+      <tr><td class="n">3</td><td>Product-photo reconciliation</td><td>Confirm the sim meshes match the shipped product region by region (two known drifts: the compute-board and battery meshes).</td></tr>
+      <tr><td class="n">4</td><td>Fastener &amp; torque schedule</td><td>Replace community-derived M2 counts with a measured schedule; set torque (Pollen publishes none).</td></tr>
+      <tr><td class="n">5</td><td>Unidentified modules</td><td>Pin down the fitted speaker, microphone(s), NFC IC + antennas, and the exact camera module.</td></tr>
+      <tr><td class="n">6</td><td>Servo volume price</td><td>One ROBOTIS OEM quote settles the entire cost-at-volume question.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<footer>
+  <span>github.com/Leif-Rydenfalk/microduck (private)</span>
+  <span>Served live: <code>tools/serve.sh</code> → localhost:8842/RELEASE.html</span>
+  <span>Reproduce: <code>TOOLCHAIN.md</code></span>
+  <span>Every claim traces to a repository file · 2026-09-02</span>
+</footer>
+
+</div>
+</body>
+</html>
