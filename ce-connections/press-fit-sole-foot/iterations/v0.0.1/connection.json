@@ -1,0 +1,66 @@
+{
+  "$triad": 1,
+  "kind": "connection",
+  "record": {
+    "slug": "press-fit-sole-foot",
+    "title": "TPU sole pushed onto the printed foot cap \u2014 a zero-clearance 36.8000 x 49.8000 mm prismatic plug, no fastener",
+    "joins": {
+      "a": "the foot cap's lower body (part:microduck-foot-left / -right, interface 'sole_skirt'): a vertical prism x 31.6000..68.4000, y -9.9000..39.9000 (36.8000 x 49.8000 mm) below a flange that overhangs the sole rim at z -18.3419; corners R3.45 back / R4.89 front, PLA",
+      "b": "the sole's socket (part:microduck-sole-left / -right, interface 'foot_socket'): the same prism as a cavity, vertical-walled, wall 2.0165 mm mean (2.1000 on the long walls), floor 2.000 +/- 0.001 mm of TPU, depth 7.9170-10.6550 mm from the rim to the sloping floor; corners R3.4 back / R4.9 front, TPU"
+    },
+    "dof_left": [],
+    "dof_left_why": "A prismatic plug in a prismatic socket leaves nothing free: the rectangular section locks both translations across the axis and all three rotations by form, and the plug bottoming on the socket floor plus the flange landing on the rim locks the last translation. The joint is rigid in every direction \u2014 which is exactly why it is a JOINT and not a clearance fit, and why the only thing left to determine is how hard it is to pull off.",
+    "detachable": true,
+    "detachable_why": "By hand. The sole is TPU, the plug is a rigid printed cap and there is no fastener, no barb and no adhesive named anywhere in the reference: cecad.meshfeatures.cylinders finds no hole through the socket wall or floor, and the ankle group's single M2 (at x 50.0000, y 4.5020) hangs the FOOT from the ankle without passing through the sole. The sole is a consumable, and it comes off by stretching it off. How much force that takes is unmeasured \u2014 see the ledger.",
+    "standard": null,
+    "standard_why": "There is no standard to cite and citing one would be false authority. ISO 286 grades a fit between two rigid bodies with stated tolerance classes; here one body is an ELASTOMER whose as-printed dimensions move with flow, temperature and infill, and the modelled clearance is exactly ZERO. A zero-clearance elastomeric interference has no IT grade, and compat.py refuses to invent one.",
+    "adds_parts": [],
+    "adds_parts_why": "Nothing is consumed: no screw, no clip, no adhesive. Both bodies are BOM rows in their own right (part:microduck-sole-left, part:microduck-foot-left), so naming either here would double-count it in assembly:microduck.",
+    "verdict": "PASS",
+    "why": "THE FIT IS MEASURED ON BOTH SIDES, ON THE SAME LINES, AND IT IS ZERO. 75 caliper stations were run through BOTH meshes with cecad.meshfeatures.intervals \u2014 54 y-lines at z -19/-20/-21/-22/-23/-24 across x 34..66, and 21 x-lines at z -19/-21/-23 across y -6..37 \u2014 giving 150 gaps between the socket's inner wall and the plug's outer wall. They span -0.0020 .. +0.0020 mm about a mean of -0.000007 mm: the two walls are the SAME surface to the 0.002 mm the decimated STL can express. Section 36.8000 x 49.8000 mm, constant from the rim (z -18.3419, the sole's own bbox maximum \u2014 meshslice finds 0 segments at -18.3419 and 659 at -18.3421) down to at least z -24.0. Socket wall 1.594-2.479 mm, mean 2.0165, with a 2.1000 plateau on the long walls. Floor 2.000 +/- 0.001 mm of TPU at nine independent stations, agreeing with the sole folder's own 27x31 grid. Depth 7.9170 mm at the toe to 10.6550 mm at the heel, because the outer floor slopes 0.087 and the inner floor follows it. TWO things stay CANNOT DETERMINE and are stated per-check in compat.py and as ledger rows rather than rounded away: (1) the RETENTION -- a zero modelled clearance in a TPU socket over a printed PLA plug is an interference of whatever the two processes actually deliver, which no mesh can say; nobody has pulled one off and measured the force. (2) a 0.2539 mm OVERLAP -- the foot's ribs reach z -29.2509 while the sole's inner floor at that station is -28.9970; whether that is deliberate squeeze into the elastomer or an overlap in the visual meshes is not resolvable from two rigid geoms in an MJCF.",
+    "joint": {
+      "$joint": 1,
+      "default_state": "the sole pushed fully home: plug ribs on the socket floor, foot flange landed on the socket rim at z -18.3419",
+      "axes": {
+        "tx": "locked",
+        "ty": "locked",
+        "tz": "locked",
+        "rx": "locked",
+        "ry": "locked",
+        "rz": "locked"
+      },
+      "axes_cannot_determine": {},
+      "limits": {},
+      "one_way": "",
+      "intermittent": false,
+      "engagement": {
+        "depth_mm_toe": 7.917,
+        "depth_mm_heel": 10.655,
+        "section_mm": [
+          36.8,
+          49.8
+        ],
+        "wall_contact_perimeter_mm": 173.2,
+        "wall_contact_perimeter_why": "2 x (36.8000 + 49.8000) as a straight-sided prism; the four corner radii shorten it by a few tenths and the exact figure needs the outline, not the bounding box"
+      },
+      "couples": [],
+      "holds_by": "friction",
+      "removable": true,
+      "transmits": [
+        "shear",
+        "axial"
+      ],
+      "driven": false,
+      "rating": {
+        "clearance_mm": 0.0,
+        "clearance_span_mm": [
+          -0.002,
+          0.002
+        ],
+        "pull_off_N": null,
+        "pull_off_why": "MISSING. The modelled clearance is zero, the socket is TPU and the plug is printed PLA, so the real grip is set by the two processes' as-built dimensions and the elastomer's modulus -- none of which is in any file here. What settles it: pull a real sole off a real foot on a gauge."
+      },
+      "why": "holds_by friction: nothing mechanical captures the plug -- no barb, no screw, no groove was found on either mesh. The rectangular section and the flange give the joint its stiffness; what stops the sole falling off is the elastomer's grip on the walls, and that is the number nobody has."
+    }
+  }
+}
