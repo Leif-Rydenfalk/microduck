@@ -17,12 +17,12 @@ a cached result can itself be empty.
 
 | script | what it produces | last run id | state at handover |
 |---|---|---|---|
-| `w7-elec-verify.js` | Every electronic component: exact MPN, package, physical dimensions (mm), pinout, voltage, and real sourcing (>=2 distributors, price at 1/100/1000, MOQ, lead time), each cited. Plus the 3 custom PCBs and what must be done to make them fabricable. | `wf_969f3a4c-3d1` | launched 2026-09-02 ~21:04, died with the launching session — **relaunch** |
-| `w8-manufacturing.js` | DFM over 5 part groups, process/break-even economics, assembly line with jigs + torque, QA/EOL test plan, 3 sourcing agents, consolidated execution plan. | `wf_7f8b1690-71f` | launched 2026-09-02 ~21:12, died with the launching session — **relaunch** |
-| `w5-drawings.js` | Manufacturing-grade dimensioned drawings. | `wf_e0ce4a43-34e` | earlier run |
-| `w4-simulate.js` | Simulation lane. | `wf_e980841f-3aa` | earlier run |
+| `elec-verify.js` | Every electronic component: exact MPN, package, physical dimensions (mm), pinout, voltage, and real sourcing (>=2 distributors, price at 1/100/1000, MOQ, lead time), each cited. Plus the 3 custom PCBs and what must be done to make them fabricable. | `wf_969f3a4c-3d1` | launched 2026-09-02 ~21:04, died with the launching session — **relaunch** |
+| `manufacturing.js` | DFM over 5 part groups, process/break-even economics, assembly line with jigs + torque, QA/EOL test plan, 3 sourcing agents, consolidated execution plan. | `wf_7f8b1690-71f` | launched 2026-09-02 ~21:12, died with the launching session — **relaunch** |
+| `drawings-mfg-grade.js` | Manufacturing-grade dimensioned drawings. | `wf_e0ce4a43-34e` | earlier run |
+| `simulate.js` | Simulation lane. | `wf_e980841f-3aa` | earlier run |
 
-All agents in w7 and w8 are pinned to `model: 'opus'`.
+All agents in elec-verify and manufacturing are pinned to `model: 'opus'`.
 
 **Their results are not yet written into any document.** When a workflow lands, that is the
 first thing to do: turn the structured JSON into an HTML document in the shared academic style
