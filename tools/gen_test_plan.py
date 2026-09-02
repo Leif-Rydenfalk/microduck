@@ -461,7 +461,7 @@ the data file&rsquo;s own value and is shown in amber. <b>The bodies column chan
 name one &ldquo;body carrying the servo&rdquo;, hand-typed, and it was inconsistent: nine rows named the MJCF
 parent and five named the child. Both bodies are now read off the MJCF and both are shown, because the MJCF says
 which two bodies a joint joins and does <b>not</b> say which of the two the servo housing is bolted to &mdash; see
-the open question in section {TAILNUM["open"]}.</caption>
+the open question in section %d.</caption>
 <thead><tr><th>ID</th><th>Joint</th><th>Bodies joined (MJCF parent &rarr; child)</th>
 <th>range lo&nbsp;rad</th><th>range hi&nbsp;rad</th><th>range lo&nbsp;deg</th><th>range hi&nbsp;deg</th>
 <th>home&nbsp;rad</th><th>home&nbsp;deg</th><th>home&nbsp;count</th></tr></thead>
@@ -478,7 +478,7 @@ first row of every write sequence.</p>
 <thead><tr><th>Addr</th><th>Bytes</th><th>Name</th><th>Area</th><th>Vendor initial</th><th>We write</th><th>Meaning</th><th>Why</th></tr></thead>
 <tbody>%s</tbody></table></div>
 """ % (SECNUM["servo"], ZERO_COUNT, RESOLUTION_PULSE_REV, ZERO_COUNT, COUNT_PER_RAD,
-       DEG_PER_COUNT, TOL_DEG, TOL_COUNT, _t_idmap, idmap_table(),
+       DEG_PER_COUNT, TOL_DEG, TOL_COUNT, _t_idmap, TAILNUM["open"], idmap_table(),
        SECNUM["servo"], _t_reg, reg_table())
         if s["id"] == "walk":
             sr = D["surface"]
@@ -657,6 +657,9 @@ CHECKS = [
  ("no unfilled at-sign token survives into the finished HTML",
   "the data file writes a measured number as an at-sign token that this generator fills; an "
   "unfilled one would ship to the reader as literal punctuation where a number belongs"),
+ ("no unrendered template expression survives into the finished HTML",
+  "a caption written inside a %-formatted block once shipped a brace-wrapped Python expression "
+  "to the reader as literal text, because that block is not an f-string and nothing evaluated it"),
  ("the finished HTML contains every test id and every eol id as an anchor",
   "a checklist link that scrolls nowhere is a checklist nobody uses"),
 ]
@@ -720,6 +723,8 @@ def selfcheck(doc=None):
             if kind not in ("scan", "written", "verify"):
                 bad.append("SV-01 read-back %d has unknown kind %r" % (a, kind))
     else:
+        tmpl = re.findall(r"\{(?:TAILNUM|SECNUM|TN\(|len\(|D\[|E\(|M\()[^}]*\}", doc)
+        if tmpl: bad.append("unrendered template expressions in the output: %s" % sorted(set(tmpl)))
         left = _TOKRE.findall(doc)
         if left: bad.append("unfilled tokens in the output: %s" % sorted(set(left)))
         for i in ids + eol_ids + ex_ids:
