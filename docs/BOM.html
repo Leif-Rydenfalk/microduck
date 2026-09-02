@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Microduck — Bom</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opt_sz,wght@8..60,400;8..60,600;8..60,700&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root{
+    --paper:#ffffff;--card:#fbfaf7;--ink:#1a1a1a;--ink-2:#565656;--ink2:#565656;
+    --line:#d7d3ca;--hair:#d7d3ca;--rule:#1a1a1a;--accent:#243b53;--wire:#243b53;--wire-ink:#243b53;
+    --ready:#1c6b3c;--pass-ink:#1c6b3c;--partial:#8a5a00;--cd:#8a5a00;--cd-ink:#8a5a00;--no:#9a2b1e;--rail:#9a2b1e;
+    --mint:#1c6b3c;--yellow:#8a5a00;--yellow-ink:#8a5a00;--graphite:#333;--figbg:#fbfaf7;
+    --pass-bg:transparent;--cd-bg:transparent;--chip-bg:transparent;--chip:transparent;--mono-bg:#fbfaf7;--head:#f2efe8;
+    --serif:"Source Serif 4",Georgia,"Times New Roman",serif;
+    --sans:"Source Sans 3",-apple-system,"Segoe UI",sans-serif;
+    --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  }
+  *{box-sizing:border-box}
+  body{background:var(--paper);color:var(--ink);margin:0;font-family:var(--serif);font-size:16px;line-height:1.55}
+  .wrap{max-width:920px;margin:0 auto;padding:0 40px 110px}
+  a{color:var(--accent);text-decoration:none;border-bottom:1px solid rgba(36,59,83,.28)}
+  a:hover{border-bottom-color:var(--accent)}
+  h1,h2,h3{font-family:var(--serif);font-weight:700;line-height:1.15;text-wrap:balance;color:var(--ink)}
+  code,.mono{font-family:var(--mono);font-size:.86em}
+  .eyebrow{font-family:var(--sans);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-2)}
+  /* masthead (header.top / header.hero) */
+  header.top,header.hero{display:block;padding:46px 0 14px;border-bottom:2.5px solid var(--rule);border-top:none}
+  header.top h1,header.hero h1{font-size:40px;letter-spacing:-.01em;font-weight:700}
+  header.top .sub,header.hero .sub{font-size:15.5px;color:var(--ink-2);margin-top:8px;max-width:40em}
+  header.hero .hero-img,.hero-img{background:#fff;border:1px solid var(--hair);border-radius:0}
+  .rev{margin-top:14px;font-family:var(--mono);font-size:11.5px;color:var(--ink-2);display:flex;flex-wrap:wrap;gap:6px 22px}
+  /* stat bar → clean inline figures */
+  .statbar{display:flex;flex-wrap:wrap;gap:0;border-bottom:1px solid var(--hair);margin:6px 0}
+  .stat{padding:14px 26px 14px 0;margin-right:24px}
+  .stat b{display:block;font-family:var(--serif);font-weight:700;font-size:22px;font-variant-numeric:tabular-nums}
+  .stat span{font-family:var(--sans);font-size:12px;color:var(--ink-2)}
+  /* toc */
+  nav.toc{position:static;background:none;border:none;border-bottom:1px solid var(--hair);display:flex;flex-wrap:wrap;gap:0 20px;padding:10px 0;font-family:var(--sans)}
+  nav.toc a{color:var(--ink);border:none;font-size:12.5px;letter-spacing:.02em;padding:4px 0;text-transform:none}
+  nav.toc a:hover{color:var(--accent)}
+  /* sections */
+  section{margin-top:36px;padding-top:0}
+  section>h2{font-size:22px;padding-bottom:6px;border-bottom:1px solid var(--hair);margin:0 0 12px;font-weight:700}
+  section>h2 .n,section>h2 .sec-no{font-family:var(--mono);font-weight:600;color:var(--accent);font-size:18px;padding-right:12px}
+  .lede{color:var(--ink-2);max-width:40em;margin:2px 0 14px}
+  h3{font-size:16.5px;margin:20px 0 6px}
+  /* cards → framed notes */
+  .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+  .card{background:var(--card);border:1px solid var(--hair);border-radius:0;padding:15px 18px}
+  .card h3{font-size:14px;margin:0 0 6px;font-family:var(--sans);font-weight:600}
+  .card p{font-size:13.5px;margin:0}
+  /* tables — booktabs */
+  .tablewrap,.tw{overflow-x:auto;border:none;border-radius:0;background:none;margin:12px 0}
+  table{border-collapse:collapse;width:100%;font-size:13.5px;font-variant-numeric:tabular-nums}
+  th{font-family:var(--sans);font-weight:600;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-2);text-align:left;padding:7px 12px 6px;border-bottom:1px solid var(--rule);border-top:1.5px solid var(--rule);white-space:nowrap}
+  td{padding:6px 12px;border-bottom:1px solid var(--hair);vertical-align:top}
+  tr:last-child td{border-bottom:1.5px solid var(--rule)}
+  td.num,td.n{text-align:right;font-family:var(--mono);white-space:nowrap}
+  /* chips → plain status words, no fill */
+  .chip{display:inline;font-family:var(--sans);font-weight:600;font-size:11.5px;letter-spacing:.03em;text-transform:uppercase;padding:0;border-radius:0;background:none;border:none;white-space:nowrap}
+  .chip.pass{color:var(--ready)} .chip.cd{color:var(--partial)} .chip.buy{color:var(--ink-2)} .chip.rail{color:var(--no);border:none}
+  /* figures */
+  figure{margin:16px 0;border:1px solid var(--hair);background:var(--figbg);border-radius:0;padding:10px;overflow:hidden}
+  figure img{display:block;width:100%;border:1px solid var(--hair);background:#fff}
+  figcaption{font-family:var(--sans);font-size:12.5px;color:var(--ink-2);padding:8px 2px 2px;border:none}
+  /* diagram / wiring embed */
+  .diagram{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:18px;align-items:start}
+  .dia{background:#fff;border:1px solid var(--hair);border-radius:0;padding:12px;overflow-x:auto}
+  .wirebox{border:1px solid var(--hair);border-radius:0;background:#fff;overflow:auto;max-height:720px;padding:10px}
+  .wirebox svg{width:100%;height:auto;display:block}
+  /* notes / callouts */
+  .note{border-left:2px solid var(--accent);background:var(--figbg);padding:10px 15px;border-radius:0;font-size:14px;margin:12px 0}
+  .mono-block{font-family:var(--mono);font-size:12.5px;background:var(--figbg);border:1px solid var(--hair);border-radius:0;padding:12px 15px;overflow-x:auto;line-height:1.6}
+  /* steps */
+  .steps{display:grid;gap:8px}
+  .step{display:grid;grid-template-columns:40px 1fr;gap:12px;background:var(--figbg);border:1px solid var(--hair);border-radius:0;padding:12px 15px}
+  .step::before{font-family:var(--mono);font-weight:600;font-size:18px;color:var(--accent);text-align:right}
+  .step b{display:block} .step span{color:var(--ink-2);font-size:13px}
+  footer{margin-top:48px;padding-top:14px;border-top:2.5px solid var(--rule);font-family:var(--sans);font-size:12px;color:var(--ink-2);display:flex;flex-wrap:wrap;gap:6px 26px}
+  @media(max-width:680px){.wrap{padding:0 22px 70px}.diagram,.grid2{grid-template-columns:1fr}}
+  .backlink{font-family:var(--sans);font-size:12.5px;margin:16px 0 0}
+  .backlink a{border:none}
+  .wrap>h2:first-of-type,.wrap>h1:first-child{margin-top:8px}
+  h2{font-size:24px;margin:30px 0 10px;padding-bottom:5px;border-bottom:1px solid var(--hair)}
+  h3{font-size:18px;margin:22px 0 6px}
+  h4{font-size:15px;font-family:var(--sans);font-weight:600;margin:16px 0 4px}
+  p{max-width:42em;margin:0 0 11px}
+  ul,ol{max-width:42em;margin:8px 0;padding-left:24px}
+  li{margin:3px 0}
+  pre.code{font-family:var(--mono);font-size:12.5px;background:var(--figbg);border:1px solid var(--hair);padding:12px 15px;overflow-x:auto;line-height:1.55;white-space:pre}
+  blockquote{border-left:2px solid var(--accent);background:var(--figbg);margin:12px 0;padding:9px 16px;color:var(--ink);font-style:italic;max-width:42em}
+  hr{border:none;border-top:1px solid var(--hair);margin:22px 0}
+  strong{font-weight:700}
+  table.data td{max-width:none}
+
+</style>
+</head>
+<body>
+<div class="wrap"><p class="backlink"><a href="RELEASE.html">← Release dossier</a></p>
+<h2>BOM — what a Microduck rebuild has to buy, print and mould, with what it costs</h2>
+<p><em>Written 2026-09-01. Pollen publishes no BOM. This one is assembled from the product pages, the open runtime, the simulation meshes and the Open Duck Mini v2 ancestry. A price appears only where a source states it; everything else is CANNOT DETERMINE with what settles it. Companion docs: <code>PARTS.md</code> (every part, dimensions, sources), <code>ELECTRONICS-AND-SOFTWARE.md</code> (how the boards connect).</em></p>
+<p>Source key: as <code>PARTS.md</code> §&quot;Source key&quot;; plus [ODM] = <code>research/raw/odm_bom.csv</code> (Open Duck Mini v2 Google-Sheets BOM, EUR, 2025) and [store-<em>] = <code>research/raw/store_</em>.json</code> (Pollen Shopify JSON fetched 2026-09-01).</p>
+<h3>1. Bought items</h3>
+<div class="tw"><table class="data"><thead><tr><th>#</th><th>item</th><th>qty</th><th>vendor / MPN</th><th>price (published)</th><th>URL</th><th>source &amp; notes</th></tr></thead><tbody><tr><td>B1</td><td>Dynamixel XL330 servo</td><td>15</td><td>ROBOTIS; sub-variant <strong>CANNOT DETERMINE</strong> (M288-T per community; never named by Pollen)</td><td>not in our sources (ROBOTIS lists it; would settle)</td><td>https://emanual.robotis.com/docs/en/dxl/x/xl330-m288/</td><td>[R1 §4.1]; Pollen sells &quot;3 × Motors&quot; inside the €99.99 Dev Pack [store-devpack]</td></tr><tr><td>B2</td><td>Dynamixel 3-pin TTL cables</td><td>15–16 (bus daisy-chain + IMU board)</td><td>ROBOTIS X-series 3-pin (JST-type) — exact part/lengths CANNOT DETERMINE</td><td>—</td><td>—</td><td>&quot;5 × Motor Cables&quot; spare in Dev Pack [store-devpack]</td></tr><tr><td>B3</td><td>Radxa Zero 3W</td><td>1</td><td>Radxa, RK3566, 1 GB LPDDR4 / 32 GB eMMC variant, Wi-Fi 6 / BT 5.4</td><td>not in our sources</td><td>https://radxa.com/products/zeros/zero3w/</td><td><code>i2c3.dts:46</code>; [presskit] 1 GB / 32 GB</td></tr><tr><td>B4</td><td>NP-F550 battery, 2600 mAh, 2S Li-ion</td><td>1 (+ spares)</td><td>Sony-format L-series; brand CANNOT DETERMINE</td><td>Charger Pack: <strong>2 batteries + dual charger €33 / $39</strong></td><td>https://store.pollen-robotics.com/products/charger-pack</td><td>[store-charger]; [presskit]</td></tr><tr><td>B5</td><td>Dual battery charger (NP-F)</td><td>1</td><td>CANNOT DETERMINE (specs, current)</td><td>included in B4&#x27;s €33</td><td>same</td><td>[store-charger]</td></tr><tr><td>B6</td><td>IMX219 camera board with M12 mount</td><td>1</td><td>Pi Camera v2 sensor class; exact board CANNOT DETERMINE</td><td>—</td><td>—</td><td><code>media:312</code>; meshes <code>m12_lens_holder</code>, <code>lens</code> [SPEC §4.3]</td></tr><tr><td>B7</td><td>M12 wide-angle lens</td><td>1</td><td>FOV CANNOT DETERMINE (&quot;still being finalised&quot;, press kit; community ~62°)</td><td>—</td><td>—</td><td>[R1 §7.1]</td></tr><tr><td>B8</td><td>22-pin MIPI CSI ribbon</td><td>1</td><td>length CANNOT DETERMINE</td><td>—</td><td>—</td><td>[Radxa] &quot;22-Pin MIPI CSI&quot;</td></tr><tr><td>B9</td><td>ToF module VL53L5CX <strong>or</strong> VL53L8CX, Stemma/Qwiic breakout</td><td>1</td><td>ST; generation CANNOT DETERMINE</td><td>—</td><td>—</td><td><code>tof:83-85</code>; HAT &quot;Stemma J5&quot; <code>i2c3.dts:10</code></td></tr><tr><td>B10</td><td>ball bearing 22 × 16 × 4</td><td>11</td><td>&quot;seeed_bearing&quot; (Onshape name); MPN CANNOT DETERMINE</td><td>—</td><td>—</td><td>[PL]; [C-fast]</td></tr><tr><td>B11</td><td>ball bearing 15 × 10 × 3</td><td>3</td><td>MPN CANNOT DETERMINE</td><td>—</td><td>—</td><td>[PL]; [C-fast]</td></tr><tr><td>B12</td><td>speaker</td><td>1</td><td>CANNOT DETERMINE (35 × 25 × 7 placeholder)</td><td>—</td><td>—</td><td>[SPEC §4.3]</td></tr><tr><td>B13</td><td>microphone(s)</td><td>≥1</td><td>CANNOT DETERMINE; codec input Mic3R mono [C-elec]</td><td>—</td><td>—</td><td>[R1 §7.4]</td></tr><tr><td>B14</td><td>NFC antennas + reader IC</td><td>2 + 1</td><td>CANNOT DETERMINE</td><td>—</td><td>—</td><td>[presskit]; no code</td></tr><tr><td>B15</td><td>REC indicator LED</td><td>1</td><td>CANNOT DETERMINE</td><td>—</td><td>—</td><td>[presskit]</td></tr><tr><td>B16</td><td>Bluetooth gamepad (Xbox-style layout)</td><td>1</td><td>model CANNOT DETERMINE</td><td>included with robot</td><td>https://store.pollen-robotics.com/products/microduck</td><td>[R1 §2]; <code>cheat:236-249</code></td></tr><tr><td>B17</td><td>USB-C cable</td><td>1</td><td>—</td><td>included</td><td>same</td><td>[R1 §2]</td></tr><tr><td>B18</td><td>Screws, inserts</td><td>see §4</td><td>M2 socket-head family (community)</td><td>—</td><td>—</td><td>[C-fast]; &quot;1 × Screw Pack&quot; in Dev Pack</td></tr><tr><td>B19</td><td>TPU / filament</td><td>see §2–3</td><td>—</td><td>—</td><td>—</td><td>—</td></tr></tbody></table></div>
+<h4>Custom PCBs (no design files exist — must be designed, not bought)</h4>
+<div class="tw"><table class="data"><thead><tr><th>#</th><th>board</th><th>what is on it</th><th>source</th></tr></thead><tbody><tr><td>P1</td><td>Pollen &quot;RPI Robot HAT&quot;, 65 × 30 mm Pi-Zero footprint</td><td>TLV320AIC3104 codec (I²C 0x18, I²S3, 12 MHz MCLK), BMI088 (dormant, 0x19/0x68), Stemma J5 for ToF, 10 kΩ pull-ups R12/R13, battery power path to the board, (inferred) half-duplex Dynamixel transceiver</td><td><code>i2c3.dts</code>; <code>aic.dts</code>; [C-elec]</td></tr><tr><td>P2</td><td><code>imu_to_dxl</code> v2</td><td>LSM6DSV16X + MCU acting as Dynamixel Protocol-2 slave ID 200 serving a 12-byte block at register 124 (20-byte diagnostic)</td><td><code>imu.rs:1-17</code>; <code>model.rs:78</code></td></tr><tr><td>P3</td><td>&quot;banana&quot; battery-contact PCB</td><td>contacts for the NP-F550, clamped by <code>banana_pcb_locker</code></td><td><code>PARTS.md</code> row 2</td></tr></tbody></table></div>
+<p>Chips on them, for pricing: TLV320AIC3104 (TI), LSM6DSV16X (ST), BMI088 (Bosch, could be omitted [C-elec]). Prices: not in our sources.</p>
+<h3>2. Printed parts</h3>
+<p>Material: SPEC.md §6 targets <strong>FDM</strong> for every custom part (walls ≥ 1.2 mm, M2 bosses, heat-set inserts where loaded); our finished parts are recorded as PLA/FDM (<code>ce-parts/microduck-{shin,trunk-base,banana-pcb-locker,power-support,upper-leg-left}/component.json</code>). Community print guide suggests PETG/ASA for hard parts [R2 §1c, ScrapMeta]. Whether Pollen&#x27;s shells are moulded: CANNOT DETERMINE (&quot;printed&quot; is the only word, press kit [R1 §12]). <strong>Grams per part: CANNOT DETERMINE</strong> until sliced — the mesh <em>solid</em> volume from [R2 §4.3] is given as the upper bound (solid, no infill); the <code>cad-print</code> skill on our rebuilt parts settles it.</p>
+<div class="tw"><table class="data"><thead><tr><th>slug</th><th>mesh</th><th>qty</th><th>colour role</th><th>solid vol cm³ [R2 §4.3]</th><th>rebuild</th></tr></thead><tbody><tr><td>microduck-trunk-base</td><td>trunk_base</td><td>1</td><td>internal</td><td>1.42</td><td>T1 PASS</td></tr><tr><td>microduck-banana-pcb-locker</td><td>banana_pcb_locker</td><td>1</td><td>internal</td><td>0.46</td><td>T1 PASS</td></tr><tr><td>microduck-power-support</td><td>power_support</td><td>1</td><td>internal</td><td>10.49</td><td>T1 PASS</td></tr><tr><td>microduck-trunk-shell-left</td><td>left_shell</td><td>1</td><td><strong>colourway</strong></td><td>11.4</td><td>no folder</td></tr><tr><td>microduck-trunk-shell-right</td><td>right_shell</td><td>1</td><td><strong>colourway</strong></td><td>11.4</td><td>no folder</td></tr><tr><td>microduck-yaw2roll</td><td>yaw2roll</td><td>2</td><td>grey</td><td>2.82</td><td>T0</td></tr><tr><td>microduck-bearing-roll</td><td>bearing_roll</td><td>2</td><td>dark</td><td>0.63</td><td>T0</td></tr><tr><td>microduck-hip-bracket</td><td>hip_l</td><td>2</td><td>light</td><td>4.53</td><td>T0</td></tr><tr><td>microduck-upper-leg-left</td><td>upper_leg_left</td><td>1</td><td>light</td><td>4.15</td><td>T1 PASS</td></tr><tr><td>microduck-upper-leg-right</td><td>upper_leg_right</td><td>1</td><td>light</td><td>4.15</td><td>T1 PASS</td></tr><tr><td>microduck-upper-leg-rigidity-plate</td><td>upper_leg_rigidity_plate</td><td>2</td><td>mint (1 mm — sheet? CANNOT DETERMINE)</td><td>0.75</td><td>T0</td></tr><tr><td>microduck-shin</td><td>leg</td><td>2</td><td>pale blue</td><td>3.41</td><td>T1 PASS</td></tr><tr><td>microduck-ankle-left / -right</td><td>ankle_left / right</td><td>1 + 1</td><td><strong>trim</strong> (orange/yellow)</td><td>7.88</td><td>T0</td></tr><tr><td>microduck-foot-left / -right</td><td>foot_left / right</td><td>1 + 1</td><td><strong>trim</strong></td><td>12.18</td><td>no folder</td></tr><tr><td>microduck-neck-plate</td><td>neck</td><td>2</td><td>light</td><td>0.40</td><td>no folder</td></tr><tr><td>microduck-neck-pitch-bracket</td><td>neck_pitch</td><td>1</td><td>dark</td><td>4.11</td><td>no folder</td></tr><tr><td>microduck-yaw-roll-motion</td><td>yaw_roll_motion</td><td>1</td><td>pale blue</td><td>4.56</td><td>no folder</td></tr><tr><td>microduck-motor-support</td><td>motor_support</td><td>1</td><td>internal</td><td>7.52</td><td>no folder</td></tr><tr><td>microduck-top-head-shell</td><td>top_head_shell</td><td>1</td><td><strong>colourway</strong></td><td>29.87</td><td>no folder</td></tr><tr><td>microduck-bottom-head-shell</td><td>bottom_head_shell</td><td>1</td><td><strong>trim</strong></td><td>23.80</td><td>no folder</td></tr><tr><td>microduck-face-part</td><td>face_part</td><td>1</td><td>dark</td><td>5.82</td><td>T0</td></tr><tr><td>microduck-eye-ring</td><td>noenoeil</td><td>1</td><td>dark</td><td>4.25</td><td>T0</td></tr><tr><td>microduck-m12-lens-holder</td><td>m12_lens_holder</td><td>1</td><td>dark — bought or printed CANNOT DETERMINE</td><td>1.10</td><td>T0</td></tr><tr><td>microduck-jaw</td><td>jaw</td><td>1</td><td><strong>trim</strong></td><td>9.36</td><td>no folder</td></tr></tbody></table></div>
+<p>Printed count: 24 slugs, <strong>31 pieces</strong>. Solid-volume sum ≈ 183 cm³ (sum of the column with quantities). Colourway hexes: Cream <code>#f7e6cb</code>, Graphite <code>#6c6a68</code>, Lavender <code>#bfa9cf</code>, Sky <code>#a9dbe8</code>; trim orange (Cream, Sky) or yellow (Graphite, Lavender) [presskit; R1 §12].</p>
+<h3>3. Soft parts (TPU — inferred)</h3>
+<div class="tw"><table class="data"><thead><tr><th>slug</th><th>mesh</th><th>qty</th><th>thickness</th><th>vol cm³</th><th>basis</th></tr></thead><tbody><tr><td>microduck-sole-left / -right</td><td>sole_left / right</td><td>1 + 1</td><td>12.9 mm (the foot contact geom, friction 1.0 in sim)</td><td>6.25 each</td><td>lilac/mint materials + &quot;soft&quot; names [SPEC §6]; community TPU 90–95A [R2 §1c]; ODM v2 used TPU 40 % infill for <code>foot_bottom_tpu</code> [R1 §16.1]</td></tr><tr><td>microduck-jaw-soft</td><td>jaw_soft</td><td>1</td><td>8.4 mm</td><td>18.6</td><td>same</td></tr><tr><td>microduck-soft-mouth-top</td><td>soft_mouth_top</td><td>1</td><td>3.3 mm</td><td>2.7</td><td>same</td></tr></tbody></table></div>
+<p>Material and durometer: <strong>CANNOT DETERMINE</strong> — Pollen has not said; a production unit&#x27;s lip would settle it. Grams: CANNOT DETERMINE until sliced.</p>
+<h3>4. Fasteners (community counts — flagged, not Pollen&#x27;s)</h3>
+<p>From <code>research/raw/community/replica_fastener-reconstruction.en.md</code> (hole fitting on the 47 meshes): ~146 structural M2 clearance holes + 60 on the servo bodies; depths 51 @ 0–3 mm, 24 @ 3–5 mm, 4 @ 8–12 mm.</p>
+<div class="tw"><table class="data"><thead><tr><th>spec</th><th>community buy estimate (incl. spares)</th><th>flag</th></tr></thead><tbody><tr><td>M2×4 socket head</td><td>60</td><td>lengths inferred from hole depth, not measured</td></tr><tr><td>M2×6 socket head</td><td>80</td><td></td></tr><tr><td>M2×8 socket head</td><td>40</td><td></td></tr><tr><td>M2×12 socket head</td><td>15</td><td></td></tr><tr><td>M2 nuts</td><td>50</td><td></td></tr><tr><td>M2 heat-set inserts</td><td>60</td><td>inserts vs tapped plastic on production: CANNOT DETERMINE</td></tr><tr><td>M2.5×6</td><td>20</td><td>the 20 Ø2.7/2.8 holes</td></tr></tbody></table></div>
+<p>Pollen corroboration: Dev Pack has &quot;1 × Screwdriver&quot; and &quot;1 × Screw Pack&quot; [store-devpack]. Prices: not in our sources.</p>
+<h3>5. Cost roll-up</h3>
+<h4>5.1 Reference points</h4>
+<div class="tw"><table class="data"><thead><tr><th></th><th>price</th><th>source</th></tr></thead><tbody><tr><td>Pollen Microduck, assembled, with gamepad + battery + cable</td><td><strong>$399</strong> / <strong>€340</strong> (before tax/shipping); heise €440.30 delivered</td><td>[store-microduck]; [R1 §13]</td></tr><tr><td>+ Charger Pack (2 batteries, dual charger)</td><td>$39 / €33</td><td>[store-charger]</td></tr><tr><td>+ Dev Pack (3 motors, 5 cables, 2 batteries, charger, 10 NFC tags, HF credit, screwdriver, screw pack)</td><td>$119 / €99.99</td><td>[store-devpack]</td></tr><tr><td>+ Accessory Pack (2 rollers, laser, NFC Polaroid, 10 tags, ball)</td><td>$39 / €33</td><td>[store-accessory]</td></tr><tr><td>&quot;Fully loaded&quot;</td><td>$596 / €505.99</td><td>[R1 §13]</td></tr><tr><td>Open Duck Mini v2 DIY BOM (14 × STS3215 servos, Pi Zero 2W, BNO055, 2 × 18650…)</td><td><strong>€398.10</strong> (lowest-price column €331.10)</td><td>[ODM] row 24</td></tr><tr><td>ODM v2 + &quot;expression package&quot; (speaker, LEDs, mic, projector, Pi camera)</td><td>€432.34 (lowest €365.34)</td><td>[ODM] row 34</td></tr></tbody></table></div>
+<h4>5.2 Our line-by-line, with what is and is not priced</h4>
+<div class="tw"><table class="data"><thead><tr><th>line</th><th>qty</th><th>published price in our sources</th><th>ODM v2 analogue [ODM]</th><th>note</th></tr></thead><tbody><tr><td>XL330 ×15</td><td>15</td><td>CANNOT DETERMINE</td><td>14 × Feetech STS3215 @ €14 = €196</td><td>XL330 is a different (dearer, HN: &quot;More expensive but better quality&quot; [R1 §4.1]) family</td></tr><tr><td>Radxa Zero 3W</td><td>1</td><td>CANNOT DETERMINE</td><td>Pi Zero 2W €26.08 + SD €10</td><td>Radxa has eMMC, no SD</td></tr><tr><td>NP-F550 ×1 + charger</td><td>1</td><td>€33 for 2 + charger (Pollen) → ≈ €16.50 per pack incl. charger share</td><td>2 × 18650 €10 + holder €4.99 + BMS €8.40 + UBEC €4 + switch €4.49 + USB-C charger €9.99 + jacks/XT30 €10 = €51.87</td><td>Microduck needs no BMS/UBEC/switch in the robot (pack has its own protection; no gauge, <code>model.rs:99-105</code>)</td></tr><tr><td><code>imu_to_dxl</code> v2 (LSM6DSV16X + MCU)</td><td>1</td><td>CANNOT DETERMINE (custom)</td><td>BNO055 €40 (&quot;Need to find a cheaper alternative&quot;)</td><td></td></tr><tr><td>Robot HAT (codec, ToF conn., power)</td><td>1</td><td>CANNOT DETERMINE (custom)</td><td>Waveshare bus servo adapter €5 + amplifier €5 + speaker €6 + mic €15</td><td></td></tr><tr><td>IMX219 + M12 lens</td><td>1</td><td>CANNOT DETERMINE</td><td>Pi camera €5 (&quot;Not integrated yet&quot;)</td><td></td></tr><tr><td>ToF VL53L5/8CX</td><td>1</td><td>CANNOT DETERMINE</td><td>none on ODM</td><td></td></tr><tr><td>bearings 22×16×4 ×11, 15×10×3 ×3</td><td>14</td><td>CANNOT DETERMINE</td><td>3 bearings €10.50 (€3.50 ea)</td><td></td></tr><tr><td>NFC ×2 + IC, REC LED, mics</td><td>—</td><td>CANNOT DETERMINE</td><td>LEDs €0.60, eye diffusers €0.64</td><td></td></tr><tr><td>gamepad</td><td>1</td><td>included by Pollen</td><td>not in ODM BOM (Xbox One pad)</td><td></td></tr><tr><td>filament PLA (~31 pieces)</td><td>—</td><td>CANNOT DETERMINE grams</td><td>&quot;Maybe 500 g&quot; €20</td><td>Microduck is 1/3 the mass of ODM (737 vs 2107 g [R2 §1c])</td></tr><tr><td>TPU (4 pieces)</td><td>—</td><td>CANNOT DETERMINE</td><td>&quot;negligeable&quot; €0</td><td></td></tr><tr><td>M2 screws / inserts</td><td>~146 + spares</td><td>CANNOT DETERMINE</td><td>M3 inserts €5.99</td><td></td></tr><tr><td>cables, sheath</td><td>—</td><td>CANNOT DETERMINE</td><td>sheath €9 + USB cables €13</td><td></td></tr><tr><td><strong>sourced subtotal</strong></td><td></td><td><strong>€16.50</strong> (battery share only)</td><td><strong>€398.10</strong></td><td></td></tr><tr><td><strong>unpriced lines</strong></td><td></td><td><strong>13 of 14</strong></td><td>0</td><td></td></tr></tbody></table></div>
+<p><strong>Verdict on the roll-up:</strong> with only the battery priced from a source, our parts cost is CANNOT DETERMINE. What settles it, in order of weight: (1) ROBOTIS XL330-M288-T list price × 15 — the servo line was 49 % of the ODM BOM; (2) Radxa Zero 3W 1 GB/32 GB price; (3) a quote for the two custom PCBs (P1, P2) at qty 1–10; (4) ST VL53L8CX breakout, IMX219 M12 board, bearings from a distributor; (5) slicing our rebuilt parts for filament grams. The structural comparison is already clear: Microduck removes the ODM&#x27;s BMS, UBEC, switch, foot switches (×4, €4), antenna servos (€6.66) and SD card, and adds a ToF, an NFC reader, a codec HAT and a second IMU; the servo family swap (STS3215 → XL330) is the dominant unknown.</p>
+<h3>6. What Pollen&#x27;s $399 buys that this BOM does not</h3>
+<p>Assembly, calibration, the per-robot voice, signed updates with rollback (<code>updaterd</code>), the pre-trained policies (Apache-2.0, free anyway), and the warranty (terms CANNOT DETERMINE [R1 §19]). Lead time on 2026-09-01: &quot;We can&#x27;t promise Christmas delivery for new microduck orders anymore&quot; [store banner, R1 §13]; eesel &quot;4 to 6 months&quot;.</p>
+</div>
+</body>
+</html>

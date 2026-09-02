@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Microduck — Manual</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opt_sz,wght@8..60,400;8..60,600;8..60,700&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root{
+    --paper:#ffffff;--card:#fbfaf7;--ink:#1a1a1a;--ink-2:#565656;--ink2:#565656;
+    --line:#d7d3ca;--hair:#d7d3ca;--rule:#1a1a1a;--accent:#243b53;--wire:#243b53;--wire-ink:#243b53;
+    --ready:#1c6b3c;--pass-ink:#1c6b3c;--partial:#8a5a00;--cd:#8a5a00;--cd-ink:#8a5a00;--no:#9a2b1e;--rail:#9a2b1e;
+    --mint:#1c6b3c;--yellow:#8a5a00;--yellow-ink:#8a5a00;--graphite:#333;--figbg:#fbfaf7;
+    --pass-bg:transparent;--cd-bg:transparent;--chip-bg:transparent;--chip:transparent;--mono-bg:#fbfaf7;--head:#f2efe8;
+    --serif:"Source Serif 4",Georgia,"Times New Roman",serif;
+    --sans:"Source Sans 3",-apple-system,"Segoe UI",sans-serif;
+    --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  }
+  *{box-sizing:border-box}
+  body{background:var(--paper);color:var(--ink);margin:0;font-family:var(--serif);font-size:16px;line-height:1.55}
+  .wrap{max-width:920px;margin:0 auto;padding:0 40px 110px}
+  a{color:var(--accent);text-decoration:none;border-bottom:1px solid rgba(36,59,83,.28)}
+  a:hover{border-bottom-color:var(--accent)}
+  h1,h2,h3{font-family:var(--serif);font-weight:700;line-height:1.15;text-wrap:balance;color:var(--ink)}
+  code,.mono{font-family:var(--mono);font-size:.86em}
+  .eyebrow{font-family:var(--sans);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-2)}
+  /* masthead (header.top / header.hero) */
+  header.top,header.hero{display:block;padding:46px 0 14px;border-bottom:2.5px solid var(--rule);border-top:none}
+  header.top h1,header.hero h1{font-size:40px;letter-spacing:-.01em;font-weight:700}
+  header.top .sub,header.hero .sub{font-size:15.5px;color:var(--ink-2);margin-top:8px;max-width:40em}
+  header.hero .hero-img,.hero-img{background:#fff;border:1px solid var(--hair);border-radius:0}
+  .rev{margin-top:14px;font-family:var(--mono);font-size:11.5px;color:var(--ink-2);display:flex;flex-wrap:wrap;gap:6px 22px}
+  /* stat bar → clean inline figures */
+  .statbar{display:flex;flex-wrap:wrap;gap:0;border-bottom:1px solid var(--hair);margin:6px 0}
+  .stat{padding:14px 26px 14px 0;margin-right:24px}
+  .stat b{display:block;font-family:var(--serif);font-weight:700;font-size:22px;font-variant-numeric:tabular-nums}
+  .stat span{font-family:var(--sans);font-size:12px;color:var(--ink-2)}
+  /* toc */
+  nav.toc{position:static;background:none;border:none;border-bottom:1px solid var(--hair);display:flex;flex-wrap:wrap;gap:0 20px;padding:10px 0;font-family:var(--sans)}
+  nav.toc a{color:var(--ink);border:none;font-size:12.5px;letter-spacing:.02em;padding:4px 0;text-transform:none}
+  nav.toc a:hover{color:var(--accent)}
+  /* sections */
+  section{margin-top:36px;padding-top:0}
+  section>h2{font-size:22px;padding-bottom:6px;border-bottom:1px solid var(--hair);margin:0 0 12px;font-weight:700}
+  section>h2 .n,section>h2 .sec-no{font-family:var(--mono);font-weight:600;color:var(--accent);font-size:18px;padding-right:12px}
+  .lede{color:var(--ink-2);max-width:40em;margin:2px 0 14px}
+  h3{font-size:16.5px;margin:20px 0 6px}
+  /* cards → framed notes */
+  .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+  .card{background:var(--card);border:1px solid var(--hair);border-radius:0;padding:15px 18px}
+  .card h3{font-size:14px;margin:0 0 6px;font-family:var(--sans);font-weight:600}
+  .card p{font-size:13.5px;margin:0}
+  /* tables — booktabs */
+  .tablewrap,.tw{overflow-x:auto;border:none;border-radius:0;background:none;margin:12px 0}
+  table{border-collapse:collapse;width:100%;font-size:13.5px;font-variant-numeric:tabular-nums}
+  th{font-family:var(--sans);font-weight:600;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-2);text-align:left;padding:7px 12px 6px;border-bottom:1px solid var(--rule);border-top:1.5px solid var(--rule);white-space:nowrap}
+  td{padding:6px 12px;border-bottom:1px solid var(--hair);vertical-align:top}
+  tr:last-child td{border-bottom:1.5px solid var(--rule)}
+  td.num,td.n{text-align:right;font-family:var(--mono);white-space:nowrap}
+  /* chips → plain status words, no fill */
+  .chip{display:inline;font-family:var(--sans);font-weight:600;font-size:11.5px;letter-spacing:.03em;text-transform:uppercase;padding:0;border-radius:0;background:none;border:none;white-space:nowrap}
+  .chip.pass{color:var(--ready)} .chip.cd{color:var(--partial)} .chip.buy{color:var(--ink-2)} .chip.rail{color:var(--no);border:none}
+  /* figures */
+  figure{margin:16px 0;border:1px solid var(--hair);background:var(--figbg);border-radius:0;padding:10px;overflow:hidden}
+  figure img{display:block;width:100%;border:1px solid var(--hair);background:#fff}
+  figcaption{font-family:var(--sans);font-size:12.5px;color:var(--ink-2);padding:8px 2px 2px;border:none}
+  /* diagram / wiring embed */
+  .diagram{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:18px;align-items:start}
+  .dia{background:#fff;border:1px solid var(--hair);border-radius:0;padding:12px;overflow-x:auto}
+  .wirebox{border:1px solid var(--hair);border-radius:0;background:#fff;overflow:auto;max-height:720px;padding:10px}
+  .wirebox svg{width:100%;height:auto;display:block}
+  /* notes / callouts */
+  .note{border-left:2px solid var(--accent);background:var(--figbg);padding:10px 15px;border-radius:0;font-size:14px;margin:12px 0}
+  .mono-block{font-family:var(--mono);font-size:12.5px;background:var(--figbg);border:1px solid var(--hair);border-radius:0;padding:12px 15px;overflow-x:auto;line-height:1.6}
+  /* steps */
+  .steps{display:grid;gap:8px}
+  .step{display:grid;grid-template-columns:40px 1fr;gap:12px;background:var(--figbg);border:1px solid var(--hair);border-radius:0;padding:12px 15px}
+  .step::before{font-family:var(--mono);font-weight:600;font-size:18px;color:var(--accent);text-align:right}
+  .step b{display:block} .step span{color:var(--ink-2);font-size:13px}
+  footer{margin-top:48px;padding-top:14px;border-top:2.5px solid var(--rule);font-family:var(--sans);font-size:12px;color:var(--ink-2);display:flex;flex-wrap:wrap;gap:6px 26px}
+  @media(max-width:680px){.wrap{padding:0 22px 70px}.diagram,.grid2{grid-template-columns:1fr}}
+  .backlink{font-family:var(--sans);font-size:12.5px;margin:16px 0 0}
+  .backlink a{border:none}
+  .wrap>h2:first-of-type,.wrap>h1:first-child{margin-top:8px}
+  h2{font-size:24px;margin:30px 0 10px;padding-bottom:5px;border-bottom:1px solid var(--hair)}
+  h3{font-size:18px;margin:22px 0 6px}
+  h4{font-size:15px;font-family:var(--sans);font-weight:600;margin:16px 0 4px}
+  p{max-width:42em;margin:0 0 11px}
+  ul,ol{max-width:42em;margin:8px 0;padding-left:24px}
+  li{margin:3px 0}
+  pre.code{font-family:var(--mono);font-size:12.5px;background:var(--figbg);border:1px solid var(--hair);padding:12px 15px;overflow-x:auto;line-height:1.55;white-space:pre}
+  blockquote{border-left:2px solid var(--accent);background:var(--figbg);margin:12px 0;padding:9px 16px;color:var(--ink);font-style:italic;max-width:42em}
+  hr{border:none;border-top:1px solid var(--hair);margin:22px 0}
+  strong{font-weight:700}
+  table.data td{max-width:none}
+
+</style>
+</head>
+<body>
+<div class="wrap"><p class="backlink"><a href="RELEASE.html">← Release dossier</a></p>
+<h2>Microduck construction manual</h2>
+<p><em>Authored 2026-09-02 from <code>joints.json</code> (14 MJCF hinges), <code>placements.json</code> (70 placements), <code>docs/PARTS.md</code>, <code>docs/ELECTRONICS-AND-SOFTWARE.md</code> §3.2 and <code>wiring/CABLES.md</code>. <code>bin/manual</code> was not used: it requires a <code>design.py</code> exposing <code>system()</code>, which this triad assembly does not have. Step order: trunk -&gt; hips -&gt; legs -&gt; neck -&gt; head, then wiring.</em></p>
+<p><strong>Fastener flag.</strong> No screw list is published by Pollen. Every M2 count below is <strong>community-derived</strong> (fanhao375/microduck-replica hole-fitting on the sim meshes — <code>docs/PARTS.md</code> §5): clearance Ø2.2/2.4, counterbore Ø4.4, tap Ø1.6. FDM holes print 0.1–0.3 mm undersize; drill or ream before assembly. Our rebuild uses M2 heat-set inserts where a thread is loaded (SPEC §6); production may tap the plastic — CANNOT DETERMINE.</p>
+<p><strong>Servo rule.</strong> Set each XL330&#x27;s ID (and baud 1 Mbps, <code>baud_rate = 3</code>) BEFORE installing it — the bus is one daisy chain and a duplicate ID means disassembly. IDs per <code>docs/ELECTRONICS-AND-SOFTWARE.md</code> §3.2 (<code>model.rs:15-19</code>). All servos: Dynamixel Protocol 2.0.</p>
+<p><strong>Bearing rule.</strong> All bearings are press-fit into printed seats (<code>ce-connections/press-fit-bearing-15x10x3</code>, and 22×16×4 seats). Press with even force on the OUTER race only (an arbor press or a vice with a socket); each 22×16×4 sits on a servo axis opposite the horn — the idler side.</p>
+<h3>Step 1 — Trunk (body <code>trunk_base</code>)</h3>
+<p>Parts: microduck-trunk-base ×1, microduck-power-support ×1, microduck-banana-pcb-locker ×1, banana contact PCB (P3), NP-F550 battery, 2 × XL330, 2 × bearing 22×16×4.</p>
+<ol><li>Press the two 22×16×4 hip-yaw idler bearings into trunk_base at</li></ol>
+<p>   (6, ±17.5, −5) mm body-frame.</p>
+<ol><li>Set servo IDs <strong>20</strong> (left hip yaw) and <strong>10</strong> (right hip yaw); bolt both</li></ol>
+<p>   XL330s hanging from trunk_base, output horns down (−z), horn axes through    world (6, ±17.5, 115). Each XL330 carries its own M2 pattern    (4 × Ø2.0 + 8 × Ø1.6).</p>
+<ol><li>Bolt power_support (the battery cradle) to trunk_base — power_support has</li></ol>
+<p>   8 × Ø1.6 M2 tap holes [community]; use M2×6 into inserts.</p>
+<ol><li>Clamp the banana contact PCB onto power_support&#x27;s Ø3.9 pins with</li></ol>
+<p>   banana_pcb_locker — 2 × M2 through its Ø2.17 eyes.</p>
+<ol><li>The NP-F550 slides into the cradle against the banana contacts (do not</li></ol>
+<p>   fit the battery until Step 8).</p>
+<p>Fasteners this step: trunk_base has 4 × Ø2.3 M2 clearance; ~10 × M2 total [community, flagged].</p>
+<h3>Step 2 — Hips (bodies <code>yaw2roll</code>/<code>bearing_roll</code>, <code>hip_l</code>/<code>hip_l_2</code>)</h3>
+<p>Parts per side: microduck-yaw2roll ×1, microduck-bearing-roll ×1, microduck-hip-bracket ×1, 2 × XL330, 2 × bearing 22×16×4.</p>
+<ol><li>Set servo IDs <strong>21</strong> (left hip roll) / <strong>11</strong> (right hip roll).</li><li>Press one 22×16×4 into yaw2roll/bearing_roll at (0, 16.5, 12.5)</li></ol>
+<p>   body-frame (hip-yaw idler side) and one into each hip bracket at    (21/25, 0, −18.5) (hip-roll idler side).</p>
+<ol><li>Fix yaw2roll to the hip-yaw servo horn (spline <code>spline-xl330-horn</code>);</li></ol>
+<p>   the bearing_roll 3 mm plate rides the idler bearing opposite the horn —    4 × M2 clearance [community].</p>
+<ol><li>Mount the hip-roll servo in yaw2roll (8 × M2 clearance + 6 c&#x27;bore</li></ol>
+<p>   [community]); roll axis +x at world (22.5, ±17.5, 102.5).</p>
+<ol><li>Fix hip-bracket (hip_l) to the hip-roll horn — 9 × M2 clearance +</li></ol>
+<p>   6 c&#x27;bore [community]. Hip-pitch axis +y at world (4, ±42.5, 102.5).</p>
+<ol><li>Mirror for the right side (IDs 10/11 set in Step 1/2).</li></ol>
+<h3>Step 3 — Legs (bodies <code>upper_leg_*</code>, <code>leg</code>, <code>ankle_*</code>)</h3>
+<p>Parts per side: microduck-upper-leg ×1, microduck-upper-leg-rigidity-plate ×1, microduck-shin ×1, microduck-ankle ×1, microduck-foot ×1, sole (TPU) ×1, 3 × XL330, 2 × bearing 22×16×4, 1 × bearing 15×10×3.</p>
+<ol><li>Set IDs <strong>22</strong> hip pitch, <strong>23</strong> knee, <strong>24</strong> ankle (left);</li></ol>
+<p>   <strong>12</strong>, <strong>13</strong>, <strong>14</strong> (right).</p>
+<ol><li>Fit the hip-pitch and knee servos into the upper-leg housing (2 XL330</li></ol>
+<p>   per thigh; knee axis −y at (−31.8, ±38.5, 80.5)); press one 22×16×4    into the upper leg at (22, 35.8, −4) body-frame.</p>
+<ol><li>Screw the 1 mm rigidity plate across the thigh — 4 × M2 clearance</li></ol>
+<p>   [community].</p>
+<ol><li>Hang the upper leg on the hip bracket: horn side to the hip-pitch servo,</li></ol>
+<p>   idler side on the bracket&#x27;s bearing.</p>
+<ol><li>Fit the ankle servo into the shin (<code>leg</code> body; the shin is the 8 mm</li></ol>
+<p>   stepped plate) — 6 × M2 clearance + 6 c&#x27;bore [community]; join shin to    knee horn + idler bearing.</p>
+<ol><li>Press the 15×10×3 bearing into the ankle bracket; fix ankle to the ankle</li></ol>
+<p>   servo horn (5 × M2 clearance + 5 c&#x27;bore [community]).</p>
+<ol><li>Screw the hard foot to the ankle (fixed, no joint), then fit the TPU</li></ol>
+<p>   sole onto the foot (the ground-contact part, friction surface down).</p>
+<h3>Step 4 — Neck (body <code>neck</code>, <code>neck_pitch</code>)</h3>
+<p>Parts: microduck-neck-plate ×2, microduck-neck-pitch-bracket ×1, 2 × XL330, 1 × bearing 22×16×4.</p>
+<ol><li>Set IDs <strong>30</strong> (neck pitch, bottom) and <strong>31</strong> (head pitch, top).</li><li>The two 2 mm neck plates span the 50 mm neck with a servo at each end —</li></ol>
+<p>   4 × M2 clearance per plate [community]. Neck-pitch axis −y at world    (26, 14.5, 152.4); head-pitch axis +y at (26, 14.5, 202.4).</p>
+<ol><li>Bolt the ID-30 servo to the trunk (horn to the neck plates); bolt ID-31</li></ol>
+<p>   at the top of the plates.</p>
+<ol><li>Press one 22×16×4 into neck_pitch at (0, 20.8, −14.5) body-frame — this</li></ol>
+<p>   is the head-yaw axis bearing; fix neck_pitch to the ID-31 horn — 12 × M2    clearance + 4 c&#x27;bore [community].</p>
+<h3>Step 5 — Head (bodies <code>yaw_roll_motion</code>, <code>jaw_soft</code>)</h3>
+<p>Parts: microduck-yaw-roll-motion ×1, microduck-motor-support ×1, microduck-face-part ×1, microduck-eye-ring ×1, m12 lens + holder, IMX219 camera board, ToF module, Radxa Zero 3W, Robot HAT, speaker, microduck-top-head-shell ×1, microduck-bottom-head-shell ×1, microduck-jaw ×1, jaw-soft + soft-mouth-top (TPU), 3 × XL330, 2 × bearing 22×16×4, 1 × bearing 15×10×3.</p>
+<ol><li>Set IDs <strong>32</strong> (head yaw), <strong>33</strong> (head roll), <strong>34</strong> (mouth).</li><li>Press two 22×16×4 bearings into yaw_roll_motion at x = −16 and +18</li></ol>
+<p>   body-frame (straddling the roll axis). Fix yaw_roll_motion onto the    head-yaw axis: ID-32 horn below, neck_pitch&#x27;s bearing above — 4 × M2    clearance + 6 c&#x27;bore [community]. Head-yaw axis +z at world (26, 0, 221.1).</p>
+<ol><li>Mount the ID-33 head-roll servo in yaw_roll_motion; roll axis −x at</li></ol>
+<p>   (8.1, 0, 235.6).</p>
+<ol><li>Fix motor_support (the head plate) to the ID-33 horn. It carries the</li></ol>
+<p>   ID-33/ID-34 servos and the electronics.</p>
+<ol><li>Press the 15×10×3 bearing for the mouth hinge (body jaw_soft); mount the</li></ol>
+<p>   jaw on the ID-34 horn + that bearing — 5 × M2 clearance [community].    Mouth range −5° (closed) … +30° (open).</p>
+<ol><li>Electronics onto motor_support / face: screw the M12 lens holder to the</li></ol>
+<p>   IMX219 board (3 × M2), thread the lens; camera sits behind face_part at    world (81.4, 0, 251.1), <strong>mounted upside down</strong> (rotation 180 in the    overlay). ToF at (81.4, 22.4, 249.1), 22.4 mm left of the camera. Fit    eye-ring into face_part (10 × M2 clearance + 4 tap [community]). Stack    the Robot HAT on the Radxa Zero 3W 40-pin header (board-to-board).</p>
+<ol><li>Fit the TPU lips: jaw_soft (8.4 mm) on the jaw, soft_mouth_top (3.3 mm)</li></ol>
+<p>   under the top shell.</p>
+<ol><li>Close the shells: bottom_head_shell (4 × M2), top_head_shell (3 × M2),</li></ol>
+<p>   trunk shells left/right (7 and 6+1 × M2) [all community].</p>
+<h3>Step 6 — Wiring (from <code>wiring/CABLES.md</code>, measured route floors + stated slack)</h3>
+<p>One Dynamixel bus, 1 Mbps, <code>/dev/ttyS2</code> on the Radxa via the HAT. Daisy chain order and cut lengths (JST EH 3-pin, X3P leads):</p>
+<p>HAT → id34 (35 mm) → id33 (60) → id32 (50) → <strong>id31 (165, crosses head yaw + head pitch — route at the servo flank, this length pays out the full ±170° sweep)</strong> → id30 (35) → imu200 board (120, crosses neck pitch) → splits: imu200 → id20 (40) → id21 (65) → id22 (125) → id23 (20) → id24 (95) and imu200 → id10 (40) → id11 (65) → id12 (125) → id13 (20) → id14 (95).</p>
+<p>Other looms: ToF↔HAT Stemma J5, JST-SH 4-pin, 35 mm (I²C 0x29); speaker↔HAT 70 mm; battery→HAT 340 mm (crosses all four neck/head joints — route with the bus loom); CSI ribbon Radxa→camera 15 mm floor (22-pin 0.5 mm FFC); mic loom CANNOT DETERMINE (part/placement unknown). Voltage-drop check at 1 A/servo, AWG 21: PASS (worst drop 0.55 V HAT→ankle).</p>
+<h3>Step 7 — Power-up and checks</h3>
+<ol><li>Fit the NP-F550. Servo bus VDD is battery-direct through the HAT (the</li></ol>
+<p>   runtime reads pack voltage as the servos&#x27; own supply).</p>
+<ol><li>Scan the bus: expect IDs 10–14, 20–24, 30–34 and <strong>200</strong> (imu_to_dxl).</li></ol>
+<p>   The runtime asserts <code>return_delay_time = 0</code>, <code>baud_rate = 3</code>,    <code>pwm_slope = 255</code>, <code>shutdown = 52</code> at boot.</p>
+<ol><li>Verify joint ranges against the MJCF (e.g. hip yaw −25…+30 left) before</li></ol>
+<p>   loading a policy.</p>
+<p><em>Torque figures: CANNOT DETERMINE — no torque spec exists in any fetched source; M2 into plastic: snug + a quarter turn.</em></p>
+</div>
+</body>
+</html>

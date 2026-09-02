@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Microduck — Spec</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opt_sz,wght@8..60,400;8..60,600;8..60,700&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root{
+    --paper:#ffffff;--card:#fbfaf7;--ink:#1a1a1a;--ink-2:#565656;--ink2:#565656;
+    --line:#d7d3ca;--hair:#d7d3ca;--rule:#1a1a1a;--accent:#243b53;--wire:#243b53;--wire-ink:#243b53;
+    --ready:#1c6b3c;--pass-ink:#1c6b3c;--partial:#8a5a00;--cd:#8a5a00;--cd-ink:#8a5a00;--no:#9a2b1e;--rail:#9a2b1e;
+    --mint:#1c6b3c;--yellow:#8a5a00;--yellow-ink:#8a5a00;--graphite:#333;--figbg:#fbfaf7;
+    --pass-bg:transparent;--cd-bg:transparent;--chip-bg:transparent;--chip:transparent;--mono-bg:#fbfaf7;--head:#f2efe8;
+    --serif:"Source Serif 4",Georgia,"Times New Roman",serif;
+    --sans:"Source Sans 3",-apple-system,"Segoe UI",sans-serif;
+    --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  }
+  *{box-sizing:border-box}
+  body{background:var(--paper);color:var(--ink);margin:0;font-family:var(--serif);font-size:16px;line-height:1.55}
+  .wrap{max-width:920px;margin:0 auto;padding:0 40px 110px}
+  a{color:var(--accent);text-decoration:none;border-bottom:1px solid rgba(36,59,83,.28)}
+  a:hover{border-bottom-color:var(--accent)}
+  h1,h2,h3{font-family:var(--serif);font-weight:700;line-height:1.15;text-wrap:balance;color:var(--ink)}
+  code,.mono{font-family:var(--mono);font-size:.86em}
+  .eyebrow{font-family:var(--sans);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-2)}
+  /* masthead (header.top / header.hero) */
+  header.top,header.hero{display:block;padding:46px 0 14px;border-bottom:2.5px solid var(--rule);border-top:none}
+  header.top h1,header.hero h1{font-size:40px;letter-spacing:-.01em;font-weight:700}
+  header.top .sub,header.hero .sub{font-size:15.5px;color:var(--ink-2);margin-top:8px;max-width:40em}
+  header.hero .hero-img,.hero-img{background:#fff;border:1px solid var(--hair);border-radius:0}
+  .rev{margin-top:14px;font-family:var(--mono);font-size:11.5px;color:var(--ink-2);display:flex;flex-wrap:wrap;gap:6px 22px}
+  /* stat bar → clean inline figures */
+  .statbar{display:flex;flex-wrap:wrap;gap:0;border-bottom:1px solid var(--hair);margin:6px 0}
+  .stat{padding:14px 26px 14px 0;margin-right:24px}
+  .stat b{display:block;font-family:var(--serif);font-weight:700;font-size:22px;font-variant-numeric:tabular-nums}
+  .stat span{font-family:var(--sans);font-size:12px;color:var(--ink-2)}
+  /* toc */
+  nav.toc{position:static;background:none;border:none;border-bottom:1px solid var(--hair);display:flex;flex-wrap:wrap;gap:0 20px;padding:10px 0;font-family:var(--sans)}
+  nav.toc a{color:var(--ink);border:none;font-size:12.5px;letter-spacing:.02em;padding:4px 0;text-transform:none}
+  nav.toc a:hover{color:var(--accent)}
+  /* sections */
+  section{margin-top:36px;padding-top:0}
+  section>h2{font-size:22px;padding-bottom:6px;border-bottom:1px solid var(--hair);margin:0 0 12px;font-weight:700}
+  section>h2 .n,section>h2 .sec-no{font-family:var(--mono);font-weight:600;color:var(--accent);font-size:18px;padding-right:12px}
+  .lede{color:var(--ink-2);max-width:40em;margin:2px 0 14px}
+  h3{font-size:16.5px;margin:20px 0 6px}
+  /* cards → framed notes */
+  .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+  .card{background:var(--card);border:1px solid var(--hair);border-radius:0;padding:15px 18px}
+  .card h3{font-size:14px;margin:0 0 6px;font-family:var(--sans);font-weight:600}
+  .card p{font-size:13.5px;margin:0}
+  /* tables — booktabs */
+  .tablewrap,.tw{overflow-x:auto;border:none;border-radius:0;background:none;margin:12px 0}
+  table{border-collapse:collapse;width:100%;font-size:13.5px;font-variant-numeric:tabular-nums}
+  th{font-family:var(--sans);font-weight:600;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-2);text-align:left;padding:7px 12px 6px;border-bottom:1px solid var(--rule);border-top:1.5px solid var(--rule);white-space:nowrap}
+  td{padding:6px 12px;border-bottom:1px solid var(--hair);vertical-align:top}
+  tr:last-child td{border-bottom:1.5px solid var(--rule)}
+  td.num,td.n{text-align:right;font-family:var(--mono);white-space:nowrap}
+  /* chips → plain status words, no fill */
+  .chip{display:inline;font-family:var(--sans);font-weight:600;font-size:11.5px;letter-spacing:.03em;text-transform:uppercase;padding:0;border-radius:0;background:none;border:none;white-space:nowrap}
+  .chip.pass{color:var(--ready)} .chip.cd{color:var(--partial)} .chip.buy{color:var(--ink-2)} .chip.rail{color:var(--no);border:none}
+  /* figures */
+  figure{margin:16px 0;border:1px solid var(--hair);background:var(--figbg);border-radius:0;padding:10px;overflow:hidden}
+  figure img{display:block;width:100%;border:1px solid var(--hair);background:#fff}
+  figcaption{font-family:var(--sans);font-size:12.5px;color:var(--ink-2);padding:8px 2px 2px;border:none}
+  /* diagram / wiring embed */
+  .diagram{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:18px;align-items:start}
+  .dia{background:#fff;border:1px solid var(--hair);border-radius:0;padding:12px;overflow-x:auto}
+  .wirebox{border:1px solid var(--hair);border-radius:0;background:#fff;overflow:auto;max-height:720px;padding:10px}
+  .wirebox svg{width:100%;height:auto;display:block}
+  /* notes / callouts */
+  .note{border-left:2px solid var(--accent);background:var(--figbg);padding:10px 15px;border-radius:0;font-size:14px;margin:12px 0}
+  .mono-block{font-family:var(--mono);font-size:12.5px;background:var(--figbg);border:1px solid var(--hair);border-radius:0;padding:12px 15px;overflow-x:auto;line-height:1.6}
+  /* steps */
+  .steps{display:grid;gap:8px}
+  .step{display:grid;grid-template-columns:40px 1fr;gap:12px;background:var(--figbg);border:1px solid var(--hair);border-radius:0;padding:12px 15px}
+  .step::before{font-family:var(--mono);font-weight:600;font-size:18px;color:var(--accent);text-align:right}
+  .step b{display:block} .step span{color:var(--ink-2);font-size:13px}
+  footer{margin-top:48px;padding-top:14px;border-top:2.5px solid var(--rule);font-family:var(--sans);font-size:12px;color:var(--ink-2);display:flex;flex-wrap:wrap;gap:6px 26px}
+  @media(max-width:680px){.wrap{padding:0 22px 70px}.diagram,.grid2{grid-template-columns:1fr}}
+  .backlink{font-family:var(--sans);font-size:12.5px;margin:16px 0 0}
+  .backlink a{border:none}
+  .wrap>h2:first-of-type,.wrap>h1:first-child{margin-top:8px}
+  h2{font-size:24px;margin:30px 0 10px;padding-bottom:5px;border-bottom:1px solid var(--hair)}
+  h3{font-size:18px;margin:22px 0 6px}
+  h4{font-size:15px;font-family:var(--sans);font-weight:600;margin:16px 0 4px}
+  p{max-width:42em;margin:0 0 11px}
+  ul,ol{max-width:42em;margin:8px 0;padding-left:24px}
+  li{margin:3px 0}
+  pre.code{font-family:var(--mono);font-size:12.5px;background:var(--figbg);border:1px solid var(--hair);padding:12px 15px;overflow-x:auto;line-height:1.55;white-space:pre}
+  blockquote{border-left:2px solid var(--accent);background:var(--figbg);margin:12px 0;padding:9px 16px;color:var(--ink);font-style:italic;max-width:42em}
+  hr{border:none;border-top:1px solid var(--hair);margin:22px 0}
+  strong{font-weight:700}
+  table.data td{max-width:none}
+
+</style>
+</head>
+<body>
+<div class="wrap"><p class="backlink"><a href="RELEASE.html">← Release dossier</a></p>
+<h2>SPEC — the Microduck we are rebuilding</h2>
+<p><em>Every number carries its source and a confidence tag. Nothing here is a claim that our rebuild is correct — this is what the rebuild is measured against. Tags: <strong>[P]</strong> published by Pollen (press kit, store, blog, docs); <strong>[M]</strong> measured by us off Pollen&#x27;s own MJCF + meshes with <code>ce-cad/bin/cad-mjcf</code> (reference/pollen-microduck-simulator/assembled/measured.json); <strong>[C]</strong> community-reported, not verified by us; <strong>[?]</strong> not published, our inference. Sources by number: research/01-product-and-specs.md §0.</em></p>
+<p>Leif, 2026-09-01: <em>&quot;It should match the images exactly.&quot;</em> The standard this document sets is stricter: match <strong>Pollen&#x27;s own geometry</strong>, which they published as 38 decimated STL meshes and one MJCF with every joint axis, range, mass and placement. The photos are the check on colour, finish and anything the decimated meshes lost.</p>
+<h3>1. Identity</h3>
+<div class="tw"><table class="data"><thead><tr><th></th><th></th><th></th></tr></thead><tbody><tr><td>product</td><td>Microduck, Pollen Robotics (Bordeaux)</td><td>[P]</td></tr><tr><td>price</td><td>$399 / €340; pre-orders opened 2026-08-27, Christmas 2026 target</td><td>[P]</td></tr><tr><td>lineage</td><td>commercial descendant of Open Duck Mini v2 (Antoine Pirrone): same joint naming and ID scheme (+34 for the mouth), different servo family, compute, IMU, battery; adds ToF, NFC, gripper beak; drops the two antenna servos</td><td>[P][C]</td></tr><tr><td>what is open</td><td>firmware + software Apache-2.0; MJCF + STL sim assets CC BY-SA-NC; <strong>mechanical CAD, BOM, PCBs: not published</strong> (&quot;do not describe the robot as open-source hardware&quot; — press kit)</td><td>[P]</td></tr><tr><td>Onshape source</td><td><code>cad.onshape.com/documents/804927696f06d877f3f1803e</code> (from the MJCF header; not readable without a key — API 403 measured 2026-09-01)</td><td>[M]</td></tr></tbody></table></div>
+<h3>2. Envelope and mass</h3>
+<div class="tw"><table class="data"><thead><tr><th>quantity</th><th>value</th><th>source</th></tr></thead><tbody><tr><td>standing height</td><td>25 cm</td><td>[P]</td></tr><tr><td>width</td><td>14 cm</td><td>[P]</td></tr><tr><td>mass</td><td>&quot;under 800 g&quot; / 780 g (store)</td><td>[P]</td></tr><tr><td>summed MJCF inertial mass</td><td><strong>737.2 g</strong> over 15 bodies</td><td>[M]</td></tr><tr><td>zero-pose envelope (legs straight, head level)</td><td><strong>144.1 × 141.0 × 264.0 mm</strong> (x × y × z), feet 13.5 mm above the free-joint ground</td><td>[M]</td></tr><tr><td>STAND keyframe</td><td>trunk z = 120 mm; hip_roll −5°, hip_pitch −26.24°, knee −0.28°, ankle +25.95°, neck_pitch +20°, head_pitch +20° (both legs mirrored) — the crouch that makes 264 mm into 25 cm</td><td>[P] microduck_rl scene xml</td></tr><tr><td>colourways</td><td>Cream <code>#f7e6cb</code> (orange trim/beak), Graphite <code>#6c6a68</code> (yellow), Lavender <code>#bfa9cf</code> (yellow), Sky <code>#a9dbe8</code> (orange) — &quot;four printed colourways&quot;</td><td>[P]</td></tr><tr><td>MJCF material colours</td><td>shells <code>0.8/0.8/0.8</code> grey-white; beak/feet/ankles <code>#fab601</code> yellow; soles + rigidity plate <code>#89dad3</code> mint; shin <code>#cfdbe5</code>; jaw_soft/mouth_top <code>#d9c1dd</code> lilac (soft parts)</td><td>[M]</td></tr></tbody></table></div>
+<h3>3. Kinematics — 15 motors, 14 policy DoF</h3>
+<p>Frame: MJCF world at zero pose — <strong>+x forward (beak), +y left, +z up</strong>, trunk_base body origin at (0, 0, 120). All mm / degrees. [M]</p>
+<div class="tw"><table class="data"><thead><tr><th>joint</th><th>ID</th><th>parent → child</th><th>axis origin (x, y, z)</th><th>world axis</th><th>range</th></tr></thead><tbody><tr><td>left_hip_yaw</td><td>20</td><td>trunk_base → yaw2roll</td><td>(6.0, 17.5, 115.0)</td><td>−z</td><td>−25 … +30</td></tr><tr><td>left_hip_roll</td><td>21</td><td>yaw2roll → hip_l</td><td>(22.5, 17.5, 102.5)</td><td>+x</td><td>±22</td></tr><tr><td>left_hip_pitch</td><td>22</td><td>hip_l → upper_leg_left</td><td>(4.0, 42.5, 102.5)</td><td>+y</td><td>±90</td></tr><tr><td>left_knee</td><td>23</td><td>upper_leg_left → leg</td><td>(−31.8, 38.5, 80.5)</td><td>−y</td><td>±90</td></tr><tr><td>left_ankle</td><td>24</td><td>leg → ankle_left</td><td>(−31.8, 64.5, 38.5)</td><td>+y</td><td>±90</td></tr><tr><td>neck_pitch</td><td>30</td><td>trunk_base → neck</td><td>(26.0, 14.5, 152.4)</td><td>−y</td><td>−90 … +60</td></tr><tr><td>head_pitch</td><td>31</td><td>neck → neck_pitch</td><td>(26.0, 14.5, 202.4)</td><td>+y</td><td>±90</td></tr><tr><td>head_yaw</td><td>32</td><td>neck_pitch → yaw_roll_motion</td><td>(26.0, 0, 221.1)</td><td>+z</td><td>±170</td></tr><tr><td>head_roll</td><td>33</td><td>yaw_roll_motion → jaw_soft (the head)</td><td>(8.1, 0, 235.6)</td><td>−x</td><td>±25</td></tr><tr><td>mouth</td><td>34</td><td>inside the head; not in the MJCF tree; −5° closed … +30° open</td><td>—</td><td>—</td><td>[P] runtime</td></tr><tr><td>right_*</td><td>10–14</td><td>mirror of left about y = 0</td><td></td><td></td><td></td></tr></tbody></table></div>
+<p>Derived link lengths [M]: hip-yaw axes 35 mm apart (y ±17.5); hip-pitch axes 85 mm apart (y ±42.5); knee axes y ±38.5; ankle axes y ±64.5 (shin offset 26 mm outboard of the knee). Thigh hip-pitch→knee: Δ(−35.8, −4, −22) mm = <strong>42.0 mm</strong> sagittal. Shin knee→ankle: Δ(0, +26, −42) = 42 mm vertical. Ankle→sole contact site Δ(0, −14.1, −23.8). Neck pitch→head pitch <strong>50 mm</strong>. Head-roll axis→mouth tip 77.7 mm forward. Camera site (81.4, 0, 251.1), ToF (81.4, 22.4, 249.1), head IMU (59.2, 0, 250.8), trunk IMU (−21, 0, 105.3).</p>
+<p>Body masses (MJCF inertials) [M]: trunk_base 199.2 g · yaw2roll 23.0 ×2 · hip_l 6.19 ×2 · upper_leg 48.2 ×2 · leg 21.6 ×2 · ankle 30.0 ×2 · neck 36.8 · neck_pitch 5.72 · yaw_roll_motion 48.6 · head (jaw_soft body) 188.8.</p>
+<h3>4. The parts — what each mesh is, measured</h3>
+<p>Every mesh&#x27;s bbox in its own file frame (mm), from <code>cad-mjcf meshes</code>. [M] <strong>Quantities</strong> are VISUAL placements (spec/mesh-placements.json); <code>measured.json</code>&#x27;s <code>placed</code> also counts collision copies of the same geom and over-counts leg / power_support / hip_l / sole (corrected 2026-09-01). Fasteners: the community hole analysis reads the whole robot as an <strong>M2 system</strong> (Ø2.2 clearance ×77, Ø4.4 c&#x27;bore ×28, Ø1.6 tap ×20, Ø2.7/2.8 ×20) [C]; bearings 22×16×4 (×11) and 15×10×3 (×3) — named &quot;seeed_bearing&quot; [M].</p>
+<h4>4.1 Trunk</h4>
+<div class="tw"><table class="data"><thead><tr><th>mesh</th><th>size</th><th>reading</th></tr></thead><tbody><tr><td>trunk_base</td><td>57.0 × 36.0 × 1.0 (a 3 mm plate in the community export)</td><td>the chassis plate both hip-yaw servos hang from</td></tr><tr><td>left_shell / right_shell</td><td>33.7 × 80.9 × 41.7 / 31.8 × 80.9 × 41.7</td><td>the two half-shells of the egg body, colourway part</td></tr><tr><td>power_support ×1</td><td>54.5 × 17.0 × 83.5</td><td>battery cradle (the MJCF&#x27;s second geom is its self-collision copy)</td></tr><tr><td>np_f970 (named)</td><td>38.6 × 20.6 × 70.8</td><td><strong>an NP-F550</strong> envelope (38.4 × 20.6 × 70.8), not F970; product spec says NP-F550</td></tr><tr><td>banana_pcb_locker</td><td>53.5 × 3.8 × 6.6</td><td>PCB retaining bar</td></tr><tr><td>xl330 ×2 (hip yaw)</td><td>29.0 × 20.0 × 34.0</td><td>XL330 incl. horn; datasheet body 20.0 × 34.0 × 26.0</td></tr></tbody></table></div>
+<h4>4.2 Leg (×2, mirrored)</h4>
+<div class="tw"><table class="data"><thead><tr><th>mesh</th><th>size</th><th>reading</th></tr></thead><tbody><tr><td>yaw2roll</td><td>23.0 × 25.8 × 20.5</td><td>hip-yaw output link carrying the roll servo</td></tr><tr><td>bearing_roll</td><td>23.0 × 3.0 × 40.0</td><td>the idler plate opposite the yaw servo horn</td></tr><tr><td>hip_l</td><td>32.5 × 34.5 × 19.0</td><td>hip-roll output bracket (used ×4 counting collision)</td></tr><tr><td>upper_leg_left/right</td><td>28.0 × 47.7 × 61.0</td><td>thigh housing holding the hip-pitch and knee servos</td></tr><tr><td>upper_leg_rigidity_plate</td><td>1.0 × 45.0 × 58.1</td><td>a 1 mm side plate stiffening the thigh (mint)</td></tr><tr><td>leg ×1 per side</td><td>8.0 × 20.0 × 58.0</td><td>shin plate 8 mm thick (the MJCF&#x27;s second <code>leg</code> geom is the self-collision copy of the same one — 2 per robot)</td></tr><tr><td>xl330 ×3 per leg</td><td></td><td>hip roll, hip pitch, knee — plus ankle servo in the shin</td></tr><tr><td>ankle_left/right</td><td>39.5 × 36.5 × 25.5</td><td>ankle bracket (yellow)</td></tr><tr><td>foot_left/right</td><td>40.1 × 54.0 × 16.9</td><td>foot (yellow)</td></tr><tr><td>sole_left/right</td><td>41.1 × 54.0 × 12.9</td><td>sole, mint, the contact geom</td></tr></tbody></table></div>
+<h4>4.3 Neck and head</h4>
+<div class="tw"><table class="data"><thead><tr><th>mesh</th><th>size</th><th>reading</th></tr></thead><tbody><tr><td>neck ×2</td><td>2.0 × 20.0 × 11.0</td><td>two 2 mm plates spanning the 50 mm neck (servo at each end)</td></tr><tr><td>neck_pitch</td><td>35.0 × 18.0 × 27.7</td><td>head-pitch output bracket</td></tr><tr><td>yaw_roll_motion</td><td>34.0 × 35.9 × 22.5</td><td>head-yaw output carrying the roll servo</td></tr><tr><td>motor_support</td><td>73.5 × 54.2 × 18.8</td><td>the plate inside the head that holds the roll/mouth servos + electronics</td></tr><tr><td>top_head_shell</td><td>91.6 × 122.7 × 46.3</td><td>the dome (colourway)</td></tr><tr><td>bottom_head_shell</td><td>91.7 × 116.7 × 20.1</td><td>the yellow underside of the head</td></tr><tr><td>face_part</td><td>87.7 × 12.5 × 44.6</td><td>the front face plate with eyes/camera aperture</td></tr><tr><td>noenoeil</td><td>29.9 × 9.5 × 29.9</td><td>eye part</td></tr><tr><td>jaw</td><td>91.4 × 68.7 × 29.4</td><td>the lower beak (yellow), mouth DoF</td></tr><tr><td>jaw_soft / soft_mouth_top</td><td>87.7 × 32.2 × 8.4 / 87.8 × 32.6 × 3.3</td><td>soft lips (lilac — TPU/soft)</td></tr><tr><td>lens / m12_lens_holder</td><td>16.9 × 18.9 × 16.9 / 23.1 × 14.8 × 16.0</td><td>M12 lens + holder → IMX219 sensor board</td></tr><tr><td>pcb__raspberry_pi_zero_2_w</td><td>65.0 × 1.6 × 30.0</td><td><strong>Radxa Zero 3W</strong> footprint (same as Pi Zero) — compute lives IN THE HEAD</td></tr><tr><td>elec_rpi_robot_hat_pcb</td><td>65.0 × 30.0 × 0.84</td><td>Pollen &quot;RPI Robot HAT&quot; (codec, ToF, dormant BMI088)</td></tr><tr><td>speaker</td><td>35.0 × 25.0 × 7.0</td><td>placeholder box, 12 tris</td></tr></tbody></table></div>
+<h3>5. Electronics (what the rebuild must house)</h3>
+<div class="tw"><table class="data"><thead><tr><th>item</th><th>fact</th><th>source</th></tr></thead><tbody><tr><td>servos</td><td>15 × Dynamixel XL330 (sub-variant M288 vs M077 <strong>not stated</strong>; community assumes M288-T). 18 g each; 20.0 × 34.0 × 26.0 mm; 3.7–6.0 V datasheet, run here at 6.6–8.2 V pack; one 1 Mbps TTL half-duplex bus on <code>/dev/ttyS2</code></td><td>[P][?]</td></tr><tr><td>compute</td><td>Radxa Zero 3W (RK3566, 1 GB, 32 GB eMMC, Wi-Fi 6/BT 5.4, 65 × 30 mm) — device-tree <code>radxa,zero-3w</code></td><td>[P]</td></tr><tr><td>HAT</td><td>Pollen &quot;RPI Robot HAT&quot;, 65 × 30 mm, TLV320AIC3104 codec, VL53L5CX/L8CX 8×8 ToF on I²C3, dormant BMI088, half-duplex transceiver, battery-to-board power</td><td>[P] source</td></tr><tr><td>control IMU</td><td>LSM6DSV16X on <code>imu_to_dxl</code> v2 board, Dynamixel ID 200 — trunk site at (−21, 0, 105.3)</td><td>[P][M]</td></tr><tr><td>camera</td><td>IMX219 sensor, M12 wide-angle lens, mounted upside down</td><td>[P]</td></tr><tr><td>battery</td><td>NP-F550 2S Li-ion 2600 mAh, removable, 6.6–8.2 V window, ~1 h</td><td>[P]</td></tr><tr><td>audio</td><td>mic(s) + speaker (35 × 25 × 7 placeholder)</td><td>[P][M]</td></tr><tr><td>NFC</td><td>two antennas: head and beak; IC not published</td><td>[P]</td></tr></tbody></table></div>
+<h3>6. Manufacturing (published vs inferred)</h3>
+<ul><li>&quot;Four <strong>printed</strong> colourways&quot; is the only word about process [P]. The</li></ul>
+<p>  meshes show 1–3 mm plates, 2 mm shell walls and printed-style bosses;   our rebuild targets <strong>FDM print</strong> for every custom part, walls ≥ 1.2 mm,   bosses for <strong>M2</strong> screws, and heat-set inserts where a thread is loaded [?].</p>
+<ul><li>Soft parts (jaw_soft, soft_mouth_top): TPU [?].</li><li>Bearings: 22×16×4 (MR-style thin section) ×11, 15×10×3 ×3 [M].</li></ul>
+<h3>7. What we do NOT know (CANNOT DETERMINE until measured on a unit)</h3>
+<p>Official CAD/STEP, drawings, BOM; PCB schematics; XL330 sub-variant; screw lengths and insert types; whether shells are moulded; soft-part material; speaker/mic part numbers; NFC IC; harness routing through the neck yaw; charger specs; real weight breakdown. Each is listed with what would settle it in research/01-product-and-specs.md §19.</p>
+<h3>8. Acceptance — how &quot;matches&quot; is measured</h3>
+<p>For every rebuilt custom part: <code>cecad.meshcompare.compare(ours, theirs)</code> against the reference mesh — <strong>PASS at p95 surface distance ≤ 1.0 mm both ways and bbox within 1.5 mm per axis</strong> (the decimation error of their export is the floor). For the assembly: every joint axis within 0.5 mm and 0.5° of the table in §3, via <code>cad-mjcf tree</code> on our exported model. For the look: photo-match overlays of <code>cecad.meshview</code> silhouettes on the press photos (images/). Results land in <code>evidence/ledger.jsonl</code>.</p>
+<h3>Status</h3>
+<ul><li>2026-09-01: reference material collected and measured; tools written</li></ul>
+<p>  (<code>cad-mjcf</code>, <code>meshview</code>, <code>meshcompare</code>, <code>Part.loft/ellipsoid/shell/from_mesh</code>,   multi-root triad); this spec. Next: blueprint (P12) and the part-by-part   rebuild.</p>
+</div>
+</body>
+</html>

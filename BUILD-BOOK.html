@@ -5,79 +5,82 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Microduck Build Book</title>
 <style>
-:root{
-  --paper:#faf8f4; --card:#ffffff; --ink:#22262b; --ink-2:#5a6069; --line:#e3ded4;
-  --yellow:#e8a802; --yellow-ink:#7a5800; --mint:#4fae9f; --graphite:#33383f;
-  --pass-bg:#e5f2e5; --pass-ink:#2c6e33; --cd-bg:#faf0d7; --cd-ink:#8a6510;
-  --chip-bg:#f1ede4; --mono-bg:#f4f1ea;
-}
-:root:not([data-theme="light"]){}
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-    --paper:#191c20; --card:#22262c; --ink:#e8e6e1; --ink-2:#a0a4ab; --line:#363b42;
-    --yellow:#f5b301; --yellow-ink:#f5c95e; --mint:#6cc7b8; --graphite:#c8ccd2;
-    --pass-bg:#233723; --pass-ink:#8fce96; --cd-bg:#3a311f; --cd-ink:#e3bd62;
-    --chip-bg:#2b3037; --mono-bg:#1f2329;
+  :root{
+    --paper:#ffffff;--card:#fbfaf7;--ink:#1a1a1a;--ink-2:#565656;--ink2:#565656;
+    --line:#d7d3ca;--hair:#d7d3ca;--rule:#1a1a1a;--accent:#243b53;--wire:#243b53;--wire-ink:#243b53;
+    --ready:#1c6b3c;--pass-ink:#1c6b3c;--partial:#8a5a00;--cd:#8a5a00;--cd-ink:#8a5a00;--no:#9a2b1e;--rail:#9a2b1e;
+    --mint:#1c6b3c;--yellow:#8a5a00;--yellow-ink:#8a5a00;--graphite:#333;--figbg:#fbfaf7;
+    --pass-bg:transparent;--cd-bg:transparent;--chip-bg:transparent;--chip:transparent;--mono-bg:#fbfaf7;--head:#f2efe8;
+    --serif:"Source Serif 4",Georgia,"Times New Roman",serif;
+    --sans:"Source Sans 3",-apple-system,"Segoe UI",sans-serif;
+    --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
   }
-}
-:root[data-theme="dark"]{
-  --paper:#191c20; --card:#22262c; --ink:#e8e6e1; --ink-2:#a0a4ab; --line:#363b42;
-  --yellow:#f5b301; --yellow-ink:#f5c95e; --mint:#6cc7b8; --graphite:#c8ccd2;
-  --pass-bg:#233723; --pass-ink:#8fce96; --cd-bg:#3a311f; --cd-ink:#e3bd62;
-  --chip-bg:#2b3037; --mono-bg:#1f2329;
-}
-html{scroll-behavior:smooth}
-@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}}
-body{background:var(--paper); color:var(--ink); font-family:"IBM Plex Sans",-apple-system,"Segoe UI",sans-serif; font-size:15.5px; line-height:1.55; margin:0}
-.wrap{max-width:1080px; margin:0 auto; padding:0 28px 90px}
-a{color:var(--mint)}
-h1,h2,h3{font-family:"Archivo","IBM Plex Sans",sans-serif; text-wrap:balance; margin:0}
-code,.mono{font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:.92em}
-.eyebrow{font-family:"IBM Plex Mono",monospace; font-size:11.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--yellow-ink)}
-header.hero{display:grid; grid-template-columns:minmax(300px,1.05fr) minmax(280px,1fr); gap:36px; align-items:center; padding:56px 0 30px; border-bottom:3px solid var(--ink)}
-header.hero h1{font-size:clamp(34px,5vw,54px); font-weight:800; letter-spacing:-.015em; line-height:1.02}
-header.hero .sub{margin-top:14px; color:var(--ink-2); max-width:52ch}
-.hero-img{background:var(--graphite); border:1px solid var(--line); border-radius:6px; overflow:hidden}
-.hero-img img{display:block; width:100%}
-.statbar{display:flex; flex-wrap:wrap; gap:0; border-bottom:1px solid var(--line); margin-bottom:8px}
-.stat{padding:16px 26px 16px 0; margin-right:26px}
-.stat b{display:block; font-family:"Archivo",sans-serif; font-size:24px; font-variant-numeric:tabular-nums}
-.stat span{font-size:12.5px; color:var(--ink-2)}
-nav.toc{position:sticky; top:0; z-index:5; background:var(--paper); border-bottom:1px solid var(--line); display:flex; gap:2px; overflow-x:auto; padding:6px 0}
-nav.toc a{color:var(--ink-2); text-decoration:none; font-family:"IBM Plex Mono",monospace; font-size:12px; letter-spacing:.05em; padding:7px 11px; border-radius:4px; white-space:nowrap}
-nav.toc a:hover,nav.toc a:focus-visible{background:var(--chip-bg); color:var(--ink); outline:none}
-section{padding-top:44px}
-section>h2{font-size:26px; font-weight:800; letter-spacing:-.01em; padding-bottom:8px; margin-bottom:4px}
-section>h2 .sec-no{color:var(--yellow); padding-right:8px}
-.lede{color:var(--ink-2); max-width:70ch; margin:0 0 18px}
-.grid2{display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:18px}
-.card{background:var(--card); border:1px solid var(--line); border-radius:6px; padding:18px 20px}
-.card h3{font-size:15px; margin-bottom:8px}
-figure{margin:0; background:var(--card); border:1px solid var(--line); border-radius:6px; overflow:hidden}
-figure img{display:block; width:100%}
-figcaption{font-size:12.5px; color:var(--ink-2); padding:9px 13px; border-top:1px solid var(--line)}
-.tablewrap{overflow-x:auto; border:1px solid var(--line); border-radius:6px; background:var(--card)}
-table{border-collapse:collapse; width:100%; font-size:13.5px}
-th{font-family:"IBM Plex Mono",monospace; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-2); text-align:left; padding:10px 12px; border-bottom:2px solid var(--line); white-space:nowrap}
-td{padding:8px 12px; border-bottom:1px solid var(--line); vertical-align:top}
-tr:last-child td{border-bottom:none}
-td.num{font-family:"IBM Plex Mono",monospace; font-variant-numeric:tabular-nums; white-space:nowrap}
-.chip{display:inline-block; font-family:"IBM Plex Mono",monospace; font-size:10.5px; letter-spacing:.06em; padding:2px 8px; border-radius:99px; white-space:nowrap}
-.chip.pass{background:var(--pass-bg); color:var(--pass-ink)}
-.chip.cd{background:var(--cd-bg); color:var(--cd-ink)}
-.chip.buy{background:var(--chip-bg); color:var(--ink-2)}
-.dia{background:var(--card); border:1px solid var(--line); border-radius:6px; padding:14px; overflow-x:auto}
-pre.mermaid{margin:0; display:flex; justify-content:center}
-.steps{counter-reset:step; display:grid; gap:10px}
-.step{display:grid; grid-template-columns:44px 1fr; gap:14px; background:var(--card); border:1px solid var(--line); border-radius:6px; padding:14px 16px}
-.step::before{counter-increment:step; content:counter(step); font-family:"Archivo",sans-serif; font-weight:800; font-size:22px; color:var(--yellow); text-align:right}
-.step b{display:block}
-.step span{color:var(--ink-2); font-size:13.5px}
-.note{border-left:3px solid var(--yellow); background:var(--mono-bg); padding:12px 16px; border-radius:0 6px 6px 0; font-size:13.5px; margin:14px 0}
-footer{margin-top:60px; padding-top:18px; border-top:3px solid var(--ink); font-size:13px; color:var(--ink-2); display:flex; flex-wrap:wrap; gap:8px 26px}
-@media (max-width:760px){header.hero{grid-template-columns:1fr}}
+  *{box-sizing:border-box}
+  body{background:var(--paper);color:var(--ink);margin:0;font-family:var(--serif);font-size:16px;line-height:1.55}
+  .wrap{max-width:920px;margin:0 auto;padding:0 40px 110px}
+  a{color:var(--accent);text-decoration:none;border-bottom:1px solid rgba(36,59,83,.28)}
+  a:hover{border-bottom-color:var(--accent)}
+  h1,h2,h3{font-family:var(--serif);font-weight:700;line-height:1.15;text-wrap:balance;color:var(--ink)}
+  code,.mono{font-family:var(--mono);font-size:.86em}
+  .eyebrow{font-family:var(--sans);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-2)}
+  /* masthead (header.top / header.hero) */
+  header.top,header.hero{display:block;padding:46px 0 14px;border-bottom:2.5px solid var(--rule);border-top:none}
+  header.top h1,header.hero h1{font-size:40px;letter-spacing:-.01em;font-weight:700}
+  header.top .sub,header.hero .sub{font-size:15.5px;color:var(--ink-2);margin-top:8px;max-width:40em}
+  header.hero .hero-img,.hero-img{background:#fff;border:1px solid var(--hair);border-radius:0}
+  .rev{margin-top:14px;font-family:var(--mono);font-size:11.5px;color:var(--ink-2);display:flex;flex-wrap:wrap;gap:6px 22px}
+  /* stat bar → clean inline figures */
+  .statbar{display:flex;flex-wrap:wrap;gap:0;border-bottom:1px solid var(--hair);margin:6px 0}
+  .stat{padding:14px 26px 14px 0;margin-right:24px}
+  .stat b{display:block;font-family:var(--serif);font-weight:700;font-size:22px;font-variant-numeric:tabular-nums}
+  .stat span{font-family:var(--sans);font-size:12px;color:var(--ink-2)}
+  /* toc */
+  nav.toc{position:static;background:none;border:none;border-bottom:1px solid var(--hair);display:flex;flex-wrap:wrap;gap:0 20px;padding:10px 0;font-family:var(--sans)}
+  nav.toc a{color:var(--ink);border:none;font-size:12.5px;letter-spacing:.02em;padding:4px 0;text-transform:none}
+  nav.toc a:hover{color:var(--accent)}
+  /* sections */
+  section{margin-top:36px;padding-top:0}
+  section>h2{font-size:22px;padding-bottom:6px;border-bottom:1px solid var(--hair);margin:0 0 12px;font-weight:700}
+  section>h2 .n,section>h2 .sec-no{font-family:var(--mono);font-weight:600;color:var(--accent);font-size:18px;padding-right:12px}
+  .lede{color:var(--ink-2);max-width:40em;margin:2px 0 14px}
+  h3{font-size:16.5px;margin:20px 0 6px}
+  /* cards → framed notes */
+  .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+  .card{background:var(--card);border:1px solid var(--hair);border-radius:0;padding:15px 18px}
+  .card h3{font-size:14px;margin:0 0 6px;font-family:var(--sans);font-weight:600}
+  .card p{font-size:13.5px;margin:0}
+  /* tables — booktabs */
+  .tablewrap,.tw{overflow-x:auto;border:none;border-radius:0;background:none;margin:12px 0}
+  table{border-collapse:collapse;width:100%;font-size:13.5px;font-variant-numeric:tabular-nums}
+  th{font-family:var(--sans);font-weight:600;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-2);text-align:left;padding:7px 12px 6px;border-bottom:1px solid var(--rule);border-top:1.5px solid var(--rule);white-space:nowrap}
+  td{padding:6px 12px;border-bottom:1px solid var(--hair);vertical-align:top}
+  tr:last-child td{border-bottom:1.5px solid var(--rule)}
+  td.num,td.n{text-align:right;font-family:var(--mono);white-space:nowrap}
+  /* chips → plain status words, no fill */
+  .chip{display:inline;font-family:var(--sans);font-weight:600;font-size:11.5px;letter-spacing:.03em;text-transform:uppercase;padding:0;border-radius:0;background:none;border:none;white-space:nowrap}
+  .chip.pass{color:var(--ready)} .chip.cd{color:var(--partial)} .chip.buy{color:var(--ink-2)} .chip.rail{color:var(--no);border:none}
+  /* figures */
+  figure{margin:16px 0;border:1px solid var(--hair);background:var(--figbg);border-radius:0;padding:10px;overflow:hidden}
+  figure img{display:block;width:100%;border:1px solid var(--hair);background:#fff}
+  figcaption{font-family:var(--sans);font-size:12.5px;color:var(--ink-2);padding:8px 2px 2px;border:none}
+  /* diagram / wiring embed */
+  .diagram{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:18px;align-items:start}
+  .dia{background:#fff;border:1px solid var(--hair);border-radius:0;padding:12px;overflow-x:auto}
+  .wirebox{border:1px solid var(--hair);border-radius:0;background:#fff;overflow:auto;max-height:720px;padding:10px}
+  .wirebox svg{width:100%;height:auto;display:block}
+  /* notes / callouts */
+  .note{border-left:2px solid var(--accent);background:var(--figbg);padding:10px 15px;border-radius:0;font-size:14px;margin:12px 0}
+  .mono-block{font-family:var(--mono);font-size:12.5px;background:var(--figbg);border:1px solid var(--hair);border-radius:0;padding:12px 15px;overflow-x:auto;line-height:1.6}
+  /* steps */
+  .steps{display:grid;gap:8px}
+  .step{display:grid;grid-template-columns:40px 1fr;gap:12px;background:var(--figbg);border:1px solid var(--hair);border-radius:0;padding:12px 15px}
+  .step::before{font-family:var(--mono);font-weight:600;font-size:18px;color:var(--accent);text-align:right}
+  .step b{display:block} .step span{color:var(--ink-2);font-size:13px}
+  footer{margin-top:48px;padding-top:14px;border-top:2.5px solid var(--rule);font-family:var(--sans);font-size:12px;color:var(--ink-2);display:flex;flex-wrap:wrap;gap:6px 26px}
+  @media(max-width:680px){.wrap{padding:0 22px 70px}.diagram,.grid2{grid-template-columns:1fr}}
+
 </style>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@700;800&family=IBM+Plex+Sans:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opt_sz,wght@8..60,400;8..60,600;8..60,700&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 </head>
 <body>
 
@@ -111,7 +114,7 @@ footer{margin-top:60px; padding-top:18px; border-top:3px solid var(--ink); font-
     <figure><img src="out/sim/walk.gif" alt="Walking (live GIF from out/sim/walk.gif)"><figcaption>alpha_walking — 0.79 m in 8 s at 0.25 m/s command, max tilt 4.1°, zero self-collisions. Full videos: <code>out/sim/walk.mp4</code>, <code>walk.gif</code></figcaption></figure>
     <figure><img src="out/sim/frames/sitstand_ours_t04.0s.png" alt="Sitting, t = 4 s"><figcaption>alpha_sitstand — sits to trunk z 59 mm and stands back up. <code>out/sim/sitstand.mp4</code>, <code>stand.mp4</code></figcaption></figure>
   </div>
-  <p style="font-size:12.5px;color:var(--ink-2)">Live files: <a href="out/sim/walk.mp4">walk.mp4</a> · <a href="out/sim/sitstand.mp4">sitstand.mp4</a> · <a href="out/sim/stand.mp4">stand.mp4</a> · <a href="out/sim/report.md">report.md</a> · <a href="sim/README.md">how to run</a></p>
+  <p style="font-size:12.5px;color:var(--ink-2)">Live files: <a href="out/sim/walk.mp4">walk.mp4</a> · <a href="out/sim/sitstand.mp4">sitstand.mp4</a> · <a href="out/sim/stand.mp4">stand.mp4</a> · <a href="out/sim/report.html">report.md</a> · <a href="sim/README.html">how to run</a></p>
   <div class="note">Measured honestly: the 0.15 m/s command sits inside the policy's stand-still band (swept 0.05–0.40 m/s); videos use 0.25 m/s, the simulator's own default. Speed tracks at ~40 % of command because MJCF position actuators stand in for the BAM actuator model the policy was trained with — same substitution Pollen's own reference script makes.</div>
 </section>
 
@@ -176,7 +179,7 @@ flowchart TB
 
 </pre>
   </div>
-  <p style="font-size:12.5px;color:var(--ink-2)">Live files: <a href="docs/ELECTRONICS-AND-SOFTWARE.md">ELECTRONICS-AND-SOFTWARE.md</a> · <a href="docs/PARTS.md">PARTS.md</a> · <a href="electronics/">electronics/</a></p>
+  <p style="font-size:12.5px;color:var(--ink-2)">Live files: <a href="docs/ELECTRONICS-AND-SOFTWARE.html">ELECTRONICS-AND-SOFTWARE.md</a> · <a href="docs/PARTS.html">PARTS.md</a> · <a href="electronics/">electronics/</a></p>
   <h3 style="margin:22px 0 8px">The servo bus, exactly</h3>
   <div class="tablewrap"><table>
     <tr><th>bus</th><th>devices</th><th>IDs → joints</th><th>boot registers (robotd)</th><th>loop</th></tr>
@@ -226,7 +229,7 @@ flowchart TB
       <p style="font-size:13.5px">The CSI ribbon crosses <em>no</em> joint (camera, HAT and compute all live in the head). What crosses joints is the <b>battery feed</b>: trunk → head through neck pitch, head pitch, yaw ±170° and roll — 720° of accumulated range on one 340 mm power cable.</p></div>
   </div>
   <figure style="margin-top:14px"><img src="wiring/designs/microduck/wiring.svg" alt="Wiring diagram"><figcaption>wiring/designs/microduck/wiring.svg — the ce-wire design</figcaption></figure>
-  <div class="note">Full table: <a href="wiring/CABLES.md">wiring/CABLES.md</a> · per-hop drops <code>wiring/drop.json</code> · ce-wire check: 53 PASS, 0 FAIL, 18 CANNOT DETERMINE (unpublished currents and audio pin vocabulary).</div>
+  <div class="note">Full table: <a href="wiring/CABLES.html">wiring/CABLES.md</a> · per-hop drops <code>wiring/drop.json</code> · ce-wire check: 53 PASS, 0 FAIL, 18 CANNOT DETERMINE (unpublished currents and audio pin vocabulary).</div>
 </section>
 
 <section id="blueprints">
@@ -236,13 +239,13 @@ flowchart TB
     <figure><img src="out/drawings/microduck-shin/microduck-shin.svg" alt="Shin plate blueprint"><figcaption>microduck-shin — A3 2:1, 15 holes called out</figcaption></figure>
     <figure><img src="out/drawings/microduck-power-support/microduck-power-support.svg" alt="Battery cradle blueprint"><figcaption>microduck-power-support — A3 1:2, 14 holes</figcaption></figure>
     <figure><img src="out/drawings/microduck-trunk-base/microduck-trunk-base.svg" alt="Trunk base plate blueprint"><figcaption>microduck-trunk-base — A3 2:1, 6 holes</figcaption></figure>
-    <div class="card"><h3>All ten sheets</h3><p style="font-size:13.5px">shin · trunk-base · banana-pcb-locker · power-support · bearing-roll · yaw2roll · hip-bracket · upper-leg L/R · rigidity plate<br><br>DXF + SVG + PDF each, under <a href="out/drawings/">out/drawings/</a> with <a href="out/drawings/INDEX.md">INDEX.md</a> and a machine-readable <code>result.json</code> per sheet.</p></div>
+    <div class="card"><h3>All ten sheets</h3><p style="font-size:13.5px">shin · trunk-base · banana-pcb-locker · power-support · bearing-roll · yaw2roll · hip-bracket · upper-leg L/R · rigidity plate<br><br>DXF + SVG + PDF each, under <a href="out/drawings/">out/drawings/</a> with <a href="out/drawings/INDEX.html">INDEX.md</a> and a machine-readable <code>result.json</code> per sheet.</p></div>
   </div>
 </section>
 
 <section id="assembly">
   <h2><span class="sec-no">§6</span>Assembly — 7 steps</h2>
-  <p class="lede">From <a href="ce-assemblies/microduck/current/manual/MANUAL.md">the construction manual</a>, built off the measured joints and placements. Rules that bind every step: set each servo's ID and baud <em>before</em> it joins the bus; all bearings press-fit into printed seats; no screw list is published, so every M2 count is community-derived and flagged.</p>
+  <p class="lede">From <a href="ce-assemblies/microduck/current/manual/MANUAL.html">the construction manual</a>, built off the measured joints and placements. Rules that bind every step: set each servo's ID and baud <em>before</em> it joins the bus; all bearings press-fit into printed seats; no screw list is published, so every M2 count is community-derived and flagged.</p>
   <div class="steps">
     <div class="step"><div><b>Trunk</b><span>base plate, hip-yaw servos ID 20/10, battery cradle, contact PCB + locker bar, shells</span></div></div>
     <div class="step"><div><b>Hips</b><span>yaw2roll + bearing_roll links, hip brackets, 22×16×4 bearings, servos 21/11</span></div></div>
@@ -258,7 +261,7 @@ flowchart TB
   <h2><span class="sec-no">§7</span>Manufacturing — sliced, plated, decided</h2>
   <div class="grid2">
     <div class="card"><h3>Printing (real slicer numbers, Bambu H2S)</h3>
-      <p style="font-size:13.5px; font-variant-numeric:tabular-nums"><b>PLA</b> 26 parts · 32 pieces · 218.29 g · 9.93 h<br><b>TPU</b> 4 pieces (soles + beak lips) · 26.20 g · 2.41 h<br>Two ready plates: <a href="out/print/plates/PLA/microduck-PLA.3mf">microduck-PLA.3mf</a>, <a href="out/print/plates/TPU/microduck-TPU.3mf">microduck-TPU.3mf</a> (<a href="out/print/PRINT.md">PRINT.md</a>) — bed-verified 340 × 320. Nothing was sent to a printer.</p></div>
+      <p style="font-size:13.5px; font-variant-numeric:tabular-nums"><b>PLA</b> 26 parts · 32 pieces · 218.29 g · 9.93 h<br><b>TPU</b> 4 pieces (soles + beak lips) · 26.20 g · 2.41 h<br>Two ready plates: <a href="out/print/plates/PLA/microduck-PLA.3mf">microduck-PLA.3mf</a>, <a href="out/print/plates/TPU/microduck-TPU.3mf">microduck-TPU.3mf</a> (<a href="out/print/PRINT.html">PRINT.md</a>) — bed-verified 340 × 320. Nothing was sent to a printer.</p></div>
     <div class="card"><h3>Print vs mould (sourced, <code>docs/production/process.md</code>)</h3>
       <p style="font-size:13.5px">1–10 units: print in-house. 100: print at a farm, mould nothing. 1 000: mould the 9 visible shells (tooling floor ≈ $13.5–90 k), keep the 22 small brackets printed. Pollen itself: made with Seeed in Shenzhen against a &gt;20 000-unit target (Bloomberg).</p></div>
   </div>
@@ -266,7 +269,7 @@ flowchart TB
 
 <section id="buy">
   <h2><span class="sec-no">§8</span>What to buy — one robot</h2>
-  <p class="lede">From <a href="out/release/bom.csv">out/release/bom.csv</a> and <a href="docs/production/components.md">docs/production/components.md</a>; every price was read at the linked vendor on 2026-09-02. A price nobody read is CANNOT DETERMINE, never a guess.</p>
+  <p class="lede">From <a href="out/release/bom.csv">out/release/bom.csv</a> and <a href="docs/production/components.html">docs/production/components.md</a>; every price was read at the linked vendor on 2026-09-02. A price nobody read is CANNOT DETERMINE, never a guess.</p>
   <div class="tablewrap"><table>
     <tr><th>item</th><th>qty</th><th>unit</th><th>vendor</th><th>note</th></tr>
     <tr><td>Dynamixel XL330-M288-T</td><td class="num">15</td><td class="num">$23.90</td><td>ROBOTIS intl</td><td>the whole cost story — $358.50, no volume tiers published</td></tr>
@@ -300,7 +303,7 @@ flowchart TB
 
 <section id="tools">
   <h2><span class="sec-no">§11</span>The tools, and one project in one repo</h2>
-  <p class="lede">This repo carries the product; the tools that build and grade it live in ce-cad and are pinned by commit in <a href="TOOLCHAIN.md">TOOLCHAIN.md</a>. Lifting the repo out orphans nothing: geometry, evidence, drawings, plates, videos and the release package are all inside it.</p>
+  <p class="lede">This repo carries the product; the tools that build and grade it live in ce-cad and are pinned by commit in <a href="TOOLCHAIN.html">TOOLCHAIN.md</a>. Lifting the repo out orphans nothing: geometry, evidence, drawings, plates, videos and the release package are all inside it.</p>
   <div class="tablewrap"><table>
     <tr><th>what</th><th>where</th><th>notes</th></tr>
     <tr><td><b>This project — everything about the duck</b></td><td class="mono">~/dev/ce-workshop/ce-designs/microduck<br>github.com/Leif-Rydenfalk/microduck (private)</td><td>its own git repo AND a triad root: <a href="ce-parts/">ce-parts/</a> · <a href="ce-connections/">ce-connections/</a> · <a href="ce-assemblies/">ce-assemblies/</a> · <a href="reference/">reference/</a> · <a href="research/">research/</a> · <a href="docs/">docs/</a> · <a href="wiring/">wiring/</a> · <a href="sim/">sim/</a> · <a href="out/">out/</a> — all committed</td></tr>
@@ -322,7 +325,7 @@ flowchart TB
     <tr><td>Electronics</td><td><span class="chip cd">PARTIAL</span></td><td>datasheets + netlist done; HAT PCB reconstruction running</td></tr>
     <tr><td>Wiring</td><td><span class="chip pass">PASS · verified</span></td><td>22 cables re-measured independently to &lt;0.05 mm</td></tr>
     <tr><td>Manufacturing package</td><td><span class="chip cd">PARTIAL</span></td><td>drawings + plates + manual + BOM done; bin/deliver package running</td></tr>
-    <tr><td>Production research</td><td><span class="chip pass">PASS</span></td><td>155 sources, <a href="docs/PRODUCTION.md">docs/PRODUCTION.md</a></td></tr>
+    <tr><td>Production research</td><td><span class="chip pass">PASS</span></td><td>155 sources, <a href="docs/PRODUCTION.html">docs/PRODUCTION.md</a></td></tr>
   </table></div>
   <div class="note"><b>Licence line that matters:</b> Pollen's meshes are CC BY-SA-<b>NC</b> — perfect for building, simulating and printing our own unit; anything sold must stand on our own geometry (that is what the 20 rebuilt parts are for).</div>
 </section>
@@ -336,6 +339,6 @@ flowchart TB
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.9.1/mermaid.min.js"></script>
-<script>mermaid.initialize({startOnLoad:true, theme: matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "neutral"});</script>
+<script>mermaid.initialize({startOnLoad:true, theme: "neutral"});</script>
 </body>
 </html>
