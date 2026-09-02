@@ -130,6 +130,11 @@ def sec_verdict(L, feas, drop, fat, conv, mats, meshab):
     if fails:
         s.append('<div class="verdict warn"><b>FAIL list.</b> %s.</div>' % "; ".join(
             '<code>%s</code> %s — SF %s (%s)' % (esc(r["part"]), esc(r["case"]), f((r.get("outputs") or {}).get("sf")), esc(r.get("why", "")[:160])) for r in fails))
+    bk = [json.load(open(p)) for p in sorted(glob.glob(os.path.join(EVID, "buckling_*.json")))]
+    if bk:
+        s.append('<div class="verdict %s"><b>Buckling — %s.</b> %s</div>' % (
+            "warn" if any(r["verdict"] == "FAIL" for r in bk) else "", "/".join(sorted({r["verdict"] for r in bk})),
+            " ".join('<code>%s</code>: %s.' % (esc(r["part"].replace("part:", "")), esc(r["why"][:170])) for r in bk)))
     if fat:
         s.append('<div class="verdict %s"><b>Fatigue on the ankle — %s.</b> %s</div>' % ("warn" if fat["verdict"] != "PASS" else "", esc(fat["verdict"]), esc(fat["why"])))
     if conv:
@@ -300,6 +305,31 @@ def sec_conv(conv, mats):
     return "\n".join(s)
 
 
+def sec_buckling():
+    studies = [json.load(open(p)) for p in sorted(glob.glob(os.path.join(EVID, "buckling_*.json")))]
+    if not studies:
+        return ""
+    s = ['<section id="buckling"><h2><span class="n">5b</span>Buckling and first mode — the slender members</h2>',
+         '<p class="lede">Yield is one way a part fails; a 58 mm shin or a 1 mm plate under the landing load can fold first. ce-struct (voxel hex mesh + CalculiX '
+         '*BUCKLE / *FREQUENCY, :8099) on our rebuilt meshes, the member held at one end and pushed axially over the other with the measured landing force. '
+         'Script <code>sim/struct_ce.py</code>. ce-struct rule: load factor ≥ 2 PASS.</p>',
+         '<div class="tw"><table class="data"><caption>Table 7b. Buckling load factor and natural frequencies. Source: <code>out/sim-evidence/buckling_&lt;part&gt;.json</code>.</caption>'
+         '<thead><tr><th>Part</th><th class="n">Load N</th><th>Axis / held / loaded</th><th class="n">Cell mm</th><th class="n">Cells</th><th class="n">Factor 1</th><th class="n">Factors 2, 3</th><th class="n">Critical N</th><th class="n">f₁ Hz</th><th>Verdict</th></tr></thead><tbody>']
+    for r in studies:
+        i, o = r["inputs"], r.get("outputs") or {}
+        b = o.get("buckle") or {}
+        facs = b.get("factors") or []
+        s.append('<tr><td><code>%s</code></td><td class="n">%s</td><td>%s / %s / %s</td><td class="n">%s</td><td class="n">%s</td><td class="n">%s</td><td class="n">%s</td><td class="n">%s</td><td class="n">%s</td><td>%s</td></tr>' % (
+            esc(r["part"].replace("part:microduck-", "")), f(i["force_N"], 3), esc(i["long_axis"]), esc(i["held_face"]), esc(i["loaded_face"]), i["cell_mm"], b.get("cells", "—"),
+            f(facs[0], 4) if facs else "—", ", ".join(f(x, 3) for x in facs[1:3]) if len(facs) > 1 else "—", f(o.get("critical_load_N"), 2), f(o.get("first_mode_hz"), 2), chip(r["verdict"])))
+    s.append('</tbody></table></div>')
+    for r in studies:
+        s.append('<p class="note"><code>%s</code>: %s</p>' % (esc(r["part"]), esc(r["why"])))
+    s.append('<p class="note">Print normal assumed = the thickness axis (printed flat) for the material table; no part.py declares it. The plate&#39;s &quot;load over the end face&quot; is a bounding idealisation of four screws.</p>')
+    s.append('</section>')
+    return "\n".join(s)
+
+
 def sec_drop(D):
     if not D:
         return '<section id="drop"><h2><span class="n">6</span>Drop / impact</h2><p>out/sim-evidence/drop_impact.json missing.</p></section>'
@@ -412,7 +442,7 @@ def sections():
     mats = load("fea_materials_microduck-ankle-left_drop.json")
     meshab = load("fea_meshability_microduck-upper-leg-left.json")
     M = load(os.path.join(REPO, "out", "stress", "matrix.json"))
-    return [sec_verdict(L, feas, drop, fat, conv, mats, meshab), sec_loads(L), sec_fea(feas), sec_matrix(M), sec_conv(conv, mats),
+    return [sec_verdict(L, feas, drop, fat, conv, mats, meshab), sec_loads(L), sec_fea(feas), sec_matrix(M), sec_conv(conv, mats), sec_buckling(),
             sec_drop(drop), sec_fatigue(fat), sec_material(feas), sec_open(feas, meshab, drop, fat, conv), sec_method()]
 
 
@@ -462,7 +492,7 @@ def page():
   <div class="rev"><span>MD-STR-001 · Rev A</span><span>%s</span><span>generator: tools/gen_structural.py</span><span>data: out/sim-evidence/*.json</span></div>
 </header>
 <nav class="toc">
-  <a href="#verdict">1 Verdict</a><a href="#loads">2 Load basis</a><a href="#fea">3 FEA</a><a href="#matrix">4 Matrix</a><a href="#conv">5 Convergence</a>
+  <a href="#verdict">1 Verdict</a><a href="#loads">2 Load basis</a><a href="#fea">3 FEA</a><a href="#matrix">4 Matrix</a><a href="#conv">5 Convergence</a><a href="#buckling">5b Buckling</a>
   <a href="#drop">6 Drop</a><a href="#fatigue">7 Fatigue</a><a href="#material">8 Material</a><a href="#open">9 Open</a><a href="#method">10 Method</a>
 </nav>
 %s

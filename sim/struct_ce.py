@@ -45,11 +45,42 @@ def solve(spec, study, stl_b64, options=None):
     return out
 
 
+def judge(rec, F):
+    """PASS/FAIL on the ce-struct rule, with one refusal: three lowest factors
+    within 1 % of each other is a LOCAL mode (cells at the loaded face
+    crushing), not a member mode — measured on the rigidity plate 2026-09-02:
+    factors 1.000246 / 1.000266 / 1.001148 at 0.33 mm cells. That is not a
+    buckling load of the plate and is not reported as one."""
+    out = rec["outputs"]
+    b = out.get("buckle", {})
+    crit = b.get("critical") or b.get("criticalFactor")
+    facs = b.get("factors") or []
+    if b.get("error") or crit is None:
+        rec.update(verdict="CANNOT DETERMINE", why="buckle solve refused: %s" % (b.get("error") or json.dumps(b)[:300]))
+    elif len(facs) >= 3 and facs[2] / max(facs[0], 1e-12) < 1.01:
+        rec.update(verdict="CANNOT DETERMINE",
+                   why="the three lowest eigen-factors %s lie within 1 %% of each other — a localised mode at the loaded end face (voxel edge crushing), "
+                       "not a plate mode; no buckling load of the member was found. What settles it: a shell/solid model loaded through the four screw "
+                       "holes instead of the end face, or a printed plate compressed in a rig" % [round(x, 6) for x in facs])
+    else:
+        out["critical_load_N"] = round(float(crit) * F, 4)
+        rec.update(verdict="PASS" if float(crit) >= 2.0 else "FAIL",
+                   why="buckling load factor %.4f on the %.4f N landing load (critical %.2f N); ce-struct rule factor >= 2; higher factors %s" % (
+                       float(crit), F, float(crit) * F, [round(x, 4) for x in facs[1:]]))
+    fr = out.get("frequency", {})
+    if not fr.get("error"):
+        out["first_mode_hz"] = fr.get("first_Hz")
+        out["modes_hz"] = [m.get("hz") for m in fr.get("modes", [])]
+
+
 def main():
     for slug, stl, axis, held, loaded, mat, pn, F, src, cell in MEMBERS:
         prev = os.path.join(EVID, "buckling_" + slug + ".json")
-        if os.path.exists(prev) and json.load(open(prev)).get("verdict") in ("PASS", "FAIL") and "--force" not in sys.argv:
-            print("skip (done)", slug); continue
+        if os.path.exists(prev) and json.load(open(prev)).get("outputs", {}).get("buckle", {}).get("factors") and "--force" not in sys.argv:
+            rec = json.load(open(prev))          # re-judge the stored solve (the rule may have changed; the solve has not)
+            judge(rec, F)
+            json.dump(rec, open(prev, "w"), indent=1)
+            print("re-judged", slug, rec["verdict"], rec["why"][:160]); continue
         path = os.path.normpath(os.path.join(ROOT, "sim", "meshes_ours", stl))
         rec = {"study": "buckling_" + slug, "part": "part:" + slug, "generated": time.strftime("%Y-%m-%dT%H:%M:%S"), "script": "sim/struct_ce.py",
                "inputs": {"mesh": os.path.relpath(path, ROOT), "cell_mm": cell, "long_axis": axis, "held_face": axis + "=" + held, "loaded_face": axis + "=" + loaded,
@@ -77,17 +108,7 @@ def main():
                 out[study] = {"error": str(e)[-400:]}
             print(slug, study, json.dumps({k: v for k, v in out[study].items() if k not in ("field", "fields", "mesh", "nodes", "cells_xyz")})[:400])
         rec["outputs"] = out
-        b = out.get("buckle", {})
-        crit = b.get("critical") or b.get("criticalFactor")
-        if b.get("error") or crit is None:
-            rec.update(verdict="CANNOT DETERMINE", why="buckle solve refused: %s" % (b.get("error") or json.dumps(b)[:300]))
-        else:
-            rec["outputs"]["critical_load_N"] = round(float(crit) * F, 4)
-            rec.update(verdict="PASS" if float(crit) >= 2.0 else "FAIL",
-                       why="buckling load factor %.4f on the %.4f N landing load (critical %.2f N); ce-struct rule factor >= 2" % (float(crit), F, float(crit) * F))
-        fr = out.get("frequency", {})
-        if not fr.get("error"):
-            rec["outputs"]["first_mode_hz"] = fr.get("frequencies", fr.get("hz", fr.get("f1")))
+        judge(rec, F)
         json.dump(rec, open(os.path.join(EVID, rec["study"] + ".json"), "w"), indent=1)
         print("  ->", rec["verdict"], rec["why"])
 

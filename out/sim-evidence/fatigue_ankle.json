@@ -1,0 +1,121 @@
+{
+ "study": "fatigue_ankle",
+ "part": "part:microduck-ankle-left",
+ "generated": "2026-09-02",
+ "script": "sim/fatigue_ankle.py",
+ "inputs": {
+  "gait": {
+   "period_s_mean": 0.405,
+   "period_s_min": 0.4,
+   "period_s_max": 0.41,
+   "n_cycles_measured": 16,
+   "stride_m_per_cycle": 0.04452,
+   "cycles_per_km": 22461.3,
+   "left_stance_fraction": 0.533,
+   "source": "out/sim-evidence/loads_mujoco.json walk.gait (sim/measure_loads.py: left-foot touchdowns, BEST_alpha_walking vx 0.25 m/s, 8 s)"
+  },
+  "stress": {
+   "sigma_max_walk_mpa": 1.247576821953209,
+   "force_N": 22.0262,
+   "source": "out/sim-evidence/fea_microduck-ankle-left_walk.json outputs.max_von_mises_mpa",
+   "mesh": {
+    "strategy": "raw",
+    "size": 1.5,
+    "nodes": 36719,
+    "elements": 20446,
+    "eltype": "C3D10",
+    "gmsh_extra": []
+   },
+   "sigma_max_mesh_scaled_mpa": null,
+   "mesh_scaling": "convergence study not available",
+   "load_ratio_R": "~0 (pulsating: stance loads, swing unloads; the paper's R = 0 rows apply)"
+  },
+  "sn_curve": {
+   "paper": "O.H. Ezeh, L. Susmel, 'Fatigue strength of additively manufactured polylactide (PLA): effect of raster angle and non-zero mean stresses', International Journal of Fatigue 126 (2019) 319-326, doi:10.1016/j.ijfatigue.2019.05.014",
+   "file": "research/fatigue/ezeh-susmel-2019-ijfatigue-126-319-pla-fatigue.pdf",
+   "sha256": "6539146573d830076e5f3b1ec0feca62fa64d08a255a1487da4e211404d7ae13",
+   "design_curve": "P_s >= 90 %: k = 5.5, sigma_MAX = 0.1 sigma_UTS at N_ref = 2e6 cycles (eqs 5-6, valid for 100 % infill printed flat)",
+   "table1_theta0": {
+    "uts_mpa": 42.6,
+    "R-1": {
+     "k": 7.7,
+     "sigma_A50_mpa": 10.4,
+     "T": 1.185
+    },
+    "R-0.5": {
+     "k": 8.9,
+     "sigma_A50_mpa": 10.1,
+     "T": 1.266
+    },
+    "R0": {
+     "k": 7.4,
+     "sigma_A50_mpa": 6.1,
+     "T": 1.592
+    },
+    "R0.3": {
+     "k": 7.0,
+     "sigma_A50_mpa": 5.1,
+     "T": 1.216
+    }
+   },
+   "specimens": "Ultimaker 2 Extended+, New Verbatim PLA 2.85 mm, 240/60 C, 30 mm/s, 100 % infill, 0.1 mm layers, 0.4 mm shell; 6 mm x 3/5 mm dog-bones, 10 Hz, run-out 2e6",
+   "scatter": "T_sigma ~ 2.9 in terms of sigma_max across all angles and load ratios (Fig 9)"
+  }
+ },
+ "method": "Basquin: N = 2e6 (0.1 UTS / sigma_max)^5.5; life_km = N / cycles_per_km; sigma_max = peak nodal von Mises of the walk-peak FEA (worst point, R ~ 0)",
+ "outputs": {
+  "curves": [
+   {
+    "uts_basis": "paper_theta0",
+    "uts_mpa": 42.6,
+    "uts_source": "Ezeh & Susmel 2019 Table 1, theta_p 0 deg",
+    "stress_basis": "fea_peak",
+    "sigma_max_mpa": 1.2476,
+    "design_endurance_sigma_max_2e6_mpa": 4.26,
+    "k": 5.5,
+    "cycles_to_failure_design_Ps90": "> 2e6 (below the design endurance limit)",
+    "cycles_numeric": 1715586632.7330241,
+    "life_km_design_Ps90": "infinite by the design curve",
+    "endurance_margin": 3.4146,
+    "median_R0_amplitude_2e6_mpa_theta0": 6.1,
+    "median_R0_sigma_max_2e6_mpa_theta0": 12.2,
+    "note": "median (P_s 50 %) R = 0 endurance in terms of sigma_max = 2 x 6.1 = 12.2 MPa (Table 1); the design curve (0.1 UTS = 4.26 MPa) is the P_s >= 90 % floor"
+   },
+   {
+    "uts_basis": "prusament_tds",
+    "uts_mpa": 51.0,
+    "uts_source": "Prusament PLA TDS, printed horizontal, 51 +- 3 MPa yield (used as UTS: PLA's yield and UTS coincide within the TDS tolerance \u2014 brittle)",
+    "stress_basis": "fea_peak",
+    "sigma_max_mpa": 1.2476,
+    "design_endurance_sigma_max_2e6_mpa": 5.1,
+    "k": 5.5,
+    "cycles_to_failure_design_Ps90": "> 2e6 (below the design endurance limit)",
+    "cycles_numeric": 4616319160.327384,
+    "life_km_design_Ps90": "infinite by the design curve",
+    "endurance_margin": 4.0879,
+    "median_R0_amplitude_2e6_mpa_theta0": 6.1,
+    "median_R0_sigma_max_2e6_mpa_theta0": 12.2,
+    "note": "median (P_s 50 %) R = 0 endurance in terms of sigma_max = 2 x 6.1 = 12.2 MPa (Table 1); the design curve (0.1 UTS = 5.10 MPa) is the P_s >= 90 % floor"
+   }
+  ],
+  "worst_basis": "paper_theta0/fea_peak",
+  "best_basis": "prusament_tds/fea_peak",
+  "cycles_for_10_km": 224613,
+  "cycles_for_100_km": 2246130,
+  "stress_headroom_to_design_endurance": 0.2929
+ },
+ "limits": [
+  "isotropic linear FEA peak at a nodal point (mesh-sensitive at re-entrant corners \u2014 see the convergence study)",
+  "the S-N curve is for printed-FLAT 100 %-infill coupons; this bracket's print orientation and infill are not declared in its part.py (across-layer strength 17 +- 3 MPa per the Prusament TDS is the weaker axis)",
+  "the design curve has no notch factor; a screw hole edge is a notch (PMC12787623: smooth ~49,000 vs central-hole ~24,000 cycles at 12 MPa amplitude)",
+  "gait measured in MuJoCo at the browser simulator's VEL_FWD 0.25 m/s; a different gait or terrain changes both the peak and the cycle count"
+ ],
+ "what_settles_it": "a tensile-fatigue coupon set of THE filament on THE printer in the bracket's orientation (R = 0, 10 Hz, 4 stress levels x 2, run-out 2e6 per JSME as the paper did), and a walked-km log of one printed ankle",
+ "verdict": "PASS",
+ "why": "peak walk-cycle von Mises 1.248 MPa on the ankle (walk-peak force 22.0262 N) is 0.293x BELOW the P_s>=90 % design endurance limit 4.26 MPa (0.1 x UTS 42.6 MPa, Ezeh & Susmel 2019) even on the least favourable basis \u2014 infinite life by the design curve at 22461 cycles/km (period 0.405 s, stride 0.0445 m)",
+ "artifacts": [
+  "out/sim-evidence/fea_microduck-ankle-left_walk.json",
+  "out/sim-evidence/loads_mujoco.json"
+ ],
+ "looked_at": []
+}

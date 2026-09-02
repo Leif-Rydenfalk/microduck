@@ -71,7 +71,7 @@ def main():
                            "cycles_numeric": N, "life_km_design_Ps90": ("infinite by the design curve" if N > 2e6 else round(km, 3)),
                            "endurance_margin": round(endurance_ratio, 4),
                            "median_R0_amplitude_2e6_mpa_theta0": 6.1, "median_R0_sigma_max_2e6_mpa_theta0": 12.2,
-                           "note": "median (P_s 50 %) R = 0 endurance in terms of sigma_max = 2 x 6.1 = 12.2 MPa (Table 1); the design curve (0.1 UTS = %.2f MPa) is the P_s >= 90 %% floor" % sA})
+                           "note": "median (P_s 50 %%) R = 0 endurance in terms of sigma_max = 2 x 6.1 = 12.2 MPa (Table 1); the design curve (0.1 UTS = %.2f MPa) is the P_s >= 90 %% floor" % sA})
     worst = min(curves, key=lambda c: c["endurance_margin"])
     best = max(curves, key=lambda c: c["endurance_margin"])
     infinite = worst["cycles_numeric"] > 2e6
