@@ -10,6 +10,18 @@ import json, os, html, datetime
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
 
+def _count_tests():
+    """How many gated tests TEST-PLAN.html actually carries, counted off the published
+    document rather than typed into this index. A number in two files is a number that
+    goes stale in one of them."""
+    fp = os.path.join(REPO, "TEST-PLAN.html")
+    if not os.path.exists(fp):
+        return None
+    return open(fp, encoding="utf-8").read().count('<article class="test"')
+
+_N_TESTS = _count_tests()
+_TESTS_PHRASE = ("%d gated tests" % _N_TESTS) if _N_TESTS else "Gated tests"
+
 SECTIONS = [
     ("Start here", "The two documents that answer 'what is this and is it real'.", [
         ("RELEASE.html", "Release dossier",
@@ -44,9 +56,13 @@ SECTIONS = [
     ]),
     ("Test & validation", "How a built unit is proved to work, before it ships.", [
         ("TEST-PLAN.html", "Test & validation plan",
-         "35 gated tests from a never-powered robot to one that has walked: electrical bring-up, servo ID and calibration, sensor checks, control-loop acceptance and a walk test. Every gate names whether its number came from a vendor datasheet, Pollen's source, our simulation, or a decision of the plan."),
+         _TESTS_PHRASE + " from a never-powered robot to one that has walked: electrical bring-up, servo ID and calibration, sensor checks, control-loop acceptance, the two radios and the pairing PIN, a walk test, and an endurance and thermal soak. Every gate names whether its number came from a vendor datasheet, Pollen's source, our simulation, or a decision of the plan."),
         ("spec/test-plan.json", "Test plan (data)",
-         "The data the plan is generated from: the rail table, the XL330 register set, the ID map and every gate with its basis."),
+         "The data the plan is generated from: the rail table, the XL330 register set, the ID map, the gamepad map and every gate with its basis."),
+        ("firmware/upstream.json", "Firmware pointers (data)",
+         "Everything running below Linux: the servo firmware and its identity registers, the unpublished imu_to_dxl board and the 12-byte block it serves at address 124, the ToF sensor's uploaded ST blob, the board overlays, and the signed release payload \u2014 each marked published or not."),
+        ("software/upstream.json", "Software pointers (data)",
+         "Pollen's published software: both upstream repositories with their licence read live from the GitHub API, the seven daemons and which test touches each, the policy set and its 61-input/14-output shape, and the config file that survives an update."),
     ]),
     ("Sourcing & procurement", "Where every bought part comes from, and what it costs.", [
         ("SOURCING.html", "Sourcing evidence", "Every bought line: two or more real distributors, tier prices, MOQ, lead time, alternates, and the URL of every page that refused a price."),
