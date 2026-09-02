@@ -1,75 +1,34 @@
 {
  "study": "buckling_microduck-neck-plate",
  "part": "part:microduck-neck-plate",
- "generated": "2026-09-02T23:11:24",
+ "generated": "2026-09-03T04:04:41",
  "script": "sim/struct_ce.py",
  "inputs": {
   "mesh": "out/sim-evidence/fea/microduck-neck-plate_ours.stl",
-  "cell_mm": 0.4,
+  "cells_mm": [
+   0.4,
+   0.3
+  ],
   "long_axis": "y",
   "held_face": "y=min",
   "loaded_face": "y=max",
-  "force_N": 24.4404,
-  "force_source": "out/sim-evidence/loads_mujoco.json :: 0.5 x drops[foot].body_transmitted_force_max_N.neck (two plates)",
+  "force_vector_part_frame_N": [
+   9.79116,
+   7.62165,
+   -20.9883
+  ],
+  "force_magnitude_N": 24.4404,
+  "axial_component_N": 7.62165,
+  "axial_is_compressive": false,
+  "share": 0.5,
+  "force_source": "out/sim-evidence/loads_mujoco.json :: drops[drop_foot_rollm10_default_contact_dt5ms].part_frames_at_peak.neck.force_from_body_neck (t 0.230 s) (already x 0.5: two identical plates share it \u2014 stress_all.py)",
   "material": "PLA",
   "printNormal_ASSUMED": "x (the thickness axis \u2014 the part printed flat; no part.py declares print_up)",
   "solver": "ce-struct /api/solve (voxel hex mesh + CalculiX *BUCKLE / *FREQUENCY)"
  },
- "method": "axial compression over the whole end face, the other end fixed xyz; buckling eigenvalue = load factor on the applied force; first natural frequency with the same support",
+ "method": "load over the whole loaded end face, the other end fixed xyz; buckling eigenvalue = load factor on the applied load; solved with the AXIAL component alone and with the FULL measured vector, at each cell size; first natural frequency with the same support",
  "artifacts": [],
  "looked_at": [],
- "outputs": {
-  "buckle": {
-   "study": "buckle",
-   "ms": 69613,
-   "cells": 6340,
-   "nodes": 8346,
-   "interfaces": [],
-   "factors": [
-    4.802649,
-    38.89365,
-    84.43847
-   ],
-   "critical": 4.802649,
-   "_seconds": 71.86
-  },
-  "frequency": {
-   "study": "frequency",
-   "ms": 49693,
-   "cells": 6340,
-   "nodes": 8346,
-   "interfaces": [],
-   "modes": [
-    {
-     "mode": 1,
-     "eigenvalue": 55319130,
-     "rad_s": 7437.683,
-     "hz": 1183.744
-    },
-    {
-     "mode": 2,
-     "eigenvalue": 756063500,
-     "rad_s": 27496.61,
-     "hz": 4376.221
-    },
-    {
-     "mode": 3,
-     "eigenvalue": 870743600,
-     "rad_s": 29508.37,
-     "hz": 4696.402
-    }
-   ],
-   "first_Hz": 1183.744,
-   "_seconds": 50.54
-  },
-  "critical_load_N": 117.3787,
-  "first_mode_hz": 1183.744,
-  "modes_hz": [
-   1183.744,
-   4376.221,
-   4696.402
-  ]
- },
- "verdict": "PASS",
- "why": "buckling load factor 4.8026 on the 24.4404 N landing load (critical 117.38 N); ce-struct rule factor >= 2; higher factors [38.8937, 84.4385]"
+ "verdict": "CANNOT DETERMINE",
+ "why": "the measured axial component 7.6216 N is TENSILE on this member at the drop peak (loaded max, held min) \u2014 no buckling case exists for it"
 }

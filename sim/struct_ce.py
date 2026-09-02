@@ -168,10 +168,23 @@ def judge(rec):
                    why="the three lowest eigen-factors %s lie within 1 %% of each other — a localised mode at the loaded end face (voxel edge crushing), not a member mode; "
                        "no buckling load of the member was found. What settles it: a shell/solid model loaded through the screw holes instead of the end face, or a printed part compressed in a rig" % [round(x, 6) for x in facs])
         return
+    allf = [float(r["critical"]) for r in full + axial]
+    o["factor_bracket_all_cells_and_loads"] = [round(min(allf), 6), round(max(allf), 6)]
     if drift is not None and drift > DRIFT_OK:
+        if max(allf) < 2.0:
+            # not converged to 5 %, but every factor at every cell and under both loads sits below the rule's 2 — a CANNOT DETERMINE
+            # here would hide a verdict the whole bracket agrees on
+            rec.update(verdict="FAIL",
+                       why="not converged to %g %% (full-vector factor %s over cells %s, drift %.2f %% between the finest two; axial-only %s) but the WHOLE bracket %s lies below "
+                           "the ce-struct rule's 2 — FAIL at every cell and under both loads; critical load %.2f-%.2f N on the %.4f N landing vector%s; the first version "
+                           "(2026-09-02) applied the vector magnitude as axial and read 0.9262 — superseded" % (
+                               100 * DRIFT_OK, o["convergence"]["factor_by_cell_full"], o["convergence"]["cells_solved"], 100 * drift, o["convergence"]["factor_by_cell_axial"],
+                               o["factor_bracket_all_cells_and_loads"], min(allf) * i["force_magnitude_N"], max(allf) * i["force_magnitude_N"], i["force_magnitude_N"],
+                               ("; Euler bracket %.1f-%.1f N (K 2..0.7) %s the eigen answer %.2f N" % (euler["euler_N_K2_fixed_free"], euler["euler_N_K0.7_fixed_pinned"], "CONTAINS" if euler["inside_bracket"] else "does NOT contain", euler["eigen_axial_critical_N"])) if euler else ""))
+            return
         rec.update(verdict="CANNOT DETERMINE",
-                   why="the factor still moves %.2f %% between the two finest cells (%s) — not converged; what settles it: a finer cell or a tetrahedral mesh of the same case" % (
-                       100 * drift, o["convergence"]["factor_by_cell_full"]))
+                   why="the factor still moves %.2f %% between the two finest cells (%s) and the bracket %s straddles the rule's 2 — not converged; what settles it: a finer cell or a tetrahedral mesh of the same case" % (
+                       100 * drift, o["convergence"]["factor_by_cell_full"], o["factor_bracket_all_cells_and_loads"]))
         return
     if len(full) < 2 and len(axial) < 2:
         rec.update(verdict="CANNOT DETERMINE", why="one cell size only (%s) — no convergence evidence; factor %.4f" % (fin["cell_mm"], crit)); return
@@ -191,6 +204,11 @@ def main():
         if only and slug not in only:
             continue
         prev = os.path.join(EVID, "buckling_" + slug + ".json")
+        if "--rejudge" in sys.argv:
+            if os.path.exists(prev) and (json.load(open(prev)).get("outputs") or {}).get("rows"):
+                rec = json.load(open(prev)); judge(rec); json.dump(rec, open(prev, "w"), indent=1)
+                print("re-judged", slug, rec["verdict"], rec["why"][:200])
+            continue
         if os.path.exists(prev) and "--force" not in sys.argv and (json.load(open(prev)).get("outputs") or {}).get("rows"):
             print("exists (v2 rows present)", slug); continue
         print("===", slug); sys.stdout.flush()

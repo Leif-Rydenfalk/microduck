@@ -306,23 +306,28 @@ def sec_fea(feas):
          'datasheet (Prusament PLA 51 ± 3 MPa yield printed horizontal; NinjaFlex TPU 85A yield 4 MPa). "SF used" is the more conservative, or the nonlinear one '
          'when the linear solve left its regime (§3b). "Fails at" is the linear failure load: applied force × table SF. Regime: plate if t/mid ≤ 0.15; the linear '
          'solve is a prediction while δ ≤ t/2 (plate) and δ ≤ L/10 (any part). Script: <code>sim/stress_all.py</code>; grading <code>sim/fea_rejudge.py</code>.</p>',
-         '<div class="tw"><table class="data"><caption>Table 4. Safety factors, all %d studies. Source: <code>out/sim-evidence/fea_&lt;part&gt;_&lt;case&gt;.json</code>.</caption>'
-         '<thead><tr><th>Part</th><th>Case</th><th>Verdict</th><th class="n">|F| N</th><th>Mat.</th><th class="n">SF used</th><th class="n">SF table</th><th class="n">SF TDS</th><th class="n">SF across layers</th>'
-         '<th class="n">σ<sub>vM</sub> MPa</th><th class="n">δ mm</th><th>Regime</th><th class="n">Fails at N</th></tr></thead><tbody>' % len(feas)]
+         '<div class="tw"><table class="data"><caption>Table 4. Verdict and safety factors, all %d studies. Source: <code>out/sim-evidence/fea_&lt;part&gt;_&lt;case&gt;.json</code>.</caption>'
+         '<thead><tr><th>Part</th><th>Case</th><th>Verdict</th><th class="n">|F| N</th><th>Mat.</th><th class="n">SF used</th><th class="n">SF table</th><th class="n">SF TDS</th><th class="n">SF across layers</th></tr></thead><tbody>' % len(feas)]
+    for r in feas:
+        o = r.get("outputs") or {}
+        s.append('<tr><td><code>%s</code></td><td>%s</td><td>%s</td><td class="n">%s</td><td>%s</td><td class="n"><b>%s</b></td><td class="n">%s</td><td class="n">%s</td><td class="n">%s</td></tr>' % (
+            esc(r["part"].replace("part:microduck-", "")), esc(CASE_LABEL.get(r["case"], r["case"])), chip(r.get("verdict")), f(r["inputs"].get("force_magnitude_N"), 3), esc(r.get("material", "—")),
+            f(sf_used(r)), f(o.get("sf")), f(o.get("sf_vs_tds_yield")), f(o.get("sf_vs_tds_interlayer_across_layers"))))
+    s.append('</tbody></table></div>')
+    s.append('<div class="tw"><table class="data"><caption>Table 4a. Peak stress, deflection, regime and the linear failure load, same studies.</caption>'
+             '<thead><tr><th>Part</th><th>Case</th><th class="n">σ<sub>vM</sub> MPa</th><th class="n">δ mm</th><th>Regime (plate? d/t, d/L)</th><th>Model graded</th><th class="n">Fails at N</th></tr></thead><tbody>')
     for r in feas:
         o = r.get("outputs") or {}
         reg = regime_of(r)
         gr = o.get("grading") or {}
         regtxt = "—"
         if reg.get("linear_regime_valid") is True:
-            regtxt = "linear ok (d/L %s)" % f(reg.get("d_over_L"), 4)
+            regtxt = "inside (%s, %s, %s)" % ("plate" if reg.get("plate") else "member", f(reg.get("d_over_t"), 3), f(reg.get("d_over_L"), 4))
         elif reg.get("linear_regime_valid") is False:
-            regtxt = "OUTSIDE (%s d/t %s, d/L %s) → %s" % ("plate" if reg.get("plate") else "member", f(reg.get("d_over_t"), 3), f(reg.get("d_over_L"), 4), esc(gr.get("model", "linear")))
-        s.append('<tr><td><code>%s</code></td><td>%s</td><td>%s</td><td class="n">%s</td><td>%s</td><td class="n"><b>%s</b></td><td class="n">%s</td><td class="n">%s</td><td class="n">%s</td>'
-                 '<td class="n">%s</td><td class="n">%s</td><td>%s</td><td class="n">%s</td></tr>' % (
-                     esc(r["part"].replace("part:microduck-", "")), esc(CASE_LABEL.get(r["case"], r["case"])), chip(r.get("verdict")), f(r["inputs"].get("force_magnitude_N"), 3), esc(r.get("material", "—")),
-                     f(sf_used(r)), f(o.get("sf")), f(o.get("sf_vs_tds_yield")), f(o.get("sf_vs_tds_interlayer_across_layers")),
-                     f(o.get("max_von_mises_mpa")), f(o.get("max_displacement_mm"), 4), regtxt, f(o.get("failure_load_N_linear"), 1)))
+            regtxt = "OUTSIDE (%s, %s, %s)" % ("plate" if reg.get("plate") else "member", f(reg.get("d_over_t"), 3), f(reg.get("d_over_L"), 4))
+        s.append('<tr><td><code>%s</code></td><td>%s</td><td class="n">%s</td><td class="n">%s</td><td>%s</td><td>%s</td><td class="n">%s</td></tr>' % (
+            esc(r["part"].replace("part:microduck-", "")), esc(CASE_LABEL.get(r["case"], r["case"])), f(o.get("max_von_mises_mpa")), f(o.get("max_displacement_mm"), 4), regtxt,
+            esc(gr.get("model", "linear")) if o.get("sf") is not None else "—", f(o.get("failure_load_N_linear"), 1)))
     s.append('</tbody></table></div>')
     s.append('<p class="note">Right-hand parts (ankle-right, foot-right, sole-right, upper-leg-right) are measured mirrors of the left (p95 0.000–0.002 mm, '
              'each part.py header) and inherit these verdicts. The hip bracket is one part used on both sides. The head-drop case exists only on the neck chain: '
@@ -367,17 +372,23 @@ def sec_nlgeom(nls):
         s.append('<p>No nonlinear re-solve on disk yet (the chain runs one CalculiX job at a time; each takes 20–60 min on this shared machine). Until it lands, every '
                  '"OUTSIDE" row in Table 4 is graded on its linear bound and says so.</p></section>')
         return "\n".join(s)
-    s.append('<div class="tw"><table class="data"><caption>Table 4b. Linear vs geometrically nonlinear, same deck. Source: <code>out/sim-evidence/fea_nlgeom_*.json</code>.</caption>'
-             '<thead><tr><th>Part</th><th>Case</th><th>Verdict</th><th class="n">|F| N</th><th class="n">Load reached</th><th class="n">Incr.</th><th class="n">σ<sub>vM</sub> linear</th><th class="n">σ<sub>vM</sub> nonlinear</th>'
-             '<th class="n">ratio</th><th class="n">δ linear</th><th class="n">δ nonlinear</th><th class="n">SF nonlinear</th><th class="n">s</th></tr></thead><tbody>')
+    s.append('<div class="tw"><table class="data"><caption>Table 4b. Linear vs geometrically nonlinear peak stress, same deck. Source: <code>out/sim-evidence/fea_nlgeom_*.json</code>.</caption>'
+             '<thead><tr><th>Part</th><th>Case</th><th>Verdict</th><th class="n">|F| N</th><th class="n">σ<sub>vM</sub> linear MPa</th><th class="n">σ<sub>vM</sub> nonlinear MPa</th><th class="n">ratio</th><th class="n">SF nonlinear</th></tr></thead><tbody>')
     for r in nls:
         i, o = r["inputs"], r["outputs"]
         lin = i["linear"]
-        s.append('<tr><td><code>%s</code></td><td>%s</td><td>%s</td><td class="n">%s</td><td class="n">%s</td><td class="n">%s</td><td class="n">%s</td><td class="n">%s</td><td class="n">%s</td>'
-                 '<td class="n">%s</td><td class="n">%s</td><td class="n">%s</td><td class="n">%s</td></tr>' % (
-                     esc(r["part"].replace("part:microduck-", "")), esc(CASE_LABEL.get(r["case"], r["case"])), chip(r["verdict"]), f(i["force_magnitude_N"], 3),
-                     f(o.get("load_fraction_reached"), 3), o.get("increments", "—"), f(lin["max_von_mises_mpa"]), f(o.get("max_von_mises_mpa")),
-                     f(o.get("ratio_nonlinear_over_linear_vm")), f(lin["max_displacement_mm"], 4), f(o.get("max_displacement_mm"), 4), f(o.get("sf")), o.get("seconds", "—")))
+        s.append('<tr><td><code>%s</code></td><td>%s</td><td>%s</td><td class="n">%s</td><td class="n">%s</td><td class="n">%s</td><td class="n">%s</td><td class="n">%s</td></tr>' % (
+            esc(r["part"].replace("part:microduck-", "")), esc(CASE_LABEL.get(r["case"], r["case"])), chip(r["verdict"]), f(i["force_magnitude_N"], 3),
+            f(lin["max_von_mises_mpa"]), f(o.get("max_von_mises_mpa")), f(o.get("ratio_nonlinear_over_linear_vm")), f(o.get("sf"))))
+    s.append('</tbody></table></div>')
+    s.append('<div class="tw"><table class="data"><caption>Table 4c. The same re-solves: load reached, increments, deflection, wall time.</caption>'
+             '<thead><tr><th>Part</th><th>Case</th><th class="n">Load reached</th><th class="n">Incr.</th><th class="n">δ linear mm</th><th class="n">δ nonlinear mm</th><th class="n">s</th></tr></thead><tbody>')
+    for r in nls:
+        i, o = r["inputs"], r["outputs"]
+        lin = i["linear"]
+        s.append('<tr><td><code>%s</code></td><td>%s</td><td class="n">%s</td><td class="n">%s</td><td class="n">%s</td><td class="n">%s</td><td class="n">%s</td></tr>' % (
+            esc(r["part"].replace("part:microduck-", "")), esc(CASE_LABEL.get(r["case"], r["case"])), f(o.get("load_fraction_reached"), 3), o.get("increments", "—"),
+            f(lin["max_displacement_mm"], 4), f(o.get("max_displacement_mm"), 4), o.get("seconds", "—")))
     s.append('</tbody></table></div>')
     for r in nls:
         s.append('<p class="note"><code>%s</code> %s: %s</p>' % (esc(r["part"]), esc(r["case"]), esc(r["why"])))
@@ -450,24 +461,35 @@ def sec_buckling():
          'off the mesh (<code>sim/member_section.py</code>) decide whether the number is a member mode at all. Script <code>sim/struct_ce.py</code>. ce-struct rule: '
          'load factor ≥ 2 PASS. The first version (2026-09-02) applied the force MAGNITUDE as axial — a 20 % error on the shin, found by the skeptic and superseded here.</p>',
          '<div class="tw"><table class="data"><caption>Table 7b. Buckling load factor per cell size and load, and natural frequencies. Source: <code>out/sim-evidence/buckling_&lt;part&gt;.json</code>.</caption>'
-         '<thead><tr><th>Part</th><th class="n">|F| N</th><th class="n">Axial N</th><th>Axis / held / loaded</th><th class="n">Cell mm</th><th>Load</th><th class="n">Cells</th><th class="n">Factor 1</th><th class="n">Factors 2, 3</th><th class="n">f₁ Hz</th><th>Verdict</th></tr></thead><tbody>']
+         '<thead><tr><th>Part</th><th class="n">Cell mm</th><th>Load</th><th class="n">Cells</th><th class="n">Factor 1</th><th class="n">Factors 2, 3</th><th class="n">f₁ Hz</th><th>Verdict</th></tr></thead><tbody>']
     for r in studies:
         i, o = r["inputs"], r.get("outputs") or {}
         rows = o.get("rows")
         if rows:
             for k, row in enumerate(rows):
                 facs = row.get("factors") or []
-                s.append('<tr><td><code>%s</code></td><td class="n">%s</td><td class="n">%s</td><td>%s / %s / %s</td><td class="n">%s</td><td>%s</td><td class="n">%s</td><td class="n">%s</td><td class="n">%s</td><td class="n">%s</td><td>%s</td></tr>' % (
-                    esc(r["part"].replace("part:microduck-", "")) if k == 0 else "", f(i["force_magnitude_N"], 4), f(i.get("axial_component_N"), 4), esc(i["long_axis"]), esc(i["held_face"]), esc(i["loaded_face"]),
+                s.append('<tr><td><code>%s</code></td><td class="n">%s</td><td>%s</td><td class="n">%s</td><td class="n">%s</td><td class="n">%s</td><td class="n">%s</td><td>%s</td></tr>' % (
+                    esc(r["part"].replace("part:microduck-", "")) if k == 0 else "",
                     row["cell_mm"], esc(row["load"]), row.get("cells", "—"), f(facs[0], 4) if facs else esc(row.get("error", "—")), ", ".join(f(x, 3) for x in facs[1:3]) if len(facs) > 1 else "—",
                     f(row.get("first_mode_hz"), 2), chip(r["verdict"]) if k == len(rows) - 1 else ""))
+        elif not o:
+            s.append('<tr><td><code>%s</code></td><td class="n">—</td><td>no solve</td><td class="n">—</td><td class="n">—</td><td class="n">—</td><td class="n">—</td><td>%s</td></tr>' % (
+                esc(r["part"].replace("part:microduck-", "")), chip(r["verdict"])))
         else:
             b = o.get("buckle") or {}
             facs = b.get("factors") or []
-            s.append('<tr><td><code>%s</code></td><td class="n">%s</td><td class="n">—</td><td>%s / %s / %s</td><td class="n">%s</td><td>magnitude as axial (v1)</td><td class="n">%s</td><td class="n">%s</td><td class="n">%s</td><td class="n">%s</td><td>%s</td></tr>' % (
-                esc(r["part"].replace("part:microduck-", "")), f(i["force_N"], 3), esc(i["long_axis"]), esc(i["held_face"]), esc(i["loaded_face"]), i["cell_mm"], b.get("cells", "—"),
+            s.append('<tr><td><code>%s</code></td><td class="n">%s</td><td>magnitude as axial (v1)</td><td class="n">%s</td><td class="n">%s</td><td class="n">%s</td><td class="n">%s</td><td>%s</td></tr>' % (
+                esc(r["part"].replace("part:microduck-", "")), i["cell_mm"], b.get("cells", "—"),
                 f(facs[0], 4) if facs else "—", ", ".join(f(x, 3) for x in facs[1:3]) if len(facs) > 1 else "—", f(o.get("first_mode_hz"), 2), chip(r["verdict"])))
     s.append('</tbody></table></div>')
+    for r in studies:
+        i = r["inputs"]
+        if "long_axis" not in i:
+            continue
+        s.append('<p class="note"><code>%s</code> inputs: |F| %s N%s, axis %s, held %s, loaded %s, mesh <code>%s</code>, %s, print normal %s. Source: %s</p>' % (
+            esc(r["part"].replace("part:", "")), f(i.get("force_magnitude_N", i.get("force_N")), 4),
+            (", axial component %s N (%s)" % (f(i["axial_component_N"], 4), "compressive" if i.get("axial_is_compressive") else "tensile")) if "axial_component_N" in i else " (magnitude applied as axial — v1)",
+            esc(i["long_axis"]), esc(i["held_face"]), esc(i["loaded_face"]), esc(i["mesh"]), esc(i["material"]), esc(i["printNormal_ASSUMED"]), esc(i["force_source"])))
     for r in studies:
         s.append('<p class="note"><code>%s</code> %s: %s</p>' % (esc(r["part"]), chip(r["verdict"]), esc(r["why"])))
         e = (r.get("outputs") or {}).get("euler_crosscheck")
@@ -495,11 +517,12 @@ def sec_drop(D):
     if i.get("height_sensitivity"):
         s.append('<div class="tw"><table class="data"><caption>Table 8a. Height sensitivity (closed form). Energy ∝ h; impact speed and the rigid-spring peak (model A) ∝ √h; the Hertz peak (model B) ∝ h<sup>3/5</sup>; '
                  'linear FEA stress ∝ force. MuJoCo\'s default contact (model C) is not a linear spring and needs a re-run at the new height.</caption>'
-                 '<thead><tr><th class="n">h m</th><th class="n">energy ×</th><th class="n">speed ×</th><th class="n">model A force ×</th><th class="n">model B force ×</th><th>what it is</th></tr></thead><tbody>')
+                 '<thead><tr><th class="n">h m</th><th class="n">energy ×</th><th class="n">speed ×</th><th class="n">model A force ×</th><th class="n">model B force ×</th></tr></thead><tbody>')
         for row in i["height_sensitivity"]:
-            s.append('<tr><td class="n">%s</td><td class="n">%s</td><td class="n">%s</td><td class="n">%s</td><td class="n">%s</td><td>%s</td></tr>' % (
-                f(row["height_m"], 3), f(row["energy_ratio"], 4), f(row["speed_ratio"], 4), f(row["model_A_force_ratio"], 4), f(row["model_B_hertz_force_ratio"], 4), esc(row["what_it_is"])))
+            s.append('<tr><td class="n">%s</td><td class="n">%s</td><td class="n">%s</td><td class="n">%s</td><td class="n">%s</td></tr>' % (
+                f(row["height_m"], 3), f(row["energy_ratio"], 4), f(row["speed_ratio"], 4), f(row["model_A_force_ratio"], 4), f(row["model_B_hertz_force_ratio"], 4)))
         s.append('</tbody></table></div>')
+        s.append('<p class="note">Heights: %s.</p>' % esc("; ".join("%.3f m — %s" % (row["height_m"], row["what_it_is"]) for row in i["height_sensitivity"])))
     s.append('<div class="tw"><table class="data"><caption>Table 8. Peak contact force by model. A: rigid body on a linear spring, F = v√(Km). B: Hertz on the struck curvature with the bottoming-out check. C: MuJoCo (solref, timestep).</caption>'
              '<thead><tr><th>Model</th><th>Case</th><th class="n">K N/m · E* MPa · solref</th><th class="n">δ mm</th><th class="n">F peak N</th><th class="n">Impulse N·s</th></tr></thead><tbody>')
     notes = []
@@ -543,13 +566,19 @@ def sec_fatigue(F, FW):
                      f(i["gait"]["cycles_per_km"], 1), i["gait"]["period_s_mean"], i["gait"]["stride_m_per_cycle"], i["gait"]["n_cycles_measured"], esc(i["stress_basis"]),
                      f(i["life_km_required"]["value"], 0), esc(i["life_km_required"]["source"])))
         s.append('<div class="tw"><table class="data"><caption>Table 9. Design life per part (P<sub>s</sub> ≥ 90 % curve on the least favourable UTS basis; P<sub>s</sub> 50 % median R = 0 curve beside it). Source: <code>out/sim-evidence/fatigue_walk.json</code>.</caption>'
-                 '<thead><tr><th>Part</th><th>Verdict</th><th class="n">|F| walk N</th><th class="n">σ<sub>max</sub> MPa</th><th class="n">Design endurance MPa</th><th class="n">σ<sub>max</sub> / limit</th><th class="n">Life km (P<sub>s</sub>≥90 %)</th><th class="n">Life km (median)</th><th>Static walk</th></tr></thead><tbody>')
+                 '<thead><tr><th>Part</th><th>Verdict</th><th class="n">σ<sub>max</sub> MPa</th><th class="n">Endurance MPa</th><th class="n">σ<sub>max</sub> / limit</th><th class="n">Life km (P<sub>s</sub>≥90 %)</th><th class="n">Life km (median)</th></tr></thead><tbody>')
         for r in o["rows"]:
             has = bool(r.get("curves"))
-            s.append('<tr><td><code>%s</code></td><td>%s</td><td class="n">%s</td><td class="n">%s</td><td class="n">%s</td><td class="n">%s</td><td class="n">%s</td><td class="n">%s</td><td>%s SF %s</td></tr>' % (
-                esc(r["part"].replace("part:microduck-", "")), chip(r["verdict"]), f(r.get("force_N"), 4), f(r.get("sigma_max_mpa"), 4), f(r.get("design_endurance_mpa_worst"), 2),
-                f(r.get("sigma_over_endurance_worst"), 3), ("∞ (design curve)" if has and r.get("life_km_design_Ps90_worst") is None else g(r.get("life_km_design_Ps90_worst"))),
-                ("∞" if has and r.get("life_km_Ps50") is None else g(r.get("life_km_Ps50"))), chip(r.get("static_verdict")), f(r.get("static_sf"))))
+            s.append('<tr><td><code>%s</code></td><td>%s</td><td class="n">%s</td><td class="n">%s</td><td class="n">%s</td><td class="n">%s</td><td class="n">%s</td></tr>' % (
+                esc(r["part"].replace("part:microduck-", "")), chip(r["verdict"]), f(r.get("sigma_max_mpa"), 4), f(r.get("design_endurance_mpa_worst"), 2),
+                f(r.get("sigma_over_endurance_worst"), 3), ("∞" if has and r.get("life_km_design_Ps90_worst") is None else g(r.get("life_km_design_Ps90_worst"))),
+                ("∞" if has and r.get("life_km_Ps50") is None else g(r.get("life_km_Ps50")))))
+        s.append('</tbody></table></div>')
+        s.append('<div class="tw"><table class="data"><caption>Table 9a. The walk load and static verdict each fatigue row rests on.</caption>'
+                 '<thead><tr><th>Part</th><th class="n">|F| walk N</th><th>Material</th><th>Static walk verdict</th><th class="n">Static SF</th><th>Walk study</th></tr></thead><tbody>')
+        for r in o["rows"]:
+            s.append('<tr><td><code>%s</code></td><td class="n">%s</td><td>%s</td><td>%s</td><td class="n">%s</td><td><code>%s</code></td></tr>' % (
+                esc(r["part"].replace("part:microduck-", "")), f(r.get("force_N"), 4), esc(r.get("material") or "—"), chip(r.get("static_verdict")), f(r.get("static_sf")), esc(os.path.basename(r["walk_study"]))))
         s.append('</tbody></table></div>')
         s.append('<ul class="note">' + "".join('<li><code>%s</code>: %s%s</li>' % (esc(r["part"].replace("part:", "")), esc(r["why"]), (" What settles it: %s" % esc(r["what_settles_it"])) if r.get("what_settles_it") else "") for r in o["rows"]) + '</ul>')
         s.append('<p class="note">Limits: %s. What settles it: %s</p>' % (esc("; ".join(FW["limits"])), esc(FW["what_settles_it"])))
@@ -557,11 +586,11 @@ def sec_fatigue(F, FW):
         i, o = F["inputs"], F["outputs"]
         s.append('<h3>The ankle in detail (with the mesh-scaled peak)</h3><p class="lede">%s %s</p>' % (chip(F["verdict"]), esc(F["why"])))
         s.append('<div class="tw"><table class="data"><caption>Table 9b. Ankle life by basis. σ<sub>max</sub> from the walk-peak FEA (%s N). Load ratio %s. Source: <code>out/sim-evidence/fatigue_ankle.json</code>.</caption>'
-                 '<thead><tr><th>UTS basis</th><th class="n">UTS MPa</th><th>Stress basis</th><th class="n">σ<sub>max</sub> MPa</th><th class="n">Design endurance MPa</th><th class="n">σ<sub>max</sub> / limit</th><th class="n">N (P<sub>s</sub>≥90 %%)</th><th class="n">Life km</th></tr></thead><tbody>' % (
+                 '<thead><tr><th>UTS basis</th><th class="n">UTS MPa</th><th>Stress</th><th class="n">σ<sub>max</sub> MPa</th><th class="n">Endurance MPa</th><th class="n">σ / limit</th><th class="n">N</th><th class="n">Life km</th></tr></thead><tbody>' % (
                      f(i["stress"]["force_N"], 4), esc(i["stress"]["load_ratio_R"])))
         for c in o["curves"]:
             s.append('<tr><td>%s</td><td class="n">%s</td><td>%s</td><td class="n">%s</td><td class="n">%s</td><td class="n">%s</td><td class="n">%s</td><td class="n">%s</td></tr>' % (
-                esc(c["uts_basis"]), f(c["uts_mpa"], 1), esc(c["stress_basis"]), f(c["sigma_max_mpa"], 4), f(c["design_endurance_sigma_max_2e6_mpa"], 3), f(1 / c["endurance_margin"] if c["endurance_margin"] else None, 3),
+                esc(c["uts_basis"].replace("prusament_tds", "TDS").replace("paper_theta0", "paper")), f(c["uts_mpa"], 1), esc(c["stress_basis"].replace("fea_peak_mesh_scaled", "mesh-scaled").replace("fea_peak", "FEA peak")), f(c["sigma_max_mpa"], 4), f(c["design_endurance_sigma_max_2e6_mpa"], 3), f(1 / c["endurance_margin"] if c["endurance_margin"] else None, 3),
                 esc(str(c["cycles_to_failure_design_Ps90"]).replace("> 2e6 (below the design endurance limit)", "> 2·10⁶")), esc(str(c["life_km_design_Ps90"]).replace("infinite by the design curve", "∞ (design curve)"))))
         s.append('</tbody></table></div>')
         s.append('<p class="note">Table 1 of the paper (θ<sub>p</sub> = 0°, UTS 42.6 MPa): median endurance amplitude at 2·10⁶ cycles, R = −1: 10.4 MPa, R = 0: 6.1 MPa (σ<sub>max</sub> 12.2 MPa). '

@@ -1,75 +1,96 @@
 {
  "study": "buckling_microduck-upper-leg-rigidity-plate",
  "part": "part:microduck-upper-leg-rigidity-plate",
- "generated": "2026-09-02T23:06:21",
+ "generated": "2026-09-03T04:04:41",
  "script": "sim/struct_ce.py",
  "inputs": {
   "mesh": "sim/meshes_ours/upper_leg_rigidity_plate.stl",
-  "cell_mm": 0.33,
+  "cells_mm": [
+   0.33
+  ],
   "long_axis": "z",
   "held_face": "z=min",
   "loaded_face": "z=max",
-  "force_N": 109.4988,
-  "force_source": "out/sim-evidence/loads_mujoco.json :: drops[foot].body_transmitted_force_max_N.upper_leg_left (100 % through the plate: bounding)",
+  "force_vector_part_frame_N": [
+   -46.67,
+   -90.35177,
+   -40.75523
+  ],
+  "force_magnitude_N": 109.4988,
+  "axial_component_N": -40.75523,
+  "axial_is_compressive": true,
+  "share": 1.0,
+  "force_source": "out/sim-evidence/loads_mujoco.json :: drops[drop_foot_rollm10_default_contact_dt5ms].part_frames_at_peak.upper_leg_rigidity_plate.force_from_body_upper_leg_left (t 0.230 s)",
   "material": "PLA",
   "printNormal_ASSUMED": "x (the thickness axis \u2014 the part printed flat; no part.py declares print_up)",
   "solver": "ce-struct /api/solve (voxel hex mesh + CalculiX *BUCKLE / *FREQUENCY)"
  },
- "method": "axial compression over the whole end face, the other end fixed xyz; buckling eigenvalue = load factor on the applied force; first natural frequency with the same support",
+ "method": "load over the whole loaded end face, the other end fixed xyz; buckling eigenvalue = load factor on the applied load; solved with the AXIAL component alone and with the FULL measured vector, at each cell size; first natural frequency with the same support",
  "artifacts": [],
  "looked_at": [],
  "outputs": {
-  "buckle": {
-   "study": "buckle",
-   "ms": 162105,
-   "cells": 21597,
-   "nodes": 32164,
-   "interfaces": [],
-   "factors": [
-    1.000246,
-    1.000266,
-    1.001148
-   ],
-   "critical": 1.000246,
-   "_seconds": 164.05
-  },
-  "frequency": {
-   "study": "frequency",
-   "ms": 134153,
-   "cells": 21597,
-   "nodes": 32164,
-   "interfaces": [],
-   "modes": [
-    {
-     "mode": 1,
-     "eigenvalue": 36334.5,
-     "rad_s": 190.6161,
-     "hz": 30.3375
-    },
-    {
-     "mode": 2,
-     "eigenvalue": 484386.5,
-     "rad_s": 695.9788,
-     "hz": 110.7685
-    },
-    {
-     "mode": 3,
-     "eigenvalue": 626584.7,
-     "rad_s": 791.571,
-     "hz": 125.9824
-    }
-   ],
-   "first_Hz": 30.3375,
-   "_seconds": 138.95
-  },
-  "critical_load_N": 109.5257,
+  "rows": [
+   {
+    "cell_mm": 0.33,
+    "load": "axial",
+    "cells": 21597,
+    "nodes": 32164,
+    "factors": [
+     0.9725246,
+     1.017121,
+     1.024005
+    ],
+    "critical": 0.9725246,
+    "seconds": 11.33,
+    "error": null
+   },
+   {
+    "cell_mm": 0.33,
+    "load": "full",
+    "cells": 21597,
+    "nodes": 32164,
+    "factors": [
+     0.9998262,
+     1.000018,
+     1.000251
+    ],
+    "critical": 0.9998262,
+    "seconds": 14.32,
+    "error": null,
+    "first_mode_hz": 30.3375,
+    "modes_hz": [
+     30.3375,
+     110.7685,
+     125.9824
+    ]
+   }
+  ],
+  "critical_factor_full_finest": 0.9998262,
+  "critical_factor_axial_finest": 0.9725246,
+  "critical_load_N_full": 109.4798,
+  "critical_axial_load_N": 39.6355,
   "first_mode_hz": 30.3375,
   "modes_hz": [
    30.3375,
    110.7685,
    125.9824
-  ]
+  ],
+  "convergence": {
+   "cells_solved": [
+    0.33
+   ],
+   "factor_by_cell_full": [
+    0.9998262
+   ],
+   "factor_by_cell_axial": [
+    0.9725246
+   ],
+   "drift_finest_pair": null,
+   "rule": "drift < 0.05"
+  },
+  "mode_separation_f3_over_f1": 1.000425,
+  "euler_crosscheck": null
  },
  "verdict": "CANNOT DETERMINE",
- "why": "the three lowest eigen-factors [1.000246, 1.000266, 1.001148] lie within 1 % of each other \u2014 a localised mode at the loaded end face (voxel edge crushing), not a plate mode; no buckling load of the member was found. What settles it: a shell/solid model loaded through the four screw holes instead of the end face, or a printed plate compressed in a rig"
+ "why": "the three lowest eigen-factors [0.999826, 1.000018, 1.000251] lie within 1 % of each other \u2014 a localised mode at the loaded end face (voxel edge crushing), not a member mode; no buckling load of the member was found. What settles it: a shell/solid model loaded through the screw holes instead of the end face, or a printed part compressed in a rig"
 }
