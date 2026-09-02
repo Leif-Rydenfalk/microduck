@@ -180,9 +180,9 @@ def main():
     done = drawings + refs + prints
     rest = [r for r in rows if r not in done]
 
-    def group(rs, title, n, lede, empty):
+    def group(rs, title, n, lede, empty, anchor=None):
         h = ['<section id="%s"><h2><span class="n">%s</span>%s</h2>'
-             % (title.lower().replace(" ", "-"), n, E(title)),
+             % (anchor or title.lower().replace(" ", "-"), n, E(title)),
              '<p class="lede">%s</p>' % lede]
         h.append("".join(sheet_card(r) for r in rs) if rs
                  else '<p class="note">%s</p>' % empty)
@@ -269,7 +269,7 @@ def main():
 <nav class="toc">
   <a href="#how">1 What a sheet must carry</a>
   <a href="#dimensioned-drawings">2 Dimensioned drawings</a>
-  <a href="#reference-drawings-—-bought-parts">3 Reference drawings</a>
+  <a href="#reference-drawings">3 Reference drawings</a>
   <a href="#print-sheets">4 Print sheets</a>
   <a href="#no-sheet">5 Parts with no sheet</a>
 </nav>
@@ -315,7 +315,7 @@ def main():
        "sheet is a reference for checking the assembly against a real envelope — the "
        "vendor's own drawing governs every dimension. Each sheet says so in its "
        "print/DFM block.",
-       "No bought part has been drawn.")}
+       "No bought part has been drawn.", anchor="reference-drawings")}
 
 {group(prints, "Print sheets", 4,
        "Parts backed by a published mesh. No dimension can be read off a decimated "
