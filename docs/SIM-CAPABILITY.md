@@ -5,7 +5,11 @@ this Mac (8-core, macOS) on 2026-09-02; **cited** numbers name the file or URL t
 come from. Toolchain state as measured today: `cargo 1.97.1` on PATH; `gmsh` and
 `ccx` NOT on PATH but found at runtime inside FreeCAD.app (proven working by the
 passing FEA runs below); MuJoCo 3.12.0 + onnxruntime 1.29.0 in FreeCAD's python;
-`MUJOCO_GL=glfw` offscreen rendering works.
+`MUJOCO_GL=glfw` offscreen rendering works. **Re-verified 2026-09-02** (section
+3): the stress self-test, a mechanism sweep and the policy-in-the-loop round-trip
+were each re-run; verdict counts and the walk trajectory reproduced exactly, and
+the real-time-factor numbers were corrected downward after re-measurement (they
+are load-dependent and the machine was at load average 28 — see §1.4 and §3).
 
 ## 1. Feature matrix — our stack vs the SolidWorks feature set
 
@@ -60,12 +64,20 @@ SolidWorks study list used for comparison: [GoEngineer package comparison](https
 
 ### 1.4 What actually runs in real time (SolidWorks: nothing in this class)
 
+Real-time factors here are **machine-load dependent** and every row below marked
+*re-measured 2026-09-02* was taken while this 8-core Mac carried **load average
+27.95** (≈3.5x oversubscribed — other agents' FreeCAD/MuJoCo processes running),
+so they are **lower bounds**, not the machine's ceiling. The one number that is
+**invariant of load** is the trajectory: the 10 s walk lands at **1.0045 m,
+did not fall, max tilt 4.11°** on every run (bit-exact, three runs).
+
 | lane | measured rate | real-time factor |
 |---|---|---|
-| Rust kernel live tick (single mechanism, 1 coordinate) | 10.05 µs/tick (10,000-tick bench) | **99.5x** real time at dt=1 ms; also runs as wasm in the browser viewer |
+| Rust kernel live tick (single mechanism, 1 coordinate) | 10.05 µs/tick (10,000-tick bench, cited CLAUDE.md §96) | **99.5x** real time at dt=1 ms; also runs as wasm in the browser viewer |
 | Viewer live kinematic solve | worst 0.17 ms/frame over 241 frames, 8 machines (cited, CLAUDE.md §96) | comfortably 60 fps |
-| MuJoCo, microduck, pure physics (`mj_step`, dt=5 ms, full contact) | 33.8 µs/step (2,000-step bench) | **148x** real time |
-| MuJoCo + ONNX policy at 50 Hz (the real control stack's loop shape) | 10 s walk in 0.13 s loop wall (1.08 s process wall incl. model+policy load); walked 1.0045 m at vx 0.25, did not fall | **~77x** real time |
+| MuJoCo `mj_step`, microduck standing (ncon=5, dt=5 ms, contacts on) | **re-measured 2026-09-02**: 227 µs/step (4,000-step bench, under load 28) | **22x** real time under load; a quiet machine did 33.8 µs/step = 148x (cited, prior bench) |
+| ONNX walking policy inference alone | **re-measured 2026-09-02**: 122 µs/inference (2,000-call bench, under load 28) | negligible vs the 20 ms control period |
+| MuJoCo + ONNX policy at 50 Hz (the real control stack's loop shape) | **re-measured 2026-09-02**: 10 s walk in **0.61–0.77 s** steady-state loop wall (best 0.607 s; 2.71 s cold, first process); walked 1.0045 m at vx 0.25, did not fall | **13–16x** real time under load (best 16.5x); the earlier **0.13 s / 77x** was the *theoretical sum* of per-part costs (122 µs policy + 4×33.8 µs `mj_step`) × 500 steps = 0.128 s, **not** a measured full-loop wall, and did not reproduce — the loop's Python obs/apply/record overhead is real. It is comfortably faster than real time either way. |
 | ce-struct in-tab static solve | 1.57 s for 7,080 cells (re-solves while a slider moves) | interactive, not real-time physics |
 
 ### 1.5 Testing microduck's REAL software against simulation (the Isaac Sim question)
@@ -76,7 +88,7 @@ SolidWorks study list used for comparison: [GoEngineer package comparison](https
 | The real Rust daemons (robotd et al.) in the loop | NO physics-in-the-loop bridge exists. What exists: `duck-control`'s `RobotIo` trait with a `FakeIo` backend (`--fake`) — the daemon runs without hardware, against CANNED sensors, not simulated dynamics | read from the clone: `duck-control/src/io.rs` (`pub trait RobotIo`, `FakeIo`, "simulated failure" error) |
 | The robot's kinematics code vs physics ground truth | YES — Pollen's own Rust FK crate is tested against MuJoCo's `mj_kinematics` on 64 random poses to 1e-6 m | read: `kinematics/tests/fk_against_mujoco.rs` |
 | What a robotd↔MuJoCo bridge would need | a `RobotIo` impl that answers `sync_read` (15 servos + the id-200 IMU register block) from `mj_step` state and applies goal positions as `data.ctrl` — the trait seam already exists; the work is the Dynamixel register model + real-time pacing | gap, not measured |
-| Isaac Sim's actual add | GPU-parallel RL at scale (thousands of concurrent envs), RTX sensor simulation (camera/depth/lidar/radar, segmentation, synthetic data), USD scenes, ROS 2 integration | cited: [NVIDIA Isaac Sim paper (arXiv 2606.03551)](https://arxiv.org/html/2606.03551v1), [Isaac Lab](https://github.com/isaac-sim/IsaacLab), [NVIDIA/HF state of simulation](https://huggingface.co/blog/nvidia/state-of-simulation-for-physical-ai). None of that is needed to RUN Pollen's already-trained policies (measured above at 77x real time on CPU); it becomes relevant if we TRAIN policies or need camera/lidar sensor realism |
+| Isaac Sim's actual add | GPU-parallel RL at scale (thousands of concurrent envs), RTX sensor simulation (camera/depth/lidar/radar, segmentation, synthetic data), USD scenes, ROS 2 integration | cited: [NVIDIA Isaac Sim paper (arXiv 2606.03551)](https://arxiv.org/html/2606.03551v1), [Isaac Lab](https://github.com/isaac-sim/IsaacLab), [NVIDIA/HF state of simulation](https://huggingface.co/blog/nvidia/state-of-simulation-for-physical-ai). None of that is needed to RUN Pollen's already-trained policies (re-measured above at 13–16x real time on this CPU under heavy load — comfortably faster than real time); it becomes relevant if we TRAIN policies or need camera/lidar sensor realism |
 
 ## 2. Is it like SolidWorks?
 
@@ -95,8 +107,9 @@ the solid (40/40 checks, measured), and a missing fact is a named CANNOT
 DETERMINE rather than a silent pass (the totem run above blocks its own gate for
 an undeclared keep-out); real-time — the Rust kernel ticks a live mechanism at
 ~100x real time and MuJoCo runs the microduck's actual shipped ONNX policies with
-full contact at ~77–148x real time on this 8-core CPU, a software-in-the-loop
-lane SolidWorks simply does not have. On the Isaac Sim question: we already do
+full contact faster than real time on this 8-core CPU (re-measured 13–16x today
+under a load average of 28; the bit-exact 1.0045 m walk trajectory is invariant
+of load), a software-in-the-loop lane SolidWorks simply does not have. On the Isaac Sim question: we already do
 the part of Isaac Sim that matters for microduck today — physics-accurate
 policy-in-the-loop simulation on our own rebuilt geometry — but only at the
 policy level; the real Rust daemons (robotd) can run hardware-free against a

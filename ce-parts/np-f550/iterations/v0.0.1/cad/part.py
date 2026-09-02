@@ -57,6 +57,14 @@ NOTCH_W = 4.0             # latch notches reach in to |x| = 4.0
 FOOT_Z = ((-22.95, -14.65), (-6.35, -3.2), (6.7, 14.95), (22.5, 25.35))
 HOLE_D, HOLE_X, HOLE_Y = 2.4, 16.9, -7.75
 HOLE_Z = (-33.6, -27.55)  # cut span (measured -33.05..-27.55, opened to the rail end face)
+# 2 shallow Ø3.2 dimples in the bottom-rail undersides (meshfeatures: d 3.198,
+#   axis +y, centres (+-14.65, y -10.201, z -30.75), len ~0.12 mm)
+DIMPLE_D, DIMPLE_X, DIMPLE_Z = 3.2, 14.65, -30.75
+DIMPLE_Y0, DIMPLE_DEPTH = RAIL_Y - 0.05, 0.20      # cut +y from just below the rail face
+# 2 shallow Ø3.48 counterbores on the terminal-end face, coaxial with the D2.4
+#   holes (meshfeatures: d 3.476, axis z, centres (+-16.9, -7.75, z ~-33.5), len 0.1..0.23)
+END_CB_D = 3.48
+END_CB_Z = (-33.7, -33.35)  # shallow ring on the rail end face (z -33.55) around each terminal hole
 
 MATERIAL = "ABS"          # moulded pack shell, assumed — see docs/README.md
 
@@ -96,6 +104,14 @@ def build(doc, params=None):
     for sx in (-1, 1):
         p.cyl(HOLE_D, HOLE_Z[1] - HOLE_Z[0], at=(sx * HOLE_X, HOLE_Y, HOLE_Z[0]),
               axis="z", op="cut")
+    # shallow Ø3.48 counterbores on the end face, coaxial with the terminal holes
+    for sx in (-1, 1):
+        p.cyl(END_CB_D, END_CB_Z[1] - END_CB_Z[0], at=(sx * HOLE_X, HOLE_Y, END_CB_Z[0]),
+              axis="z", op="cut")
+    # shallow Ø3.2 dimples in the bottom-rail undersides
+    for sx in (-1, 1):
+        p.cyl(DIMPLE_D, DIMPLE_DEPTH, at=(sx * DIMPLE_X, DIMPLE_Y0, DIMPLE_Z),
+              axis="y", op="cut")
     p.clean()
     p.connector("terminals", at=(0, HOLE_Y, -Z_HALF), dir="-z")   # contact end
     p.connector("rails", at=(0, RAIL_Y, 0), dir="-y")             # the NP-F latch rails
