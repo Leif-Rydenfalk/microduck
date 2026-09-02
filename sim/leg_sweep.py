@@ -525,6 +525,14 @@ def main():
             res[nm]["joints"][jn] = dict(travel_deg=round(D(q.max() - q.min()), 3),
                                          min_deg=round(D(q.min()), 3), max_deg=round(D(q.max()), 3),
                                          peak_velocity_deg_s=round(D(np.abs(dq).max()), 2))
+    wk = os.path.join(ROOT, "out", "sim", "walk_ours_traj.npz")
+    if os.path.exists(wk):
+        res["walking_policy"] = dict(
+            source=os.path.relpath(wk, ROOT),
+            policy="BEST_alpha_walking.onnx (Pollen), vx 0.25 m/s, 8.0 s at 50 Hz",
+            note="what the leg joints actually do when the duck walks - the working envelope, "
+                 "against the full MJCF range above",
+            joints=peak_from_traj(wk, m))
     ss = os.path.join(ROOT, "out", "sim", "sitstand_ours_traj.npz")
     if os.path.exists(ss):
         res["sitstand_policy"] = dict(source=os.path.relpath(ss, ROOT),

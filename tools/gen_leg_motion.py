@@ -25,6 +25,7 @@ DY = J["dynamic_step_policy_paused"]["joints"]
 SS = J["sitstand_policy"]["joints"]
 SQ = J["squat"]["joints"]
 LL = J["leg_lift"]["joints"]
+WK = J.get("walking_policy", {}).get("joints", {})
 ORDER = list(R.keys())
 CT = J["self_collision"]["controls"]
 FR = J.get("framing_check")
@@ -47,11 +48,15 @@ contact sheet <a href="%s">%s</a> · gif <a href="%s">%s</a> · frames <span cla
 jt = "".join(
     "<tr><td class=mono>%s</td><td class=n>%.3f … %.3f</td><td class=mono>%s</td>"
     "<td class=n>%.3f</td><td class=n>%.1f%%</td><td class=n>%.1f</td><td class=n>%.2f</td>"
-    "<td class=n>%.3f</td><td class=n>%.1f</td><td class=n>%.3f</td></tr>" % (
+    "<td class=n>%.3f</td><td class=n>%.1f</td><td class=n>%s</td><td class=n>%s</td>"
+    "<td class=n>%.3f</td></tr>" % (
         E(j), R[j]["lo_deg"], R[j]["hi_deg"], E(R[j]["cite"]),
         DY[j]["travel_deg"], 100 * DY[j]["travel_frac_of_mjcf_range"],
         DY[j]["peak_velocity_deg_s"], DY[j]["tracking_rms_deg"],
-        SS[j]["travel_deg"], SS[j]["peak_velocity_deg_s"], SQ[j]["travel_deg"]) for j in ORDER)
+        SS[j]["travel_deg"], SS[j]["peak_velocity_deg_s"],
+        ("%.3f" % WK[j]["travel_deg"]) if j in WK else "—",
+        ("%.1f" % WK[j]["peak_velocity_deg_s"]) if j in WK else "—",
+        SQ[j]["travel_deg"]) for j in ORDER)
 
 sw = J["self_collision"]["pollen_collision_meshes"]["sweeps"]
 st = "".join("<tr><td class=mono>%s</td><td class=n>%.3f … %.3f</td><td class=n>%d</td>"
@@ -154,7 +159,7 @@ max tilt %.2f&deg;, and it does not fall.</p>
 <div class=tw><table class=data>
 <thead><tr><th>joint</th><th>MJCF range (deg)</th><th>cite</th><th>travel reached</th><th>of range</th>
 <th>peak vel (deg/s)</th><th>tracking RMS (deg)</th><th>sit-stand travel</th><th>sit-stand peak</th>
-<th>squat travel</th></tr></thead><tbody>%s</tbody></table></div>
+<th>walk travel</th><th>walk peak</th><th>squat travel</th></tr></thead><tbody>%s</tbody></table></div>
 <p class=note><b>Peak velocity is a model number, not a servo number.</b> %s</p>
 <p class=note>%s</p>
 
