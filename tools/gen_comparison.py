@@ -83,6 +83,9 @@ joints = "\n".join(pair_block(t, "real robot, same joint (cropped from the profi
 HEAD_PATH = os.path.join(REPO, "out", "head", "head.json")
 HEAD = json.load(open(HEAD_PATH)) if os.path.exists(HEAD_PATH) else None   # tools/head_verdict.py (lane A)
 
+ANKLE_PATH = os.path.join(REPO, "out", "laneT", "ankle-revision.json")
+ANKLE = json.load(open(ANKLE_PATH)) if os.path.exists(ANKLE_PATH) else None  # tools/ankle_revision.py (lane T)
+
 
 def _pm(v, u, nd=2):
     if v is None: return "CANNOT DETERMINE"
@@ -90,7 +93,7 @@ def _pm(v, u, nd=2):
 
 
 def _chip(v):
-    return '<span class="chip %s">%s</span>' % ("pass" if v == "PASS" else "cd", html.escape(v))
+    return '<span class="chip %s">%s</span>' % ({"PASS": "pass", "FAIL": "no"}.get(v, "cd"), html.escape(v))
 
 
 def head_verdict_block():
@@ -101,23 +104,29 @@ def head_verdict_block():
     C = HEAD["combined"]; V = HEAD["verdict"]; FV = HEAD["front_view"]["comparison"]; CV = C["verdicts"]
     cls = {"PASS": "", "FAIL": " warn", "CANNOT DETERMINE": " cd"}[V["head"]]
     settle = html.escape(" ".join(V["what_would_settle"])) if V["what_would_settle"] else "Nothing — every check PASSES."
+    FP = C.get("front_pair", {})
     conseq = {"PASS": "Head tooling can be cut from the published meshes.",
-              "FAIL": "The head must be re-modelled from the photographs before tooling."}.get(
+              "FAIL": "Head tooling must NOT be cut from the published meshes. " + html.escape(V.get("remodel") or "")}.get(
               V["head"], "Tooling waits on one calliper reading of a product head (or one purpose-shot photograph); the 1.5 mm rule cannot be decided from the store photographs alone.")
     v1 = f"""  <div class="verdict{cls}">
     <b>The head — {html.escape(V["head"])}, measured in millimetres.</b> Lane A scaled {C["n_photos"]} product photographs by the
     XL330-M288-T case in the same frame (20.000 mm), posed our model to each with a perspective camera and compared the head shell
     against the mesh: product/mesh size ratio <b>{_pm(C["product_over_mesh"], C["product_over_mesh_unc"], 4)}</b>, head-length deviation
     <b>{_pm(C["head_length_dev_mm"], C["head_length_dev_unc_mm"])}&nbsp;mm</b> on 122.690&nbsp;mm; along the head's own axes
-    {_pm(C["dev_major_mm"], C["dev_major_unc_mm"])} / {_pm(C["dev_minor_mm"], C["dev_minor_unc_mm"])}&nbsp;mm. The eye bezel is
-    <b>{html.escape(V["eye_bezel"])}</b>: it is the <code>noenoeil</code> mesh (Ø30.000&nbsp;×&nbsp;7.5&nbsp;mm ring proud of the face); the product ring
-    reads {_pm(C["eye_dev_mm"], C["eye_dev_unc_mm"])}&nbsp;mm against it in the profiles and {C["eye_front_view_dev_mm"]:+.2f}&nbsp;mm in the true front view.
+    {_pm(C["dev_major_mm"], C["dev_major_unc_mm"])} / {_pm(C["dev_minor_mm"], C["dev_minor_unc_mm"])}&nbsp;mm ({_chip(CV["length"])} on the length).
+    The true front view grades the pair (ring OD, head width) <b>{html.escape(FP.get("verdict", "—"))}</b>: ring OD / beak width
+    {FP.get("ratio_photo", 0):.4f} in the photograph against {FP.get("ratio_mesh", 0):.4f} on the mesh ({FP.get("excess_pct", 0):+.1f}&nbsp;%,
+    {_pm(FP.get("dev_mm"), FP.get("unc_mm"))}&nbsp;mm at the mesh width, the same verdict at every camera distance); which member is off is CANNOT DETERMINE
+    from a ratio — the profiles' ring/length agreement ({_pm(C["eye_dev_mm"], C["eye_dev_unc_mm"])}&nbsp;mm) puts it on the width (implied
+    {FP.get("implied_head_width_mm_if_ring_is_mesh", 0):.2f}&nbsp;mm). The eye bezel is <b>{html.escape(V["eye_bezel"])}</b>: it is the <code>noenoeil</code>
+    mesh (Ø30.000&nbsp;×&nbsp;7.5&nbsp;mm ring proud of the face), not a missing part.
     Full evidence, every overlay real-beside-ours: <a href="HEAD-RECONSTRUCTION.html">HEAD-RECONSTRUCTION.html</a>.
   </div>"""
     row = f"""      <tr><td class="n">1</td><td><b>Head conformance — {html.escape(V["head"])}.</b> Product/mesh size ratio
         {_pm(C["product_over_mesh"], C["product_over_mesh_unc"], 4)} over {C["n_photos"]} servo-scaled photographs; head length
-        {_pm(C["head_length_dev_mm"], C["head_length_dev_unc_mm"])}&nbsp;mm; eye bezel {html.escape(V["eye_bezel"])}
-        ({_pm(C["eye_dev_mm"], C["eye_dev_unc_mm"])}&nbsp;mm profile, {C["eye_front_view_dev_mm"]:+.2f}&nbsp;mm front view).</td>
+        {_pm(C["head_length_dev_mm"], C["head_length_dev_unc_mm"])}&nbsp;mm ({html.escape(CV["length"])}); front view ring OD / head width
+        {html.escape(FP.get("verdict", "—"))} ({FP.get("excess_pct", 0):+.1f}&nbsp;%, {_pm(FP.get("dev_mm"), FP.get("unc_mm"))}&nbsp;mm, attribution CANNOT DETERMINE);
+        eye bezel {html.escape(V["eye_bezel"])} ({_pm(C["eye_dev_mm"], C["eye_dev_unc_mm"])}&nbsp;mm at the head's length scale, profiles).</td>
         <td><a href="HEAD-RECONSTRUCTION.html">HEAD-RECONSTRUCTION.html</a>, <code>out/head/head.json</code></td>
         <td>{conseq}</td>
         <td>{settle}</td></tr>"""
@@ -134,9 +143,10 @@ def head_verdict_block():
       <tr><td>head silhouette, major axis</td><td class="n">{_pm(C["dev_major_mm"], C["dev_major_unc_mm"])} mm</td><td>{_chip(CV["major"])}</td></tr>
       <tr><td>head silhouette, minor axis</td><td class="n">{_pm(C["dev_minor_mm"], C["dev_minor_unc_mm"])} mm</td><td>{_chip(CV["minor"])}</td></tr>
       <tr><td>eye ring Ø (30.000 mm mesh), profile photographs</td><td class="n">{_pm(C["eye_dev_mm"], C["eye_dev_unc_mm"])} mm</td><td>{_chip(CV["eye_profile"])}</td></tr>
-      <tr><td>eye ring Ø, true front view (ratio to head width)</td><td class="n">{C["eye_front_view_dev_mm"]:+.2f} mm</td><td>{_chip(CV["eye_front"])}</td></tr>
-      <tr><td>eye centre below shell top / off mid-line (front view)</td><td class="n">{FV["eye_below_top_over_width"]["dev_mm"]:+.2f} / {FV["eye_x_offset_over_width"]["dev_mm"]:+.2f} mm</td><td>—</td></tr>
-      <tr><td>ToF window centre from the eye (front view vs MJCF site 22.4 mm)</td><td class="n">{FV["tof_x_from_eye_over_width"]["dev_mm"]:+.2f} mm</td><td>—</td></tr>
+      <tr><td>front view: ring OD / head width — the pair (which member: CANNOT DETERMINE)</td><td class="n">{_pm(C["eye_front_view_dev_mm"], C["eye_front_view_unc_mm"])} mm at the mesh width</td><td>{_chip(CV["eye_front"])}</td></tr>
+      <tr><td>eye centre below shell top (front view)</td><td class="n">{_pm(FV["eye_below_top_over_width"]["dev_mm"], FV["eye_below_top_over_width"]["dev_unc_mm"])} mm</td><td>{_chip(FV["eye_below_top_over_width"]["verdict"])}</td></tr>
+      <tr><td>eye centre off the mid-line (front view)</td><td class="n">{_pm(FV["eye_x_offset_over_width"]["dev_mm"], FV["eye_x_offset_over_width"]["dev_unc_mm"])} mm</td><td>{_chip(FV["eye_x_offset_over_width"]["verdict"])}</td></tr>
+      <tr><td>ToF window centre from the eye (front view vs MJCF site 22.4 mm)</td><td class="n">{_pm(FV["tof_x_from_eye_over_width"]["dev_mm"], FV["tof_x_from_eye_over_width"]["dev_unc_mm"])} mm</td><td>{_chip(FV["tof_x_from_eye_over_width"]["verdict"])}</td></tr>
     </tbody>
   </table></div>
   <div class="pair">
@@ -149,6 +159,45 @@ def head_verdict_block():
   <p><b>What would settle the rest.</b> {settle}</p>
 """
     return v1, row, sub
+
+
+
+def ankle_row():
+    """§5 finding-4 row, from out/laneT/ankle-revision.json so this page cannot contradict the
+    folder that settled it. Returns the OPEN wording when lane T has not run."""
+    if ANKLE is None:
+        return """      <tr><td class="n">4</td><td><b>Two ankle variants ship in the asset set</b>
+        (<code>ankle_left</code> 36.500&nbsp;mm vs <code>ankle_l_v1</code> 46.500&nbsp;mm in Y).</td>
+        <td>Table 1, rows 1\u20134</td>
+        <td>Building the wrong revision changes ankle geometry by 10&nbsp;mm.</td>
+        <td>CANNOT DETERMINE \u2014 <code>out/laneT/ankle-revision.json</code> is not on disk. Run
+        <code>tools/ankle_revision.py</code>.</td></tr>
+"""
+    n_leg = sum(1 for m in ANKLE["mjcf_inventory"] if not m["roller_kit"])
+    n_rol = sum(1 for m in ANKLE["mjcf_inventory"] if m["roller_kit"])
+    reads = "; ".join("%s \u2192 %s" % (html.escape(r["reading"]), html.escape(r["supports"]))
+                      for r in ANKLE["readings"])
+    return """      <tr><td class="n">4</td><td><b>SETTLED %s \u2014 the two ankles are not two revisions.</b>
+        <code>ankle_left</code> (Y&nbsp;36.5000&nbsp;mm) and <code>ankle_l_v1</code>
+        (Y&nbsp;46.4981&nbsp;mm) belong to two <em>locomotion variants</em>, not to a revision
+        history: %s The product in the box uses <b>%s</b>.</td>
+        <td><code>out/laneT/ankle-revision.json</code> (%s), verdict %s. %d MJCF model(s) carry
+        <code>ankle_left</code> with a foot and a sole and no roller kit; %d carry
+        <code>ankle_l_v1</code> with <code>rim</code>/<code>tire</code>/<code>roller_blade</code>
+        and no foot. Three independent readings, all agreeing: %s.</td>
+        <td>None, now that it is answered \u2014 but the old action was wrong and would have caused
+        one: treating <code>_v1</code> as superseded would have deleted the roller variant's ankle.</td>
+        <td>Build <code>ankle_left</code>/<code>ankle_right</code>. Still open, and it does not
+        change this answer: %s</td></tr>
+""" % (html.escape(ANKLE["date"]),
+       html.escape(ANKLE["not_a_revision_history"]),
+       html.escape(ANKLE["answer"]),
+       html.escape(ANKLE["date"]), _chip(ANKLE["verdict"]),
+       n_leg, n_rol, reads,
+       html.escape(ANKLE["still_open"]))
+
+
+ANKLE_ROW = ankle_row()
 
 
 _hv = head_verdict_block()
@@ -221,9 +270,10 @@ HTML = f"""<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Reference Match</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opt_sz,wght@8..60,400;8..60,600;8..60,700&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="tools/doc.css">
 <style>
+  .chip.no{color:var(--no)}
   .pair{{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:10px 0 4px}}
   .pair figure{{margin:0;padding:8px}}
   .pair figure img{{width:100%;aspect-ratio:1/1;object-fit:contain;background:#fff}}
@@ -344,12 +394,7 @@ HTML = f"""<!doctype html>
         <td><code>pcb__raspberry_pi_zero_2_w</code> 65.000&nbsp;×&nbsp;1.600&nbsp;×&nbsp;30.000&nbsp;mm</td>
         <td>Both are 65×30&nbsp;mm so the envelope holds, but connector positions differ.</td>
         <td>Verify mounting-hole and connector positions against the real Radxa Zero 3W.</td></tr>
-      <tr><td class="n">4</td><td><b>Two ankle variants ship in the asset set</b>
-        (<code>ankle_left</code> 36.500&nbsp;mm vs <code>ankle_l_v1</code> 46.500&nbsp;mm in Y).</td>
-        <td>Table 1, rows 1–4</td>
-        <td>Building the wrong revision changes ankle geometry by 10&nbsp;mm.</td>
-        <td>Confirm which revision ships; the <code>_v1</code> parts appear superseded.</td></tr>
-    </tbody>
+{ANKLE_ROW}    </tbody>
   </table></div>
 </section>
 

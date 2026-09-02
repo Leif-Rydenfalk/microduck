@@ -1,6 +1,6 @@
 {
- "generated": "2026-09-02 23:29",
- "method": "head_profile_frame.py \u2014 the one published PURE-PROFILE view with the head un-yawed:\nimages/github/gh_readme_7.png (Pollen's README, 2215 x 884), Pollen's own simulator\nrender on the left and the real sky unit on the right, both in profile, jaw closed,\neye ring not visible (so head yaw ~ 0). Why it matters: in the store photographs the\nhead is yawed 50 deg towards the camera, and the head-to-servo size ratio then depends\non the camera distance (the face is ~45 mm nearer than the servo) \u2014 a distance the\nstore frames do not reveal (HEAD-RECONSTRUCTION.html \u00a73). In a pure profile the head's\nsilhouette extremes (crest of the dome, front face, rear) and the neck servos all sit\non the robot's centre plane, so ONE mm/px serves both, to first order independent of\nthe camera distance.\n\nMeasured, both halves with the same estimators:\n  servo width   mode of the dark-run widths across the upper neck servo case (20.000 mm,\n                the horn/label face \u2014 the same face as in the store photographs)\n  head extents  principal-axis extents of the head silhouette (colour-segmented: sky\n                blue + orange on the real unit; white + yellow on the render), 0.5/99.5\n                percentile; the major axis is the head length (shell + closed beak), the\n                minor the head height at that pitch.\nResult: head length in mm for the real unit; the same for Pollen's render (which uses\nthese very meshes, so it must read ~122.7 mm \u2014 that is the method's check); and the\nratio real/sim, which is scale-free.\n\nLimits (stated, not hidden): a video frame \u2014 the servo is ~45 px wide, so +-1.5 px is\n+-3.3 %, i.e. +-4 mm on the head; motion blur; a residual head yaw of 10 deg would\nlengthen the silhouette by ~11 % (yaw only ever makes it LONGER), so the real value is an\nupper bound on the product head length if any yaw remains.\n\nWrites out/head/profile_frame.json and out/head/profile_frame_pair.png.\n    /Applications/FreeCAD.app/Contents/Resources/bin/python tools/head_profile_frame.py\n",
+ "generated": "2026-09-03 03:30",
+ "method": "head_profile_frame.py \u2014 the one published PURE-PROFILE view with the head un-yawed:\nimages/github/gh_readme_7.png (Pollen's README, 2215 x 884), Pollen's own simulator\nrender on the left and the real sky unit on the right, both in profile, jaw closed,\neye ring not visible (so head yaw ~ 0). Why it matters: in the store photographs the\nhead is yawed 50 deg towards the camera, and the head-to-servo size ratio then depends\non the camera distance (the face is ~45 mm nearer than the servo) \u2014 a distance the\nstore frames do not reveal (HEAD-RECONSTRUCTION.html \u00a73). In a pure profile the head's\nsilhouette extremes (crest of the dome, front face, rear) and the neck servos all sit\non the robot's centre plane, so ONE mm/px serves both, to first order independent of\nthe camera distance.\n\nMeasured, both halves with the same estimators:\n  servo width   mode of the dark-run widths across the upper neck servo case (20.000 mm,\n                the horn/label face \u2014 the same face as in the store photographs). The\n                scan is BOUNDED to the half's region and a run that reaches the bound is\n                refused (it measured the region, not a case). On the simulator half the\n                background is a saturated blue, darker than the luminance threshold, so\n                saturated pixels are forced bright before the scan (the servo is grey).\n  head extents  principal-axis extents of the head silhouette (colour-segmented: sky\n                blue + orange on the real unit; white + yellow on the render), 0.5/99.5\n                percentile; the major axis is the head length (shell + closed beak), the\n                minor the head height at that pitch.\nResult: head length in mm for the real unit; the same for Pollen's render (which uses\nthese very meshes, so it must read ~122.7 mm \u2014 that is the method's check); and the\nratio real/sim, which is scale-free.\n\nLimits (stated, not hidden): a video frame \u2014 the servo is ~45 px wide, so +-1.5 px is\n+-3.3 %, i.e. +-4 mm on the head; motion blur; a residual head yaw of 10 deg would\nlengthen the silhouette by ~11 % (yaw only ever makes it LONGER), so the real value is an\nupper bound on the product head length if any yaw remains. Every refusal below names\nwhat the scan met, and out/head/profile_frame_servo_zoom.png shows both servo regions at\n4x with the scan lines drawn, so a reader can see it.\n\nWrites out/head/profile_frame.json, out/head/profile_frame_pair.png and\nout/head/profile_frame_servo_zoom.png.\n    /Applications/FreeCAD.app/Contents/Resources/bin/python tools/head_profile_frame.py\n",
  "image": "images/github/gh_readme_7.png",
  "size_px": [
   2215,
@@ -46,6 +46,8 @@
     ],
     "seed_x": 1930,
     "tilt_deg": -8.0,
+    "face_mm": 20.0,
+    "face_evidence": "CANNOT DETERMINE: no face evidence recorded for this scan",
     "n_lines": 60,
     "n_accepted": 23,
     "width_px_mode": 85,
@@ -53,6 +55,7 @@
     "width_px_unc": 1.5856158720704756,
     "width_px_min": 71.0,
     "width_px_max": 99.0,
+    "n_hit_boundary": 0,
     "lines": [
      [
       1931.9484234134409,
@@ -196,9 +199,17 @@
     "mm_per_px": 0.23553507424475165,
     "mm_per_px_unc": 0.004398242447255939
    },
+   "servo_region": [
+    1880,
+    240,
+    2010,
+    345
+   ],
+   "servo_region_mean_luminance": 62.17531135531136,
+   "scan_image": "luminance",
    "aspect_major_over_minor": 2.5290924900647296,
    "scale_verdict": "CANNOT DETERMINE",
-   "scale_why": "dark run 84.9 px is the servo + horn bracket + cables merged (a 20 mm case would be ~45 px at this frame's scale); the frame cannot resolve the case edge"
+   "scale_why": "the dark run of 84.9 px ends on bright pixels inside the region, but a 20 mm case is ~45 px at this frame's scale (head 317 px ~ 123 mm): the run is more than the case \u2014 out/head/profile_frame_servo_zoom.png shows what it spans \u2014 at 4x the left case edge is visible at x ~1905 but the right edge is behind the grey horn bracket (x ~1950-1995) and the cables, so the run is case + bracket"
   },
   "sim": {
    "note": "Pollen's own simulator render, left half of the frame (same meshes)",
@@ -234,101 +245,142 @@
      235,
      300
     ],
-    "seed_x": 505,
+    "seed_x": 545,
     "tilt_deg": -12.0,
+    "face_mm": 20.0,
+    "face_evidence": "CANNOT DETERMINE: no face evidence recorded for this scan",
     "n_lines": 65,
-    "n_accepted": 62,
-    "width_px_mode": 962,
-    "width_px": 962.0322580645161,
-    "width_px_unc": 1.425207873185453,
-    "width_px_min": 574.0,
-    "width_px_max": 963.0,
+    "n_accepted": 35,
+    "width_px_mode": 103,
+    "width_px": 102.25714285714285,
+    "width_px_unc": 1.6791640291331558,
+    "width_px_min": 75.0,
+    "width_px_max": 104.0,
+    "n_hit_boundary": 0,
     "lines": [
      [
-      511.75712995157716,
+      551.7571299515772,
       235.71020297615132,
-      523.0,
-      438.0
+      35.0,
+      66.0
      ],
      [
-      510.7175714974884,
-      240.60094097982034,
-      522.0,
-      439.0
+      551.3413065699417,
+      237.66649817761893,
+      34.0,
+      66.0
      ],
      [
-      509.6780130433996,
+      550.9254831883061,
+      239.62279337908654,
+      34.0,
+      67.0
+     ],
+     [
+      550.5096598066706,
+      241.57908858055416,
+      33.0,
+      67.0
+     ],
+     [
+      550.0938364250351,
+      243.53538378202177,
+      33.0,
+      67.0
+     ],
+     [
+      549.6780130433996,
       245.49167898348938,
-      521.0,
-      440.0
+      32.0,
+      68.0
      ],
      [
-      508.6384545893108,
-      250.3824169871584,
-      520.0,
-      441.0
+      549.2621896617641,
+      247.447974184957,
+      33.0,
+      68.0
      ],
      [
-      507.598896135222,
+      548.8463662801286,
+      249.4042693864246,
+      33.0,
+      69.0
+     ],
+     [
+      548.4305428984931,
+      251.3605645878922,
+      33.0,
+      68.0
+     ],
+     [
+      548.0147195168576,
+      253.31685978935982,
+      33.0,
+      68.0
+     ],
+     [
+      547.598896135222,
       255.27315499082744,
-      519.0,
-      442.0
+      32.0,
+      69.0
      ],
      [
-      506.5593376811332,
-      260.16389299449645,
-      518.0,
-      443.0
+      547.1830727535864,
+      257.229450192295,
+      33.0,
+      69.0
      ],
      [
-      505.5197792270444,
+      546.7672493719509,
+      259.18574539376266,
+      32.0,
+      70.0
+     ],
+     [
+      546.3514259903154,
+      261.14204059523024,
+      32.0,
+      70.0
+     ],
+     [
+      545.9356026086799,
+      263.0983357966979,
+      32.0,
+      71.0
+     ],
+     [
+      545.5197792270444,
       265.05463099816546,
-      517.0,
-      444.0
+      31.0,
+      71.0
      ],
      [
-      504.4802207729556,
-      269.94536900183454,
-      516.0,
-      445.0
+      545.1039558454089,
+      267.0109261996331,
+      31.0,
+      71.0
      ],
      [
-      503.4406623188668,
-      274.83610700550355,
-      515.0,
-      446.0
-     ],
-     [
-      502.401103864778,
-      279.72684500917256,
-      514.0,
-      447.0
-     ],
-     [
-      501.3615454106892,
-      284.6175830128416,
-      513.0,
-      448.0
-     ],
-     [
-      500.3219869566004,
-      289.50832101651065,
-      512.0,
-      450.0
-     ],
-     [
-      499.2824285025116,
-      294.39905902017966,
-      510.0,
-      451.0
+      544.6881324637734,
+      268.9672214011007,
+      30.0,
+      70.0
      ]
     ],
-    "mm_per_px": 0.020789323676357174,
-    "mm_per_px_unc": 3.079845559581849e-05
+    "mm_per_px": 0.19558535903883767,
+    "mm_per_px_unc": 0.003211706198186319
    },
+   "servo_region": [
+    480,
+    215,
+    620,
+    320
+   ],
+   "servo_region_mean_luminance": 66.33882086167802,
+   "scan_image": "luminance; saturated (s > 0.30) pixels forced to 255 so the blue background ends a run",
    "aspect_major_over_minor": 2.438685345252084,
    "scale_verdict": "CANNOT DETERMINE",
-   "scale_why": "dark run 962.0 px is the servo + horn bracket + cables merged (a 20 mm case would be ~45 px at this frame's scale); the frame cannot resolve the case edge"
+   "scale_why": "the dark run of 102.3 px ends on bright pixels inside the region, but a 20 mm case is ~45 px at this frame's scale (head 293 px ~ 123 mm): the run is more than the case \u2014 out/head/profile_frame_servo_zoom.png shows what it spans \u2014 at 4x the run spans the servo case AND the grey neck plate beside it: both are unsaturated greys of the same luminance in this render, so no threshold separates them"
   }
  },
  "aspect_real": 2.5290924900647296,

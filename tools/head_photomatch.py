@@ -29,14 +29,21 @@ each of which is drawn on the annotated picture so a reader can check it:
      and photo pixels. The objective is silhouette IoU of the head region PLUS
      the eye-ring ellipse (centre, major, minor) — a circle's image pins yaw and
      pitch far better than a silhouette does.
-  3. SIZE   — the same servo is measured in the RENDER at the fitted camera (the
-     segmentation mask of that xl330 geom, same mode-of-runs estimator), so the
+  3. SIZE   — W_render is the width a 20.000 mm face has in the render at the
+     servo's depth: 20.000 * f / z through the exact pinhole the frame was drawn
+     with (f from its fovy, z = the servo geom's mean vertex depth in the fitted
+     camera, MuJoCo's stereo pair averaged as the mono render does), so the
      product/mesh size ratio needs no px-per-mm calibration of the renderer:
         r = k * W_render / W_photo
-     (one render px = k photo px; the servo is W_render render px and W_photo
-     photo px; if the product head were the mesh head, W_photo would be
-     k * W_render). The perspective camera puts the servo and the head at their
-     real depths, so the depth difference is modelled, not assumed away.
+     (one render px = k photo px; if the product head were the mesh head,
+     W_photo would be k * W_render). The perspective camera puts the servo and
+     the head at their real depths, so the depth difference is modelled, not
+     assumed away. The model's servo fixes the DEPTH; the face the photograph
+     shows is identified on the photograph (face_evidence per scan). The
+     projection is CROSS-CHECKED, for every servo, in a second +-250 mm / 1600 px
+     frame that holds even the ankle: the geom's segmentation mask read across
+     its own axis against its projected-vertex extent (servo_crosscheck) — a
+     servo without that read is never graded PASS by tools/head_verdict.py.
      Head-length deviation = 122.690 * (r - 1) mm; per-axis deviations are the
      photo head extents along its own principal axes minus the render extents at
      the servo-anchored scale, in mm.
@@ -83,6 +90,9 @@ EYE_SRC = ("reference/pollen-microduck-rl/assets/noenoeil.stl via cecad.meshfeat
            "boss d_mm 30.0 length 7.5 axis y; hole d 14.4 length 6.0. face_part.stl: hole d 14.5 length 1.3 at the same axis, "
            "no 30 mm opening — the ring stands proud of the face panel (noenoeil y -63.5..-54.0, face_part front at y -55.5).")
 HALF_FRAME_MM = 95.0       # the render frames +-95 mm about the head at every distance (fovy follows D)
+HEAD_ROLL_JOINT_RANGE_DEG = 25.0   # sim/microduck_ours.xml:215 head_roll range +-0.4363 rad; the photo pose may exceed it (camera roll, a unit posed by hand)
+ROLL_BOUND_DEG = 45.0      # the search box for head roll: wider than the joint so a fit cannot be pinned on the joint limit unreported
+                           # (the first run's cream fit sat exactly on the old +-25 bound — a constrained solution, now a recorded at_bound)
 
 # ----------------------------------------------------------------------------
 # The photographs. Pixel coordinates are in the ORIGINAL image. Every seed /
@@ -92,9 +102,11 @@ PHOTOS = [
     dict(id="cream-profile-left",
          path="images/store/store_microduck-cream-standing-profile-left.jpg",
          title="Cream, standing, left profile (store)", colourway="cream",
-         cam_az=270.0, az_free=False, el0=-8.0, D_mm=1100.0, D_source="camera distance to the head: not measurable from this frame to better than a factor 2 (the near ankle servo, 44.1 mm nearer than the neck servos, reads 136.2-145.5 px against the neck's 131.4 px depending on the scan tilt, i.e. D 700-1650 mm); 1100 mm is the centre of that range and the sensitivity runs at 700 and 1600 mm bracket it (out/head/head_fit_*_D700.json / _D1600.json)",
-         servo_scans=[dict(rows=(760, 920), seed_x=1222, what="upper neck servo (head_pitch), horn/label face", geom="neck_upper"),
-                      dict(rows=(925, 1070), seed_x=1218, what="lower neck servo (neck_pitch), horn/label face", geom="neck_lower")],
+         cam_az=270.0, az_free=False, el0=-8.0, D_mm=1100.0, D_source="camera distance to the head: not measurable from this frame to better than a factor 2 (the near ankle servo, 44.1 mm nearer than the neck servos, reads 136.2-145.5 px against the neck's 131.4 px depending on the scan tilt, i.e. D 700-1650 mm); its centre is 1175 mm; 1100 mm is used, inside that range, and the sensitivity runs at 600 and 2000 mm bracket the whole range (out/head/head_fit_cream-profile-left_D600.json / _D2000.json)",
+         servo_scans=[dict(rows=(760, 920), seed_x=1222, what="upper neck servo (head_pitch), horn/label face", geom="neck_upper",
+                           face_evidence="the 20 x 34 label face: 'DYNAMIXEL XL330-M288-T' printed across it (visible in the pair picture), the neck pitch axes are lateral so the horn faces a profile camera; the model's neck servo geom shows the same 20 mm face (render_silhouette_mm)"),
+                      dict(rows=(925, 1070), seed_x=1218, what="lower neck servo (neck_pitch), horn/label face", geom="neck_lower",
+                           face_evidence="as the upper servo: label text across the scanned face, lateral pitch axis")],
          eye_box=(735, 335, 1000, 585), eye_hue=(20, 55), eye_hue_note="orange-yellow ring on the cream unit",
          head_ycut=985,
          neck_poly=[(1120, 1150), (1120, 815), (1200, 790), (1280, 762), (1340, 745), (1420, 745), (1420, 1150)],
@@ -103,7 +115,7 @@ PHOTOS = [
     dict(id="sky-three-quarter-front-left",
          path="images/store/store_microduck-sky-standing-three-quarter-left-02.jpg",
          title="Sky, standing, three-quarter front-left (store)", colourway="sky",
-         cam_az=225.0, az_free=True, el0=-10.0, D_mm=1100.0, D_source="camera distance to the head: not measurable from this frame either; same store shoot, same value assumed to better than a factor 2 (the near ankle servo, 44.1 mm nearer than the neck servos, reads 136.2-145.5 px against the neck's 131.4 px depending on the scan tilt, i.e. D 700-1650 mm); 1100 mm is the centre of that range and the sensitivity runs at 700 and 1600 mm bracket it (out/head/head_fit_*_D700.json / _D1600.json)",
+         cam_az=225.0, az_free=True, el0=-10.0, D_mm=1100.0, D_source="camera distance to the head: not measurable from this frame either; same store shoot, same value assumed to better than a factor 2 (the near ankle servo, 44.1 mm nearer than the neck servos, reads 136.2-145.5 px against the neck's 131.4 px depending on the scan tilt, i.e. D 700-1650 mm); its centre is 1175 mm; 1100 mm is used, inside that range, and the sensitivity runs at 600 and 2000 mm bracket the whole range (out/head/head_fit_cream-profile-left_D600.json / _D2000.json)",
          servo_scans=[dict(rows=(880, 975), seed_x=1200, what="upper neck servo (head_pitch), label face + side face", geom="neck_upper"),
                       dict(rows=(1015, 1115), seed_x=1160, what="lower neck servo (neck_pitch), label face + side face", geom="neck_lower")],
          eye_box=(800, 320, 1030, 545), eye_hue=(20, 55), eye_hue_note="orange-yellow ring on the sky unit",
@@ -113,10 +125,14 @@ PHOTOS = [
     dict(id="graphite-profile-right",
          path="images/store/store_microduck-graphite-standing-profile-right-02.jpg",
          title="Graphite, standing, right profile (store)", colourway="graphite",
-         cam_az=90.0, az_free=False, el0=-8.0, D_mm=1100.0, D_source="camera distance to the head: not measurable from this frame either; same store shoot, same value assumed to better than a factor 2 (the near ankle servo, 44.1 mm nearer than the neck servos, reads 136.2-145.5 px against the neck's 131.4 px depending on the scan tilt, i.e. D 700-1650 mm); 1100 mm is the centre of that range and the sensitivity runs at 700 and 1600 mm bracket it (out/head/head_fit_*_D700.json / _D1600.json)",
+         cam_az=90.0, az_free=False, el0=-8.0, D_mm=1100.0, D_source="camera distance to the head: not measurable from this frame either; same store shoot, same value assumed to better than a factor 2 (the near ankle servo, 44.1 mm nearer than the neck servos, reads 136.2-145.5 px against the neck's 131.4 px depending on the scan tilt, i.e. D 700-1650 mm); its centre is 1175 mm; 1100 mm is used, inside that range, and the sensitivity runs at 600 and 2000 mm bracket the whole range (out/head/head_fit_cream-profile-left_D600.json / _D2000.json)",
          # the neck servos' faces are covered by the horn brackets in this shot; the near ankle servo's label face is clear
          servo_scans=[dict(rows=(1865, 1945), seed_x=950, what="near (right) ankle servo, label face; tilted with the shin",
-                           geom="ankle_right", tilt_deg=35.0)],
+                           geom="ankle_right", tilt_deg=35.0,
+                           face_evidence="the 20 x 34 label face: 'DYNAMIXEL XL330-M288-T' is printed across the scanned face (read at 4x zoom, "
+                                         "rows 1700-2100 x 780-1180 of the photograph); the ankle joint's bearing at (1030, 1850) is seen face-on, so the "
+                                         "joint axis — the servo's horn axis — points at the camera and the horn/label faces are what a profile sees; "
+                                         "and the run (136.8 px) is 20.8 mm at the cream shoot's neck-servo scale (0.1523 mm/px), not the 26 mm side face (171 px)")],
          eye_box=(1270, 320, 1480, 535), eye_hue=(255, 300), eye_hue_note="lavender ring on the graphite unit", eye_smin=0.12,
          head_ycut=1000,
          neck_poly=[(1150, 1300), (1150, 800), (1200, 780), (1260, 758), (1320, 740), (1400, 720), (1520, 690), (1700, 600), (1700, 1300)],
@@ -146,8 +162,9 @@ class HeadRenderer:
     """Poses the head joints + jaw and renders segmentation masks with a
     PERSPECTIVE camera whose frame always spans +-HALF_FRAME_MM at the lookat."""
 
-    def __init__(self, model, data, size=1000):
+    def __init__(self, model, data, size=1000, half_frame_mm=HALF_FRAME_MM):
         self.model, self.data, self.size = model, data, size
+        self.half_frame = half_frame_mm
         self.r = mujoco.Renderer(model, size, size)
         self.r.enable_segmentation_rendering()
         self.opt = mujoco.MjvOption()
@@ -201,7 +218,50 @@ class HeadRenderer:
         D = distance_mm / 1000.0
         self.cam.azimuth = float(az); self.cam.elevation = float(el); self.cam.distance = D
         self.cam.lookat[:] = self.data.xpos[self.head_bid]
-        self.model.vis.global_.fovy = math.degrees(2.0 * math.atan(HALF_FRAME_MM / distance_mm))
+        self.model.vis.global_.fovy = math.degrees(2.0 * math.atan(self.half_frame / distance_mm))
+
+    def pinhole(self):
+        """the camera the picture was actually drawn with: MuJoCo fills scene.camera[0] and [1] as a stereo pair
+        +-ipd/2 along the right axis and the mono render uses their AVERAGE (render_gl3.c), so the average is taken
+        here; f in px from the fovy the frame was rendered at (square frame, fovx = fovy)."""
+        c0, c1 = self.r.scene.camera[0], self.r.scene.camera[1]
+        pos = 0.5 * (np.array(c0.pos, float) + np.array(c1.pos, float))
+        fwd = np.array(c0.forward, float); fwd /= np.linalg.norm(fwd)
+        up = np.array(c0.up, float); right = np.cross(fwd, up); right /= np.linalg.norm(right); up2 = np.cross(right, fwd)
+        f = (self.size / 2.0) / math.tan(math.radians(self.model.vis.global_.fovy) / 2.0)
+        return pos, fwd, right, up2, f
+
+    def project_points(self, P):
+        """world points (m, N x 3) -> image px (x right, y down) through the render's own pinhole camera."""
+        pos, fwd, right, up2, f = self.pinhole()
+        rel = P - pos; z = rel @ fwd
+        return np.stack([self.size / 2.0 + f * (rel @ right) / z, self.size / 2.0 - f * (rel @ up2) / z], 1), z
+
+    def geom_world_vertices(self, gid):
+        m = self.model; mid = m.geom_dataid[gid]; a, n = m.mesh_vertadr[mid], m.mesh_vertnum[mid]
+        v = m.mesh_vert[a:a + n]; R = self.data.geom_xmat[gid].reshape(3, 3); t = self.data.geom_xpos[gid]
+        return (R @ v.T).T + t
+
+    def geom_axis_tilt_deg(self, gid):
+        """tilt of the servo's long axis (its 34 mm mesh extent) in the image, degrees from image-down: the geom's
+        placement projected through the render camera — deterministic, unlike a PCA of a partly hidden mask."""
+        m = self.model; mid = m.geom_dataid[gid]; a, n = m.mesh_vertadr[mid], m.mesh_vertnum[mid]
+        v = m.mesh_vert[a:a + n]; ext = v.max(0) - v.min(0); ax = np.zeros(3); ax[int(np.argmax(ext))] = 0.01
+        R = self.data.geom_xmat[gid].reshape(3, 3); c = self.data.geom_xpos[gid]
+        uv, _ = self.project_points(np.stack([c - R @ ax, c + R @ ax]))
+        dx, dy = uv[1] - uv[0]
+        if dy < 0: dx, dy = -dx, -dy
+        return math.degrees(math.atan2(dx, dy))
+
+    def geom_extent_px(self, gid, tilt_deg):
+        """ANALYTIC silhouette width of a mesh geom across its long axis in THIS render's camera: every mesh vertex is
+        projected through the pinhole and the extent along the image direction perpendicular to the tilted axis is
+        taken. Exact for the MJCF placement and the perspective camera whatever the geom's orientation or depth, and
+        whether or not the geom is inside the frame."""
+        uv, z = self.project_points(self.geom_world_vertices(gid))
+        tilt = math.radians(tilt_deg); perp = np.array([math.cos(tilt), -math.sin(tilt)])
+        pr = uv @ perp
+        return float(pr.max() - pr.min()), float(z.mean() * 1000)
 
     def seg(self):
         self.r.update_scene(self.data, self.cam, self.opt)
@@ -257,26 +317,35 @@ def silhouette(rgb):
     return (mn < 228) | ((mx - mn) > 14)
 
 
-def runs_along(L, p0, direction, thresh):
-    """dark run through p0 along +-direction (unit vector) in the luminance image L: returns (a, b) in px."""
+def runs_along(L, p0, direction, thresh, region=None):
+    """dark run through p0 along +-direction (unit vector) in the luminance image L: returns (a, b, hit) in px,
+    hit = True when either end of the run reached the image edge or the `region` box (x0, y0, x1, y1) instead of a
+    bright pixel — the run then measures the region, not the object, and the caller must say so."""
     H, W = L.shape
+    x0, y0, x1, y1 = region if region else (0, 0, W, H)
     def walk(sgn):
         t = 0.0
         while True:
             x = p0[0] + sgn * (t + 1) * direction[0]; y = p0[1] + sgn * (t + 1) * direction[1]
             xi, yi = int(round(x)), int(round(y))
-            if xi < 0 or yi < 0 or xi >= W or yi >= H or L[yi, xi] >= thresh: return t
+            if xi < x0 or yi < y0 or xi >= x1 or yi >= y1: return t, True
+            if L[yi, xi] >= thresh: return t, False
             t += 1.0
     if L[int(round(p0[1])), int(round(p0[0]))] >= thresh: return None
-    return walk(-1), walk(+1)
+    (a, ha), (b, hb) = walk(-1), walk(+1)
+    return a, b, ha or hb
 
 
-def measure_servo(rgb, scan, thresh=110):
+def measure_servo(rgb, scan, thresh=110, L=None, region=None):
     """width of the servo case (px) as the MODE of the dark-run widths over many
     scan lines perpendicular to the servo's long axis (tilt_deg, 0 = vertical
     servo, runs horizontal). Rows through label text or a cable give short/long
-    runs; the case gives the same width on every clean row, which is the mode."""
-    L = rgb.mean(axis=2)
+    runs; the case gives the same width on every clean row, which is the mode.
+    L overrides the luminance image (e.g. saturated pixels forced bright so a
+    coloured background ends a run); region bounds the walk, and a run that
+    reaches the bound is counted (n_hit_boundary) — if the accepted rows did,
+    the read is refused: the scan escaped, it did not find a case edge."""
+    if L is None: L = rgb.mean(axis=2)
     r0, r1 = scan["rows"]; tilt = math.radians(scan.get("tilt_deg", 0.0))
     # scan lines: step along the servo axis (tilted), runs perpendicular to it
     axis = np.array([math.sin(tilt), math.cos(tilt)])      # image-down direction of the servo's long axis
@@ -285,10 +354,10 @@ def measure_servo(rgb, scan, thresh=110):
     n = int(r1 - r0); rows = []
     for i in range(n):
         p = c0 + (i - n / 2.0) * axis
-        rr = runs_along(L, p, perp, thresh)
+        rr = runs_along(L, p, perp, thresh, region)
         if rr is None: continue
-        a, b = rr
-        rows.append((float(p[0]), float(p[1]), a, b, a + b + 1))
+        a, b, hit = rr
+        rows.append((float(p[0]), float(p[1]), a, b, a + b + 1, hit))
     if len(rows) < 5: return dict(verdict="CANNOT DETERMINE", why="fewer than 5 scan lines with a dark run at the seed", what=scan["what"])
     w = np.array([r[4] for r in rows])
     hist = np.bincount(np.round(w).astype(int))
@@ -297,10 +366,18 @@ def measure_servo(rgb, scan, thresh=110):
     wa = np.array([r[4] for r in acc])
     width = float(wa.mean())
     unc = math.sqrt(2.0 + wa.var())      # +-1 px per edge (2 px^2) + the accepted rows' spread
+    n_hit = sum(1 for r in acc if r[5])
+    if n_hit:
+        return dict(verdict="CANNOT DETERMINE", what=scan["what"], geom=scan.get("geom"), rows=[r0, r1], seed_x=scan["seed_x"], tilt_deg=scan.get("tilt_deg", 0.0),
+                    n_lines=len(rows), n_accepted=len(acc), n_hit_boundary=n_hit, width_px_mode=mode, run_px=width,
+                    why="%d of the %d accepted scan lines ran to the %s without meeting a bright pixel: the %.1f px run is the scan escaping into "
+                        "the background, not a case width" % (n_hit, len(acc), "region bound %s" % list(region) if region else "image edge", width),
+                    lines=[(r[0], r[1], r[2], r[3]) for r in acc[:: max(1, len(acc) // 12)]])
     return dict(what=scan["what"], geom=scan["geom"], rows=[r0, r1], seed_x=scan["seed_x"], tilt_deg=scan.get("tilt_deg", 0.0),
+                face_mm=XL330_FACE_W_MM, face_evidence=scan.get("face_evidence", "CANNOT DETERMINE: no face evidence recorded for this scan"),
                 n_lines=len(rows), n_accepted=len(acc), width_px_mode=mode, width_px=width, width_px_unc=unc,
                 width_px_min=float(w.min()), width_px_max=float(w.max()),
-                lines=[(r[0], r[1], r[2], r[3]) for r in acc[:: max(1, len(acc) // 12)]],
+                n_hit_boundary=0, lines=[(r[0], r[1], r[2], r[3]) for r in acc[:: max(1, len(acc) // 12)]],
                 mm_per_px=XL330_FACE_W_MM / width, mm_per_px_unc=XL330_FACE_W_MM / width * unc / width)
 
 
@@ -324,6 +401,54 @@ def measure_servo_mask(mask, tilt_deg=0.0):
     return dict(n_lines=len(w), n_accepted=len(wa), width_px_mode=mode, width_px=float(wa.mean()),
                 width_px_unc=math.sqrt(2.0 + wa.var()), width_px_min=float(w.min()), width_px_max=float(w.max()),
                 centre_px=[float(c[0]), float(c[1])])
+
+
+def mask_axis_tilt_deg(mask):
+    """tilt of a mask's long axis from image-down, degrees (the servo's own axis in the render, so the render is read
+    across ITS axis exactly as the photograph is read across its own)."""
+    ys, xs = np.nonzero(mask)
+    e = ellipse_of(np.stack([xs, ys], 1).astype(float))
+    dx, dy = e["major_axis_dir"]
+    if dy < 0: dx, dy = -dx, -dy
+    return math.degrees(math.atan2(dx, dy))
+
+
+WIDE_HALF_FRAME_MM = 250.0   # the cross-check frame: +-250 mm about the head holds the ankle servo (the head sits ~190 mm above it)
+
+
+def servo_crosscheck(hr_wide, role, fit, neck_pitch_deg, jaw_open):
+    """The render-mask-vs-analytic cross-check, MEASURED for every servo, in a frame wide enough to hold it: the same
+    camera (az, el, D) at the fitted pose, +-WIDE_HALF_FRAME_MM about the head at 1600 px, the servo geom's
+    segmentation mask read with the mode-of-runs estimator across the mask's own axis, against the projected-vertex
+    width in the same frame. A gap > 5 % means the servo's silhouette at this azimuth is not the clean case face the
+    photograph scan assumes (occlusion by a bracket, a side face merged in), and tools/head_verdict.py then refuses the
+    scale. A servo with no cross-check read is never graded PASS."""
+    hr_wide.pose(fit["head_pitch_deg"], fit["head_yaw_deg"], fit["head_roll_deg"], fit["jaw_open_deg"] if jaw_open else 0.0, neck_pitch_deg=neck_pitch_deg)
+    hr_wide.set_camera(fit["cam_az_deg"], fit["cam_el_deg"], fit["cam_distance_mm"])
+    ids, types = hr_wide.seg(); isg = types == int(mujoco.mjtObj.mjOBJ_GEOM)
+    mask = hr_wide.servo_mask(role, ids, isg)
+    out = dict(frame_half_mm=hr_wide.half_frame, frame_px=hr_wide.size, n_mask_px=int(mask.sum()))
+    if mask.sum() < 50:
+        out.update(verdict="CANNOT DETERMINE", why="servo not visible even in the +-%.0f mm frame (%d px)" % (hr_wide.half_frame, mask.sum()))
+        return out, mask
+    gid = hr_wide.servo[role]
+    tilt = hr_wide.geom_axis_tilt_deg(gid)      # the servo's long axis as placed in the model, projected — not a PCA of a
+    rs = measure_servo_mask(mask, tilt)         # partly hidden mask (a shell-occluded servo is nearly square and its PCA is arbitrary)
+    an, depth = hr_wide.geom_extent_px(gid, tilt)
+    uv, _ = hr_wide.project_points(hr_wide.geom_world_vertices(gid))
+    bbox_area = float((uv[:, 0].max() - uv[:, 0].min()) * (uv[:, 1].max() - uv[:, 1].min()))
+    out.update(tilt_render_deg=tilt, mask=rs, analytic_px=an, servo_depth_mm=depth,
+               mask_fill_of_projected_bbox=float(mask.sum() / bbox_area) if bbox_area else None)
+    if bbox_area and mask.sum() / bbox_area < 0.35:
+        out.update(verdict="CANNOT DETERMINE", why="only %.0f %% of the servo's projected box is visible in the render (occluded or speckled mask) — the case width cannot be read" % (100 * mask.sum() / bbox_area))
+        return out, mask
+    if "width_px" in rs:
+        out["mask_vs_analytic_pct"] = (rs["width_px"] / an - 1) * 100
+        out["how"] = ("mask: mode of run widths across the servo geom's own axis (%.1f deg from image-down) in a %d px frame spanning "
+                      "+-%.0f mm at the head; analytic: extent of the geom's projected mesh vertices along the same direction" % (tilt, hr_wide.size, hr_wide.half_frame))
+    else:
+        out.update(verdict="CANNOT DETERMINE", why=rs.get("why", "mask read failed"))
+    return out, mask
 
 
 def ellipse_of(P):
@@ -437,7 +562,7 @@ def fit_photo(ph, hr, rgb, eye, quick=False, w_eye=10.0):
     tx0 = cx_p - k0 * rx.mean(); ty0 = cy_p - k0 * ry.mean()
     bounds = [(ph["el0"] - 12, ph["el0"] + 12),
               (ph["cam_az"] - 25, ph["cam_az"] + 25) if ph["az_free"] else (ph["cam_az"] - 0.01, ph["cam_az"] + 0.01),
-              (-40, 40), (0, 90) if yaw_sign > 0 else (-90, 0), (-25, 25),
+              (-40, 40), (0, 90) if yaw_sign > 0 else (-90, 0), (-ROLL_BOUND_DEG, ROLL_BOUND_DEG),
               (0, 40) if ph["jaw_open"] else (0, 0.01),
               (k0 * 0.7, k0 * 1.4), (tx0 - 120, tx0 + 120), (ty0 - 120, ty0 + 120)]
     lo_b = np.array([b[0] for b in bounds]); hi_b = np.array([b[1] for b in bounds])
@@ -470,12 +595,26 @@ def fit_photo(ph, hr, rgb, eye, quick=False, w_eye=10.0):
     fit_polishes = [(round(t[0], 5), round(t[1], 4)) for t in [base] + ks]
     best_iou, et, mr, eyem, tm = eval_params(p, True)
     el, az, pitch, yaw, roll, jaw, k, tx, ty = [float(x) for x in p]
+    # a parameter sitting on the edge of its search box means the optimum lies OUTSIDE the box and the solution is
+    # constrained: recorded by name, never silently (fixed-by-design edges — az on a profile shot, jaw closed — are not bounds)
+    names = ["cam_el", "cam_az", "head_pitch", "head_yaw", "head_roll", "jaw", "k", "tx", "ty"]
+    fixed = {"cam_az"} if not ph["az_free"] else set()
+    if not ph["jaw_open"]: fixed.add("jaw")
+    at_bound = []
+    for nm, val, (lo, hi) in zip(names, p, bounds):
+        if nm in fixed: continue
+        span = hi - lo
+        if min(abs(val - lo), abs(hi - val)) <= 0.005 * span:
+            at_bound.append(dict(param=nm, value=float(val), bounds=[float(lo), float(hi)]))
     pys, pxs = np.nonzero(crop); rys, rxs = np.nonzero(mr)
     fit = dict(objective=float(best[0]), iou=float(best_iou), eye_term=float(et), seconds=round(time.time() - t0, 1),
                n_eval=int(res.nfev + res2.nfev),
                cam_el_deg=el, cam_az_deg=az, cam_distance_mm=D_mm, cam_distance_source=ph.get("D_source", ""),
                head_pitch_deg=pitch, head_yaw_deg=yaw, head_roll_deg=roll, jaw_open_deg=jaw if ph["jaw_open"] else 0.0,
                k_photo_px_per_render_px=k * ds, k_fit_spread=k_spread * ds, polishes=fit_polishes, tx=tx * ds + bx0, ty=ty * ds + by0,
+               bounds=dict(zip(names, [[float(a), float(b)] for a, b in bounds])), at_bound=at_bound,
+               head_roll_joint_range_deg=HEAD_ROLL_JOINT_RANGE_DEG,
+               head_roll_within_joint_range=bool(abs(roll) <= HEAD_ROLL_JOINT_RANGE_DEG),
                crop_box=[int(bx0), int(by0), int(bx1), int(by1)],
                photo_head_extent_px=[int(pxs.max() - pxs.min() + 1), int(pys.max() - pys.min() + 1)],
                photo_head_area_px=int(crop.sum()),
@@ -576,9 +715,10 @@ def main():
         for ph in PHOTOS: ph["D_mm"] = args.D; ph["D_source"] = "override --D %.0f mm (sensitivity run)" % args.D
     model, data = load_model()
     hr = HeadRenderer(model, data, size=640)
+    hr_wide = HeadRenderer(model, data, size=1600, half_frame_mm=WIDE_HALF_FRAME_MM)   # the servo cross-check frame (offwidth is 1600)
     results = []
     for ph in PHOTOS:
-        if args.only and ph["id"] != args.only: continue
+        if args.only and ph["id"] not in args.only.split(","): continue
         print("==", ph["id"]); sys.stdout.flush()
         rgb = load_rgb(os.path.join(REPO, ph["path"]))
         servo = [measure_servo(rgb, s) for s in ph["servo_scans"]]
@@ -589,21 +729,54 @@ def main():
         hr.set_camera(fit["cam_az_deg"], fit["cam_el_deg"], fit["cam_distance_mm"])
         ids, types = hr.seg(); isg = types == int(mujoco.mjtObj.mjOBJ_GEOM)
         ratios = []
+        wide_pics = []
         for s in servo:
             if "width_px" not in s: continue
-            rs = measure_servo_mask(hr.servo_mask(s["geom"], ids, isg), s["tilt_deg"])
+            # 1) the cross-check, measured for EVERY servo in a frame that holds it (+-250 mm at 1600 px): mask vs analytic
+            xc, wide_mask = servo_crosscheck(hr_wide, s["geom"], fit, ph.get("neck_pitch_deg", 0.0), ph["jaw_open"])
+            s["crosscheck"] = xc
+            if "mask_vs_analytic_pct" in xc:
+                s["render_mask_vs_analytic_pct"] = xc["mask_vs_analytic_pct"]
+                s["render_tilt_deg"] = xc["tilt_render_deg"]; s["tilt_photo_minus_render_deg"] = s["tilt_deg"] - xc["tilt_render_deg"]
+            wide_pics.append((s, wide_mask, hr_wide.shaded()))
+            # 2) the head-frame read: the mask when the servo is inside the head frame (the neck servos), and the ANALYTIC
+            #    width of the same case across the servo's own axis in the head frame — projected mesh vertices through the
+            #    head frame's pinhole camera, exact whatever the geom's orientation and depth, inside the frame or not.
+            hr.pose(fit["head_pitch_deg"], fit["head_yaw_deg"], fit["head_roll_deg"], fit["jaw_open_deg"], neck_pitch_deg=ph.get("neck_pitch_deg", 0.0))
+            hr.set_camera(fit["cam_az_deg"], fit["cam_el_deg"], fit["cam_distance_mm"])
+            ids, types = hr.seg(); isg = types == int(mujoco.mjtObj.mjOBJ_GEOM)
+            tilt_r = xc.get("tilt_render_deg", s["tilt_deg"])
+            rs = measure_servo_mask(hr.servo_mask(s["geom"], ids, isg), tilt_r)
             s["render"] = rs
             dz_servo, dz_head = hr.servo_depths_mm(s["geom"])
-            # ANALYTIC render width of the same case: the frame is exactly 2*HALF_FRAME_MM at the lookat depth,
-            # the case is 20.000 along world x and 26.000 along world y (neck vertical, no yaw), seen from azimuth az,
-            # and sits dz_servo/dz_head as deep as the lookat. Exact given the MJCF placement; the mask read is the cross-check.
-            az = math.radians(fit["cam_az_deg"])
-            w_face = XL330_FACE_W_MM * abs(math.sin(az)) + 26.0 * abs(math.cos(az))
-            w_an = w_face * (hr.size / (2.0 * HALF_FRAME_MM)) * (dz_head / dz_servo)
+            sil_px, z_servo = hr.geom_extent_px(hr.servo[s["geom"]], tilt_r)     # what the MODEL's servo geom shows across its axis
+            _, _, _, _, f_px = hr.pinhole()
+            # W_render = the width a 20.000 mm face at the servo's depth has in the head frame, through the exact pinhole
+            # (f from the fovy the frame was drawn with, z = the geom's mean vertex depth, the stereo pair averaged).
+            # The model's servo fixes the DEPTH only; the face the photograph shows is identified on the photograph
+            # (the label text is on the 20 x 34 face) and cross-checked against the neck-servo scale of the same shoot.
+            w_an = XL330_FACE_W_MM * f_px / z_servo
             s["render_width_px_analytic"] = w_an
-            s["render_width_analytic_how"] = "(20.000*|sin az| + 26.000*|cos az|) mm * %d px / %.1f mm * D_head/D_servo (%.4f)" % (hr.size, 2 * HALF_FRAME_MM, dz_head / dz_servo)
+            s["render_width_analytic_how"] = ("20.000 mm * f / z: f = %.1f px (fovy %.3f deg, %d px frame, +-%.0f mm at the head, D %.0f mm), "
+                                              "z = %.1f mm (the servo geom's mean vertex depth in the fitted camera)" % (
+                                                  f_px, hr.model.vis.global_.fovy, hr.size, HALF_FRAME_MM, fit["cam_distance_mm"], z_servo))
+            s["render_silhouette_px"] = sil_px; s["render_silhouette_mm"] = sil_px * z_servo / f_px
+            s["render_silhouette_how"] = "extent of the model servo geom's projected vertices across its own axis (%.1f deg from image-down) in the head frame, and in mm at its depth" % tilt_r
+            if abs(s["render_silhouette_mm"] - XL330_FACE_W_MM) > 1.0:
+                # a 20 x 26 case turned t about its long axis shows 20 cos t + 26 sin t: solve for t (small-angle root)
+                sil = s["render_silhouette_mm"]; t = 0.0
+                for _ in range(60):
+                    g = XL330_FACE_W_MM * math.cos(t) + 26.0 * math.sin(t) - sil
+                    dg = -XL330_FACE_W_MM * math.sin(t) + 26.0 * math.cos(t)
+                    t -= g / dg
+                s["render_face_note"] = ("the model's servo geom presents a %.2f mm silhouette across its axis at this camera — a 20 x 26 case turned %.1f deg about "
+                                         "its long axis (leg pose + hip yaw in the model's keyframe), not the square-on 20.000 mm label face the photograph shows; "
+                                         "the geom fixes the depth only, the face width comes from the photograph's face_evidence" % (sil, math.degrees(t)))
+            # the first run's closed-form box width, kept as a self-check of the projection on the vertical neck servos
+            az = math.radians(fit["cam_az_deg"])
+            s["render_width_px_box_formula"] = (XL330_FACE_W_MM * abs(math.sin(az)) + 26.0 * abs(math.cos(az))) * (hr.size / (2.0 * HALF_FRAME_MM)) * (dz_head / dz_servo)
             if "width_px" in rs:
-                s["render_mask_vs_analytic_pct"] = (rs["width_px"] / w_an - 1) * 100
+                s["render_mask_vs_silhouette_pct_headframe"] = (rs["width_px"] / sil_px - 1) * 100
             rr = fit["k_photo_px_per_render_px"] * w_an / s["width_px"]
             rel = math.sqrt((s["width_px_unc"] / s["width_px"]) ** 2 + (fit["k_fit_spread"] / fit["k_photo_px_per_render_px"]) ** 2)
             s["size_ratio"] = dict(product_over_mesh=rr, unc=rr * rel, servo_depth_mm=dz_servo, head_depth_mm=dz_head,
@@ -654,7 +827,18 @@ def main():
                     r["eye"]["diameter_via_render_mm"] = EYE_RING_D_MM * eye["major_px"] / (k_servo * re_["major_px"])
                     c_r = k * np.array(re_["centre"]) + np.array([fit["tx"], fit["ty"]])
                     r["eye"]["centre_offset_photo_minus_render_mm"] = [float((eye["centre"][0] - c_r[0]) * mmpp), float((eye["centre"][1] - c_r[1]) * mmpp)]
-        overlay_pictures(ph, rgb, fit, servo, eye, hr, mmpp or 0.0, next((s.get("render") for s in servo if s.get("render")), None), tag=args.tag)
+        overlay_pictures(ph, rgb, fit, servo, eye, hr, mmpp or 0.0, next((s.get("render") for s in servo if s.get("render") and "centre_px" in s["render"]), None), tag=args.tag)
+        # the wide-frame cross-check, drawn: the shaded +-250 mm render with the servo mask's box and both widths
+        for i, (s, wm, sh) in enumerate(wide_pics):
+            xc = s["crosscheck"]
+            if "mask" not in xc or "centre_px" not in xc["mask"]: continue
+            im = Image.fromarray(sh); dd = ImageDraw.Draw(im)
+            ys_, xs_ = np.nonzero(wm)
+            dd.rectangle([xs_.min() - 3, ys_.min() - 3, xs_.max() + 3, ys_.max() + 3], outline=(30, 120, 220), width=3)
+            dd.text((xs_.max() + 10, ys_.min()), "%s\nmask %.1f px | analytic %.1f px | %+.1f %%\naxis %.1f deg" % (
+                s["what"], xc["mask"]["width_px"], xc["analytic_px"], xc["mask_vs_analytic_pct"], xc["tilt_render_deg"]), fill=(30, 120, 220))
+            im.save(os.path.join(OUT, "%s%s_render_servo_wide%s.png" % (ph["id"], args.tag, "" if i == 0 else "_%d" % i)))
+            s["crosscheck"]["picture"] = "out/head/%s%s_render_servo_wide%s.png" % (ph["id"], args.tag, "" if i == 0 else "_%d" % i)
         results.append(r)
         print(json.dumps({k: v for k, v in r.items() if k in ("scale", "size", "eye")}, indent=1, default=float)[:4000])
         print("fit:", json.dumps(r["fit"], default=float)); sys.stdout.flush()
@@ -663,7 +847,7 @@ def main():
                          noenoeil_mm=HEAD_MESH_MM["noenoeil"], jaw_mm=HEAD_MESH_MM["jaw"], source="out/verify/mech_dims.json",
                          eye_ring_source=EYE_SRC),
                servo_source=XL330_SRC, photos=results)
-    path = os.path.join(OUT, ("head_fit%s.json" % args.tag) if not args.only else "head_fit_%s%s.json" % (args.only, args.tag))
+    path = os.path.join(OUT, ("head_fit%s.json" % args.tag) if (not args.only or "," in args.only) else "head_fit_%s%s.json" % (args.only, args.tag))
     json.dump(out, open(path, "w"), indent=1, default=float)
     print("wrote", path)
 
