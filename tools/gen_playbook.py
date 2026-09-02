@@ -526,19 +526,28 @@ for r in ROWS:
     rows.append([
         td('<code>%s</code>' % E(r["slug"]), "pn"),
         td("<b>%s</b>" % f["best"], "num"),
-        td("%.2f %%" % (100 * f["b"]["frac_lt45"]), "num"),
         td("%.2f %%" % (100 * f["b"]["frac_lt30"]), "num"),
         td("%.2f %%" % (100 * f["b"]["frac_lt10"]), "num"),
         td("%.0f" % f["b"]["projected_lt30_mm2"], "num"),
-        td("%d" % f["b"]["layers_at_0p2"], "num"),
         td(n(w.get("min_mm")), "num"),
         td(n(w.get("p5_mm")), "num"),
-        td(n(w.get("median_mm")), "num"),
         td(n(f["tw"]) if f["tw"] is not None else '<span class="chip cd">mesh</span>', "num"),
-        td(chip(f["verdict"])),
+        td('<span class="chip %s">%s</span>'
+           % ("pass" if f["verdict"] == "PRINTABLE" else "cd",
+              "clear" if f["verdict"] == "PRINTABLE" else "watch")),
     ])
-A(tbl(["part", "build dir", "β&lt;45°", "β&lt;30°", "β&lt;10°", "unsup. mm²", "layers",
-       "wall min", "wall p5", "wall med", "solid wall", "verdict"], rows, cls="data tight"))
+A(tbl(["part", "build dir", "β&lt;30°", "β&lt;10°", "unsup. mm²",
+       "wall min", "wall p5", "solid wall", "oh+wall"], rows, cls="data tight"))
+A('<p class="note" style="border:none;background:none;padding:0;font-size:13px">'
+  '<b>oh+wall</b> grades ONLY the two things this section measures — unsupported area and wall '
+  'thickness. <b>clear</b> = neither is a problem; <b>watch</b> = at least one is, spelled out with '
+  'its reason in §3.1. It is NOT the whole DFM verdict: bridged bores, bed-contact footprint and '
+  'fragile moving features are graded on the parametric solids in <code>docs/DFM.md</code> and '
+  'collected in §3.2. A part can read <b>clear</b> here and still need a reamed bearing seat. '
+  '<b>solid wall</b> is <code>cecad.inspect.thinnest_wall</code> on the parametric solid and reads '
+  '<b>mesh</b> where the STL is a vendor mesh with no solid behind it. '
+  'Layer counts, the &beta;&lt;45° band, the median wall and every raw per-direction figure are in '
+  '<code>out/dfm/dfm.json</code>; §4.2 carries the layer count beside the orientation.</p>')
 
 A('''<div class="verdict warn"><b>What §3 measured, and what it did not.</b> Every row below is
 read off the STL in <code>out/print/stl/</code> — <b>the file a shop would actually print</b>, and
@@ -550,6 +559,20 @@ ray percentiles, every hole, elevated-vs-bed support area, per-part risks — is
 <code>docs/DFM.md</code> %s, which reached the same bed-contact correction from a separate tool.
 Read both: this section tells you what will come off the printer today, that one tells you what
 the design says.</div>''' % (src("STALESTL"), src("DFMMD")))
+
+A('''<div class="note"><b>Two independent measurements, on two different objects, agree on 19 of
+20 orientations.</b> <code>docs/DFM.md</code> ranks the same six directions with its own tool
+(<code>tools/dfm_orient.py</code>) on the PARAMETRIC SOLID of each of the 20 rebuilt parts, and it
+reached the bed-contact correction independently — its words: <i>&ldquo;a part&rsquo;s flat bottom is a
+beta = 0 face, so microduck-trunk-base ... scored 43.7% overhang lying flat ... The bed is not
+support material&rdquo;</i> @SRC@. This section ranks them off the vendor-mesh STL that will actually be
+printed. Where both cover a part the chosen axis matches on 19 of 20. <b>The exception is
+<code>microduck-shin</code></b>, and it is a genuine trade rather than an error: standing it +Z is
+the least-support orientation (203 mm² there) but leaves the part touching the bed on 3.6 mm², so
+that file calls a brim mandatory; the slenderness cap here rejects +Z (58 mm tall on an 8 mm
+section) and takes +Y; and the sliced rule in §4.2 took the flat 8 mm face, buying 696–831 mm² of
+support to get 190 mm² of bed. Three defensible answers, all measured, and the shop should pick
+one and record it.</div>'''.replace("@SRC@", src("DFMMD")))
 
 A('<h3>3.1 The finding, part by part</h3>')
 rows = []
