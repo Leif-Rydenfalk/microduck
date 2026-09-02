@@ -74,6 +74,8 @@ SECTIONS = [
     ]),
     ("Simulation & evidence", "Every claim that has a measurement behind it.", [
         ("SIMULATION.html", "Simulation dossier", "Structural FEA matrix, mesh convergence, material sweep, and the motion-policy runs."),
+        ("MOTION.html", "Motion — the machine moving",
+         "The one document for Leif's question of 2026-09-02: is the neck as dynamic, and show the mechanics moving. 23 videos of our rebuilt parts under Pollen's own policies \u2014 the body walking, every leg and head joint in tracked close-up, the composite and the 0.25\u00d7 gait cycle \u2014 each with the measurement it is evidence for: MJCF range, travel used, peak angular velocity, tracking lag and torque, the self-collision table, and our renders beside the real product where a photograph of the same motion exists."),
         ("HEAD-MOTION.html", "Head and neck dynamics", "Is the neck as dynamic? Every head joint driven through its full MJCF range under Pollen's stand policy, with travel, peak velocity, tracking lag, torque, a self-collision range probe and four videos."),
         ("out/motion/head.json", "Head and neck dynamics (data)", "The joint table, the kinematic range probe, the servo datasheet numbers and the verdict."),
         ("out/motion/head_real_video.json", "Real robot head motion (data)", "Head-pitch travel and rate tracked frame by frame off Pollen's own gallery_chorale.mp4, with its error budget."),
@@ -121,6 +123,9 @@ TOOLS = [
     ("sim/leg_compare.py", "Puts our standing and sitting renders beside the product photos at the same subject height."),
     ("sim/leg_verify.py", "Reads every leg clip back out of the encoded mp4 and gif and refuses blank, frozen or oversized ones."),
     ("tools/gen_leg_motion.py", "Builds LEG-MOTION.html from out/motion/legs.json."),
+    ("tools/gen_motion.py", "Builds MOTION.html from every out/motion/*.json \u2014 the walk, head and leg "
+                            "lanes in one document; stat()s all 131 referenced files before writing and "
+                            "exits non-zero if any is missing."),
     ("sim/assembly_steps_mj.py", "Cumulative assembly-step renders."),
     ("sim/run_policy.py", "Runs Pollen's trained policies on our meshes."),
     ("sim/gait_sweep.py", "The gait-robustness matrix: speed, mass, friction, slope and push, "
