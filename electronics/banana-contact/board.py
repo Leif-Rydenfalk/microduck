@@ -285,6 +285,13 @@ def build(self_test=None, publish=True, verbose=True):
 
     # -- what nobody has published, said out loud ----------------------------
     b.notes.append(
+        "THE `binding` CHECK REPORTS CANNOT DETERMINE, AND THAT IS CORRECT. "
+        "BAT_T exists on this board and not in the robot netlist, because "
+        "electronics/netlist.py wires the pack as {BAT+: VBAT, BAT-: GND} "
+        "and nothing in Pollen's published source reads the pack's third "
+        "terminal. Decision B6 fits it anyway. The check is right to say it "
+        "cannot verify a net the netlist does not model.")
+    b.notes.append(
         f"POCKET, MEASURED 2026-09-02 off Pollen's own meshes: clear width "
         f"{POCKET_W:.3f} mm (power_support.stl, x -22.930..+22.930), clear "
         f"height {POCKET_H:.3f} mm (z 50.930..56.080), clear depth "

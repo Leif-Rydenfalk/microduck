@@ -497,6 +497,17 @@ def build(self_test=None, publish=True, verbose=True):
 
     # -- what nobody has published, said out loud ----------------------------
     b.notes.append(
+        "THE `binding` CHECK REPORTS CANNOT DETERMINE, AND THAT IS CORRECT. "
+        "Fourteen nets exist on this board and not in the robot netlist — "
+        "BYPASS, DIR, DXL_DRV, IMU_INT1, MCU_RX, MCU_TX, NRST, SPI_MISO, "
+        "SPI_MOSI, SPI_NSS, SPI_SCK, SWCLK, SWDIO, V3V3. They are board-LOCAL "
+        "and they must be: electronics/netlist.py models this whole board as "
+        "ONE device, `imu200`, with exactly three terminals (GND, VDD, DATA — "
+        "'rides the Dynamixel bus'), because that is all Pollen's published "
+        "source says about it. Everything inside the box is this file's own "
+        "circuit. The check is right to say it cannot verify what the netlist "
+        "does not model, and it would be wrong to silence it.")
+    b.notes.append(
         "OUTLINE IS NOT MEASURED. 40.000 x 22.000 mm r2.0 with two M2 holes "
         "at (3.000, 18.500) and (37.000, 18.500) is decision E8. Pollen ships "
         "no mesh, no drawing and no photograph of this board; the MJCF places "
