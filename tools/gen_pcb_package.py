@@ -513,7 +513,30 @@ def main():
           'A commodity passive carries a SPECIFICATION rather than a manufacturer part '
           'number, and says so — naming one 100&nbsp;nF 0603 would be a false precision.</p>')
 
-        A(f'<h3>{n}.6 Files a fab receives</h3>')
+        hf = d.get("head_fit") if m["slug"] == "robot-hat" else None
+        if hf:
+            A(f'<h3>{n}.6 Where it sits, and what does not fit</h3>')
+            A(f'<p class="lede">{esc(hf["$note"])}</p>')
+            A(f'<p><strong>The board&rsquo;s own box.</strong> {esc(hf["hat_box"])}</p>')
+            A('<table class="tight"><thead><tr><th>Neighbour in the same body</th>'
+              '<th>Separation</th><th>What it means</th></tr></thead><tbody>')
+            for a_, b_, c_ in hf["rows"]:
+                A(f'<tr><td><code>{esc(a_)}</code></td><td class="n">{esc(b_)}</td>'
+                  f'<td>{esc(c_)}</td></tr>')
+            A('</tbody></table>')
+            A(f'<p><span class="no">{esc(hf["verdict"])}</span></p>')
+            A('<table class="tight"><thead><tr><th>Part</th><th>Height</th>'
+              '<th>Finding</th></tr></thead><tbody>')
+            for ref_, h_, why_ in hf["fails"]:
+                A(f'<tr><td><code>{esc(ref_)}</code></td>'
+                  f'<td class="n no">{esc(h_)}</td><td>{esc(why_)}</td></tr>')
+            A('</tbody></table>')
+            A('<p class="fig-cap">Heights are each footprint&rsquo;s own declared height, '
+              'read off the built board. Everything else on this board is under 7.000 mm '
+              'and clears.</p>')
+            A(f'<h3>{n}.7 Files a fab receives</h3>')
+        else:
+            A(f'<h3>{n}.6 Files a fab receives</h3>')
         fabdir = os.path.join(REPO, m["dir"], "out", "fab")
         names = sorted(os.listdir(fabdir)) if os.path.isdir(fabdir) else []
         A('<table class="tight"><thead><tr><th>File</th><th>Bytes</th>'
@@ -619,7 +642,15 @@ def main():
                   f'<td class="cd">{esc(t.split()[0])}</td><td>{esc(t)}</td></tr>')
     A('</tbody></table>')
     A('<p class="fig-cap">Table 7.1. Read out of the shipped fab READMEs, not restated here.</p>')
-    A('<h3>7.1 The five that matter most</h3><ol>')
+    A('<h3>7.1 The ones that matter most</h3><ol>')
+    A('<li><strong>A part on the Robot HAT is taller than the space above the '
+      'Robot HAT.</strong> The compute board sits 7.310&nbsp;mm above it (measured, '
+      '&sect;3.6) and the Pololu D30V30F5 of decision D1 is 7.700&nbsp;mm tall. It does '
+      'not fit as placed, and that reverses D1&rsquo;s own reasoning &mdash; the option '
+      'D1 beat was a discrete regulator. J1&rsquo;s socket must also mate at '
+      '7.310&nbsp;mm, not the 8.500&nbsp;mm a generic 2&times;20 stacking header gives. '
+      'Settled by <code>cecad.pcbview.board_assembly()</code> on the real solids, '
+      'which needs FreeCAD and has not been run.</li>')
     A('<li><strong>Pollen&rsquo;s real schematics.</strong> All three boards are '
       'functional stand-ins. A teardown photograph of a production HAT&rsquo;s connector '
       'side would settle the connector family and the 4.800&nbsp;mm column question in '

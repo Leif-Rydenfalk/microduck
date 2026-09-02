@@ -653,6 +653,13 @@
         "E8 said the outline is our choice and that nothing measured constrains it, then left the clearance question open without trying.",
         "Transforming every mesh placed in body trunk_base into the body frame and measuring each bounding box against the MJCF `imu` site at (-21.000, 0.100, -14.700) mm.",
         "The pack's bounding box is 0.524 mm above the site, and the site is inside its x and y ranges \u2014 so the board lies flat under the battery and its component side must face away from it. Decision E11. The outline itself is still ours; what is now measured is the ORIENTATION and the one neighbour that is close."
+      ],
+      [
+        "robot-hat",
+        "A part on the board is taller than the space above the board",
+        "Decision D1 fitted a Pololu D30V30F5 buck module, 7.700 mm tall by the vendor's own drawing, and nothing checked it against the head.",
+        "Transforming every mesh placed in body jaw_soft by its own quaternion and measuring bounding boxes against the HAT's. The compute board sits 7.310 mm above the HAT \u2014 that is the stack height and the ceiling for everything on the top face.",
+        "OPEN, not fixed. U2 is 0.390 mm too tall and J1's generic 8.500 mm header model is 1.190 mm taller than the gap it has to span. J1's is a specification (the socket must mate at 7.310 mm); U2's is a collision, and it reverses D1's own reasoning \u2014 the alternative D1 beat was a discrete regulator. Recorded in section 3.7 with both options and with what settles it."
       ]
     ]
   },
@@ -701,5 +708,84 @@
       "why_exit_1": "bin/pcb --self-test ALSO runs cecad/electrical.py and cecad/netlist.py, and both were failing on this machine when this lane read them: electrical.py '[FAIL] len(pins) == 6 * ports_spanned for all 19 modules that state one' and '[FAIL] knob -> port_order PASS (labels run 1,2)'; netlist.py '[FAIL] conformance over FAIL \u2014 both layers agree on the headline verdict' and '[FAIL] 12 systems compared finding for finding on (verdict, rule, where): 3 DRIFTED'.",
       "verdict": "CANNOT DETERMINE for the toolchain as a whole, PASS for the PCB layer. Those two modules are not the PCB layer and they are not this lane's; several sessions were editing ce-cad the same night. Reported, not fixed, and not silenced: an exit code of 1 is stated here as 1."
     }
+  },
+  "head_fit": {
+    "$note": "Where the Robot HAT sits in the head, measured 2026-09-02 by transforming every mesh placed in body jaw_soft by its own quaternion and comparing bounding boxes. Bounding boxes, not solids: a separation is a lower bound on the real clearance and an overlap is not proof of a collision.",
+    "hat_box": "x 0.430..30.455, y -32.511..32.514, z -51.900..-51.060 mm in the head-body frame (30.025 x 65.025 x 0.840)",
+    "rows": [
+      [
+        "pcb__raspberry_pi_zero_2_w (the compute board)",
+        "7.310 mm above in z",
+        "THE STACK HEIGHT. This is the space the 40-pin socket must span and the ceiling every part on the HAT's top face must clear."
+      ],
+      [
+        "m12_lens_holder",
+        "3.680 mm below in z",
+        "the nearest thing under the board"
+      ],
+      [
+        "motor_support",
+        "6.860 mm below in z",
+        ""
+      ],
+      [
+        "xl330 (neck)",
+        "8.560 mm below in z",
+        ""
+      ],
+      [
+        "face_part",
+        "8.900 mm below in z",
+        ""
+      ],
+      [
+        "lens",
+        "10.980 mm below in z",
+        ""
+      ],
+      [
+        "noenoeil",
+        "19.900 mm below in z",
+        ""
+      ],
+      [
+        "speaker",
+        "52.083 mm away in z",
+        ""
+      ],
+      [
+        "jaw_soft",
+        "7.740 mm away in x",
+        ""
+      ],
+      [
+        "soft_mouth_top",
+        "6.326 mm away in x",
+        ""
+      ],
+      [
+        "seeed_bearing (neck)",
+        "25.560 mm away in z, 4.489 in y",
+        ""
+      ],
+      [
+        "top_head_shell / bottom_head_shell / jaw",
+        "boxes overlap",
+        "the shells enclose the board; a box overlap with an enclosure is expected and proves nothing either way"
+      ]
+    ],
+    "verdict": "FAIL for two parts, and the measurement is what found it.",
+    "fails": [
+      [
+        "J1",
+        "8.500 mm",
+        "the generic 2.54 mm header model is 1.190 mm taller than the measured 7.310 mm board-to-board gap. J1 is the part that SPANS the gap, so this is not a collision \u2014 it is a SPECIFICATION: the socket fitted here must have a mated height of 7.310 mm, which is shorter than the common 8.5 mm 2x20 stacking header. The exact socket was already CANNOT DETERMINE; it now has a dimension to be chosen against."
+      ],
+      [
+        "U2",
+        "7.700 mm",
+        "the Pololu D30V30F5 buck module is 0.390 mm TALLER than the space above the board. It does not fit as placed. This reverses decision D1's own reasoning: the alternative D1 beat was 'a discrete buck IC', rejected because a module is one BOM line \u2014 and the module does not fit. Options: (a) fit a discrete regulator under 7.310 mm, (b) move U2 to the bottom side, where the nearest measured neighbour is the m12_lens_holder at 3.680 mm, which is worse. WHAT SETTLES IT: cecad.pcbview.board_assembly() with the real solids, which needs FreeCAD and has not been run."
+      ]
+    ]
   }
 }
