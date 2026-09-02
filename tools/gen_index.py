@@ -59,6 +59,8 @@ SECTIONS = [
         ("HEAD-MOTION.html", "Head and neck dynamics", "Is the neck as dynamic? Every head joint driven through its full MJCF range under Pollen's stand policy, with travel, peak velocity, tracking lag, torque, a self-collision range probe and four videos."),
         ("out/motion/head.json", "Head and neck dynamics (data)", "The joint table, the kinematic range probe, the servo datasheet numbers and the verdict."),
         ("out/motion/head_real_video.json", "Real robot head motion (data)", "Head-pitch travel and rate tracked frame by frame off Pollen's own gallery_chorale.mp4, with its error budget."),
+        ("out/motion/WALK.html", "Walking mechanics", "Nine tracked-camera videos of the walk \u2014 full body, knee/hip/ankle close-ups, a 2\u00d72 composite and one gait cycle at 0.25\u00d7 with the joint-angle traces \u2014 with every joint's travel and peak angular velocity, and our gait phase-matched against Pollen's own move clip."),
+        ("out/motion/walk.json", "Walking mechanics (data)", "Per joint: MJCF range, travel actually used, peak angular velocity and the frame it happened on; the gait period; and the frame-by-frame read-back verdict of all nine videos."),
         ("docs/SIM-CAPABILITY.html", "Simulation capability", "What the simulation can and cannot do, stated honestly."),
         ("out/verify/mech_dims.json", "Measured dimensions (data)", "Bounding box of all 47 meshes in mm to 4 dp, plus rebuild deviation."),
         ("out/verify/head_analysis.json", "Head conformance (data)", "Scale-free silhouette ratios for the head, and why the verdict is CANNOT DETERMINE."),
@@ -88,6 +90,9 @@ TOOLS = [
     ("sim/mech_dims.py", "Measures every mesh through the FreeCAD kernel."),
     ("sim/stress_matrix.py", "The structural FEA matrix: parts × load cases × materials."),
     ("sim/compare_render.py", "Photo-matched studio renders and joint close-ups."),
+    ("sim/motion_render.py", "Films the walk: joint-tracking studio videos, the composite and the 0.25\u00d7 gait cycle, and the per-joint travel/velocity table."),
+    ("sim/walk_vs_product.py", "Phase-matches our walk against Pollen's published move clip; measures both gait periods."),
+    ("tools/gen_walk_motion.py", "Builds out/motion/WALK.html from out/motion/walk.json."),
     ("sim/assembly_steps_mj.py", "Cumulative assembly-step renders."),
     ("sim/run_policy.py", "Runs Pollen's trained policies on our meshes."),
     ("sim/gait_sweep.py", "The gait-robustness matrix: speed, mass, friction, slope and push, "
