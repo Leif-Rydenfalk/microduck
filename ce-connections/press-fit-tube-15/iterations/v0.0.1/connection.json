@@ -1,0 +1,70 @@
+{
+  "$triad": 1,
+  "kind": "connection",
+  "record": {
+    "slug": "press-fit-tube-15",
+    "title": "\u00d815.0 open-arch cradle, 149.06\u00b0 \u2014 the motor-support end of the jaw pivot",
+    "joins": {
+      "a": "a \u00d815.0 cylindrical body laid into the cradle. On this robot that body is the 15x10x3 ball bearing's OUTER RING (part:bearing-15x10x3, interface 'od', \u00d815.0 measured on Pollen's own mesh), whose bore carries part:microduck-jaw's \u00d810.0000 journal.",
+      "b": "the cradle: an arch of \u00d814.9938\u201314.9978 bore swept 149.06\u00b0 about its axis and cut off flat at the chord plane \u2014 part:microduck-motor-support interface 'lens_tube', two ring bands 2.0000 mm and 1.0000 mm long with a 1.0000 mm \u00d816.8 relief between them."
+    },
+    "dof_left": [
+      "rotation_about_z",
+      "translation_along_z"
+    ],
+    "dof_left_why": "MEASURED, and this is the whole point of the folder: the cradle is NOT a bore. cecad.meshslice at x -38.5 finds material only from z 9.5000 to 16.1919 \u2014 the arch is cut off flat at z 9.5000 and 210.94\u00b0 of the circle is open air below. An open arch cannot grip, so it leaves the ring free to turn (rotation_about_z, which is what the jaw pivot is FOR) and free to slide along the axis (translation_along_z: no shoulder, groove or end stop was found on either ring band). It also cannot stop the ring being lifted OUT downward; that is not a DOF in the six-axis vocabulary, so it is stated in `joint.open_direction` and in compat.py rather than hidden. The jaw is held up by its XL330 horn at the other end of the part (jaw.stl, \u00d86.0 centre + 4 x \u00d82.2 on a \u00d812 bolt circle at x ~+42) \u2014 this end only locates it.",
+    "detachable": true,
+    "detachable_why": "By hand, with no tool and no press: the ring lifts straight out of the open side. That is the honest consequence of a 149.06\u00b0 arch and it is why this folder is NOT connection:press-fit-bearing-15x10x3, whose seats are 360\u00b0 pockets and bosses that must be pressed.",
+    "standard": null,
+    "standard_why": "No published standard governs an open cradle of arbitrary included angle. ISO 286 grades bores and shafts; it has nothing to say about an arch that is missing 210.94\u00b0 of its circle, and quoting it here would be borrowing authority the geometry does not have. compat.py therefore grades DIAMETER and ANGULAR CAPTURE from measurements and refuses to grade grip at all.",
+    "adds_parts": [],
+    "adds_parts_why": "A cradle adds no fastener and no part of its own. The ring it holds is added by connection:press-fit-bearing-15x10x3 (which seats that ring's bore on the jaw journal); adding part:bearing-15x10x3 here as well would double-count it in assembly:microduck's BOM. Nothing is named that this shelf could not resolve.",
+    "verdict": "PASS",
+    "why": "THE GEOMETRY IS MEASURED ON BOTH SIDES AND IT AGREES. Cradle: circle fits to cecad.meshslice cross-sections of motor_support.stl at five x stations read \u00d814.9938 / 14.9954 / 14.9978 at the three stations whose residual mean is under 0.0036 mm, centre (y 0.0000, z 7.4995), swept 149.06\u2013149.09\u00b0, chord plane z 9.5000, crown z 15.0000; the two ring bands are x -39.5000..-37.5000 (2.0000 mm) and -36.5000..-35.5000 (1.0000 mm) with a 1.0000 mm \u00d816.8 relief between, read by ray-cast intervals at radius 8.100 mm. Ring: \u00d815.0 OD, 3.0 wide (part:bearing-15x10x3, its own frozen evidence). Journal through the ring: the jaw's \u00d810.0000 boss, centre (y 0.0000, z 7.5000), residual max 0.00254 mm, x -39.7000..-37.0000 (2.7000 mm) behind a \u00d811.9949 x 0.3000 flange. CRADLE AND JOURNAL ARE COAXIAL TO 0.0005 mm. TWO measured facts are recorded rather than smoothed: (1) Pollen's MJCF places the bearing GEOM 0.2005 mm above both axes and 0.3000 mm outboard of the journal shoulder \u2014 a placement artefact of the visual model, not of the parts; (2) the interface this folder is named from is called 'lens_tube' and its own text calls it a lens seat, and that reading is FALSE \u2014 in this same frame the m12 lens holder sits at y -52.38..-37.58 and the lens at y -63.8..-44.88, on a different axis 37\u201364 mm away, with no \u00d815 feature anywhere on them. What stays CANNOT DETERMINE is stated per-check in compat.py and as a ledger row: nothing measurable closes the open 210.94\u00b0, so the retention of the ring in the cradle cannot be graded from the meshes at all.",
+    "joint": {
+      "$joint": 1,
+      "default_state": "one \u00d815.0 ring lying in the arch, free to turn and free to slide; the assembly closes nothing under it in any mesh measured here",
+      "axes": {
+        "tx": "locked",
+        "ty": "locked",
+        "tz": "free",
+        "rx": "locked",
+        "ry": "locked",
+        "rz": "free"
+      },
+      "axes_cannot_determine": {
+        "tx": "locked only in the +z half-space the arch covers. The arch spans 149.06\u00b0 centred on +z, so it opposes motion upward and sideways-and-upward; it opposes nothing downward. 'locked' here means 'locked against the arch', and the open direction is named in open_direction.",
+        "ty": "same qualification as tx.",
+        "tz": "recorded as free because NO axial stop was measured on either ring band \u2014 no groove, no shoulder, no end face. If the jaw's \u00d811.9949 x 0.3000 flange is intended as that stop it would act on the ring's bore side, not in this cradle."
+      },
+      "limits": {},
+      "one_way": "the cradle resists load only in the closed 149.06\u00b0; a downward load lifts the ring out",
+      "intermittent": false,
+      "engagement": {
+        "ring_width_mm": 3.0,
+        "band_contact_len_mm": 2.0,
+        "band_contact_why": "with the ring where Pollen's MJCF puts it (x -40.0000..-37.0000) only the first band (-39.5000..-37.5000) touches it: 2.0000 mm of the ring's 3.0000 mm width, 66.7%. The second band (-36.5000..-35.5000) is clear of the ring by 0.5000 mm. Seat the ring instead against the jaw's flange (x -39.7000..-36.7000) and the numbers become 1.8000 mm on band one and 0.2000 mm on band two \u2014 which datum is intended is not stated anywhere in the reference.",
+        "angular_capture_deg": 149.06
+      },
+      "couples": [],
+      "holds_by": "form",
+      "removable": true,
+      "transmits": [
+        "radial_into_the_arch"
+      ],
+      "driven": false,
+      "rating": {
+        "bore_d_mm": 14.9938,
+        "bore_d_mm_span": [
+          14.9938,
+          14.9978
+        ],
+        "ring_d_mm": 15.0,
+        "angular_capture_deg": 149.06,
+        "retention_N": null,
+        "retention_why": "MISSING and unmeasurable from geometry: an open cradle's holding force is whatever closes it, and nothing in any of Pollen's four MJCF files closes this one."
+      },
+      "why": "holds_by form: what holds the ring is the arch's shape, not friction \u2014 0.0000\u20130.0062 mm of nominal interference over 149.06\u00b0 would not grip anything and is not claimed to. driven false: the jaw is driven by its XL330 at the other end (the horn face measured on jaw.stl at x ~+42: \u00d86.0 centre bore + 4 x \u00d82.2 on a \u00d812.0 bolt circle). This end is the idler."
+    }
+  }
+}

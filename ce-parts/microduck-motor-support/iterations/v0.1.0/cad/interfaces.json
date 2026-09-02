@@ -7,32 +7,106 @@
     "interfaces": [
       {
         "name": "head_roll",
-        "frame": {"origin_mm": [0.0, 18.0, 4.5], "z_axis": [0, 1, 0], "x_axis": [0, 0, 1]},
-        "accepts": ["connection:spline-xl330-horn"],
+        "frame": {
+          "origin_mm": [
+            0.0,
+            18.0,
+            4.5
+          ],
+          "z_axis": [
+            0,
+            1,
+            0
+          ],
+          "x_axis": [
+            0,
+            0,
+            1
+          ]
+        },
+        "accepts": [
+          "connection:spline-xl330-horn"
+        ],
         "role": "joint_child_link",
         "what": "the head_roll hinge (yaw_roll_motion -> head), range +/-25 deg per the MJCF; the servo barrel measured in this mesh is centred (x 0, z 4.49) — arch shell r_out 12.7 / r_in 11.1 — and the north wall plate (y 17.95..19.3) carries the horn face",
         "source": "MJCF joint origin/axis transformed into the mesh frame (cecad.meshshelve, v0.0.1) and confirmed by the measured barrel centre (0, 4.49) off the mesh, 2026-09-02"
       },
       {
         "name": "mouth_servo",
-        "frame": {"origin_mm": [0.0, -18.63, 4.49], "z_axis": [0, -1, 0], "x_axis": [0, 0, 1]},
-        "accepts": ["connection:spline-xl330-horn"],
+        "frame": {
+          "origin_mm": [
+            0.0,
+            -18.63,
+            4.49
+          ],
+          "z_axis": [
+            0,
+            -1,
+            0
+          ],
+          "x_axis": [
+            0,
+            0,
+            1
+          ]
+        },
+        "accepts": [
+          "connection:spline-xl330-horn"
+        ],
         "role": "servo_mount",
         "what": "the mouth/jaw servo sits in the south saddle (arch shell r 12.7/11.1 over the wall band y -20.35..-15.95) with stepped gusset faces at y -18.63/-18.1 (r 9.5 and r 11.1 clearance arches); horn axis along y through (x 0, z 4.49). Which y-side carries the horn and which the idler CANNOT DETERMINE from the mesh alone.",
         "source": "MEASURED off Pollen's mesh by cecad.meshslice calipers (probes quoted in part.py), 2026-09-02"
       },
       {
         "name": "lens_tube",
-        "frame": {"origin_mm": [-39.5, 0.0, 7.5], "z_axis": [-1, 0, 0], "x_axis": [0, 0, 1]},
-        "accepts": ["connection:press-fit-tube-15"],
-        "role": "lens_seat",
-        "what": "stepped arch tube on the -x face, axis x at (y 0, z 7.5): bore rings Ø15.0 min with Ø17.5 sections (x -35.5..-29.0 and -37.5..-36.5), outer rings Ø17.4/18.4/20.5, flat-bottomed at z 9.5 outboard — the camera lens / lens-holder seat (SPEC §4.3: m12_lens_holder lives in the head). Mate kind not yet on the shelf; the named connection is the work item.",
-        "source": "MEASURED off Pollen's mesh: y=0 z-interval profile x -39.4..-28.6 and arc fits of x-plane cuts, 2026-09-02"
+        "frame": {
+          "origin_mm": [
+            -39.5,
+            0.0,
+            7.5
+          ],
+          "z_axis": [
+            -1,
+            0,
+            0
+          ],
+          "x_axis": [
+            0,
+            0,
+            1
+          ]
+        },
+        "accepts": [
+          "connection:press-fit-tube-15"
+        ],
+        "role": "journal_cradle",
+        "what": "Ø15.0 open-arch CRADLE on the -x face, axis x through (y 0.0000, z 7.4995): circle fits to meshslice cross-sections read Ø14.9938 / 14.9954 / 14.9978 at the three stations whose residual mean is under 0.0036 mm, swept 149.06-149.09 deg, chord plane z 9.5000, crown z 15.0000, outer surface Ø17.3926. Two ring bands x -39.5000..-37.5000 (2.0000 mm) and -36.5000..-35.5000 (1.0000 mm) with 1.0000 mm of Ø16.8 relief between. It cradles the 15x10x3 bearing's Ø15.0 OUTER RACE; the jaw's Ø10.0000 journal (centre y 0.0000, z 7.5000, x -39.7000..-37.0000) turns in its bore. Cradle and journal are coaxial to 0.0005 mm. CORRECTED 2026-09-02 (lane T): this row previously called the feature the camera lens / lens-holder seat and that is REFUTED by measurement — in this same frame m12_lens_holder sits at y -52.38..-37.58 and lens at y -63.8..-44.88, a different axis 37-64 mm away, and neither carries any Ø15 surface (barrel Ø11.6 / 13.6 / 16.94). 210.94 deg of the arch is open air below the chord and NOTHING in any of Pollen's four MJCF files closes it, so retention here is CANNOT DETERMINE.",
+        "source": "MEASURED off Pollen's motor_support.stl and jaw.stl by cecad.meshslice circle fits at five x stations, cecad.meshfeatures.cylinders and cecad.meshfeatures.intervals (ray-cast at radius 8.100 mm), plus the MJCF body/geom composition that places the bearing and the jaw in this frame; frozen in ce-connections/press-fit-tube-15/iterations/v0.0.1/evidence/tube-15-geometry.json, 2026-09-02",
+        "name_is_legacy": true,
+        "name_is_legacy_why": "the name 'lens_tube' is kept because cad/part.py line 262 builds a connector of that name; the ROLE and the text below are the measurement. connection:press-fit-tube-15 compat.py carries `claims_a_lens_seat` as the regression guard."
       },
       {
         "name": "base_screws",
-        "frame": {"origin_mm": [-30.0, 23.0, 0.4], "z_axis": [0, 0, -1], "x_axis": [1, 0, 0]},
-        "accepts": ["connection:threaded-m2"],
+        "frame": {
+          "origin_mm": [
+            -30.0,
+            23.0,
+            0.4
+          ],
+          "z_axis": [
+            0,
+            0,
+            -1
+          ],
+          "x_axis": [
+            1,
+            0,
+            0
+          ]
+        },
+        "accepts": [
+          "connection:threaded-m2"
+        ],
         "role": "screw_pattern",
         "what": "4 x Ø2.7 through the 1.7 mm base plate at (-30,23), (9.35,-23), (-30,-16), (19,19.5) — mounts the plate into the bottom head shell. Ø2.7 measured: loose for M2, plausible M2.5 clearance; the connection folder decides.",
         "source": "MEASURED off Pollen's mesh by cecad.meshfeatures.cylinders (d 2.7, len 1.7, axis z), 2026-09-02"
