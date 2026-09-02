@@ -1,0 +1,1050 @@
+{
+ "generated": "2026-09-02T21:59:17",
+ "model": {
+  "kinematic": "sim/microduck_ours_allcollisions.xml",
+  "note": "Pollen MJCF verbatim, OUR rebuilt meshes on the visual geoms (sim/swap_meshes.py). Collision geoms are Pollen's except where ours_collision is stated."
+ },
+ "mjcf_ranges": {
+  "left_hip_yaw": {
+   "axis": "0 0 1",
+   "lo_rad": -0.4363323129985824,
+   "hi_rad": 0.5235987755982988,
+   "lo_deg": -25.0,
+   "hi_deg": 29.999999999999996,
+   "span_deg": 55.0,
+   "cite": "sim/microduck_ours.xml:112"
+  },
+  "left_hip_roll": {
+   "axis": "0 0 1",
+   "lo_rad": -0.3839724354387525,
+   "hi_rad": 0.3839724354387525,
+   "lo_deg": -22.0,
+   "hi_deg": 22.0,
+   "span_deg": 44.0,
+   "cite": "sim/microduck_ours.xml:125"
+  },
+  "left_hip_pitch": {
+   "axis": "0 0 1",
+   "lo_rad": -1.570796326795005,
+   "hi_rad": 1.5707963267947882,
+   "lo_deg": -90.00000000000621,
+   "hi_deg": 89.99999999999379,
+   "span_deg": 180.0,
+   "cite": "sim/microduck_ours.xml:134"
+  },
+  "left_knee": {
+   "axis": "0 0 1",
+   "lo_rad": -1.570796326795012,
+   "hi_rad": 1.570796326794781,
+   "lo_deg": -90.00000000000662,
+   "hi_deg": 89.99999999999338,
+   "span_deg": 180.0,
+   "cite": "sim/microduck_ours.xml:149"
+  },
+  "left_ankle": {
+   "axis": "0 0 1",
+   "lo_rad": -1.5707963267949019,
+   "hi_rad": 1.5707963267948912,
+   "lo_deg": -90.0000000000003,
+   "hi_deg": 89.99999999999969,
+   "span_deg": 180.0,
+   "cite": "sim/microduck_ours.xml:159"
+  },
+  "right_hip_yaw": {
+   "axis": "0 0 1",
+   "lo_rad": -0.5235987755982988,
+   "hi_rad": 0.4363323129985824,
+   "lo_deg": -29.999999999999996,
+   "hi_deg": 25.0,
+   "span_deg": 55.0,
+   "cite": "sim/microduck_ours.xml:265"
+  },
+  "right_hip_roll": {
+   "axis": "0 0 1",
+   "lo_rad": -0.3839724354387525,
+   "hi_rad": 0.3839724354387525,
+   "lo_deg": -22.0,
+   "hi_deg": 22.0,
+   "span_deg": 44.0,
+   "cite": "sim/microduck_ours.xml:278"
+  },
+  "right_hip_pitch": {
+   "axis": "0 0 1",
+   "lo_rad": -1.5707963267949268,
+   "hi_rad": 1.5707963267948664,
+   "lo_deg": -90.00000000000173,
+   "hi_deg": 89.99999999999827,
+   "span_deg": 180.0,
+   "cite": "sim/microduck_ours.xml:287"
+  },
+  "right_knee": {
+   "axis": "0 0 1",
+   "lo_rad": -1.570796326794932,
+   "hi_rad": 1.570796326794861,
+   "lo_deg": -90.00000000000203,
+   "hi_deg": 89.99999999999797,
+   "span_deg": 180.0,
+   "cite": "sim/microduck_ours.xml:302"
+  },
+  "right_ankle": {
+   "axis": "0 0 1",
+   "lo_rad": -1.5707963267949054,
+   "hi_rad": 1.5707963267948877,
+   "lo_deg": -90.00000000000051,
+   "hi_deg": 89.99999999999949,
+   "span_deg": 180.0,
+   "cite": "sim/microduck_ours.xml:312"
+  }
+ },
+ "actuator": {
+  "cite": "sim/microduck_ours.xml:41-48 class chosen_actuator",
+  "kp": 0.55,
+  "kv": 0.0,
+  "forcerange_Nm": [
+   -0.96,
+   0.96
+  ],
+  "damping": 0.053,
+  "frictionloss": 0.0048,
+  "armature": 0.0018,
+  "ctrlrange": [
+   -10.0,
+   10.0
+  ],
+  "servo_reality_check": "The MJCF actuator is NOT the datasheet servo. Pollen's class chosen_actuator gives every leg joint forcerange +-0.96 N.m, while the repo's verified entry for the fitted servo (Dynamixel XL330-M288-T, out/verify/electronics_verify.json, ROBOTIS eManual cited there) gives stall 0.52 N.m at 5.0 V - the model is 1.846x stronger than the cited stall torque. The class also sets kv = 0 and the model carries NO joint velocity limit, so the step-response peak velocities below are what the MODEL can do, not what the servo can do. The XL330's no-load speed is not recorded anywhere in this repo: CANNOT DETERMINE, and it must be added before any of these peak velocities is quoted as a hardware capability.",
+  "peak_velocity_caveat": "peak_velocity_deg_s is measured during a commanded STEP from DEFAULT_POSE to the MJCF limit with the policy paused and the trunk pinned. Under Pollen's own policies the same joints stay far slower - see sitstand_policy and squat below."
+ },
+ "self_collision": {
+  "pollen_collision_meshes": {
+   "collision_geoms": [
+    "trunk_base/power_support",
+    "trunk_base/np_f970",
+    "hip_l/hip_l",
+    "leg/leg",
+    "ankle_left/left_foot_collision",
+    "jaw_soft/top_head_shell",
+    "jaw_soft/jaw",
+    "jaw_soft/bottom_head_shell",
+    "hip_l_2/hip_l",
+    "leg_2/leg",
+    "ankle_right/right_foot_collision"
+   ],
+   "note": "MuJoCo collides mesh geoms as their CONVEX HULLS. The trunk power_support geom is class self_collision_only (contype/conaffinity 2) and is the only geom in that group, so it can never produce a contact - stated, not silently passed.",
+   "sweeps": {
+    "left_hip_yaw": {
+     "step_deg": 0.05,
+     "samples": 1101,
+     "swept_deg": [
+      -25.0,
+      30.0
+     ],
+     "neutral_deg": 0.0,
+     "contact_samples": 0,
+     "pairs": {},
+     "verdict": "CLEAR"
+    },
+    "left_hip_roll": {
+     "step_deg": 0.05,
+     "samples": 881,
+     "swept_deg": [
+      -22.0,
+      22.0
+     ],
+     "neutral_deg": -5.0,
+     "contact_samples": 0,
+     "pairs": {},
+     "verdict": "CLEAR"
+    },
+    "left_hip_pitch": {
+     "step_deg": 0.05,
+     "samples": 3601,
+     "swept_deg": [
+      -90.0,
+      90.0
+     ],
+     "neutral_deg": -26.237,
+     "contact_samples": 0,
+     "pairs": {},
+     "verdict": "CLEAR"
+    },
+    "left_knee": {
+     "step_deg": 0.05,
+     "samples": 3601,
+     "swept_deg": [
+      -90.0,
+      90.0
+     ],
+     "neutral_deg": -0.283,
+     "contact_samples": 0,
+     "pairs": {},
+     "verdict": "CLEAR"
+    },
+    "left_ankle": {
+     "step_deg": 0.05,
+     "samples": 3601,
+     "swept_deg": [
+      -90.0,
+      90.0
+     ],
+     "neutral_deg": 25.954,
+     "contact_samples": 0,
+     "pairs": {},
+     "verdict": "CLEAR"
+    },
+    "right_hip_yaw": {
+     "step_deg": 0.05,
+     "samples": 1101,
+     "swept_deg": [
+      -30.0,
+      25.0
+     ],
+     "neutral_deg": 0.0,
+     "contact_samples": 0,
+     "pairs": {},
+     "verdict": "CLEAR"
+    },
+    "right_hip_roll": {
+     "step_deg": 0.05,
+     "samples": 881,
+     "swept_deg": [
+      -22.0,
+      22.0
+     ],
+     "neutral_deg": 5.0,
+     "contact_samples": 0,
+     "pairs": {},
+     "verdict": "CLEAR"
+    },
+    "right_hip_pitch": {
+     "step_deg": 0.05,
+     "samples": 3601,
+     "swept_deg": [
+      -90.0,
+      90.0
+     ],
+     "neutral_deg": 26.237,
+     "contact_samples": 0,
+     "pairs": {},
+     "verdict": "CLEAR"
+    },
+    "right_knee": {
+     "step_deg": 0.05,
+     "samples": 3601,
+     "swept_deg": [
+      -90.0,
+      90.0
+     ],
+     "neutral_deg": 0.283,
+     "contact_samples": 0,
+     "pairs": {},
+     "verdict": "CLEAR"
+    },
+    "right_ankle": {
+     "step_deg": 0.05,
+     "samples": 3601,
+     "swept_deg": [
+      -90.0,
+      90.0
+     ],
+     "neutral_deg": -25.954,
+     "contact_samples": 0,
+     "pairs": {},
+     "verdict": "CLEAR"
+    }
+   }
+  },
+  "ours_shin_collision_mesh": {
+   "collision_geoms": [
+    "trunk_base/power_support",
+    "trunk_base/np_f970",
+    "hip_l/hip_l",
+    "leg/leg__ours",
+    "ankle_left/left_foot_collision",
+    "jaw_soft/top_head_shell",
+    "jaw_soft/jaw",
+    "jaw_soft/bottom_head_shell",
+    "hip_l_2/hip_l",
+    "leg_2/leg__ours",
+    "ankle_right/right_foot_collision"
+   ],
+   "note": "MuJoCo collides mesh geoms as their CONVEX HULLS. The trunk power_support geom is class self_collision_only (contype/conaffinity 2) and is the only geom in that group, so it can never produce a contact - stated, not silently passed.",
+   "sweeps": {
+    "left_hip_yaw": {
+     "step_deg": 0.05,
+     "samples": 1101,
+     "swept_deg": [
+      -25.0,
+      30.0
+     ],
+     "neutral_deg": 0.0,
+     "contact_samples": 0,
+     "pairs": {},
+     "verdict": "CLEAR"
+    },
+    "left_hip_roll": {
+     "step_deg": 0.05,
+     "samples": 881,
+     "swept_deg": [
+      -22.0,
+      22.0
+     ],
+     "neutral_deg": -5.0,
+     "contact_samples": 0,
+     "pairs": {},
+     "verdict": "CLEAR"
+    },
+    "left_hip_pitch": {
+     "step_deg": 0.05,
+     "samples": 3601,
+     "swept_deg": [
+      -90.0,
+      90.0
+     ],
+     "neutral_deg": -26.237,
+     "contact_samples": 0,
+     "pairs": {},
+     "verdict": "CLEAR"
+    },
+    "left_knee": {
+     "step_deg": 0.05,
+     "samples": 3601,
+     "swept_deg": [
+      -90.0,
+      90.0
+     ],
+     "neutral_deg": -0.283,
+     "contact_samples": 0,
+     "pairs": {},
+     "verdict": "CLEAR"
+    },
+    "left_ankle": {
+     "step_deg": 0.05,
+     "samples": 3601,
+     "swept_deg": [
+      -90.0,
+      90.0
+     ],
+     "neutral_deg": 25.954,
+     "contact_samples": 0,
+     "pairs": {},
+     "verdict": "CLEAR"
+    },
+    "right_hip_yaw": {
+     "step_deg": 0.05,
+     "samples": 1101,
+     "swept_deg": [
+      -30.0,
+      25.0
+     ],
+     "neutral_deg": 0.0,
+     "contact_samples": 0,
+     "pairs": {},
+     "verdict": "CLEAR"
+    },
+    "right_hip_roll": {
+     "step_deg": 0.05,
+     "samples": 881,
+     "swept_deg": [
+      -22.0,
+      22.0
+     ],
+     "neutral_deg": 5.0,
+     "contact_samples": 0,
+     "pairs": {},
+     "verdict": "CLEAR"
+    },
+    "right_hip_pitch": {
+     "step_deg": 0.05,
+     "samples": 3601,
+     "swept_deg": [
+      -90.0,
+      90.0
+     ],
+     "neutral_deg": 26.237,
+     "contact_samples": 0,
+     "pairs": {},
+     "verdict": "CLEAR"
+    },
+    "right_knee": {
+     "step_deg": 0.05,
+     "samples": 3601,
+     "swept_deg": [
+      -90.0,
+      90.0
+     ],
+     "neutral_deg": 0.283,
+     "contact_samples": 0,
+     "pairs": {},
+     "verdict": "CLEAR"
+    },
+    "right_ankle": {
+     "step_deg": 0.05,
+     "samples": 3601,
+     "swept_deg": [
+      -90.0,
+      90.0
+     ],
+     "neutral_deg": -25.954,
+     "contact_samples": 0,
+     "pairs": {},
+     "verdict": "CLEAR"
+    }
+   }
+  },
+  "combinations": {
+   "why": "a one-at-a-time sweep leaves every other joint at DEFAULT_POSE; the folded and crossed postures that could actually collide need two joints off default",
+   "step_deg": 0.1,
+   "cases": {
+    "left_knee swept, left_hip_pitch pinned at MJCF lo (-90.000 deg)": {
+     "swept_deg": [
+      -90.0,
+      90.0
+     ],
+     "neutral_deg": -0.283,
+     "pairs": {
+      "hip_l/hip_l <-> leg/leg": {
+       "onset_deg": 69.6,
+       "contact_interval_deg": [
+        69.6,
+        90.0
+       ],
+       "contact_samples": 781,
+       "max_penetration_mm": 6.0239
+      }
+     },
+     "verdict": "TOUCHES"
+    },
+    "left_knee swept, left_hip_pitch pinned at MJCF hi (90.000 deg)": {
+     "swept_deg": [
+      -90.0,
+      90.0
+     ],
+     "neutral_deg": -0.283,
+     "pairs": {},
+     "verdict": "CLEAR"
+    },
+    "left_ankle swept, left_knee pinned at MJCF lo (-90.000 deg)": {
+     "swept_deg": [
+      -90.0,
+      90.0
+     ],
+     "neutral_deg": 25.954,
+     "pairs": {},
+     "verdict": "CLEAR"
+    },
+    "left_ankle swept, left_knee pinned at MJCF hi (90.000 deg)": {
+     "swept_deg": [
+      -90.0,
+      90.0
+     ],
+     "neutral_deg": 25.954,
+     "pairs": {
+      "ankle_left/left_foot_collision <-> hip_l/hip_l": {
+       "onset_deg": 19.4,
+       "contact_interval_deg": [
+        -90.0,
+        19.4
+       ],
+       "contact_samples": 3335,
+       "max_penetration_mm": 11.1946
+      }
+     },
+     "verdict": "TOUCHES"
+    },
+    "left_hip_pitch swept, left_hip_roll pinned at MJCF lo (-22.000 deg)": {
+     "swept_deg": [
+      -90.0,
+      90.0
+     ],
+     "neutral_deg": -26.237,
+     "pairs": {},
+     "verdict": "CLEAR"
+    },
+    "left_hip_pitch swept, left_hip_roll pinned at MJCF hi (22.000 deg)": {
+     "swept_deg": [
+      -90.0,
+      90.0
+     ],
+     "neutral_deg": -26.237,
+     "pairs": {
+      "leg/leg <-> trunk_base/np_f970": {
+       "onset_deg": 75.3,
+       "contact_interval_deg": [
+        75.3,
+        90.0
+       ],
+       "contact_samples": 590,
+       "max_penetration_mm": 2.8447
+      }
+     },
+     "verdict": "TOUCHES"
+    },
+    "right_knee swept, right_hip_pitch pinned at MJCF lo (-90.000 deg)": {
+     "swept_deg": [
+      -90.0,
+      90.0
+     ],
+     "neutral_deg": 0.283,
+     "pairs": {},
+     "verdict": "CLEAR"
+    },
+    "right_knee swept, right_hip_pitch pinned at MJCF hi (90.000 deg)": {
+     "swept_deg": [
+      -90.0,
+      90.0
+     ],
+     "neutral_deg": 0.283,
+     "pairs": {
+      "hip_l_2/hip_l <-> leg_2/leg": {
+       "onset_deg": -69.6,
+       "contact_interval_deg": [
+        -90.0,
+        -69.6
+       ],
+       "contact_samples": 584,
+       "max_penetration_mm": 6.0229
+      }
+     },
+     "verdict": "TOUCHES"
+    },
+    "right_ankle swept, right_knee pinned at MJCF lo (-90.000 deg)": {
+     "swept_deg": [
+      -90.0,
+      90.0
+     ],
+     "neutral_deg": -25.954,
+     "pairs": {
+      "ankle_right/right_foot_collision <-> hip_l_2/hip_l": {
+       "onset_deg": -19.4,
+       "contact_interval_deg": [
+        -19.4,
+        90.0
+       ],
+       "contact_samples": 3417,
+       "max_penetration_mm": 11.1946
+      }
+     },
+     "verdict": "TOUCHES"
+    },
+    "right_ankle swept, right_knee pinned at MJCF hi (90.000 deg)": {
+     "swept_deg": [
+      -90.0,
+      90.0
+     ],
+     "neutral_deg": -25.954,
+     "pairs": {},
+     "verdict": "CLEAR"
+    },
+    "right_hip_pitch swept, right_hip_roll pinned at MJCF lo (-22.000 deg)": {
+     "swept_deg": [
+      -90.0,
+      90.0
+     ],
+     "neutral_deg": 26.237,
+     "pairs": {
+      "leg_2/leg <-> trunk_base/np_f970": {
+       "onset_deg": -75.3,
+       "contact_interval_deg": [
+        -90.0,
+        -75.3
+       ],
+       "contact_samples": 575,
+       "max_penetration_mm": 2.842
+      }
+     },
+     "verdict": "TOUCHES"
+    },
+    "right_hip_pitch swept, right_hip_roll pinned at MJCF hi (22.000 deg)": {
+     "swept_deg": [
+      -90.0,
+      90.0
+     ],
+     "neutral_deg": 26.237,
+     "pairs": {},
+     "verdict": "CLEAR"
+    }
+   }
+  },
+  "both_legs_mirrored": {
+   "why": "both legs driven together \u2014 legs crossing, splaying and scissoring",
+   "cases": {
+    "left_hip_roll + right_hip_roll  sign (1.0, 1.0)  (hip roll, same sense)": {
+     "swept_deg": [
+      -22.0,
+      22.0
+     ],
+     "step_deg": 0.05,
+     "note": "offset added to BOTH joints on top of DEFAULT_POSE, clipped to each MJCF range; the angle reported is that offset, not the joint angle",
+     "pairs": {},
+     "verdict": "CLEAR"
+    },
+    "left_hip_roll + right_hip_roll  sign (1.0, -1.0)  (hip roll, opposed (knees in/out))": {
+     "swept_deg": [
+      -22.0,
+      22.0
+     ],
+     "step_deg": 0.05,
+     "note": "offset added to BOTH joints on top of DEFAULT_POSE, clipped to each MJCF range; the angle reported is that offset, not the joint angle",
+     "pairs": {
+      "ankle_left/left_foot_collision <-> ankle_right/right_foot_collision": {
+       "onset_deg": -13.1,
+       "contact_interval_deg": [
+        -22.0,
+        -13.1
+       ],
+       "contact_samples": 274,
+       "max_penetration_mm": 12.6501
+      }
+     },
+     "verdict": "TOUCHES"
+    },
+    "left_hip_yaw + right_hip_yaw  sign (1.0, -1.0)  (hip yaw, opposed (toes in/out))": {
+     "swept_deg": [
+      -27.5,
+      27.5
+     ],
+     "step_deg": 0.05,
+     "note": "offset added to BOTH joints on top of DEFAULT_POSE, clipped to each MJCF range; the angle reported is that offset, not the joint angle",
+     "pairs": {},
+     "verdict": "CLEAR"
+    },
+    "left_hip_pitch + right_hip_pitch  sign (1.0, 1.0)  (hip pitch, same sense (scissor))": {
+     "swept_deg": [
+      -90.0,
+      90.0
+     ],
+     "step_deg": 0.05,
+     "note": "offset added to BOTH joints on top of DEFAULT_POSE, clipped to each MJCF range; the angle reported is that offset, not the joint angle",
+     "pairs": {},
+     "verdict": "CLEAR"
+    },
+    "left_knee + right_knee  sign (1.0, -1.0)  (knee, opposed)": {
+     "swept_deg": [
+      -90.0,
+      90.0
+     ],
+     "step_deg": 0.05,
+     "note": "offset added to BOTH joints on top of DEFAULT_POSE, clipped to each MJCF range; the angle reported is that offset, not the joint angle",
+     "pairs": {},
+     "verdict": "CLEAR"
+    }
+   }
+  }
+ },
+ "dynamic_step_policy_paused": {
+  "rig": "trunk pinned (root qpos re-imposed, root qvel zeroed every physics step); gravity on",
+  "why": "the stand policy has no leg command slot (ONNX command_names = 'twist,head_pose'), so leg joints cannot be commanded through it; data.ctrl is written directly instead",
+  "joints": {
+   "left_hip_yaw": {
+    "joint": "left_hip_yaw",
+    "mjcf_lo_deg": -25.0,
+    "mjcf_hi_deg": 30.0,
+    "mjcf_span_deg": 55.0,
+    "reached_max_deg": 29.988,
+    "reached_min_deg": -24.549,
+    "travel_deg": 54.536,
+    "travel_frac_of_mjcf_range": 0.992,
+    "peak_velocity_deg_s": 209.958,
+    "peak_velocity_source": "step to the MJCF hi limit, policy paused",
+    "peak_velocity_at_s": 5.24,
+    "ramp_peak_velocity_deg_s": 42.723,
+    "commanded_ramp_rate_deg_s": 43.197,
+    "overshoot_past_hi_deg": 0.0,
+    "overshoot_past_lo_deg": 0.0,
+    "tracking_rms_deg": 4.475,
+    "seconds": 6.8
+   },
+   "left_hip_roll": {
+    "joint": "left_hip_roll",
+    "mjcf_lo_deg": -22.0,
+    "mjcf_hi_deg": 22.0,
+    "mjcf_span_deg": 44.0,
+    "reached_max_deg": 22.076,
+    "reached_min_deg": -21.559,
+    "travel_deg": 43.634,
+    "travel_frac_of_mjcf_range": 0.992,
+    "peak_velocity_deg_s": 183.04,
+    "peak_velocity_source": "step to the MJCF hi limit, policy paused",
+    "peak_velocity_at_s": 5.26,
+    "ramp_peak_velocity_deg_s": 34.244,
+    "commanded_ramp_rate_deg_s": 34.558,
+    "overshoot_past_hi_deg": 0.076,
+    "overshoot_past_lo_deg": 0.0,
+    "tracking_rms_deg": 4.02,
+    "seconds": 6.8
+   },
+   "left_hip_pitch": {
+    "joint": "left_hip_pitch",
+    "mjcf_lo_deg": -90.0,
+    "mjcf_hi_deg": 90.0,
+    "mjcf_span_deg": 180.0,
+    "reached_max_deg": 90.499,
+    "reached_min_deg": -89.635,
+    "travel_deg": 180.135,
+    "travel_frac_of_mjcf_range": 1.001,
+    "peak_velocity_deg_s": 782.279,
+    "peak_velocity_source": "step to the MJCF hi limit, policy paused",
+    "peak_velocity_at_s": 5.26,
+    "ramp_peak_velocity_deg_s": 140.036,
+    "commanded_ramp_rate_deg_s": 141.372,
+    "overshoot_past_hi_deg": 0.499,
+    "overshoot_past_lo_deg": 0.0,
+    "tracking_rms_deg": 16.81,
+    "seconds": 6.8
+   },
+   "left_knee": {
+    "joint": "left_knee",
+    "mjcf_lo_deg": -90.0,
+    "mjcf_hi_deg": 90.0,
+    "mjcf_span_deg": 180.0,
+    "reached_max_deg": 90.263,
+    "reached_min_deg": -89.596,
+    "travel_deg": 179.859,
+    "travel_frac_of_mjcf_range": 0.999,
+    "peak_velocity_deg_s": 629.038,
+    "peak_velocity_source": "step to the MJCF hi limit, policy paused",
+    "peak_velocity_at_s": 5.24,
+    "ramp_peak_velocity_deg_s": 139.853,
+    "commanded_ramp_rate_deg_s": 141.372,
+    "overshoot_past_hi_deg": 0.263,
+    "overshoot_past_lo_deg": 0.0,
+    "tracking_rms_deg": 13.271,
+    "seconds": 6.8
+   },
+   "left_ankle": {
+    "joint": "left_ankle",
+    "mjcf_lo_deg": -90.0,
+    "mjcf_hi_deg": 90.0,
+    "mjcf_span_deg": 180.0,
+    "reached_max_deg": 90.108,
+    "reached_min_deg": -89.577,
+    "travel_deg": 179.685,
+    "travel_frac_of_mjcf_range": 0.998,
+    "peak_velocity_deg_s": 451.923,
+    "peak_velocity_source": "step to the MJCF hi limit, policy paused",
+    "peak_velocity_at_s": 5.24,
+    "ramp_peak_velocity_deg_s": 178.491,
+    "commanded_ramp_rate_deg_s": 141.372,
+    "overshoot_past_hi_deg": 0.108,
+    "overshoot_past_lo_deg": 0.0,
+    "tracking_rms_deg": 10.591,
+    "seconds": 6.8
+   },
+   "right_hip_yaw": {
+    "joint": "right_hip_yaw",
+    "mjcf_lo_deg": -30.0,
+    "mjcf_hi_deg": 25.0,
+    "mjcf_span_deg": 55.0,
+    "reached_max_deg": 24.929,
+    "reached_min_deg": -29.547,
+    "travel_deg": 54.476,
+    "travel_frac_of_mjcf_range": 0.99,
+    "peak_velocity_deg_s": 174.715,
+    "peak_velocity_source": "step to the MJCF hi limit, policy paused",
+    "peak_velocity_at_s": 5.24,
+    "ramp_peak_velocity_deg_s": 46.274,
+    "commanded_ramp_rate_deg_s": 43.197,
+    "overshoot_past_hi_deg": 0.0,
+    "overshoot_past_lo_deg": 0.0,
+    "tracking_rms_deg": 3.949,
+    "seconds": 6.8
+   },
+   "right_hip_roll": {
+    "joint": "right_hip_roll",
+    "mjcf_lo_deg": -22.0,
+    "mjcf_hi_deg": 22.0,
+    "mjcf_span_deg": 44.0,
+    "reached_max_deg": 21.972,
+    "reached_min_deg": -21.557,
+    "travel_deg": 43.529,
+    "travel_frac_of_mjcf_range": 0.989,
+    "peak_velocity_deg_s": 114.998,
+    "peak_velocity_source": "step to the MJCF hi limit, policy paused",
+    "peak_velocity_at_s": 5.26,
+    "ramp_peak_velocity_deg_s": 41.891,
+    "commanded_ramp_rate_deg_s": 34.558,
+    "overshoot_past_hi_deg": 0.0,
+    "overshoot_past_lo_deg": 0.0,
+    "tracking_rms_deg": 2.96,
+    "seconds": 6.8
+   },
+   "right_hip_pitch": {
+    "joint": "right_hip_pitch",
+    "mjcf_lo_deg": -90.0,
+    "mjcf_hi_deg": 90.0,
+    "mjcf_span_deg": 180.0,
+    "reached_max_deg": 90.316,
+    "reached_min_deg": -89.644,
+    "travel_deg": 179.96,
+    "travel_frac_of_mjcf_range": 1.0,
+    "peak_velocity_deg_s": 435.422,
+    "peak_velocity_source": "step to the MJCF hi limit, policy paused",
+    "peak_velocity_at_s": 5.24,
+    "ramp_peak_velocity_deg_s": 180.219,
+    "commanded_ramp_rate_deg_s": 141.372,
+    "overshoot_past_hi_deg": 0.316,
+    "overshoot_past_lo_deg": 0.0,
+    "tracking_rms_deg": 10.699,
+    "seconds": 6.8
+   },
+   "right_knee": {
+    "joint": "right_knee",
+    "mjcf_lo_deg": -90.0,
+    "mjcf_hi_deg": 90.0,
+    "mjcf_span_deg": 180.0,
+    "reached_max_deg": 90.33,
+    "reached_min_deg": -89.598,
+    "travel_deg": 179.929,
+    "travel_frac_of_mjcf_range": 1.0,
+    "peak_velocity_deg_s": 626.71,
+    "peak_velocity_source": "step to the MJCF hi limit, policy paused",
+    "peak_velocity_at_s": 5.24,
+    "ramp_peak_velocity_deg_s": 139.816,
+    "commanded_ramp_rate_deg_s": 141.372,
+    "overshoot_past_hi_deg": 0.33,
+    "overshoot_past_lo_deg": 0.0,
+    "tracking_rms_deg": 13.2,
+    "seconds": 6.8
+   },
+   "right_ankle": {
+    "joint": "right_ankle",
+    "mjcf_lo_deg": -90.0,
+    "mjcf_hi_deg": 90.0,
+    "mjcf_span_deg": 180.0,
+    "reached_max_deg": 90.286,
+    "reached_min_deg": -89.578,
+    "travel_deg": 179.864,
+    "travel_frac_of_mjcf_range": 0.999,
+    "peak_velocity_deg_s": 797.878,
+    "peak_velocity_source": "step to the MJCF hi limit, policy paused",
+    "peak_velocity_at_s": 5.24,
+    "ramp_peak_velocity_deg_s": 139.735,
+    "commanded_ramp_rate_deg_s": 141.372,
+    "overshoot_past_hi_deg": 0.286,
+    "overshoot_past_lo_deg": 0.0,
+    "tracking_rms_deg": 16.457,
+    "seconds": 6.8
+   }
+  }
+ },
+ "squat_directctrl_FAILS": {
+  "rig": "on the floor, physics on, POLICY PAUSED, direct ctrl ramp",
+  "commanded_knee_flexion_deg": 11.459,
+  "verdict": "FAIL - the duck tips over",
+  "max_trunk_tilt_deg": 88.56,
+  "trunk_z_m": {
+   "start": 0.11853,
+   "min": 0.0477,
+   "end": 0.0477
+  },
+  "finding": "standing is not an open-loop pose: with the policy paused, a commanded knee flexion of only 11.459 deg pitches the trunk past the 60 deg fall rule. The squat below therefore runs WITH Pollen's stand policy, driven through its body-z command slot - stated because it is the answer to 'can direct joint targets be used'."
+ },
+ "squat": {
+  "rig": "on the floor, physics on, Pollen BEST_alpha_stand policy RUNNING",
+  "driver": "command slot 9 (body-z) driven 0 -> 0.10 -> 0 twice, raised cosine, period 3.0 s after a 1.0 s lead; every leg joint angle is the policy's own output, not a target we wrote",
+  "cycles": 2,
+  "seconds": 7.0,
+  "trunk_z_m": {
+   "start": 0.11853,
+   "min": 0.09106,
+   "max": 0.11873
+  },
+  "trunk_drop_mm": 27.48,
+  "max_trunk_tilt_deg": 1.45,
+  "fell": false,
+  "joints": {
+   "left_hip_yaw": {
+    "travel_deg": 14.05,
+    "min_deg": -14.056,
+    "max_deg": -0.006,
+    "peak_velocity_deg_s": 28.66
+   },
+   "left_hip_roll": {
+    "travel_deg": 2.656,
+    "min_deg": -7.111,
+    "max_deg": -4.454,
+    "peak_velocity_deg_s": 8.22
+   },
+   "left_hip_pitch": {
+    "travel_deg": 22.34,
+    "min_deg": -28.956,
+    "max_deg": -6.616,
+    "peak_velocity_deg_s": 41.94
+   },
+   "left_knee": {
+    "travel_deg": 55.979,
+    "min_deg": -3.8,
+    "max_deg": 52.179,
+    "peak_velocity_deg_s": 68.6
+   },
+   "left_ankle": {
+    "travel_deg": 34.363,
+    "min_deg": 24.549,
+    "max_deg": 58.912,
+    "peak_velocity_deg_s": 58.65
+   },
+   "right_hip_yaw": {
+    "travel_deg": 13.411,
+    "min_deg": -0.541,
+    "max_deg": 12.869,
+    "peak_velocity_deg_s": 37.34
+   },
+   "right_hip_roll": {
+    "travel_deg": 5.317,
+    "min_deg": 4.245,
+    "max_deg": 9.562,
+    "peak_velocity_deg_s": 10.91
+   },
+   "right_hip_pitch": {
+    "travel_deg": 20.16,
+    "min_deg": 6.094,
+    "max_deg": 26.254,
+    "peak_velocity_deg_s": 35.61
+   },
+   "right_knee": {
+    "travel_deg": 58.394,
+    "min_deg": -55.051,
+    "max_deg": 3.343,
+    "peak_velocity_deg_s": 76.61
+   },
+   "right_ankle": {
+    "travel_deg": 39.719,
+    "min_deg": -61.817,
+    "max_deg": -22.099,
+    "peak_velocity_deg_s": 62.11
+   }
+  }
+ },
+ "leg_lift": {
+  "rig": "hoisted (trunk pinned), policy paused, direct ctrl",
+  "seconds": 9.6,
+  "joints": {
+   "left_hip_yaw": {
+    "travel_deg": 0.005,
+    "min_deg": -0.0,
+    "max_deg": 0.005,
+    "peak_velocity_deg_s": 0.0
+   },
+   "left_hip_roll": {
+    "travel_deg": 10.901,
+    "min_deg": -15.901,
+    "max_deg": -5.0,
+    "peak_velocity_deg_s": 14.86
+   },
+   "left_hip_pitch": {
+    "travel_deg": 48.084,
+    "min_deg": -74.321,
+    "max_deg": -26.237,
+    "peak_velocity_deg_s": 63.54
+   },
+   "left_knee": {
+    "travel_deg": 59.487,
+    "min_deg": -0.283,
+    "max_deg": 59.204,
+    "peak_velocity_deg_s": 78.31
+   },
+   "left_ankle": {
+    "travel_deg": 0.001,
+    "min_deg": 25.954,
+    "max_deg": 25.955,
+    "peak_velocity_deg_s": 0.0
+   },
+   "right_hip_yaw": {
+    "travel_deg": 0.006,
+    "min_deg": -0.005,
+    "max_deg": 0.0,
+    "peak_velocity_deg_s": 0.0
+   },
+   "right_hip_roll": {
+    "travel_deg": 10.901,
+    "min_deg": 5.0,
+    "max_deg": 15.901,
+    "peak_velocity_deg_s": 14.86
+   },
+   "right_hip_pitch": {
+    "travel_deg": 48.087,
+    "min_deg": 26.234,
+    "max_deg": 74.321,
+    "peak_velocity_deg_s": 63.54
+   },
+   "right_knee": {
+    "travel_deg": 59.488,
+    "min_deg": -59.204,
+    "max_deg": 0.284,
+    "peak_velocity_deg_s": 78.31
+   },
+   "right_ankle": {
+    "travel_deg": 0.001,
+    "min_deg": -25.955,
+    "max_deg": -25.954,
+    "peak_velocity_deg_s": 0.0
+   }
+  }
+ },
+ "sitstand_policy": {
+  "source": "out/sim/sitstand_ours_traj.npz",
+  "policy": "BEST_alpha_sitstand.onnx (Pollen)",
+  "joints": {
+   "left_hip_yaw": {
+    "travel_deg": 15.136,
+    "min_deg": -8.903,
+    "max_deg": 6.233,
+    "peak_velocity_deg_s": 163.56
+   },
+   "left_hip_roll": {
+    "travel_deg": 16.711,
+    "min_deg": -5.415,
+    "max_deg": 11.296,
+    "peak_velocity_deg_s": 113.96
+   },
+   "left_hip_pitch": {
+    "travel_deg": 27.918,
+    "min_deg": -46.071,
+    "max_deg": -18.153,
+    "peak_velocity_deg_s": 325.65
+   },
+   "left_knee": {
+    "travel_deg": 75.606,
+    "min_deg": -0.48,
+    "max_deg": 75.126,
+    "peak_velocity_deg_s": 423.63
+   },
+   "left_ankle": {
+    "travel_deg": 42.276,
+    "min_deg": 3.29,
+    "max_deg": 45.566,
+    "peak_velocity_deg_s": 380.21
+   },
+   "right_hip_yaw": {
+    "travel_deg": 16.906,
+    "min_deg": -4.344,
+    "max_deg": 12.562,
+    "peak_velocity_deg_s": 115.96
+   },
+   "right_hip_roll": {
+    "travel_deg": 17.355,
+    "min_deg": -11.901,
+    "max_deg": 5.454,
+    "peak_velocity_deg_s": 166.28
+   },
+   "right_hip_pitch": {
+    "travel_deg": 26.754,
+    "min_deg": 5.262,
+    "max_deg": 32.016,
+    "peak_velocity_deg_s": 372.12
+   },
+   "right_knee": {
+    "travel_deg": 80.144,
+    "min_deg": -79.682,
+    "max_deg": 0.461,
+    "peak_velocity_deg_s": 730.69
+   },
+   "right_ankle": {
+    "travel_deg": 27.961,
+    "min_deg": -32.658,
+    "max_deg": -4.698,
+    "peak_velocity_deg_s": 335.77
+   }
+  }
+ }
+}
