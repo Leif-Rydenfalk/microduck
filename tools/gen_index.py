@@ -99,7 +99,10 @@ SECTIONS = [
         ("docs/SIM-CAPABILITY.html", "Simulation capability", "What the simulation can and cannot do, stated honestly."),
         ("out/verify/mech_dims.json", "Measured dimensions (data)", "Bounding box of all 47 meshes in mm to 4 dp, plus rebuild deviation."),
         ("out/verify/head_analysis.json", "Head conformance (data)", "Scale-free silhouette ratios for the head, and why the verdict is CANNOT DETERMINE."),
-        ("out/stress/matrix.json", "Structural FEA matrix (data)", "Every part × load case × material, with mesh convergence."),
+        ("LOAD-BASIS-CORRECTION.html", "Load basis correction",
+         "The landing case was labelled 3x bodyweight and applied 8.30x. Re-solved at the correct load; the ankle does not yield."),
+        ("out/stress/corrected.json", "Corrected FEA (data)", "Re-solved leg cases at a load basis that survives arithmetic."),
+        ("out/stress/matrix.json", "Structural FEA matrix (data)", "Every part × load case × material. Its landing case is SUPERSEDED — see the correction."),
         ("out/stress/report.json", "Structural FEA — standing case (data)", "The original single-case run."),
     ]),
     ("Project", "How the work is run and reproduced.", [
