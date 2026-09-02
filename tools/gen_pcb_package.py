@@ -591,6 +591,15 @@ def main():
               f'<td>{esc(c)}</td></tr>')
         A('</tbody></table>')
         A(f'<p><strong>Not run.</strong> {esc(tc["not_run"])}</p>')
+        st = tc.get("self_test")
+        if st:
+            A('<h4>The checks, broken on purpose</h4>')
+            A(f'<p><code>{esc(st["command"])}</code>, run {esc(st["read"])}, '
+              f'<strong>exit code {st["exit_code"]}</strong>.</p>')
+            A(f'<p><span class="pass">PCB layer:</span> {esc(st["pcb_layer"])}</p>')
+            A(f'<p><span class="cd">Why it exits {st["exit_code"]}:</span> '
+              f'{esc(st["why_exit_1"])}</p>')
+            A(f'<p>{esc(st["verdict"])}</p>')
     A('<h3>6.4 The fab rules these boards were checked against</h3>')
     for v in quotes["vendors"]:
         A(f'<p><strong>{esc(v["vendor"])}</strong> — <a href="{esc(v["spec_url"])}">'
