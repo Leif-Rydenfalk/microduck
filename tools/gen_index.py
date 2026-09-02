@@ -42,6 +42,12 @@ SECTIONS = [
         ("out/print/PRINT.html", "Print package", "Plate files and the measured filament/time for every printed part."),
         ("BUILD-BOOK.html", "Build book", "The long-form build narrative."),
     ]),
+    ("Sourcing & procurement", "Where every bought part comes from, and what it costs.", [
+        ("SOURCING.html", "Sourcing evidence", "Every bought line: two or more real distributors, tier prices, MOQ, lead time, alternates, and the URL of every page that refused a price."),
+        ("RFQ.html", "Requests for quotation", "One ready-to-send request per supplier, placeholders for the human's contact details. Nothing has been sent."),
+        ("spec/sourcing.json", "Sourcing (data)", "The 32 bought lines both pages are generated from; every price carries its vendor URL and fetch date."),
+        ("docs/production/components.md", "Components at volume (prior lane)", "The prose sourcing pass this data file supersedes."),
+    ]),
     ("Simulation & evidence", "Every claim that has a measurement behind it.", [
         ("SIMULATION.html", "Simulation dossier", "Structural FEA matrix, mesh convergence, material sweep, and the motion-policy runs."),
         ("docs/SIM-CAPABILITY.html", "Simulation capability", "What the simulation can and cannot do, stated honestly."),
@@ -61,6 +67,7 @@ SECTIONS = [
 TOOLS = [
     ("tools/gen_comparison.py", "Builds COMPARISON.html from the measured data."),
     ("tools/gen_index.py", "Builds this index, checking every link."),
+    ("tools/gen_sourcing.py", "Builds SOURCING.html and RFQ.html from spec/sourcing.json; refuses to publish a verdict the data does not support."),
     ("tools/head_analysis.py", "Measures head conformance from silhouettes."),
     ("tools/md2html.py", "Converts the Markdown docs to the shared HTML style."),
     ("sim/mech_dims.py", "Measures every mesh through the FreeCAD kernel."),
