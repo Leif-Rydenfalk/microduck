@@ -155,3 +155,49 @@ every claim in the repo is either measured, cited, or explicitly marked CANNOT D
 5. **MORE DETAIL, EVERYWHERE.** More poses, more joint pictures, more sections,
    more comparisons against the real photographs, more dimensions on every sheet.
    Depth is the deliverable.
+
+## STANDING ORDERS ADDED 2026-09-03 LATE — Leif, verbatim. Four more, all binding.
+
+> Give the microduck these researches to injest and utilize and do research on:
+> https://makerworld.com/en/models/3250889-microduck-robotic-duck-structural-parts-simulation
+> https://github.com/pollen-robotics/microduck_rl/tree/develop/src/mjlab_microduck/robot/microduck/assets
+> and an new image covering the components of the microduck internals. the cad
+> and 3d printable files and stuff should be in these resourches tell it to dive
+> deeply into it
+
+> We have a Chinese guy working on this project and we will work together with
+> all the resources and manufacturing and factories and research on this. We
+> have a factory and 10 engineers to put on this. So just send the documents of
+> what needs to be done. Give it this verbatim.
+
+> it should not run simiulation just once it should iterate and simulate,
+> design, fix, simulate, design, fix, simulate, design fix until it matches
+> exactly the real airtag based on all the research all night never stop it
+> should set its own goal so it never stops. we need this to be a real product.
+> same as with the microduck two real world products and real world results.
+
+> I like the halo dock browser more but the styling of themicroduck more with
+> the white. redesign the microduck repository / document browser to have this
+> same clean sideview i like it a lot. tell the workflows working on this
+
+**What binds every agent from here:**
+
+1. **THE AUDIENCE IS NOW A FACTORY AND TEN ENGINEERS.** Not us. A stranger who
+   watched no measurement being taken must be able to build from the paper. Say
+   per artifact whether it is READY TO BUILD FROM or NOT YET, and put what is
+   not ready at the FRONT, not the back.
+2. **CONVERGE, DO NOT DELIVER ONCE.** "matches exactly" is a MEASURED SCALAR
+   THAT SHRINKS. Every iteration picks the largest delta, changes the design,
+   re-runs the tool that measures it, and records the number before and after.
+   An iteration that makes something worse is a finding: record it and revert.
+   Never loosen a check to make a delta look smaller. The convergence table
+   (`CONVERGENCE.html`, generated from data) is the project's scoreboard.
+   Measured deltas open as of 2026-09-03 23:xx: **28 drawing sheets 0 PASS /
+   28 FAIL** on our own `bin/sheetcheck`; **bom.json 38 rows, ZERO fasteners**
+   against a 145-hole M2 census; **139 CANNOT DETERMINE items** open; the head
+   shell front-to-back geometry vs the product photographs.
+3. **NEVER STOP; SET THE NEXT GOAL YOURSELF.** When a lane lands, start the
+   next on the largest remaining delta without being asked.
+4. **DIVE DEEPLY INTO NEW SOURCES.** Archive the primary page into the repo,
+   pin the commit SHA for anything from a git branch, record the licence and
+   attribution, and diff new geometry mesh-by-mesh against `reference/`.
