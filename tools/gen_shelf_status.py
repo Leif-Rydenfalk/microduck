@@ -490,7 +490,79 @@ def verdict_counts(refs):
     return c
 
 
-def render(refs, totals, before, exit_code, root, recovered_n=0, recoverable_n=0):
+def pass_movement(refs, totals, before, before_doc):
+    """PASS went 19 -> 17. Say WHICH refs moved and why, from the two files.
+
+    A statbar that prints a fall and stops there invites the reader to guess a
+    cause, and the guess ("coverage got worse") is the wrong one here. The
+    before snapshot lists ONLY its not-PASS refs (its own totals say 59 checked
+    and it carries 40 rows), so what can and cannot be named is asymmetric, and
+    this says which is which rather than papering over it:
+
+      * NAMEABLE: refs that were not-PASS then and are PASS now (they are in
+        the before file by name), and refs that are not-PASS now and are NOT in
+        the before file (they were either PASS then or did not exist then).
+      * NOT NAMEABLE: a ref that was PASS then and is PASS now. It is in
+        neither list. Its count follows from the arithmetic and nothing else.
+
+    The arithmetic closes on its own and that is what makes the new-folder count
+    a measurement rather than an assumption: pass_after = pass_before + new_pass
+    + gained - lost, so new_pass is determined, and when new_pass equals the
+    growth in `checked` every folder added since the snapshot is PASS today.
+    """
+    before_notpass = {r["ref"] for r in before_doc.get("refs", [])}
+    now = {r["ref"]: r for r in refs}
+    gained = sorted(r for r, x in now.items()
+                    if x["verdict"] == "PASS" and r in before_notpass)
+    lost = sorted(r for r, x in now.items()
+                  if x["verdict"] != "PASS" and r not in before_notpass)
+    grew = totals["checked"] - before["checked"]
+    new_pass = totals["pass"] - before["pass"] - len(gained) + len(lost)
+    cls = {}
+    for r in lost:
+        key = ", ".join(sorted({x["class"] for x in now[r]["reasons"]})) or "unclassified"
+        cls.setdefault(key, []).append(r)
+    o = ['<div class="note"><b>Where the %d &rarr; %d came from, ref by ref.</b> '
+         'The shelf grew by %d folder%s while this lane worked, and the movement decomposes: '
+         '<code>%d + %d new + %d regained &minus; %d lost = %d</code>. '
+         % (before["pass"], totals["pass"], grew, "" if grew == 1 else "s",
+            before["pass"], new_pass, len(gained), len(lost), totals["pass"])]
+    if new_pass == grew:
+        o.append('<code>new</code> is derived from that identity, not assumed, and it equals '
+                 'the growth in <code>checked</code> exactly &mdash; so every folder added to '
+                 'the shelf since the snapshot is PASS today. ')
+    else:
+        n_bad = abs(grew - new_pass)
+        o.append('<code>new</code> (%d) and the growth in <code>checked</code> (%d) DISAGREE, '
+                 'so at least %d folder%s added since the snapshot %s not PASS, and the fall '
+                 'is NOT fully explained by the shelf growing. '
+                 % (new_pass, grew, n_bad, "" if n_bad == 1 else "s",
+                    "is" if n_bad == 1 else "are"))
+    o.append('<b>Regained (%d)</b>, not-PASS then and PASS now: %s. '
+             % (len(gained), ", ".join("<code>%s</code>" % e(r) for r in gained) or "none"))
+    o.append('<b>Lost (%d)</b>, PASS then and not-PASS now, grouped by the ONLY defect class '
+             'each one carries: ' % len(lost))
+    o.append("; ".join(
+        "%s &mdash; %s" % (", ".join("<code>%s</code>" % e(r) for r in rs), e(k))
+        for k, rs in sorted(cls.items())) or "none")
+    o.append('. ')
+    only_sup = [k for k in cls if k == "superseded_row"]
+    if only_sup:
+        o.append('Every lost ref\u2019s only complaint is a SUPERSEDED LEDGER ROW: another lane '
+                 're-ran a study and appended a newer row, so the earlier row is reported rather '
+                 'than deleted. There is no gap in any of those folders and no measurement was '
+                 'withdrawn &mdash; it is what an append-only ledger costs, and it is the price '
+                 'of being able to prove nobody edited one. ')
+    o.append('<b>What this cannot name</b>, and does not pretend to: a ref that was PASS at the '
+             'snapshot and is PASS now appears in neither file, because the snapshot lists only '
+             'its %d not-PASS refs against %d checked. Only the counts above are measured for '
+             'those.</div>'
+             % (len(before_notpass), before["checked"]))
+    return "".join(o)
+
+
+def render(refs, totals, before, exit_code, root, recovered_n=0, recoverable_n=0,
+           before_doc=None):
     now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
     by_class = {}
     for r in refs:
@@ -627,6 +699,8 @@ def render(refs, totals, before, exit_code, root, recovered_n=0, recoverable_n=0
           'not-PASS %d. After: checked %d, PASS %d, not-PASS %d.</p>'
           % (before["checked"], before["pass"], before["not_pass"],
              totals["checked"], totals["pass"], totals["not_pass"]))
+    if before_doc:
+        A(pass_movement(refs, totals, before, before_doc))
     # WHAT the not-PASS rows are, not just how many. A bare "PASS went down"
     # invites the reader to guess a cause; the composition names it.
     A('<p class="lede">Composition of what is not PASS, by defect class \u2014 one folder can '
@@ -815,12 +889,13 @@ def main(argv=None):
         print("BROKEN INPUT: bin/triad check --all printed no summary line", file=sys.stderr)
         print(text[-2000:], file=sys.stderr)
         return 2
-    before = None
+    before = before_doc = None
     if os.path.exists(a.before):
         try:
-            before = json.load(open(a.before, encoding="utf-8"))["totals"]
+            before_doc = json.load(open(a.before, encoding="utf-8"))
+            before = before_doc["totals"]
         except Exception:                                     # noqa: BLE001
-            before = None
+            before = before_doc = None
 
     doc = {"$what": "the triad shelf's own verdict on every folder in this repo, per ref, "
                     "with the reason the checker gave and the defect class it belongs to",
@@ -899,7 +974,7 @@ def main(argv=None):
         return 1
     os.makedirs(os.path.dirname(a.json), exist_ok=True)
     json.dump(doc, open(a.json, "w", encoding="utf-8"), indent=1)
-    open(a.html, "w", encoding="utf-8").write(render(refs, totals, before, code, a.root, recovered, recoverable))
+    open(a.html, "w", encoding="utf-8").write(render(refs, totals, before, code, a.root, recovered, recoverable, before_doc))
     print("checked %(checked)d  PASS %(pass)d  not-PASS %(not_pass)d" % totals)
     print("wrote", os.path.relpath(a.json, REPO), "and", os.path.relpath(a.html, REPO))
     return code
