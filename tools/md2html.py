@@ -14,6 +14,22 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
 CSS = open(os.path.join(HERE, "doc.css")).read() if os.path.exists(os.path.join(HERE, "doc.css")) else ""
 
+# A Markdown source table can carry ten columns of prose and long URLs. doc.css's
+# `compact` shrinks the type but a cell holding an unbroken 90-character URL still
+# forces the table past the 840 px sheet column, and a printed page has no
+# horizontal scrollbar, so those columns land off the paper. MEASURED on
+# docs/production/components.md, 2026-09-03, with tools/shot_page.py:
+#   data                    -> 2 tables over (9 cols 1173 px, 6 cols 896 px), exit 1
+#   data compact            -> 4 tables over (max 1057 px), exit 1
+#   data compact + this     -> 0 tables over, exit 0
+# Kept here rather than in doc.css because it is a property of MACHINE-CONVERTED
+# Markdown tables, not of the hand-authored ones the stylesheet was written for.
+EXTRA_CSS = """
+  table.data.compact td{overflow-wrap:anywhere}
+  table.data.compact th{overflow-wrap:break-word}
+  table.data.compact td a,table.data.compact td code{word-break:break-all}
+"""
+
 
 def inline(t):
     t = html.escape(t)
@@ -60,8 +76,18 @@ def convert(md, title):
             for r in rows:
                 tds = "".join("<td>%s</td>" % inline(c) for c in r)
                 trs.append("<tr>%s</tr>" % tds)
-            out.append('<div class="tw"><table class="data"><thead><tr>%s</tr></thead><tbody>%s</tbody></table></div>'
-                       % (th, "".join(trs)))
+            # A wide Markdown table overflows the 840 px sheet column. .tw
+            # scrolls it on screen but a printed page or PDF has no scrollbar,
+            # so the columns simply sit outside the paper. doc.css's `compact`
+            # class is the project's answer to that (lane F2, 2026-09-03).
+            # MEASURED on docs/production/components.md, 2026-09-03: at plain
+            # `data` two of its 19 tables were wider than their column (9 cols
+            # 1173 px in 840, 6 cols 896 px in 840) and tools/shot_page.py
+            # exited 1; with `compact` on every table of 5 or more columns all
+            # 19 fit and it exits 0.
+            cls = "data compact" if len(header) >= 5 else "data"
+            out.append('<div class="tw"><table class="%s"><thead><tr>%s</tr></thead><tbody>%s</tbody></table></div>'
+                       % (cls, th, "".join(trs)))
             continue
         # headings
         m = re.match(r"^(#{1,6})\s+(.*)$", ln)
@@ -109,8 +135,8 @@ def convert(md, title):
             '<meta name="viewport" content="width=device-width, initial-scale=1">\n'
             '<title>%s</title>\n'
             '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">\n'
-            '<style>\n%s\n</style>\n</head>\n<body>\n<div class="wrap"><p class="backlink"><a href="RELEASE.html">← Release dossier</a></p>\n%s\n</div>\n</body>\n</html>\n'
-            % (html.escape(title), CSS, body))
+            '<style>\n%s\n%s</style>\n</head>\n<body>\n<div class="wrap"><p class="backlink"><a href="RELEASE.html">← Release dossier</a></p>\n%s\n</div>\n</body>\n</html>\n'
+            % (html.escape(title), CSS, EXTRA_CSS, body))
 
 
 #: A WRAPPED BULLET IS ONE BULLET.

@@ -70,7 +70,7 @@
   and an alternate with the reason it is or is not equivalent. Nothing here is estimated.
   A price nobody read is <b>CANNOT DETERMINE</b>, printed with the URL that refused it.</p>
   <div class="rev">
-    <span>MD-SRC-001 &middot; Rev B</span><span>generated 2026-09-03</span>
+    <span>MD-SRC-001 &middot; Rev C</span><span>generated 2026-09-03</span>
     <span>pages fetched 2026-09-02, 2026-09-03</span>
     <span>source: <code>spec/sourcing.json</code> &rarr; <code>tools/gen_sourcing.py</code></span>
   </div>
@@ -79,13 +79,13 @@
 <div class="statbar">
   <div class="stat"><b>32</b><span>bought lines</span></div>
   <div class="stat"><b>19</b><span>PASS &mdash; two or more shops read</span></div>
-  <div class="stat"><b>12</b><span>CANNOT DETERMINE</span></div>
-  <div class="stat"><b>1</b><span>FAIL &mdash; unbuyable as specified</span></div>
+  <div class="stat"><b>10</b><span>CANNOT DETERMINE</span></div>
+  <div class="stat"><b>3</b><span>FAIL &mdash; unbuyable as specified</span></div>
   <div class="stat"><b>$546.4155</b><span>USD / robot @1, lines graded PASS</span></div>
-  <div class="stat"><b>$40.7700</b><span>readable, but from lines graded FAIL / CD</span></div>
-  <div class="stat"><b>8</b><span>lines with no price at all</span></div>
-  <div class="stat"><b>35</b><span>distinct distributors read (registered domains)</span></div>
-  <div class="stat"><b>40</b><span>pages that refused a price</span></div>
+  <div class="stat"><b>$81.0808</b><span>readable, but from lines graded FAIL / CD</span></div>
+  <div class="stat"><b>5</b><span>lines with no price at all</span></div>
+  <div class="stat"><b>37</b><span>distinct distributors that gave a price (registered domains)</span></div>
+  <div class="stat"><b>57</b><span>pages that refused a price</span></div>
 </div>
 
 <nav class="toc">
@@ -102,7 +102,7 @@
   <div class="card"><h3>Quantity model</h3><p>For N robots the order quantity of a line is qty_per_robot x N. The unit price used is the vendor&#x27;s largest tier whose quantity is &lt;= that order quantity. If the vendor&#x27;s MOQ exceeds the order quantity the MOQ tier price is used and moq_exceeds_need is set.</p></div>
   <div class="card"><h3>No currency is converted</h3><p>Left exactly as the vendor states it. NO FX rate was fetched, so no conversion is performed anywhere. Only USD offers enter the USD roll-up; EUR / GBP / NZD / AUD / INR lines are reported beside it, unconverted.</p></div>
   <div class="card"><h3>An unknown is never zero</h3><p>The roll-up publishes TWO subtotals: the readable subtotal (lines with a read USD price) and the CANNOT DETERMINE list (lines with none). An unknown is NEVER summed as zero.</p></div>
-  <div class="card"><h3>The three verdicts</h3><p>PASS = two or more distributors with a price read on a page, and a unit price determinable at 1 / 100 / 1000 robots. CANNOT DETERMINE = fewer than two read prices, or none. FAIL = the line as specified cannot be bought from anyone (the part does not exist in the maker&#x27;s own catalogue).</p></div>
+  <div class="card"><h3>The three verdicts</h3><p>PASS = two or more DISTRIBUTORS as defined above (distinct registered domains that each gave a price), and a unit price determinable at 1 / 100 / 1000 robots. CANNOT DETERMINE = fewer than two such distributors, or none. FAIL = the line as specified cannot be bought as specified from anyone read - either the part does not exist in the maker&#x27;s own catalogue (B3: the 1 GB / 32 GB Radxa ZERO 3W SKU Pollen names is absent from Radxa&#x27;s own table), or EVERY distributor that gave a price publishes a process rule this line&#x27;s own artwork measurably violates (P1 and P2: minimum copper track 0.1500 mm measured over 879 and 383 segments in the committed .kicad_pcb, against a published 6 mil = 0.1524 mm line/space floor at both OSH Park and AdvancedPCB - short by 0.0024 mm). This second clause was added 2026-09-03 when the custom-PCB lines were priced for the first time; before that the definition had no bucket for &#x27;priced by two, buildable by neither&#x27; and the page would have had to call such a line PASS. A FAIL line&#x27;s readable money is reported OUTSIDE the headline subtotal, never inside it and never as zero.</p></div>
   <div class="card"><h3>The page refuses to publish a verdict it cannot support</h3>
   <p>Before either page is written, <code>selfcheck()</code> re-derives every PASS from the data: two or
   more <i>distinct</i> distributors with a price read, and a price at every quantity. It caught four
@@ -234,8 +234,14 @@ a vendor whose minimum exceeds what one robot needs.</p>
 <td class="n">$546.4155</td><td class="n">$531.5484</td>
 <td class="n">$530.4328</td><td></td></tr>
 <tr class="grouprow"><td colspan="8">Priced, but this document does not grade the line buyable
-&mdash; the flag on each row says why. These 3 lines are shown because their prices were read,
+&mdash; the flag on each row says why. These 6 lines are shown because their prices were read,
 and are kept OUT of the subtotal above.</td></tr>
+<tr><td><a href="#line-P3">P3</a> Banana battery-contact PCB - custom, bare board + contacts</td>
+<td><span class="chip cd">CANNOT DETERMINE</span></td>
+<td class="n">1</td><td>AdvancedPCB / Advanced Circuits (US)</td>
+<td class="n">$33.0000</td><td class="n">$33.0000</td>
+<td class="n">$33.0000</td>
+<td class="sub2">ceiling &mdash; vendor publishes no tier table; MOQ &gt; need</td></tr>
 <tr><td><a href="#line-B3">B3</a> Radxa ZERO 3W single-board computer</td>
 <td><span class="chip rail">FAIL</span></td>
 <td class="n">1</td><td>ALLNET China</td>
@@ -254,18 +260,30 @@ and are kept OUT of the subtotal above.</td></tr>
 <td class="n">$7.9900</td><td class="n">$7.9900</td>
 <td class="n">$7.9900</td>
 <td class="sub2">ceiling &mdash; vendor publishes no tier table; prices ONE of three candidate focal lengths on an FOV that Pollen has not fixed ($7.99 / $9.99 / $11.99); the line is graded CANNOT DETERMINE</td></tr>
-<tr class="totalrow"><td>SUBTOTAL &mdash; 3 lines graded FAIL or CANNOT DETERMINE</td><td></td><td class="n"></td><td></td>
-<td class="n">$40.7700</td><td class="n">$37.0700</td>
-<td class="n">$35.9700</td><td></td></tr>
-<tr class="totalrow"><td>EVERY READABLE USD LINE &mdash; 19 lines</td><td></td><td class="n"></td><td></td>
-<td class="n">$587.1855</td><td class="n">$568.6184</td>
-<td class="n">$566.4028</td><td></td></tr>
+<tr><td><a href="#line-P1">P1</a> Robot HAT - custom PCB, bare board + assembly</td>
+<td><span class="chip rail">FAIL</span></td>
+<td class="n">1</td><td>OSH Park (US)</td>
+<td class="n">$5.0375</td><td class="n">$3.0225</td>
+<td class="n">$3.0225</td>
+<td class="sub2">MOQ &gt; need</td></tr>
+<tr><td><a href="#line-P2">P2</a> imu_to_dxl v2 - custom PCB, bare board + assembly</td>
+<td><span class="chip rail">FAIL</span></td>
+<td class="n">1</td><td>OSH Park (US)</td>
+<td class="n">$2.2733</td><td class="n">$1.3640</td>
+<td class="n">$1.3640</td>
+<td class="sub2">MOQ &gt; need</td></tr>
+<tr class="totalrow"><td>SUBTOTAL &mdash; 6 lines graded FAIL or CANNOT DETERMINE</td><td></td><td class="n"></td><td></td>
+<td class="n">$81.0808</td><td class="n">$74.4565</td>
+<td class="n">$73.3565</td><td></td></tr>
+<tr class="totalrow"><td>EVERY READABLE USD LINE &mdash; 22 lines</td><td></td><td class="n"></td><td></td>
+<td class="n">$627.4964</td><td class="n">$606.0049</td>
+<td class="n">$603.7893</td><td></td></tr>
 </tbody></table></div>
 
 <p class="note"><b>Why the table has three totals and not one.</b> A price being readable does not make the
-line buyable. 3 of the 19 priced lines are graded FAIL or CANNOT DETERMINE by
-this same document &mdash; <b>$40.7700 of the $587.1855 readable at one robot,
-6.94&nbsp;% of it</b> &mdash; and until 2026-09-03 that money sat inside a single headline
+line buyable. 6 of the 22 priced lines are graded FAIL or CANNOT DETERMINE by
+this same document &mdash; <b>$81.0808 of the $627.4964 readable at one robot,
+12.92&nbsp;% of it</b> &mdash; and until 2026-09-03 that money sat inside a single headline
 subtotal with nothing in the row to say so. It is now split out, and the flag on every such row carries the
 reason from the line&#39;s own record: the wrong SKU, sold out on the fetch date, a part that does not fit
 the cavity, or an unfixed specification.</p>
@@ -305,16 +323,7 @@ from Seeed's @1 to Seeed's 10+ tier. Nothing is blended.</p>
 <tr><td><a href="#line-B18b">B18b</a> M2 socket head cap screws, other lengths (x4, x8, x12) + M2…</td>
 <td class="n">185</td>
 <td>Only ONE distributor rendered a price for these sizes (ModelFixings, GBP inc VAT, 25-piece packs), so the two-distributor bar is not met; the fifth size (M2.5x6) has no price anywhere; and the nut ModelFixings prices is steel BZP, not the A2 stainless the rest of the schedule specifies. The line moved from &#x27;no price at all&#x27; to &#x27;one shop, one currency, four of five sizes&#x27; - which is progress, and is not a price.</td></tr>
-<tr><td><a href="#line-P1">P1</a> Robot HAT - custom PCB, bare board + assembly</td>
-<td class="n">1</td>
-<td>There is nothing to send a fab. A quantity of boards with no Gerbers has no price, and inventing one would put a number in the roll-up that no supplier ever gave.</td></tr>
-<tr><td><a href="#line-P2">P2</a> imu_to_dxl v2 - custom PCB, bare board + assembly</td>
-<td class="n">1</td>
-<td>No design, and two of its three chips are unidentified.</td></tr>
-<tr><td><a href="#line-P3">P3</a> Banana battery-contact PCB - custom, bare board + contacts</td>
-<td class="n">1</td>
-<td>Shape and contacts unknown; nothing to quote.</td></tr>
-<tr class="totalrow"><td>CANNOT DETERMINE SUBTOTAL &mdash; 8 lines</td><td class="n"></td>
+<tr class="totalrow"><td>CANNOT DETERMINE SUBTOTAL &mdash; 5 lines</td><td class="n"></td>
 <td>Not a number. These lines are unpriced, and summing them as zero would state that they are free.</td></tr>
 </tbody></table></div>
 
@@ -322,15 +331,15 @@ from Seeed's @1 to Seeed's 10+ tier. Nothing is blended.</p>
 The subtotal of the lines graded PASS is <b>$546.4155</b> at one robot and <b>$530.4328</b> at a
 thousand &mdash; it moves by $15.9827 across a factor of a thousand in volume,
 because the servos are the majority of it and ROBOTIS publishes no tier at any quantity. A further
-$40.7700 at one robot is readable but comes from 3 line(s) this document grades FAIL
-or CANNOT DETERMINE, and is kept separate. The subtotal excludes 8 unpriced lines
-&mdash; B13 Microphone(s), B15 Camera-in-use indicator LED, B16 Bluetooth gamepad (Xbox-style), B17 USB-C cable, B18b M2 socket head cap screws, other lengths (x4, x8,…, P1 Robot HAT - custom PCB, bare board + assembly, P2 imu_to_dxl v2 - custom PCB, bare board + assembly and P3 Banana battery-contact PCB - custom, bare board +… &mdash; and every non-USD line in Table&nbsp;2. It is a floor, not a cost.</p>
+$81.0808 at one robot is readable but comes from 6 line(s) this document grades FAIL
+or CANNOT DETERMINE, and is kept separate. The subtotal excludes 5 unpriced lines
+&mdash; B13 Microphone(s), B15 Camera-in-use indicator LED, B16 Bluetooth gamepad (Xbox-style), B17 USB-C cable and B18b M2 socket head cap screws, other lengths (x4, x8,… &mdash; and every non-USD line in Table&nbsp;2. It is a floor, not a cost.</p>
 </section>
 
 <section id="unknown"><h2><span class="n">3</span> What has no price, and what would settle it</h2>
 <p class="lede">Each of these is a work item with a named next step, not a shrug.</p>
 <ul class="tight">
-<li><b>B13 Microphone(s)</b> &mdash; Nothing about this line is known - not the part, not the type, not the count, not the placement. There is no URL to try because there is no part to look up. Part number, type, count, position and connector: all CANNOT DETERMINE (ce-parts/microduck-mic/component.json).</li><li><b>B15 Camera-in-use indicator LED</b> &mdash; Nothing is known beyond the press kit sentence. A 0603 LED is a five-cent part; the reason this stays open is that its placement is a mechanical and regulatory question (a privacy indicator), not a price question. Part, colour, package, GPIO, mounting: CANNOT DETERMINE.</li><li><b>B16 Bluetooth gamepad (Xbox-style)</b> &mdash; The gamepad is INCLUDED in Pollen&#x27;s $399 retail bundle, so no price for it alone exists on any Pollen page; and the model is unnamed, so no third-party price applies to it. Model: CANNOT DETERMINE.</li><li><b>B17 USB-C cable</b> &mdash; Included in the retail bundle; no separate price and no specification. Length, rating, whether it carries data or power only: CANNOT DETERMINE.</li><li><b>B18b M2 socket head cap screws, other lengths (x4, x8, x12) + M2 nuts + M2.5x6</b> &mdash; Only ONE distributor rendered a price for these sizes (ModelFixings, GBP inc VAT, 25-piece packs), so the two-distributor bar is not met; the fifth size (M2.5x6) has no price anywhere; and the nut ModelFixings prices is steel BZP, not the A2 stainless the rest of the schedule specifies. The line moved from &#x27;no price at all&#x27; to &#x27;one shop, one currency, four of five sizes&#x27; - which is progress, and is not a price. A second distributor: CANNOT DETERMINE - Accu (403), Fastenal (403) and Westfield (JS-only prices) all refused on 2026-09-02. M2.5x6 at any vendor: CANNOT DETERMINE. A2 stainless M2 nuts: ModelFixings prices STEEL BZP nuts; the A2 equivalent was not read. Whether these lengths are right at all: the counts and lengths come from hole-DEPTH inference on the meshes, not from a schedule. RELEASE.html §7 item 4 has this as an open factory blocker.</li><li><b>P1 Robot HAT - custom PCB, bare board + assembly</b> &mdash; There is nothing to send a fab. A quantity of boards with no Gerbers has no price, and inventing one would put a number in the roll-up that no supplier ever gave. Bare-board and turnkey-assembly price at 1 / 100 / 1000: CANNOT DETERMINE until lane D produces Gerbers and a placement BOM.</li><li><b>P2 imu_to_dxl v2 - custom PCB, bare board + assembly</b> &mdash; No design, and two of its three chips are unidentified. Outline, MCU, transceiver, board and assembly price: all CANNOT DETERMINE.</li><li><b>P3 Banana battery-contact PCB - custom, bare board + contacts</b> &mdash; Shape and contacts unknown; nothing to quote. Board outline, contact part, plating, current rating, price: all CANNOT DETERMINE.</li>
+<li><b>B13 Microphone(s)</b> &mdash; Nothing about this line is known - not the part, not the type, not the count, not the placement. There is no URL to try because there is no part to look up. Part number, type, count, position and connector: all CANNOT DETERMINE (ce-parts/microduck-mic/component.json).</li><li><b>B15 Camera-in-use indicator LED</b> &mdash; Nothing is known beyond the press kit sentence. A 0603 LED is a five-cent part; the reason this stays open is that its placement is a mechanical and regulatory question (a privacy indicator), not a price question. Part, colour, package, GPIO, mounting: CANNOT DETERMINE.</li><li><b>B16 Bluetooth gamepad (Xbox-style)</b> &mdash; The gamepad is INCLUDED in Pollen&#x27;s $399 retail bundle, so no price for it alone exists on any Pollen page; and the model is unnamed, so no third-party price applies to it. Model: CANNOT DETERMINE.</li><li><b>B17 USB-C cable</b> &mdash; Included in the retail bundle; no separate price and no specification. Length, rating, whether it carries data or power only: CANNOT DETERMINE.</li><li><b>B18b M2 socket head cap screws, other lengths (x4, x8, x12) + M2 nuts + M2.5x6</b> &mdash; Only ONE distributor rendered a price for these sizes (ModelFixings, GBP inc VAT, 25-piece packs), so the two-distributor bar is not met; the fifth size (M2.5x6) has no price anywhere; and the nut ModelFixings prices is steel BZP, not the A2 stainless the rest of the schedule specifies. The line moved from &#x27;no price at all&#x27; to &#x27;one shop, one currency, four of five sizes&#x27; - which is progress, and is not a price. A second distributor: CANNOT DETERMINE - Accu (403), Fastenal (403) and Westfield (JS-only prices) all refused on 2026-09-02. M2.5x6 at any vendor: CANNOT DETERMINE. A2 stainless M2 nuts: ModelFixings prices STEEL BZP nuts; the A2 equivalent was not read. Whether these lengths are right at all: the counts and lengths come from hole-DEPTH inference on the meshes, not from a schedule. RELEASE.html §7 item 4 has this as an open factory blocker.</li>
 </ul>
 </section>
 
@@ -342,7 +351,7 @@ date, alternates with the equivalence argument, the open questions, and every pa
   <span class="chip pass">PASS</span></h3>
 <p class="meta">Qty per robot 15  &middot; basis: docs/BOM.md row B1; 15 joints in spec/kinematics-all-models.json &middot; <code>part:xl330-m288-t</code></p>
 <p class="meta">MPN <code>XL330-M288-T (ROBOTIS SKU 902-0163-000)</code> &middot; <i>community-derived sub-variant</i>
-  &middot; 4 distinct distributor(s) with a price read</p>
+  &middot; 4 distinct distributor(s) that gave a price</p>
 <p class="note">Pollen never states M288 vs M077 (SPEC.md §5). Both are $23.90 at ROBOTIS intl, so the price line does not depend on it; the gear ratio does.</p>
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
@@ -403,7 +412,7 @@ date, alternates with the equivalence argument, the open questions, and every pa
   <span class="chip pass">PASS</span></h3>
 <p class="meta">Qty per robot 2  &middot; basis: 16 leads needed (15 servos daisy-chained + imu_to_dxl, wiring/CABLES.md rows 1-16) -&gt; 2 packs of 10</p>
 <p class="meta">MPN <code>903-0251-000 (Robot Cable-X3P Convertible 180 mm, 10 pcs)</code> &middot; <i>confirmed at vendor</i>
-  &middot; 2 distinct distributor(s) with a price read</p>
+  &middot; 2 distinct distributor(s) that gave a price</p>
 
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
@@ -442,7 +451,7 @@ date, alternates with the equivalence argument, the open questions, and every pa
   <span class="chip rail">FAIL</span></h3>
 <p class="meta">Qty per robot 1  &middot; basis: docs/BOM.md row B3; one compute board in the head (spec/mesh-placements.json) &middot; <code>part:radxa-zero-3w</code></p>
 <p class="meta">MPN <code>SKU as specified by Pollen (1 GB LPDDR4 / 32 GB eMMC) DOES NOT EXIST</code> &middot; <i>FAIL - the specified configuration is absent from the maker&#x27;s own SKU table</i>
-  &middot; 5 distinct distributor(s) with a price read</p>
+  &middot; 5 distinct distributor(s) that gave a price</p>
 <p class="note">Radxa&#x27;s product brief RAD-DOC-0084 rev 1.10 §7 &#x27;Models and SKU&#x27; (https://dl.radxa.com/zero3/docs/hw/3w/radxa_zero_3w_product_brief.pdf) lists 1GB/none, 1GB/8GB, 2GB/none, 2GB/16GB, 4GB/none, 4GB/32GB, 8GB/none, 8GB/64GB. There is no 1 GB / 32 GB part. Pollen&#x27;s press-kit figure is therefore either a custom Radxa build or a mis-statement of the 1 GB / 8 GB catalogue part (RS107-D1E8H1W15). What settles it: lsblk on a production unit, or Pollen naming the SKU.</p><p class="verdict warn"><b>FAIL</b> &mdash; The line as specified is unbuyable: the 1 GB / 32 GB SKU is not in Radxa&#x27;s catalogue, and every 1 GB variant read on 2026-09-02 was SOLD OUT at every distributor reached. Two distributors did render prices, so the failure is availability and specification - not readability.</p>
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
@@ -514,7 +523,7 @@ date, alternates with the equivalence argument, the open questions, and every pa
   <span class="chip pass">PASS</span></h3>
 <p class="meta">Qty per robot 1  &middot; basis: docs/BOM.md row B4; one pack in the trunk on power_support (docs/PARTS.md row 35) &middot; <code>part:np-f550</code></p>
 <p class="meta">MPN <code>CANNOT DETERMINE - the maker of the fitted pack is unidentified</code> &middot; <i>form factor known, part not</i>
-  &middot; 3 distinct distributor(s) with a price read</p>
+  &middot; 3 distinct distributor(s) that gave a price</p>
 <p class="note">LANE C&#x27;s finding, read 2026-09-02 from ce-parts/np-f550/component.json: &#x27;NP-F550&#x27; names Sony&#x27;s ORIGINAL L-series pack, which Sony rates 1500 mAh / 10.8 Wh. A 2600 mAh &#x27;NP-F550&#x27; is NECESSARILY a third-party pack in Sony&#x27;s shape, and no source names whose. The mesh envelope is 38.6 x 20.6 x 70.8 mm (Pollen&#x27;s np_f970 mesh); Duracell&#x27;s DR5 page states 70 x 38 x 20 mm - consistent to the millimetre. THIS DOES NOT CHANGE THE SOURCING LINE: the shape, the 7.2 V 2S chemistry and the 2600 mAh capacity are what is bought, and the cradle was checked against 38.6 x 20.6 x 70.8. What it changes is that no MPN can be put on a purchase order - only a specification.</p>
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
@@ -576,7 +585,7 @@ date, alternates with the equivalence argument, the open questions, and every pa
   <span class="chip pass">PASS</span></h3>
 <p class="meta">Qty per robot 1  &middot; basis: docs/BOM.md row B6; camera at world (81.4, 0, 251.1), mounted upside down (RELEASE.html §4 step 5) &middot; <code>part:imx219</code></p>
 <p class="meta">MPN <code>Arducam B0183 (representative). The module Pollen fits: CANNOT DETERMINE</code> &middot; <i>representative substitute</i>
-  &middot; 5 distinct distributor(s) with a price read</p>
+  &middot; 5 distinct distributor(s) that gave a price</p>
 
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
@@ -648,7 +657,7 @@ date, alternates with the equivalence argument, the open questions, and every pa
   <span class="chip cd">CANNOT DETERMINE</span></h3>
 <p class="meta">Qty per robot 1  &middot; basis: docs/BOM.md row B7. Zero if B0183/B0103 is bought (both include a lens). &middot; <code>part:microduck-m12-lens</code></p>
 <p class="meta">MPN <code>Arducam M40180H13L (representative). Required FOV: CANNOT DETERMINE</code> &middot; <i>representative substitute; the required focal length is not fixed</i>
-  &middot; 2 distinct distributor(s) with a price read</p>
+  &middot; 2 distinct distributor(s) that gave a price</p>
 <p class="verdict warn"><b>CANNOT DETERMINE</b> &mdash; Downgraded from PASS on 2026-09-03 by the same standard that downgraded B12. Two distributors do carry a price on a real product page, but they price TWO DIFFERENT LENSES and neither is shown to be the right one. (1) Required FOV is CANNOT DETERMINE - Pollen&#x27;s press kit says it is &#x27;still being finalised&#x27; and the only community figure is ~62 deg HFOV (docs/ELECTRONICS-AND-SOFTWARE.md:225, flagged unverified). Both priced lenses are far wider than that: 110 deg (Arducam LN180) and 118 deg (Pi Hut LN007), both measured on a 1/4-inch sensor as the vendor pages state. (2) The Pi Hut part is 20.0000 mm across against Pollen&#x27;s modelled `lens` at 16.9400 mm diameter (out/verify/mech_dims.json) - 3.0600 mm oversize, so it cannot be the modelled part. That leaves ONE candidate lens with one distributor, which is not a sourced line. The UCTRONICS price stays in Table 1 because it was read, and is broken out there as coming from a line this document does not grade buyable. What settles it: Pollen stating the FOV, or a lens measured off a production unit; then this line is one page away from PASS.</p>
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
@@ -687,7 +696,7 @@ date, alternates with the equivalence argument, the open questions, and every pa
   <span class="chip pass">PASS</span></h3>
 <p class="meta">Qty per robot 1  &middot; basis: wiring/CABLES.md row 20; route floor 13.3 mm, cut length 15 mm &middot; <code>part:microduck-camera-module</code></p>
 <p class="meta">MPN <code>22-pin 0.5 mm to 15-pin 1.0 mm FPC camera cable (the Pi-Zero-class part). The ribbon Pollen fits: CANNOT DETERMINE</code> &middot; <i>class identified; exact part and length unknown</i>
-  &middot; 2 distinct distributor(s) with a price read</p>
+  &middot; 2 distinct distributor(s) that gave a price</p>
 <p class="verdict "><b>PASS</b> &mdash; Two distributors now carry a 22-pin 0.5 mm camera ribbon at a read price. The line is PASS on SOURCING and still open on LENGTH, and the two are not the same question: the shortest catalogue part found anywhere is Pimoroni&#x27;s 38 mm SC0004, and our measured route floor is 13.3 mm with a 15 mm cut (wiring/CABLES.md row 20). Every buyable ribbon is at least 2.5x too long, so the head must either absorb ~23 mm of folded flex or a custom-length FFC must be ordered. That is a mechanical finding, not a price one.</p>
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
@@ -726,7 +735,7 @@ date, alternates with the equivalence argument, the open questions, and every pa
   <span class="chip pass">PASS</span></h3>
 <p class="meta">Qty per robot 1  &middot; basis: docs/BOM.md row B9; ToF at world (81.4, 22.4, 249.1), I2C 0x29 on the HAT&#x27;s Stemma J5 &middot; <code>part:vl53l8cx</code></p>
 <p class="meta">MPN <code>VL53L8CX or VL53L5CX - which generation ships is CANNOT DETERMINE (both drivers are vendored in Pollen&#x27;s source)</code> &middot; <i>generation unresolved</i>
-  &middot; 3 distinct distributor(s) with a price read</p>
+  &middot; 3 distinct distributor(s) that gave a price</p>
 
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
@@ -811,7 +820,7 @@ date, alternates with the equivalence argument, the open questions, and every pa
   <span class="chip pass">PASS</span></h3>
 <p class="meta">Qty per robot 11  &middot; basis: docs/PARTS.md / RELEASE.html §4: 2 in trunk_base, 2 per hip side (yaw2roll + bracket) x2, 1 in upper leg x2, 1 in neck_pitch, 2 in yaw_roll_motion = 11 &middot; <code>part:bearing-22x16x4</code></p>
 <p class="meta">MPN <code>MR1622-ZZ (aliases ET2216ZZ, SET2216, A2216, DDA2216(ZZ), 1622ZZ)</code> &middot; <i>designation confirmed from dimensions; Pollen&#x27;s own MPN CANNOT DETERMINE</i>
-  &middot; 2 distinct distributor(s) with a price read</p>
+  &middot; 2 distinct distributor(s) that gave a price</p>
 <p class="note">16 x 22 x 4 is NOT an ISO 67xx/61xxx size (6700 = 10x15x4, 6702 = 15x21x4). SMB Bearings&#x27; drawing ET2216-thin-section-bearing-16x22x4mm.pdf gives SAE52100 chrome steel, pressed-steel cage, static 62 kgf, dynamic 97 kgf, 11 000 rpm.</p>
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
@@ -850,7 +859,7 @@ date, alternates with the equivalence argument, the open questions, and every pa
   <span class="chip pass">PASS</span></h3>
 <p class="meta">Qty per robot 3  &middot; basis: one per ankle bracket (x2) + one mouth hinge in the head (RELEASE.html §4 steps 3 and 5) &middot; <code>part:bearing-15x10x3</code></p>
 <p class="meta">MPN <code>MR6700 open (aliases 61700J1, 61700R, 6700E, 6700; ISO 61700)</code> &middot; <i>designation confirmed from dimensions; width community-measured</i>
-  &middot; 2 distinct distributor(s) with a price read</p>
+  &middot; 2 distinct distributor(s) that gave a price</p>
 <p class="note">6700 / 6700ZZ is 10 x 15 x 4, NOT x3 - VXB, FastEddy and Bearings Direct all list 6700-ZZ as 10x15x4. The 3 mm-wide part is the OPEN MR6700 / ISO 61700. If a shielded 10x15x3 is wanted the designation is 61700-2Z (FAG lists 61700-2Z-HLC).</p>
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
@@ -889,7 +898,7 @@ date, alternates with the equivalence argument, the open questions, and every pa
   <span class="chip cd">CANNOT DETERMINE</span></h3>
 <p class="meta">Qty per robot 1  &middot; basis: docs/BOM.md row B12; one speaker in the head, 70 mm lead to the HAT (wiring/CABLES.md row 18) &middot; <code>part:microduck-speaker</code></p>
 <p class="meta">MPN <code>CANNOT DETERMINE - Pollen&#x27;s mesh is a 12-triangle box, no part number anywhere</code> &middot; <i>unknown; two catalogued substitutes priced</i>
-  &middot; 2 distinct distributor(s) with a price read</p>
+  &middot; 2 distinct distributor(s) that gave a price</p>
 <p class="verdict warn"><b>CANNOT DETERMINE</b> &mdash; Downgraded from PASS by this document&#x27;s own consistency check. The two priced parts are BOTH DigiKey lines, so there is one distributor, not two; the third reading is a different Visaton variant in another currency; and neither priced part FITS - Soberton&#x27;s SPM-2035NU is 39 x 20 x 8.2 mm and Visaton&#x27;s K 28.40 is 40 x 28 x 11.7 mm against a 35 x 25 x 7 mm cavity. No distributor anywhere prices a 35 x 25 x 7 part. Two prices for two parts that do not fit is not a sourced line.</p>
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
@@ -940,7 +949,7 @@ date, alternates with the equivalence argument, the open questions, and every pa
   <span class="chip cd">CANNOT DETERMINE</span></h3>
 <p class="meta">Qty per robot <span class='cdtxt'>CANNOT DETERMINE</span> &middot; basis: UNKNOWN - the press kit says &#x27;Microphones&#x27; (plural); the codec input the community names is Mic3R, which is MONO. Count is unresolved. &middot; <code>part:microduck-mic</code></p>
 <p class="meta">MPN <code>CANNOT DETERMINE</code> &middot; <i>unknown</i>
-  &middot; 0 distinct distributor(s) with a price read</p>
+  &middot; 0 distinct distributor(s) that gave a price</p>
 <p class="verdict warn"><b>CANNOT DETERMINE</b> &mdash; Nothing about this line is known - not the part, not the type, not the count, not the placement. There is no URL to try because there is no part to look up.</p>
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
@@ -955,7 +964,7 @@ date, alternates with the equivalence argument, the open questions, and every pa
   <span class="chip pass">PASS</span></h3>
 <p class="meta">Qty per robot 1  &middot; basis: press kit names one antenna in the head and one in the beak. Nothing in Pollen&#x27;s runtime source mentions NFC (docs/BOM.md B14), so the count of ICs is inferred (one controller drives both antennas through a switch, or there are two). &middot; <code>part:pn7150</code></p>
 <p class="meta">MPN <code>CANNOT DETERMINE which IC ships. Two candidates are fully characterised in ce-parts (both graded PASS there): NXP PN7150 and ST ST25R3916.</code> &middot; <i>candidate set of two</i>
-  &middot; 2 distinct distributor(s) with a price read</p>
+  &middot; 2 distinct distributor(s) that gave a price</p>
 <p class="verdict "><b>PASS</b> &mdash; Two distributors with full read tier tables for EACH candidate. Which candidate is fitted is a separate unknown and is stated as such.</p>
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
@@ -1016,7 +1025,7 @@ date, alternates with the equivalence argument, the open questions, and every pa
   <span class="chip cd">CANNOT DETERMINE</span></h3>
 <p class="meta">Qty per robot 1  &middot; basis: press kit; GPIO not identified</p>
 <p class="meta">MPN <code>CANNOT DETERMINE</code> &middot; <i>unknown</i>
-  &middot; 0 distinct distributor(s) with a price read</p>
+  &middot; 0 distinct distributor(s) that gave a price</p>
 <p class="verdict warn"><b>CANNOT DETERMINE</b> &mdash; Nothing is known beyond the press kit sentence. A 0603 LED is a five-cent part; the reason this stays open is that its placement is a mechanical and regulatory question (a privacy indicator), not a price question.</p>
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
@@ -1031,7 +1040,7 @@ date, alternates with the equivalence argument, the open questions, and every pa
   <span class="chip cd">CANNOT DETERMINE</span></h3>
 <p class="meta">Qty per robot 1  &middot; basis: Pollen ships one with the robot</p>
 <p class="meta">MPN <code>CANNOT DETERMINE</code> &middot; <i>unknown</i>
-  &middot; 1 distinct distributor(s) with a price read</p>
+  &middot; 0 distinct distributor(s) that gave a price &middot; 1 further domain(s) read that gave no price for this part (pollen-robotics.com)</p>
 <p class="verdict warn"><b>CANNOT DETERMINE</b> &mdash; The gamepad is INCLUDED in Pollen&#x27;s $399 retail bundle, so no price for it alone exists on any Pollen page; and the model is unnamed, so no third-party price applies to it.</p>
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
@@ -1056,7 +1065,7 @@ date, alternates with the equivalence argument, the open questions, and every pa
   <span class="chip cd">CANNOT DETERMINE</span></h3>
 <p class="meta">Qty per robot 1  &middot; basis: included with the robot</p>
 <p class="meta">MPN <code>CANNOT DETERMINE</code> &middot; <i>unknown</i>
-  &middot; 0 distinct distributor(s) with a price read</p>
+  &middot; 0 distinct distributor(s) that gave a price</p>
 <p class="verdict warn"><b>CANNOT DETERMINE</b> &mdash; Included in the retail bundle; no separate price and no specification.</p>
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
@@ -1071,7 +1080,7 @@ date, alternates with the equivalence argument, the open questions, and every pa
   <span class="chip pass">PASS</span></h3>
 <p class="meta">Qty per robot 80  &middot; basis: docs/BOM.md §4 buy list - COMMUNITY-DERIVED from hole-fitting on the 47 meshes, NOT a Pollen BOM. Flagged everywhere it appears.</p>
 <p class="meta">MPN <code>DIN 912 / ISO 4762 M2x6 A2</code> &middot; <i>standard</i>
-  &middot; 2 distinct distributor(s) with a price read</p>
+  &middot; 2 distinct distributor(s) that gave a price</p>
 <p class="verdict "><b>PASS</b> &mdash; Two distributors with a read price (RST-Versand DE in EUR with tiers to 100; ModelFixings UK in GBP with tiers to 25). Neither publishes anything above 100 pieces, so the @1000-robot figure is a ceiling, and there is still NO USD price for this line - it does not enter the USD subtotal.</p>
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
@@ -1110,7 +1119,7 @@ date, alternates with the equivalence argument, the open questions, and every pa
   <span class="chip cd">CANNOT DETERMINE</span></h3>
 <p class="meta">Qty per robot 185  &middot; basis: docs/BOM.md §4: M2x4 x60, M2x8 x40, M2x12 x15, M2 nuts x50, M2.5x6 x20 - all COMMUNITY-DERIVED</p>
 <p class="meta">MPN <code>DIN 912 M2x4 / M2x8 / M2x12 A2; DIN 934 M2 nut A2; DIN 912 M2.5x6 A2</code> &middot; <i>standard</i>
-  &middot; 1 distinct distributor(s) with a price read</p>
+  &middot; 1 distinct distributor(s) that gave a price</p>
 <p class="verdict warn"><b>CANNOT DETERMINE</b> &mdash; Only ONE distributor rendered a price for these sizes (ModelFixings, GBP inc VAT, 25-piece packs), so the two-distributor bar is not met; the fifth size (M2.5x6) has no price anywhere; and the nut ModelFixings prices is steel BZP, not the A2 stainless the rest of the schedule specifies. The line moved from &#x27;no price at all&#x27; to &#x27;one shop, one currency, four of five sizes&#x27; - which is progress, and is not a price.</p>
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
@@ -1177,7 +1186,7 @@ date, alternates with the equivalence argument, the open questions, and every pa
   <span class="chip pass">PASS</span></h3>
 <p class="meta">Qty per robot 60  &middot; basis: docs/BOM.md §4 - community-derived; inserts vs tapped plastic on a production part is itself CANNOT DETERMINE</p>
 <p class="meta">MPN <code>M2 x 3.0 mm brass heat-set insert (no single industry designation)</code> &middot; <i>standard class, vendor-specific part</i>
-  &middot; 3 distinct distributor(s) with a price read</p>
+  &middot; 3 distinct distributor(s) that gave a price</p>
 
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
@@ -1227,7 +1236,7 @@ date, alternates with the equivalence argument, the open questions, and every pa
   <span class="chip pass">PASS</span></h3>
 <p class="meta">Qty per robot 0.218295 kg &middot; basis: out/print/slice.json - 218.2946 g summed over every PLA part x its quantity. These are BambuStudio 02.08.02.61&#x27;s OWN filament figures via ce-slice, never derived from volume x density.</p>
 <p class="meta">MPN <code>Bambu Lab PLA Basic, 1.75 mm, 1 kg spool</code> &middot; <i>matches the sliced preset exactly</i>
-  &middot; 2 distinct distributor(s) with a price read</p>
+  &middot; 2 distinct distributor(s) that gave a price</p>
 <p class="note">The slice was run with filament preset &#x27;Bambu PLA Basic @BBL H2S&#x27; on a Bambu Lab H2S. Sourcing a DIFFERENT PLA invalidates the 218.2946 g and 9.935 h figures until re-sliced.</p>
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
@@ -1277,7 +1286,7 @@ date, alternates with the equivalence argument, the open questions, and every pa
   <span class="chip pass">PASS</span></h3>
 <p class="meta">Qty per robot 0.0262028 kg &middot; basis: out/print/slice.json - 26.2028 g summed over the 4 TPU parts. Slicer&#x27;s own figure, preset &#x27;Bambu TPU 85A @BBL H2S&#x27;.</p>
 <p class="meta">MPN <code>Bambu Lab TPU 85A, 1.75 mm, 1 kg spool</code> &middot; <i>matches the sliced preset exactly</i>
-  &middot; 2 distinct distributor(s) with a price read</p>
+  &middot; 2 distinct distributor(s) that gave a price</p>
 <p class="note">Pollen&#x27;s durometer is CANNOT DETERMINE (docs/BOM.md; community says 90-95A). We sliced 85A because that is the preset the H2S resolves; if the real part is 95A the grams change and the sole friction changes.</p>
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
@@ -1316,7 +1325,7 @@ date, alternates with the equivalence argument, the open questions, and every pa
   <span class="chip pass">PASS</span></h3>
 <p class="meta">Qty per robot 1  &middot; basis: one codec on P1, the Robot HAT (docs/ELECTRONICS-AND-SOFTWARE.md) &middot; <code>part:tlv320aic3104</code></p>
 <p class="meta">MPN <code>TLV320AIC3104IRHBR</code> &middot; <i>confirmed</i>
-  &middot; 2 distinct distributor(s) with a price read</p>
+  &middot; 2 distinct distributor(s) that gave a price</p>
 
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
@@ -1352,7 +1361,7 @@ date, alternates with the equivalence argument, the open questions, and every pa
   <span class="chip pass">PASS</span></h3>
 <p class="meta">Qty per robot 1  &middot; basis: one IMU on P2 (docs/ELECTRONICS-AND-SOFTWARE.md; the bus scan expects ID 200) &middot; <code>part:lsm6dsv16x</code></p>
 <p class="meta">MPN <code>LSM6DSV16XTR</code> &middot; <i>confirmed</i>
-  &middot; 2 distinct distributor(s) with a price read</p>
+  &middot; 2 distinct distributor(s) that gave a price</p>
 
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
@@ -1391,7 +1400,7 @@ date, alternates with the equivalence argument, the open questions, and every pa
   <span class="chip pass">PASS</span></h3>
 <p class="meta">Qty per robot 1  &middot; basis: one footprint on P1. Described as DORMANT in RELEASE.html §1 - populated or not is a board decision, so this line may be zero. &middot; <code>part:bmi088</code></p>
 <p class="meta">MPN <code>BMI088</code> &middot; <i>confirmed</i>
-  &middot; 2 distinct distributor(s) with a price read</p>
+  &middot; 2 distinct distributor(s) that gave a price</p>
 
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
@@ -1430,7 +1439,7 @@ date, alternates with the equivalence argument, the open questions, and every pa
   <span class="chip cd">CANNOT DETERMINE</span></h3>
 <p class="meta">Qty per robot 0 <span class='sub2'>(reference line &mdash; arrives inside another purchase)</span> &middot; basis: ZERO per robot: this chip arrives soldered on the Radxa board bought as line B3. Priced here only so a re-spin of the compute board, or a repair, has a number. &middot; <code>part:et7301b</code></p>
 <p class="meta">MPN <code>ET7301B (Radxa&#x27;s U6). Pollen&#x27;s device tree names FUSB302, which is the DRIVER name, not the fitted die (part:fusb302 record.title).</code> &middot; <i>two names, one socket - resolved by lane C in favour of ET7301B on the schematic</i>
-  &middot; 2 distinct distributor(s) with a price read</p>
+  &middot; 2 distinct distributor(s) that gave a price</p>
 <p class="verdict warn"><b>CANNOT DETERMINE</b> &mdash; The part actually fitted (ET7301B) has NO distributor with a readable price: LCSC&#x27;s search returns nothing for ET7301B and DigiKey&#x27;s own ETEK Microelectronics supplier centre lists no ET7301 part (both checked 2026-09-02). The FUSB302BMPX below is fully priced at two distributors, but it is the ALTERNATE, not the fitted part.</p>
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
@@ -1469,7 +1478,7 @@ date, alternates with the equivalence argument, the open questions, and every pa
   <span class="chip pass">PASS</span></h3>
 <p class="meta">Qty per robot 0 <span class='sub2'>(reference line &mdash; arrives inside another purchase)</span> &middot; basis: ZERO per robot. The NP-F550 charger is a separate accessory (line B4 prices it as a shared cost). Priced here so a bespoke charger or dock can be costed. &middot; <code>part:mcp73213</code></p>
 <p class="meta">MPN <code>MCP73213-A6SI/MF (DFN-10 3x3)</code> &middot; <i>family confirmed (part:mcp73213 verdict PASS); the exact option suffix a bespoke charger needs depends on the chosen float voltage (8.2 / 8.4 / 8.7 / 8.8 V)</i>
-  &middot; 2 distinct distributor(s) with a price read</p>
+  &middot; 2 distinct distributor(s) that gave a price</p>
 
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
@@ -1505,7 +1514,7 @@ date, alternates with the equivalence argument, the open questions, and every pa
   <span class="chip cd">CANNOT DETERMINE</span></h3>
 <p class="meta">Qty per robot 0 <span class='sub2'>(reference line &mdash; arrives inside another purchase)</span> &middot; basis: ZERO per robot - it arrives inside the pack bought as line B4. Priced so a bespoke pack can be costed. &middot; <code>part:s-8252</code></p>
 <p class="meta">MPN <code>S-8252 series; exact suffix CANNOT DETERMINE (the series has ~30 detection-voltage options and the fitted pack is unidentified)</code> &middot; <i>series confirmed, option unknown</i>
-  &middot; 2 distinct distributor(s) with a price read</p>
+  &middot; 2 distinct distributor(s) that gave a price</p>
 <p class="verdict warn"><b>CANNOT DETERMINE</b> &mdash; Two distributors now carry the series with full read tier tables - but for TWO DIFFERENT OPTION CODES (-AAX at DigiKey, -AAC at LCSC), and neither is known to be the one inside the pack. Two prices for two parts that are not the part is not two prices for the part. This stays CANNOT DETERMINE until a pack is opened and the die marking read.</p>
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
@@ -1541,7 +1550,7 @@ date, alternates with the equivalence argument, the open questions, and every pa
   <span class="chip pass">PASS</span></h3>
 <p class="meta">Qty per robot 1  &middot; basis: 16 leads x 2 ends = 32 EHR-3 housings and 96 SEH-001T-P0.6 contacts (wiring/CABLES.md rows 1-16, connector column). ALTERNATIVE to line B2, not additional to it.</p>
 <p class="meta">MPN <code>JST EHR-3 (housing) + JST SEH-001T-P0.6 (crimp contact)</code> &middot; <i>confirmed - these are exactly the parts wiring/CABLES.md names</i>
-  &middot; 2 distinct distributor(s) with a price read</p>
+  &middot; 2 distinct distributor(s) that gave a price</p>
 <p class="verdict "><b>PASS</b> &mdash; Two distributors for BOTH parts of the kit, all four tier tables read. LCSC is roughly 2.3-2.4x cheaper than DigiKey on both, which at 32 housings + 96 contacts per robot is $4.35 vs $1.86 of parts - a real difference, and still small beside the wire, the crimp tool and the 96 crimp operations this option adds.</p>
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
@@ -1602,7 +1611,7 @@ date, alternates with the equivalence argument, the open questions, and every pa
   <span class="chip pass">PASS</span></h3>
 <p class="meta">Qty per robot 1  &middot; basis: SHR-04V-S-B x2 (both ends of the 35 mm ToF cable, wiring/CABLES.md row 17); GHR-02V-S x2 (speaker lead, row 18 - the HAT end is CANNOT DETERMINE, so one of the two is provisional)</p>
 <p class="meta">MPN <code>JST SHR-04V-S-B (1.00 mm, 4 pos) + JST GHR-02V-S (1.25 mm, 2 pos)</code> &middot; <i>SH 4-pin confirmed at the HAT&#x27;s J5; the ToF-board end and the HAT speaker end are CANNOT DETERMINE</i>
-  &middot; 2 distinct distributor(s) with a price read</p>
+  &middot; 2 distinct distributor(s) that gave a price</p>
 <p class="verdict "><b>PASS</b> &mdash; Two distributors for both housings, four tier tables read. DigiKey is out of stock on the GHR-02V-S until 16-Dec-2026 and LCSC holds 1,125 - but LCSC is 2.7x dearer on that part, so the two sources are not interchangeable on price or on availability.</p>
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
@@ -1660,49 +1669,170 @@ date, alternates with the equivalence argument, the open questions, and every pa
 
 
 <h3 id="line-P1"><span class="lid">P1</span> Robot HAT - custom PCB, bare board + assembly
-  <span class="chip cd">CANNOT DETERMINE</span></h3>
+  <span class="chip rail">FAIL</span></h3>
 <p class="meta">Qty per robot 1  &middot; basis: one HAT stacked on the Radxa 40-pin header &middot; <code>part:microduck-robot-hat-pcb</code></p>
-<p class="meta">MPN <code>no published design</code> &middot; <i>not a bought part until a design exists</i>
-  &middot; 0 distinct distributor(s) with a price read</p>
-<p class="verdict warn"><b>CANNOT DETERMINE</b> &mdash; There is nothing to send a fab. A quantity of boards with no Gerbers has no price, and inventing one would put a number in the roll-up that no supplier ever gave.</p>
+<p class="meta">MPN <code>microduck_robot_hat (this repository&#x27;s own design; fab package electronics/robot-hat/out/fab/microduck_robot_hat-fab.zip)</code> &middot; <i>in-house design, DRC verdict FAIL - quotable as an outline and stackup, not releasable as artwork</i>
+  &middot; 2 distinct distributor(s) that gave a price &middot; 2 further domain(s) read that gave no price for this part (jlcpcb.com, pcbway.com)</p>
+<p class="note">THE DESIGN EXISTS AND IS IN THIS REPOSITORY. electronics/robot-hat/out/fab/ holds microduck_robot_hat-fab.zip plus the loose Gerbers (F.Cu.GTL, B.Cu.GBL, F/B.Mask, F/B.Silk, F/B.Paste, Edge.Cuts.GKO), PTH.drl and NPTH.drl, positions.csv, bom.csv and the .kicad_pcb. Until 2026-09-03 this line read &#x27;There is nothing to send a fab&#x27; - a refusal the repository itself contradicted, and the reason the largest unknown in the cost model stayed unpriced. Board data below is measured off that .kicad_pcb, not transcribed: 1 759 copper segments (879 at 0.1500 mm, 803 at 0.3000 mm, 61 at 0.8000 mm, 10 at 0.2500 mm, 4 at 0.2000 mm, 2 at 0.4000 mm), 33 vias at 0.800 mm pad / 0.300 mm drill, 64 through-hole pads, 97 drilled holes in all.</p><p class="verdict warn"><b>FAIL</b> &mdash; Two fabs published a price this document could compute for a board of this outline and stackup, and NEITHER WILL BUILD THIS ARTWORK: the minimum copper track is 0.1500 mm, measured over 879 segments in microduck_robot_hat.kicad_pcb, against a published floor of 6 mil = 0.1524 mm at OSH Park and 0.006&quot; at AdvancedPCB - short by 0.0024 mm. The board&#x27;s own DRC is FAIL besides (7 unrouted nets). The bare-board money is therefore readable and is reported outside the headline subtotal; the assembly price is CANNOT DETERMINE. WHAT SETTLES IT: either lane D widens the minimum track to 0.1524 mm and re-routes, or a 4 mil fab quotes it - JLCPCB&#x27;s published 2-layer process accepts 0.10 mm but publishes only a &#x27;From $2.00 / 5 pcs&#x27; floor with no size attached, so the RFQ to JLCPCB in RFQ.html is the instrument that closes this.</p>
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
 <th>Lead time (as printed)</th><th>Stock, on this offer&#39;s own fetch date</th><th>Read?</th></tr></thead>
-<tbody><tr><td colspan="6" class="cdtxt">No offer with a price read on any page.</td></tr></tbody></table></div>
+<tbody><tr>
+  <td>OSH Park (US)<br><span class="sub2"><a href="https://docs.oshpark.com/services/two-layer/">2-Layer Prototype (set of 3) / 2 Layer Medium Run</a></span></td>
+  <td class="n">3+ USD 5.03751, 40+ USD 3.02251</td>
+  <td class="n">3</td>
+  <td>9-12 calendar days (prototype); 12-21 calendar days (medium run)</td>
+  <td>made to order - no stock concept</td>
+  <td><span class="chip pass">read</span> 2026-09-03
+      <div class="sub2">counts as distributor <code>oshpark.com</code></div>
+      <div class="sub2">OSH Park publishes a RATE, not a per-part price, so the number here is that rate times the board&#x27;s own measured area. 2-Layer Prototype: &#x27;$5 per square inch, which includes three copies of your design&#x27; (docs.oshpark.com/services/two-layer/, read 2026-09-03), 63 mil (1.6 mm) nominal, 1 oz copper, ENIG (Gold) to IPC-4552, purple mask, 6 mil (0.1524 mm) minimum trace and space, 10 mil (0.254 mm) minimum drill, minimum board 0.25 in (6.35 mm) square, maximum 16 x 22 in, &#x27;orders ... will ship within 9-12 calendar days&#x27;. 3.022506 sq in x $5.00 = $15.112530 per set of three = $5.037510 per board, and three boards is the smallest order. 2 Layer Medium Run (docs.oshpark.com/services/two-layer-medium-run/, read 2026-09-03): &#x27;$1 per square inch, 100 square inch minimum&#x27;, each design &#x27;ordered in a multiple of 10 boards&#x27;, same stackup and same ENIG, 12-21 calendar days. 100 sq in / 3.022506 sq in = 33.0851 boards, rounded up to a multiple of 10 = 40 boards, so the $1/sq in tier starts at 40 pieces at $3.022506 per board. AREA IS THE BOUNDING RECTANGLE 65.0000 x 30.0000 mm, which is a CEILING: the routed outline is 1939.24 mm2 (3.005828 sq in) once the corner radii are taken off, and OSH Park does not publish which of the two it bills.</div>
+      </td>
+</tr>
+<tr>
+  <td>AdvancedPCB / Advanced Circuits (US)<br><span class="sub2"><a href="https://www.advancedpcb.com/en-us/33-each-special/">$33 Each Special</a></span></td>
+  <td class="n">3+ USD 33</td>
+  <td class="n">3</td>
+  <td>&#x27;Lead Time 5 Days&#x27;</td>
+  <td>made to order - no stock concept</td>
+  <td><span class="chip pass">read</span> 2026-09-03
+      <div class="sub2">counts as distributor <code>advancedpcb.com</code></div>
+      <div class="sub2">&#x27;$33 Each Special&#x27; on &#x27;ORDER 3 OR MORE BOARDS&#x27;, flat per board regardless of size: &#x27;2-Layers, FR-4, 0.062&quot;, 1 Ounce Finished Copper&#x27;, &#x27;Lead free HAL (AdvancedPCB May Also Use Other Lead-Free Finishes Such As ENIG Or Silver At No Additional Charge)&#x27;, &#x27;Green LPI Mask&#x27;, &#x27;White Legend (1 Or 2 Sides)&#x27;, &#x27;Maximum Size 60 Sq. Inches&#x27;. Restrictions read the same day: &#x27;Minimum 0.006&quot; Line/Space&#x27;, &#x27;Minimum 0.010&quot; Hole Size&#x27;, &#x27;Maximum 35 Drilled Holes Per Square Inch&#x27;, &#x27;No Slots (Or Overlapping Drill Hits)&#x27;, &#x27;No Internal Routing (Cutouts)&#x27;, &#x27;No Scoring, Tab Rout, Or Drilled Hole Board Separations&#x27;, &#x27;Does Not Include Blind/Buried Vias&#x27;, and &#x27;$50 Lot Charge For Multiple Images Or Step &amp; Repeat&#x27;. This board measures 3.022506 sq in (inside 60) and 32.0926 drilled holes per square inch (inside 35). NO VOLUME TIER IS PUBLISHED, so $33.00 is carried unchanged to 100 and 1 000 pieces as a CEILING - at those quantities this is a quotation to ask for, not a price to budget. THE ARTWORK DOES NOT MEET THIS SPECIAL: minimum copper track 0.1500 mm = 0.005906&quot;, under the published 0.006&quot; line/space. The price is recorded for the outline; the order would be refused as drawn.</div>
+      <div class="flag">no tier table published &mdash; @1 is a ceiling</div></td>
+</tr>
+<tr>
+  <td>JLCPCB (CN)<br><span class="sub2"><a href="https://jlcpcb.com/">FR-4 2-layer prototype</a></span></td>
+  <td class="n"><span class='cdtxt'>no price read</span></td>
+  <td class="n">5</td>
+  <td>&#x27;Build Time: 24 hours&#x27;</td>
+  <td>made to order - no stock concept</td>
+  <td><span class="chip pass">read</span> 2026-09-03
+      <div class="sub2">counts as distributor <code>jlcpcb.com</code></div>
+      <div class="sub2">READ, BUT NOT A PRICE FOR THIS BOARD. The home page prints &#x27;From $2.00 / 5 pcs&#x27; for FR-4 with &#x27;Build Time: 24 hours&#x27; and &#x27;PCB Assembly From $8.00&#x27;. Both are FLOORS with no board size, layer count or finish attached, and the quote engine that would attach them is JavaScript that WebFetch does not run. `tiers` is therefore EMPTY and this offer counts toward no distributor total. It is recorded because JLCPCB is the only fab read on this line whose published 2-layer process accepts the artwork: &#x27;0.10 / 0.10 mm (4 / 4 mil)&#x27; track/space at 1 oz, plated hole &#x27;0.15 - 6.3 mm&#x27;, minimum board &#x27;3 x 3 mm&#x27;, thicknesses &#x27;0.4/0.6/0.8/1.0/1.2/1.6/2.0 mm&#x27;, finishes &#x27;HASL (leaded / lead-free), ENIG, OSP&#x27; (jlcpcb.com/capabilities/pcb-capabilities, re-read 2026-09-03). Assembly of this board&#x27;s 28 parts / 21 nets against the shipped bom.csv is a separate CANNOT DETERMINE - &#x27;$8.00&#x27; is a floor for somebody else&#x27;s board.</div>
+      </td>
+</tr>
+<tr>
+  <td>PCBWay (CN)<br><span class="sub2"><a href="https://www.pcbway.com/">1-2 layer prototype</a></span></td>
+  <td class="n"><span class='cdtxt'>no price read</span></td>
+  <td class="n">10</td>
+  <td>&#x27;Build Time:24 hours&#x27;</td>
+  <td>made to order - no stock concept</td>
+  <td><span class="chip pass">read</span> 2026-09-03
+      <div class="sub2">counts as distributor <code>pcbway.com</code></div>
+      <div class="sub2">READ, BUT NOT A PRICE FOR THIS BOARD. The home page prints &#x27;$ 5.00  10 pcs  1-2 layer&#x27; with &#x27;Build Time:24 hours&#x27;, and &#x27;$ 29 free shipping for 1-20pcs assembly&#x27;. Neither carries a board size, so neither is a price for a board of this outline; `tiers` is empty and this offer counts toward no distributor total. The instant-quote form at pcbway.com/orderonline.aspx is JavaScript and rendered no number.</div>
+      </td>
+</tr></tbody></table></div>
 
 
-<p class="lab">Open on this line</p><ul class="tight"><li>Bare-board and turnkey-assembly price at 1 / 100 / 1000: CANNOT DETERMINE until lane D produces Gerbers and a placement BOM.</li></ul>
-
+<p class="lab">Open on this line</p><ul class="tight"><li>Turnkey ASSEMBLY price at 3 / 100 / 1000 boards: CANNOT DETERMINE. Both fabs that gave a bare-board price quote bare board only; the two that advertise assembly (JLCPCB &#x27;From $8.00&#x27;, PCBWay &#x27;$29 free shipping for 1-20pcs assembly&#x27;) publish a floor with no BOM attached. A quotation against the shipped bom.csv + positions.csv is the only thing that settles it - that request is drafted in RFQ.html.</li><li>Whether OSH Park bills the bounding rectangle (3.022506 sq in) or the routed outline (3.005828 sq in): CANNOT DETERMINE - neither service page says. The bounding rectangle is used here, so every OSH Park number on this line is a CEILING by at most $0.0834 per set of three.</li><li>Surcharge to hold 0.1500 mm track on a 6 mil process, if any fab will: CANNOT DETERMINE - no fab publishes one.</li></ul>
+<p class="lab">Pages that refused a price</p><ul class="tight small"><li><a href="https://www.pcbway.com/orderonline.aspx">https://www.pcbway.com/orderonline.aspx</a> &mdash; instant-quote form is JavaScript; the fetched page text carries no price (tried 2026-09-03)</li><li><a href="https://www.seeedstudio.com/fusion_pcb.html">https://www.seeedstudio.com/fusion_pcb.html</a> &mdash; every cost field renders as &#x27;USD$0.00&#x27; until Gerbers are uploaded; no price in the page text (tried 2026-09-03)</li><li><a href="https://aisler.net/pricing">https://aisler.net/pricing</a> &mdash; HTTP 404 (tried 2026-09-03)</li><li><a href="https://aisler.net/en/products/boards">https://aisler.net/en/products/boards</a> &mdash; publishes only &#x27;Starting at just EUR 14.20&#x27; - no per-area rate, no quantity, no spec (tried 2026-09-03)</li><li><a href="https://aisler.net/help/general-information/pricing">https://aisler.net/help/general-information/pricing</a> &mdash; HTTP 301 to community.aisler.net (tried 2026-09-03)</li><li><a href="https://jlcpcb.com/quote">https://jlcpcb.com/quote</a> &mdash; the quote engine is JavaScript; no price is emitted in the fetched HTML (tried 2026-09-03)</li></ul>
 
 <h3 id="line-P2"><span class="lid">P2</span> imu_to_dxl v2 - custom PCB, bare board + assembly
-  <span class="chip cd">CANNOT DETERMINE</span></h3>
+  <span class="chip rail">FAIL</span></h3>
 <p class="meta">Qty per robot 1  &middot; basis: one board on the bus at Dynamixel Protocol-2 slave ID 200 &middot; <code>part:microduck-imu-to-dxl</code></p>
-<p class="meta">MPN <code>no published design</code> &middot; <i>not a bought part until a design exists</i>
-  &middot; 0 distinct distributor(s) with a price read</p>
-<p class="verdict warn"><b>CANNOT DETERMINE</b> &mdash; No design, and two of its three chips are unidentified.</p>
+<p class="meta">MPN <code>microduck_imu_to_dxl (this repository&#x27;s own design; fab package electronics/imu-to-dxl/out/fab/microduck_imu_to_dxl-fab.zip)</code> &middot; <i>in-house design, DRC verdict FAIL - quotable as an outline and stackup, not releasable as artwork</i>
+  &middot; 2 distinct distributor(s) that gave a price &middot; 2 further domain(s) read that gave no price for this part (jlcpcb.com, pcbway.com)</p>
+<p class="note">THE DESIGN EXISTS AND IS IN THIS REPOSITORY: electronics/imu-to-dxl/out/fab/ holds the fab zip, the loose Gerbers, PTH/NPTH drills, positions.csv and bom.csv. Measured off the .kicad_pcb: 590 copper segments (383 at 0.1500 mm, 190 at 0.3000 mm, 9 at 0.4000 mm, 8 at 2.0000 mm), 27 vias (23 at 0.800 mm pad / 0.300 mm drill, 4 at 1.000 mm / 0.300 mm), 11 through-hole pads, 38 drilled holes in all.</p><p class="verdict warn"><b>FAIL</b> &mdash; Same defect as P1 and the same evidence: a bare-board price is readable at two fabs for a board of this outline, and neither will build the artwork - minimum copper track 0.1500 mm over 383 segments against a published 6 mil (0.1524 mm) floor at both, short by 0.0024 mm - and the board&#x27;s own DRC is FAIL with three unrouted nets. Assembly price CANNOT DETERMINE. WHAT SETTLES IT: a 0.1524 mm re-route, or a quotation from a 4 mil fab; the request is drafted in RFQ.html.</p>
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
 <th>Lead time (as printed)</th><th>Stock, on this offer&#39;s own fetch date</th><th>Read?</th></tr></thead>
-<tbody><tr><td colspan="6" class="cdtxt">No offer with a price read on any page.</td></tr></tbody></table></div>
+<tbody><tr>
+  <td>OSH Park (US)<br><span class="sub2"><a href="https://docs.oshpark.com/services/two-layer/">2-Layer Prototype (set of 3) / 2 Layer Medium Run</a></span></td>
+  <td class="n">3+ USD 2.27334, 80+ USD 1.364</td>
+  <td class="n">3</td>
+  <td>9-12 calendar days (prototype); 12-21 calendar days (medium run)</td>
+  <td>made to order - no stock concept</td>
+  <td><span class="chip pass">read</span> 2026-09-03
+      <div class="sub2">counts as distributor <code>oshpark.com</code></div>
+      <div class="sub2">OSH Park publishes a RATE, not a per-part price, so the number here is that rate times the board&#x27;s own measured area. 2-Layer Prototype: &#x27;$5 per square inch, which includes three copies of your design&#x27; (docs.oshpark.com/services/two-layer/, read 2026-09-03), 63 mil (1.6 mm) nominal, 1 oz copper, ENIG (Gold) to IPC-4552, purple mask, 6 mil (0.1524 mm) minimum trace and space, 10 mil (0.254 mm) minimum drill, minimum board 0.25 in (6.35 mm) square, maximum 16 x 22 in, &#x27;orders ... will ship within 9-12 calendar days&#x27;. 1.364003 sq in x $5.00 = $6.820014 per set of three = $2.273338 per board, and three boards is the smallest order. 2 Layer Medium Run (docs.oshpark.com/services/two-layer-medium-run/, read 2026-09-03): &#x27;$1 per square inch, 100 square inch minimum&#x27;, each design &#x27;ordered in a multiple of 10 boards&#x27;, same stackup and same ENIG, 12-21 calendar days. 100 sq in / 1.364003 sq in = 73.3136 boards, rounded up to a multiple of 10 = 80 boards, so the $1/sq in tier starts at 80 pieces at $1.364003 per board. AREA IS THE BOUNDING RECTANGLE 40.0000 x 22.0000 mm, which is a CEILING: the routed outline is 876.49 mm2 (1.358562 sq in) once the corner radii are taken off, and OSH Park does not publish which of the two it bills.</div>
+      </td>
+</tr>
+<tr>
+  <td>AdvancedPCB / Advanced Circuits (US)<br><span class="sub2"><a href="https://www.advancedpcb.com/en-us/33-each-special/">$33 Each Special</a></span></td>
+  <td class="n">3+ USD 33</td>
+  <td class="n">3</td>
+  <td>&#x27;Lead Time 5 Days&#x27;</td>
+  <td>made to order - no stock concept</td>
+  <td><span class="chip pass">read</span> 2026-09-03
+      <div class="sub2">counts as distributor <code>advancedpcb.com</code></div>
+      <div class="sub2">&#x27;$33 Each Special&#x27; on &#x27;ORDER 3 OR MORE BOARDS&#x27;, flat per board regardless of size: &#x27;2-Layers, FR-4, 0.062&quot;, 1 Ounce Finished Copper&#x27;, &#x27;Lead free HAL (AdvancedPCB May Also Use Other Lead-Free Finishes Such As ENIG Or Silver At No Additional Charge)&#x27;, &#x27;Green LPI Mask&#x27;, &#x27;White Legend (1 Or 2 Sides)&#x27;, &#x27;Maximum Size 60 Sq. Inches&#x27;. Restrictions read the same day: &#x27;Minimum 0.006&quot; Line/Space&#x27;, &#x27;Minimum 0.010&quot; Hole Size&#x27;, &#x27;Maximum 35 Drilled Holes Per Square Inch&#x27;, &#x27;No Slots (Or Overlapping Drill Hits)&#x27;, &#x27;No Internal Routing (Cutouts)&#x27;, &#x27;No Scoring, Tab Rout, Or Drilled Hole Board Separations&#x27;, &#x27;Does Not Include Blind/Buried Vias&#x27;, and &#x27;$50 Lot Charge For Multiple Images Or Step &amp; Repeat&#x27;. This board measures 1.364003 sq in (inside 60) and 27.8592 drilled holes per square inch (inside 35). NO VOLUME TIER IS PUBLISHED, so $33.00 is carried unchanged to 100 and 1 000 pieces as a CEILING - at those quantities this is a quotation to ask for, not a price to budget. THE ARTWORK DOES NOT MEET THIS SPECIAL: minimum copper track 0.1500 mm = 0.005906&quot;, under the published 0.006&quot; line/space.</div>
+      <div class="flag">no tier table published &mdash; @1 is a ceiling</div></td>
+</tr>
+<tr>
+  <td>JLCPCB (CN)<br><span class="sub2"><a href="https://jlcpcb.com/">FR-4 2-layer prototype</a></span></td>
+  <td class="n"><span class='cdtxt'>no price read</span></td>
+  <td class="n">5</td>
+  <td>&#x27;Build Time: 24 hours&#x27;</td>
+  <td>made to order - no stock concept</td>
+  <td><span class="chip pass">read</span> 2026-09-03
+      <div class="sub2">counts as distributor <code>jlcpcb.com</code></div>
+      <div class="sub2">READ, BUT NOT A PRICE FOR THIS BOARD. The home page prints &#x27;From $2.00 / 5 pcs&#x27; for FR-4 with &#x27;Build Time: 24 hours&#x27; and &#x27;PCB Assembly From $8.00&#x27;. Both are FLOORS with no board size, layer count or finish attached, and the quote engine that would attach them is JavaScript that WebFetch does not run. `tiers` is therefore EMPTY and this offer counts toward no distributor total. It is recorded because JLCPCB is the only fab read on this line whose published 2-layer process accepts the artwork: &#x27;0.10 / 0.10 mm (4 / 4 mil)&#x27; track/space at 1 oz, plated hole &#x27;0.15 - 6.3 mm&#x27;, minimum board &#x27;3 x 3 mm&#x27;, thicknesses &#x27;0.4/0.6/0.8/1.0/1.2/1.6/2.0 mm&#x27;, finishes &#x27;HASL (leaded / lead-free), ENIG, OSP&#x27; (jlcpcb.com/capabilities/pcb-capabilities, re-read 2026-09-03). Assembly of 24 parts / 17 nets is a separate CANNOT DETERMINE.</div>
+      </td>
+</tr>
+<tr>
+  <td>PCBWay (CN)<br><span class="sub2"><a href="https://www.pcbway.com/">1-2 layer prototype</a></span></td>
+  <td class="n"><span class='cdtxt'>no price read</span></td>
+  <td class="n">10</td>
+  <td>&#x27;Build Time:24 hours&#x27;</td>
+  <td>made to order - no stock concept</td>
+  <td><span class="chip pass">read</span> 2026-09-03
+      <div class="sub2">counts as distributor <code>pcbway.com</code></div>
+      <div class="sub2">READ, BUT NOT A PRICE FOR THIS BOARD. The home page prints &#x27;$ 5.00  10 pcs  1-2 layer&#x27; with &#x27;Build Time:24 hours&#x27;, and &#x27;$ 29 free shipping for 1-20pcs assembly&#x27;. Neither carries a board size, so neither is a price for a board of this outline; `tiers` is empty and this offer counts toward no distributor total. The instant-quote form at pcbway.com/orderonline.aspx is JavaScript and rendered no number.</div>
+      </td>
+</tr></tbody></table></div>
 
 
-<p class="lab">Open on this line</p><ul class="tight"><li>Outline, MCU, transceiver, board and assembly price: all CANNOT DETERMINE.</li></ul>
-
+<p class="lab">Open on this line</p><ul class="tight"><li>Turnkey ASSEMBLY price at 3 / 100 / 1000 boards: CANNOT DETERMINE - no fab quoted a BOM, only floors.</li><li>Two of the three chips on this board are still unidentified (MCU and half-duplex transceiver); the LSM6DSV16X is priced separately as line P2c. An assembly quotation cannot be firm until they are named.</li><li>Whether OSH Park bills the bounding rectangle (1.364003 sq in) or the routed outline (1.358562 sq in): CANNOT DETERMINE - the bounding rectangle is used, so the OSH Park numbers are a CEILING.</li></ul>
+<p class="lab">Pages that refused a price</p><ul class="tight small"><li><a href="https://www.pcbway.com/orderonline.aspx">https://www.pcbway.com/orderonline.aspx</a> &mdash; instant-quote form is JavaScript; the fetched page text carries no price (tried 2026-09-03)</li><li><a href="https://www.seeedstudio.com/fusion_pcb.html">https://www.seeedstudio.com/fusion_pcb.html</a> &mdash; every cost field renders as &#x27;USD$0.00&#x27; until Gerbers are uploaded; no price in the page text (tried 2026-09-03)</li><li><a href="https://aisler.net/pricing">https://aisler.net/pricing</a> &mdash; HTTP 404 (tried 2026-09-03)</li><li><a href="https://aisler.net/en/products/boards">https://aisler.net/en/products/boards</a> &mdash; publishes only &#x27;Starting at just EUR 14.20&#x27; - no per-area rate, no quantity, no spec (tried 2026-09-03)</li><li><a href="https://aisler.net/help/general-information/pricing">https://aisler.net/help/general-information/pricing</a> &mdash; HTTP 301 to community.aisler.net (tried 2026-09-03)</li></ul>
 
 <h3 id="line-P3"><span class="lid">P3</span> Banana battery-contact PCB - custom, bare board + contacts
   <span class="chip cd">CANNOT DETERMINE</span></h3>
 <p class="meta">Qty per robot 1  &middot; basis: one board clamped onto power_support&#x27;s pins by banana_pcb_locker (RELEASE.html §4 step 1)</p>
-<p class="meta">MPN <code>no published design</code> &middot; <i>not a bought part until a design exists</i>
-  &middot; 0 distinct distributor(s) with a price read</p>
-<p class="verdict warn"><b>CANNOT DETERMINE</b> &mdash; Shape and contacts unknown; nothing to quote.</p>
+<p class="meta">MPN <code>microduck_banana_contact (this repository&#x27;s own design; fab package electronics/banana-contact/out/fab/microduck_banana_contact-fab.zip)</code> &middot; <i>in-house design, DRC verdict CANNOT DETERMINE - the outline and stackup are quotable, the contact part is not</i>
+  &middot; 1 distinct distributor(s) that gave a price &middot; 2 further domain(s) read that gave no price for this part (jlcpcb.com, pcbway.com)</p>
+<p class="note">THE OUTLINE IS NOT UNKNOWN. Measured off Edge.Cuts.GKO / the .kicad_pcb in electronics/banana-contact/out/fab/: a single closed rounded rectangle 45.8000 x 4.6000 mm, corner radius 0.5000 mm, no internal cut-outs, three 0.8000 mm plated holes, copper tracks 0.4000 mm (1) and 1.5000 mm (2). Until 2026-09-03 this line said &#x27;Board outline, contact part, plating, current rating, price: all CANNOT DETERMINE&#x27;; three of those five were already answered on disk. PLATING is ENIG and the board&#x27;s own fab README says why - &#x27;A sliding spring contact on a HASL pad cold-flows and oxidises&#x27; - and JLCPCB publishes ENIG as an order option on this process. CURRENT CAPACITY is 3.21 A at a 10 degC rise (4.35 A at 20 degC) for the two 1.500 mm tracks on 1 oz outer copper, by IPC-2221 6.2 I = 0.048*dT^0.44*A^0.725; it is the current DEMAND that is CANNOT DETERMINE, because Sony publishes no maximum continuous discharge for the NP-F pack and wiring/CABLES.md&#x27;s 1 A-per-moving-servo worst case is stated there as an assumption.</p><p class="verdict warn"><b>CANNOT DETERMINE</b> &mdash; The bare board is now priced, but at ONE distributor, not two: AdvancedPCB&#x27;s $33 Each Special covers it (0.326555 sq in inside the 60 sq in cap, 9.1868 drilled holes per square inch inside the 35 cap, 0.4000 mm track over the 0.006&quot; floor, 0.8000 mm hole over the 0.010&quot; floor, no slots, no internal routing), and OSH Park REFUSES it on a measured rule - the board is 4.6000 mm across its short axis and both OSH Park service pages publish a minimum board size of 0.25 in (6.35 mm) by 0.25 in, so it is short by 1.7500 mm. AdvancedPCB will not GUARANTEE the required ENIG either: its special states lead-free HAL and says it &#x27;May Also Use Other Lead-Free Finishes Such As ENIG Or Silver At No Additional Charge&#x27;, which is permission, not a specification. The spring contact itself has no part number at all. WHAT SETTLES IT: a quotation from a fab that will run a 4.6 mm board (or price the array) with ENIG named on the order - JLCPCB&#x27;s published minimum board size is 3 x 3 mm and it lists ENIG on this process, so its RFQ closes both halves - and a caliper across a physical NP-F550 pack to fix the contact pitch, which is derived from a 12.000 mm window divided into three cells and is measured nowhere.</p>
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
 <th>Lead time (as printed)</th><th>Stock, on this offer&#39;s own fetch date</th><th>Read?</th></tr></thead>
-<tbody><tr><td colspan="6" class="cdtxt">No offer with a price read on any page.</td></tr></tbody></table></div>
+<tbody><tr>
+  <td>AdvancedPCB / Advanced Circuits (US)<br><span class="sub2"><a href="https://www.advancedpcb.com/en-us/33-each-special/">$33 Each Special</a></span></td>
+  <td class="n">3+ USD 33</td>
+  <td class="n">3</td>
+  <td>&#x27;Lead Time 5 Days&#x27;</td>
+  <td>made to order - no stock concept</td>
+  <td><span class="chip pass">read</span> 2026-09-03
+      <div class="sub2">counts as distributor <code>advancedpcb.com</code></div>
+      <div class="sub2">&#x27;$33 Each Special&#x27; on &#x27;ORDER 3 OR MORE BOARDS&#x27;, flat per board regardless of size: &#x27;2-Layers, FR-4, 0.062&quot;, 1 Ounce Finished Copper&#x27;, &#x27;Lead free HAL (AdvancedPCB May Also Use Other Lead-Free Finishes Such As ENIG Or Silver At No Additional Charge)&#x27;, &#x27;Green LPI Mask&#x27;, &#x27;White Legend (1 Or 2 Sides)&#x27;, &#x27;Maximum Size 60 Sq. Inches&#x27;. Restrictions read the same day: &#x27;Minimum 0.006&quot; Line/Space&#x27;, &#x27;Minimum 0.010&quot; Hole Size&#x27;, &#x27;Maximum 35 Drilled Holes Per Square Inch&#x27;, &#x27;No Slots (Or Overlapping Drill Hits)&#x27;, &#x27;No Internal Routing (Cutouts)&#x27;, &#x27;No Scoring, Tab Rout, Or Drilled Hole Board Separations&#x27;, &#x27;Does Not Include Blind/Buried Vias&#x27;, and &#x27;$50 Lot Charge For Multiple Images Or Step &amp; Repeat&#x27;. This board measures 0.326555 sq in (inside 60) and 9.1868 drilled holes per square inch (inside 35). NO VOLUME TIER IS PUBLISHED, so $33.00 is carried unchanged to 100 and 1 000 pieces as a CEILING - at those quantities this is a quotation to ask for, not a price to budget. This board CLEARS every published restriction of the special. What it does not get is the ENIG this board requires: the special specifies lead-free HAL and only permits ENIG at the fab&#x27;s option.</div>
+      <div class="flag">no tier table published &mdash; @1 is a ceiling</div></td>
+</tr>
+<tr>
+  <td>JLCPCB (CN)<br><span class="sub2"><a href="https://jlcpcb.com/">FR-4 2-layer prototype</a></span></td>
+  <td class="n"><span class='cdtxt'>no price read</span></td>
+  <td class="n">5</td>
+  <td>&#x27;Build Time: 24 hours&#x27;</td>
+  <td>made to order - no stock concept</td>
+  <td><span class="chip pass">read</span> 2026-09-03
+      <div class="sub2">counts as distributor <code>jlcpcb.com</code></div>
+      <div class="sub2">READ, BUT NOT A PRICE FOR THIS BOARD. The home page prints &#x27;From $2.00 / 5 pcs&#x27; for FR-4 with &#x27;Build Time: 24 hours&#x27; and &#x27;PCB Assembly From $8.00&#x27;. Both are FLOORS with no board size, layer count or finish attached, and the quote engine that would attach them is JavaScript that WebFetch does not run. `tiers` is therefore EMPTY and this offer counts toward no distributor total. It is recorded because JLCPCB is the only fab read on this line whose published 2-layer process accepts the artwork: &#x27;0.10 / 0.10 mm (4 / 4 mil)&#x27; track/space at 1 oz, plated hole &#x27;0.15 - 6.3 mm&#x27;, minimum board &#x27;3 x 3 mm&#x27;, thicknesses &#x27;0.4/0.6/0.8/1.0/1.2/1.6/2.0 mm&#x27;, finishes &#x27;HASL (leaded / lead-free), ENIG, OSP&#x27; (jlcpcb.com/capabilities/pcb-capabilities, re-read 2026-09-03). JLCPCB&#x27;s published minimum board size is &#x27;3 x 3 mm&#x27;, so unlike OSH Park it does not refuse a 4.6000 mm-wide board, and it lists ENIG on this process.</div>
+      </td>
+</tr>
+<tr>
+  <td>PCBWay (CN)<br><span class="sub2"><a href="https://www.pcbway.com/">1-2 layer prototype</a></span></td>
+  <td class="n"><span class='cdtxt'>no price read</span></td>
+  <td class="n">10</td>
+  <td>&#x27;Build Time:24 hours&#x27;</td>
+  <td>made to order - no stock concept</td>
+  <td><span class="chip pass">read</span> 2026-09-03
+      <div class="sub2">counts as distributor <code>pcbway.com</code></div>
+      <div class="sub2">READ, BUT NOT A PRICE FOR THIS BOARD. The home page prints &#x27;$ 5.00  10 pcs  1-2 layer&#x27; with &#x27;Build Time:24 hours&#x27;, and &#x27;$ 29 free shipping for 1-20pcs assembly&#x27;. Neither carries a board size, so neither is a price for a board of this outline; `tiers` is empty and this offer counts toward no distributor total. The instant-quote form at pcbway.com/orderonline.aspx is JavaScript and rendered no number.</div>
+      </td>
+</tr></tbody></table></div>
 
-
-<p class="lab">Open on this line</p><ul class="tight"><li>Board outline, contact part, plating, current rating, price: all CANNOT DETERMINE.</li></ul>
-
+<div class="tablewrap"><table class="alt">
+<thead><tr><th>Alternate</th><th>Why it is (or is not) equivalent</th><th>Where / price</th></tr></thead>
+<tbody><tr><td><code>NP-F pack spring contact block - no part number</code></td><td>NOT an alternate: there is no identified bought part for the contacts at all. Sony publishes no NP-F terminal drawing, the 4.000 mm pitch on this board is DERIVED (the power_support head plate&#x27;s 12.000 mm window divided into three cells) and footprint P1 is marked UNCONFIRMED in the board&#x27;s own bom.csv. A caliper across a physical pack settles it and nothing else does.</td>
+        <td>&amp;mdash;<div class="sub2">CANNOT DETERMINE - no part, therefore no price</div></td></tr></tbody></table></div>
+<p class="lab">Open on this line</p><ul class="tight"><li>A second fab that will build a 4.6000 mm-wide board AND name ENIG on the order: CANNOT DETERMINE. OSH Park is measured-refused (6.35 mm minimum, short by 1.7500 mm); JLCPCB&#x27;s 3 x 3 mm minimum and ENIG option fit but it publishes no price for this size.</li><li>Array / panel charge for a 45.8 x 4.6 mm board: CANNOT DETERMINE. AdvancedPCB publishes &#x27;$50 Lot Charge For Multiple Images Or Step &amp; Repeat&#x27; but says nothing about a single small board run in an array.</li><li>The spring contact part itself: CANNOT DETERMINE - no manufacturer, no part number, and a contact pitch derived rather than measured.</li><li>Current DEMAND through the two 1.5000 mm tracks: CANNOT DETERMINE. The board&#x27;s CAPACITY is 3.21 A at a 10 degC rise by IPC-2221 6.2; Sony publishes no maximum continuous discharge for the NP-F pack.</li></ul>
+<p class="lab">Pages that refused a price</p><ul class="tight small"><li><a href="https://www.pcbway.com/orderonline.aspx">https://www.pcbway.com/orderonline.aspx</a> &mdash; instant-quote form is JavaScript; the fetched page text carries no price (tried 2026-09-03)</li><li><a href="https://www.seeedstudio.com/fusion_pcb.html">https://www.seeedstudio.com/fusion_pcb.html</a> &mdash; every cost field renders as &#x27;USD$0.00&#x27; until Gerbers are uploaded; no price in the page text (tried 2026-09-03)</li><li><a href="https://aisler.net/pricing">https://aisler.net/pricing</a> &mdash; HTTP 404 (tried 2026-09-03)</li><li><a href="https://aisler.net/en/products/boards">https://aisler.net/en/products/boards</a> &mdash; publishes only &#x27;Starting at just EUR 14.20&#x27; - no per-area rate, no quantity, no spec (tried 2026-09-03)</li><li><a href="https://aisler.net/help/general-information/pricing">https://aisler.net/help/general-information/pricing</a> &mdash; HTTP 301 to community.aisler.net (tried 2026-09-03)</li><li><a href="https://docs.oshpark.com/services/two-layer/">https://docs.oshpark.com/services/two-layer/</a> &mdash; read, and REFUSES this board: &#x27;Minimum board size 0.25in (6.35mm) by 0.25in (6.35mm)&#x27; against this board&#x27;s 4.6000 mm short axis - short by 1.7500 mm. The same minimum is published on docs.oshpark.com/services/two-layer-medium-run/ (both read 2026-09-03)</li></ul>
 
 </section>
 
@@ -1713,16 +1843,23 @@ page answered 403, 402, 500, a closed socket or a body with no price, that URL i
 line so the next attempt starts where this one stopped &mdash; a browser session reads most of them.</p>
 <p class="lab">Every blocked URL on this page, collected</p>
 <ul class="tight small">
-<li><b>B1</b> <a href="https://www.robotshop.com/products/robotis-dynamixel-xl330-m288-t-smart-servo-actuator">https://www.robotshop.com/products/robotis-dynamixel-xl330-m288-t-smart-servo-actuator</a> &mdash; HTTP 403 to the fetcher</li><li><b>B1</b> <a href="https://www.aliexpress.com/i/1005004403336577.html">https://www.aliexpress.com/i/1005004403336577.html</a> &mdash; page body blank to the fetcher</li><li><b>B3</b> <a href="https://www.okdo.com/p/okdo-rock-zero-3w-1gb-with-wi-fi-ble-without-gpio/">https://www.okdo.com/p/okdo-rock-zero-3w-1gb-with-wi-fi-ble-without-gpio/</a> &mdash; &#x27;Socket is closed&#x27; x5 (OKdo is Radxa&#x27;s EU/UK distributor)</li><li><b>B3</b> <a href="https://befr.rs-online.com/web/p/rock-sbc-boards/2564694">https://befr.rs-online.com/web/p/rock-sbc-boards/2564694</a> &mdash; hang / timeout</li><li><b>B4</b> <a href="https://www.bhphotovideo.com/c/product/1733125-REG/neewer_66600244_2_2600mah_f550.html">https://www.bhphotovideo.com/c/product/1733125-REG/neewer_66600244_2_2600mah_f550.html</a> &mdash; HTTP 403</li><li><b>B4</b> <a href="https://www.alibaba.com/product-detail/Beston-2600mAh-replacement-NP-F550-NP_60828272766.html">https://www.alibaba.com/product-detail/Beston-2600mAh-replacement-NP-F550-NP_60828272766.html</a> &mdash; page body blank to the fetcher</li><li><b>B4</b> <a href="https://eu.nkon.nl/rechargeable/li-ion/18650-size/samsung-icr18650-26j3.html">https://eu.nkon.nl/rechargeable/li-ion/18650-size/samsung-icr18650-26j3.html</a> &mdash; HTTP 403</li><li><b>B6</b> <a href="https://www.arducam.com/product/arducam-imx219-low-distortion-m12-mount-camera-module-drop-in-replacement-for-raspberry-pi-v2-camera/">https://www.arducam.com/product/arducam-imx219-low-distortion-m12-mount-camera-module-drop-in-re</a> &mdash; HTTP 403 on every arducam.com URL</li><li><b>B8</b> <a href="https://esp32s.com/product/radxa-camera-fpc-cable-for-radxa-camera-8m-219-and-rpi-camera-for-zero-3w-3e/">https://esp32s.com/product/radxa-camera-fpc-cable-for-radxa-camera-8m-219-and-rpi-camera-for-zer</a> &mdash; HTTP 403 (a search snippet claims $1.90 - NOT read, so not used)</li><li><b>B8</b> <a href="https://www.fabtolab.com/radxa-fpc-cable-zero-3-camera-8m-219-zero-3">https://www.fabtolab.com/radxa-fpc-cable-zero-3-camera-8m-219-zero-3</a> &mdash; Socket is closed</li><li><b>B8</b> <a href="https://docs.radxa.com/en/zero/zero3/accessories/camera">https://docs.radxa.com/en/zero/zero3/accessories/camera</a> &mdash; documentation, carries no price</li><li><b>B9</b> <a href="https://www.mouser.com/ProductDetail/STMicroelectronics/VL53L5CX-SATEL">https://www.mouser.com/ProductDetail/STMicroelectronics/VL53L5CX-SATEL</a> &mdash; timeout x3</li><li><b>B10</b> <a href="https://www.bocabearings.com/parts/10x15x3">https://www.bocabearings.com/parts/10x15x3</a> &mdash; HTTP 403</li><li><b>B10</b> <a href="https://vxb.com/search?q=16x22x4">https://vxb.com/search?q=16x22x4</a> &mdash; 0 bearing results</li><li><b>B10</b> <a href="https://bearingsdirect.com/search.php?search_query=16x22x4">https://bearingsdirect.com/search.php?search_query=16x22x4</a> &mdash; 0 results</li><li><b>B10</b> <a href="http://www.zotyindustrial.com/products/1622ZZ-16x22x4-thin-special-bearing-for-jumping-rope.html">http://www.zotyindustrial.com/products/1622ZZ-16x22x4-thin-special-bearing-for-jumping-rope.html</a> &mdash; HTTP 500 (tried 2026-09-02)</li><li><b>B11</b> <a href="https://www.123bearing.com/bearing-housing/deep-groove-bearing/single-row/6700">https://www.123bearing.com/bearing-housing/deep-groove-bearing/single-row/6700</a> &mdash; no price rendered</li><li><b>B12</b> <a href="https://www.amazon.com/CQRobot-Rectangle-Electronic-Application-Components/dp/B0CMQCQQV4">https://www.amazon.com/CQRobot-Rectangle-Electronic-Application-Components/dp/B0CMQCQQV4</a> &mdash; page body not served</li><li><b>B12</b> <a href="https://www.ebay.com/itm/277690727056">https://www.ebay.com/itm/277690727056</a> &mdash; timeout x6 across three eBay 3525 listings</li><li><b>B18a</b> <a href="https://www.accu.co.uk/socket-cap-screws/1077-SSCM2-6-A2">https://www.accu.co.uk/socket-cap-screws/1077-SSCM2-6-A2</a> &mdash; HTTP 403 (re-tried 2026-09-02)</li><li><b>B18a</b> <a href="https://www.boltdepot.com/Product-Details?product=15964">https://www.boltdepot.com/Product-Details?product=15964</a> &mdash; HTTP 403</li><li><b>B18a</b> <a href="https://www.mcmaster.com/91292A831/">https://www.mcmaster.com/91292A831/</a> &mdash; blank to the fetcher</li><li><b>B18a</b> <a href="https://us.misumi-ec.com/vona2/detail/221000348314/?HissuCode=SNSS-M2X6">https://us.misumi-ec.com/vona2/detail/221000348314/?HissuCode=SNSS-M2X6</a> &mdash; HTTP 403</li><li><b>B18a</b> <a href="https://www.albanycountyfasteners.com/Socket-Head-Cap-Screw-2MM-A2-Stainless-Steel-p/5020000.htm">https://www.albanycountyfasteners.com/Socket-Head-Cap-Screw-2MM-A2-Stainless-Steel-p/5020000.htm</a> &mdash; page served without a price</li><li><b>B18a</b> <a href="https://www.fastenal.com/product/details/MS2460006A20000">https://www.fastenal.com/product/details/MS2460006A20000</a> &mdash; HTTP 403 (tried 2026-09-02)</li><li><b>B18a</b> <a href="https://www.westfieldfasteners.co.uk/A2-ScrewBolt-SHCap-M2.html">https://www.westfieldfasteners.co.uk/A2-ScrewBolt-SHCap-M2.html</a> &mdash; page served with loading spinners where every price should be - prices are client-side only</li><li><b>B18b</b> <a href="https://www.accu.co.uk/hexagon-nuts/7884-HPN-M2-A2">https://www.accu.co.uk/hexagon-nuts/7884-HPN-M2-A2</a> &mdash; HTTP 403 (tried 2026-09-02)</li><li><b>B18b</b> <a href="https://www.rst-versand.de/Sechskantmutter-M2-A2-DIN934">https://www.rst-versand.de/Sechskantmutter-M2-A2-DIN934</a> &mdash; Socket is closed (tried 2026-09-02)</li><li><b>B18b</b> <a href="https://www.fastenal.com/product/details/MS2460006A20000">https://www.fastenal.com/product/details/MS2460006A20000</a> &mdash; HTTP 403 (tried 2026-09-02)</li><li><b>B18b</b> <a href="https://www.westfieldfasteners.co.uk/A2-ScrewBolt-SHCap-M2.html">https://www.westfieldfasteners.co.uk/A2-ScrewBolt-SHCap-M2.html</a> &mdash; prices render only in JavaScript; the served page carries loading spinners</li><li><b>B18c</b> <a href="https://www.amazon.com/Heat-Set-Threaded-Inserts-Insert-Tips/dp/B0D4L464XG">https://www.amazon.com/Heat-Set-Threaded-Inserts-Insert-Tips/dp/B0D4L464XG</a> &mdash; HTTP 500</li><li><b>B19a</b> <a href="https://us.store.bambulab.com/products/pla-basic-filament">https://us.store.bambulab.com/products/pla-basic-filament</a> &mdash; HTTP 402 Payment Required</li><li><b>B19a</b> <a href="https://www.matterhackers.com/store/l/bambu-lab-pla-basic-3d-printer-filament/sk/M2X0FQ9W">https://www.matterhackers.com/store/l/bambu-lab-pla-basic-3d-printer-filament/sk/M2X0FQ9W</a> &mdash; page served without a price</li><li><b>B19b</b> <a href="https://us.store.bambulab.com/products/tpu-85a-tpu-90a">https://us.store.bambulab.com/products/tpu-85a-tpu-90a</a> &mdash; HTTP 402 Payment Required</li><li><b>P1c</b> <a href="https://www.mouser.com/ProductDetail/Texas-Instruments/TLV320AIC3104IRHBR">https://www.mouser.com/ProductDetail/Texas-Instruments/TLV320AIC3104IRHBR</a> &mdash; timeout x3</li><li><b>P1c</b> <a href="https://www.ti.com/store/ti/en/p/product/?p=TLV320AIC3104IRHBR">https://www.ti.com/store/ti/en/p/product/?p=TLV320AIC3104IRHBR</a> &mdash; requires login / blocked</li><li><b>P2c</b> <a href="https://www.mouser.com/ProductDetail/STMicroelectronics/LSM6DSV16XTR">https://www.mouser.com/ProductDetail/STMicroelectronics/LSM6DSV16XTR</a> &mdash; product page access restricted; no price served</li><li><b>P1d</b> <a href="https://www.mouser.com/ProductDetail/Bosch-Sensortec/BMI088">https://www.mouser.com/ProductDetail/Bosch-Sensortec/BMI088</a> &mdash; &#x27;Access to this page has been denied&#x27;; no price served</li><li><b>R1</b> <a href="https://www.digikey.com/en/supplier-centers/etek-microelectronics">https://www.digikey.com/en/supplier-centers/etek-microelectronics</a> &mdash; supplier centre lists no ET7301 part number at all (read 2026-09-02)</li><li><b>R1</b> <a href="https://www.lcsc.com/">https://www.lcsc.com/</a> &mdash; site search returns no ET7301B result</li>
+<li><b>B1</b> <a href="https://www.robotshop.com/products/robotis-dynamixel-xl330-m288-t-smart-servo-actuator">https://www.robotshop.com/products/robotis-dynamixel-xl330-m288-t-smart-servo-actuator</a> &mdash; HTTP 403 to the fetcher</li><li><b>B1</b> <a href="https://www.aliexpress.com/i/1005004403336577.html">https://www.aliexpress.com/i/1005004403336577.html</a> &mdash; page body blank to the fetcher</li><li><b>B3</b> <a href="https://www.okdo.com/p/okdo-rock-zero-3w-1gb-with-wi-fi-ble-without-gpio/">https://www.okdo.com/p/okdo-rock-zero-3w-1gb-with-wi-fi-ble-without-gpio/</a> &mdash; &#x27;Socket is closed&#x27; x5 (OKdo is Radxa&#x27;s EU/UK distributor)</li><li><b>B3</b> <a href="https://befr.rs-online.com/web/p/rock-sbc-boards/2564694">https://befr.rs-online.com/web/p/rock-sbc-boards/2564694</a> &mdash; hang / timeout</li><li><b>B4</b> <a href="https://www.bhphotovideo.com/c/product/1733125-REG/neewer_66600244_2_2600mah_f550.html">https://www.bhphotovideo.com/c/product/1733125-REG/neewer_66600244_2_2600mah_f550.html</a> &mdash; HTTP 403</li><li><b>B4</b> <a href="https://www.alibaba.com/product-detail/Beston-2600mAh-replacement-NP-F550-NP_60828272766.html">https://www.alibaba.com/product-detail/Beston-2600mAh-replacement-NP-F550-NP_60828272766.html</a> &mdash; page body blank to the fetcher</li><li><b>B4</b> <a href="https://eu.nkon.nl/rechargeable/li-ion/18650-size/samsung-icr18650-26j3.html">https://eu.nkon.nl/rechargeable/li-ion/18650-size/samsung-icr18650-26j3.html</a> &mdash; HTTP 403</li><li><b>B6</b> <a href="https://www.arducam.com/product/arducam-imx219-low-distortion-m12-mount-camera-module-drop-in-replacement-for-raspberry-pi-v2-camera/">https://www.arducam.com/product/arducam-imx219-low-distortion-m12-mount-camera-module-drop-in-re</a> &mdash; HTTP 403 on every arducam.com URL</li><li><b>B8</b> <a href="https://esp32s.com/product/radxa-camera-fpc-cable-for-radxa-camera-8m-219-and-rpi-camera-for-zero-3w-3e/">https://esp32s.com/product/radxa-camera-fpc-cable-for-radxa-camera-8m-219-and-rpi-camera-for-zer</a> &mdash; HTTP 403 (a search snippet claims $1.90 - NOT read, so not used)</li><li><b>B8</b> <a href="https://www.fabtolab.com/radxa-fpc-cable-zero-3-camera-8m-219-zero-3">https://www.fabtolab.com/radxa-fpc-cable-zero-3-camera-8m-219-zero-3</a> &mdash; Socket is closed</li><li><b>B8</b> <a href="https://docs.radxa.com/en/zero/zero3/accessories/camera">https://docs.radxa.com/en/zero/zero3/accessories/camera</a> &mdash; documentation, carries no price</li><li><b>B9</b> <a href="https://www.mouser.com/ProductDetail/STMicroelectronics/VL53L5CX-SATEL">https://www.mouser.com/ProductDetail/STMicroelectronics/VL53L5CX-SATEL</a> &mdash; timeout x3</li><li><b>B10</b> <a href="https://www.bocabearings.com/parts/10x15x3">https://www.bocabearings.com/parts/10x15x3</a> &mdash; HTTP 403</li><li><b>B10</b> <a href="https://vxb.com/search?q=16x22x4">https://vxb.com/search?q=16x22x4</a> &mdash; 0 bearing results</li><li><b>B10</b> <a href="https://bearingsdirect.com/search.php?search_query=16x22x4">https://bearingsdirect.com/search.php?search_query=16x22x4</a> &mdash; 0 results</li><li><b>B10</b> <a href="http://www.zotyindustrial.com/products/1622ZZ-16x22x4-thin-special-bearing-for-jumping-rope.html">http://www.zotyindustrial.com/products/1622ZZ-16x22x4-thin-special-bearing-for-jumping-rope.html</a> &mdash; HTTP 500 (tried 2026-09-02)</li><li><b>B11</b> <a href="https://www.123bearing.com/bearing-housing/deep-groove-bearing/single-row/6700">https://www.123bearing.com/bearing-housing/deep-groove-bearing/single-row/6700</a> &mdash; no price rendered</li><li><b>B12</b> <a href="https://www.amazon.com/CQRobot-Rectangle-Electronic-Application-Components/dp/B0CMQCQQV4">https://www.amazon.com/CQRobot-Rectangle-Electronic-Application-Components/dp/B0CMQCQQV4</a> &mdash; page body not served</li><li><b>B12</b> <a href="https://www.ebay.com/itm/277690727056">https://www.ebay.com/itm/277690727056</a> &mdash; timeout x6 across three eBay 3525 listings</li><li><b>B18a</b> <a href="https://www.accu.co.uk/socket-cap-screws/1077-SSCM2-6-A2">https://www.accu.co.uk/socket-cap-screws/1077-SSCM2-6-A2</a> &mdash; HTTP 403 (re-tried 2026-09-02)</li><li><b>B18a</b> <a href="https://www.boltdepot.com/Product-Details?product=15964">https://www.boltdepot.com/Product-Details?product=15964</a> &mdash; HTTP 403</li><li><b>B18a</b> <a href="https://www.mcmaster.com/91292A831/">https://www.mcmaster.com/91292A831/</a> &mdash; blank to the fetcher</li><li><b>B18a</b> <a href="https://us.misumi-ec.com/vona2/detail/221000348314/?HissuCode=SNSS-M2X6">https://us.misumi-ec.com/vona2/detail/221000348314/?HissuCode=SNSS-M2X6</a> &mdash; HTTP 403</li><li><b>B18a</b> <a href="https://www.albanycountyfasteners.com/Socket-Head-Cap-Screw-2MM-A2-Stainless-Steel-p/5020000.htm">https://www.albanycountyfasteners.com/Socket-Head-Cap-Screw-2MM-A2-Stainless-Steel-p/5020000.htm</a> &mdash; page served without a price</li><li><b>B18a</b> <a href="https://www.fastenal.com/product/details/MS2460006A20000">https://www.fastenal.com/product/details/MS2460006A20000</a> &mdash; HTTP 403 (tried 2026-09-02)</li><li><b>B18a</b> <a href="https://www.westfieldfasteners.co.uk/A2-ScrewBolt-SHCap-M2.html">https://www.westfieldfasteners.co.uk/A2-ScrewBolt-SHCap-M2.html</a> &mdash; page served with loading spinners where every price should be - prices are client-side only</li><li><b>B18b</b> <a href="https://www.accu.co.uk/hexagon-nuts/7884-HPN-M2-A2">https://www.accu.co.uk/hexagon-nuts/7884-HPN-M2-A2</a> &mdash; HTTP 403 (tried 2026-09-02)</li><li><b>B18b</b> <a href="https://www.rst-versand.de/Sechskantmutter-M2-A2-DIN934">https://www.rst-versand.de/Sechskantmutter-M2-A2-DIN934</a> &mdash; Socket is closed (tried 2026-09-02)</li><li><b>B18b</b> <a href="https://www.fastenal.com/product/details/MS2460006A20000">https://www.fastenal.com/product/details/MS2460006A20000</a> &mdash; HTTP 403 (tried 2026-09-02)</li><li><b>B18b</b> <a href="https://www.westfieldfasteners.co.uk/A2-ScrewBolt-SHCap-M2.html">https://www.westfieldfasteners.co.uk/A2-ScrewBolt-SHCap-M2.html</a> &mdash; prices render only in JavaScript; the served page carries loading spinners</li><li><b>B18c</b> <a href="https://www.amazon.com/Heat-Set-Threaded-Inserts-Insert-Tips/dp/B0D4L464XG">https://www.amazon.com/Heat-Set-Threaded-Inserts-Insert-Tips/dp/B0D4L464XG</a> &mdash; HTTP 500</li><li><b>B19a</b> <a href="https://us.store.bambulab.com/products/pla-basic-filament">https://us.store.bambulab.com/products/pla-basic-filament</a> &mdash; HTTP 402 Payment Required</li><li><b>B19a</b> <a href="https://www.matterhackers.com/store/l/bambu-lab-pla-basic-3d-printer-filament/sk/M2X0FQ9W">https://www.matterhackers.com/store/l/bambu-lab-pla-basic-3d-printer-filament/sk/M2X0FQ9W</a> &mdash; page served without a price</li><li><b>B19b</b> <a href="https://us.store.bambulab.com/products/tpu-85a-tpu-90a">https://us.store.bambulab.com/products/tpu-85a-tpu-90a</a> &mdash; HTTP 402 Payment Required</li><li><b>P1c</b> <a href="https://www.mouser.com/ProductDetail/Texas-Instruments/TLV320AIC3104IRHBR">https://www.mouser.com/ProductDetail/Texas-Instruments/TLV320AIC3104IRHBR</a> &mdash; timeout x3</li><li><b>P1c</b> <a href="https://www.ti.com/store/ti/en/p/product/?p=TLV320AIC3104IRHBR">https://www.ti.com/store/ti/en/p/product/?p=TLV320AIC3104IRHBR</a> &mdash; requires login / blocked</li><li><b>P2c</b> <a href="https://www.mouser.com/ProductDetail/STMicroelectronics/LSM6DSV16XTR">https://www.mouser.com/ProductDetail/STMicroelectronics/LSM6DSV16XTR</a> &mdash; product page access restricted; no price served</li><li><b>P1d</b> <a href="https://www.mouser.com/ProductDetail/Bosch-Sensortec/BMI088">https://www.mouser.com/ProductDetail/Bosch-Sensortec/BMI088</a> &mdash; &#x27;Access to this page has been denied&#x27;; no price served</li><li><b>R1</b> <a href="https://www.digikey.com/en/supplier-centers/etek-microelectronics">https://www.digikey.com/en/supplier-centers/etek-microelectronics</a> &mdash; supplier centre lists no ET7301 part number at all (read 2026-09-02)</li><li><b>R1</b> <a href="https://www.lcsc.com/">https://www.lcsc.com/</a> &mdash; site search returns no ET7301B result</li><li><b>P1</b> <a href="https://www.pcbway.com/orderonline.aspx">https://www.pcbway.com/orderonline.aspx</a> &mdash; instant-quote form is JavaScript; the fetched page text carries no price (tried 2026-09-03)</li><li><b>P1</b> <a href="https://www.seeedstudio.com/fusion_pcb.html">https://www.seeedstudio.com/fusion_pcb.html</a> &mdash; every cost field renders as &#x27;USD$0.00&#x27; until Gerbers are uploaded; no price in the page text (tried 2026-09-03)</li><li><b>P1</b> <a href="https://aisler.net/pricing">https://aisler.net/pricing</a> &mdash; HTTP 404 (tried 2026-09-03)</li><li><b>P1</b> <a href="https://aisler.net/en/products/boards">https://aisler.net/en/products/boards</a> &mdash; publishes only &#x27;Starting at just EUR 14.20&#x27; - no per-area rate, no quantity, no spec (tried 2026-09-03)</li><li><b>P1</b> <a href="https://aisler.net/help/general-information/pricing">https://aisler.net/help/general-information/pricing</a> &mdash; HTTP 301 to community.aisler.net (tried 2026-09-03)</li><li><b>P1</b> <a href="https://jlcpcb.com/quote">https://jlcpcb.com/quote</a> &mdash; the quote engine is JavaScript; no price is emitted in the fetched HTML (tried 2026-09-03)</li><li><b>P2</b> <a href="https://www.pcbway.com/orderonline.aspx">https://www.pcbway.com/orderonline.aspx</a> &mdash; instant-quote form is JavaScript; the fetched page text carries no price (tried 2026-09-03)</li><li><b>P2</b> <a href="https://www.seeedstudio.com/fusion_pcb.html">https://www.seeedstudio.com/fusion_pcb.html</a> &mdash; every cost field renders as &#x27;USD$0.00&#x27; until Gerbers are uploaded; no price in the page text (tried 2026-09-03)</li><li><b>P2</b> <a href="https://aisler.net/pricing">https://aisler.net/pricing</a> &mdash; HTTP 404 (tried 2026-09-03)</li><li><b>P2</b> <a href="https://aisler.net/en/products/boards">https://aisler.net/en/products/boards</a> &mdash; publishes only &#x27;Starting at just EUR 14.20&#x27; - no per-area rate, no quantity, no spec (tried 2026-09-03)</li><li><b>P2</b> <a href="https://aisler.net/help/general-information/pricing">https://aisler.net/help/general-information/pricing</a> &mdash; HTTP 301 to community.aisler.net (tried 2026-09-03)</li><li><b>P3</b> <a href="https://www.pcbway.com/orderonline.aspx">https://www.pcbway.com/orderonline.aspx</a> &mdash; instant-quote form is JavaScript; the fetched page text carries no price (tried 2026-09-03)</li><li><b>P3</b> <a href="https://www.seeedstudio.com/fusion_pcb.html">https://www.seeedstudio.com/fusion_pcb.html</a> &mdash; every cost field renders as &#x27;USD$0.00&#x27; until Gerbers are uploaded; no price in the page text (tried 2026-09-03)</li><li><b>P3</b> <a href="https://aisler.net/pricing">https://aisler.net/pricing</a> &mdash; HTTP 404 (tried 2026-09-03)</li><li><b>P3</b> <a href="https://aisler.net/en/products/boards">https://aisler.net/en/products/boards</a> &mdash; publishes only &#x27;Starting at just EUR 14.20&#x27; - no per-area rate, no quantity, no spec (tried 2026-09-03)</li><li><b>P3</b> <a href="https://aisler.net/help/general-information/pricing">https://aisler.net/help/general-information/pricing</a> &mdash; HTTP 301 to community.aisler.net (tried 2026-09-03)</li><li><b>P3</b> <a href="https://docs.oshpark.com/services/two-layer/">https://docs.oshpark.com/services/two-layer/</a> &mdash; read, and REFUSES this board: &#x27;Minimum board size 0.25in (6.35mm) by 0.25in (6.35mm)&#x27; against this board&#x27;s 4.6000 mm short axis - short by 1.7500 mm. The same minimum is published on docs.oshpark.com/services/two-layer-medium-run/ (both read 2026-09-03)</li>
 </ul>
 <p class="lab">What counts as a distributor</p>
-<p class="note">35 distinct distributors were read, counted as <b>registered domains</b>.
-They are entered in the data under 41 vendor name strings, because the same shop is
-named differently where the packaging differs &mdash; DigiKey appears as <code>DigiKey</code>,
+<p class="note">37 distinct distributors <b>gave a price</b>, counted as <b>registered
+domains</b>. They are entered in the data under 42 vendor name strings, because the
+same shop is named differently where the packaging differs &mdash; DigiKey appears as <code>DigiKey</code>,
 <code>DigiKey (cut tape)</code> and <code>DigiKey (cut tape / Digi-Reel)</code>, and Neewer, ROBOTIS US,
 Pollen Robotics and UCTRONICS under two names each. Until 2026-09-03 this page counted the 41 names and
-called them 41 distributors. The domains, in full:</p>
-<p class="note"><code>adafruit.com, allnetchina.cn, ameridroid.com, arace.tech, bearingsdirect.com, cnckitchen.store, digikey.com, evelta.com, generationrobots.com, gigaparts.com, lcsc.com, made-in-china.com, modelfixings.co.uk, neewer.com, nextbatteries.com, nzminiaturebearings.com, pimoroni.com, pollen-robotics.com, pololu.com, prusa3d.com, reichelt.de, robotis.com, robotis.us, rst-versand.de, seeedstudio.com, shop3duniverse.com, sparkfun.com, theengineerstore.in, thepihut.com, thinkrobotics.com, tribotix.com, uctronics.com, vector3d.shop, vxb.com, welectron.com</code></p>
+called them 41 distributors. The priced domains, in full:</p>
+<p class="note"><code>adafruit.com, advancedpcb.com, allnetchina.cn, ameridroid.com, arace.tech, bearingsdirect.com, cnckitchen.store, digikey.com, evelta.com, generationrobots.com, gigaparts.com, lcsc.com, made-in-china.com, modelfixings.co.uk, neewer.com, nextbatteries.com, nzminiaturebearings.com, oshpark.com, pimoroni.com, pollen-robotics.com, pololu.com, prusa3d.com, reichelt.de, robotis.com, robotis.us, rst-versand.de, seeedstudio.com, shop3duniverse.com, sparkfun.com, theengineerstore.in, thepihut.com, thinkrobotics.com, tribotix.com, uctronics.com, vector3d.shop, vxb.com, welectron.com</code></p>
+<p class="note">A further 2 domain(s) were read and gave <b>no price for our
+part</b>, and are counted nowhere: <code>jlcpcb.com</code>, <code>pcbway.com</code>.
+The two-distributor bar counts priced domains only. It did not until 2026-09-03: the bar counted every
+domain read, and the price test beside it was an <code>any()</code> over the whole line, so one priced shop
+beside one price-less shop passed. The hole was measured by emptying <code>tiers</code> on one of B10's
+two read offers and watching the generator publish anyway; the guard is now
+<code>priced_domains()</code> and the same mutation makes it exit red naming B10.</p>
 <p class="note">Regenerate with <code>python3 tools/gen_sourcing.py</code>. The data is
 <code>spec/sourcing.json</code>; this page, <a href="RFQ.html">RFQ.html</a> and
 <a href="out/release/bom.csv"><code>out/release/bom.csv</code></a> are all outputs and are never edited by
