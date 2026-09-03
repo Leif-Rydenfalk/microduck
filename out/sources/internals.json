@@ -1,0 +1,73 @@
+{
+ "$comment": "SOURCE 3 - the internals picture. Search log, findings and the data INTERNALS.html is generated from (tools/gen_internals.py). Partial checkpoint; appended as the lane progresses.",
+ "lane": "src-internals",
+ "owner_paths": [
+  "out/sources/",
+  "INTERNALS.html",
+  "tools/gen_internals.py",
+  "tools/internals_render.py",
+  "images/CATALOG.md (append only)"
+ ],
+ "date": "2026-09-03",
+ "leif_verbatim": "and an new image covering the components of the microduck internals",
+ "search_log": [
+  {
+   "where": "https://makerworld.com/en/models/3250889-microduck-robotic-duck-structural-parts-simulation",
+   "how": "HTML 403 (Cloudflare challenge) -> public API https://makerworld.com/api/v1/design-service/design/3250889, archived as out/sources/makerworld-3250889-api.json",
+   "fetched": "2026-09-03",
+   "result": "NO internals image. 15 STL thumbnails + 1 cover render; author 'Peter Pan’s Techland' (handle foo00, uid 2020122555); licence BY-NC-SA; created 2026-09-02T04:01:04Z; downloads 5; summary says (translated) 'Derived from Pollen Robotics official public microduck_rl MJCF simulation model with world coordinate transformation applied' and 'not official CAD ... only for shell/structural reference'. Same geometry family our CAD was seeded from."
+  },
+  {
+   "where": "https://github.com/pollen-robotics/microduck_rl/tree/develop/src/mjlab_microduck/robot/microduck/assets",
+   "how": "gh api (branches/develop, contents, git/trees recursive)",
+   "fetched": "2026-09-03",
+   "result": "develop HEAD 29e887ecfbf5d37144759e5a9f8a176dfb83d547 (2026-09-02T20:20:08Z, 'Merge pull request #30 ... sim: the ToF numbered its columns backwards'). Assets dir holds 47 .stl + 47 .part, zero image files; the whole develop tree has no png/jpg/webp/svg. NO internals image."
+  },
+  {
+   "where": "https://github.com/pollen-robotics/microduck (main, recursive tree)",
+   "how": "gh api git/trees",
+   "fetched": "2026-09-03",
+   "result": "zero image files in the repo tree (README media are external). NO internals image."
+  },
+  {
+   "where": "pollen-robotics.com/microduck, /press-kit, /blog (archived research/raw/product_page.txt, presskit.txt, blog.txt)",
+   "how": "grep internal|inside|teardown|component",
+   "fetched": "2026-09-01 archive, re-read 2026-09-03",
+   "result": "press kit says 'The mechanical and electronic design files are not [open]'. No internals diagram published. BUT two press-kit photographs show PARTIALLY DISASSEMBLED units: images/press/press_desk.jpg and images/press/press_morning.jpg (see real_photos)."
+  },
+  {
+   "where": "https://huggingface.co/spaces/mishig/microduck-anatomy",
+   "how": "HF API + raw source components/microduck-blueprint.tsx (sha 5329ff5db7c6baa5c15def88085f842e0221395e, lastModified 2026-08-31T17:56:13Z)",
+   "fetched": "2026-09-03",
+   "result": "community 'anatomy' viewer; its own strings say 'official simulator geometry', 'CAD uses a legacy Pi Zero proxy', 'placement from simulator geometry', 'Concept engineering view'. Renders public/robot/mjlab/microduck.glb = the same simulator meshes. NOT a photograph of internals."
+  },
+  {
+   "where": "https://github.com/fanhao375/microduck-replica (master 28d8ee92638c42c8547aae5b194f357e25d51fc9, 2026-09-03T13:51:06Z)",
+   "how": "gh api tree + raw assembly-drawings/05,06,07 png",
+   "fetched": "2026-09-03",
+   "result": "7 exploded/colour-coded drawings derived from the MJCF (masses printed = MJCF inertials: head 189 g, trunk 199 g ...). README states 'Unverified against physical hardware'. One real photo build-log/photos/2026-09-02-首批打印件.jpg = their own printed parts, not a Pollen unit."
+  },
+  {
+   "where": "https://www.bilibili.com/video/BV1R2tH6tEsK/ 'Microduck硬件架构拆解' by Z-Rob",
+   "how": "api.bilibili.com/x/web-interface/view",
+   "fetched": "2026-09-03",
+   "result": "desc '一段拆解分析报告' (an analysis report), 1358 s, published 2026-08-30 10:28:18 UTC — three days after pre-orders opened and months before the Christmas-2026 ship date, so it cannot be a physical teardown; cover archived (bili_cover)."
+  },
+  {
+   "where": "163.com article L5J9PIJ30556722C, rcdrone.top hardware-explained, cnx-software 2026-08-28, awesome-microduck list, web searches (EN + ZH: 'teardown', 'internals', '拆解 内部结构')",
+   "how": "WebFetch/WebSearch",
+   "fetched": "2026-09-03",
+   "result": "no interior photograph anywhere; every article reuses Pollen's press renders and the simulator meshes."
+  },
+  {
+   "where": "local: ~/Downloads, ~/Desktop (7 screenshots 22:26-22:28 tonight), images/ (CATALOG.md, 65 files)",
+   "how": "ls -newermt, Read",
+   "fetched": "2026-09-03",
+   "result": "tonight's screenshots are Leif reviewing COMPARISON.html / HEAD-RECONSTRUCTION.html / INDEX.html in Chrome with a WeChat 'A-Team' chat open beside them — not an internals image. Nothing new in Downloads besides the MakerWorld zip (22:11)."
+  }
+ ],
+ "verdict_new_image": "CANNOT DETERMINE — no public photograph or diagram of a Microduck's full internal component layout exists as of 2026-09-03 (robots ship Christmas 2026; every community 'anatomy'/'exploded' artefact is the simulator mesh re-rendered). The image Leif refers to was most likely received in the WeChat A-Team chat visible in his 22:26 screenshot and is not on this disk. What settles it: drop the file into images/ (any name) — this lane's tools/internals_render.py --real <file> places it beside our renders and the catalog row is appended.",
+ "real_photos": [],
+ "renders": [],
+ "components": []
+}
