@@ -116,6 +116,16 @@ def breakeven(c_print, c_mould, tool):
     return tool / d
 
 
+#: The failure-buffer multipliers §2.3's sensitivity is computed at: the two
+#: ends of the sourced band and its arithmetic midpoint. Read from the rate
+#: table, never typed — change the band in tools/data/playbook.json and these
+#: move with it.
+BUFFERS = {
+    "low": R["failure_buffer"]["low"],
+    "mid": (R["failure_buffer"]["low"] + R["failure_buffer"]["high"]) / 2.0,
+    "high": R["failure_buffer"]["high"],
+}
+
 ROWS = []
 if SLICE:
     for p in SLICE["parts"]:
@@ -131,9 +141,36 @@ if SLICE:
             be_best=breakeven(c["inhouse_mid"], m["low"], t["floor"]),
             be_worst=breakeven(c["inhouse_mid"], m["low"], t["alu_high"]),
             be_at_mould_high=breakeven(c["inhouse_mid"], m["high"], t["floor"]),
+            # THE FAILURE BUFFER, WHICH c_print DOES NOT CARRY. §2.2's headline
+            # per-robot figure applies the ×1.10–1.30 buffer from the same rate
+            # table; the piece cost below does not, and leaving it out is NOT
+            # neutral — it makes c_print smaller, which makes every N* LARGER,
+            # which is the direction that favours printing. So the same
+            # break-even is computed at each end of the buffer band and at its
+            # midpoint, and §2.3 publishes the sensitivity instead of a footnote.
+            be_buf={k: breakeven(c["inhouse_mid"] * f, m["low"], t["floor"])
+                    for k, f in BUFFERS.items()},
             warn=p.get("slicer_warning"),
             orient=p.get("orientation_rule") or SLICE and None))
 ROWS.sort(key=lambda r: (-r["c"]["inhouse_mid"], r["slug"]))
+
+#: Slugs that out/print/slice.json's own `flags` list names. One of them
+#: (microduck-m12-lens-holder) is flagged as possibly a BOUGHT part — so every
+#: table that counts it as printed carries the chip, and §2.2 quantifies it.
+FLAGGED = {}
+for _fl in ((SLICE or {}).get("flags") or []):
+    for _r in ROWS:
+        if _r["slug"] in _fl:
+            FLAGGED.setdefault(_r["slug"], []).append(_fl)
+
+
+def flagchip(slug):
+    """The chip a flagged slug carries in every table that counts it as printed."""
+    if slug not in FLAGGED:
+        return ""
+    return (' <span class="chip cd" title="%s">may be bought</span>'
+            % E("; ".join(FLAGGED[slug])))
+
 
 TOT = {}
 if ROWS:
@@ -280,6 +317,51 @@ def slender_exemplars():
     return b, nv
 
 
+# --- THE BED THE PRINTABILITY VERDICT WAS TAKEN ON --------------------------
+# cecad.printed.printability defaults to bed="prusa_mk4" (250 x 210 x 220) and
+# out/dfm/dfm.json carried that default until 2026-09-03, while §4 states the
+# machine as the Bambu H2S. Both beds are now read from the files and compared
+# here rather than being reconciled nowhere: a bed fit is half of what the
+# printability boolean in §3.1 grades, so the two must be the same machine.
+def bed_from_slice():
+    m = re.search(r"bed\s*([\d.]+)\s*[x×]\s*([\d.]+)\s*[x×]\s*([\d.]+)",
+                  (SLICE or {}).get("printer", "") or "")
+    return [float(x) for x in m.groups()] if m else None
+
+
+def bed_from_dfm():
+    for d in (DFM or {}).get("parts", {}).values():
+        prb = (d.get("solid_dfm") or {}).get("printability")
+        if isinstance(prb, list) and len(prb) == 2 and isinstance(prb[1], dict):
+            bd = prb[1].get("bed")
+            if bd:
+                return [float(x) for x in bd]
+    return None
+
+
+BED_SLICE, BED_DFM = bed_from_slice(), bed_from_dfm()
+
+
+def bed_sentence():
+    if BED_SLICE is None or BED_DFM is None:
+        return ('<b>Bed reconciliation: <span class="chip cd">CANNOT DETERMINE</span></b> — '
+                'one of the two files does not state a bed.')
+    same = all(abs(a - b) < 1e-6 for a, b in zip(BED_SLICE, BED_DFM))
+    return ('<b>Bed:</b> the printability boolean grades bed fit, so it has to be graded on the '
+            'machine these parts are sliced for. Sliced on %s mm %s; printability run on %s mm '
+            '%s. <b>%s</b>%s'
+            % (" × ".join(n(x) for x in BED_SLICE), src("SLICE"),
+               " × ".join(n(x) for x in BED_DFM), src("DFM"),
+               "Same machine — reconciled." if same
+               else "THESE ARE NOT THE SAME MACHINE — the fit verdict is against a bed nobody owns.",
+               " Until 2026-09-03 they were not: <code>cecad.printed.printability</code>&rsquo;s "
+               "default bed is <code>prusa_mk4</code>, 250 × 210 × 220 mm, and that is what the "
+               "committed <code>dfm.json</code> had been measured against. Every part fits either "
+               "bed, so no verdict moved — but a conservative wrong number is still a wrong number, "
+               "and <code>tools/measure_dfm.py</code> now passes the H2S bed explicitly."
+               if same else ""))
+
+
 def dfm_row(slug):
     if not DFM or slug not in DFM["parts"]:
         return None
@@ -292,6 +374,10 @@ def dfm_row(slug):
     sol = d.get("solid_dfm") or {}
     tw = (sol.get("thinnest_wall") or {}).get("mm") if sol.get("ok") else None
     holes = sol.get("holes") if sol.get("ok") else None
+    prb = sol.get("printability") if sol.get("ok") else None
+    pr_ok, pr, pr_slug = None, {}, slug
+    if isinstance(prb, list) and len(prb) == 2 and isinstance(prb[1], dict):
+        pr_ok, pr = bool(prb[0]), prb[1]
     findings, verdict = [], "PRINTABLE"
     if b["frac_lt30"] > 0.09:
         findings.append("%.1f %% of the surface is unsupported even in its best build "
@@ -306,10 +392,23 @@ def dfm_row(slug):
                         % (100 * b["frac_lt10"], b["projected_lt30_mm2"]))
         verdict = "PRINTABLE-WITH-CARE"
     if asm["area_lt30_mm2"] > 1.6 * b["area_lt30_mm2"]:
-        findings.append("orientation matters: +Z as modelled gives %.0f mm² unsupported "
-                        "against %.0f mm² at %s — a %.1f× penalty for printing it upright"
-                        % (asm["area_lt30_mm2"], b["area_lt30_mm2"], best,
-                           asm["area_lt30_mm2"] / max(b["area_lt30_mm2"], 1e-9)))
+        # A RATIO NEEDS A DENOMINATOR. Six parts have EXACTLY 0.0000 mm²
+        # unsupported in their recommended direction, and dividing by an epsilon
+        # published "a 355731200000.0x penalty" as if that magnitude were a
+        # measurement (measured 2026-09-03: face-part, eye-ring,
+        # upper-leg-rigidity-plate, neck-plate, banana-pcb-locker, bearing-roll).
+        # The true statement about those parts is stronger than any ratio: the
+        # recommended direction has no overhang at all.
+        if b["area_lt30_mm2"] > 0.0:
+            findings.append("orientation matters: +Z as modelled gives %.0f mm² unsupported "
+                            "against %.0f mm² at %s — a %.1f× penalty for printing it upright"
+                            % (asm["area_lt30_mm2"], b["area_lt30_mm2"], best,
+                               asm["area_lt30_mm2"] / b["area_lt30_mm2"]))
+        else:
+            findings.append("orientation matters, and there is no ratio to quote: %s carries "
+                            "<b>no unsupported area at all</b> (0.0000 mm²) while +Z as "
+                            "modelled carries %.0f mm². Printing it upright buys the whole of "
+                            "that support from nothing" % (best, asm["area_lt30_mm2"]))
     p5 = w.get("p5_mm")
     if p5 is not None and p5 < TWO_PERIM:
         findings.append("ray-cast wall p5 = %.4f mm is under the %.2f mm two-perimeter "
@@ -317,11 +416,27 @@ def dfm_row(slug):
                         "than two 0.4 mm perimeters" % (p5, TWO_PERIM, 5))
         verdict = "PRINTABLE-WITH-CARE"
     if tw is not None and tw < TWO_PERIM:
+        # THIS USED TO APPEND A SENTENCE AND LEAVE THE VERDICT ALONE, so
+        # microduck-yaw2roll — exact wall 0.1980 mm, a quarter of the floor, and
+        # the reason cecad.printed.printability returns ok=False for it —
+        # published "clear" under a caption promising that this column grades
+        # wall thickness. It grades it now.
         findings.append("solid thinnest wall %.4f mm (cecad.inspect, exact) — docs/DFM.md "
                         "reads sub-0.80 mm as a knife-edge chamfer, not a structural wall; "
                         "the slicer rounds it off" % tw)
+        verdict = "PRINTABLE-WITH-CARE"
+    if pr_ok is False:
+        findings.append("<b>cecad.printed.printability returns FAIL on this solid</b> "
+                        "(%s): thinnest wall %s mm against the %s mm two-perimeter floor, "
+                        "bed %s. That is the kernel's own verdict on the parametric part, "
+                        "printed here rather than paraphrased"
+                        % (E(pr_slug), mm4(pr.get("thinnest_wall")),
+                           mm4(pr.get("min_wall")),
+                           " × ".join(mm4(x) for x in (pr.get("bed") or []))))
     if not findings:
-        findings.append("no unsupported region above 5 %% of the surface in its best "
+        # A PLAIN append, NOT a %-format: "5 %%" would reach the page as "5 %%".
+        # Measured 2026-09-03 in §3.1's microduck-trunk-base row.
+        findings.append("no unsupported region above 5 % of the surface in its best "
                         "build direction and no wall under the two-perimeter floor")
     if best != minoh:
         mo = m["overhang_by_build_dir"][minoh]
@@ -330,7 +445,8 @@ def dfm_row(slug):
                         "build %s instead (%.0f mm², %d layers)"
                         % (minoh, mo["area_lt30_mm2"], mo["layers_at_0p2"],
                            n(min(m["bbox_mm"])), best, b["area_lt30_mm2"], b["layers_at_0p2"]))
-    return dict(best=best, minoh=minoh, slender=slender, admissible=admissible,
+    return dict(printability_ok=pr_ok, printability=pr,
+                best=best, minoh=minoh, slender=slender, admissible=admissible,
                 b=b, asmZ=asm, w=w, tw=tw,
                 nholes=len(holes) if isinstance(holes, list) else None,
                 radii=(sol.get("radii_mm") if isinstance(sol.get("radii_mm"), list) else None),
@@ -548,19 +664,79 @@ readable bought cost at $472–481 per robot at every quantity from 1 to 1000. T
 parts are %s–%s of that in-house. <b>The printed half of this robot is not where the money
 is, at any volume.</b> Fifteen XL330 servos are.</div>''' % (usd(TOT["robot_lo"], 2), usd(TOT["robot_hi"], 2)))
 
+# --- WHAT THE SLICER ITSELF FLAGGED, carried into this document -------------
+# out/print/slice.json ends with a `flags` list, and one of those flags is a
+# CANNOT DETERMINE about WHETHER A PART IS PRINTED AT ALL:
+# "microduck-m12-lens-holder may be a bought part (CANNOT DETERMINE,
+# docs/PARTS.md row 27) - sliced anyway".  §1 of this document claims that no
+# default has been substituted for a missing value; costing that slug as printed
+# without saying so was exactly such a substitution, measured 2026-09-03.  The
+# flags are rendered from the file, and where a flag names a slug this section
+# costs, its own contribution and the effect of dropping it are computed here.
+def slice_flag_items():
+    out = []
+    for fl in (SLICE.get("flags") or []):
+        named = [r for r in ROWS if r["slug"] in fl]
+        extra = ""
+        for r in named:
+            c = r["c"]
+            g = c["grams"] * r["qty"]
+            hh = c["hours"] * r["qty"]
+            extra += ("  <b>What it is worth if it is bought and not printed:</b> "
+                      "%s of c<sub>print</sub>, %.4f g and %.4f h off this robot &mdash; "
+                      "%s g and %s h instead of %.4f g and %.4f h, and the in-house total "
+                      "%s&ndash;%s instead of %s&ndash;%s. The %d-slug and %d-piece counts in "
+                      "this document would become %d and %d."
+                      % (usd(c["inhouse_mid"], 4), g, hh,
+                         "%.4f" % (TOT["grams"] - g), "%.4f" % (TOT["hours"] - hh),
+                         TOT["grams"], TOT["hours"],
+                         usd((TOT["inhouse_lo"] - c["inhouse_lo"] * r["qty"])
+                             * R["failure_buffer"]["low"], 2),
+                         usd((TOT["inhouse_hi"] - c["inhouse_hi"] * r["qty"])
+                             * R["failure_buffer"]["high"], 2),
+                         usd(TOT["robot_lo"], 2), usd(TOT["robot_hi"], 2),
+                         len(ROWS), TOT["pieces"], len(ROWS) - 1, TOT["pieces"] - r["qty"]))
+        out.append("<li>%s%s</li>" % (E(fl), extra))
+    return "".join(out)
+
+
+if SLICE and SLICE.get("flags"):
+    A('''<div class="note"><b>The slicer&rsquo;s own flags, and one of them is a
+CANNOT DETERMINE about a part in the table above.</b> <code>out/print/slice.json</code> records
+%d flags on this run %s and they are reproduced here verbatim rather than summarised, because the
+first of them says a slug this document costs, DFM-reviews and counts as printed <b>may not be a
+printed part at all</b>:
+<ol class="steps2">%s</ol>
+The slug stays in every table in this document, because dropping it would substitute a decision
+nobody has taken; what changes is that the row is now labelled and its whole contribution is
+quantified above. §8 carries it as an open item with the one thing that settles it.</div>'''
+      % (len(SLICE["flags"]), src("SLICE"), slice_flag_items()))
+
 A('<h3 id="s2-3">2.3 Piece cost and break-even, every printed part</h3>')
 A('''<p>N* = T / (c<sub>print</sub> − c<sub>mould</sub>). c<sub>print</sub> is the in-house
 mid-point computed from this part's own sliced grams and seconds plus its share of the plate's
 labour; c<sub>mould</sub> is the sourced $0.50–5.00 band %s; T is one cavity set. A dash in the
 break-even columns means <b>there is none</b>: the printed piece already costs less than the
-moulded one, so no tooling spend ever pays back. Sorted by piece cost.</p>''' % src("HT"))
+moulded one, so no tooling spend ever pays back. Sorted by piece cost.</p>
+
+<div class="note"><b>What c<sub>print</sub> in this table does NOT include, said plainly.</b>
+It is material + the mid machine rate + the plate&rsquo;s labour share, and it carries
+<b>no failure buffer</b> — while §2.2&rsquo;s headline %s&ndash;%s per robot applies the
+&times;%.2f&ndash;%.2f buffer from the same rate table %s. That omission is not neutral: a smaller
+c<sub>print</sub> makes every N* <b>larger</b>, which is the direction that favours printing,
+which is this section&rsquo;s own conclusion. So the buffer is applied below rather than argued
+about, at both ends of the sourced band and at its midpoint.</div>''' % (
+    src("HT"), usd(TOT["robot_lo"], 2) if TOT else "\u2014",
+    usd(TOT["robot_hi"], 2) if TOT else "\u2014",
+    R["failure_buffer"]["low"], R["failure_buffer"]["high"], src("CC", "GC")))
 
 rows = []
 for r in ROWS:
     c = r["c"]
     rows.append([
-        td('<code>%s</code>%s' % (E(r["slug"]),
-                                  ' <span class="chip buy">visible</span>' if r["visible"] else ""), "pn"),
+        td('<code>%s</code>%s%s' % (E(r["slug"]),
+                                    ' <span class="chip buy">visible</span>' if r["visible"] else "",
+                                    flagchip(r["slug"])), "pn"),
         td(r["material"] + (" ×%d" % r["qty"] if r["qty"] > 1 else "")),
         td("%.4f" % c["grams"], "num"),
         td("%.4f" % c["hours"], "num"),
@@ -585,7 +761,9 @@ against the dear end</b> — the printed piece is simply cheaper. Where a break-
 it is <b>%s to %s units</b> at the Protolabs tool floor, and %s to %s units at the aluminium
 ceiling. §8 of process.md recommended moulding the nine visible parts at 1,000 units; it made
 that call with Σ hours marked CANNOT DETERMINE. With the hours measured, <b>the arithmetic no
-longer supports it at 1,000</b>. What can still move those nine parts to a mould is
+longer supports it at 1,000</b> &mdash; and that holds on <b>every</b> failure-buffer basis, not
+only on the unbuffered c<sub>print</sub> of this table: the buffer table below recomputes each N*
+at &times;%s&ndash;%s and the lowest of the nine stays at %s units. What can still move those nine parts to a mould is
 <b>surface finish and throughput</b>, not unit cost — and neither has a written acceptance
 standard yet (§8).</div>''' % (
     len(ROWS), nnone,
@@ -593,7 +771,76 @@ standard yet (§8).</div>''' % (
     thou(min(r["be_best"] for r in ROWS if r["be_best"])) if nbe else "—",
     thou(max(r["be_best"] for r in ROWS if r["be_best"])) if nbe else "—",
     thou(min(r["be_worst"] for r in ROWS if r["be_worst"])) if any(r["be_worst"] for r in ROWS) else "—",
-    thou(max(r["be_worst"] for r in ROWS if r["be_worst"])) if any(r["be_worst"] for r in ROWS) else "—"))
+    thou(max(r["be_worst"] for r in ROWS if r["be_worst"])) if any(r["be_worst"] for r in ROWS) else "—",
+    "%.2f" % R["failure_buffer"]["low"], "%.2f" % R["failure_buffer"]["high"],
+    thou(min(x for x in (breakeven(r["c"]["inhouse_mid"] * R["failure_buffer"]["high"],
+                                   R["mould_piece_usd"]["low"], R["tool_usd"]["floor"])
+                          for r in ROWS if r["visible"] and r["material"] != "TPU") if x))))
+
+# --- THE FAILURE BUFFER, APPLIED RATHER THAN ARGUED ABOUT -------------------
+# c_print in the table above carries none; §2.2's headline per-robot figure
+# carries ×1.10–1.30 from the same rate table. Which basis a reader takes
+# changes WHICH PARTS break even under 1,000 units, so the sensitivity is a
+# table, not a sentence. Measured 2026-09-03: at ×1.10 one slug crosses under
+# 1,000 and at ×1.20 and ×1.30 three do — and all three are TPU, none of them
+# one of the nine hard visible parts docs/production/process.md §8 proposed to
+# mould.
+HARD_VIS = [r for r in ROWS if r["visible"] and r["material"] != "TPU"]
+SOFT_VIS = [r for r in ROWS if r["visible"] and r["material"] == "TPU"]
+
+
+def bufstats(key):
+    """N* @ the $1,495 tool floor for every slug at one buffer multiplier."""
+    if key == "none":
+        f, ns = 1.0, {r["slug"]: r["be_best"] for r in ROWS}
+    else:
+        f, ns = BUFFERS[key], {r["slug"]: r["be_buf"][key] for r in ROWS}
+    under = sorted([(v, s) for s, v in ns.items() if v and v < 1000.0])
+    hard = [ns[r["slug"]] for r in HARD_VIS if ns[r["slug"]]]
+    hard_min = min(hard) if hard else None
+    hard_slug = ([r["slug"] for r in HARD_VIS if ns[r["slug"]] == hard_min][0]
+                 if hard_min is not None else None)
+    return dict(f=f, ns=ns, n_none=sum(1 for v in ns.values() if not v), under=under,
+                hard_min=hard_min, hard_slug=hard_slug,
+                hard_none=sum(1 for r in HARD_VIS if not ns[r["slug"]]))
+
+
+BUFROWS = [(k, bufstats(k)) for k in ("none", "low", "mid", "high")]
+BUF = dict(BUFROWS)
+_lbl = {"none": "as tabled above &mdash; <b>no buffer</b>",
+        "low": "buffer at the low end of the sourced band",
+        "mid": "buffer at the band&rsquo;s midpoint",
+        "high": "buffer at the high end of the sourced band"}
+A(tbl(["c<sub>print</sub> basis", "&times;", "no break-even",
+       "N* &lt; 1,000", "which ones, at what N*",
+       "lowest N* of the nine hard visible parts"],
+      [[td(_lbl[k], "f"),
+        td("&times;%.2f" % b["f"], "num"),
+        td("%d of %d" % (b["n_none"], len(ROWS)), "num"),
+        td("<b>%d</b>" % len(b["under"]), "num"),
+        td(", ".join("<code>%s</code> %s" % (E(sl), thou(v)) for v, sl in b["under"])
+           or "none", "f"),
+        td("%s <code>%s</code>" % (thou(b["hard_min"]), E(b["hard_slug"] or "")), "num")]
+       for k, b in BUFROWS], cls="data tight"))
+
+A('''<div class="verdict"><b>What the buffer changes, and what it does not.</b> It changes the
+answer for the soft set and not for the shells. On every basis in the table &mdash; no buffer,
+&times;%.2f, &times;%.2f, &times;%.2f &mdash; the lowest break-even among the <b>nine hard visible
+parts</b> (the set <code>docs/production/process.md</code> §8 proposed to mould: the visible list
+minus the four TPU pieces) is <b>%s units</b> at the harshest basis, on <code>%s</code>. Those nine
+never cross 1,000, so §2.4&rsquo;s decision at 1,000 does not turn on the buffer. What does cross is
+TPU: %s. The buffer puts <b>%d</b> slug%s under 1,000 at &times;%.2f and <b>%d</b> at &times;%.2f,
+every one of them soft &mdash; and the case for tooling a soft part was never the one process.md
+made. Note the other direction too: a part with <b>no</b> break-even at one basis acquires one at
+another (%d slugs have none unbuffered, %d at &times;%.2f), because a larger c<sub>print</sub> is
+what opens a gap over the moulded piece at all.</div>''' % (
+    BUF["low"]["f"], BUF["mid"]["f"], BUF["high"]["f"],
+    thou(BUF["high"]["hard_min"]), E(BUF["high"]["hard_slug"] or ""),
+    ", ".join("<code>%s</code> at %s (&times;%.2f)" % (E(sl), thou(v), BUF["high"]["f"])
+              for v, sl in BUF["high"]["under"]) or "nothing",
+    len(BUF["low"]["under"]), "" if len(BUF["low"]["under"]) == 1 else "s",
+    BUF["low"]["f"], len(BUF["high"]["under"]), BUF["high"]["f"],
+    BUF["none"]["n_none"], BUF["high"]["n_none"], BUF["high"]["f"]))
 
 A('<h3 id="s2-4">2.4 The decision, by quantity</h3>')
 vis_rows = [r for r in ROWS if r["visible"]]
@@ -608,7 +855,7 @@ A(tbl(["units", "decision", "the arithmetic behind it"], [
         % (usd(all_tool_floor / 10.0, 0), src("ML")))],
     [td("<b>100</b>"), td("<b>FDM farm</b> — own printers or a no-MOQ farm. Mould nothing."),
      td("%s printer-hours for 100 robots. At the farm's own %s–%s per robot the printed parts are still under 12 %% of the bought cost."
-        % (TOT["hours"] * 100, usd(TOT["farm_lo"], 2), usd(TOT["farm_hi"], 2)))],
+        % (thou(TOT["hours"] * 100), usd(TOT["farm_lo"], 2), usd(TOT["farm_hi"], 2)))],
     [td("<b>1,000</b>"), td("<b>Keep every part on FDM on cost.</b> Re-open the nine visible parts on finish and throughput, not on price."),
      td("%s printer-hours = a %d-printer farm for %.0f days at 20 h/day. Tooling the nine visible parts is %s–%s at the floor and the aluminium ceiling %s, i.e. %s–%s per robot on top of a moulded piece price that is mostly ABOVE what we print for. The case for a tool here is the layer line on a shell, and §8 records that nobody has written the acceptance standard that would settle it."
         % (thou(TOT["hours"] * 1000), 20, TOT["hours"] * 1000 / 20 / 20,
@@ -651,12 +898,18 @@ for r in ROWS:
         td(mm4(w.get("min_mm")), "num"),
         td(mm4(w.get("p5_mm")), "num"),
         td(mm4(f["tw"]) if f["tw"] is not None else '<span class="chip cd">mesh</span>', "num"),
+        td(chip("PASS") if f["printability_ok"] is True else
+           (chip("FAIL") if f["printability_ok"] is False
+            else '<span class="chip cd">mesh</span>')),
         td('<span class="chip %s">%s</span>'
            % ("pass" if f["verdict"] == "PRINTABLE" else "cd",
               "clear" if f["verdict"] == "PRINTABLE" else "watch")),
     ])
 A(tbl(["part", "build dir", "β&lt;30°", "β&lt;10°", "unsup. mm²",
-       "wall min", "wall p5", "solid wall", "oh+wall"], rows, cls="data tight compact"))
+       "wall min", "wall p5", "solid wall", "cecad printability", "oh+wall"],
+      rows, cls="data tight compact"))
+_nfail = sum(1 for r in ROWS if (dfm_row(r["slug"]) or {}).get("printability_ok") is False)
+_failed = [r["slug"] for r in ROWS if (dfm_row(r["slug"]) or {}).get("printability_ok") is False]
 A('<p class="note" style="border:none;background:none;padding:0;font-size:13px">'
   '<b>oh+wall</b> grades ONLY the two things this section measures — unsupported area and wall '
   'thickness. <b>clear</b> = neither is a problem; <b>watch</b> = at least one is, spelled out with '
@@ -665,8 +918,14 @@ A('<p class="note" style="border:none;background:none;padding:0;font-size:13px">
   'collected in §3.2. A part can read <b>clear</b> here and still need a reamed bearing seat. '
   '<b>solid wall</b> is <code>cecad.inspect.thinnest_wall</code> on the parametric solid and reads '
   '<b>mesh</b> where the STL is a vendor mesh with no solid behind it. '
+  '<b>cecad printability</b> is <code>cecad.printed.printability</code>&rsquo;s own boolean on that '
+  'same solid — bed fit and the two-perimeter floor — and it is printed here rather than '
+  'paraphrased: <b>%d of the %d parametric solids FAIL it</b> (%s). '
+  '%s '
   'Layer counts, the &beta;&lt;45° band, the median wall and every raw per-direction figure are in '
-  '<code>out/dfm/dfm.json</code>; §4.2 carries the layer count beside the orientation.</p>')
+  '<code>out/dfm/dfm.json</code>; §4.2 carries the layer count beside the orientation.</p>'
+  % (_nfail, sum(1 for r in ROWS if (dfm_row(r["slug"]) or {}).get("printability_ok") is not None),
+     ", ".join("<code>%s</code>" % E(x) for x in _failed) or "none", bed_sentence()))
 
 A('''<div class="verdict warn"><b>What §3 measured, and what it did not.</b> Every row below is
 read off the STL in <code>out/print/stl/</code> — <b>the file a shop would actually print</b>, and
@@ -716,6 +975,10 @@ for r in ROWS:
            "".join("<li>%s</li>" % x for x in f["findings"]) +
            ("<li>%s</li>" % "; ".join(extra) if extra else "") +
            ("<li><b>slicer said:</b> %s</li>" % E(sl["slicer_warning"]) if sl.get("slicer_warning") else "") +
+           # A part this section DFM-reviews as printed while the slice file
+           # flags it as possibly bought must say so in its own row (§2.2).
+           "".join("<li><b>slice.json flag:</b> %s</li>" % E(x)
+                   for x in FLAGGED.get(r["slug"], [])) +
            "</ul>", "f"),
         td(chip(f["verdict"])),
     ])
@@ -771,7 +1034,9 @@ A('''<p class="lede">These are the presets that produced every gram and second i
 document — not a recommendation written afterwards. Reproducing the numbers means using
 these exact names.</p>''')
 A(tbl(["setting", "value", "note"], [
-    [td("printer"), td("<code>%s</code>" % E(SLICE["printer"] if SLICE else "—")), td("bed 340 × 320 × 340")],
+    [td("printer"), td("<code>%s</code>" % E(SLICE["printer"] if SLICE else "—")),
+     td("bed %s mm, read out of that string" % (" × ".join(n(x) for x in BED_SLICE)
+                                                if BED_SLICE else "CANNOT DETERMINE"))],
     [td("machine preset"), td("<code>%s</code>" % E(pr.get("machine_preset", "—"))), td("0.4 mm nozzle")],
     [td("process preset"), td("<code>%s</code>" % E(pr.get("process_preset", "—"))),
      td("layer %s mm" % n(pr.get("layer_mm")))],
@@ -1060,19 +1325,122 @@ one. The packaging insert is therefore the only thing standing between a battery
 IATA E.08&rsquo;s requirement that equipment be &ldquo;packaged in a manner that prevents unintentional
 activation&rdquo; %s. That makes the insert a regulated part, not a cosmetic one — and it is the
 single packaging item with no design and no supplier in this repository.</div>''' % src("S9"))
+
+# --- 7.2 WHICH PACK, AND WHERE 18.72 Wh COMES FROM --------------------------
+# The whole of §7 rests on one pack, and this document used to name it without
+# saying that the FITTED pack is a CANNOT DETERMINE in this same repository
+# (ce-parts/np-f550/component.json: "THE FORM FACTOR IS KNOWN, THE FITTED PACK
+# IS NOT") or that 18.72 Wh is nominal arithmetic and not a reading off a
+# label. Both are said here, and the classification is recomputed over every
+# sourced candidate so a reader can see whether the open question can move it.
+ID = b.get("identity")
+if ID:
+    th = ID["thresholds"]
+
+    def _wh(c):
+        return c["mah"] / 1000.0 * c["volts"]
+
+    cands = sorted(ID["candidates"], key=_wh)
+    A('<h3 id="s7-2">7.2 Which pack this is, and where %s Wh comes from</h3>' % n(b["wh"]))
+    A('<div class="note"><b>%s</b> %s</div>' % (E(b["wh_basis"]), src("S15", "S12")))
+    A('''<div class="verdict warn"><b>The fitted pack is
+<span class="chip cd">CANNOT DETERMINE</span>, and the form factor is not.</b>
+<b>Closed:</b> %s %s
+<b>Open:</b> %s %s
+<b>What settles it:</b> %s</div>''' % (E(ID["closed"]), src("BAY"), E(ID["open"]),
+                                       src("NPF550"), E(ID["settles"])))
+    rows = []
+    for c in cands:
+        wh = _wh(c)
+        cell = wh / 2.0            # every candidate is a 2-series pack (S15: "Number of cells: 2")
+        ok = (cell <= th["cell_wh_max"] and wh <= th["battery_wh_max"]
+              and wh > th["button_exempt_wh"])
+        rows.append([
+            td("<b>%s</b>" % E(c["pack"]), "f"),
+            td("%s mAh<br>× %s V" % (n(c["mah"]), n(c["volts"])), "num"),
+            td("<b>%.4f</b>" % wh, "num"),
+            td("%.4f" % cell, "num"),
+            td(chip("PASS") if ok else chip("FAIL")),
+            td(E(c["cite"]) + " " + src(*c.get("src", [])), "f"),
+        ])
+    A(tbl(["candidate pack", "marked", "battery Wh",
+           "cell Wh (2S)", "regime", "where the row comes from"],
+          rows, cls="data tight"))
+    _lo, _hi = _wh(cands[0]), _wh(cands[-1])
+    _allok = all(_wh(c) / 2.0 <= th["cell_wh_max"] and _wh(c) <= th["battery_wh_max"]
+                 and _wh(c) > th["button_exempt_wh"] for c in cands)
+    A('''<div class="verdict"><b>The open question does not move the shipping regime.</b> Over the
+whole sourced range — %.4f Wh to %.4f Wh, a factor of %.2f — every candidate stays under the
+%s Wh cell limit and the %s Wh battery limit and above the %s Wh floor %s, so
+<b>%s</b>: UN 3481 with PI 967 / PI 966 Section II exactly as tabled above. What the open question
+moves is the <b>marked value</b> on the case and the lot record at S0 — which is why S0&rsquo;s gate
+is written as &ldquo;%s&rdquo; and not as a number this document chose. %s</div>''' % (
+        _lo, _hi, _hi / _lo,
+        n(th["cell_wh_max"]), n(th["battery_wh_max"]), n(th["button_exempt_wh"]),
+        src(*th.get("src", [])),
+        "every row above lands in the same regime" if _allok
+        else "AT LEAST ONE CANDIDATE FALLS OUTSIDE IT — see the FAIL row",
+        E(next((g["pass"] for s in D["stations"] if s["id"] == "S0"
+                for g in s["gates"] if "Wh" in g["gate"]), "the supplier's printed Wh")),
+        E(th.get("note", ""))))
+    A('''<p class="note" style="font-size:13px"><b>Read against <code>COMPARISON.html</code> §5
+finding 2.</b> That row still reads &ldquo;Battery mesh is an NP-F970, not the NP-F550 class cell the
+documentation calls out&rdquo; and asks to &ldquo;confirm the shipping cell&rdquo;. Half of it was
+answered by measurement on 2026-09-02 and this document uses the measured half: the mesh is
+<i>named</i> np_f970 and its body is F550-class, and the bay refuses a published F970 by
+19.829&nbsp;mm %s. The half that is still open is the one carried in §8 — <i>which</i> F550-shape
+pack, and therefore what Wh is printed on it.</p>''' % src("BAY"))
+
 A("</section>")
 
 # ---- 8 -------------------------------------------------------------------
 A('<section id="open"><h2><span class="n">8</span>Open items</h2>')
 A('''<p class="lede">What this playbook cannot yet tell a shop, with the measurement that would
 close each one. These are work items, not caveats.</p>''')
+def stale_consequence():
+    """§8's consequence sentence for the stale print files, COMPUTED.
+
+    It was hand-typed prose and it was wrong: it said "four slugs differ by 5 %
+    or more" and then listed five (measured 2026-09-03 against
+    out/playbook/stale-stl-delta.json, which has five rows over 5 % on mass or
+    on time). A generator owns every number in this repo; this is the same
+    figure §4.3's table and verdict are built from, so the two cannot disagree
+    again.
+    """
+    if not STALE:
+        return None
+    t = STALE["totals"]
+    big = [r for r in STALE["rows"] if abs(r["d_g_pct"]) >= 5 or abs(r["d_s_pct"]) >= 5]
+    def _one(r):
+        axes = []
+        if abs(r["d_g_pct"]) >= 5:
+            axes.append("%+.1f %% mass" % r["d_g_pct"])
+        if abs(r["d_s_pct"]) >= 5:
+            axes.append("%+.1f %% time" % r["d_s_pct"])
+        return "%s (%s)" % (r["slug"].replace("microduck-", ""), " / ".join(axes))
+    return ("Measured, not assumed: §4.3 slices all %d rebuilds on the same presets. "
+            "Across a robot the difference is %+.2f g and %+.3f h (%+.1f %% and %+.1f %%), "
+            "so §2's costs and break-evens do not move. But %d of the %d differ by 5 %% or "
+            "more on mass or on time — %s — and for those §3's overhang and wall figures and "
+            "§4.2's orientation describe a shape the design no longer has."
+            % (len(STALE["rows"]), t["delta_grams_per_robot"], t["delta_hours_per_robot"],
+               100.0 * t["delta_grams_per_robot"] / t["robot_grams_on_disk"],
+               100.0 * t["delta_hours_per_robot"] / t["robot_hours_on_disk"],
+               len(big), len(STALE["rows"]), ", ".join(_one(r) for r in big)))
+
+
+GEN_CONS = {"stale_delta": stale_consequence()}
+
 rows = []
 for o in D["open"]:
+    cons = o.get("consequence") or GEN_CONS.get(o.get("consequence_generated"))
+    if o.get("consequence_generated") and cons is None:
+        raise SystemExit("open item %r asks for generated consequence %r and the "
+                         "generator produced none" % (o["item"], o["consequence_generated"]))
     rows.append([
         td("<b>%s</b>" % E(o["item"]), "f"),
         td(chip(o["state"])),
-        td(E(o["settles"]) + (("<br><b>Consequence:</b> " + E(o["consequence"]))
-                              if o.get("consequence") else ""), "f"),
+        td(E(o["settles"]) + (("<br><b>Consequence:</b> " + E(cons)) if cons else ""), "f"),
     ])
 A(tbl(["item", "state", "what settles it, and why it matters"], rows, cls="data tight"))
 A("</section>")

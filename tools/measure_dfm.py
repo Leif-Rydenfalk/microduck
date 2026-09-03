@@ -52,6 +52,11 @@ os.environ.setdefault("CE_TRIAD_ROOT", ROOT + ":" + os.path.dirname(os.path.dirn
 
 SAMPLE_N = 4000          # wall-thickness rays per part
 SEED = 20260902
+
+#: The build volume of the machine that produced every gram and second in
+#: out/print/slice.json, read off that file's own `printer` field and confirmed
+#: by the plate read-back in out/print/PRINT.md:59. mm, X x Y x Z.
+H2S_BED = (340.0, 320.0, 340.0)
 EPS = 1e-3               # mm, ray start offset off the surface
 OPPOSE = 0.20            # min |cos| between ray and hit-facet normal to count as a wall
 
@@ -226,7 +231,15 @@ def solid_dfm(slug):
     except Exception as e:
         out["radii_mm"] = {"reason": "inspect.radius_values raised: %s" % e}
     try:
-        rep = printed.printability(part)
+        # THE BED THE PARTS ARE ACTUALLY PRINTED ON. cecad.printed.printability
+        # defaults to bed="prusa_mk4" (250 x 210 x 220), which is not this
+        # programme's machine: out/print/slice.json's `printer` field reads
+        # "Bambu Lab H2S (roster: H2S (2), 192.168.1.133, bed 340x320x340)" and
+        # out/print/PRINT.md:59 measured 340 x 320, h 340 back out of both plate
+        # files. Leaving the default in place published a fit verdict against a
+        # machine nobody owns; it happened to be conservative (every part fits
+        # either bed), but a conservative wrong number is still a wrong number.
+        rep = printed.printability(part, bed=H2S_BED)
         out["printability"] = json.loads(json.dumps(rep, default=str))
     except Exception as e:
         out["printability"] = {"reason": "printability raised: %s" % e}
