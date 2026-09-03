@@ -150,8 +150,11 @@ def verify_evidence(data):
 
 
 def repo_licence_file():
-    hits = sorted(os.path.basename(p) for p in glob.glob(os.path.join(REPO, "LICENSE*")) + glob.glob(os.path.join(REPO, "LICENCE*")))
-    return {"present": bool(hits), "files": hits}
+    # Exact licence-file names only. A bare LICENCE* glob matched LICENCE-POSITION.html
+    # (this page) and reported a false PASS — caught by reading the screenshot back.
+    names = ["LICENSE", "LICENSE.md", "LICENSE.txt", "LICENCE", "LICENCE.md", "LICENCE.txt", "COPYING"]
+    hits = [n for n in names if os.path.isfile(os.path.join(REPO, n))]
+    return {"present": bool(hits), "files": hits, "looked_for": names}
 
 
 # ---------------------------------------------------------------- rendering
@@ -209,6 +212,11 @@ def render(data, census, readme_checks, evidence, lic_file, now):
       '  @media(max-width:800px){.headline{grid-template-columns:1fr}}\n'
       '  table.data td{vertical-align:top;font-size:13px}\n'
       '  table.data td.v{white-space:nowrap}\n'
+      '  table.data td.v .chip.long{white-space:normal;display:inline-block;max-width:150px;line-height:1.35}\n'
+      '  table#q4 td.v{white-space:normal;min-width:120px}\n'
+      '  table#q4{table-layout:fixed}\n'
+      '  table#ev{table-layout:fixed;width:100%%;min-width:0} table#ev td,table#ev th{overflow-wrap:anywhere;word-break:break-all;white-space:normal}\n'
+      '  table#repo{table-layout:fixed;width:100%%;min-width:0} table#repo td{overflow-wrap:anywhere;white-space:normal}\n'
       '  .instr{display:grid;grid-template-columns:1fr 1fr;gap:18px}\n'
       '  .instr ol{margin:0 0 0 20px;font-size:13.5px}\n'
       '  .instr ol li{margin:5px 0}\n'
@@ -256,11 +264,11 @@ def render(data, census, readme_checks, evidence, lic_file, now):
 
     # 1 questions
     A(h2(1, "The four questions a factory asks", "工厂会问的四个问题", "questions"))
-    A('<div class="tablewrap"><table class="data"><thead><tr>%s%s%s%s%s</tr></thead><tbody>'
+    A('<div class="tablewrap"><table class="data" id="q4"><colgroup><col style="width:5%%"><col style="width:20%%"><col style="width:16%%"><col style="width:41%%"><col style="width:18%%"></colgroup><thead><tr>%s%s%s%s%s</tr></thead><tbody>'
       % (th("#", "编号"), th("Question", "问题"), th("Verdict", "结论"), th("Plain reading of the licence", "许可证字面解读"), th("What settles it", "如何确定")))
     for q in qs:
         A('<tr><td class="v"><code>%s</code></td><td><b>%s</b><br><span class="zh">%s</span></td><td class="v">%s</td><td>%s%s%s</td><td>%s</td></tr>'
-          % (e(q["id"]), e(q["q_en"]), e(q["q_zh"]), chip(q["verdict"]), e(q.get("plain_reading", "")),
+          % (e(q["id"]), e(q["q_en"]), e(q["q_zh"]), chip(q["verdict"]).replace('class="chip ', 'class="chip long '), e(q.get("plain_reading", "")),
              ('<br><br><b>May do now:</b> %s' % e(q["what_the_factory_may_do_now"])) if q.get("what_the_factory_may_do_now") else "",
              ('<br><b>May not do now:</b> %s' % e(q["what_the_factory_may_not_do_now"])) if q.get("what_the_factory_may_not_do_now") else "",
              e(q.get("settles_it", "see section 3"))))
@@ -396,7 +404,7 @@ def render(data, census, readme_checks, evidence, lic_file, now):
     A('  <div class="stat"><b>%d / %d</b><span>our rebuilds with a licence field</span></div>' % (len(census["generated_with_licence"]), census["generated_total"]))
     A('  <div class="stat"><b>%s</b><span>repo LICENSE file</span></div>' % ("present" if lic_file["present"] else "ABSENT"))
     A('</div>')
-    A('<div class="tablewrap"><table class="data"><thead><tr>%s%s%s</tr></thead><tbody>' % (th("Check", "检查项"), th("Verdict", "结论"), th("Measured", "测量结果")))
+    A('<div class="tablewrap"><table class="data" id="repo"><colgroup><col style="width:40%%"><col style="width:10%%"><col style="width:50%%"></colgroup><thead><tr>%s%s%s</tr></thead><tbody>' % (th("Check", "检查项"), th("Verdict", "结论"), th("Measured", "测量结果")))
     A('<tr><td>Folders asserting a CC version (4.0) that Pollen\'s README does not name</td><td class="v">%s</td><td>%s</td></tr>'
       % (chip("FAIL" if census["assert_4_0"] else "PASS"), e(", ".join(census["assert_4_0"]) or "none")))
     A('<tr><td>Folders that say "version not stated" (correct)</td><td class="v">%s</td><td>%s</td></tr>'
@@ -406,7 +414,7 @@ def render(data, census, readme_checks, evidence, lic_file, now):
     A('<tr><td>Vendor-origin folders that mention the CC licence at all</td><td class="v">%s</td><td>%d of %d: %s</td></tr>'
       % (chip("PASS" if len(census["vendor_cc_folders"]) else "FAIL"), len(census["vendor_cc_folders"]), census["by_origin"].get("vendor", 0), e(", ".join(census["vendor_cc_folders"]) or "none")))
     A('<tr><td>This repository has a LICENSE file of its own, so the partner knows the terms on OUR documents</td><td class="v">%s</td><td>%s</td></tr>'
-      % (chip("PASS" if lic_file["present"] else "FAIL"), e(", ".join(lic_file["files"]) or "ls LICENSE* LICENCE*: no match")))
+      % (chip("PASS" if lic_file["present"] else "FAIL"), e(", ".join(lic_file["files"]) or ("none of %s exists at the repo root" % ", ".join(lic_file["looked_for"])))))
     for r in readme_checks:
         A('<tr><td>README quote at cited line: <code>%s</code>%s</td><td class="v">%s</td><td>%s</td></tr>'
           % (e(r["file"]), (":%s" % e(r["line"])) if r["line"] != "-" else " (version check)", chip(r["verdict"]), e(r["why"])))
@@ -419,7 +427,7 @@ def render(data, census, readme_checks, evidence, lic_file, now):
     A(h2(7, "Evidence archive, hashed", "证据存档（含哈希）", "evidence"))
     A('<p class="lede">Every page quoted above was archived byte-for-byte in <code>out/factory/licence-evidence/</code> at fetch time. '
       'The hash was recorded in <code>licence.json</code> then and is re-computed now; a mismatch would mean the quoted page is not the archived page.</p>')
-    A('<div class="tablewrap"><table class="data compact"><thead><tr>%s%s%s%s%s</tr></thead><tbody>'
+    A('<div class="tablewrap"><table class="data compact" id="ev"><colgroup><col style="width:22%%"><col style="width:34%%"><col style="width:7%%"><col style="width:22%%"><col style="width:15%%"></colgroup><thead><tr>%s%s%s%s%s</tr></thead><tbody>'
       % (th("File", "文件"), th("URL", "网址"), th("Bytes", "字节"), th("sha256 (measured now)", "sha256（当前测量）"), th("Verdict", "结论")))
     for x in evidence:
         A('<tr><td><code>%s</code></td><td class="src"><a href="%s">%s</a></td><td class="num">%s</td><td class="src">%s</td><td class="v">%s<br><span class="src">%s</span></td></tr>'
