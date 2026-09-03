@@ -187,7 +187,7 @@ for p in slice_["parts"]:
         ("; ".join(problems) + "." if problems else note), closer, by,
         {"stl": p["stl"], "stl_source": src, "vendor_mesh": vendor, "licence": ("CC BY-SA-NC (Pollen sim mesh)" if vendor else "ours"), "stale": stale,
          "watertight": st.get("watertight"), "open_edges": st.get("open_edges"), "grams_per_piece": p["grams_per_piece"], "seconds_per_piece": p["seconds_per_piece"],
-         "slicer_warning": p.get("slicer_warning"), "stl_mtime": stl_mtime, "part_last_commit": part_commit, "rebuilt_delta": rebuilt_delta})
+         "slicer_warning": p.get("slicer_warning"), "qty": p["qty"], "stl_mtime": stl_mtime, "part_last_commit": part_commit, "rebuilt_delta": rebuilt_delta})
 
 # ---------------------------------------------------------------- 3 bought lines
 SRC = J(os.path.join(MEAS, "sourcing-rows.json"))
@@ -336,6 +336,10 @@ def gchip(r):
     return '<span class="g %s">%s<br><small>%s</small></span>' % (cls, E(r["grade_en"]), E(r["grade_zh"]))
 
 
+def cols(*pct):
+    return "<colgroup>" + "".join('<col style="width:%s%%">' % w for w in pct) + "</colgroup>"
+
+
 def th(en, zh):
     return "<th>%s<br><span class=\"zh\">%s</span></th>" % (E(en), E(zh))
 
@@ -344,8 +348,8 @@ A = []
 A.append('<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n<title>%s — %s</title>' % (E(D["doc"]["title"]), E(D["doc"]["title_zh"])))
 A.append('<link rel="stylesheet" href="../../tools/doc.css">')
 A.append('<style>.zh{font-family:var(--sans);font-size:12px;color:var(--ink-2);display:block}'
-         'table{border-collapse:collapse;width:100%;table-layout:fixed;font-size:12.5px;margin:8px 0 18px;word-break:break-word;overflow-wrap:anywhere}th,td{border-bottom:1px solid var(--hair);padding:5px 6px;text-align:left;vertical-align:top}th{background:var(--head);font-family:var(--sans);font-size:12px}'
-         'td.m{font-family:var(--mono);font-size:11.5px}'
+         'table{border-collapse:collapse;width:100%;table-layout:fixed;font-size:12.5px;margin:8px 0 18px;overflow-wrap:anywhere}th{white-space:normal !important;padding:5px 6px}th,td{border-bottom:1px solid var(--hair);padding:5px 6px;text-align:left;vertical-align:top}th{background:var(--head);font-family:var(--sans);font-size:12px}'
+         'td.m{font-family:var(--mono);font-size:11.5px;word-break:break-all}'
          '.g{font-family:var(--sans);font-weight:600;font-size:11px}.g.ok{color:var(--ready)}.g.no{color:var(--no)}.g.cd{color:var(--cd)}'
          '.front{border:2px solid var(--no);padding:12px 16px;margin:18px 0}.front h2{margin:0 0 6px;border:none;font-size:20px}'
          '.stat b.no{color:var(--no)}.num{text-align:right;font-variant-numeric:tabular-nums}</style>')
@@ -378,7 +382,7 @@ A.append('<nav class="toc"><a href="#notyet">1 Not yet · 尚未就绪</a><a hre
 # 1 not yet (all non-ready rows, grouped by closer)
 A.append('<section id="notyet"><h2><span class="n">1</span>Everything that is NOT ready, and who closes it · 所有未就绪项及负责方</h2>')
 A.append('<p class="lede">One row per artifact that is not READY TO BUILD FROM. "Closer" says whether a software agent finishes it tonight (and which workflow) or a person must. · 每行一个未就绪文件；“负责方”说明今晚由软件代理完成（及哪个工作流）还是必须由人完成。</p>')
-A.append('<table><tr>%s%s%s%s%s</tr>' % (th("Class", "类别"), th("Artifact", "文件"), th("Grade", "评级"), th("What is missing", "缺什么"), th("Closer", "负责方")))
+A.append('<table>%s<tr>%s%s%s%s%s</tr>' % (cols(7, 17, 11, 44, 21), th("Class", "类别"), th("Artifact", "文件"), th("Grade", "评级"), th("What is missing", "缺什么"), th("Closer", "负责方")))
 order = {"pcb": 0, "assembly": 1, "harness": 2, "drawing": 3, "print": 4, "bought": 5, "test": 6, "open": 7, "triad": 8}
 for r in sorted([r for r in rows if r["grade"] != "READY"], key=lambda r: (order[r["class"]], r["id"])):
     A.append('<tr><td>%s</td><td class="m">%s</td><td>%s</td><td>%s</td><td>%s<span class="zh">%s</span><small>%s</small></td></tr>' % (
@@ -387,7 +391,7 @@ A.append('</table></section>')
 
 # 2 in flight
 A.append('<section id="inflight"><h2><span class="n">2</span>Work an agent is doing tonight — do not hand these to the factory · 今晚代理正在做的工作（勿交给工厂）</h2>')
-A.append('<table><tr>%s%s%s</tr>' % (th("Workflow", "工作流"), th("What it closes", "完成内容"), th("Paths it owns", "所属路径")))
+A.append('<table>%s<tr>%s%s%s</tr>' % (cols(14, 50, 36), th("Workflow", "工作流"), th("What it closes", "完成内容"), th("Paths it owns", "所属路径")))
 for w in D["in_flight"]:
     A.append('<tr><td class="m">%s</td><td>%s<span class="zh">%s</span></td><td class="m">%s</td></tr>' % (E(w["id"]), E(w["en"]), E(w["zh"]), E(w["owns"])))
 A.append('</table></section>')
@@ -395,7 +399,7 @@ A.append('</table></section>')
 # 3 drawings
 A.append('<section id="drawings"><h2><span class="n">3</span>Drawing sheets — bin/sheetcheck, %s · 图纸</h2>' % E(SC["generated"]))
 A.append('<p class="lede">Limits: dimension coverage 100 %, occupancy ≥ 85 %, largest empty rectangle &lt; 5 %, minimum font ≥ 3.5 mm, ≥ 4 isometric views, ≥ 6 shaded renders, line ratio ≤ 10, curve density ≤ 1.43 mm/mm². KIND PRINT = the sheet declares itself not a dimensioned drawing (mesh-backed part).</p>')
-A.append('<table><tr>%s%s%s%s%s%s%s%s%s%s%s</tr>' % (th("Sheet", "图纸"), th("Kind", "类型"), th("Grade", "评级"), th("Dim %", "尺寸覆盖率"), th("Occ %", "占用率"), th("Empty %", "最大空白"), th("Font mm", "最小字高"), th("Iso", "等轴视图"), th("Renders", "渲染图"), th("Line ratio", "线数比"), th("Curve dens.", "曲线密度")))
+A.append('<table>%s<tr>%s%s%s%s%s%s%s%s%s%s%s</tr>' % (cols(22, 7, 13, 8, 7, 7, 7, 6, 7, 8, 8), th("Sheet", "图纸"), th("Kind", "类型"), th("Grade", "评级"), th("Dim %", "尺寸覆盖率"), th("Occ %", "占用率"), th("Empty %", "最大空白"), th("Font mm", "最小字高"), th("Iso", "等轴视图"), th("Renders", "渲染图"), th("Line ratio", "线数比"), th("Curve dens.", "曲线密度")))
 for r in sorted([r for r in rows if r["class"] == "drawing"], key=lambda r: r["id"]):
     if r.get("kind") == "NONE":
         A.append('<tr><td class="m">%s</td><td>—</td><td>%s</td><td colspan="8">%s</td></tr>' % (E(r["id"]), gchip(r), E(r["measurement"])))
@@ -410,37 +414,46 @@ A.append('</table></section>')
 
 # 4 print
 A.append('<section id="print"><h2><span class="n">4</span>Print files — ce-slice numbers, never derived from volume · 打印文件</h2>')
-A.append('<table><tr>%s%s%s%s%s%s%s%s%s</tr>' % (th("Part", "零件"), th("Grade", "评级"), th("Mat.", "材料"), th("Qty", "数量"), th("Watertight", "封闭网格"), th("g / piece", "克/件"), th("s / piece", "秒/件"), th("Source / licence", "来源 / 许可"), th("Problem", "问题")))
+A.append('<table>%s<tr>%s%s%s%s%s%s%s%s%s</tr>' % (cols(19, 12, 6, 5, 9, 8, 8, 12, 21), th("Part", "零件"), th("Grade", "评级"), th("Mat.", "材料"), th("Qty", "数量"), th("Watertight", "封闭网格"), th("g / piece", "克/件"), th("s / piece", "秒/件"), th("Source / licence", "来源 / 许可"), th("Problem", "问题")))
 for r in [r for r in rows if r["class"] == "print"]:
-    A.append('<tr><td class="m">%s</td><td>%s</td><td>%s</td><td class="num">%s</td><td>%s</td><td class="num">%.4f</td><td class="num">%.0f</td><td>%s</td><td>%s</td></tr>' % (
-        E(r["id"]), gchip(r), E(r["stl"].split("/")[3]), "", "yes" if r["watertight"] else "NO (%s open edges)" % r["open_edges"], r["grams_per_piece"], r["seconds_per_piece"], E(r["licence"]), E(r["missing"])))
+    short = []
+    if not r["watertight"]:
+        short.append("NOT watertight, %s open edges" % r["open_edges"])
+    if r["stale"]:
+        rd = r.get("rebuilt_delta") or {}
+        short.append("Pollen's mesh; our PASSed rebuild exists (bbox delta <= %s mm) — re-export for provenance/licence" % rd.get("max_abs_bbox_delta_mm", "?"))
+    if r["slicer_warning"]:
+        short.append("supports needed; sliced numbers are a floor")
+    A.append('<tr><td class="m">%s</td><td>%s</td><td>%s</td><td class="num">%d</td><td>%s</td><td class="num">%.4f</td><td class="num">%.0f</td><td>%s</td><td>%s</td></tr>' % (
+        E(r["id"]), gchip(r), E(r["stl"].split("/")[3]), r["qty"], "yes" if r["watertight"] else "NO", r["grams_per_piece"], r["seconds_per_piece"], E(r["licence"]), E("; ".join(short))))
 A.append('</table></section>')
 
 # 5 bought
 A.append('<section id="bought"><h2><span class="n">5</span>Bought lines — spec/sourcing.json rev C · 外购件</h2>')
-A.append('<table><tr>%s%s%s%s%s%s%s%s</tr>' % (th("Line", "行"), th("Item", "物料"), th("Grade", "评级"), th("Qty/robot", "每台数量"), th("Offers (priced)", "报价数"), th("MOQ", "最小起订量"), th("Lead time stated", "已注明交期"), th("Why not ready", "未就绪原因")))
+A.append('<table>%s<tr>%s%s%s%s%s%s%s%s</tr>' % (cols(6, 20, 12, 7, 8, 8, 7, 32), th("Line", "行"), th("Item", "物料"), th("Grade", "评级"), th("Qty/robot", "每台数量"), th("Offers (priced)", "报价数"), th("MOQ", "最小起订量"), th("Lead time stated", "已注明交期"), th("Why not ready", "未就绪原因")))
 for r in [r for r in rows if r["class"] == "bought"]:
     offs = r["offers"]
     A.append('<tr><td class="m">%s</td><td>%s</td><td>%s</td><td class="num">%s</td><td class="num">%d (%d)</td><td class="num">%s</td><td class="num">%d</td><td>%s</td></tr>' % (
-        E(r["id"]), E(r["name"][:70]), gchip(r), E(str(r["qty_per_robot"])), len(offs), sum(1 for o in offs if o.get("tiers")), E(", ".join(str(o.get("moq")) for o in offs if o.get("moq") is not None) or "—"), r["lead_time_stated"], E(r["missing"][:260])))
+        E(r["id"]), E(r["name"]), gchip(r), E(str(r["qty_per_robot"])), len(offs), sum(1 for o in offs if o.get("tiers")), E(", ".join(str(o.get("moq")) for o in offs if o.get("moq") is not None) or "—"), r["lead_time_stated"], E(r["missing"][:260])))
 A.append('</table></section>')
 
 # 6 pcb
 A.append('<section id="pcb"><h2><span class="n">6</span>The three custom PCBs · 三块定制电路板</h2>')
-A.append('<table><tr>%s%s%s%s%s%s</tr>' % (th("Board", "电路板"), th("Grade", "评级"), th("DRC", "设计规则检查"), th("Routed", "已布线"), th("Files on disk", "磁盘文件"), th("Design status / what closes it", "设计状态 / 完成条件")))
+A.append('<table>%s<tr>%s%s%s%s%s%s</tr>' % (cols(12, 12, 14, 8, 22, 32), th("Board", "电路板"), th("Grade", "评级"), th("DRC", "设计规则检查"), th("Routed", "已布线"), th("Files on disk", "磁盘文件"), th("Design status / what closes it", "设计状态 / 完成条件")))
 for r in [r for r in rows if r["class"] == "pcb"]:
-    A.append('<tr><td>%s</td><td>%s</td><td>%s — %s pass, %s fail, %s CD</td><td class="num">%s</td><td class="m">%s</td><td>%s</td></tr>' % (
-        E(r["name"]), gchip(r), E(r["drc"]["verdict"]), r["drc"]["pass"], r["drc"]["fail"], r["drc"]["cannot_determine"], E(r["routed"]), E("; ".join(r["fab_zip"])), E(r["missing"])))
+    routed = r["routed"] if re.match(r"^\d+ of \d+$", r["routed"]) else "not counted (see DRC)"
+    A.append('<tr><td>%s</td><td>%s</td><td>%s — %s pass, %s fail, %s CD</td><td>%s</td><td class="m">%s</td><td>%s</td></tr>' % (
+        E(r["name"]), gchip(r), E(r["drc"]["verdict"]), r["drc"]["pass"], r["drc"]["fail"], r["drc"]["cannot_determine"], E(routed), E("; ".join(r["fab_zip"])), E(r["missing"])))
 A.append('</table></section>')
 
 # 7 harness, 8 assembly, 9 test
 for sec, ident, title in [("harness", "wiring", "7 Harness · 线束"), ("assembly", "manual", "8 Assembly sequence · 装配顺序"), ("test", "test-plan", "9 Test plan · 测试计划")]:
     r = next(x for x in rows if x["id"] == ident)
     A.append('<section id="%s"><h2><span class="n">%s</span>%s</h2>' % (sec, title.split(" ")[0], E(title[2:])))
-    A.append('<table><tr>%s%s%s%s</tr><tr><td>%s</td><td>%s</td><td>%s</td><td>%s<span class="zh">%s</span><small>%s</small></td></tr></table>' % (
-        th("Grade", "评级"), th("Measurement", "测量"), th("What is missing", "缺什么"), th("Closer", "负责方"), gchip(r), E(r["measurement"]), E(r["missing"]), E(r["closer_en"]), E(r["closer_zh"]), E(r["by"])))
+    A.append('<table>%s<tr>%s%s%s%s</tr><tr><td>%s</td><td>%s</td><td>%s</td><td>%s<span class="zh">%s</span><small>%s</small></td></tr></table>' % (
+        cols(12, 36, 30, 22), th("Grade", "评级"), th("Measurement", "测量"), th("What is missing", "缺什么"), th("Closer", "负责方"), gchip(r), E(r["measurement"]), E(r["missing"]), E(r["closer_en"]), E(r["closer_zh"]), E(r["by"])))
     if sec == "assembly":
-        A.append('<h3>Steps a stranger cannot follow without asking us · 陌生人无法独立执行的步骤</h3><table><tr>%s%s%s</tr>' % (th("Step", "步骤"), th("What it assumes", "隐含前提"), th("Closer", "负责方")))
+        A.append('<h3>Steps a stranger cannot follow without asking us · 陌生人无法独立执行的步骤</h3><table>%s<tr>%s%s%s</tr>' % (cols(26, 48, 26), th("Step", "步骤"), th("What it assumes", "隐含前提"), th("Closer", "负责方")))
         for a in r["assumptions"]:
             A.append('<tr><td>%s</td><td>%s</td><td>%s<span class="zh">%s</span><small>%s</small></td></tr>' % (E(a["step"]), E(a["assumes"]), E(CL[a["closer"]]["en"]), E(CL[a["closer"]]["zh"]), E(a["by"])))
         A.append('</table>')
@@ -450,7 +463,7 @@ for sec, ident, title in [("harness", "wiring", "7 Harness · 线束"), ("assemb
 
 # 10 shelf
 A.append('<section id="shelf"><h2><span class="n">10</span>Triad shelf — bin/triad check --all · 货架</h2>')
-A.append('<table><tr>%s%s%s%s</tr>' % (th("Ref", "条目"), th("Grade", "评级"), th("First finding", "首个发现"), th("Closer", "负责方")))
+A.append('<table>%s<tr>%s%s%s%s</tr>' % (cols(24, 13, 45, 18), th("Ref", "条目"), th("Grade", "评级"), th("First finding", "首个发现"), th("Closer", "负责方")))
 for r in [r for r in rows if r["class"] == "triad"]:
     A.append('<tr><td class="m">%s</td><td>%s</td><td>%s</td><td>%s<span class="zh">%s</span></td></tr>' % (E(r["id"]), gchip(r), E(r["missing"][:200]), E(r["closer_en"]), E(r["closer_zh"])))
 A.append('</table></section>')
