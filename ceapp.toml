@@ -3,11 +3,11 @@
 contract = 1
 
 [launch.targets.buildbook]
-summary     = "Microduck Build Book served live over the real repo files"
+summary     = "Microduck repository browser — every dossier, drawing, evidence folder and triad shelf entry, served live over the real repo files (tools/docs_server.py)"
 supervision = "manual"
-cmd         = ["python3", "-m", "http.server", "8842"]
+cmd         = ["python3", "tools/docs_server.py", "8842"]
 cwd         = "."
-start_hint  = "tools/serve.sh in ~/dev/ce-workshop/ce-designs/microduck (opens the page)"
+start_hint  = "tools/serve.sh in ~/dev/ce-workshop/ce-designs/microduck (opens the page); or python3 tools/docs_server.py 8842"
 node        = "local"
 
 [launch.targets.buildbook.bind]
@@ -21,8 +21,19 @@ escalate = true
 safe_to_stop = true
 
 [launch.targets.buildbook.health]
-url           = "http://127.0.0.1:8842/BUILD-BOOK.html"
+url           = "http://127.0.0.1:8842/api/health"
 expect_status = 200
-expect_body   = "Microduck Build Book"
-# measured 2026-09-02: /no-such-page-xyz answers 404 (python http.server is not a catch-all SPA)
+expect_body   = "microduck-doc-browser"
+# MEASURED 2026-09-03 23:23 CST against the running tools/docs_server.py on 8842 (commit cfee913):
+#   GET /api/health        -> HTTP 200, 190 B, body {"app": "microduck-doc-browser", "status": "ok", ...}
+#                             "microduck-doc-browser" is the MARKER constant in tools/docs_server.py; the
+#                             bare `python3 -m http.server` this replaced answers 404 on that path, so a
+#                             port squatter of the old kind cannot turn this row green.
+#   GET /no-such-page-xyz  -> HTTP 404, 39 B, body "404 not found — microduck-doc-browser"
+#                             (the server is not a catch-all: only real repo paths and /b/, /api/, /llms.txt answer)
+#   GET /BUILD-BOOK.html   -> HTTP 200, 30828 B — the raw dossier still serves at its real path, as before
+#   GET /tools/doc.css     -> HTTP 200, 8729 B  — the stylesheet the dossiers link, unchanged
 expect_404    = "http://127.0.0.1:8842/no-such-page-xyz"
+
+[launch.targets.buildbook.log]
+path = "/tmp/microduck-docs-8842.log"
