@@ -201,3 +201,32 @@ every claim in the repo is either measured, cited, or explicitly marked CANNOT D
 4. **DIVE DEEPLY INTO NEW SOURCES.** Archive the primary page into the repo,
    pin the commit SHA for anything from a git branch, record the licence and
    attribution, and diff new geometry mesh-by-mesh against `reference/`.
+
+## THE STANDING ORDER — Leif, 2026-09-04, verbatim. This is the finish line.
+
+> continue with everything when the limits reset. try to be more token efficent.
+> continue with the work until youre 100% done and we have production ready
+> airtag clone and production ready microduck clone. open all of hte results for
+> me to look through and commit and push everything as you go with documents
+> detailing what we need to do.
+
+**100 % DONE means the convergence scoreboard has no open red row:** every
+drawing sheet at 100 % dimension coverage against A4, the fastener census
+reconciled into the assembly, the head settled against the photographs, and all
+139 CANNOT DETERMINE items either closed or explicitly deferred to a named
+physical measurement on a real sample. Nothing else counts as done.
+
+**COMMIT AND PUSH AS YOU GO.** `tools/commit-lane.sh` then `git push origin main`
+after each meaningful commit — not at the end. Three interruptions on 2026-09-03
+destroyed unsaved work; only pushed work is safe.
+
+**KEEP THE "WHAT WE NEED TO DO" DOCUMENTS CURRENT.** FACTORY-PACK.html,
+WORK-BREAKDOWN.html and FACTORY-QUESTIONS.html are living documents: any lane
+result that closes or opens a work item updates them in the same commit. A stale
+work breakdown is worse than none.
+
+**LEIF LOOKS AT RESULTS IN THE BROWSER** — `tools/docs_server.py` on
+http://localhost:8842. Anything you produce must be reachable and readable there.
+
+**BE TOKEN EFFICIENT.** Do not re-read what is already known, do not re-derive a
+settled fact, keep prompts tight. Depth of measurement, not depth of prose.
