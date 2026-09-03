@@ -80,3 +80,54 @@ Each drawing: `verify_sheet` PASS **and** a human read-back (Read the SVG) that
 confirms it is clean, fully dimensioned incl. radii, and buildable from the
 sheet alone. Each EE file: every net traceable end to end; unknowns named.
 Status tracked in `STATUS.md`.
+
+## A2 · THE SHEET LAYOUT STANDARD — Leif's second review, 2026-09-03, verbatim
+
+> the layout in the blueprint is fucked and not usable. why isnt the iso images
+> as large as possible and why is the text so small and not enough angles of iso
+> image is shown and rednerings and there is so much empty white space like use
+> all available space proeprly
+
+> there is still wierd texture in rotations also remove those.
+
+> its impossible to know if its detail you should cnc or what it is
+
+MEASURED on `out/drawings/microduck-foot-left/microduck-foot-left-sheet.png`
+(A2, 594 × 420 mm) and on every sheet's SVG, 2026-09-03:
+
+| defect | measurement | source |
+|---|---|---|
+| iso view is a stamp | 58.0000 × 43.8222 mm on an 841 × 594 mm sheet = **0.51 % of sheet area** | `<image>` element, `out/drawings/microduck-ankle-left/microduck-ankle-left.svg` |
+| one iso angle only | `imgs=1` on every parametric sheet | SVG image count, all 26 sheets |
+| text unreadable | font sizes **1.7000–6.0000 mm**; the notes block is 1.7 mm on A2 | `font-size` attributes, all sheets |
+| tessellation texture | **9543 `<line>` elements** on foot-left, 9721 on foot-right, 5781 upper-leg-left | SVG line count |
+| empty space | the left half of the foot-left sheet carries no view at all | the rendered PNG, read back |
+
+### The rules that follow (acceptance, never loosened)
+
+1. **NO TESSELLATION LINES.** A curved or rotated surface is drawn as its
+   SILHOUETTE plus its true feature edges. Facet boundaries and tangent-
+   continuous edges are SUPPRESSED. A sheet whose line count exceeds roughly
+   ten times its true edge count is a FAIL, not a dense drawing. This is Leif's
+   "weird texture in rotations" and his "impossible to know if its detail you
+   should cnc or what it is": every line on the sheet must be a real edge a
+   machinist would cut to, or it must not be there.
+2. **THE ISO VIEW IS A PRINCIPAL VIEW, NOT A STAMP.** At least **four**
+   isometric angles (front-left, front-right, rear-left, rear-right, plus
+   top/bottom where the part warrants), each at least **15 % of sheet area**,
+   dimensioned or annotated where a feature is only visible there. Shaded
+   renders sit beside them at the same scale.
+3. **USE THE WHOLE SHEET.** Views are packed to fill the drawing frame: the
+   generator computes the largest uniform scale at which the required views fit
+   the frame with the stated margins, and uses it. **Measured ink/annotation
+   coverage of the frame must be ≥ 60 %**; below that the sheet is re-laid out
+   at a larger scale or a smaller sheet size, and the coverage number is printed
+   in the title block so it can be checked.
+4. **TEXT SIZED TO THE SHEET.** Minimum **3.5 mm** for dimensions and notes on
+   A2 and larger (ISO 3098 lettering), **5.0 mm** for view labels, **7.0 mm** for
+   the part name. No text below the minimum anywhere on the sheet.
+5. **EVERY VISIBLE FEATURE DIMENSIONED**, radii included, as §A already requires.
+
+Acceptance is MEASURED by `ce-cad/bin/sheetcheck` (line-count ratio, coverage,
+minimum font size, iso count and area) and by READING THE RENDERED PNG BACK —
+a sheet nobody has looked at is not a sheet.

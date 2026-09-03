@@ -6,6 +6,27 @@
 <title>Microduck — Manufacturing Requirements</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
+/* doc.css — the shared academic style for every document in this repo.
+   Link it, do not copy it.
+
+   THE FONT LINK: the axis is `opsz`, NOT `opt_sz`. Measured 2026-09-03 (lane T
+   fix pass), headless Chrome, document.fonts:
+
+     family=Source+Serif+4:opt_sz,wght@...   ->  HTTP 400, 0 @font-face rules
+                                                 declared, {} families
+     family=Source+Serif+4:opsz,wght@...     ->  HTTP 200, 42 @font-face rules,
+                                                 {Source Serif 4: 18,
+                                                  Source Sans 3: 14,
+                                                  IBM Plex Mono: 10}
+
+   One malformed axis name 400s the WHOLE css2 request, so it did not merely
+   drop the serif — it dropped Source Sans 3 and IBM Plex Mono with it, and
+   every one of the 21 documents that carried the typo silently fell back to
+   Georgia / system sans / Menlo with no error anywhere. Nothing on the page
+   says it happened; the only way to see it is to count faces. If you edit the
+   link, re-run that count before you commit.
+   (document.fonts.check() is not the test: it returns true for a family with
+   no faces at all. Count document.fonts.size.) */
   :root{
     --paper:#ffffff;--card:#fbfaf7;--ink:#1a1a1a;--ink-2:#565656;--ink2:#565656;
     --line:#d7d3ca;--hair:#d7d3ca;--rule:#1a1a1a;--accent:#243b53;--wire:#243b53;--wire-ink:#243b53;
@@ -93,7 +114,18 @@
   hr{border:none;border-top:1px solid var(--hair);margin:22px 0}
   strong{font-weight:700}
   table.data td{max-width:none}
+  /* compact: a wide evidence table that must still fit the 920px sheet in print/PDF,
+     where .tablewrap's horizontal scroll does not exist. Added 2026-09-03 (lane F2). */
+  table.data.compact{font-size:11.5px}
+  table.data.compact th{padding:5px 6px;font-size:9.5px;letter-spacing:.03em;white-space:normal}
+  table.data.compact td{padding:4px 6px}
+  table.data.compact td code{font-size:.94em;word-break:break-all}
+  table.data.compact .chip{font-size:10px}
 
+
+  table.data.compact td{overflow-wrap:anywhere}
+  table.data.compact th{overflow-wrap:break-word}
+  table.data.compact td a,table.data.compact td code{word-break:break-all}
 </style>
 </head>
 <body>
@@ -114,6 +146,15 @@
 <p><code>wiring/designs/microduck/wiring.svg</code> is a graphic input, not the deliverable — the layout file supersedes it.</p>
 <h3>Acceptance</h3>
 <p>Each drawing: <code>verify_sheet</code> PASS <strong>and</strong> a human read-back (Read the SVG) that confirms it is clean, fully dimensioned incl. radii, and buildable from the sheet alone. Each EE file: every net traceable end to end; unknowns named. Status tracked in <code>STATUS.md</code>.</p>
+<h3>A2 · THE SHEET LAYOUT STANDARD — Leif&#x27;s second review, 2026-09-03, verbatim</h3>
+<blockquote>the layout in the blueprint is fucked and not usable. why isnt the iso images<br>as large as possible and why is the text so small and not enough angles of iso<br>image is shown and rednerings and there is so much empty white space like use<br>all available space proeprly</blockquote>
+<blockquote>there is still wierd texture in rotations also remove those.</blockquote>
+<blockquote>its impossible to know if its detail you should cnc or what it is</blockquote>
+<p>MEASURED on <code>out/drawings/microduck-foot-left/microduck-foot-left-sheet.png</code> (A2, 594 × 420 mm) and on every sheet&#x27;s SVG, 2026-09-03:</p>
+<div class="tw"><table class="data"><thead><tr><th>defect</th><th>measurement</th><th>source</th></tr></thead><tbody><tr><td>iso view is a stamp</td><td>58.0000 × 43.8222 mm on an 841 × 594 mm sheet = <strong>0.51 % of sheet area</strong></td><td><code>&lt;image&gt;</code> element, <code>out/drawings/microduck-ankle-left/microduck-ankle-left.svg</code></td></tr><tr><td>one iso angle only</td><td><code>imgs=1</code> on every parametric sheet</td><td>SVG image count, all 26 sheets</td></tr><tr><td>text unreadable</td><td>font sizes <strong>1.7000–6.0000 mm</strong>; the notes block is 1.7 mm on A2</td><td><code>font-size</code> attributes, all sheets</td></tr><tr><td>tessellation texture</td><td><strong>9543 <code>&lt;line&gt;</code> elements</strong> on foot-left, 9721 on foot-right, 5781 upper-leg-left</td><td>SVG line count</td></tr><tr><td>empty space</td><td>the left half of the foot-left sheet carries no view at all</td><td>the rendered PNG, read back</td></tr></tbody></table></div>
+<h4>The rules that follow (acceptance, never loosened)</h4>
+<ol><li><strong>NO TESSELLATION LINES.</strong> A curved or rotated surface is drawn as its SILHOUETTE plus its true feature edges. Facet boundaries and tangent- continuous edges are SUPPRESSED. A sheet whose line count exceeds roughly ten times its true edge count is a FAIL, not a dense drawing. This is Leif&#x27;s &quot;weird texture in rotations&quot; and his &quot;impossible to know if its detail you should cnc or what it is&quot;: every line on the sheet must be a real edge a machinist would cut to, or it must not be there.</li><li><strong>THE ISO VIEW IS A PRINCIPAL VIEW, NOT A STAMP.</strong> At least <strong>four</strong> isometric angles (front-left, front-right, rear-left, rear-right, plus top/bottom where the part warrants), each at least <strong>15 % of sheet area</strong>, dimensioned or annotated where a feature is only visible there. Shaded renders sit beside them at the same scale.</li><li><strong>USE THE WHOLE SHEET.</strong> Views are packed to fill the drawing frame: the generator computes the largest uniform scale at which the required views fit the frame with the stated margins, and uses it. <strong>Measured ink/annotation coverage of the frame must be ≥ 60 %</strong>; below that the sheet is re-laid out at a larger scale or a smaller sheet size, and the coverage number is printed in the title block so it can be checked.</li><li><strong>TEXT SIZED TO THE SHEET.</strong> Minimum <strong>3.5 mm</strong> for dimensions and notes on A2 and larger (ISO 3098 lettering), <strong>5.0 mm</strong> for view labels, <strong>7.0 mm</strong> for the part name. No text below the minimum anywhere on the sheet.</li><li><strong>EVERY VISIBLE FEATURE DIMENSIONED</strong>, radii included, as §A already requires.</li></ol>
+<p>Acceptance is MEASURED by <code>ce-cad/bin/sheetcheck</code> (line-count ratio, coverage, minimum font size, iso count and area) and by READING THE RENDERED PNG BACK — a sheet nobody has looked at is not a sheet.</p>
 </div>
 </body>
 </html>
