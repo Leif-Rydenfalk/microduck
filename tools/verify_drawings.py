@@ -145,9 +145,27 @@ def check(slug):
             bp = getattr(part, "blueprint", None)
             if bp is not None and getattr(bp, "meta", None) is not None:
                 bp.meta["general_tolerance"] = GENERAL_TOLERANCE
-            dfm = list(mfg["dfm"]) + list(TOLERANCE_DFM)
-            if is_bought(slug):
-                dfm += list(VENDOR_DFM)
+            # THE NOTE BLOCK THE SHEET WAS ACTUALLY BUILT WITH, out of the
+            # record — not a second guess at it. `auto_blueprint` returns
+            # `dfm` as the full list it used (measured lines + every
+            # programme line the caller passed as `dfm_extra`), and
+            # `draw_part.py` records exactly that. Rebuilding the list here
+            # from TOLERANCE_DFM + VENDOR_DFM reproduced only the extras this
+            # file happens to know about, so the moment draw_part.py added
+            # one — the radii-gap line, the orthographic-views line — the
+            # rebuilt sheet had a SHORTER notes column than the file, every
+            # view moved, and the detail-ring check failed a sheet that is
+            # right. That is the same class of error as rebuilding with
+            # `_layout()` instead of `build()`, one layer up.
+            dfm = list(rec.get("dfm") or [])
+            d["dfm_source"] = "result.json"
+            if not dfm:
+                dfm = list(mfg["dfm"]) + list(TOLERANCE_DFM)
+                if is_bought(slug):
+                    dfm += list(VENDOR_DFM)
+                d["dfm_source"] = ("rebuilt — result.json carries no dfm "
+                                   "list, so the notes column may differ "
+                                   "from the file's")
             n, dd = (int(x) for x in (rec.get("scale") or "1:1").split(":"))
             sh, _, _ = build_sheet(
                 part, size=rec.get("size", "A3"),
