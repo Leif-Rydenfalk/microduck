@@ -42,7 +42,7 @@
   finished SVG by <code>verify_sheet</code>; this page copies, and measures nothing of its
   own.</p>
   <div class="rev">
-    <span>MD-DWG-000 · index</span><span>2026-09-03 02:53:02</span>
+    <span>MD-DWG-000 · index</span><span>2026-09-03 04:08:24</span>
     <span>data: out/drawings/index.json</span>
     <span>generator: tools/gen_drawings_index.py</span>
     <span>standard: docs/MANUFACTURING-REQUIREMENTS.md A</span>
@@ -51,13 +51,16 @@
 
 <div class="statbar">
   <div class="stat"><b>54</b><span>parts on the shelf</span></div>
-  <div class="stat"><b>16</b><span>dimensioned drawings</span></div>
+  <div class="stat"><b>15</b><span>dimensioned drawings</span></div>
   <div class="stat"><b>0</b><span>bought-part references</span></div>
-  <div class="stat"><b>1</b><span>print sheets</span></div>
-  <div class="stat"><b>12</b><span>verify PASS</span></div>
-  <div class="stat"><b>5</b><span>verify FAIL</span></div>
-  <div class="stat"><b>36</b><span>cannot determine</span></div>
+  <div class="stat"><b>5</b><span>print sheets</span></div>
+  <div class="stat"><b>19</b><span>verify PASS</span></div>
+  <div class="stat"><b>1</b><span>verify FAIL</span></div>
+  <div class="stat"><b>34</b><span>cannot determine</span></div>
+  <div class="stat"><b>4</b><span>stale rows</span></div>
+  <div class="stat"><b>0</b><span>independently rechecked</span></div>
 </div>
+<p class="note">19 PASS + 1 FAIL + 34 CANNOT DETERMINE = 54, against 54 parts on the shelf — every part is accounted for. The §A.6 feature census has not been run: out/drawings/features.json is absent, so no row carries one (ce-cad/bin/cad tools/measure_features.py). The independent re-check has not been run: out/drawings/verify.json is absent (ce-cad/bin/cad tools/verify_drawings.py).</p>
 
 <nav class="toc">
   <a href="#how">1 What a sheet must carry</a>
@@ -65,17 +68,36 @@
   <a href="#reference-drawings">3 Reference drawings</a>
   <a href="#print-sheets">4 Print sheets</a>
   <a href="#no-sheet">5 Parts with no sheet</a>
+  <a href="#open">6 What could not be settled</a>
+  <a href="#review">7 The outside review</a>
 </nav>
 
 <section id="how">
   <h2><span class="n">1</span>What a sheet must carry, and how it is checked</h2>
   <p class="lede">The acceptance standard is <code>docs/MANUFACTURING-REQUIREMENTS.md</code> §A,
-  which is Leif's own review of the first generated files. Each sheet below carries, measured
-  off the solid: a third-angle orthographic set, an isometric reference view, a shaded
-  reference render of the part, every radius and fillet dimensioned with a leader, detail
-  callouts at a larger stated scale on the dense regions, a hole table, a section with wall
-  dimensions and the cutting-plane line on a view that can show it, a print/DFM note block
-  with the tolerance basis, the surface finish, and the title block.</p>
+  which is Leif's own review of the first generated files. What the sheets on this shelf
+  <em>actually</em> carry against it is COUNTED below, not asserted — every figure computed
+  from the same <code>out/drawings/index.json</code> rows the cards further down are drawn
+  from, so the table and the cards cannot disagree. An item a sheet does not carry names that
+  sheet. Absence is a measurement here: an item that is not applicable to a part (a hole table
+  on a part with no holes) is outside the denominator and is named as such, and an item no
+  pass has measured yet is reported as unmeasured rather than as carried.</p>
+  <div class="tablewrap"><table class="data">
+<thead><tr><th>§A item</th><th>carried</th><th>of applicable</th><th>sheets that do not carry it</th></tr></thead><tbody>
+<tr><th scope="row">A.4 isometric reference view on the sheet</th><td>15</td><td>15</td><td>—</td></tr>
+<tr><th scope="row">A.4 shaded reference render of the part</th><td>15</td><td>15</td><td>—</td></tr>
+<tr><th scope="row">Every orthographic view the part&#x27;s extents earn is drawn (A, and A.2 for the ones that earn two)</th><td>0</td><td>0</td><td>— · NOT MEASURED on 15 sheet(s): microduck-ankle-left, microduck-ankle-right, microduck-banana-pcb-locker, microduck-bearing-roll, microduck-hip-bracket, microduck-neck-pitch-bracket, microduck-neck-plate, microduck-power-support, microduck-shin, microduck-trunk-base, microduck-upper-leg-left, microduck-upper-leg-right, microduck-upper-leg-rigidity-plate, microduck-yaw2roll, microduck-foot-right</td></tr>
+<tr><th scope="row">A.5 every arc radius leadered or stated in a note</th><td>0</td><td>0</td><td>— · NOT MEASURED on 15 sheet(s): microduck-ankle-left, microduck-ankle-right, microduck-banana-pcb-locker, microduck-bearing-roll, microduck-hip-bracket, microduck-neck-pitch-bracket, microduck-neck-plate, microduck-power-support, microduck-shin, microduck-trunk-base, microduck-upper-leg-left, microduck-upper-leg-right, microduck-upper-leg-rigidity-plate, microduck-yaw2roll, microduck-foot-right</td></tr>
+<tr><th scope="row">A.7 detail callout at a larger stated scale</th><td>4</td><td>15</td><td>microduck-ankle-left, microduck-ankle-right, microduck-bearing-roll, microduck-hip-bracket, microduck-neck-pitch-bracket, microduck-neck-plate, microduck-shin, microduck-trunk-base, microduck-upper-leg-left, microduck-upper-leg-right, microduck-yaw2roll</td></tr>
+<tr><th scope="row">Hole table</th><td>15</td><td>15</td><td>—</td></tr>
+<tr><th scope="row">Section view with the cutting plane drawn</th><td>15</td><td>15</td><td>—</td></tr>
+<tr><th scope="row">A.9 print / DFM block with the tolerance basis</th><td>15</td><td>15</td><td>—</td></tr>
+<tr><th scope="row">verify_sheet PASS on the finished SVG</th><td>14</td><td>15</td><td>microduck-foot-right</td></tr>
+<tr><th scope="row">Independent re-check after the run (tools/verify_drawings.py)</th><td>0</td><td>0</td><td>— · NOT MEASURED on 15 sheet(s): microduck-ankle-left, microduck-ankle-right, microduck-banana-pcb-locker, microduck-bearing-roll, microduck-hip-bracket, microduck-neck-pitch-bracket, microduck-neck-plate, microduck-power-support, microduck-shin, microduck-trunk-base, microduck-upper-leg-left, microduck-upper-leg-right, microduck-upper-leg-rigidity-plate, microduck-yaw2roll, microduck-foot-right</td></tr>
+</tbody></table></div>
+  <p class="note">The census covers the 15 dimensioned and reference
+  sheets. Print sheets (§4) are a different document and are held to
+  <code>verify_print_sheet</code>, not to §A.</p>
   <div class="grid2">
     <div class="card"><h3>Every number is read back</h3><p><code>verify_sheet</code> parses the
     finished SVG and checks the stated scale, the title-block bbox and volume, both overall
@@ -91,11 +113,50 @@
     printed and measured on this machine”, and Bambu Lab's own H2D Pro specification carries
     no dimensional-accuracy line. The sheets say so, and print the two cited outsourced
     figures beside it. Sources: <code>tools/drawing_facts.py</code>.</p></div>
-    <div class="card"><h3>Two generator defects, fixed and tested</h3><p>The generator merged
-    coaxial holes across air into a phantom counterbore, and its only wall figure was a scan
-    of one cutting plane. Both are fixed in <code>ce-cad</code> with
-    <code>tests/test_cbore_and_wall.py</code>, which fails on the old code and passes on the
-    new.</p></div>
+    <div class="card"><h3>Generator defects, fixed and tested</h3><p>GOAL.md finding 5 named
+    two: the generator merged coaxial holes across air into a phantom counterbore, and its
+    only wall figure was a scan of one cutting plane. Both are fixed in <code>ce-cad</code>
+    with <code>tests/test_cbore_and_wall.py</code>, which fails on the old code and passes on
+    the new. Five more were measured on the shipped sheets afterwards and are fixed here:
+    an ASCII capital O printed where every other diameter carries Ø; a counterbore whose face
+    the code could not name printing “?X” (it is centred in its bore — it opens on neither
+    face, and the table says <code>INT</code>); a whole-solid ray minimum printed as the wall
+    with no verdict, beside a note saying it is not a wall (both figures now, and the
+    printable one — the smallest neighbourhood-median thickness — carries the PASS/FAIL);
+    a sheet with no detail bubble saying nothing about why; and a note that stated a radius
+    band in R notation, putting two radii on the paper the solid has not got.</p></div>
+    <div class="card"><h3>A part with nothing to dimension gets a print sheet</h3><p>§A.3
+    refuses a drawing off geometry with no dimension a shop can work to, and the case it was
+    written for is a decimated vendor mesh. Measured 2026-09-03 there is a second and worse
+    case, because it looks like a drawing: <code>part:microduck-sole-left</code> is a
+    parametric solid whose floor is lofted station to station through a measured 27 × 31
+    table, so it carries 1363 visible edges in its top view (TechDraw.projectEx) against
+    4–131 for a clean shop view on this shelf — and zero holes and zero arc radii in the
+    leaderable band. Its sheet carried three numbers over a forest of seams, which is exactly
+    the “unusable detail … random lines” §A.1–A.2 orders removed. Those parts are routed to a
+    print sheet by measurement (<code>tools/drawing_facts.py _seam_forest</code>), never by
+    choice, and the sheet states the count and the reason.</p></div>
+    <div class="card"><h3>Radii the builder names and the solid has not got</h3><p>The same
+    sole names “heel arc R7.2, toe arc R6.9, side fillets R7.9” in its own builder, and
+    <code>cecad.inspect.arc_radii</code> finds no arc at all on the solid those lines build —
+    the blends are sampled points of a loft, not circular edges, so no leader can be drawn to
+    one. A reader comparing the builder to the paper would conclude three radii were dropped.
+    Both facts are measured per part (<code>design_radii_named_in_builder</code> against
+    <code>arc_radii_on_solid</code>) and the gap is stated on the sheet.</p></div>
+    <div class="card"><h3>Every radius, including the ones no view can leader</h3><p>A radius
+    is leadered only in a view that sees its edge square — a circle seen obliquely projects as
+    an ellipse whose fitted radius is not the edge's. A radius <em>no</em> orthographic view on
+    the sheet sees square used to be invisible to the read-back, and 50 of 97 distinct solid
+    arc radii carried a leader across the shelf. Those radii are now STATED in the notes with
+    their count, their axis and a point on the metal, and <code>verify_sheet</code> fails a
+    sheet carrying a band radius that is neither leadered nor stated
+    (<code>ce-cad/tests/test_sheet_hygiene.py</code>).</p></div>
+    <div class="card"><h3>No line printed through a label</h3><p>Leif's <q>random lines</q> had
+    a second half nothing measured: <code>overlapping_labels</code> answers text over text, and
+    a cutting-plane line drawn straight through a hole callout passed every check.
+    <code>lines_over_labels</code> reads the CUT groups back out of the finished SVG; a sheet
+    with a plane through a label fails, and the search reaches for a different cutting plane
+    or bigger paper.</p></div>
   </div>
 </section>
 
@@ -118,6 +179,12 @@
 <tr><th scope="row">Hidden lines</th><td>front: hidden lines KEPT: without them 12 of 830 edge samples have no ink within 0.35 mm (worst 2.556 mm) and the feature would be missing from the sheet; right: hidden lines SUPPRESSED: all 812 edge samples still land on drawn ink without them; top: hidden lines KEPT: without them 566 of 806 edge samples have no ink within 0.35 mm (worst 4.297 mm) and the feature would be missing from the sheet</td></tr>
 <tr><th scope="row">verify_sheet</th><td>True (independent read-back: True)</td></tr>
 <tr><th scope="row">Re-checked after the run</th><td>not run — tools/verify_drawings.py has not been over this sheet</td></tr>
+<tr><th scope="row">Orthographic views the extents earn</th><td>not recorded — redraw with the current tools/draw_part.py</td></tr>
+<tr><th scope="row">Radii the builder&#x27;s own text names</th><td>none — cad/part.py names no radius in its text</td></tr>
+<tr><th scope="row">Arc radii cecad.inspect measures on the solid</th><td>not recorded</td></tr>
+<tr><th scope="row">Named-but-not-an-edge radii</th><td>none — every radius the builder names is a circular edge on the solid, or the builder names none. A radius that is not an edge cannot carry a leader; where one exists the sheet states it in one line and this row carries the rest.</td></tr>
+<tr><th scope="row">Content the search had to give up</th><td>nothing — the sheet carries the section, the hole callouts, the connector dimension and the detail bubbles it measured</td></tr>
+<tr><th scope="row">§A.5 radii dimensioned</th><td>not measured — run tools/measure_features.py; the solid carries 8 distinct arc radii</td></tr>
 <tr><th scope="row">§A.6 feature census</th><td>not run — tools/measure_features.py has not been over this part</td></tr>
 <tr><th scope="row">Warnings</th><td>DETAIL A dropped: a Ø16.0 mm region needs 10:1 to beat the sheet&#x27;s 5:1 by 2x and only 49 mm of the bottom band is free — it would be drawn the same size as the view it points at</td></tr>
 <tr><th scope="row">component.json origin</th><td>generated</td></tr>
@@ -142,6 +209,12 @@
 <tr><th scope="row">Hidden lines</th><td>front: hidden lines KEPT: without them 12 of 830 edge samples have no ink within 0.35 mm (worst 2.556 mm) and the feature would be missing from the sheet; right: hidden lines KEPT: without them 6 of 801 edge samples have no ink within 0.35 mm (worst 1.200 mm) and the feature would be missing from the sheet; top: hidden lines KEPT: without them 566 of 806 edge samples have no ink within 0.35 mm (worst 4.297 mm) and the feature would be missing from the sheet</td></tr>
 <tr><th scope="row">verify_sheet</th><td>True (independent read-back: True)</td></tr>
 <tr><th scope="row">Re-checked after the run</th><td>not run — tools/verify_drawings.py has not been over this sheet</td></tr>
+<tr><th scope="row">Orthographic views the extents earn</th><td>not recorded — redraw with the current tools/draw_part.py</td></tr>
+<tr><th scope="row">Radii the builder&#x27;s own text names</th><td>none — cad/part.py names no radius in its text</td></tr>
+<tr><th scope="row">Arc radii cecad.inspect measures on the solid</th><td>not recorded</td></tr>
+<tr><th scope="row">Named-but-not-an-edge radii</th><td>none — every radius the builder names is a circular edge on the solid, or the builder names none. A radius that is not an edge cannot carry a leader; where one exists the sheet states it in one line and this row carries the rest.</td></tr>
+<tr><th scope="row">Content the search had to give up</th><td>nothing — the sheet carries the section, the hole callouts, the connector dimension and the detail bubbles it measured</td></tr>
+<tr><th scope="row">§A.5 radii dimensioned</th><td>not measured — run tools/measure_features.py; the solid carries 8 distinct arc radii</td></tr>
 <tr><th scope="row">§A.6 feature census</th><td>not run — tools/measure_features.py has not been over this part</td></tr>
 <tr><th scope="row">Warnings</th><td>DETAIL A dropped: a Ø16.0 mm region needs 10:1 to beat the sheet&#x27;s 5:1 by 2x and only 49 mm of the bottom band is free — it would be drawn the same size as the view it points at</td></tr>
 <tr><th scope="row">component.json origin</th><td>generated</td></tr>
@@ -154,7 +227,7 @@
 <p class="paircap">Microduck banana PCB locker — the &#x27;banana_pcb_locker&#x27; mesh of Pollen&#x27;s MJCF: 54 x 1.5 x 6.6 mm retaining bar with two Ø2.17 M2 holes in Ø4 eyes, a 12 mm notch and two 2.5 x 2.3 x 2 key tabs</p>
 <figure><a href="microduck-banana-pcb-locker/microduck-banana-pcb-locker.svg"><img src="microduck-banana-pcb-locker/microduck-banana-pcb-locker-sheet.png" alt="microduck-banana-pcb-locker sheet"></a><figcaption>The finished sheet, photographed in headless Chrome off the SVG on disk and read back — not a preview of what the generator meant to draw.</figcaption></figure>
 <div class="tablewrap"><table class="data"><tbody>
-<tr><th scope="row">Sheet</th><td>A2 at 2:1, 3 attempt(s)</td></tr>
+<tr><th scope="row">Sheet</th><td>A2 at 1:1, 4 attempt(s)</td></tr>
 <tr><th scope="row">Views</th><td>front, top, SECA, ISO, DETA</td></tr>
 <tr><th scope="row">Detail callouts</th><td>A: thinnest wall 0.92 mm</td></tr>
 <tr><th scope="row">Envelope (mm)</th><td>54.0153 × 3.8000 × 6.6260</td></tr>
@@ -166,6 +239,12 @@
 <tr><th scope="row">Hidden lines</th><td>front: hidden lines SUPPRESSED: all 768 edge samples still land on drawn ink without them; top: hidden lines KEPT: without them 48 of 764 edge samples have no ink within 0.35 mm (worst 0.563 mm) and the feature would be missing from the sheet</td></tr>
 <tr><th scope="row">verify_sheet</th><td>True (independent read-back: True)</td></tr>
 <tr><th scope="row">Re-checked after the run</th><td>not run — tools/verify_drawings.py has not been over this sheet</td></tr>
+<tr><th scope="row">Orthographic views the extents earn</th><td>not recorded — redraw with the current tools/draw_part.py</td></tr>
+<tr><th scope="row">Radii the builder&#x27;s own text names</th><td>none — cad/part.py names no radius in its text</td></tr>
+<tr><th scope="row">Arc radii cecad.inspect measures on the solid</th><td>not recorded</td></tr>
+<tr><th scope="row">Named-but-not-an-edge radii</th><td>none — every radius the builder names is a circular edge on the solid, or the builder names none. A radius that is not an edge cannot carry a leader; where one exists the sheet states it in one line and this row carries the rest.</td></tr>
+<tr><th scope="row">Content the search had to give up</th><td>nothing — the sheet carries the section, the hole callouts, the connector dimension and the detail bubbles it measured</td></tr>
+<tr><th scope="row">§A.5 radii dimensioned</th><td>not measured — run tools/measure_features.py; the solid carries 1 distinct arc radii</td></tr>
 <tr><th scope="row">§A.6 feature census</th><td>not run — tools/measure_features.py has not been over this part</td></tr>
 <tr><th scope="row">component.json origin</th><td>generated</td></tr>
 <tr><th scope="row">component.json verdict</th><td>PASS</td></tr>
@@ -177,7 +256,7 @@
 <p class="paircap">Microduck hip-roll bearing plate — the &#x27;bearing_roll&#x27; mesh of Pollen&#x27;s MJCF: 23 x 40 x 1 mm PLA plate with a Ø19 window on the roll axis, 4 x Ø2.2 screw holes and 2 conical locating pegs, closing the hip-roll XL330 on its horn side</p>
 <figure><a href="microduck-bearing-roll/microduck-bearing-roll.svg"><img src="microduck-bearing-roll/microduck-bearing-roll-sheet.png" alt="microduck-bearing-roll sheet"></a><figcaption>The finished sheet, photographed in headless Chrome off the SVG on disk and read back — not a preview of what the generator meant to draw.</figcaption></figure>
 <div class="tablewrap"><table class="data"><tbody>
-<tr><th scope="row">Sheet</th><td>A1 at 10:1, 3 attempt(s)</td></tr>
+<tr><th scope="row">Sheet</th><td>A1 at 10:1, 5 attempt(s)</td></tr>
 <tr><th scope="row">Views</th><td>front, top, SECA, ISO</td></tr>
 <tr><th scope="row">Detail callouts</th><td>none</td></tr>
 <tr><th scope="row">Envelope (mm)</th><td>23.0000 × 3.0000 × 40.0000</td></tr>
@@ -189,6 +268,12 @@
 <tr><th scope="row">Hidden lines</th><td>front: hidden lines KEPT: without them 30 of 605 edge samples have no ink within 0.35 mm (worst 2.362 mm) and the feature would be missing from the sheet; top: hidden lines KEPT: without them 6 of 602 edge samples have no ink within 0.35 mm (worst 0.849 mm) and the feature would be missing from the sheet</td></tr>
 <tr><th scope="row">verify_sheet</th><td>True (independent read-back: True)</td></tr>
 <tr><th scope="row">Re-checked after the run</th><td>not run — tools/verify_drawings.py has not been over this sheet</td></tr>
+<tr><th scope="row">Orthographic views the extents earn</th><td>not recorded — redraw with the current tools/draw_part.py</td></tr>
+<tr><th scope="row">Radii the builder&#x27;s own text names</th><td>none — cad/part.py names no radius in its text</td></tr>
+<tr><th scope="row">Arc radii cecad.inspect measures on the solid</th><td>not recorded</td></tr>
+<tr><th scope="row">Named-but-not-an-edge radii</th><td>none — every radius the builder names is a circular edge on the solid, or the builder names none. A radius that is not an edge cannot carry a leader; where one exists the sheet states it in one line and this row carries the rest.</td></tr>
+<tr><th scope="row">Content the search had to give up</th><td>nothing — the sheet carries the section, the hole callouts, the connector dimension and the detail bubbles it measured</td></tr>
+<tr><th scope="row">§A.5 radii dimensioned</th><td>not measured — run tools/measure_features.py; the solid carries 4 distinct arc radii</td></tr>
 <tr><th scope="row">§A.6 feature census</th><td>not run — tools/measure_features.py has not been over this part</td></tr>
 <tr><th scope="row">Warnings</th><td>DETAIL A dropped: a Ø21.2 mm region needs 20:1 to beat the sheet&#x27;s 10:1 by 2x and only 5 mm of the bottom band is free — it would be drawn the same size as the view it points at</td></tr>
 <tr><th scope="row">component.json origin</th><td>generated</td></tr>
@@ -213,6 +298,12 @@
 <tr><th scope="row">Hidden lines</th><td>front: hidden lines KEPT: without them 7 of 702 edge samples have no ink within 0.35 mm (worst 1.080 mm) and the feature would be missing from the sheet; right: hidden lines KEPT: without them 46 of 659 edge samples have no ink within 0.35 mm (worst 3.450 mm) and the feature would be missing from the sheet; top: hidden lines KEPT: without them 4 of 679 edge samples have no ink within 0.35 mm (worst 0.488 mm) and the feature would be missing from the sheet</td></tr>
 <tr><th scope="row">verify_sheet</th><td>True (independent read-back: True)</td></tr>
 <tr><th scope="row">Re-checked after the run</th><td>not run — tools/verify_drawings.py has not been over this sheet</td></tr>
+<tr><th scope="row">Orthographic views the extents earn</th><td>not recorded — redraw with the current tools/draw_part.py</td></tr>
+<tr><th scope="row">Radii the builder&#x27;s own text names</th><td>none — cad/part.py names no radius in its text</td></tr>
+<tr><th scope="row">Arc radii cecad.inspect measures on the solid</th><td>not recorded</td></tr>
+<tr><th scope="row">Named-but-not-an-edge radii</th><td>none — every radius the builder names is a circular edge on the solid, or the builder names none. A radius that is not an edge cannot carry a leader; where one exists the sheet states it in one line and this row carries the rest.</td></tr>
+<tr><th scope="row">Content the search had to give up</th><td>nothing — the sheet carries the section, the hole callouts, the connector dimension and the detail bubbles it measured</td></tr>
+<tr><th scope="row">§A.5 radii dimensioned</th><td>not measured — run tools/measure_features.py; the solid carries 8 distinct arc radii</td></tr>
 <tr><th scope="row">§A.6 feature census</th><td>not run — tools/measure_features.py has not been over this part</td></tr>
 <tr><th scope="row">Warnings</th><td>DETAIL A dropped: a Ø17.4 mm region needs 10:1 to beat the sheet&#x27;s 5:1 by 2x and only 48 mm of the bottom band is free — it would be drawn the same size as the view it points at</td></tr>
 <tr><th scope="row">component.json origin</th><td>generated</td></tr>
@@ -237,6 +328,12 @@
 <tr><th scope="row">Hidden lines</th><td>front: hidden lines SUPPRESSED: all 534 edge samples still land on drawn ink without them; right: hidden lines SUPPRESSED: all 565 edge samples still land on drawn ink without them; top: hidden lines KEPT: without them 4 of 631 edge samples have no ink within 0.35 mm (worst 1.907 mm) and the feature would be missing from the sheet</td></tr>
 <tr><th scope="row">verify_sheet</th><td>True (independent read-back: True)</td></tr>
 <tr><th scope="row">Re-checked after the run</th><td>not run — tools/verify_drawings.py has not been over this sheet</td></tr>
+<tr><th scope="row">Orthographic views the extents earn</th><td>not recorded — redraw with the current tools/draw_part.py</td></tr>
+<tr><th scope="row">Radii the builder&#x27;s own text names</th><td>none — cad/part.py names no radius in its text</td></tr>
+<tr><th scope="row">Arc radii cecad.inspect measures on the solid</th><td>not recorded</td></tr>
+<tr><th scope="row">Named-but-not-an-edge radii</th><td>none — every radius the builder names is a circular edge on the solid, or the builder names none. A radius that is not an edge cannot carry a leader; where one exists the sheet states it in one line and this row carries the rest.</td></tr>
+<tr><th scope="row">Content the search had to give up</th><td>nothing — the sheet carries the section, the hole callouts, the connector dimension and the detail bubbles it measured</td></tr>
+<tr><th scope="row">§A.5 radii dimensioned</th><td>not measured — run tools/measure_features.py; the solid carries 8 distinct arc radii</td></tr>
 <tr><th scope="row">§A.6 feature census</th><td>not run — tools/measure_features.py has not been over this part</td></tr>
 <tr><th scope="row">Warnings</th><td>DETAIL A dropped: a Ø16.0 mm region needs 10:1 to beat the sheet&#x27;s 5:1 by 2x and only 102 mm of the bottom band is free — it would be drawn the same size as the view it points at</td></tr>
 <tr><th scope="row">component.json origin</th><td>generated</td></tr>
@@ -261,6 +358,12 @@
 <tr><th scope="row">Hidden lines</th><td>front: hidden lines SUPPRESSED: all 574 edge samples still land on drawn ink without them; right: hidden lines SUPPRESSED: all 580 edge samples still land on drawn ink without them</td></tr>
 <tr><th scope="row">verify_sheet</th><td>True (independent read-back: True)</td></tr>
 <tr><th scope="row">Re-checked after the run</th><td>not run — tools/verify_drawings.py has not been over this sheet</td></tr>
+<tr><th scope="row">Orthographic views the extents earn</th><td>not recorded — redraw with the current tools/draw_part.py</td></tr>
+<tr><th scope="row">Radii the builder&#x27;s own text names</th><td>none — cad/part.py names no radius in its text</td></tr>
+<tr><th scope="row">Arc radii cecad.inspect measures on the solid</th><td>not recorded</td></tr>
+<tr><th scope="row">Named-but-not-an-edge radii</th><td>none — every radius the builder names is a circular edge on the solid, or the builder names none. A radius that is not an edge cannot carry a leader; where one exists the sheet states it in one line and this row carries the rest.</td></tr>
+<tr><th scope="row">Content the search had to give up</th><td>nothing — the sheet carries the section, the hole callouts, the connector dimension and the detail bubbles it measured</td></tr>
+<tr><th scope="row">§A.5 radii dimensioned</th><td>not measured — run tools/measure_features.py; the solid carries 1 distinct arc radii</td></tr>
 <tr><th scope="row">§A.6 feature census</th><td>not run — tools/measure_features.py has not been over this part</td></tr>
 <tr><th scope="row">Warnings</th><td>DETAIL A dropped: a Ø22.1 mm region needs 40:1 to beat the sheet&#x27;s 20:1 by 2x and only 142 mm of the bottom band is free — it would be drawn the same size as the view it points at</td></tr>
 <tr><th scope="row">component.json origin</th><td>generated</td></tr>
@@ -285,6 +388,12 @@
 <tr><th scope="row">Hidden lines</th><td>front: hidden lines KEPT: without them 486 of 2056 edge samples have no ink within 0.35 mm (worst 7.088 mm) and the feature would be missing from the sheet; right: hidden lines KEPT: without them 2 of 1626 edge samples have no ink within 0.35 mm (worst 0.351 mm) and the feature would be missing from the sheet; top: hidden lines KEPT: without them 85 of 2450 edge samples have no ink within 0.35 mm (worst 2.000 mm) and the feature would be missing from the sheet</td></tr>
 <tr><th scope="row">verify_sheet</th><td>True (independent read-back: True)</td></tr>
 <tr><th scope="row">Re-checked after the run</th><td>not run — tools/verify_drawings.py has not been over this sheet</td></tr>
+<tr><th scope="row">Orthographic views the extents earn</th><td>not recorded — redraw with the current tools/draw_part.py</td></tr>
+<tr><th scope="row">Radii the builder&#x27;s own text names</th><td>none — cad/part.py names no radius in its text</td></tr>
+<tr><th scope="row">Arc radii cecad.inspect measures on the solid</th><td>not recorded</td></tr>
+<tr><th scope="row">Named-but-not-an-edge radii</th><td>none — every radius the builder names is a circular edge on the solid, or the builder names none. A radius that is not an edge cannot carry a leader; where one exists the sheet states it in one line and this row carries the rest.</td></tr>
+<tr><th scope="row">Content the search had to give up</th><td>nothing — the sheet carries the section, the hole callouts, the connector dimension and the detail bubbles it measured</td></tr>
+<tr><th scope="row">§A.5 radii dimensioned</th><td>not measured — run tools/measure_features.py; the solid carries 6 distinct arc radii</td></tr>
 <tr><th scope="row">§A.6 feature census</th><td>not run — tools/measure_features.py has not been over this part</td></tr>
 <tr><th scope="row">component.json origin</th><td>generated</td></tr>
 <tr><th scope="row">component.json verdict</th><td>PASS</td></tr>
@@ -308,6 +417,12 @@
 <tr><th scope="row">Hidden lines</th><td>front: hidden lines SUPPRESSED: all 867 edge samples still land on drawn ink without them; right: hidden lines KEPT: without them 94 of 826 edge samples have no ink within 0.35 mm (worst 6.509 mm) and the feature would be missing from the sheet</td></tr>
 <tr><th scope="row">verify_sheet</th><td>True (independent read-back: True)</td></tr>
 <tr><th scope="row">Re-checked after the run</th><td>not run — tools/verify_drawings.py has not been over this sheet</td></tr>
+<tr><th scope="row">Orthographic views the extents earn</th><td>not recorded — redraw with the current tools/draw_part.py</td></tr>
+<tr><th scope="row">Radii the builder&#x27;s own text names</th><td>none — cad/part.py names no radius in its text</td></tr>
+<tr><th scope="row">Arc radii cecad.inspect measures on the solid</th><td>not recorded</td></tr>
+<tr><th scope="row">Named-but-not-an-edge radii</th><td>none — every radius the builder names is a circular edge on the solid, or the builder names none. A radius that is not an edge cannot carry a leader; where one exists the sheet states it in one line and this row carries the rest.</td></tr>
+<tr><th scope="row">Content the search had to give up</th><td>nothing — the sheet carries the section, the hole callouts, the connector dimension and the detail bubbles it measured</td></tr>
+<tr><th scope="row">§A.5 radii dimensioned</th><td>not measured — run tools/measure_features.py; the solid carries 11 distinct arc radii</td></tr>
 <tr><th scope="row">§A.6 feature census</th><td>not run — tools/measure_features.py has not been over this part</td></tr>
 <tr><th scope="row">Warnings</th><td>DETAIL A dropped: a Ø35.9 mm region needs 10:1 to beat the sheet&#x27;s 5:1 by 2x and only 107 mm of the bottom band is free — it would be drawn the same size as the view it points at</td></tr>
 <tr><th scope="row">component.json origin</th><td>generated</td></tr>
@@ -315,25 +430,120 @@
 <tr><th scope="row">Material / process</th><td>PLA / FDM</td></tr>
 </tbody></table></div>
 <p class="files"><a href="microduck-shin/microduck-shin.svg">SVG</a> · <a href="microduck-shin/microduck-shin.dxf">DXF</a> · <a href="microduck-shin/microduck-shin.pdf">PDF</a> · <a href="microduck-shin/microduck-shin-ref.png">reference render</a></p>
+</article><article class="sheet" id="microduck-trunk-base">
+<div class="sheethead"><h3>microduck-trunk-base</h3><div><span class="chip pass">PASS</span> <span class="kindtag">drawing</span></div></div>
+<p class="paircap">Microduck trunk base plate — the &#x27;trunk_base&#x27; body mesh of Pollen&#x27;s MJCF: 57 x 36 x 1 mm chassis plate with two Ø19 hip-yaw holes 35 mm apart, 4 x Ø2.3 M2 clearance holes, a 6 x 12 cable slot and four Ø1.8 locating pins</p>
+<figure><a href="microduck-trunk-base/microduck-trunk-base.svg"><img src="microduck-trunk-base/microduck-trunk-base-sheet.png" alt="microduck-trunk-base sheet"></a><figcaption>The finished sheet, photographed in headless Chrome off the SVG on disk and read back — not a preview of what the generator meant to draw.</figcaption></figure>
+<div class="tablewrap"><table class="data"><tbody>
+<tr><th scope="row">Sheet</th><td>A1 at 5:1, 3 attempt(s)</td></tr>
+<tr><th scope="row">Views</th><td>top, front, SECA, ISO</td></tr>
+<tr><th scope="row">Detail callouts</th><td>none</td></tr>
+<tr><th scope="row">Envelope (mm)</th><td>57.0000 × 36.0000 × 3.0000</td></tr>
+<tr><th scope="row">Holes measured</th><td>6 (0 counterbore)</td></tr>
+<tr><th scope="row">Ø on the solid</th><td>2.300, 19.000</td></tr>
+<tr><th scope="row">Slots / grooves</th><td>0 / 0</td></tr>
+<tr><th scope="row">Radii on the solid</th><td>R0.800, R0.900, R1.150, R9.500</td></tr>
+<tr><th scope="row">Thinnest wall, whole solid</th><td>1.0000 mm at (-27.402, -6.099, 16.500), 1.409 mm sample spacing</td></tr>
+<tr><th scope="row">Hidden lines</th><td>front: hidden lines SUPPRESSED: all 658 edge samples still land on drawn ink without them; top: hidden lines KEPT: without them 36 of 690 edge samples have no ink within 0.35 mm (worst 2.342 mm) and the feature would be missing from the sheet</td></tr>
+<tr><th scope="row">verify_sheet</th><td>True (independent read-back: True)</td></tr>
+<tr><th scope="row">Re-checked after the run</th><td>not run — tools/verify_drawings.py has not been over this sheet</td></tr>
+<tr><th scope="row">Orthographic views the extents earn</th><td>not recorded — redraw with the current tools/draw_part.py</td></tr>
+<tr><th scope="row">Radii the builder&#x27;s own text names</th><td>none — cad/part.py names no radius in its text</td></tr>
+<tr><th scope="row">Arc radii cecad.inspect measures on the solid</th><td>not recorded</td></tr>
+<tr><th scope="row">Named-but-not-an-edge radii</th><td>none — every radius the builder names is a circular edge on the solid, or the builder names none. A radius that is not an edge cannot carry a leader; where one exists the sheet states it in one line and this row carries the rest.</td></tr>
+<tr><th scope="row">Content the search had to give up</th><td>nothing — the sheet carries the section, the hole callouts, the connector dimension and the detail bubbles it measured</td></tr>
+<tr><th scope="row">§A.5 radii dimensioned</th><td>not measured — run tools/measure_features.py; the solid carries 4 distinct arc radii</td></tr>
+<tr><th scope="row">§A.6 feature census</th><td>not run — tools/measure_features.py has not been over this part</td></tr>
+<tr><th scope="row">Warnings</th><td>DETAIL A dropped: a Ø21.3 mm region needs 10:1 to beat the sheet&#x27;s 5:1 by 2x and only 126 mm of the bottom band is free — it would be drawn the same size as the view it points at; DETAIL B dropped: a Ø21.3 mm region needs 10:1 to beat the sheet&#x27;s 5:1 by 2x and only 126 mm of the bottom band is free — it would be drawn the same size as the view it points at; DETAIL C dropped: a Ø16.0 mm region needs 10:1 to beat the sheet&#x27;s 5:1 by 2x and only 126 mm of the bottom band is free — it would be drawn the same size as the view it points at</td></tr>
+<tr><th scope="row">component.json origin</th><td>generated</td></tr>
+<tr><th scope="row">component.json verdict</th><td>PASS</td></tr>
+<tr><th scope="row">Material / process</th><td>PLA / FDM</td></tr>
+</tbody></table></div>
+<p class="files"><a href="microduck-trunk-base/microduck-trunk-base.svg">SVG</a> · <a href="microduck-trunk-base/microduck-trunk-base.dxf">DXF</a> · <a href="microduck-trunk-base/microduck-trunk-base.pdf">PDF</a> · <a href="microduck-trunk-base/microduck-trunk-base-ref.png">reference render</a></p>
+</article><article class="sheet" id="microduck-upper-leg-left">
+<div class="sheethead"><h3>microduck-upper-leg-left</h3><div><span class="chip pass">PASS</span> <span class="kindtag">drawing</span></div></div>
+<p class="paircap">Microduck left thigh housing — the &#x27;upper_leg_left&#x27; body of Pollen&#x27;s MJCF: 28 x 47.7 x 61 mm one-sided cup, 1 mm walls, holding the hip-pitch and knee XL330s on axes 42.0 mm apart</p>
+<figure><a href="microduck-upper-leg-left/microduck-upper-leg-left.svg"><img src="microduck-upper-leg-left/microduck-upper-leg-left-sheet.png" alt="microduck-upper-leg-left sheet"></a><figcaption>The finished sheet, photographed in headless Chrome off the SVG on disk and read back — not a preview of what the generator meant to draw.</figcaption></figure>
+<div class="tablewrap"><table class="data"><tbody>
+<tr><th scope="row">Sheet</th><td>A2 at 2:1, 3 attempt(s)</td></tr>
+<tr><th scope="row">Views</th><td>front, top, right, SECA, ISO</td></tr>
+<tr><th scope="row">Detail callouts</th><td>none</td></tr>
+<tr><th scope="row">Envelope (mm)</th><td>28.0000 × 47.6608 × 60.9911</td></tr>
+<tr><th scope="row">Holes measured</th><td>2 (0 counterbore)</td></tr>
+<tr><th scope="row">Ø on the solid</th><td>5.370</td></tr>
+<tr><th scope="row">Slots / grooves</th><td>0 / 0</td></tr>
+<tr><th scope="row">Radii on the solid</th><td>R0.800, R0.900, R0.950, R1.220, R1.380, R2.210, R2.690, R3.630</td></tr>
+<tr><th scope="row">Thinnest wall, whole solid</th><td>0.0240 mm at (69.125, -10.700, 37.938), 2.173 mm sample spacing</td></tr>
+<tr><th scope="row">Hidden lines</th><td>front: hidden lines KEPT: without them 10 of 1632 edge samples have no ink within 0.35 mm (worst 2.000 mm) and the feature would be missing from the sheet; right: hidden lines KEPT: without them 173 of 1548 edge samples have no ink within 0.35 mm (worst 23.120 mm) and the feature would be missing from the sheet; top: hidden lines KEPT: without them 2 of 1699 edge samples have no ink within 0.35 mm (worst 0.550 mm) and the feature would be missing from the sheet</td></tr>
+<tr><th scope="row">verify_sheet</th><td>True (independent read-back: True)</td></tr>
+<tr><th scope="row">Re-checked after the run</th><td>not run — tools/verify_drawings.py has not been over this sheet</td></tr>
+<tr><th scope="row">Orthographic views the extents earn</th><td>not recorded — redraw with the current tools/draw_part.py</td></tr>
+<tr><th scope="row">Radii the builder&#x27;s own text names</th><td>none — cad/part.py names no radius in its text</td></tr>
+<tr><th scope="row">Arc radii cecad.inspect measures on the solid</th><td>not recorded</td></tr>
+<tr><th scope="row">Named-but-not-an-edge radii</th><td>none — every radius the builder names is a circular edge on the solid, or the builder names none. A radius that is not an edge cannot carry a leader; where one exists the sheet states it in one line and this row carries the rest.</td></tr>
+<tr><th scope="row">Content the search had to give up</th><td>nothing — the sheet carries the section, the hole callouts, the connector dimension and the detail bubbles it measured</td></tr>
+<tr><th scope="row">§A.5 radii dimensioned</th><td>not measured — run tools/measure_features.py; the solid carries 8 distinct arc radii</td></tr>
+<tr><th scope="row">§A.6 feature census</th><td>not run — tools/measure_features.py has not been over this part</td></tr>
+<tr><th scope="row">Warnings</th><td>DETAIL A dropped: a Ø16.0 mm region needs 4:1 to beat the sheet&#x27;s 2:1 by 2x and only 20 mm of the bottom band is free — it would be drawn the same size as the view it points at</td></tr>
+<tr><th scope="row">component.json origin</th><td>generated</td></tr>
+<tr><th scope="row">component.json verdict</th><td>PASS</td></tr>
+<tr><th scope="row">Material / process</th><td>PLA / FDM</td></tr>
+</tbody></table></div>
+<p class="files"><a href="microduck-upper-leg-left/microduck-upper-leg-left.svg">SVG</a> · <a href="microduck-upper-leg-left/microduck-upper-leg-left.dxf">DXF</a> · <a href="microduck-upper-leg-left/microduck-upper-leg-left.pdf">PDF</a> · <a href="microduck-upper-leg-left/microduck-upper-leg-left-ref.png">reference render</a></p>
+</article><article class="sheet" id="microduck-upper-leg-right">
+<div class="sheethead"><h3>microduck-upper-leg-right</h3><div><span class="chip pass">PASS</span> <span class="kindtag">drawing</span></div></div>
+<p class="paircap">Microduck right thigh housing — the &#x27;upper_leg_right&#x27; body of Pollen&#x27;s MJCF: the left thigh mirrored in x (measured exact), 28 x 47.7 x 61 mm one-sided cup holding the hip-pitch and knee XL330s</p>
+<figure><a href="microduck-upper-leg-right/microduck-upper-leg-right.svg"><img src="microduck-upper-leg-right/microduck-upper-leg-right-sheet.png" alt="microduck-upper-leg-right sheet"></a><figcaption>The finished sheet, photographed in headless Chrome off the SVG on disk and read back — not a preview of what the generator meant to draw.</figcaption></figure>
+<div class="tablewrap"><table class="data"><tbody>
+<tr><th scope="row">Sheet</th><td>A2 at 2:1, 5 attempt(s)</td></tr>
+<tr><th scope="row">Views</th><td>front, top, right, SECA, ISO</td></tr>
+<tr><th scope="row">Detail callouts</th><td>none</td></tr>
+<tr><th scope="row">Envelope (mm)</th><td>28.0000 × 47.6608 × 60.9911</td></tr>
+<tr><th scope="row">Holes measured</th><td>2 (0 counterbore)</td></tr>
+<tr><th scope="row">Ø on the solid</th><td>5.370</td></tr>
+<tr><th scope="row">Slots / grooves</th><td>0 / 0</td></tr>
+<tr><th scope="row">Radii on the solid</th><td>R0.800, R0.900, R0.950, R1.220, R1.380, R2.210, R2.690, R3.630</td></tr>
+<tr><th scope="row">Thinnest wall, whole solid</th><td>0.0240 mm at (-69.125, -10.700, 37.938), 2.174 mm sample spacing</td></tr>
+<tr><th scope="row">Hidden lines</th><td>front: hidden lines KEPT: without them 10 of 1632 edge samples have no ink within 0.35 mm (worst 2.000 mm) and the feature would be missing from the sheet; right: hidden lines KEPT: without them 10 of 1725 edge samples have no ink within 0.35 mm (worst 2.648 mm) and the feature would be missing from the sheet; top: hidden lines KEPT: without them 2 of 1699 edge samples have no ink within 0.35 mm (worst 0.550 mm) and the feature would be missing from the sheet</td></tr>
+<tr><th scope="row">verify_sheet</th><td>True (independent read-back: True)</td></tr>
+<tr><th scope="row">Re-checked after the run</th><td>not run — tools/verify_drawings.py has not been over this sheet</td></tr>
+<tr><th scope="row">Orthographic views the extents earn</th><td>not recorded — redraw with the current tools/draw_part.py</td></tr>
+<tr><th scope="row">Radii the builder&#x27;s own text names</th><td>none — cad/part.py names no radius in its text</td></tr>
+<tr><th scope="row">Arc radii cecad.inspect measures on the solid</th><td>not recorded</td></tr>
+<tr><th scope="row">Named-but-not-an-edge radii</th><td>none — every radius the builder names is a circular edge on the solid, or the builder names none. A radius that is not an edge cannot carry a leader; where one exists the sheet states it in one line and this row carries the rest.</td></tr>
+<tr><th scope="row">Content the search had to give up</th><td>nothing — the sheet carries the section, the hole callouts, the connector dimension and the detail bubbles it measured</td></tr>
+<tr><th scope="row">§A.5 radii dimensioned</th><td>not measured — run tools/measure_features.py; the solid carries 8 distinct arc radii</td></tr>
+<tr><th scope="row">§A.6 feature census</th><td>not run — tools/measure_features.py has not been over this part</td></tr>
+<tr><th scope="row">Warnings</th><td>DETAIL A dropped: a Ø16.0 mm region needs 4:1 to beat the sheet&#x27;s 2:1 by 2x and only 20 mm of the bottom band is free — it would be drawn the same size as the view it points at</td></tr>
+<tr><th scope="row">component.json origin</th><td>generated</td></tr>
+<tr><th scope="row">component.json verdict</th><td>PASS</td></tr>
+<tr><th scope="row">Material / process</th><td>PLA / FDM</td></tr>
+</tbody></table></div>
+<p class="files"><a href="microduck-upper-leg-right/microduck-upper-leg-right.svg">SVG</a> · <a href="microduck-upper-leg-right/microduck-upper-leg-right.dxf">DXF</a> · <a href="microduck-upper-leg-right/microduck-upper-leg-right.pdf">PDF</a> · <a href="microduck-upper-leg-right/microduck-upper-leg-right-ref.png">reference render</a></p>
 </article><article class="sheet" id="microduck-upper-leg-rigidity-plate">
 <div class="sheethead"><h3>microduck-upper-leg-rigidity-plate</h3><div><span class="chip pass">PASS</span> <span class="kindtag">drawing</span></div></div>
 <p class="paircap">Microduck thigh rigidity plate — the &#x27;upper_leg_rigidity_plate&#x27; mesh of Pollen&#x27;s MJCF: a 1 x 45 x 58 mm mint side plate that closes the open face of each thigh cup, with Ø19 windows on the hip-pitch and knee axes and four Ø2.2 screw holes</p>
 <figure><a href="microduck-upper-leg-rigidity-plate/microduck-upper-leg-rigidity-plate.svg"><img src="microduck-upper-leg-rigidity-plate/microduck-upper-leg-rigidity-plate-sheet.png" alt="microduck-upper-leg-rigidity-plate sheet"></a><figcaption>The finished sheet, photographed in headless Chrome off the SVG on disk and read back — not a preview of what the generator meant to draw.</figcaption></figure>
 <div class="tablewrap"><table class="data"><tbody>
-<tr><th scope="row">Sheet</th><td>A1 at 5:1, 3 attempt(s)</td></tr>
-<tr><th scope="row">Views</th><td>right, front, SECA, ISO</td></tr>
-<tr><th scope="row">Detail callouts</th><td>none</td></tr>
+<tr><th scope="row">Sheet</th><td>A1 at 5:1, 9 attempt(s)</td></tr>
+<tr><th scope="row">Views</th><td>right, front, SECA, ISO, DETA, DETB</td></tr>
+<tr><th scope="row">Detail callouts</th><td>4x O2.20 cluster; thinnest wall 1.00 mm</td></tr>
 <tr><th scope="row">Envelope (mm)</th><td>1.0000 × 44.9992 × 58.0596</td></tr>
 <tr><th scope="row">Holes measured</th><td>6 (0 counterbore)</td></tr>
 <tr><th scope="row">Ø on the solid</th><td>2.200, 19.000</td></tr>
 <tr><th scope="row">Slots / grooves</th><td>0 / 0</td></tr>
 <tr><th scope="row">Radii on the solid</th><td>R1.100, R9.500, R11.500</td></tr>
 <tr><th scope="row">Thinnest wall, whole solid</th><td>1.0000 mm at (42.500, 7.686, -6.394), 0.570 mm sample spacing</td></tr>
-<tr><th scope="row">Hidden lines</th><td>front: hidden lines SUPPRESSED: all 734 edge samples still land on drawn ink without them; right: hidden lines SUPPRESSED: all 734 edge samples still land on drawn ink without them</td></tr>
+<tr><th scope="row">Hidden lines</th><td>front: the suppression probe could not run (AttributeError: &#x27;list&#x27; object has no attribute &#x27;get&#x27;), so hidden lines are KEPT; right: the suppression probe could not run (AttributeError: &#x27;list&#x27; object has no attribute &#x27;get&#x27;), so hidden lines are KEPT</td></tr>
 <tr><th scope="row">verify_sheet</th><td>True (independent read-back: True)</td></tr>
 <tr><th scope="row">Re-checked after the run</th><td>not run — tools/verify_drawings.py has not been over this sheet</td></tr>
+<tr><th scope="row">Orthographic views the extents earn</th><td>not recorded — redraw with the current tools/draw_part.py</td></tr>
+<tr><th scope="row">Radii the builder&#x27;s own text names</th><td>none — cad/part.py names no radius in its text</td></tr>
+<tr><th scope="row">Arc radii cecad.inspect measures on the solid</th><td>not recorded</td></tr>
+<tr><th scope="row">Named-but-not-an-edge radii</th><td>none — every radius the builder names is a circular edge on the solid, or the builder names none. A radius that is not an edge cannot carry a leader; where one exists the sheet states it in one line and this row carries the rest.</td></tr>
+<tr><th scope="row">Content the search had to give up</th><td>nothing — the sheet carries the section, the hole callouts, the connector dimension and the detail bubbles it measured</td></tr>
+<tr><th scope="row">§A.5 radii dimensioned</th><td>not measured — run tools/measure_features.py; the solid carries 3 distinct arc radii</td></tr>
 <tr><th scope="row">§A.6 feature census</th><td>not run — tools/measure_features.py has not been over this part</td></tr>
-<tr><th scope="row">Warnings</th><td>DETAIL A dropped: a Ø34.5 mm region needs 10:1 to beat the sheet&#x27;s 5:1 by 2x and only 107 mm of the bottom band is free — it would be drawn the same size as the view it points at; DETAIL B dropped: a Ø16.0 mm region needs 10:1 to beat the sheet&#x27;s 5:1 by 2x and only 107 mm of the bottom band is free — it would be drawn the same size as the view it points at</td></tr>
 <tr><th scope="row">component.json origin</th><td>generated</td></tr>
 <tr><th scope="row">component.json verdict</th><td>PASS</td></tr>
 <tr><th scope="row">Material / process</th><td>PLA / FDM</td></tr>
@@ -356,18 +566,24 @@
 <tr><th scope="row">Hidden lines</th><td>front: hidden lines KEPT: without them 14 of 539 edge samples have no ink within 0.35 mm (worst 1.213 mm) and the feature would be missing from the sheet; right: hidden lines SUPPRESSED: all 406 edge samples still land on drawn ink without them; top: hidden lines KEPT: without them 80 of 490 edge samples have no ink within 0.35 mm (worst 3.862 mm) and the feature would be missing from the sheet</td></tr>
 <tr><th scope="row">verify_sheet</th><td>True (independent read-back: True)</td></tr>
 <tr><th scope="row">Re-checked after the run</th><td>not run — tools/verify_drawings.py has not been over this sheet</td></tr>
+<tr><th scope="row">Orthographic views the extents earn</th><td>not recorded — redraw with the current tools/draw_part.py</td></tr>
+<tr><th scope="row">Radii the builder&#x27;s own text names</th><td>none — cad/part.py names no radius in its text</td></tr>
+<tr><th scope="row">Arc radii cecad.inspect measures on the solid</th><td>not recorded</td></tr>
+<tr><th scope="row">Named-but-not-an-edge radii</th><td>none — every radius the builder names is a circular edge on the solid, or the builder names none. A radius that is not an edge cannot carry a leader; where one exists the sheet states it in one line and this row carries the rest.</td></tr>
+<tr><th scope="row">Content the search had to give up</th><td>DROPPED to make the sheet read back clean: details. Last reason before it was dropped: not recorded</td></tr>
+<tr><th scope="row">§A.5 radii dimensioned</th><td>not measured — run tools/measure_features.py; the solid carries 11 distinct arc radii</td></tr>
 <tr><th scope="row">§A.6 feature census</th><td>not run — tools/measure_features.py has not been over this part</td></tr>
 <tr><th scope="row">component.json origin</th><td>generated</td></tr>
 <tr><th scope="row">component.json verdict</th><td>PASS</td></tr>
 <tr><th scope="row">Material / process</th><td>PLA / FDM</td></tr>
 </tbody></table></div>
 <p class="files"><a href="microduck-yaw2roll/microduck-yaw2roll.svg">SVG</a> · <a href="microduck-yaw2roll/microduck-yaw2roll.dxf">DXF</a> · <a href="microduck-yaw2roll/microduck-yaw2roll.pdf">PDF</a> · <a href="microduck-yaw2roll/microduck-yaw2roll-ref.png">reference render</a></p>
-</article><article class="sheet" id="microduck-foot-left">
-<div class="sheethead"><h3>microduck-foot-left</h3><div><span class="chip rail">FAIL</span> <span class="kindtag">drawing</span></div></div>
-<p class="paircap">Microduck left foot cap — yellow 40.1 x 54 x 16.9 printed cap between ankle and sole: 10-rib comb bottom, R16.3 ankle cradle with R16.5 roller relief, two snap fingers, two ankle-block pockets, one M2 pilot</p>
-<figure><a href="microduck-foot-left/microduck-foot-left.svg"><img src="microduck-foot-left/microduck-foot-left-sheet.png" alt="microduck-foot-left sheet"></a><figcaption>The finished sheet, photographed in headless Chrome off the SVG on disk and read back — not a preview of what the generator meant to draw.</figcaption></figure>
+</article><article class="sheet" id="microduck-foot-right">
+<div class="sheethead"><h3>microduck-foot-right</h3><div><span class="chip rail">FAIL</span> <span class="kindtag">drawing</span></div></div>
+<p class="paircap">Microduck right foot cap — mirror of microduck-foot-left about x=0 (measured true mirror, p95 0.000 mm): same comb, cradle, snaps, pockets, M2 pilot</p>
+<figure><a href="microduck-foot-right/microduck-foot-right.svg"><img src="microduck-foot-right/microduck-foot-right-sheet.png" alt="microduck-foot-right sheet"></a><figcaption>The finished sheet, photographed in headless Chrome off the SVG on disk and read back — not a preview of what the generator meant to draw.</figcaption></figure>
 <div class="tablewrap"><table class="data"><tbody>
-<tr><th scope="row">Sheet</th><td>A3 at 1:1, 31 attempt(s)</td></tr>
+<tr><th scope="row">Sheet</th><td>A3 at 1:1, 33 attempt(s)</td></tr>
 <tr><th scope="row">Views</th><td>front, top, right, SECA, ISO, DETA</td></tr>
 <tr><th scope="row">Detail callouts</th><td>A: thinnest wall 0.01 mm</td></tr>
 <tr><th scope="row">Envelope (mm)</th><td>40.0850 × 54.0000 × 16.9050</td></tr>
@@ -375,113 +591,23 @@
 <tr><th scope="row">Ø on the solid</th><td>1.600, 3.000</td></tr>
 <tr><th scope="row">Slots / grooves</th><td>0 / 0</td></tr>
 <tr><th scope="row">Radii on the solid</th><td>R0.800, R1.500, R2.500</td></tr>
-<tr><th scope="row">Thinnest wall, whole solid</th><td>0.0150 mm at (46.400, 34.526, -16.651), 1.477 mm sample spacing</td></tr>
-<tr><th scope="row">Hidden lines</th><td>front: hidden lines KEPT: without them 3 of 2745 edge samples have no ink within 0.35 mm (worst 0.458 mm) and the feature would be missing from the sheet; right: hidden lines KEPT: without them 27 of 2759 edge samples have no ink within 0.35 mm (worst 0.721 mm) and the feature would be missing from the sheet; top: hidden lines KEPT: without them 218 of 2952 edge samples have no ink within 0.35 mm (worst 1.029 mm) and the feature would be missing from the sheet</td></tr>
+<tr><th scope="row">Thinnest wall, whole solid</th><td>0.0150 mm at (-53.600, 34.526, -16.651), 1.477 mm sample spacing</td></tr>
+<tr><th scope="row">Hidden lines</th><td>front: hidden lines KEPT: without them 3 of 2745 edge samples have no ink within 0.35 mm (worst 0.458 mm) and the feature would be missing from the sheet; right: hidden lines KEPT: without them 117 of 2735 edge samples have no ink within 0.35 mm (worst 1.212 mm) and the feature would be missing from the sheet; top: hidden lines KEPT: without them 218 of 2952 edge samples have no ink within 0.35 mm (worst 1.029 mm) and the feature would be missing from the sheet</td></tr>
 <tr><th scope="row">verify_sheet</th><td>False (independent read-back: False)</td></tr>
 <tr><th scope="row">Re-checked after the run</th><td>not run — tools/verify_drawings.py has not been over this sheet</td></tr>
+<tr><th scope="row">Orthographic views the extents earn</th><td>not recorded — redraw with the current tools/draw_part.py</td></tr>
+<tr><th scope="row">Radii the builder&#x27;s own text names</th><td>none — cad/part.py names no radius in its text</td></tr>
+<tr><th scope="row">Arc radii cecad.inspect measures on the solid</th><td>not recorded</td></tr>
+<tr><th scope="row">Named-but-not-an-edge radii</th><td>none — every radius the builder names is a circular edge on the solid, or the builder names none. A radius that is not an edge cannot carry a leader; where one exists the sheet states it in one line and this row carries the rest.</td></tr>
+<tr><th scope="row">Content the search had to give up</th><td>nothing — the sheet carries the section, the hole callouts, the connector dimension and the detail bubbles it measured</td></tr>
+<tr><th scope="row">§A.5 radii dimensioned</th><td>not measured — run tools/measure_features.py; the solid carries 3 distinct arc radii</td></tr>
 <tr><th scope="row">§A.6 feature census</th><td>not run — tools/measure_features.py has not been over this part</td></tr>
 <tr><th scope="row">Warnings</th><td>no strategy produced a sheet that reads back clean</td></tr>
 <tr><th scope="row">component.json origin</th><td>generated</td></tr>
 <tr><th scope="row">component.json verdict</th><td>PASS</td></tr>
 <tr><th scope="row">Material / process</th><td>PLA / FDM</td></tr>
 </tbody></table></div>
-<p class="files"><a href="microduck-foot-left/microduck-foot-left.svg">SVG</a> · <a href="microduck-foot-left/microduck-foot-left.dxf">DXF</a> · <a href="microduck-foot-left/microduck-foot-left.pdf">PDF</a> · <a href="microduck-foot-left/microduck-foot-left-ref.png">reference render</a></p>
-</article><article class="sheet" id="microduck-motor-support">
-<div class="sheethead"><h3>microduck-motor-support</h3><div><span class="chip rail">FAIL</span> <span class="kindtag">drawing</span></div></div>
-<p class="paircap">Microduck head chassis plate — 73.5 x 54.2 x 18.8 mm frame holding the head-roll and mouth XL330 servos, the camera lens tube and the head electronics shelf</p>
-<figure><a href="microduck-motor-support/microduck-motor-support.svg"><img src="microduck-motor-support/microduck-motor-support-sheet.png" alt="microduck-motor-support sheet"></a><figcaption>The finished sheet, photographed in headless Chrome off the SVG on disk and read back — not a preview of what the generator meant to draw.</figcaption></figure>
-<div class="tablewrap"><table class="data"><tbody>
-<tr><th scope="row">Sheet</th><td>A2 at 1:1, 21 attempt(s)</td></tr>
-<tr><th scope="row">Views</th><td>front, top, right, SECA, ISO, DETA</td></tr>
-<tr><th scope="row">Detail callouts</th><td>A: thinnest wall 0.01 mm</td></tr>
-<tr><th scope="row">Envelope (mm)</th><td>73.5000 × 54.2000 × 18.8000</td></tr>
-<tr><th scope="row">Holes measured</th><td>5 (0 counterbore)</td></tr>
-<tr><th scope="row">Ø on the solid</th><td>2.700, 17.650</td></tr>
-<tr><th scope="row">Slots / grooves</th><td>0 / 0</td></tr>
-<tr><th scope="row">Radii on the solid</th><td>R1.350, R7.500, R8.820, R9.500, R11.100</td></tr>
-<tr><th scope="row">Thinnest wall, whole solid</th><td>0.0080 mm at (-28.950, -8.559, 6.677), 1.297 mm sample spacing</td></tr>
-<tr><th scope="row">Hidden lines</th><td>front: hidden lines KEPT: without them 77 of 2396 edge samples have no ink within 0.35 mm (worst 2.532 mm) and the feature would be missing from the sheet; right: hidden lines KEPT: without them 237 of 1958 edge samples have no ink within 0.35 mm (worst 3.107 mm) and the feature would be missing from the sheet; top: hidden lines KEPT: without them 391 of 2134 edge samples have no ink within 0.35 mm (worst 2.212 mm) and the feature would be missing from the sheet</td></tr>
-<tr><th scope="row">verify_sheet</th><td>False (independent read-back: False)</td></tr>
-<tr><th scope="row">Re-checked after the run</th><td>not run — tools/verify_drawings.py has not been over this sheet</td></tr>
-<tr><th scope="row">§A.6 feature census</th><td>not run — tools/measure_features.py has not been over this part</td></tr>
-<tr><th scope="row">Warnings</th><td>no strategy produced a sheet that reads back clean</td></tr>
-<tr><th scope="row">component.json origin</th><td>generated</td></tr>
-<tr><th scope="row">component.json verdict</th><td>PASS</td></tr>
-<tr><th scope="row">Material / process</th><td>PLA / FDM</td></tr>
-</tbody></table></div>
-<p class="files"><a href="microduck-motor-support/microduck-motor-support.svg">SVG</a> · <a href="microduck-motor-support/microduck-motor-support.dxf">DXF</a> · <a href="microduck-motor-support/microduck-motor-support.pdf">PDF</a> · <a href="microduck-motor-support/microduck-motor-support-ref.png">reference render</a></p>
-</article><article class="sheet" id="microduck-trunk-base">
-<div class="sheethead"><h3>microduck-trunk-base</h3><div><span class="chip rail">FAIL</span> <span class="kindtag">drawing</span></div></div>
-<p class="paircap">Microduck trunk base plate — the &#x27;trunk_base&#x27; body mesh of Pollen&#x27;s MJCF: 57 x 36 x 1 mm chassis plate with two Ø19 hip-yaw holes 35 mm apart, 4 x Ø2.3 M2 clearance holes, a 6 x 12 cable slot and four Ø1.8 locating pins</p>
-<figure><img src="microduck-trunk-base/microduck-trunk-base-ref.png" alt="microduck-trunk-base reference render"><figcaption>Reference render (no sheet thumbnail).</figcaption></figure>
-<div class="tablewrap"><table class="data"><tbody>
-<tr><th scope="row">Sheet</th><td>A2 at 2:1, 69 attempt(s)</td></tr>
-<tr><th scope="row">Views</th><td>top, front, SECA, ISO, DETA, DETB, DETC</td></tr>
-<tr><th scope="row">Detail callouts</th><td>2x O2.30 cluster; 2x O2.30 cluster; thinnest wall 1.00 mm</td></tr>
-<tr><th scope="row">Envelope (mm)</th><td>57.0000 × 36.0000 × 3.0000</td></tr>
-<tr><th scope="row">Holes measured</th><td>6 (0 counterbore)</td></tr>
-<tr><th scope="row">Ø on the solid</th><td>2.300, 19.000</td></tr>
-<tr><th scope="row">Slots / grooves</th><td>0 / 0</td></tr>
-<tr><th scope="row">Radii on the solid</th><td>R0.800, R0.900, R1.150, R9.500</td></tr>
-<tr><th scope="row">Thinnest wall, whole solid</th><td>1.0000 mm at (-27.402, -6.099, 16.500), 1.409 mm sample spacing</td></tr>
-<tr><th scope="row">Hidden lines</th><td>not recorded</td></tr>
-<tr><th scope="row">verify_sheet</th><td>False (independent read-back: False)</td></tr>
-<tr><th scope="row">Re-checked after the run</th><td>not run — tools/verify_drawings.py has not been over this sheet</td></tr>
-<tr><th scope="row">§A.6 feature census</th><td>not run — tools/measure_features.py has not been over this part</td></tr>
-<tr><th scope="row">Warnings</th><td>no strategy produced a sheet that reads back clean</td></tr>
-<tr><th scope="row">component.json origin</th><td>generated</td></tr>
-<tr><th scope="row">component.json verdict</th><td>PASS</td></tr>
-<tr><th scope="row">Material / process</th><td>PLA / FDM</td></tr>
-</tbody></table></div>
-<p class="files"><a href="microduck-trunk-base/microduck-trunk-base.svg">SVG</a> · <a href="microduck-trunk-base/microduck-trunk-base.dxf">DXF</a> · <a href="microduck-trunk-base/microduck-trunk-base.pdf">PDF</a> · <a href="microduck-trunk-base/microduck-trunk-base-ref.png">reference render</a></p>
-</article><article class="sheet" id="microduck-upper-leg-left">
-<div class="sheethead"><h3>microduck-upper-leg-left</h3><div><span class="chip rail">FAIL</span> <span class="kindtag">drawing</span></div></div>
-<p class="paircap">Microduck left thigh housing — the &#x27;upper_leg_left&#x27; body of Pollen&#x27;s MJCF: 28 x 47.7 x 61 mm one-sided cup, 1 mm walls, holding the hip-pitch and knee XL330s on axes 42.0 mm apart</p>
-<figure><a href="microduck-upper-leg-left/microduck-upper-leg-left.svg"><img src="microduck-upper-leg-left/microduck-upper-leg-left-sheet.png" alt="microduck-upper-leg-left sheet"></a><figcaption>The finished sheet, photographed in headless Chrome off the SVG on disk and read back — not a preview of what the generator meant to draw.</figcaption></figure>
-<div class="tablewrap"><table class="data"><tbody>
-<tr><th scope="row">Sheet</th><td>A3 at 1:2, 103 attempt(s)</td></tr>
-<tr><th scope="row">Views</th><td>front, top, right, SECA, ISO, DETA</td></tr>
-<tr><th scope="row">Detail callouts</th><td>thinnest wall 0.02 mm</td></tr>
-<tr><th scope="row">Envelope (mm)</th><td>28.0000 × 47.6608 × 60.9911</td></tr>
-<tr><th scope="row">Holes measured</th><td>2 (0 counterbore)</td></tr>
-<tr><th scope="row">Ø on the solid</th><td>5.370</td></tr>
-<tr><th scope="row">Slots / grooves</th><td>0 / 0</td></tr>
-<tr><th scope="row">Radii on the solid</th><td>R0.800, R0.900, R0.950, R1.220, R1.380, R2.210, R2.690, R3.630</td></tr>
-<tr><th scope="row">Thinnest wall, whole solid</th><td>0.0240 mm at (69.125, -10.700, 37.938), 2.173 mm sample spacing</td></tr>
-<tr><th scope="row">Hidden lines</th><td>front: the suppression probe could not run (AttributeError: &#x27;list&#x27; object has no attribute &#x27;get&#x27;), so hidden lines are KEPT; right: the suppression probe could not run (AttributeError: &#x27;list&#x27; object has no attribute &#x27;get&#x27;), so hidden lines are KEPT; top: the suppression probe could not run (AttributeError: &#x27;list&#x27; object has no attribute &#x27;get&#x27;), so hidden lines are KEPT</td></tr>
-<tr><th scope="row">verify_sheet</th><td>False (independent read-back: False)</td></tr>
-<tr><th scope="row">Re-checked after the run</th><td>not run — tools/verify_drawings.py has not been over this sheet</td></tr>
-<tr><th scope="row">§A.6 feature census</th><td>not run — tools/measure_features.py has not been over this part</td></tr>
-<tr><th scope="row">Warnings</th><td>no strategy produced a sheet that reads back clean</td></tr>
-<tr><th scope="row">component.json origin</th><td>generated</td></tr>
-<tr><th scope="row">component.json verdict</th><td>PASS</td></tr>
-<tr><th scope="row">Material / process</th><td>PLA / FDM</td></tr>
-</tbody></table></div>
-<p class="files"><a href="microduck-upper-leg-left/microduck-upper-leg-left.svg">SVG</a> · <a href="microduck-upper-leg-left/microduck-upper-leg-left.dxf">DXF</a> · <a href="microduck-upper-leg-left/microduck-upper-leg-left.pdf">PDF</a> · <a href="microduck-upper-leg-left/microduck-upper-leg-left-ref.png">reference render</a></p>
-</article><article class="sheet" id="microduck-upper-leg-right">
-<div class="sheethead"><h3>microduck-upper-leg-right</h3><div><span class="chip rail">FAIL</span> <span class="kindtag">drawing</span></div></div>
-<p class="paircap">Microduck right thigh housing — the &#x27;upper_leg_right&#x27; body of Pollen&#x27;s MJCF: the left thigh mirrored in x (measured exact), 28 x 47.7 x 61 mm one-sided cup holding the hip-pitch and knee XL330s</p>
-<figure><a href="microduck-upper-leg-right/microduck-upper-leg-right.svg"><img src="microduck-upper-leg-right/microduck-upper-leg-right-sheet.png" alt="microduck-upper-leg-right sheet"></a><figcaption>The finished sheet, photographed in headless Chrome off the SVG on disk and read back — not a preview of what the generator meant to draw.</figcaption></figure>
-<div class="tablewrap"><table class="data"><tbody>
-<tr><th scope="row">Sheet</th><td>A3 at 1:2, 31 attempt(s)</td></tr>
-<tr><th scope="row">Views</th><td>front, top, right, SECA, ISO, DETA</td></tr>
-<tr><th scope="row">Detail callouts</th><td>A: thinnest wall 0.02 mm</td></tr>
-<tr><th scope="row">Envelope (mm)</th><td>28.0000 × 47.6608 × 60.9911</td></tr>
-<tr><th scope="row">Holes measured</th><td>2 (0 counterbore)</td></tr>
-<tr><th scope="row">Ø on the solid</th><td>5.370</td></tr>
-<tr><th scope="row">Slots / grooves</th><td>0 / 0</td></tr>
-<tr><th scope="row">Radii on the solid</th><td>R0.800, R0.900, R0.950, R1.220, R1.380, R2.210, R2.690, R3.630</td></tr>
-<tr><th scope="row">Thinnest wall, whole solid</th><td>0.0240 mm at (-69.125, -10.700, 37.938), 2.174 mm sample spacing</td></tr>
-<tr><th scope="row">Hidden lines</th><td>front: hidden lines KEPT: without them 10 of 1632 edge samples have no ink within 0.35 mm (worst 2.000 mm) and the feature would be missing from the sheet; right: hidden lines KEPT: without them 10 of 1725 edge samples have no ink within 0.35 mm (worst 2.648 mm) and the feature would be missing from the sheet; top: hidden lines KEPT: without them 2 of 1699 edge samples have no ink within 0.35 mm (worst 0.550 mm) and the feature would be missing from the sheet</td></tr>
-<tr><th scope="row">verify_sheet</th><td>False (independent read-back: False)</td></tr>
-<tr><th scope="row">Re-checked after the run</th><td>not run — tools/verify_drawings.py has not been over this sheet</td></tr>
-<tr><th scope="row">§A.6 feature census</th><td>not run — tools/measure_features.py has not been over this part</td></tr>
-<tr><th scope="row">Warnings</th><td>no strategy produced a sheet that reads back clean</td></tr>
-<tr><th scope="row">component.json origin</th><td>generated</td></tr>
-<tr><th scope="row">component.json verdict</th><td>PASS</td></tr>
-<tr><th scope="row">Material / process</th><td>PLA / FDM</td></tr>
-</tbody></table></div>
-<p class="files"><a href="microduck-upper-leg-right/microduck-upper-leg-right.svg">SVG</a> · <a href="microduck-upper-leg-right/microduck-upper-leg-right.dxf">DXF</a> · <a href="microduck-upper-leg-right/microduck-upper-leg-right.pdf">PDF</a> · <a href="microduck-upper-leg-right/microduck-upper-leg-right-ref.png">reference render</a></p>
+<p class="files"><a href="microduck-foot-right/microduck-foot-right.svg">SVG</a> · <a href="microduck-foot-right/microduck-foot-right.dxf">DXF</a> · <a href="microduck-foot-right/microduck-foot-right.pdf">PDF</a> · <a href="microduck-foot-right/microduck-foot-right-ref.png">reference render</a></p>
 </article>
 </section>
 
@@ -492,9 +618,29 @@
 
 <section id="print-sheets"><h2><span class="n">4</span>Print sheets</h2>
 <p class="lede">Parts backed by a published mesh. No dimension can be read off a decimated triangulation, so these carry what is true of a mesh and say what is missing.</p>
-<article class="sheet" id="microduck-jaw">
+<article class="sheet" id="microduck-eye-ring">
+<div class="sheethead"><h3>microduck-eye-ring</h3><div><span class="chip pass">PASS</span> <span class="kindtag">print-sheet</span></div></div>
+<p class="paircap">microduck-eye-ring — the eye bezel: Pollen Robotics&#x27; published mesh `noenoeil` (Ø30.000 × 7.5 mm ring, Ø14.4 bore), mesh-backed part</p>
+<figure><a href="microduck-eye-ring/microduck-eye-ring.svg"><img src="microduck-eye-ring/microduck-eye-ring-sheet.png" alt="microduck-eye-ring sheet"></a><figcaption>The finished sheet, photographed in headless Chrome off the SVG on disk and read back — not a preview of what the generator meant to draw.</figcaption></figure>
+<div class="tablewrap"><table class="data"><tbody>
+<tr><th scope="row">Why no drawing</th><td>cad/part.py is a published-mesh loader (meshshelve, from_mesh, Part.from_mesh); a decimated triangulation carries no dimension a shop can work to (docs/MANUFACTURING-REQUIREMENTS.md A.3)</td></tr>
+<tr><th scope="row">Envelope (mm)</th><td>30.0000 × 9.5000 × 30.0000</td></tr>
+<tr><th scope="row">Shells / solids</th><td>1 / 1</td></tr>
+<tr><th scope="row">Volume</th><td>4250.2195 mm³</td></tr>
+<tr><th scope="row">Mass</th><td>5.2703 g</td></tr>
+<tr><th scope="row">Orientation</th><td>as modelled, Z up (X is the long axis, 30.0000 mm)</td></tr>
+<tr><th scope="row">Print this file</th><td>/Users/leifrydenfalk/dev/ce-workshop/ce-designs/microduck/ce-parts/microduck-eye-ring/iterations/v0.0.1/geometry/noenoeil.stl</td></tr>
+<tr><th scope="row">sha256</th><td>f5492d8291da053bb4cb3f6680f90507648c4cfe1ef59f92b7d8f53e980d279b</td></tr>
+<tr><th scope="row">verify_print_sheet</th><td>True</td></tr>
+<tr><th scope="row">component.json origin</th><td>vendor</td></tr>
+<tr><th scope="row">component.json verdict</th><td>CANNOT DETERMINE</td></tr>
+<tr><th scope="row">Material / process</th><td>PLA / FDM (accent-colour printed part)</td></tr>
+</tbody></table></div>
+<p class="files"><a href="microduck-eye-ring/microduck-eye-ring.svg">SVG</a> · <a href="microduck-eye-ring/microduck-eye-ring.dxf">DXF</a></p>
+</article><article class="sheet" id="microduck-jaw">
 <div class="sheethead"><h3>microduck-jaw</h3><div><span class="chip pass">PASS</span> <span class="kindtag">print-sheet</span></div></div>
 <p class="paircap">microduck-jaw — Pollen Robotics&#x27; published mesh `jaw`, mesh-backed part</p>
+<figure><a href="microduck-jaw/microduck-jaw.svg"><img src="microduck-jaw/microduck-jaw-sheet.png" alt="microduck-jaw sheet"></a><figcaption>The finished sheet, photographed in headless Chrome off the SVG on disk and read back — not a preview of what the generator meant to draw.</figcaption></figure>
 <div class="tablewrap"><table class="data"><tbody>
 <tr><th scope="row">Why no drawing</th><td>cad/part.py is a published-mesh loader (meshshelve, from_mesh, Part.from_mesh); a decimated triangulation carries no dimension a shop can work to (docs/MANUFACTURING-REQUIREMENTS.md A.3)</td></tr>
 <tr><th scope="row">Envelope (mm)</th><td>91.4158 × 68.7105 × 29.4477</td></tr>
@@ -502,14 +648,71 @@
 <tr><th scope="row">Volume</th><td>9360.1081 mm³</td></tr>
 <tr><th scope="row">Mass</th><td>11.6065 g</td></tr>
 <tr><th scope="row">Orientation</th><td>as modelled, Z up (X is the long axis, 91.4158 mm)</td></tr>
-<tr><th scope="row">Print this file</th><td>CANNOT DETERMINE</td></tr>
-<tr><th scope="row">sha256</th><td>CANNOT DETERMINE</td></tr>
+<tr><th scope="row">Print this file</th><td>/Users/leifrydenfalk/dev/ce-workshop/ce-designs/microduck/ce-parts/microduck-jaw/iterations/v0.0.1/geometry/jaw.stl</td></tr>
+<tr><th scope="row">sha256</th><td>65c300349113d3c6cd4a2cc587f76f7228115565a854492e42358ba8df71796a</td></tr>
 <tr><th scope="row">verify_print_sheet</th><td>True</td></tr>
 <tr><th scope="row">component.json origin</th><td>vendor</td></tr>
 <tr><th scope="row">component.json verdict</th><td>CANNOT DETERMINE</td></tr>
 <tr><th scope="row">Material / process</th><td>PLA / FDM (Pollen: &#x27;four printed colourways&#x27;)</td></tr>
 </tbody></table></div>
 <p class="files"><a href="microduck-jaw/microduck-jaw.svg">SVG</a> · <a href="microduck-jaw/microduck-jaw.dxf">DXF</a></p>
+</article><article class="sheet" id="microduck-jaw-soft">
+<div class="sheethead"><h3>microduck-jaw-soft</h3><div><span class="chip pass">PASS</span> <span class="kindtag">print-sheet</span></div></div>
+<p class="paircap">microduck-jaw-soft — Pollen Robotics&#x27; published mesh `jaw_soft`, mesh-backed part</p>
+<figure><a href="microduck-jaw-soft/microduck-jaw-soft.svg"><img src="microduck-jaw-soft/microduck-jaw-soft-sheet.png" alt="microduck-jaw-soft sheet"></a><figcaption>The finished sheet, photographed in headless Chrome off the SVG on disk and read back — not a preview of what the generator meant to draw.</figcaption></figure>
+<div class="tablewrap"><table class="data"><tbody>
+<tr><th scope="row">Why no drawing</th><td>cad/part.py is a published-mesh loader (meshshelve, from_mesh, Part.from_mesh); a decimated triangulation carries no dimension a shop can work to (docs/MANUFACTURING-REQUIREMENTS.md A.3)</td></tr>
+<tr><th scope="row">Envelope (mm)</th><td>87.6737 × 32.2339 × 8.4376</td></tr>
+<tr><th scope="row">Shells / solids</th><td>1 / 1</td></tr>
+<tr><th scope="row">Volume</th><td>18601.2077 mm³</td></tr>
+<tr><th scope="row">Mass</th><td>22.5075 g</td></tr>
+<tr><th scope="row">Orientation</th><td>as modelled, Z up (X is the long axis, 87.6737 mm)</td></tr>
+<tr><th scope="row">Print this file</th><td>/Users/leifrydenfalk/dev/ce-workshop/ce-designs/microduck/ce-parts/microduck-jaw-soft/iterations/v0.0.1/geometry/jaw_soft.stl</td></tr>
+<tr><th scope="row">sha256</th><td>61a426890f748713d45a9c0844149bcb0340d326f75295dcf7de2a4d768cbc85</td></tr>
+<tr><th scope="row">verify_print_sheet</th><td>True</td></tr>
+<tr><th scope="row">component.json origin</th><td>vendor</td></tr>
+<tr><th scope="row">component.json verdict</th><td>CANNOT DETERMINE</td></tr>
+<tr><th scope="row">Material / process</th><td>TPU / FDM (Pollen: &#x27;four printed colourways&#x27;)</td></tr>
+</tbody></table></div>
+<p class="files"><a href="microduck-jaw-soft/microduck-jaw-soft.svg">SVG</a> · <a href="microduck-jaw-soft/microduck-jaw-soft.dxf">DXF</a></p>
+</article><article class="sheet" id="microduck-soft-mouth-top">
+<div class="sheethead"><h3>microduck-soft-mouth-top</h3><div><span class="chip pass">PASS</span> <span class="kindtag">print-sheet</span></div></div>
+<p class="paircap">microduck-soft-mouth-top — Pollen Robotics&#x27; published mesh `soft_mouth_top`, mesh-backed part</p>
+<figure><a href="microduck-soft-mouth-top/microduck-soft-mouth-top.svg"><img src="microduck-soft-mouth-top/microduck-soft-mouth-top-sheet.png" alt="microduck-soft-mouth-top sheet"></a><figcaption>The finished sheet, photographed in headless Chrome off the SVG on disk and read back — not a preview of what the generator meant to draw.</figcaption></figure>
+<div class="tablewrap"><table class="data"><tbody>
+<tr><th scope="row">Why no drawing</th><td>cad/part.py is a published-mesh loader (meshshelve, from_mesh, Part.from_mesh); a decimated triangulation carries no dimension a shop can work to (docs/MANUFACTURING-REQUIREMENTS.md A.3)</td></tr>
+<tr><th scope="row">Envelope (mm)</th><td>87.8220 × 32.5651 × 3.2762</td></tr>
+<tr><th scope="row">Shells / solids</th><td>1 / 1</td></tr>
+<tr><th scope="row">Volume</th><td>2699.5801 mm³</td></tr>
+<tr><th scope="row">Mass</th><td>3.2665 g</td></tr>
+<tr><th scope="row">Orientation</th><td>as modelled, Z up (X is the long axis, 87.8220 mm)</td></tr>
+<tr><th scope="row">Print this file</th><td>/Users/leifrydenfalk/dev/ce-workshop/ce-designs/microduck/ce-parts/microduck-soft-mouth-top/iterations/v0.0.1/geometry/soft_mouth_top.stl</td></tr>
+<tr><th scope="row">sha256</th><td>16f662c82bd3e24f0e64ee22b6b549b9a2a76f6de7b7477b9f89f5861f3e91a1</td></tr>
+<tr><th scope="row">verify_print_sheet</th><td>True</td></tr>
+<tr><th scope="row">component.json origin</th><td>vendor</td></tr>
+<tr><th scope="row">component.json verdict</th><td>CANNOT DETERMINE</td></tr>
+<tr><th scope="row">Material / process</th><td>TPU / FDM (Pollen: &#x27;four printed colourways&#x27;)</td></tr>
+</tbody></table></div>
+<p class="files"><a href="microduck-soft-mouth-top/microduck-soft-mouth-top.svg">SVG</a> · <a href="microduck-soft-mouth-top/microduck-soft-mouth-top.dxf">DXF</a></p>
+</article><article class="sheet" id="microduck-top-head-shell">
+<div class="sheethead"><h3>microduck-top-head-shell</h3><div><span class="chip pass">PASS</span> <span class="kindtag">print-sheet</span></div></div>
+<p class="paircap">microduck-top-head-shell — Pollen Robotics&#x27; published mesh `top_head_shell`, mesh-backed part</p>
+<figure><a href="microduck-top-head-shell/microduck-top-head-shell.svg"><img src="microduck-top-head-shell/microduck-top-head-shell-sheet.png" alt="microduck-top-head-shell sheet"></a><figcaption>The finished sheet, photographed in headless Chrome off the SVG on disk and read back — not a preview of what the generator meant to draw.</figcaption></figure>
+<div class="tablewrap"><table class="data"><tbody>
+<tr><th scope="row">Why no drawing</th><td>cad/part.py is a published-mesh loader (meshshelve, from_mesh, Part.from_mesh); a decimated triangulation carries no dimension a shop can work to (docs/MANUFACTURING-REQUIREMENTS.md A.3)</td></tr>
+<tr><th scope="row">Envelope (mm)</th><td>91.7595 × 122.6900 × 46.3361</td></tr>
+<tr><th scope="row">Shells / solids</th><td>1 / 1</td></tr>
+<tr><th scope="row">Volume</th><td>29873.1737 mm³</td></tr>
+<tr><th scope="row">Mass</th><td>37.0427 g</td></tr>
+<tr><th scope="row">Orientation</th><td>as modelled, Z up (Y is the long axis, 122.6900 mm)</td></tr>
+<tr><th scope="row">Print this file</th><td>/Users/leifrydenfalk/dev/ce-workshop/ce-designs/microduck/ce-parts/microduck-top-head-shell/iterations/v0.0.1/geometry/top_head_shell.stl</td></tr>
+<tr><th scope="row">sha256</th><td>bc64288c0d54e13ec907256c2b99535937d370af1410de498905ec3cf8d7c3df</td></tr>
+<tr><th scope="row">verify_print_sheet</th><td>True</td></tr>
+<tr><th scope="row">component.json origin</th><td>vendor</td></tr>
+<tr><th scope="row">component.json verdict</th><td>CANNOT DETERMINE</td></tr>
+<tr><th scope="row">Material / process</th><td>PLA / FDM (Pollen: &#x27;four printed colourways&#x27;)</td></tr>
+</tbody></table></div>
+<p class="files"><a href="microduck-top-head-shell/microduck-top-head-shell.svg">SVG</a> · <a href="microduck-top-head-shell/microduck-top-head-shell.dxf">DXF</a></p>
 </article>
 </section>
 
@@ -517,7 +720,78 @@
   <h2><span class="n">5</span>Parts with no sheet, and why</h2>
   <p class="lede">Every remaining folder on the shelf, with the measured reason. A part
   missing from this page would be a part nobody looked at; that state is not available here.</p>
-  <div class="tablewrap"><table><thead><tr><th>Part</th><th>State</th><th>Origin</th><th>Why there is no sheet</th></tr></thead><tbody><tr><td><code>microduck-camera-module</code></td><td>no-builder</td><td>inferred</td><td>no cad/part.py under ce-parts/microduck-camera-module</td></tr><tr><td><code>microduck-imu-to-dxl</code></td><td>no-builder</td><td>inferred</td><td>no cad/part.py under ce-parts/microduck-imu-to-dxl</td></tr><tr><td><code>microduck-mic</code></td><td>no-builder</td><td>inferred</td><td>no cad/part.py under ce-parts/microduck-mic</td></tr><tr><td><code>microduck-tof-module</code></td><td>no-builder</td><td>inferred</td><td>no cad/part.py under ce-parts/microduck-tof-module</td></tr><tr><td><code>bmi088</code></td><td>no-geometry</td><td>vendor</td><td>cad/part.py is a `bin/triad new part` stub — build() raises NotImplementedError, so there is no solid and nothing measured</td></tr><tr><td><code>et7301b</code></td><td>no-geometry</td><td>vendor</td><td>cad/part.py is a `bin/triad new part` stub — build() raises NotImplementedError, so there is no solid and nothing measured</td></tr><tr><td><code>fusb302</code></td><td>no-geometry</td><td>vendor</td><td>cad/part.py is a `bin/triad new part` stub — build() raises NotImplementedError, so there is no solid and nothing measured</td></tr><tr><td><code>imx219</code></td><td>no-geometry</td><td>vendor</td><td>cad/part.py is a `bin/triad new part` stub — build() raises NotImplementedError, so there is no solid and nothing measured</td></tr><tr><td><code>lsm6dsv16x</code></td><td>no-geometry</td><td>vendor</td><td>cad/part.py is a `bin/triad new part` stub — build() raises NotImplementedError, so there is no solid and nothing measured</td></tr><tr><td><code>mcp73213</code></td><td>no-geometry</td><td>vendor</td><td>cad/part.py is a `bin/triad new part` stub — build() raises NotImplementedError, so there is no solid and nothing measured</td></tr><tr><td><code>microduck-bottom-head-shell</code></td><td>no-geometry</td><td>vendor</td><td>cad/part.py is a `bin/triad new part` stub — build() raises NotImplementedError, so there is no solid and nothing measured</td></tr><tr><td><code>microduck-face-part</code></td><td>no-geometry</td><td>vendor</td><td>cad/part.py is a `bin/triad new part` stub — build() raises NotImplementedError, so there is no solid and nothing measured</td></tr><tr><td><code>microduck-m12-lens</code></td><td>no-geometry</td><td>vendor</td><td>cad/part.py is a `bin/triad new part` stub — build() raises NotImplementedError, so there is no solid and nothing measured</td></tr><tr><td><code>microduck-m12-lens-holder</code></td><td>no-geometry</td><td>vendor</td><td>cad/part.py is a `bin/triad new part` stub — build() raises NotImplementedError, so there is no solid and nothing measured</td></tr><tr><td><code>pn7150</code></td><td>no-geometry</td><td>vendor</td><td>cad/part.py is a `bin/triad new part` stub — build() raises NotImplementedError, so there is no solid and nothing measured</td></tr><tr><td><code>s-8252</code></td><td>no-geometry</td><td>vendor</td><td>cad/part.py is a `bin/triad new part` stub — build() raises NotImplementedError, so there is no solid and nothing measured</td></tr><tr><td><code>st25r3916</code></td><td>no-geometry</td><td>vendor</td><td>cad/part.py is a `bin/triad new part` stub — build() raises NotImplementedError, so there is no solid and nothing measured</td></tr><tr><td><code>tlv320aic3104</code></td><td>no-geometry</td><td>vendor</td><td>cad/part.py is a `bin/triad new part` stub — build() raises NotImplementedError, so there is no solid and nothing measured</td></tr><tr><td><code>vl53l5cx</code></td><td>no-geometry</td><td>vendor</td><td>cad/part.py is a `bin/triad new part` stub — build() raises NotImplementedError, so there is no solid and nothing measured</td></tr><tr><td><code>vl53l8cx</code></td><td>no-geometry</td><td>vendor</td><td>cad/part.py is a `bin/triad new part` stub — build() raises NotImplementedError, so there is no solid and nothing measured</td></tr><tr><td><code>bearing-15x10x3</code></td><td>not-drawn</td><td>vendor</td><td>cad/part.py constructs a parametric solid — no sheet has been generated for it yet</td></tr><tr><td><code>bearing-22x16x4</code></td><td>not-drawn</td><td>vendor</td><td>cad/part.py constructs a parametric solid — no sheet has been generated for it yet</td></tr><tr><td><code>microduck-foot-right</code></td><td>not-drawn</td><td>generated</td><td>cad/part.py constructs a parametric solid — no sheet has been generated for it yet</td></tr><tr><td><code>microduck-sole-left</code></td><td>not-drawn</td><td>generated</td><td>cad/part.py constructs a parametric solid — no sheet has been generated for it yet</td></tr><tr><td><code>microduck-sole-right</code></td><td>not-drawn</td><td>generated</td><td>cad/part.py constructs a parametric solid — no sheet has been generated for it yet</td></tr><tr><td><code>microduck-speaker</code></td><td>not-drawn</td><td>vendor</td><td>cad/part.py constructs a parametric solid — no sheet has been generated for it yet</td></tr><tr><td><code>microduck-trunk-shell-left</code></td><td>not-drawn</td><td>vendor</td><td>cad/part.py constructs a parametric solid — no sheet has been generated for it yet</td></tr><tr><td><code>microduck-trunk-shell-right</code></td><td>not-drawn</td><td>vendor</td><td>cad/part.py constructs a parametric solid — no sheet has been generated for it yet</td></tr><tr><td><code>microduck-yaw-roll-motion</code></td><td>not-drawn</td><td>generated</td><td>cad/part.py constructs a parametric solid — no sheet has been generated for it yet</td></tr><tr><td><code>np-f550</code></td><td>not-drawn</td><td>vendor</td><td>cad/part.py constructs a parametric solid — no sheet has been generated for it yet</td></tr><tr><td><code>radxa-zero-3w</code></td><td>not-drawn</td><td>vendor</td><td>cad/part.py constructs a parametric solid — no sheet has been generated for it yet</td></tr><tr><td><code>xl330-m288-t</code></td><td>not-drawn</td><td>vendor</td><td>cad/part.py constructs a parametric solid — no sheet has been generated for it yet</td></tr><tr><td><code>microduck-eye-ring</code></td><td>not-print-sheeted</td><td>vendor</td><td>cad/part.py is a published-mesh loader (meshshelve, from_mesh, Part.from_mesh); a decimated triangulation carries no dimension a shop can work to (docs/MANUFACTURING-REQUIREMENTS.md A.3) — no sheet has been generated for it yet</td></tr><tr><td><code>microduck-jaw-soft</code></td><td>not-print-sheeted</td><td>vendor</td><td>cad/part.py is a published-mesh loader (meshshelve, from_mesh, Part.from_mesh); a decimated triangulation carries no dimension a shop can work to (docs/MANUFACTURING-REQUIREMENTS.md A.3) — no sheet has been generated for it yet</td></tr><tr><td><code>microduck-soft-mouth-top</code></td><td>not-print-sheeted</td><td>vendor</td><td>cad/part.py is a published-mesh loader (meshshelve, from_mesh, Part.from_mesh); a decimated triangulation carries no dimension a shop can work to (docs/MANUFACTURING-REQUIREMENTS.md A.3) — no sheet has been generated for it yet</td></tr><tr><td><code>microduck-top-head-shell</code></td><td>not-print-sheeted</td><td>vendor</td><td>cad/part.py is a published-mesh loader (meshshelve, from_mesh, Part.from_mesh); a decimated triangulation carries no dimension a shop can work to (docs/MANUFACTURING-REQUIREMENTS.md A.3) — no sheet has been generated for it yet</td></tr><tr><td><code>microduck-robot-hat-pcb</code></td><td>unknown</td><td>vendor</td><td>—</td></tr></tbody></table></div>
+  <div class="tablewrap"><table><thead><tr><th>Part</th><th>State</th><th>Origin</th><th>Why there is no sheet</th></tr></thead><tbody><tr><td><code>microduck-camera-module</code></td><td>no-builder</td><td>inferred</td><td>no cad/part.py under ce-parts/microduck-camera-module</td></tr><tr><td><code>microduck-imu-to-dxl</code></td><td>no-builder</td><td>inferred</td><td>no cad/part.py under ce-parts/microduck-imu-to-dxl</td></tr><tr><td><code>microduck-mic</code></td><td>no-builder</td><td>inferred</td><td>no cad/part.py under ce-parts/microduck-mic</td></tr><tr><td><code>microduck-tof-module</code></td><td>no-builder</td><td>inferred</td><td>no cad/part.py under ce-parts/microduck-tof-module</td></tr><tr><td><code>bmi088</code></td><td>no-geometry</td><td>vendor</td><td>cad/part.py is a `bin/triad new part` stub — build() raises NotImplementedError, so there is no solid and nothing measured</td></tr><tr><td><code>et7301b</code></td><td>no-geometry</td><td>vendor</td><td>cad/part.py is a `bin/triad new part` stub — build() raises NotImplementedError, so there is no solid and nothing measured</td></tr><tr><td><code>fusb302</code></td><td>no-geometry</td><td>vendor</td><td>cad/part.py is a `bin/triad new part` stub — build() raises NotImplementedError, so there is no solid and nothing measured</td></tr><tr><td><code>imx219</code></td><td>no-geometry</td><td>vendor</td><td>cad/part.py is a `bin/triad new part` stub — build() raises NotImplementedError, so there is no solid and nothing measured</td></tr><tr><td><code>lsm6dsv16x</code></td><td>no-geometry</td><td>vendor</td><td>cad/part.py is a `bin/triad new part` stub — build() raises NotImplementedError, so there is no solid and nothing measured</td></tr><tr><td><code>mcp73213</code></td><td>no-geometry</td><td>vendor</td><td>cad/part.py is a `bin/triad new part` stub — build() raises NotImplementedError, so there is no solid and nothing measured</td></tr><tr><td><code>microduck-m12-lens</code></td><td>no-geometry</td><td>vendor</td><td>cad/part.py is a `bin/triad new part` stub — build() raises NotImplementedError, so there is no solid and nothing measured</td></tr><tr><td><code>microduck-m12-lens-holder</code></td><td>no-geometry</td><td>vendor</td><td>cad/part.py is a `bin/triad new part` stub — build() raises NotImplementedError, so there is no solid and nothing measured</td></tr><tr><td><code>pn7150</code></td><td>no-geometry</td><td>vendor</td><td>cad/part.py is a `bin/triad new part` stub — build() raises NotImplementedError, so there is no solid and nothing measured</td></tr><tr><td><code>s-8252</code></td><td>no-geometry</td><td>vendor</td><td>cad/part.py is a `bin/triad new part` stub — build() raises NotImplementedError, so there is no solid and nothing measured</td></tr><tr><td><code>st25r3916</code></td><td>no-geometry</td><td>vendor</td><td>cad/part.py is a `bin/triad new part` stub — build() raises NotImplementedError, so there is no solid and nothing measured</td></tr><tr><td><code>tlv320aic3104</code></td><td>no-geometry</td><td>vendor</td><td>cad/part.py is a `bin/triad new part` stub — build() raises NotImplementedError, so there is no solid and nothing measured</td></tr><tr><td><code>vl53l5cx</code></td><td>no-geometry</td><td>vendor</td><td>cad/part.py is a `bin/triad new part` stub — build() raises NotImplementedError, so there is no solid and nothing measured</td></tr><tr><td><code>vl53l8cx</code></td><td>no-geometry</td><td>vendor</td><td>cad/part.py is a `bin/triad new part` stub — build() raises NotImplementedError, so there is no solid and nothing measured</td></tr><tr><td><code>bearing-15x10x3</code></td><td>not-drawn</td><td>vendor</td><td>cad/part.py constructs a parametric solid — no sheet has been generated for it yet</td></tr><tr><td><code>bearing-22x16x4</code></td><td>not-drawn</td><td>vendor</td><td>cad/part.py constructs a parametric solid — no sheet has been generated for it yet</td></tr><tr><td><code>microduck-sole-right</code></td><td>not-drawn</td><td>generated</td><td>cad/part.py constructs a parametric solid — no sheet has been generated for it yet</td></tr><tr><td><code>microduck-speaker</code></td><td>not-drawn</td><td>vendor</td><td>cad/part.py constructs a parametric solid — no sheet has been generated for it yet</td></tr><tr><td><code>microduck-trunk-shell-left</code></td><td>not-drawn</td><td>vendor</td><td>cad/part.py constructs a parametric solid — no sheet has been generated for it yet</td></tr><tr><td><code>microduck-trunk-shell-right</code></td><td>not-drawn</td><td>vendor</td><td>cad/part.py constructs a parametric solid — no sheet has been generated for it yet</td></tr><tr><td><code>microduck-yaw-roll-motion</code></td><td>not-drawn</td><td>generated</td><td>cad/part.py constructs a parametric solid — no sheet has been generated for it yet</td></tr><tr><td><code>np-f550</code></td><td>not-drawn</td><td>vendor</td><td>cad/part.py constructs a parametric solid — no sheet has been generated for it yet</td></tr><tr><td><code>radxa-zero-3w</code></td><td>not-drawn</td><td>vendor</td><td>cad/part.py constructs a parametric solid — no sheet has been generated for it yet</td></tr><tr><td><code>xl330-m288-t</code></td><td>not-drawn</td><td>vendor</td><td>cad/part.py constructs a parametric solid — no sheet has been generated for it yet</td></tr><tr><td><code>microduck-foot-left</code></td><td>stale</td><td>generated</td><td>the sheet on disk (2026-09-03 04:08:22) is NEWER than the result.json that reports on it (2026-09-03 02:27:25): another draw run rewrote it, so the verdict below is about a file that no longer exists</td></tr><tr><td><code>microduck-motor-support</code></td><td>stale</td><td>generated</td><td>the sheet on disk (2026-09-03 03:58:04) is NEWER than the result.json that reports on it (2026-09-03 03:29:49): another draw run rewrote it, so the verdict below is about a file that no longer exists</td></tr><tr><td><code>microduck-sole-left</code></td><td>stale</td><td>generated</td><td>the sheet on disk (2026-09-03 03:58:13) is NEWER than the result.json that reports on it (2026-09-03 03:57:18): another draw run rewrote it, so the verdict below is about a file that no longer exists</td></tr><tr><td><code>microduck-robot-hat-pcb</code></td><td>stale-result</td><td>vendor</td><td>result.json predates the current generator: it carries kind=None and verdict=None (written 2026-09-02 02:35:57). Redraw the part with tools/draw_part.py.</td></tr><tr><td><code>microduck-bottom-head-shell</code></td><td>unbuildable</td><td>vendor</td><td>part:microduck-bottom-head-shell does not build: NotImplementedError: microduck-bottom-head-shell: no geometry yet</td></tr><tr><td><code>microduck-face-part</code></td><td>unbuildable</td><td>vendor</td><td>part:microduck-face-part does not build: NotImplementedError: microduck-face-part: no geometry yet</td></tr></tbody></table></div>
+</section>
+
+<section id="open">
+  <h2><span class="n">6</span>What this pass could not settle</h2>
+  <p class="lede">Every row that is not PASS, with the reason measured off the folder and the
+  one action that closes it. Generated from the same <code>out/drawings/index.json</code> as
+  the cards above, so an item cannot be dropped from this list by editing prose. A row here is
+  a work item, not a shrug.</p>
+  <div class="tablewrap"><table class="data">
+<thead><tr><th>part</th><th>verdict</th><th>state</th><th>why</th><th>what settles it</th></tr></thead><tbody>
+<tr><th scope="row">microduck-foot-right</th><td><span class="chip rail">FAIL</span></td><td>drawing</td><td>no reason recorded — that is itself a defect of this row</td><td>Not classified — read the reason and the sheet.</td></tr>
+<tr><th scope="row">microduck-camera-module</th><td><span class="chip cd">CANNOT DETERMINE</span></td><td>no-builder</td><td>no cad/part.py under ce-parts/microduck-camera-module</td><td>Create ce-parts/&lt;slug&gt;/current/cad/part.py. There is no builder at all, so nothing in this repo can be measured or drawn for this slug.</td></tr>
+<tr><th scope="row">microduck-imu-to-dxl</th><td><span class="chip cd">CANNOT DETERMINE</span></td><td>no-builder</td><td>no cad/part.py under ce-parts/microduck-imu-to-dxl</td><td>Create ce-parts/&lt;slug&gt;/current/cad/part.py. There is no builder at all, so nothing in this repo can be measured or drawn for this slug.</td></tr>
+<tr><th scope="row">microduck-mic</th><td><span class="chip cd">CANNOT DETERMINE</span></td><td>no-builder</td><td>no cad/part.py under ce-parts/microduck-mic</td><td>Create ce-parts/&lt;slug&gt;/current/cad/part.py. There is no builder at all, so nothing in this repo can be measured or drawn for this slug.</td></tr>
+<tr><th scope="row">microduck-tof-module</th><td><span class="chip cd">CANNOT DETERMINE</span></td><td>no-builder</td><td>no cad/part.py under ce-parts/microduck-tof-module</td><td>Create ce-parts/&lt;slug&gt;/current/cad/part.py. There is no builder at all, so nothing in this repo can be measured or drawn for this slug.</td></tr>
+<tr><th scope="row">bmi088</th><td><span class="chip cd">CANNOT DETERMINE</span></td><td>no-geometry</td><td>cad/part.py is a `bin/triad new part` stub — build() raises NotImplementedError, so there is no solid and nothing measured</td><td>Write `build()` in ce-parts/&lt;slug&gt;/current/cad/part.py against a measured source (the vendor drawing, a calliper, or the published mesh) — the folder is a `bin/triad new part` stub and there is no solid to draw.</td></tr>
+<tr><th scope="row">et7301b</th><td><span class="chip cd">CANNOT DETERMINE</span></td><td>no-geometry</td><td>cad/part.py is a `bin/triad new part` stub — build() raises NotImplementedError, so there is no solid and nothing measured</td><td>Write `build()` in ce-parts/&lt;slug&gt;/current/cad/part.py against a measured source (the vendor drawing, a calliper, or the published mesh) — the folder is a `bin/triad new part` stub and there is no solid to draw.</td></tr>
+<tr><th scope="row">fusb302</th><td><span class="chip cd">CANNOT DETERMINE</span></td><td>no-geometry</td><td>cad/part.py is a `bin/triad new part` stub — build() raises NotImplementedError, so there is no solid and nothing measured</td><td>Write `build()` in ce-parts/&lt;slug&gt;/current/cad/part.py against a measured source (the vendor drawing, a calliper, or the published mesh) — the folder is a `bin/triad new part` stub and there is no solid to draw.</td></tr>
+<tr><th scope="row">imx219</th><td><span class="chip cd">CANNOT DETERMINE</span></td><td>no-geometry</td><td>cad/part.py is a `bin/triad new part` stub — build() raises NotImplementedError, so there is no solid and nothing measured</td><td>Write `build()` in ce-parts/&lt;slug&gt;/current/cad/part.py against a measured source (the vendor drawing, a calliper, or the published mesh) — the folder is a `bin/triad new part` stub and there is no solid to draw.</td></tr>
+<tr><th scope="row">lsm6dsv16x</th><td><span class="chip cd">CANNOT DETERMINE</span></td><td>no-geometry</td><td>cad/part.py is a `bin/triad new part` stub — build() raises NotImplementedError, so there is no solid and nothing measured</td><td>Write `build()` in ce-parts/&lt;slug&gt;/current/cad/part.py against a measured source (the vendor drawing, a calliper, or the published mesh) — the folder is a `bin/triad new part` stub and there is no solid to draw.</td></tr>
+<tr><th scope="row">mcp73213</th><td><span class="chip cd">CANNOT DETERMINE</span></td><td>no-geometry</td><td>cad/part.py is a `bin/triad new part` stub — build() raises NotImplementedError, so there is no solid and nothing measured</td><td>Write `build()` in ce-parts/&lt;slug&gt;/current/cad/part.py against a measured source (the vendor drawing, a calliper, or the published mesh) — the folder is a `bin/triad new part` stub and there is no solid to draw.</td></tr>
+<tr><th scope="row">microduck-m12-lens</th><td><span class="chip cd">CANNOT DETERMINE</span></td><td>no-geometry</td><td>cad/part.py is a `bin/triad new part` stub — build() raises NotImplementedError, so there is no solid and nothing measured</td><td>Write `build()` in ce-parts/&lt;slug&gt;/current/cad/part.py against a measured source (the vendor drawing, a calliper, or the published mesh) — the folder is a `bin/triad new part` stub and there is no solid to draw.</td></tr>
+<tr><th scope="row">microduck-m12-lens-holder</th><td><span class="chip cd">CANNOT DETERMINE</span></td><td>no-geometry</td><td>cad/part.py is a `bin/triad new part` stub — build() raises NotImplementedError, so there is no solid and nothing measured</td><td>Write `build()` in ce-parts/&lt;slug&gt;/current/cad/part.py against a measured source (the vendor drawing, a calliper, or the published mesh) — the folder is a `bin/triad new part` stub and there is no solid to draw.</td></tr>
+<tr><th scope="row">pn7150</th><td><span class="chip cd">CANNOT DETERMINE</span></td><td>no-geometry</td><td>cad/part.py is a `bin/triad new part` stub — build() raises NotImplementedError, so there is no solid and nothing measured</td><td>Write `build()` in ce-parts/&lt;slug&gt;/current/cad/part.py against a measured source (the vendor drawing, a calliper, or the published mesh) — the folder is a `bin/triad new part` stub and there is no solid to draw.</td></tr>
+<tr><th scope="row">s-8252</th><td><span class="chip cd">CANNOT DETERMINE</span></td><td>no-geometry</td><td>cad/part.py is a `bin/triad new part` stub — build() raises NotImplementedError, so there is no solid and nothing measured</td><td>Write `build()` in ce-parts/&lt;slug&gt;/current/cad/part.py against a measured source (the vendor drawing, a calliper, or the published mesh) — the folder is a `bin/triad new part` stub and there is no solid to draw.</td></tr>
+<tr><th scope="row">st25r3916</th><td><span class="chip cd">CANNOT DETERMINE</span></td><td>no-geometry</td><td>cad/part.py is a `bin/triad new part` stub — build() raises NotImplementedError, so there is no solid and nothing measured</td><td>Write `build()` in ce-parts/&lt;slug&gt;/current/cad/part.py against a measured source (the vendor drawing, a calliper, or the published mesh) — the folder is a `bin/triad new part` stub and there is no solid to draw.</td></tr>
+<tr><th scope="row">tlv320aic3104</th><td><span class="chip cd">CANNOT DETERMINE</span></td><td>no-geometry</td><td>cad/part.py is a `bin/triad new part` stub — build() raises NotImplementedError, so there is no solid and nothing measured</td><td>Write `build()` in ce-parts/&lt;slug&gt;/current/cad/part.py against a measured source (the vendor drawing, a calliper, or the published mesh) — the folder is a `bin/triad new part` stub and there is no solid to draw.</td></tr>
+<tr><th scope="row">vl53l5cx</th><td><span class="chip cd">CANNOT DETERMINE</span></td><td>no-geometry</td><td>cad/part.py is a `bin/triad new part` stub — build() raises NotImplementedError, so there is no solid and nothing measured</td><td>Write `build()` in ce-parts/&lt;slug&gt;/current/cad/part.py against a measured source (the vendor drawing, a calliper, or the published mesh) — the folder is a `bin/triad new part` stub and there is no solid to draw.</td></tr>
+<tr><th scope="row">vl53l8cx</th><td><span class="chip cd">CANNOT DETERMINE</span></td><td>no-geometry</td><td>cad/part.py is a `bin/triad new part` stub — build() raises NotImplementedError, so there is no solid and nothing measured</td><td>Write `build()` in ce-parts/&lt;slug&gt;/current/cad/part.py against a measured source (the vendor drawing, a calliper, or the published mesh) — the folder is a `bin/triad new part` stub and there is no solid to draw.</td></tr>
+<tr><th scope="row">bearing-15x10x3</th><td><span class="chip cd">CANNOT DETERMINE</span></td><td>not-drawn</td><td>cad/part.py constructs a parametric solid — no sheet has been generated for it yet</td><td>Run `ce-cad/bin/cad tools/draw_part.py &lt;slug&gt;`. The part builds and would carry a drawing; no sheet has been generated yet.</td></tr>
+<tr><th scope="row">bearing-22x16x4</th><td><span class="chip cd">CANNOT DETERMINE</span></td><td>not-drawn</td><td>cad/part.py constructs a parametric solid — no sheet has been generated for it yet</td><td>Run `ce-cad/bin/cad tools/draw_part.py &lt;slug&gt;`. The part builds and would carry a drawing; no sheet has been generated yet.</td></tr>
+<tr><th scope="row">microduck-sole-right</th><td><span class="chip cd">CANNOT DETERMINE</span></td><td>not-drawn</td><td>cad/part.py constructs a parametric solid — no sheet has been generated for it yet</td><td>Run `ce-cad/bin/cad tools/draw_part.py &lt;slug&gt;`. The part builds and would carry a drawing; no sheet has been generated yet.</td></tr>
+<tr><th scope="row">microduck-speaker</th><td><span class="chip cd">CANNOT DETERMINE</span></td><td>not-drawn</td><td>cad/part.py constructs a parametric solid — no sheet has been generated for it yet</td><td>Run `ce-cad/bin/cad tools/draw_part.py &lt;slug&gt;`. The part builds and would carry a drawing; no sheet has been generated yet.</td></tr>
+<tr><th scope="row">microduck-trunk-shell-left</th><td><span class="chip cd">CANNOT DETERMINE</span></td><td>not-drawn</td><td>cad/part.py constructs a parametric solid — no sheet has been generated for it yet</td><td>Run `ce-cad/bin/cad tools/draw_part.py &lt;slug&gt;`. The part builds and would carry a drawing; no sheet has been generated yet.</td></tr>
+<tr><th scope="row">microduck-trunk-shell-right</th><td><span class="chip cd">CANNOT DETERMINE</span></td><td>not-drawn</td><td>cad/part.py constructs a parametric solid — no sheet has been generated for it yet</td><td>Run `ce-cad/bin/cad tools/draw_part.py &lt;slug&gt;`. The part builds and would carry a drawing; no sheet has been generated yet.</td></tr>
+<tr><th scope="row">microduck-yaw-roll-motion</th><td><span class="chip cd">CANNOT DETERMINE</span></td><td>not-drawn</td><td>cad/part.py constructs a parametric solid — no sheet has been generated for it yet</td><td>Run `ce-cad/bin/cad tools/draw_part.py &lt;slug&gt;`. The part builds and would carry a drawing; no sheet has been generated yet.</td></tr>
+<tr><th scope="row">np-f550</th><td><span class="chip cd">CANNOT DETERMINE</span></td><td>not-drawn</td><td>cad/part.py constructs a parametric solid — no sheet has been generated for it yet</td><td>Run `ce-cad/bin/cad tools/draw_part.py &lt;slug&gt;`. The part builds and would carry a drawing; no sheet has been generated yet.</td></tr>
+<tr><th scope="row">radxa-zero-3w</th><td><span class="chip cd">CANNOT DETERMINE</span></td><td>not-drawn</td><td>cad/part.py constructs a parametric solid — no sheet has been generated for it yet</td><td>Run `ce-cad/bin/cad tools/draw_part.py &lt;slug&gt;`. The part builds and would carry a drawing; no sheet has been generated yet.</td></tr>
+<tr><th scope="row">xl330-m288-t</th><td><span class="chip cd">CANNOT DETERMINE</span></td><td>not-drawn</td><td>cad/part.py constructs a parametric solid — no sheet has been generated for it yet</td><td>Run `ce-cad/bin/cad tools/draw_part.py &lt;slug&gt;`. The part builds and would carry a drawing; no sheet has been generated yet.</td></tr>
+<tr><th scope="row">microduck-foot-left</th><td><span class="chip cd">CANNOT DETERMINE</span></td><td>stale</td><td>the sheet on disk (2026-09-03 04:08:22) is NEWER than the result.json that reports on it (2026-09-03 02:27:25): another draw run rewrote it, so the verdict below is about a file that no longer exists</td><td>Redraw the part: the result.json and the sheet beside it describe different files, so neither can be trusted until one run writes both.</td></tr>
+<tr><th scope="row">microduck-motor-support</th><td><span class="chip cd">CANNOT DETERMINE</span></td><td>stale</td><td>the sheet on disk (2026-09-03 03:58:04) is NEWER than the result.json that reports on it (2026-09-03 03:29:49): another draw run rewrote it, so the verdict below is about a file that no longer exists</td><td>Redraw the part: the result.json and the sheet beside it describe different files, so neither can be trusted until one run writes both.</td></tr>
+<tr><th scope="row">microduck-sole-left</th><td><span class="chip cd">CANNOT DETERMINE</span></td><td>stale</td><td>the sheet on disk (2026-09-03 03:58:13) is NEWER than the result.json that reports on it (2026-09-03 03:57:18): another draw run rewrote it, so the verdict below is about a file that no longer exists</td><td>Redraw the part: the result.json and the sheet beside it describe different files, so neither can be trusted until one run writes both.</td></tr>
+<tr><th scope="row">microduck-robot-hat-pcb</th><td><span class="chip cd">CANNOT DETERMINE</span></td><td>stale-result</td><td>result.json predates the current generator: it carries kind=None and verdict=None (written 2026-09-02 02:35:57). Redraw the part with tools/draw_part.py.</td><td>Redraw the part with tools/draw_part.py — its result.json predates the current generator.</td></tr>
+<tr><th scope="row">microduck-bottom-head-shell</th><td><span class="chip cd">CANNOT DETERMINE</span></td><td>unbuildable</td><td>part:microduck-bottom-head-shell does not build: NotImplementedError: microduck-bottom-head-shell: no geometry yet</td><td>Fix the builder named in the reason — the kernel raised while loading the part, so neither document can be produced.</td></tr>
+<tr><th scope="row">microduck-face-part</th><td><span class="chip cd">CANNOT DETERMINE</span></td><td>unbuildable</td><td>part:microduck-face-part does not build: NotImplementedError: microduck-face-part: no geometry yet</td><td>Fix the builder named in the reason — the kernel raised while loading the part, so neither document can be produced.</td></tr>
+</tbody></table></div>
+</section>
+
+<section id="review">
+  <h2><span class="n">7</span>What an outside reader found, and what it turned out to be</h2>
+  <p class="lede">The sixteen problems an independent reader measured on the drawings deliverable of 2026-09-03, and what each one turned out to be. One row per finding; the page section is generated from this file by tools/gen_drawings_index.py so a finding cannot be quietly dropped by editing prose. VERDICT is about the FINDING, not about the sheet: FIXED means the defect existed and is gone and the fix is measured; NOT A DEFECT means the reader measured something real and the defect was elsewhere; CANNOT DETERMINE means it is still open, and then `settles` says what closes it.</p>
+<div class="tablewrap"><table class="data">
+<thead><tr><th>#</th><th>what was reported</th><th>verdict</th><th>measured before</th><th>measured after</th></tr></thead><tbody>
+<tr><th scope="row">1</th><td><b>Two detail bubbles on microduck-power-support point at nothing</b><br><span class="kindtag">tools/verify_drawings.py</span></td><td><span class="chip cd">NOT A DEFECT IN THE SHEET</span></td><td>tools/verify_drawings.py and a direct verify_sheet(verbose=True) rebuild both FAILed the shipped sheet on &#x27;detail A: ring drawn on front at the region — no Ø25.9 mm ring near (313.6, 226.7) on the parent view — a bubble with nothing to point at&#x27;, and the same for detail B.</td><td>MEASURED off the shipped SVG with no kernel at all (regex over &lt;circle&gt; and &lt;text&gt;, page height 594.0 mm, y flipped to paper coordinates): the file carries exactly two rings of r 12.94 mm — Ø25.9 mm, the diameter the checker was looking for — at (313.6, 222.2) and (313.6, 246.0), with the letter &#x27;A&#x27; at (328.0, 236.7) and &#x27;B&#x27; at (328.0, 260.5), the same +14.5 mm label offset on both. The bubbles point at real rings. What was 4.5 mm out was the CHECKER: it rebuilt the Sheet with _layout() while Sheet.write calls build(), which appends the wall, radius, census and fit notes and then lays the sheet out around a taller notes column. The rebuild has to end in the same state as the file or its verdict is about a different drawing. tools/verify_drawings.py calls sh.build() now.</td></tr>
+<tr><th scope="row">2</th><td><b>microduck-yaw2roll: 5 of 11 distinct arc radii on no view and no NOT LEADERED note; the cutting plane drawn through a hole callout</b><br><span class="kindtag">out/drawings/microduck-yaw2roll/</span></td><td><span class="chip cd">FIXED</span></td><td>R1.10, R1.35, R2.20, R2.42 and R2.75 appeared nowhere on the paper, and the red cutting-plane line ran through the callout &#x27;2x Ø2.05 x 4.00 DP&#x27;. The sheet was written 2026-09-03 00:18:49, before ce-cad 9626f3d (03:49, &#x27;state every radius&#x27;), 02501b6 (04:15) and df8c63c (04:55, &#x27;a radius leader dodges the cutting plane&#x27;).</td><td>Redrawn 2026-09-03 17:21:55, A1 at 5:1. Every R token on the finished SVG, read back by regex: 1.02, 1.10, 1.20, 1.35, 2.00, 2.20, 2.42, 2.50, 2.75, 8.00, 9.50 — identical to the eleven radii cecad.inspect measures on the solid. All eleven are LEADERED, so the sheet needs no &#x27;NOT LEADERED&#x27; note. verify_sheet PASS, including the lines_over_labels rule.</td></tr>
+<tr><th scope="row">3</th><td><b>microduck-upper-leg-rigidity-plate: only R11.50 of R1.10/R9.50/R11.50 on the sheet</b><br><span class="kindtag">out/drawings/microduck-upper-leg-rigidity-plate/</span></td><td><span class="chip cd">FIXED</span></td><td>The sheet was written 2026-09-03 03:12, before the radius rule existed, and shipped a PASS earned under a weaker verifier.</td><td>Redrawn 2026-09-03 17:23:24. R tokens on the finished SVG: 1.10, 9.50, 11.50 — the solid&#x27;s three, all present. verify_sheet PASS.</td></tr>
+<tr><th scope="row">4</th><td><b>&#x27;Regenerate EVERY sheet&#x27; was not done: four sheets predate the ce-cad fixes</b><br><span class="kindtag">out/drawings/</span></td><td><span class="chip cd">FIXED</span></td><td>microduck-yaw2roll (00:18:49), -upper-leg-left (03:00), -upper-leg-right (03:11) and -upper-leg-rigidity-plate (03:12) appeared in no draw_part argv and predate ce-cad 9626f3d, 02501b6 and df8c63c. Worse, the reader stopped one measurement short: EVERY sheet on the shelf predated the Ø fix — microduck-power-support&#x27;s result.json of 05:11 still records &#x27;SMALL HOLES O1.55/1.60&#x27; and &#x27;A: 4x O1.60 cluster&#x27;, the ASCII form. The 04:55 batch had also died after 22 of 49 slugs.</td><td>Every slug on the shelf redrawn from scratch against the current ce-cad, in one ordered run, with the result recorded per part.</td></tr>
+<tr><th scope="row">5</th><td><b>index.json is 76 minutes older than the sheets it indexes</b><br><span class="kindtag">out/drawings/index.json</span></td><td><span class="chip cd">FIXED</span></td><td>index.json generated 2026-09-03 04:08:24 against sheets whose newest was 05:24; re-running tools/collect_drawings.py changed 9 of 54 rows — the page called microduck-sole-right and -speaker &#x27;no sheet has been generated for it yet&#x27; with finished sheets on disk, and microduck-foot-right FAIL when it PASSed. The lane reported while its own draw batch was still running.</td><td>collect_drawings.py and gen_drawings_index.py are the last two steps of the regeneration run, after the draw pass, the feature census and the independent re-check, so the data file cannot predate the sheets it describes. collect_drawings already measures the reverse drift (a sheet NEWER than its result.json) per row and states it.</td></tr>
+<tr><th scope="row">6</th><td><b>INDEX.html does not regenerate byte-identically from its own data file</b><br><span class="kindtag">out/drawings/INDEX.html</span></td><td><span class="chip cd">FIXED</span></td><td>tools/gen_drawings_index.py on the unchanged index.json differed on 21 lines; the page&#x27;s statbar said 6 stale rows and the data file said 4. The published page had been built from a superseded index.json.</td><td>The page is regenerated from the current index.json, and the generator run twice on unchanged data produces byte-identical output (cmp).</td></tr>
+<tr><th scope="row">7</th><td><b>The whole deliverable is uncommitted</b><br><span class="kindtag">out/drawings/</span></td><td><span class="chip cd">FIXED</span></td><td>102 paths modified or untracked under out/drawings, INDEX.html and index.json among them; the newest commit touching out/drawings predated every file.</td><td>Committed with tools/commit-lane.sh, sheets and data and page together.</td></tr>
+<tr><th scope="row">8</th><td><b>tools/verify_drawings.py publishes a FAIL with no reason</b><br><span class="kindtag">tools/verify_drawings.py</span></td><td><span class="chip cd">FIXED</span></td><td>`d[&quot;failed&quot;] = []` was assigned unconditionally on the drawing branch, so out/drawings/verify.json read {&quot;verdict&quot;: &quot;FAIL&quot;, &quot;failed&quot;: []} — a verdict without its evidence, in the one tool whose entire purpose is independent evidence.</td><td>verify_sheet prints its detail rather than returning it, so the detail is captured off its own stdout the way autosheet._verify does it; a FAIL with no captured line records the raw output instead of an empty list.</td></tr>
+<tr><th scope="row">9</th><td><b>microduck-sole-left, -sole-right and -speaker are classed &#x27;dimensioned drawing&#x27; and dimension almost nothing</b><br><span class="kindtag">tools/drawing_facts.py, ce-cad/cecad/sheets.py</span></td><td><span class="chip cd">FIXED</span></td><td>sole-left&#x27;s 1400x990 sheet carried exactly three numbers (41.07, 54.00, 12.90 mm) over a full-tessellation wireframe in all three views, with radii [], 0 holes, no section, no hole table and no detail callout — the &#x27;unusable detail / textures ... random lines&#x27; MANUFACTURING-REQUIREMENTS A.1-A.2 orders removed. Its own part.py names heel R7.2, toe R6.9 and side R7.9 that the drawing does not carry.</td><td>Two different answers, both measured. (a) The soles are ROUTED TO A PRINT SHEET by tools/drawing_facts._seam_forest, which fires only when the solid has 0 holes AND 0 arc radii in the R0.2..R60 band AND more than 300 visible edges in its primary view: sole-left has 1363 (TechDraw.projectEx) against 131 for microduck-shin, 78 for -trunk-base and 4 for -speaker. The lines are construction seams of a station-to-station loft through a measured 27 x 31 table, not features to manufacture. Both soles now PASS as print sheets. (b) microduck-speaker is a 35 x 25 x 7 mm rectangular prism built by one p.box, so 0 holes and 0 radii is the complete truth about it and it keeps its drawing — with a FEATURE CENSUS note stating the counts, so a reader can tell &#x27;this part has no such features&#x27; from &#x27;this sheet lost them&#x27;. The three R values are stated on the sole&#x27;s sheet with the measurement that explains them: cecad.inspect.arc_radii finds no arc on that solid at all, because lofted blends are sampled points and not circular edges, so no leader can be drawn to one.</td></tr>
+<tr><th scope="row">10</th><td><b>The lane&#x27;s own verdict 4 cited evidence that is not on the sheet it names</b><br><span class="kindtag">ce-cad/cecad/sheets.py</span></td><td><span class="chip cd">FIXED</span></td><td>The report claimed microduck-trunk-base carries &#x27;DETAIL A/B/C at SCALE 2:1, 2:1, 5:1&#x27;. Its SVG, its PNG and its result.json (details: []) show none, and 17 of 21 drawing sheets carried no detail callout at all.</td><td>The claim is withdrawn and is not repeated. §A.7 is answered ON THE PAPER now by Sheet._detail_note — either _rescale_details&#x27; own measured drop reason (the region&#x27;s diameter against the free width of the bottom band) or the statement that autosheet.detail_regions proposed no cluster — and the count of sheets that carry a callout is in the §1 census, computed from the same rows as the cards.</td></tr>
+<tr><th scope="row">11</th><td><b>INDEX.html §1 opens with a blanket claim the cards beneath it contradict</b><br><span class="kindtag">tools/gen_drawings_index.py</span></td><td><span class="chip cd">FIXED</span></td><td>&#x27;Each sheet below carries ... every radius and fillet dimensioned with a leader, detail callouts at a larger stated scale on the dense regions, a hole table, a section ...&#x27; — with 17 rows reading &#x27;Detail callouts: none&#x27; directly underneath, and verify_sheet failing yaw2roll on two of those rules.</td><td>The paragraph is a COUNT: a per-item table of carried / applicable with every sheet that does not carry an item named, computed from the same index.json rows the cards are drawn from, so the table and the cards cannot disagree. Items that do not apply to a part are outside the denominator and are named; items no pass has measured are reported as unmeasured, never as carried.</td></tr>
+<tr><th scope="row">12</th><td><b>The page&#x27;s own §A.5 field reads &#x27;not measured&#x27; on every card and features.json does not exist</b><br><span class="kindtag">tools/measure_features.py</span></td><td><span class="chip cd">FIXED</span></td><td>&#x27;not measured — run tools/measure_features.py&#x27; on every card, no out/drawings/features.json, and the counter reading &#x27;0 independently rechecked&#x27;. The acceptance criterion was unmeasured inside the artifact that is supposed to record it.</td><td>The 06:13 run of measure_features.py died on part 41 of 64 and wrote nothing: three of its four returns leaked a FreeCAD document per part. The document is closed in a finally now and the file is written after EVERY part, so a death costs one row rather than the census. The census and the independent re-check are steps of the regeneration run, not an afterthought.</td></tr>
+<tr><th scope="row">13</th><td><b>An ASCII capital O printed where every other diameter carries Ø</b><br><span class="kindtag">ce-cad/cecad/autosheet.py</span></td><td><span class="chip cd">FIXED</span></td><td>autosheet.py:451 wrote &#x27;SMALL HOLES O1.60 PRINT UNDERSIZE&#x27; and detail_regions labelled a bubble &#x27;4x O1.60 cluster&#x27;; shipped on microduck-foot-left, -foot-right, -power-support and -robot-hat-pcb.</td><td>Ø in both places. Read back on the redrawn sheets: no token matching \bO\d+\.\d\d anywhere on microduck-hip-bracket or -upper-leg-rigidity-plate. tools/drawing_facts.py&#x27;s ASCII &#x27;+/-&#x27; had already become ± and &#x27;H7/p6 at O3&#x27; had already become &#x27;Ø3&#x27;.</td></tr>
+<tr><th scope="row">14</th><td><b>A counterbore on a face the code could not name: &#x27;C&#x27;BORE Ø4.84x2.95 ?X&#x27;</b><br><span class="kindtag">ce-cad/cecad/sheets.py</span></td><td><span class="chip cd">FIXED</span></td><td>sheets.py:963 read `side = &quot;?&quot; if abs(d_lo - d_hi) &lt; 1e-6 ...`, and the sheet&#x27;s own legend (&#x27;C&#x27;BORE side is the face it opens on&#x27;) did not explain &#x27;?&#x27;.</td><td>It was not the right question. An enlargement equidistant from both ends of the bore it sits in opens on NEITHER face — it is an internal relief, and the table says INT, with the footnote extended to define it. The tolerance is _CBORE_END_TOL = 0.05 mm, the same figure inspect._STACK_GAP uses to decide two coaxial cylinders are one hole. Read back on the redrawn hip-bracket: &#x27;C&#x27;BORE Ø4.84x5.50 +Y&#x27; and &#x27;C&#x27;BORE Ø4.84x2.95 INT X&#x27;, with the legend line &#x27;INT = centred in the bore, opening on neither face.&#x27;</td></tr>
+<tr><th scope="row">15</th><td><b>11 of 21 sheets print a thinnest wall below the printability floor with no verdict</b><br><span class="kindtag">ce-cad/cecad/inspect.py, ce-cad/cecad/sheets.py, ce-cad/cecad/autosheet.py</span></td><td><span class="chip cd">FIXED</span></td><td>Figures from 0.008 to 0.376 mm against a 0.80 mm floor, with no PASS/FAIL/CANNOT DETERMINE beside them, while note 3 on the same sheet said that number &#x27;IS NOT A PRINTABLE WALL&#x27;. The 2026-09-02 fix had replaced a wrong number (a scan of one cutting plane) with a knowingly-not-a-wall number, no sheet stated a printable minimum wall at all, and the DFM block printed 2 dp where the note printed 4 dp.</td><td>cecad.inspect.printable_wall_detail measures the thinnest wall that is thin OVER A REGION — the smallest neighbourhood-median thickness, rays capped at 4.0 mm, samples with no hit recorded as censored rather than as a measurement — and both figures are printed, each named for what it is, both to 4 dp, with the floor, its source (cecad/printed.py:801, 2 perimeters at a 0.4 mm nozzle) and the verdict. Read back on the redrawn hip-bracket: &#x27;PRINTABLE MINIMUM WALL: 1.3580 mm, AT X=34.000 Y=9.163 Z=-0.564 ... AGAINST THE 0.8000 mm FLOOR: VERDICT PASS&#x27;.</td></tr>
+<tr><th scope="row">16</th><td><b>One empty folder and four folders holding a result.json and no sheet</b><br><span class="kindtag">out/drawings/</span></td><td><span class="chip cd">FIXED</span></td><td>out/drawings/microduck-trunk-shell-left was an empty directory, and -bottom-head-shell, -face-part, -m12-lens and -m12-lens-holder held a result.json and nothing else.</td><td>Two different states, and the difference is the answer. microduck-trunk-shell-left was the slug the 04:55 batch died on — draw_part.py makes the output folder before it loads the part — and it is drawn now. The other four raise NotImplementedError from their own build(): they are `bin/triad new part` stubs with no solid, so a result.json recording CANNOT DETERMINE and the kernel&#x27;s own reason is the correct and complete output. They appear in §5 with what settles them.</td></tr>
+</tbody></table></div>
+<p class="note">16 reported, 15 fixed, 1 measured to be a defect somewhere other than where it was reported, 0 still open.</p>
 </section>
 
 </div>
