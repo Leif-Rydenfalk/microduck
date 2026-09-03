@@ -1,11 +1,11 @@
 {
  "study": "power-battery",
- "status": "PARTIAL \u2014 checkpoint 1",
+ "status": "PARTIAL — checkpoint 2",
  "date": "2026-09-04",
- "owner": "resolve-power lane (CLASS 2 \u2014 power, battery, runtime). OWNS out/open/power-battery.json, out/open/trunk-inertial-fit.json, tools/trunk_inertial_fit.py, ce-parts/np-f550/*, ce-parts/radxa-zero-3w/* (electrical/component/docs records only).",
+ "owner": "resolve-power lane (CLASS 2 — power, battery, runtime). OWNS out/open/power-battery.json, out/open/trunk-inertial-fit.json, tools/trunk_inertial_fit.py, ce-parts/np-f550/*, ce-parts/radxa-zero-3w/* (electrical/component/docs records only).",
  "items": {
   "trunk_inertial_includes_battery": {
-   "verdict": "PASS \u2014 RESOLVED: Pollen's trunk_base inertial (0.199224 kg) INCLUDES the battery",
+   "verdict": "PASS — RESOLVED: Pollen's trunk_base inertial (0.199224 kg) INCLUDES the battery",
    "method": "tools/trunk_inertial_fit.py: signed volume + centroid of every visual geom parented directly under trunk_base in reference/pollen-microduck-simulator/robot_allcollisions.xml, placed by the MJCF pos/quat; fit against the inertial's mass and COM x/z",
    "measured": {
     "geoms_cm3": {
@@ -62,9 +62,72 @@
      "note": "exact fit (3 eq / 3 unknowns) with physically plausible values: printed 1111 kg/m3 (PLA with infill), battery 111.6 g"
     }
    },
-   "reading": "The battery mesh np_f970 (51.59 cm3) is the only geom that can put the trunk's COM 22.6 mm behind the origin at z 2.8 mm; every battery-out case leaves the COM at x -7..-11 mm, z 12.8..14.8 mm. So the 0.199224 kg is battery-IN, and the MJCF total 737.24 g is the robot WITH pack. Consequence: the 'battery-out' gait perturbation is a -99..-112 g change to trunk_base, not a +99 g one, and the 780 g Pollen shipping mass minus 737.24 g leaves 42.8 g for cables, screws, inserts and the mouth servo \u2014 a plausible remainder, where a battery-out reading would leave -56 g.",
+   "reading": "The battery mesh np_f970 (51.59 cm3) is the only geom that can put the trunk's COM 22.6 mm behind the origin at z 2.8 mm; every battery-out case leaves the COM at x -7..-11 mm, z 12.8..14.8 mm. So the 0.199224 kg is battery-IN, and the MJCF total 737.24 g is the robot WITH pack. Consequence: the 'battery-out' gait perturbation is a -99..-112 g change to trunk_base, not a +99 g one, and the 780 g Pollen shipping mass minus 737.24 g leaves 42.8 g for cables, screws, inserts and the mouth servo — a plausible remainder, where a battery-out reading would leave -56 g.",
    "residual_uncertainty": "the fitted battery mass 111.6 g is what a lumped fit gives when the printed density is also free; with PLA fixed at 1240 the remainder is 99-113 g. Between 95 g (Sony's own F550) and 112 g the fit cannot discriminate; a scale on a built unit does (E6).",
    "what_settles_it_beyond_this": "Nothing further is needed for the sim question. For the physical robot: weigh one built unit with and without the pack (TEST-PLAN E6)."
+  },
+  "rk3566_thermal_resistance": {
+   "verdict": "PASS — RESOLVED: Rockchip publishes it. theta_JA 20.728 C/W, theta_JB 17.74 C/W, theta_JC 1.544 C/W",
+   "quote": "Table 4-1 Thermal Resistance Characteristics: Junction-to-ambient thermal resistance θJA 20.728 (℃/W); Junction-to-board thermal resistance θJB 17.74 (℃/W); Junction-to-case thermal resistance θJC 1.544 (℃/W)",
+   "source": "Rockchip RK3566 Datasheet Rev 1.5 (revision history: 2024-12-11 1.5 'Delete the part number RK3566-D in Chapter 2'), Chapter 4 Thermal Management, section 4.2 Package Thermal Characteristics, printed page 61 of 62; 'Max Conjunction Temperature Tj NA 125 ℃' in the electrical specification table. Fetched 2026-09-04 from https://rockchip.fr/RK3566%20datasheet%20V1.5.pdf (a mirror; Rockchip's own site publishes no direct PDF URL). Archived byte-for-byte at ce-parts/radxa-zero-3w/iterations/v0.0.1/docs/fetched/rockchip_rk3566_datasheet_v1.5.pdf, sha256 5609a11b7cb320a56da6cbe59d16c0beb77788e9a12b866a341d28f92ea66b24, 2930235 bytes",
+   "caveat": "theta_JA is a JEDEC still-air, standard-test-board figure; on the Radxa's 65 x 30 mm board inside the head shell the real junction-to-air resistance is higher (less copper, no airflow) — the datasheet number is a LOWER bound on the rise per watt. The previous 'Rockchip publishes no theta_JA' in the harvest (#9) was wrong: it is in Rev 1.5 (and the chapter exists since Rev 1.0's TOC)."
+  },
+  "sony_original_np_f550": {
+   "verdict": "PASS — Sony's own leaflet figures recovered (from a manual mirror; Sony's hosts refuse the fetcher)",
+   "quote": "Maximum output voltage: DC 8.4 V; Mean output voltage: DC 7.2 V; Capacity: 10.8 Wh (1500 mAh); Operating temperature: 0°C to 40°C (32°F to 104°F); Dimensions: Approx. 38.4 × 20.6 × 70.8 mm (w/h/d); Mass: Approx. 95 g (3.4 oz); document number 3-865-315-14 (1)",
+   "source": "Sony NP-F550 operating-instructions leaflet 3-865-315-14(1), read from https://camera.manualsonline.com/manuals/mfg/sony/sony_infolithium_l_series_np_npf550.html (fetched 2026-09-04). NOT a Sony host: sony.com.au / sony-asia.com answered 403 to curl and WebFetch again on 2026-09-04, and manualzz / manualslib 403. The leaflet's document number is the tie to Sony.",
+   "reconciliation_with_the_press_kit": "Pollen's '2600 mAh' cannot be Sony's pack (1500 mAh / 10.8 Wh). Sony's body 38.4 x 20.6 x 70.8 mm equals Pollen's mesh 38.6085 x 20.5681 x 70.8050 mm to 0.2 mm on every axis, so the CAD is a Sony-shaped body and the fitted pack is a third-party 2600 mAh pack in that shell (two 18650 cells side by side, 18.4 mm max dia each = 36.8 < 38.4)."
+  },
+  "cell_class_inside_a_2600mAh_np_f550": {
+   "verdict": "BEST-SUPPORTED: two Samsung ICR18650-26J-class 2600 mAh NMC cells in series (the only cell class that makes 2600 mAh 7.2 V in this shell); fitted maker still CANNOT DETERMINE",
+   "datasheet_quotes": {
+    "nominal_capacity": "2600mAh (0.2C, 2.75V discharge)",
+    "minimum_capacity": "2550mAh(0.2C, 2.75V discharge)",
+    "nominal_voltage": "3.63V",
+    "max_discharge_current": "5200mA(ambient temperature 25℃)",
+    "discharge_cutoff": "2.75V",
+    "cell_weight": "45.0g max",
+    "cell_dimension": "Height : 65.00mm max, Diameter : 18.40mm max",
+    "initial_internal_impedance": "Initial internal impedance measured at AC 1kHz after rated charge. Initial internal impedance ≤ 100mΩ",
+    "discharge_rate_capability": "7.7 Discharge Rate Capabilities ... 0.2C (520mA) 100% / 0.5C (1300mA) 95% / 1.0C (2600mA) 90% / 2.0C (5200mA) 80% ... Percentage as an index of the capacity at 25℃(=2550mAh) is 100%",
+    "operating_temperature": "Charge : 0 to 45℃, Discharge: -20 to 60℃"
+   },
+   "source": "SAMSUNG SDI 'Spec. No. ICR18650-26J1 Version No. 1.0', V-1.0 '14-09-11 First version Jongsik Jung; 19-page PDF mirrored by DNK Power https://www.dnkpower.com/wp-content/uploads/2018/04/Samsung-ICR18650-26JM-Datasheet.pdf (fetched 2026-09-04; TME's copy answered 403). Archived at ce-parts/np-f550/docs/samsung-icr18650-26j-spec-v1.0-2014-dnkpower-mirror.pdf, sha256 754005550e44e7191a5d3ed9b66632045290d7e340aaf3879c2fd75a970a1368, 772732 bytes",
+   "mass_check": "2 x 45.0 g cells = 90 g; Sony's 95 g pack and Duracell's 99 g pack leave 5-9 g for shell, contacts and protection PCB — consistent",
+   "why_this_cell_class": "Deity's NP-F550 sheet (already on the shelf) says 'Uses LG high-capacity 18650 cells'; sourcing.json already names Samsung ICR18650-26J as the 2600 mAh cell candidate; the datasheet has no discharge CURVE (only the rate table to 2.75 V), so the 3.3 V/cell cut-off fraction is read from lygte-info.dk's measured curves of the same cell (next item)."
+  },
+  "regulator_5V_efficiency_and_self_heating": {
+   "verdict": "PASS for the design as drawn (Pololu D30V30F5, decision D1): 96.1 +/- 1.0 % at 0.5 A, 7.4 V in; loss 0.10 W at 2.5 W out. NOTE electronics/pcb-package.json:364 says the module is 0.390 mm too tall as placed — the efficiency is the number for D1 or for whatever buck replaces it at similar topology, not a claim that D1 fits",
+   "measured": "tools/digitise_pololu_efficiency.py reads the curve pixels of Pololu's own 'Typical efficiency of Step-Down Voltage Regulator D30V30F5' graph (picture 0J12264, https://a.pololu-files.com/picture/0J12264.1200.png, fetched 2026-09-04; archived out/open/power-evidence/pololu-d30v30f5-efficiency-0J12264.png). Calibration: grid columns at 164/244/324 px = 0/1/2 A (80.0 px/A), grid rows 75/149/223/296 px = 100/90/80/70 % (73.67 px per 10 %). Vin=6 V curve: 0.3 A 96.88 %, 0.5 A 96.61 %, 1.0 A 95.93 %; Vin=12 V curve: 0.3 A 94.43 %, 0.5 A 94.57 %, 1.0 A 94.71 %. Interpolated to 7.4 V: 0.3 A 96.3 %, 0.5 A 96.1 %, 1.0 A 95.6 %. Pixel resolution 0.14 % per px; interpolation between 6 and 12 V curves is the dominant uncertainty, +/-1 %",
+   "pollen_hat": "Pollen's HAT regulator is unpublished (no schematic). The harvest item said 'servo-bus regulator': there is none — the servos are on the raw pack (docs/ELECTRONICS-AND-SOFTWARE.md 3.4, robotd clears the Input Voltage Error bit; EB-04 confirms with a meter). The only regulator in the power path is the 5 V buck for the Radxa and sensors.",
+   "self_heating": "at 2.5 W out (0.5 A) loss 0.10 W; at 5.0 W out (1.0 A) loss 0.23 W. Pololu prints no theta_JA for the module; with the 17.8 x 20.3 mm board's two-sided copper this is a few degC rise — a thermocouple on U2 at 1 A settles it (TEST-PLAN TH-02 site)."
+  },
+  "radxa_zero_3w_power_draw": {
+   "verdict": "NARROWED, not settled: the only method-stated measurement found is 3.2 W for 1080p60 capture + HEVC encode + SRT Wi-Fi streaming (a heavier load than the Microduck's); idle/policy figures exist only in a review with no instrument named",
+   "sources": [
+    {
+     "figure": "around 3.2 watts",
+     "load": "Capturing a 1080p60 signal from a C790, encoding to 4.5Mb/s HEVC and streaming via SRT over WiFi",
+     "url": "https://github.com/tailwind-streaming/gear-docs/blob/main/Gear/Encoders/radxa_zero_3w.md",
+     "fetched": "2026-09-04",
+     "weight": "a user's field figure, method not stated, but the load is described"
+    },
+    {
+     "figure": "idle, headless, Wi-Fi connected: approximately 0.35 to 0.45 A at 5.0 V (roughly 1.8 to 2.3 W); sustained CPU stress 0.85 to 1.05 A (4.3 to 5.3 W); 1080p MJPEG streaming 0.55 to 0.65 A",
+     "url": "https://easygoingnerd.com/review/radxa-zero-3w-review/",
+     "author_date": "Rob, 26 July 2026",
+     "fetched": "2026-09-04",
+     "weight": "the review says its numbers come from 'the Radxa Zero 3W hardware wiki alongside published community measurements ±10 %' — the wiki carries no such figure (checked 2026-09-02, ce-parts/radxa-zero-3w), so this is NOT a measurement and is recorded as the upper edge only"
+    },
+    {
+     "figure": "idle SoC 44.4 C / GPU 43.8 C at 21 C room, Waveshare heatsink; 72.8 C after indexing photos with the Alltech heatsink; 85 C 'on my experiments' rendering camera video (avaf)",
+     "url": "https://forum.radxa.com/t/zero-3w-running-hot/19851",
+     "fetched": "2026-09-04",
+     "weight": "temperatures, not watts; with theta_JA 20.728 C/W a 23 C idle rise implies 1.1 W of SoC dissipation at idle (upper bound: the board's own copper does better than the JEDEC board)"
+    }
+   ],
+   "vendor": "Radxa states only 'Requires 5V/2A' (10.0 W ceiling) — unchanged from ce-parts/radxa-zero-3w/electrical.host.json",
+   "what_settles_it": "TEST-PLAN EB-07 on a production unit: an inline USB/5 V meter (e.g. a Nordic PPK2 or a shunt on the HAT's V5 net) in idle / policy-running / camera-streaming; log with /sys/class/thermal/thermal_zone0/temp"
   }
  }
 }
