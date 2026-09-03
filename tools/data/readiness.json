@@ -1,0 +1,54 @@
+{
+  "$comment": "Judgement data for tools/gen_readiness.py -> out/factory/readiness.json + out/factory/readiness.html. Every NUMBER on the page is computed by the generator from out/factory/measure/*.json and the repo's own data files; this file holds only the things a measurement cannot produce: who owns each open parcel tonight, the bilingual labels, and the list of steps in the manual that assume knowledge not on the page (read as a stranger, 2026-09-03).",
+  "doc": {"id": "MD-FACT-RDY-001", "rev": "A", "title": "Readiness audit", "title_zh": "制造就绪度审核",
+          "sub": "Artifact by artifact: can a factory that has never seen this repository build from this file today? READY TO BUILD FROM or NOT YET, with the measurement behind each grade, and for every NOT YET, what is missing and whether an agent closes it tonight or a person must.",
+          "sub_zh": "逐个文件审核：一家从未见过本仓库的工厂，今天能否直接按此文件制造？每项给出“可直接制造”或“尚未就绪”，附测量依据；对每个“尚未就绪”项，说明缺什么、今晚由软件代理完成还是必须由人完成。"},
+  "grades": {
+    "READY": {"en": "READY TO BUILD FROM", "zh": "可直接制造"},
+    "NOT_YET": {"en": "NOT YET", "zh": "尚未就绪"},
+    "CD": {"en": "CANNOT DETERMINE", "zh": "无法判定"}
+  },
+  "closers": {
+    "agent_tonight": {"en": "agent, tonight", "zh": "软件代理，今晚"},
+    "agent_later": {"en": "agent, not in tonight's six workflows", "zh": "软件代理，不在今晚六个工作流内"},
+    "human": {"en": "a person must", "zh": "必须由人完成"},
+    "factory": {"en": "partner factory", "zh": "合作工厂"}
+  },
+  "in_flight": [
+    {"id": "WF-SHEETS", "en": "Drawing-sheet rebuild to the A2/A3/A4 standard; every sheet regenerated", "zh": "按 A2/A3/A4 标准重建全部图纸", "owns": "ce-cad/cecad/autosheet.py, sheets.py, out/drawings/"},
+    {"id": "WF-FASTENERS", "en": "Fastener census and assembly (every screw, nut, insert, ball joint into the assembly through a connection)", "zh": "紧固件普查并装入装配体（每颗螺钉、螺母、热熔嵌件、球头）", "owns": "out/fasteners/, FASTENERS.html, ce-assemblies/microduck bom"},
+    {"id": "WF-UNKNOWNS", "en": "139-unknown resolution, cross-document reconciliation, three adversarial critics", "zh": "解决 139 项未定项、跨文档核对、三名对抗式审阅", "owns": "out/open/"},
+    {"id": "WF-POSE", "en": "Photo pose-match and wiring visibility in the renders", "zh": "照片姿态匹配与渲染中的布线可见性", "owns": "out/pose/, POSE-MATCH.html, out/wiring/"},
+    {"id": "WF-HARNESS", "en": "Harness in CAD and a per-joint dossier", "zh": "线束进入 CAD 与逐关节档案", "owns": "out/harness/, out/joints/, HARNESS.html, JOINTS.html"},
+    {"id": "WF-SOURCES", "en": "New-source ingestion (MakerWorld 3250889, microduck_rl develop) and the convergence scoreboard", "zh": "新来源导入（MakerWorld 3250889、microduck_rl develop）与收敛记分板", "owns": "out/sources/, out/converge/, CONVERGENCE.html, INTERNALS.html, SOURCES.html"}
+  ],
+  "manual_assumptions": [
+    {"step": "Fastener flag (preamble)", "assumes": "Every M2 count is community hole-fitting and the page says so; no screw LENGTH is given for any hole, so the line cannot kit a screw bag from this page.", "closer": "agent_tonight", "by": "WF-FASTENERS"},
+    {"step": "Preamble: 'production may tap the plastic — CANNOT DETERMINE'", "assumes": "Whether each threaded hole gets a heat-set insert or a tapped thread is undecided; the reader must choose.", "closer": "human", "by": "design decision (Leif / partner) after the coupon test in PLAYBOOK §5.3"},
+    {"step": "1.2 'bolt both XL330s hanging from trunk_base, horn axes through world (6, ±17.5, 115)'", "assumes": "The world frame is the MJCF's; there is no datum on any drawing to measure (6, ±17.5, 115) from, and which of the servo's 4+8 holes are used is not stated.", "closer": "agent_tonight", "by": "WF-FASTENERS (hole-to-screw map) + WF-SHEETS (datums on the sheet)"},
+    {"step": "1.3 'use M2×6 into inserts'", "assumes": "Insert part number, installation temperature and depth are not on the page (B18c names a candidate insert; no process).", "closer": "human", "by": "factory process engineer writes the insert procedure on the first parts"},
+    {"step": "1.4 banana contact PCB onto Ø3.9 pins", "assumes": "Board polarity/orientation and which face meets the battery are not stated; the spring contact has no part number (P3).", "closer": "human", "by": "teardown of a real pack + contact-part selection"},
+    {"step": "2.3 'Fix yaw2roll to the hip-yaw servo horn (spline)'", "assumes": "Which horn (ROBOTIS ships the XL330 with an idler and a horn), the horn screw count and the horn-zero index are only in PLAYBOOK §5.1/§5.3, not on this page.", "closer": "agent_tonight", "by": "WF-FASTENERS + manual regeneration"},
+    {"step": "2.4-2.5 'roll axis +x at world (22.5, ±17.5, 102.5)'", "assumes": "Left/right handedness of the hip bracket and which face is the horn side are not illustrated.", "closer": "agent_tonight", "by": "WF-POSE (per-joint pictures) / WF-HARNESS per-joint dossier"},
+    {"step": "3.4 'Hang the upper leg on the hip bracket: horn side to the hip-pitch servo'", "assumes": "No picture of the thigh's horn side; the servo cavity orientation is described in words only.", "closer": "agent_tonight", "by": "WF-HARNESS per-joint dossier"},
+    {"step": "3.7 'fit the TPU sole onto the foot'", "assumes": "Press-fit vs adhesive is not stated; connection:press-fit-sole-foot exists but its interference is not on the page.", "closer": "agent_later", "by": "manual regeneration from the connection record"},
+    {"step": "4.3 'Bolt the ID-30 servo to the trunk'", "assumes": "Which trunk part (trunk_base or power_support) and which holes are not named.", "closer": "agent_tonight", "by": "WF-FASTENERS"},
+    {"step": "5.6 'screw the M12 lens holder to the IMX219 board (3 × M2)'", "assumes": "The holder is bought-or-printed CANNOT DETERMINE (PARTS row 27); lens thread-in depth / focus procedure absent.", "closer": "human", "by": "factory buys a standard M12 holder and sets focus on the first unit"},
+    {"step": "5.6 ToF, speaker, microphone mounting", "assumes": "No fixing method (screw / adhesive / clip) for any of the three; speaker and microphone part numbers are CANNOT DETERMINE (B12, B13).", "closer": "human", "by": "teardown of a shipped unit or Pollen's answer"},
+    {"step": "5.8 'Close the shells (… × M2)'", "assumes": "Shell screw positions, the order of closing and whether the trunk shells attach to trunk_base or to each other are not stated.", "closer": "agent_tonight", "by": "WF-FASTENERS"},
+    {"step": "6 Wiring", "assumes": "Cable lengths are route floors rounded to 5 mm with no tolerance; JST EH pin-1 orientation and cable retention (ties/clips) not stated; 6 of 23 rows carry a CANNOT DETERMINE.", "closer": "agent_tonight", "by": "WF-HARNESS; the tolerance needs the first physical loom"},
+    {"step": "7.2 'Scan the bus'", "assumes": "Which tool, which software image to flash on the Radxa and how to install it are not on the page (TEST-PLAN names robotctl; MANUAL does not say where it comes from).", "closer": "agent_later", "by": "manual regeneration citing software/upstream.json + install steps"},
+    {"step": "Torque (footnote): 'snug + a quarter turn'", "assumes": "No torque value for any of the three screw joints (PLAYBOOK §5.3 CANNOT DETERMINE).", "closer": "human", "by": "strip / pull-out coupon test on the production print profile"},
+    {"step": "Bearing seats (preamble)", "assumes": "Interference at every printed bearing seat is not specified anywhere (PLAYBOOK open item 3); the seat is modelled at nominal.", "closer": "human", "by": "measure five printed seats per part on the production printer and set the interference"},
+    {"step": "All coordinates", "assumes": "Every position is an MJCF body-frame number; the page never says which physical face is the frame origin, so nothing can be checked with a caliper.", "closer": "agent_tonight", "by": "WF-SHEETS (datums)"}
+  ],
+  "pcb_notes": {
+    "robot-hat": {"design_status": "Pollen publishes no schematic or Gerbers; this board is a footprint-accurate RECONSTRUCTION from the mesh and the press kit, not the shipped design.", "closer": "agent_later", "what": "re-route the 8 open nets and widen minimum track to >= 0.1524 mm, then the partner fab quotes it; a working HAT still needs a bring-up by an electronics engineer because the schematic is reconstructed."},
+    "imu-to-dxl": {"design_status": "Unpublished by Pollen; MCU choice (STM32G031F6P6) and firmware are OURS, firmware not written.", "closer": "agent_later", "what": "route the 13 open connections; write the Protocol-2 slave firmware; then fab."},
+    "banana-contact": {"design_status": "Passive strip; artwork complete and routed 3 of 3.", "closer": "human", "what": "the spring-contact part has no part number and the contact pitch is derived, not measured; a caliper on a real NP-F550 pack and a contact selection settle it; JLCPCB accepts the 4.6 mm board with ENIG."}
+  },
+  "licence": {
+    "en": "22 of the 30 print STLs are Pollen's simulation meshes, licensed CC BY-SA-NC (microduck_rl README §License: '3D model files are licensed under Creative Commons BY-SA-NC'). They may be printed for prototypes; they may NOT be sold. Only the 8 parametric rebuilds are ours. Pollen's mechanical CAD, BOM and PCBs are not published (SPEC.md:24).",
+    "zh": "30 个打印 STL 中有 22 个是 Pollen 的仿真网格，许可证为 CC BY-SA-NC（microduck_rl README §License）。可用于打印样机，不可用于销售。仅 8 个参数化重建件为我方自有。Pollen 的机械 CAD、BOM 和 PCB 未公开（SPEC.md:24）。"
+  }
+}
