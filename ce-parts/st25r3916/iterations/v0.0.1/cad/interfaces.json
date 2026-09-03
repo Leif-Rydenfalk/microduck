@@ -31,8 +31,248 @@
           5.0,
           0.55
         ],
-        "what": "THREE PACKAGES SHIP AND THE DESIGN DOES NOT SAY WHICH. ST's own product page lists: 'UFQFPN 32 5x5x0.55 mm' (Active), 'VFQFPN 5X5X1 32L WETTABLE FLANKS' (NRND — not recommended for new design) and 'WLCSP 36B DIE3916 P05 MM' (Active). The body_mm on this row is the ACTIVE 32-pin UFQFPN, 5.0000 x 5.0000 x 0.5500 mm; the NRND VFQFPN shares its 5.0000 x 5.0000 footprint at 1.0000 mm tall, and the WLCSP36 is a different part entirely. THE FRAME IS VALID FOR ALL THREE: it is the package's geometric centre ON THE SEATING PLANE (z = 0 is the PCB land plane, +z into the body), which does not move between package options. What does move is the height (0.5500 vs 1.0000 mm) and the land pattern, and those stay CANNOT DETERMINE until the board says which is fitted. What settles it: Pollen's Robot HAT / imu_to_dxl board files (unpublished — COMPARISON.html finding 6), or a photograph of the fitted part. `accepts` is EMPTY on purpose: an SMT land joint is connection:solder-smt, which is NOT on this shelf — naming it would dangle.",
-        "source": "READ OFF THE VENDOR'S OWN PRODUCT PAGE: STMicroelectronics ST25R3916 product page https://www.st.com/en/nfc/st25r3916.html, package list and lifecycle badges, fetched 2026-09-02 (lane T). This is the vendor's page, not a distributor's transcription; it is a WEAKER source than the mechanical drawing in the ST25R3916 datasheet's package-information section, which is what would carry the land pattern and the pin-1 datum, and the row says so. That datasheet is not on disk in this folder."
+        "what": "THREE PACKAGES SHIP AND THE DESIGN DOES NOT SAY WHICH — and all three now carry their own mechanical data instead of a product-page string. body_mm on this row is the ACTIVE 32-pin UFQFPN at its TYP: 5.0000 x 5.0000 x 0.5500 mm, D and E each 4.900-5.100, overall height A 0.500-0.600, lead pitch e 0.5000, lead width b 0.180-0.300, lead length L 0.300-0.500, exposed die pad D2 x E2 3.400-3.600 square, coplanarity ddd 0.080 MAX, standoff A1 0.000-0.050. Mould protrusion is EXCLUDED from D and E by the table's own note and may add up to 0.1500 mm, so 5.2500 mm is the envelope an enclosure must clear. The NRND VFQFPN32 shares the 5.000 x 5.000 footprint and the 3.500 exposed pad at 0.800-1.000 mm tall; the WLCSP36 is a different part geometrically, 3.213 x 3.203 mm at 0.550-0.630 mm on a 0.5000 mm ball pitch. WHICH ONE THE MICRODUCK USES IS STILL CANNOT DETERMINE: the board that carries it is unpublished. What settles it is a photograph or a BOM line for the board — a 5 mm square QFN and a 3.2 mm CSP are told apart by eye. The frame is the package's geometric centre ON THE SEATING PLANE (z = 0 is the PCB land plane, +z into the body). `accepts` is EMPTY on purpose: an SMT land joint is connection:solder-smt, which is NOT on this shelf — naming it would dangle, and a dangling ref is a FAIL in bin/triad check, never a warning.",
+        "source": "READ OFF THE VENDOR'S OWN MECHANICAL DRAWINGS: STMicroelectronics ST25R3916/7 datasheet DS12484 Rev 8 (May 2023), section 6 'Package information' — 6.1 VFQFPN32 (Figure 36 outline p.150, Table 134 mechanical data pp.150-151), 6.2 UFQFPN32 (Figure 38 outline p.152, Table 135 mechanical data p.153, Figure 39 footprint example p.153), 6.3 WLCSP36 (Figure 40 outline p.154, Table 136 mechanical data p.155), of 160 pages — the copy in this folder (../../../datasheet.pdf, sha256 1170f4d74ff501917262ae42bf81c60c38c11d121e2ea2af6b1e845433befef1 in the folder's PROVENANCE.json, re-fetched 2026-09-03 from https://www.st.com/resource/en/datasheet/st25r3916.pdf and byte-identical), read 2026-09-03 (lane T). SUPERSEDES the row published 2026-09-02, which cited the ST PRODUCT PAGE package list and said the land pattern would need 'the mechanical drawing in the ST25R3916 datasheet's package-information section'. That section was already in this folder, on pages 150-155 of the datasheet.pdf PROVENANCE.json had hashed. No dimension is contradicted — 5x5x0.55 is the drawing's TYP — but every number now carries min/typ/max, the exposed pad and the lead geometry are measured where before there were none, and the drawing's own note that D and E EXCLUDE up to 0.1500 mm of mould protrusion is recorded, which no product-page string carries.",
+        "body_mm_basis": "Table 135 'UFQFPN32 mechanical data', millimetres column, verbatim: D 4.900 / 5.000 / 5.100 min-typ-max, E 4.900 / 5.000 / 5.100, A 0.500 / 0.550 / 0.600. body_mm carries the TYP; the min and max are in packages_measured below. Table note 2: 'Dimensions D and E do not include mold protrusion, not to exceed 0.15 mm' — so the worst case an enclosure must clear is 5.100 + 0.15 = 5.2500 mm, not 5.1000.",
+        "packages_measured": {
+          "UFQFPN32": {
+            "status": "Active (ST product page, 2026-09-02) — the package this row's body_mm describes",
+            "A_overall_h": [
+              0.5,
+              0.55,
+              0.6
+            ],
+            "A1_standoff": [
+              0.0,
+              0.02,
+              0.05
+            ],
+            "A3_lead_frame_t": [
+              null,
+              0.152,
+              null
+            ],
+            "b_lead_w": [
+              0.18,
+              null,
+              0.3
+            ],
+            "D": [
+              4.9,
+              5.0,
+              5.1
+            ],
+            "E": [
+              4.9,
+              5.0,
+              5.1
+            ],
+            "D1": [
+              3.4,
+              3.5,
+              3.6
+            ],
+            "E1": [
+              3.4,
+              3.5,
+              3.6
+            ],
+            "D2_exposed_pad": [
+              3.4,
+              3.5,
+              3.6
+            ],
+            "E2_exposed_pad": [
+              3.4,
+              3.5,
+              3.6
+            ],
+            "e_pitch": [
+              null,
+              0.5,
+              null
+            ],
+            "L_lead_len": [
+              0.3,
+              0.4,
+              0.5
+            ],
+            "ddd_coplanarity": [
+              null,
+              null,
+              0.08
+            ],
+            "where": "Table 135, page 153 of 160; outline Figure 38 page 152",
+            "footprint_example_mm": {
+              "land_span": 5.3,
+              "exposed_pad_land": 3.8,
+              "pad_len": 0.6,
+              "pad_w": 0.3,
+              "pitch": 0.5,
+              "inner_span": 3.45,
+              "corner": 0.75,
+              "where": "Figure 39 'UFQFPN32 footprint example', page 153 — an EXAMPLE the vendor draws, not a specification"
+            }
+          },
+          "VFQFPN32": {
+            "status": "NRND — not recommended for new design (ST product page, 2026-09-02)",
+            "A_overall_h": [
+              0.8,
+              0.9,
+              1.0
+            ],
+            "A1_standoff": [
+              0.0,
+              null,
+              0.05
+            ],
+            "A3": [
+              null,
+              0.2,
+              null
+            ],
+            "L_lead_len": [
+              0.3,
+              0.4,
+              0.5
+            ],
+            "b_lead_w": [
+              0.18,
+              0.25,
+              0.3
+            ],
+            "D": [
+              null,
+              5.0,
+              null
+            ],
+            "E": [
+              null,
+              5.0,
+              null
+            ],
+            "D2_exposed_pad": [
+              3.4,
+              3.5,
+              3.6
+            ],
+            "E2_exposed_pad": [
+              3.4,
+              3.5,
+              3.6
+            ],
+            "e_pitch": [
+              null,
+              0.5,
+              null
+            ],
+            "S1": [
+              null,
+              0.35,
+              null
+            ],
+            "bbb": [
+              null,
+              0.1,
+              null
+            ],
+            "ccc": [
+              null,
+              0.1,
+              null
+            ],
+            "eee": [
+              null,
+              0.08,
+              null
+            ],
+            "where": "Table 134, pages 150-151 of 160; outline Figure 36 page 150"
+          },
+          "WLCSP36": {
+            "status": "Active (ST product page, 2026-09-02)",
+            "A_overall_h": [
+              0.55,
+              0.59,
+              0.63
+            ],
+            "A1": [
+              null,
+              0.235,
+              null
+            ],
+            "A2": [
+              null,
+              0.33,
+              null
+            ],
+            "A3_backside_coating": [
+              null,
+              0.025,
+              null
+            ],
+            "b_ball_d": [
+              null,
+              0.33,
+              null
+            ],
+            "D": [
+              3.193,
+              3.213,
+              3.233
+            ],
+            "E": [
+              3.183,
+              3.203,
+              3.223
+            ],
+            "e_pitch": [
+              null,
+              0.5,
+              null
+            ],
+            "e1_ball_array_span": [
+              null,
+              2.5,
+              null
+            ],
+            "F": [
+              null,
+              0.347,
+              null
+            ],
+            "G": [
+              null,
+              0.352,
+              null
+            ],
+            "aaa": [
+              null,
+              0.1,
+              null
+            ],
+            "bbb": [
+              null,
+              0.1,
+              null
+            ],
+            "ccc": [
+              null,
+              0.1,
+              null
+            ],
+            "ddd": [
+              null,
+              0.05,
+              null
+            ],
+            "eee": [
+              null,
+              0.05,
+              null
+            ],
+            "where": "Table 136, page 155 of 160; outline Figure 40 page 154"
+          }
+        }
       },
       {
         "name": "pcb_land",

@@ -29,10 +29,24 @@
         "body_mm": [
           2.5,
           3.0,
-          0.83
+          0.86
         ],
-        "what": "LGA-14L body 2.5000 x 3.0000 x 0.8300 mm, 14 lands, ECOPACK2. The frame is the package's geometric centre ON THE SEATING PLANE (z = 0 is the PCB land plane, +z into the body), which is the datum an SMT placement uses. TWO THINGS THIS ROW DOES NOT CLAIM, because the source does not carry them: the LAND GRID ITSELF (pad size, pitch and the pin-1 datum) is not in the vendor page this row cites, so it is CANNOT DETERMINE here — what settles it is the mechanical drawing in ST's own datasheet DS13510, section 'Package information', which the folder's PROVENANCE.json says was fetched on 2026-09-02 but which is NOT on disk in this folder today; and the BOARD this chip sits on, Pollen's imu_to_dxl v2, is unpublished, so how the package is oriented on it is unknown. `accepts` is EMPTY on purpose: an SMT land joint is connection:solder-smt, which is NOT on this shelf — naming it would dangle, and a dangling ref is a FAIL in bin/triad check, never a warning.",
-        "source": "READ OFF THE VENDOR'S OWN PRODUCT PAGE: STMicroelectronics LSM6DSV16X product page https://www.st.com/en/mems-and-sensors/lsm6dsv16x.html, package line 'LGA 14L' and 'ECOPACK2', dimensions '2.5 mm x 3 mm x 0.83 mm', fetched 2026-09-02 (lane T). This is the vendor's own page and not a distributor's transcription; it is a WEAKER source than the mechanical drawing in DS13510, which is what would carry the land grid, and the row says so."
+        "what": "LGA-14L body 2.5000 x 3.0000 mm, height 0.8600 mm MAX, 14 lands on a 0.5000 mm pitch, each land 0.2500 ±0.05 x 0.4750 ±0.05, the two land rows 1.5000 mm apart, pin 1 indicated on both top and bottom views, seating-plane flatness 0.0500 mm to datum C, general tolerance ±0.1 mm unless otherwise specified, ECOPACK. The frame is the package's geometric centre ON THE SEATING PLANE (z = 0 is the PCB land plane, +z into the body), which is the datum an SMT placement uses. WHAT THIS ROW STILL DOES NOT CLAIM: the land PATTERN to etch on a board — the drawing gives the package's own lands and sends a reader to ST technical note TN0018 for the land pattern, which is a separate document and is not in this folder; and the BOARD this chip sits on, Pollen's imu_to_dxl v2, is unpublished, so how the package is oriented on it is unknown. `accepts` is EMPTY on purpose: an SMT land joint is connection:solder-smt, which is NOT on this shelf — naming it would dangle, and a dangling ref is a FAIL in bin/triad check, never a warning.",
+        "source": "READ OFF THE VENDOR'S OWN MECHANICAL DRAWING: STMicroelectronics LSM6DSV16X datasheet DS13510 Rev 4 (May 2023), section 19.1 'LGA-14L package information', Figure 33 'LGA-14L 2.5 x 3.0 x 0.86 mm package outline and mechanical data', PAGE 175 of 198 — the copy in this folder (../../../datasheet.pdf, sha256 ec53c0e5952fc0c9587ed32b56d066016c2954bc6e9d18355b13a1c4cda17894 in the folder's PROVENANCE.json, re-fetched 2026-09-03 from https://www.st.com/resource/en/datasheet/lsm6dsv16x.pdf and byte-identical), read 2026-09-03 (lane T). SUPERSEDES the row published 2026-09-02, which cited the ST PRODUCT PAGE ('LGA 14L', '2.5 mm x 3 mm x 0.83 mm') and said the land grid was CANNOT DETERMINE because the mechanical drawing was 'NOT on disk in this folder today'. IT WAS ON DISK: the drawing is on page 175 of the datasheet.pdf that PROVENANCE.json already hashed. TWO NUMBERS MOVE with the better source: the height is 0.8600 mm MAX on the drawing, not 0.8300 — the 0.83 is a product-page figure that appears nowhere on the drawing and carries no stated basis, and it is 0.0300 mm SMALLER than the drawing's maximum, which is the wrong direction for a clearance check; and the land grid, previously CANNOT DETERMINE, is now measured.",
+        "body_mm_basis": "L 2.50 ±0.1, W 3.00 ±0.1, H 0.86 MAX — the three rows of the OUTER DIMENSIONS table inside Figure 33, read verbatim. H is a MAX and has no typ on the drawing, so the z here is a maximum envelope and not a nominal; L and W carry ±0.1, which is also the drawing's stated general tolerance.",
+        "land_grid_mm": {
+          "pitch": 0.5,
+          "land_short_side": 0.25,
+          "land_short_side_tol": 0.05,
+          "land_long_side": 0.475,
+          "land_long_side_tol": 0.05,
+          "land_count": 14,
+          "row_span": 1.5,
+          "corner_feature": 0.1,
+          "corner_feature_count": 4,
+          "seating_flatness_to_datum_C": 0.05,
+          "basis": "Figure 33 callouts, verbatim: '0.5' pitch (called twice), '14x 0.25±0.05' and '14x 0.475±0.05' land dimensions, '1.5' between the land rows, '4x (0.1)' as a reference (parenthesised = reference dimension, not toleranced), '0.05 C' flatness to datum C. Pin 1 is indicated on both the TOP VIEW and the BOTTOM VIEW. NOT on this drawing and therefore NOT recorded: the land PATTERN a board should etch — the drawing's own note sends a reader to ST technical note TN0018 for land pattern and soldering, which is a different document and is not in this folder."
+        }
       }
     ]
   }
