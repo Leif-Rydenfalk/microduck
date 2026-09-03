@@ -185,3 +185,50 @@ curved-region check that FAILS a line view whose local line density exceeds a
 stated threshold inside a region the solid says is curved. Plus the human
 read-back: open the PNG and answer "could a shop cut this part from this sheet
 alone, and does the surface form read at a glance?"
+
+## A4 · EVERY FEATURE CARRIES A REAL DIMENSION — Leif, 2026-09-03, verbatim
+
+> all details in the blueprints needs meassurement and dimensions leave nothing
+> as a maybe to the engineer we neeed real dimensions for all features.
+
+This is the strictest rule on the sheet and it is an ACCEPTANCE GATE, not an
+aspiration. §A2 and §A3 govern what the sheet looks like; A4 governs whether it
+is complete.
+
+### The rule
+
+**Every manufacturable feature on the part carries a dimension on the sheet.**
+Not a note, not "as modelled", not a reference to the STEP file, not a scale
+bar — a real toleranced dimension, measured off the solid, printed on the
+drawing. Nothing is left for the engineer to infer, scale off the paper, or
+guess.
+
+A feature is any of: outline envelope; every hole (diameter, depth, position
+from two datums, thread or clearance callout, counterbore/countersink diameter
+and depth); every boss (OD, height, position); every pocket and slot (width,
+length, depth, corner radii); every rib (thickness, height, pitch); every wall
+(thickness at every distinct station, not one sample); every fillet and every
+radius, individually (this is the gap Leif named first and it is still the
+gap); every chamfer (size and angle); every draft; every step and shoulder;
+every bearing seat (bore, depth, lead-in); every cable channel; every surface
+that mates with another part (with the mating part named by its triad ref);
+and every feature that exists only on a curved surface, which gets a section or
+a detail view at a scale where it can be dimensioned.
+
+### The completeness gate
+
+The generator must ENUMERATE the features off the solid (the same feature
+enumeration the fastener census uses) and then PROVE that each one has a
+dimension on the sheet. `ce-cad/bin/sheetcheck` gains a **dimension-coverage
+check**: features enumerated, features dimensioned, and the list of the ones
+that are not. **Coverage below 100 % is a FAIL** and the sheet names the
+undimensioned features on its own face rather than shipping silently
+incomplete. A feature whose dimension genuinely cannot be measured is printed
+as a CANNOT DETERMINE row on the sheet, naming what would settle it — never as
+a blank, and never as a plausible number.
+
+Tolerances: every dimension carries one, from a stated basis (a general
+tolerance block plus per-feature tolerances where the fit requires it, with the
+fit class named for anything that mates). "As printed" is not a tolerance; the
+printed dimensional band is a measured number or a CANNOT DETERMINE with the
+coupon that settles it.
