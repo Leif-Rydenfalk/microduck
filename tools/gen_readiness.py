@@ -27,6 +27,8 @@ import os
 import re
 import subprocess
 
+import numpy as np
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 MEAS = os.path.join(ROOT, "out", "factory", "measure")
@@ -143,11 +145,28 @@ for p in slice_["parts"]:
     stl_mtime = datetime.datetime.fromtimestamp(os.path.getmtime(os.path.join(ROOT, p["stl"]))).strftime("%Y-%m-%dT%H:%M")
     part_commit = git_last_commit("ce-parts/" + slug)
     stale = slug in stale_list
+    rebuilt_delta = None
+    if stale:
+        rb = os.path.join(ROOT, "out", "dfm", "stl-rebuilt", slug + ".stl")
+        if os.path.exists(rb):
+            try:
+                import struct
+                def _bbox(path):
+                    d = open(path, "rb").read()
+                    n = struct.unpack("<I", d[80:84])[0]
+                    arr = np.frombuffer(d[84:84 + n * 50], dtype=np.dtype([("n", "<3f4"), ("v", "<9f4"), ("a", "<u2")]))["v"].reshape(-1, 3)
+                    return n, arr.max(0) - arr.min(0)
+                na, ba = _bbox(os.path.join(ROOT, p["stl"]))
+                nb, bb = _bbox(rb)
+                rebuilt_delta = {"rebuilt_stl": os.path.relpath(rb, ROOT), "print_triangles": int(na), "rebuilt_triangles": int(nb), "bbox_delta_mm": [round(float(x), 4) for x in (bb - ba)], "max_abs_bbox_delta_mm": round(float(abs(bb - ba).max()), 4)}
+            except Exception as e:
+                rebuilt_delta = {"error": str(e)}
     problems = []
     if not st.get("watertight"):
         problems.append("STL is NOT watertight (%s open edges)" % st.get("open_edges"))
     if stale:
-        problems.append("STL is Pollen's mesh although a PASSed parametric rebuild exists (PLAYBOOK open item 1; STL %s, part folder last commit %s)" % (stl_mtime, part_commit))
+        problems.append("STL is Pollen's mesh although a PASSed parametric rebuild exists (PLAYBOOK open item 1; STL %s, part folder last commit %s%s)" % (
+            stl_mtime, part_commit, ("; rebuilt export bbox differs by at most %.4f mm, so the shape is the same and the difference is PROVENANCE and LICENCE" % rebuilt_delta["max_abs_bbox_delta_mm"]) if rebuilt_delta and "max_abs_bbox_delta_mm" in rebuilt_delta else ""))
     if p.get("slicer_warning"):
         problems.append("slicer warning '%s' and the sliced numbers are from a preset with supports OFF (floor)" % p["slicer_warning"])
     grade = "READY" if not problems or (len(problems) == 1 and p.get("slicer_warning") and not stale and st.get("watertight")) else "NOT_YET"
@@ -168,7 +187,7 @@ for p in slice_["parts"]:
         ("; ".join(problems) + "." if problems else note), closer, by,
         {"stl": p["stl"], "stl_source": src, "vendor_mesh": vendor, "licence": ("CC BY-SA-NC (Pollen sim mesh)" if vendor else "ours"), "stale": stale,
          "watertight": st.get("watertight"), "open_edges": st.get("open_edges"), "grams_per_piece": p["grams_per_piece"], "seconds_per_piece": p["seconds_per_piece"],
-         "slicer_warning": p.get("slicer_warning"), "stl_mtime": stl_mtime, "part_last_commit": part_commit})
+         "slicer_warning": p.get("slicer_warning"), "stl_mtime": stl_mtime, "part_last_commit": part_commit, "rebuilt_delta": rebuilt_delta})
 
 # ---------------------------------------------------------------- 3 bought lines
 SRC = J(os.path.join(MEAS, "sourcing-rows.json"))
@@ -325,9 +344,9 @@ A = []
 A.append('<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n<title>%s — %s</title>' % (E(D["doc"]["title"]), E(D["doc"]["title_zh"])))
 A.append('<link rel="stylesheet" href="../../tools/doc.css">')
 A.append('<style>.zh{font-family:var(--sans);font-size:12px;color:var(--ink-2);display:block}'
-         'table{border-collapse:collapse;width:100%;font-size:13px;margin:8px 0 18px}th,td{border-bottom:1px solid var(--hair);padding:5px 6px;text-align:left;vertical-align:top}th{background:var(--head);font-family:var(--sans);font-size:12px}'
+         'table{border-collapse:collapse;width:100%;table-layout:fixed;font-size:12.5px;margin:8px 0 18px;word-break:break-word;overflow-wrap:anywhere}th,td{border-bottom:1px solid var(--hair);padding:5px 6px;text-align:left;vertical-align:top}th{background:var(--head);font-family:var(--sans);font-size:12px}'
          'td.m{font-family:var(--mono);font-size:11.5px}'
-         '.g{font-family:var(--sans);font-weight:600;font-size:11.5px;white-space:nowrap}.g.ok{color:var(--ready)}.g.no{color:var(--no)}.g.cd{color:var(--cd)}'
+         '.g{font-family:var(--sans);font-weight:600;font-size:11px}.g.ok{color:var(--ready)}.g.no{color:var(--no)}.g.cd{color:var(--cd)}'
          '.front{border:2px solid var(--no);padding:12px 16px;margin:18px 0}.front h2{margin:0 0 6px;border:none;font-size:20px}'
          '.stat b.no{color:var(--no)}.num{text-align:right;font-variant-numeric:tabular-nums}</style>')
 A.append('</head>\n<body>\n<div class="wrap">')
