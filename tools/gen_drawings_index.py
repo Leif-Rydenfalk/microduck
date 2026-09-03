@@ -52,6 +52,29 @@ def bbox_txt(b):
     return " × ".join("%.4f" % float(x) for x in b)
 
 
+def _gave_up_line(r):
+    """What the sheet does NOT carry, and the last reason it could not.
+
+    `autosheet._search` answers a failed read-back by dropping content — the
+    connector dimension, then the hole callouts, then the detail bubbles, then
+    the section. That is the right order and it must not be silent: measured
+    2026-09-03, microduck-shin passed only after sixteen attempts by dropping
+    its SECTION, and nothing on the page said the sheet had one fewer view
+    than the standard asks for.
+    """
+    g = r.get("gave_up") or {}
+    if not g:
+        return "not recorded"
+    lost = [k for k, v in g.items() if v is False]
+    if not lost:
+        return ("nothing — the sheet carries the section, the hole callouts, "
+                "the connector dimension and the detail bubbles it measured")
+    return ("DROPPED to make the sheet read back clean: %s. Last reason "
+            "before it was dropped: %s"
+            % (", ".join(sorted(lost)),
+               str(r.get("last_reason") or "not recorded")[:300]))
+
+
 def _radius_line(r):
     """§A.5 — Leif's own words, *"Every radius and fillet dimensioned"* — as a
     fraction rather than an impression.
@@ -74,6 +97,103 @@ def _radius_line(r):
     return ("%d of %d distinct radii printed on the sheet%s"
             % (on, len(f),
                "" if not miss else " — MISSING: " + ", ".join(miss)))
+
+
+#: The §A items the census counts, each with the MEASUREMENT that decides
+#: whether a given sheet carries it. `None` from a probe means "not applicable
+#: to this part" (a part with no holes cannot carry a hole table) and is
+#: counted in neither the numerator nor the denominator; a probe that cannot
+#: answer returns the string "?" and the item is reported as unmeasured.
+def _ortho_views(r):
+    return [v for v in (r.get("views") or [])
+            if not v.startswith(("SEC", "DET", "ISO"))]
+
+
+def _A_PROBES():
+    return [
+        ("A.4 isometric reference view on the sheet",
+         lambda r: "ISO" in (r.get("views") or [])),
+        ("A.4 shaded reference render of the part",
+         lambda r: bool(r.get("reference_render"))),
+        # NOT "3 or more views". §A asks for a third-angle set and §A.2 orders
+        # the third view SUPPRESSED on a thin part — "a 2 mm rib seen on its
+        # end is a black band that means nothing" — so counting sheets with
+        # two orthographic views as failures would score a sheet down for
+        # obeying the standard. `cecad.autosheet.choose_views` decides off the
+        # bounding box; the sheet now prints that decision and its ratio, and
+        # this asks whether every view it earned is on the paper.
+        ("Every orthographic view the part's extents earn is drawn "
+         "(A, and A.2 for the ones that earn two)",
+         lambda r: ("?" if not isinstance(r.get("views_chosen"), list)
+                    else set(_ortho_views(r)) == set(r["views_chosen"]))),
+        ("A.5 every arc radius leadered or stated in a note",
+         lambda r: (None if (r.get("features") or {}).get("radii") == []
+                    else ("?" if (r.get("features") or {}).get("radii") is None
+                          else all(x.get("on_sheet") for x in
+                                   r["features"]["radii"])))),
+        ("A.7 detail callout at a larger stated scale",
+         lambda r: bool(r.get("details"))),
+        ("Hole table",
+         lambda r: (None if not r.get("holes")
+                    else (r.get("gave_up") or {}).get("holes") is not False)),
+        ("Section view with the cutting plane drawn",
+         lambda r: any(v.startswith("SEC") for v in (r.get("views") or []))),
+        ("A.9 print / DFM block with the tolerance basis",
+         lambda r: bool(r.get("dfm"))),
+        ("verify_sheet PASS on the finished SVG",
+         lambda r: bool(r.get("verified")) and bool(r.get("verify_sheet"))),
+        ("Independent re-check after the run (tools/verify_drawings.py)",
+         lambda r: ("?" if not r.get("recheck")
+                    else r["recheck"].get("verdict") == "PASS")),
+    ]
+
+
+def coverage(rs):
+    """WHAT THE SHEETS ON THIS SHELF ACTUALLY CARRY, counted off index.json.
+
+    §1 of this page used to open with a blanket sentence — *"Each sheet below
+    carries ... every radius and fillet dimensioned with a leader, detail
+    callouts at a larger stated scale ..., a hole table, a section"* — and the
+    cards directly beneath it contradicted it: measured 2026-09-03 on the
+    shipped page, 17 of 21 rows read "Detail callouts: none". A claim a reader
+    can refute by scrolling is worse than no claim, so the paragraph is a
+    COUNT now, per §A item, with the sheets that do not carry it named. Every
+    figure here is computed from the same rows the cards are drawn from, so
+    the two cannot disagree.
+    """
+    out = []
+    for name, probe in _A_PROBES():
+        yes, no, na, unk = [], [], [], []
+        for r in rs:
+            try:
+                v = probe(r)
+            except Exception:                                 # noqa: BLE001
+                v = "?"
+            (na if v is None else unk if v == "?" else yes if v else no
+             ).append(r["slug"])
+        out.append({"item": name, "yes": yes, "no": no, "na": na, "unk": unk})
+    return out
+
+
+def coverage_table(rs):
+    cov = coverage(rs)
+    h = ['<div class="tablewrap"><table class="data">',
+         "<thead><tr><th>§A item</th><th>carried</th><th>of applicable"
+         "</th><th>sheets that do not carry it</th></tr></thead><tbody>"]
+    for c in cov:
+        appl = len(c["yes"]) + len(c["no"])
+        miss = ", ".join(c["no"]) or "—"
+        if c["unk"]:
+            miss += (" · NOT MEASURED on %d sheet(s): %s"
+                     % (len(c["unk"]), ", ".join(c["unk"])))
+        if c["na"]:
+            miss += (" · not applicable to %d part(s): %s"
+                     % (len(c["na"]), ", ".join(c["na"])))
+        h.append("<tr><th scope=\"row\">%s</th><td>%d</td><td>%d</td>"
+                 "<td>%s</td></tr>" % (E(c["item"]), len(c["yes"]), appl,
+                                       E(miss)))
+    h.append("</tbody></table></div>")
+    return "\n".join(h)
 
 
 def sheet_card(r):
@@ -143,6 +263,7 @@ def sheet_card(r):
                  ((r.get("recheck") or {}).get("svg_header") or {}).get("size")))
              if r.get("recheck") else
              "not run — tools/verify_drawings.py has not been over this sheet"),
+            ("Content the search had to give up", _gave_up_line(r)),
             ("§A.5 radii dimensioned", _radius_line(r)),
             ("§A.6 feature census",
              (r.get("features") or {}).get("A6_summary")
@@ -189,6 +310,87 @@ def sheet_card(r):
                          + "; ".join(E(c["name"]) for c in bad) + "</p>")
     parts.append("</article>")
     return "\n".join(parts)
+
+
+#: What would settle each state of "no answer", by the state `collect_drawings`
+#: measured. A CANNOT DETERMINE that does not say what closes it is a shrug,
+#: and this page is where the shrug would live.
+_SETTLES = {
+    "no-geometry": ("Write `build()` in ce-parts/<slug>/current/cad/part.py "
+                    "against a measured source (the vendor drawing, a "
+                    "calliper, or the published mesh) — the folder is a "
+                    "`bin/triad new part` stub and there is no solid to draw."),
+    "no-builder": ("Create ce-parts/<slug>/current/cad/part.py. There is no "
+                   "builder at all, so nothing in this repo can be measured "
+                   "or drawn for this slug."),
+    "not-drawn": ("Run `ce-cad/bin/cad tools/draw_part.py <slug>`. The part "
+                  "builds and would carry a drawing; no sheet has been "
+                  "generated yet."),
+    "not-print-sheeted": ("Run `ce-cad/bin/cad tools/draw_part.py <slug>`. "
+                          "The part is mesh-backed and would carry a print "
+                          "sheet; none has been generated yet."),
+    "unbuildable": ("Fix the builder named in the reason — the kernel raised "
+                    "while loading the part, so neither document can be "
+                    "produced."),
+    "stale": ("Redraw the part: the result.json and the sheet beside it "
+              "describe different files, so neither can be trusted until one "
+              "run writes both."),
+    "stale-result": ("Redraw the part with tools/draw_part.py — its "
+                     "result.json predates the current generator."),
+    "unreadable": ("Delete and redraw: the result.json will not parse."),
+    "print-sheet": ("Name the geometry file. A print sheet whose whole "
+                    "purpose is the file it prints, with no file, is the one "
+                    "thing this document cannot supply."),
+}
+
+
+def open_items(rows):
+    """Every row this pass could not answer, with what settles it.
+
+    Generated from the same index.json as everything else, so an item cannot
+    be quietly dropped from the list by editing prose.
+    """
+    out = []
+    for r in rows:
+        if r.get("verdict") == "PASS":
+            continue
+        st = r.get("state") or r.get("kind") or "unknown"
+        out.append({"slug": r["slug"], "state": st,
+                    "verdict": r.get("verdict") or "CANNOT DETERMINE",
+                    "why": r.get("why") or _first_failed(r) or "no reason "
+                           "recorded — that is itself a defect of this row",
+                    "settles": _SETTLES.get(st, "Not classified — read the "
+                                            "reason and the sheet.")})
+    out.sort(key=lambda d: (d["verdict"] != "FAIL", d["state"], d["slug"]))
+    return out
+
+
+def _first_failed(r):
+    bad = [c["name"] for c in (r.get("checks") or []) if not c.get("ok")]
+    if bad:
+        return "failed checks: " + "; ".join(bad)
+    rc = r.get("recheck") or {}
+    if rc.get("failed"):
+        return "independent re-check failed: " + "; ".join(
+            str(x) for x in rc["failed"])[:600]
+    return None
+
+
+def open_table(rows):
+    items = open_items(rows)
+    if not items:
+        return ('<p class="note">Every row on this shelf is PASS. Nothing is '
+                'open.</p>')
+    h = ['<div class="tablewrap"><table class="data">',
+         "<thead><tr><th>part</th><th>verdict</th><th>state</th>"
+         "<th>why</th><th>what settles it</th></tr></thead><tbody>"]
+    for d in items:
+        h.append("<tr><th scope=\"row\">%s</th><td>%s</td><td>%s</td>"
+                 "<td>%s</td><td>%s</td></tr>"
+                 % (E(d["slug"]), chip(d["verdict"]), E(d["state"]),
+                    E(str(d["why"])[:700]), E(d["settles"])))
+    h.append("</tbody></table></div>")
+    return "\n".join(h)
 
 
 def main():
@@ -329,17 +531,23 @@ def main():
   <a href="#reference-drawings">3 Reference drawings</a>
   <a href="#print-sheets">4 Print sheets</a>
   <a href="#no-sheet">5 Parts with no sheet</a>
+  <a href="#open">6 What could not be settled</a>
 </nav>
 
 <section id="how">
   <h2><span class="n">1</span>What a sheet must carry, and how it is checked</h2>
   <p class="lede">The acceptance standard is <code>docs/MANUFACTURING-REQUIREMENTS.md</code> §A,
-  which is Leif's own review of the first generated files. Each sheet below carries, measured
-  off the solid: a third-angle orthographic set, an isometric reference view, a shaded
-  reference render of the part, every radius and fillet dimensioned with a leader, detail
-  callouts at a larger stated scale on the dense regions, a hole table, a section with wall
-  dimensions and the cutting-plane line on a view that can show it, a print/DFM note block
-  with the tolerance basis, the surface finish, and the title block.</p>
+  which is Leif's own review of the first generated files. What the sheets on this shelf
+  <em>actually</em> carry against it is COUNTED below, not asserted — every figure computed
+  from the same <code>out/drawings/index.json</code> rows the cards further down are drawn
+  from, so the table and the cards cannot disagree. An item a sheet does not carry names that
+  sheet. Absence is a measurement here: an item that is not applicable to a part (a hole table
+  on a part with no holes) is outside the denominator and is named as such, and an item no
+  pass has measured yet is reported as unmeasured rather than as carried.</p>
+  {coverage_table(drawings + refs)}
+  <p class="note">The census covers the {len(drawings) + len(refs)} dimensioned and reference
+  sheets. Print sheets (§4) are a different document and are held to
+  <code>verify_print_sheet</code>, not to §A.</p>
   <div class="grid2">
     <div class="card"><h3>Every number is read back</h3><p><code>verify_sheet</code> parses the
     finished SVG and checks the stated scale, the title-block bbox and volume, both overall
@@ -355,11 +563,36 @@ def main():
     printed and measured on this machine”, and Bambu Lab's own H2D Pro specification carries
     no dimensional-accuracy line. The sheets say so, and print the two cited outsourced
     figures beside it. Sources: <code>tools/drawing_facts.py</code>.</p></div>
-    <div class="card"><h3>Two generator defects, fixed and tested</h3><p>The generator merged
-    coaxial holes across air into a phantom counterbore, and its only wall figure was a scan
-    of one cutting plane. Both are fixed in <code>ce-cad</code> with
-    <code>tests/test_cbore_and_wall.py</code>, which fails on the old code and passes on the
-    new.</p></div>
+    <div class="card"><h3>Generator defects, fixed and tested</h3><p>GOAL.md finding 5 named
+    two: the generator merged coaxial holes across air into a phantom counterbore, and its
+    only wall figure was a scan of one cutting plane. Both are fixed in <code>ce-cad</code>
+    with <code>tests/test_cbore_and_wall.py</code>, which fails on the old code and passes on
+    the new. Five more were measured on the shipped sheets afterwards and are fixed here:
+    an ASCII capital O printed where every other diameter carries Ø; a counterbore whose face
+    the code could not name printing “?X” (it is centred in its bore — it opens on neither
+    face, and the table says <code>INT</code>); a whole-solid ray minimum printed as the wall
+    with no verdict, beside a note saying it is not a wall (both figures now, and the
+    printable one — the smallest neighbourhood-median thickness — carries the PASS/FAIL);
+    a sheet with no detail bubble saying nothing about why; and a note that stated a radius
+    band in R notation, putting two radii on the paper the solid has not got.</p></div>
+    <div class="card"><h3>A part with nothing to dimension gets a print sheet</h3><p>§A.3
+    refuses a drawing off geometry with no dimension a shop can work to, and the case it was
+    written for is a decimated vendor mesh. Measured 2026-09-03 there is a second and worse
+    case, because it looks like a drawing: <code>part:microduck-sole-left</code> is a
+    parametric solid whose floor is lofted station to station through a measured 27 × 31
+    table, so it carries 1363 visible edges in its top view (TechDraw.projectEx) against
+    4–131 for a clean shop view on this shelf — and zero holes and zero arc radii in the
+    leaderable band. Its sheet carried three numbers over a forest of seams, which is exactly
+    the “unusable detail … random lines” §A.1–A.2 orders removed. Those parts are routed to a
+    print sheet by measurement (<code>tools/drawing_facts.py _seam_forest</code>), never by
+    choice, and the sheet states the count and the reason.</p></div>
+    <div class="card"><h3>Radii the builder names and the solid has not got</h3><p>The same
+    sole names “heel arc R7.2, toe arc R6.9, side fillets R7.9” in its own builder, and
+    <code>cecad.inspect.arc_radii</code> finds no arc at all on the solid those lines build —
+    the blends are sampled points of a loft, not circular edges, so no leader can be drawn to
+    one. A reader comparing the builder to the paper would conclude three radii were dropped.
+    Both facts are measured per part (<code>design_radii_named_in_builder</code> against
+    <code>arc_radii_on_solid</code>) and the gap is stated on the sheet.</p></div>
     <div class="card"><h3>Every radius, including the ones no view can leader</h3><p>A radius
     is leadered only in a view that sees its edge square — a circle seen obliquely projects as
     an ellipse whose fitted radius is not the edge's. A radius <em>no</em> orthographic view on
@@ -398,6 +631,15 @@ def main():
   <p class="lede">Every remaining folder on the shelf, with the measured reason. A part
   missing from this page would be a part nobody looked at; that state is not available here.</p>
   {''.join(rest_tbl)}
+</section>
+
+<section id="open">
+  <h2><span class="n">6</span>What this pass could not settle</h2>
+  <p class="lede">Every row that is not PASS, with the reason measured off the folder and the
+  one action that closes it. Generated from the same <code>out/drawings/index.json</code> as
+  the cards above, so an item cannot be dropped from this list by editing prose. A row here is
+  a work item, not a shrug.</p>
+  {open_table(rows)}
 </section>
 
 </div>

@@ -59,6 +59,17 @@ def on_sheet(v, nums, tol=0.011):
 
 
 def measure(slug):
+    """One part's feature census. ALWAYS closes its document.
+
+    MEASURED 2026-09-03: the 06:13 run of this file died after 40 of 64 parts
+    and wrote no features.json at all, so `tools/gen_drawings_index.py`
+    printed "not measured — run tools/measure_features.py" on every card and
+    the §A.5 acceptance criterion was unmeasured inside the artifact that
+    records it. Three of the four `return`s below left a FreeCAD document open
+    — one per part, each holding its solid — and the kernel grew until it was
+    killed. The document is closed in a `finally` now, and `main()` writes the
+    file incrementally so a death loses one part rather than all of them.
+    """
     out = {"slug": slug}
     kind, why = classify(slug)
     out["kind"] = kind
@@ -66,6 +77,16 @@ def measure(slug):
         out["why"] = why
         return out
     doc = FreeCAD.newDocument("mf_" + slug.replace("-", "_"))
+    try:
+        return _measure_open(slug, doc, out)
+    finally:
+        try:
+            FreeCAD.closeDocument(doc.Name)
+        except Exception:                                     # noqa: BLE001
+            pass
+
+
+def _measure_open(slug, doc, out):
     try:
         part = triad.load(doc, "part:" + slug)
     except Exception as e:                                    # noqa: BLE001
@@ -128,7 +149,6 @@ def measure(slug):
                          "measurable by any tool in this repo: %s"
                          % (len(present), len(present) + len(absent),
                             ", ".join(absent) or "none", ", ".join(na) or "none"))
-    FreeCAD.closeDocument(doc.Name)
     return out
 
 
@@ -139,18 +159,28 @@ def main():
         slugs = sorted(d for d in os.listdir(parts)
                        if os.path.isdir(os.path.join(parts, d)))
     rows = {}
+    os.makedirs(os.path.dirname(OUT), exist_ok=True)
+
+    def flush():
+        json.dump({"generated": time.strftime("%Y-%m-%d %H:%M:%S"),
+                   "standard": "docs/MANUFACTURING-REQUIREMENTS.md A.6",
+                   "generator": "tools/measure_features.py",
+                   "requested": len(slugs), "measured": len(rows),
+                   "parts": rows}, open(OUT, "w"), indent=1)
+
     for s in slugs:
         try:
             rows[s] = measure(s)
         except Exception as e:                                # noqa: BLE001
             rows[s] = {"slug": s, "error": "%s: %s" % (type(e).__name__, e)}
+        # WRITTEN AFTER EVERY PART, not once at the end. The previous run died
+        # on part 41 of 64 and left no file; a partial census is a measurement
+        # and an absent file is not.
+        flush()
         print("FEAT %s %s" % (s, json.dumps(rows[s])[:200]), flush=True)
-    doc = {"generated": time.strftime("%Y-%m-%d %H:%M:%S"),
-           "standard": "docs/MANUFACTURING-REQUIREMENTS.md A.6",
-           "generator": "tools/measure_features.py", "parts": rows}
-    os.makedirs(os.path.dirname(OUT), exist_ok=True)
-    json.dump(doc, open(OUT, "w"), indent=1)
-    print("wrote %s over %d parts" % (OUT, len(rows)), flush=True)
+    flush()
+    print("wrote %s over %d of %d parts" % (OUT, len(rows), len(slugs)),
+          flush=True)
 
 
 main()

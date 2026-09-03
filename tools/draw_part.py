@@ -37,7 +37,29 @@ from cecad.printsheet import (print_sheet, verify_print_sheet,  # noqa: E402
 
 from drawing_facts import (TOLERANCE_DFM, VENDOR_DFM, classify,  # noqa: E402
                            part_record, is_bought, GENERAL_TOLERANCE,
-                           mesh_geometry_of)
+                           mesh_geometry_of, design_radii)
+
+
+def export_stl(part, outdir, slug):
+    """Write <outdir>/<slug>.stl off the LOADED SOLID and read it back.
+
+    A print sheet that names no file is a CANNOT DETERMINE with a next step,
+    and for a mesh-backed vendor part that next step is finding the vendor's
+    mesh. For a part routed here because its own outline cannot be dimensioned
+    (`drawing_facts._seam_forest`) there is nothing to find: the geometry is
+    the solid in memory. Writing it is the next step, so it is taken.
+    """
+    import Mesh
+    path = os.path.join(outdir, slug + ".stl")
+    shape = getattr(part, "shape", None) or getattr(part, "Shape", None)
+    m = Mesh.Mesh()
+    m.addFacets(shape.tessellate(0.02))
+    m.write(path)
+    n = m.CountFacets
+    if n < 4 or os.path.getsize(path) < 200:
+        raise RuntimeError("STL export of %s produced %d facets / %d bytes"
+                           % (slug, n, os.path.getsize(path)))
+    return path
 
 
 def render_reference(part, slug, outdir):
@@ -147,12 +169,96 @@ def draw(slug):
     out["kind"], out["kind_why"] = kind, why
     out["bought"] = bool(is_bought(slug))
 
+    # WHAT THE BUILDER NAMES AGAINST WHAT THE SOLID CARRIES. A reader who
+    # opens ce-parts/microduck-sole-left/current/cad/part.py finds "heel arc
+    # R7.2, toe arc R6.9, side fillets R7.9" and finds none of the three on
+    # the sheet, and the only honest reading of that gap is that the drawing
+    # dropped them. It did not: `cecad.inspect.arc_radii` measures ZERO arcs
+    # in the R0.2..R60 band on that solid, because its blends are a loft
+    # through a measured station table and exist as sampled points, not as
+    # circular edges. Both facts go in the record, and onto the sheet.
+    out["design_radii_named_in_builder"] = design_radii(slug)
+    try:
+        out["arc_radii_on_solid"] = sorted(
+            {round(float(o.r), 3) for o in inspect.arc_radii(part)})
+    except Exception as e:                                    # noqa: BLE001
+        out["arc_radii_on_solid"] = "CANNOT DETERMINE (%s)" % e
+    radii_gap = None
+    named = out["design_radii_named_in_builder"]
+    onsolid = out["arc_radii_on_solid"]
+    if named and isinstance(onsolid, list):
+        missing = [r for r in named
+                   if not any(abs(r - v) <= 0.011 for v in onsolid)]
+        if missing:
+            # STATED IN mm, NOT IN R NOTATION. `verify_sheet` checks every
+            # `R<n.nn>` printed on a sheet against the solid's own arcs, and
+            # these are exactly the radii the solid has NOT got — writing
+            # them as "R7.20" would fail the sheet on the note that explains
+            # why they are absent.
+            radii_gap = (
+                "RADII NAMED IN THE BUILDER THAT ARE NOT ARCS ON THIS SOLID: "
+                "%s. cecad.inspect.arc_radii measures %d arc(s) on it%s. "
+                "These are DESIGN blends of a lofted surface — real curvature, "
+                "sampled station to station — and no circular edge carries "
+                "them, so no leader can be drawn to one and no dimension on "
+                "this document is missing. What settles them for a shop: the "
+                "printed geometry file named on this sheet."
+                % (", ".join("%.2f mm" % r for r in missing), len(onsolid),
+                   ("" if not onsolid else
+                    " (" + ", ".join("%.2f mm" % v for v in onsolid[:12])
+                    + ")")))
+    out["design_radii_gap"] = radii_gap
+
+    # HOW MANY ORTHOGRAPHIC VIEWS THE PART EARNS, and why — on the record and
+    # on the paper. §A asks for a third-angle set; §A.2 orders the opposite
+    # for a thin part ("a 2 mm rib seen on its end is a black band that means
+    # nothing"). `cecad.autosheet.choose_views` already decides this off the
+    # bounding box, and until now it decided silently, so a sheet with two
+    # orthographic views looked like a sheet that had lost one. MEASURED
+    # 2026-09-03: 6 of 15 sheets carried two, every one of them a plate or a
+    # rod, and nothing on any of them said so.
+    from cecad.autosheet import choose_views                  # noqa: PLC0415
+    try:
+        chosen, primary = choose_views(part)
+        ex, ey, ez = [float(v) for v in bb]
+        thin = min(ex, ey, ez) / max(ex, ey, ez, 1e-9)
+        out["views_chosen"] = list(chosen)
+        out["views_primary"] = primary
+        views_note = (
+            "ORTHOGRAPHIC VIEWS: %d (%s), CHOSEN OFF THE BOUNDING BOX "
+            "%.4f x %.4f x %.4f mm BY cecad.autosheet.choose_views — "
+            "THINNEST/LONGEST EXTENT RATIO %.4f. %s"
+            % (len(chosen), ", ".join(chosen).upper(), ex, ey, ez, thin,
+               ("A THIRD ORTHOGRAPHIC VIEW OF THIS PART WOULD BE THE PART "
+                "SEEN EDGE-ON — A PAIR OF LINES CARRYING NO FEATURE, WHICH "
+                "docs/MANUFACTURING-REQUIREMENTS.md A.2 ORDERS SUPPRESSED. "
+                "THE SECTION AND THE ISOMETRIC CARRY THE THIRD DIRECTION."
+                if len(chosen) < 3 else
+                "THE FULL THIRD-ANGLE SET IS DRAWN.")))
+        out["views_note"] = views_note
+    except Exception as e:                                    # noqa: BLE001
+        out["views_chosen"] = "CANNOT DETERMINE (%s: %s)" % (
+            type(e).__name__, e)
+        views_note = None
+
     if kind == "print-sheet":
         stl = mesh_geometry_of(slug)
+        if stl is None:
+            # NOTHING TO PRINT IS NOT AN ANSWER WHEN THE SOLID IS RIGHT HERE.
+            # A part routed to a print sheet by `_seam_forest` is a
+            # PARAMETRIC solid we own — there is no vendor mesh to find, and
+            # the file the shop needs is one we can write. Exported from the
+            # loaded shape, at a deflection stated on the sheet, so the STL
+            # and the solid are the same geometry.
+            stl = export_stl(part, outdir, slug)
+            out["stl_exported_from"] = "the loaded solid"
         r = print_sheet(part, stem, stl=stl, size="A3",
                         source="ce-parts/%s/current/cad/part.py" % slug,
                         material=rec.get("material"),
-                        why="Origin: %s. %s" % (rec.get("origin"), why))
+                        why=" ".join(x for x in
+                                     ["Origin: %s. %s" % (rec.get("origin"),
+                                                          why), radii_gap]
+                                     if x))
         ok, checks = verify_print_sheet(r, part, verbose=False)
         out["thumbnail"], out["thumbnail_facts"] = _shoot(r["svg"], stem)
         out.update({k: v for k, v in r.items() if k != "notes"})
@@ -189,14 +295,17 @@ def draw(slug):
             reference_image=png,
             reference_caption="REFERENCE RENDER (ISO2) — rendered off this "
                               "solid, %d x %d px" % tuple(pfacts["size"]),
-            dfm_extra=(TOLERANCE_DFM + VENDOR_DFM if out["bought"]
-                       else TOLERANCE_DFM))
+            dfm_extra=((TOLERANCE_DFM + VENDOR_DFM if out["bought"]
+                        else TOLERANCE_DFM)
+                       + ((radii_gap,) if radii_gap else ())
+                       + ((views_note,) if views_note else ())))
         sh = r["sheet"]
         ok2 = verify_sheet(sh, r["svg"], part, verbose=False)
         out.update({
             "dxf": r["dxf"], "svg": r["svg"], "pdf": r["pdf"],
             "size": r["size"], "scale": "%d:%d" % tuple(r["scale"]),
             "views": r["views"], "details": r.get("details", []),
+            "details_dropped": r.get("details_dropped", []),
             "dfm": r.get("dfm", []), "density": r.get("density"),
             "verified": bool(r["verified"]), "verify_sheet": bool(ok2),
             "attempts": len(r["attempts"]),

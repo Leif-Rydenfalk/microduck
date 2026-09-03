@@ -43,6 +43,31 @@ DRAWINGS = os.path.join(ROOT, "out", "drawings")
 OUT = os.path.join(DRAWINGS, "verify.json")
 
 
+def _verify_verbose(sh, svg, part):
+    """(ok, [the checks that failed, with their reason]).
+
+    A VERDICT WITHOUT ITS EVIDENCE IS NOT EVIDENCE. This file used to write
+    `d["failed"] = []` unconditionally on the drawing branch, so
+    out/drawings/verify.json published {"verdict": "FAIL", "failed": []} — in
+    the one tool whose entire purpose is to say WHICH number disagreed with
+    the solid. `verify_sheet` prints its detail rather than returning it, so
+    the detail is captured off its own output, exactly the way
+    `autosheet._verify` does it.
+    """
+    import io
+    from contextlib import redirect_stdout
+    from cecad.sheets import verify_sheet as _vs
+    buf = io.StringIO()
+    with redirect_stdout(buf):
+        ok = _vs(sh, svg, part, verbose=True)
+    failed = [ln.strip()[6:].strip() for ln in buf.getvalue().splitlines()
+              if ln.strip().startswith("FAIL")]
+    if not ok and not failed:
+        failed = ["verify_sheet returned False and printed no FAIL line — "
+                  "read the raw output: " + buf.getvalue()[-400:]]
+    return ok, failed
+
+
 def svg_says(path):
     """(scale, size) as printed in the sheet's own header line."""
     if not os.path.exists(path):
@@ -103,6 +128,8 @@ def check(slug):
             ok, checks = verify_print_sheet(dict(rec, svg=svg), part,
                                             verbose=False)
             d["failed"] = [n for n, o, _ in checks if not o]
+            d["failed_detail"] = [{"check": n, "why": str(w)[:400]}
+                                  for n, o, w in checks if not o]
         else:
             from cecad.sheets import verify_sheet
             from cecad.autosheet import build_sheet, _mfg_extras
@@ -138,9 +165,20 @@ def check(slug):
                 dim=last.get("dim", True),
                 holes=last.get("holes", True),
                 sec_rank=last.get("sec_rank", 0))
-            sh._layout()
-            ok = verify_sheet(sh, svg, part, verbose=False)
-            d["failed"] = []
+            # `build()`, NOT `_layout()`. MEASURED 2026-09-03 on
+            # out/drawings/microduck-power-support: the sheet on disk PASSED
+            # its own read-back and this checker FAILED it on "detail A: ring
+            # drawn on front at the region — no Ø25.9 mm ring near (313.6,
+            # 226.7)", with the two rings actually at y = 222.221 and 246.021.
+            # `Sheet.write` calls `build()`, which APPENDS the wall, radius,
+            # census and fit notes and then lays the sheet out around a taller
+            # notes column; `_layout()` alone places every view 4.5 mm off, so
+            # the check was measuring a sheet nobody wrote. The rebuild has to
+            # end in the same state as the file, or its verdict is about a
+            # different drawing.
+            sh.build()
+            ok, failed = _verify_verbose(sh, svg, part)
+            d["failed"] = failed
             d["rebuilt_from"] = {k: last.get(k) for k in
                                  ("size", "scale", "sec_rank", "section",
                                   "dim", "holes", "details")}
