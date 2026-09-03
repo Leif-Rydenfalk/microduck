@@ -196,6 +196,15 @@ class Studio:
     def gpos(self, key):
         return (self.d.geom_xpos[self.geoms[key]] * 1000.0).tolist()
 
+    def gaabb(self, key):
+        """world axis-aligned bounding box of a mesh geom, mm, off the mesh vertices themselves"""
+        g = self.geoms[key]; mid = self.m.geom_dataid[g]
+        a = self.m.mesh_vertadr[mid]; n = self.m.mesh_vertnum[mid]
+        v = self.m.mesh_vert[a:a + n]
+        R = self.d.geom_xmat[g].reshape(3, 3); t = self.d.geom_xpos[g]
+        w = (v @ R.T + t) * 1000.0
+        return w.min(axis=0).tolist(), w.max(axis=0).tolist()
+
     def spos(self, name):
         sid = mujoco.mj_name2id(self.m, mujoco.mjtObj.mjOBJ_SITE, name)
         return (self.d.site_xpos[sid] * 1000.0).tolist()
@@ -281,8 +290,10 @@ def label_items(st, keys, sites=()):
         p = st.gpos(key)
         ref = M2P.get(key[1].replace("__ours", ""), None)
         items.append(dict(n=n, text=label, uv=st.project(p), kind="geom"))
+        lo, hi = st.gaabb(key)
         comp_rows.append(dict(n=n, body=key[0], mesh=key[1], instance=key[2], ref=ref, label=label, function=func,
-                              pos_world_mm=[round(v, 3) for v in p]))
+                              pos_world_mm=[round(v, 3) for v in p], aabb_min_mm=[round(v, 3) for v in lo],
+                              aabb_max_mm=[round(v, 3) for v in hi], size_mm=[round(b - a, 3) for a, b in zip(lo, hi)]))
     for s in sites:
         n += 1
         label, ref, func = SITES[s]
@@ -366,9 +377,10 @@ def main():
         components.setdefault(region, rows)
     # ---- whole robot see-through with cable routes (zero pose = cables.json frame)
     st.reset(); st.set_alpha(is_structure, 0.10)
-    im = st.shoot([10, 0, 140], 235, -10, 0.62)
+    im = st.shoot([10, 0, 150], 235, -10, 0.50)
     cab = json.load(open(CABLES))["record"]
-    groups = {"dynamixel-chain": (200, 90, 20, 230), "tof": (30, 110, 200, 230), "speaker": (120, 40, 160, 230)}
+    palette = [(200, 90, 20, 230), (30, 110, 200, 230), (120, 40, 160, 230), (20, 140, 90, 230), (90, 90, 90, 230)]
+    groups = {g: palette[i % len(palette)] for i, g in enumerate(sorted(set(c["group"] for c in cab["cables"])))}
     cable_rows = []
     undetermined = []
     for c in cab["cables"]:
@@ -389,7 +401,7 @@ def main():
     for gname, col in groups.items():
         dr.line([(30, y), (80, y)], fill=col, width=5); dr.text((90, y - 12), gname, fill=INK, font=f); y += 30
     fn = "cables-seethrough.png"; im.save(os.path.join(OUT, fn)); say("wrote", fn, "cables drawn", len(cable_rows), "undetermined", len(undetermined))
-    renders.append(dict(file="out/sources/internals/" + fn, region="cables", title="Cable routes, see-through", camera=dict(az=235, el=-10, dist_m=0.62, lookat_mm=[10, 0, 140]),
+    renders.append(dict(file="out/sources/internals/" + fn, region="cables", title="Cable routes, see-through", camera=dict(az=235, el=-10, dist_m=0.50, lookat_mm=[10, 0, 150]),
                         labels=[], off_frame=0, real_photo=None, cables=cable_rows, cables_undetermined=undetermined))
     # ---- joint anchors in this pose, for the record
     joints = {}
@@ -397,6 +409,30 @@ def main():
         nm = mujoco.mj_id2name(st.m, mujoco.mjtObj.mjOBJ_JOINT, j)
         if st.m.jnt_type[j] == mujoco.mjtJoint.mjJNT_HINGE:
             joints[nm] = [round(v, 3) for v in (st.d.xanchor[j] * 1000).tolist()]
+    # ---- checks: things the layout must satisfy, measured off the same model
+    def aabb(key): return st.gaabb(key)
+    def inside(p, lo, hi): return all(lo[i] <= p[i] <= hi[i] for i in range(3))
+    def overlap(a, b):
+        lo = [max(a[0][i], b[0][i]) for i in range(3)]; hi = [min(a[1][i], b[1][i]) for i in range(3)]
+        d = [hi[i] - lo[i] for i in range(3)]
+        return d if all(x > 0 for x in d) else None
+    checks = []
+    bat = aabb(("trunk_base", "np_f970", 0)); imu = st.spos("imu")
+    checks.append(dict(name="trunk IMU site outside the battery envelope", verdict="FAIL" if inside(imu, *bat) else "PASS",
+                       measured=dict(imu_site_mm=[round(v, 3) for v in imu], battery_aabb_mm=[[round(v, 3) for v in bat[0]], [round(v, 3) for v in bat[1]]]),
+                       why="a board carrying the IMU cannot occupy the same space as the battery pack; both come from the source MJCF (site 'imu' on trunk_base, mesh np_f970)"))
+    pi = aabb(("jaw_soft", "pcb__raspberry_pi_zero_2_w", 0)); hat = aabb(("jaw_soft", "elec_rpi_robot_hat_pcb", 0)); holder = aabb(("jaw_soft", "m12_lens_holder", 0))
+    ov = overlap(pi, hat)
+    checks.append(dict(name="compute board and Robot HAT do not interpenetrate", verdict="FAIL" if ov else "PASS",
+                       measured=dict(compute_aabb_mm=[[round(v, 3) for v in pi[0]], [round(v, 3) for v in pi[1]]], hat_aabb_mm=[[round(v, 3) for v in hat[0]], [round(v, 3) for v in hat[1]]],
+                                     overlap_mm=[round(v, 3) for v in ov] if ov else None, board_gap_x_mm=round(pi[0][0] - hat[1][0], 3)),
+                       why="two rigid PCBs stacked on a 40-pin header: their AABBs may touch, not cross; the x gap is the header stack height available"))
+    ov2 = overlap(pi, holder)
+    checks.append(dict(name="room for a camera PCB between the M12 lens holder and the compute board", verdict="FAIL" if (ov2 or (holder[0][0] - pi[1][0]) < 1.0) else "PASS",
+                       measured=dict(holder_aabb_mm=[[round(v, 3) for v in holder[0]], [round(v, 3) for v in holder[1]]], gap_x_mm=round(holder[0][0] - pi[1][0], 3),
+                                     overlap_mm=[round(v, 3) for v in ov2] if ov2 else None),
+                       why="press_desk.jpg shows a separate green camera PCB standing behind the face with the lens holder on it (out/sources/internals/real_desk_head_jaw_off.png); an IMX219 module board is ~1.0 mm FR4 plus its connector, so < 1.0 mm of x between holder and compute means our head has no place for the board the product has"))
+    doc_checks = checks
     # ---- merge into internals.json
     doc = json.load(open(DATA)) if os.path.exists(DATA) else {}
     doc["renders"] = renders
@@ -404,10 +440,12 @@ def main():
     doc["sites"] = {s: dict(label=SITES[s][0], ref=SITES[s][1], function=SITES[s][2], pos_world_mm=[round(v, 3) for v in st.spos(s)]) for s in SITES}
     doc["not_in_cad"] = [dict(what=w, ref=r, why=y) for w, r, y in NOT_IN_CAD]
     doc["joint_anchors_mm"] = joints
+    doc["checks"] = doc_checks
     doc["render_meta"] = dict(model="sim/microduck_ours.xml via sim/compare_render.studio_scene", keyframe="INIT (zero pose, trunk_base z 120 mm)",
                               frame="+x beak, +y left, +z up (SPEC.md §3)", px=[W, H], fovy_deg=float(st.m.vis.global_.fovy),
                               generated=time.strftime("%Y-%m-%d %H:%M:%S"), seconds=round(time.time() - t0, 1))
     json.dump(doc, open(DATA, "w"), indent=1, ensure_ascii=False)
+    for c in doc_checks: say("check:", c["verdict"], c["name"], json.dumps(c["measured"]))
     say("internals.json merged: %d renders, %d trunk + %d head component rows, %d sites, %d not-in-CAD; %.1f s" % (
         len(renders), len(components.get("trunk", [])), len(components.get("head", [])), len(SITES), len(NOT_IN_CAD), time.time() - t0))
 

@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Internals</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="tools/doc.css">
+<style>
+  .chip.no{color:var(--no)}
+  .pair{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:10px 0 4px}
+  .pair figure,.grid figure{margin:0;padding:8px}
+  .pair figure img,.grid figure img{width:100%;aspect-ratio:1/1;object-fit:contain;background:#fff;border:1px solid var(--hair)}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:10px 0 4px}
+  .grid.one{grid-template-columns:1fr}
+  figcaption{font-family:var(--sans);font-size:12px;color:var(--ink-2);margin-top:6px}
+  .tag{font-family:var(--sans);font-size:10.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;display:inline-block;padding:2px 8px;margin-bottom:6px;border:1px solid var(--hair);color:var(--ink-2)}
+  .tag.ours{color:var(--accent);border-color:var(--accent)}
+  .note{font-size:13.5px;color:var(--ink-2);margin:2px 0 18px;max-width:52em}
+  .verdict{border-left:3px solid var(--accent);padding:2px 0 2px 18px;margin:14px 0;font-size:15.5px}
+  .verdict b{color:var(--accent)}
+  .verdict.warn{border-left-color:var(--no)} .verdict.warn b{color:var(--no)}
+  .verdict.cd{border-left-color:#8a7f6a} .verdict.cd b{color:#8a7f6a}
+  td.dash,.dash{color:#b3aea4}
+  td.small{font-size:11.5px}
+  table.data{font-size:13px} table.data td code{font-size:11.5px}
+  #components table.data{table-layout:fixed}
+  #components th:nth-child(1),#components td:nth-child(1){width:26px}
+  #components th:nth-child(5),#components td:nth-child(5){width:17%}
+  #components th:nth-child(6),#components td:nth-child(6){width:15%}
+  #components td{overflow-wrap:break-word}
+  #search table.data{table-layout:fixed}
+  #search th:nth-child(1),#search td:nth-child(1){width:24px}
+  #search th:nth-child(2),#search td:nth-child(2){width:24%}
+  #search th:nth-child(3),#search td:nth-child(3){width:20%}
+  #search th:nth-child(4),#search td:nth-child(4){width:74px}
+  #search td{overflow-wrap:anywhere;font-size:12.5px}
+  .statbar{display:flex;flex-wrap:wrap;gap:0;border-bottom:1px solid var(--hair);margin:8px 0 2px}
+  .stat{padding:12px 26px 12px 0;margin-right:22px}
+  .stat b{display:block;font-weight:700;font-size:22px;font-variant-numeric:tabular-nums}
+  .stat span{font-family:var(--sans);font-size:12px;color:var(--ink-2)}
+  .ready{border:1px solid var(--no);padding:12px 18px;margin:16px 0;background:#fff8f4}
+  .ready h3{margin:0 0 6px;color:var(--no)}
+  .ready ul{margin:4px 0 0 18px;font-size:14px}
+  .missing{color:var(--no)}
+  @media(max-width:640px){.pair,.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<p class="backlink"><a href="INDEX.html">← Document index</a> · <a href="COMPARISON.html">Reference match</a> · <a href="SPEC.html">Spec</a></p>
+
+<header class="hero">
+  <p class="eyebrow">Microduck reverse-engineering · internals</p>
+  <h1>Internals: what is inside the Microduck</h1>
+  <p class="sub">Leif, 2026-09-03: <em>"and an new image covering the components of the microduck internals"</em>. This page carries the search for a real one
+  (§1), every real photograph of an opened unit that exists, beside our render at the same view (§2), and our own
+  internals diagram generated from the CAD — trunk (§3), head (§4), cable routes (§5) — with the layout checks (§6),
+  the list of what the CAD still does not contain (§7) and the archived sources (§8).</p>
+  <div class="rev">
+    <span>MD-INT-001 · Rev A</span><span>2026-09-04 02:02:24</span>
+    <span>renderer: MuJoCo offscreen 1400², INIT (zero pose, trunk_base z 120 mm)</span><span>frame: +x beak, +y left, +z up (SPEC.md §3)</span>
+  </div>
+</header>
+
+<div class="statbar">
+  <div class="stat"><b>9</b><span>places searched for a real internals image</span></div>
+  <div class="stat"><b>5</b><span>real photographs of opened units (all partial)</span></div>
+  <div class="stat"><b>10</b><span>labelled renders of our CAD</span></div>
+  <div class="stat"><b>33</b><span>component rows, measured</span></div>
+  <div class="stat"><b>20</b><span>cable routes drawn · 3 CANNOT DETERMINE</span></div>
+  <div class="stat"><b>2/3</b><span>layout checks PASS · 1 FAIL</span></div>
+  <div class="stat"><b>7</b><span>things not in the CAD</span></div>
+</div>
+
+<div class="ready">
+  <h3>NOT YET READY TO BUILD FROM</h3>
+  <p style="margin:0 0 4px;font-size:14px">The diagram below is a faithful picture of <b>our model</b>, and our model is a faithful copy of Pollen's <b>simulation</b> file. The factory needs these closed first, largest first:</p>
+  <ul>
+    <li><b>room for a camera PCB between the M12 lens holder and the compute board</b> — the product has a camera PCB behind the face (§2, first pair); ours has none and the lens holder crosses the compute-board plane by 1.600 mm (§6). Closes with: a camera-module outline on the shelf (<code>part:microduck-camera-module</code>) and a re-placed lens holder.</li>
+    <li><b>Compute board is a proxy</b>: the mesh is a Pi Zero 2 W; the product runs a Radxa Zero 3W (same 65 × 30 mm, different connectors). Closes with: the Radxa drawing's connector positions on the mesh (out/head/ carries the hole study).</li>
+    <li><b>7 things absent from the CAD</b> (§7): microphone, two NFC antennas, the battery-contact board, the imu_to_dxl outline, switch/USB/LED, every fastener and cable.</li>
+    <li><b>Cable routes are floors, not routes</b> (§5): straight lines through joint anchors, the wiring lane's floor-length rule; the product's harness runs along the neck's outside (§2, third pair).</li>
+  </ul>
+</div>
+
+<nav class="toc">
+  <a href="#search">1 The real image</a><a href="#real">2 Real beside ours</a><a href="#trunk">3 Trunk</a><a href="#head">4 Head</a>
+  <a href="#cables">5 Cables</a><a href="#checks">6 Checks</a><a href="#notcad">7 Not in the CAD</a><a href="#sources">8 Sources</a><a href="#method">9 Method</a>
+</nav>
+
+<section id="search">
+  <h2><span class="n">1</span>Is there a real internals image?</h2>
+  <div class="verdict cd"><b>CANNOT DETERMINE — none found publicly.</b> CANNOT DETERMINE — no public photograph or diagram of a Microduck&#x27;s full internal component layout exists as of 2026-09-03 (robots ship Christmas 2026; every community &#x27;anatomy&#x27;/&#x27;exploded&#x27; artefact is the simulator mesh re-rendered). The image Leif refers to was most likely received in the WeChat A-Team chat visible in his 22:26 screenshot and is not on this disk. What settles it: drop the file into images/ (any name) — this lane&#x27;s tools/internals_render.py --real &lt;file&gt; places it beside our renders and the catalog row is appended.</div>
+  <table class="data">
+    <thead><tr><th>#</th><th>where</th><th>how</th><th>fetched</th><th>result</th></tr></thead>
+    <tbody><tr><td>1</td><td>https://makerworld.com/en/models/3250889-microduck-robotic-duck-structural-parts-simulation</td><td>HTML 403 (Cloudflare challenge) -&gt; public API https://makerworld.com/api/v1/design-service/design/3250889, archived as out/sources/makerworld-3250889-api.json</td><td class="n">2026-09-03</td><td>NO internals image. 15 STL thumbnails + 1 cover render; author &#x27;Peter Pan’s Techland&#x27; (handle foo00, uid 2020122555); licence BY-NC-SA; created 2026-09-02T04:01:04Z; downloads 5; summary says (translated) &#x27;Derived from Pollen Robotics official public microduck_rl MJCF simulation model with world coordinate transformation applied&#x27; and &#x27;not official CAD ... only for shell/structural reference&#x27;. Same geometry family our CAD was seeded from.</td></tr>
+<tr><td>2</td><td>https://github.com/pollen-robotics/microduck_rl/tree/develop/src/mjlab_microduck/robot/microduck/assets</td><td>gh api (branches/develop, contents, git/trees recursive)</td><td class="n">2026-09-03</td><td>develop HEAD 29e887ecfbf5d37144759e5a9f8a176dfb83d547 (2026-09-02T20:20:08Z, &#x27;Merge pull request #30 ... sim: the ToF numbered its columns backwards&#x27;). Assets dir holds 47 .stl + 47 .part, zero image files; the whole develop tree has no png/jpg/webp/svg. NO internals image.</td></tr>
+<tr><td>3</td><td>https://github.com/pollen-robotics/microduck (main, recursive tree)</td><td>gh api git/trees</td><td class="n">2026-09-03</td><td>zero image files in the repo tree (README media are external). NO internals image.</td></tr>
+<tr><td>4</td><td>pollen-robotics.com/microduck, /press-kit, /blog (archived research/raw/product_page.txt, presskit.txt, blog.txt)</td><td>grep internal|inside|teardown|component</td><td class="n">2026-09-01 archive, re-read 2026-09-03</td><td>press kit says &#x27;The mechanical and electronic design files are not [open]&#x27;. No internals diagram published. BUT two press-kit photographs show PARTIALLY DISASSEMBLED units: images/press/press_desk.jpg and images/press/press_morning.jpg (see real_photos).</td></tr>
+<tr><td>5</td><td>https://huggingface.co/spaces/mishig/microduck-anatomy</td><td>HF API + raw source components/microduck-blueprint.tsx (sha 5329ff5db7c6baa5c15def88085f842e0221395e, lastModified 2026-08-31T17:56:13Z)</td><td class="n">2026-09-03</td><td>community &#x27;anatomy&#x27; viewer; its own strings say &#x27;official simulator geometry&#x27;, &#x27;CAD uses a legacy Pi Zero proxy&#x27;, &#x27;placement from simulator geometry&#x27;, &#x27;Concept engineering view&#x27;. Renders public/robot/mjlab/microduck.glb = the same simulator meshes. NOT a photograph of internals.</td></tr>
+<tr><td>6</td><td>https://github.com/fanhao375/microduck-replica (master 28d8ee92638c42c8547aae5b194f357e25d51fc9, 2026-09-03T13:51:06Z)</td><td>gh api tree + raw assembly-drawings/05,06,07 png</td><td class="n">2026-09-03</td><td>7 exploded/colour-coded drawings derived from the MJCF (masses printed = MJCF inertials: head 189 g, trunk 199 g ...). README states &#x27;Unverified against physical hardware&#x27;. One real photo build-log/photos/2026-09-02-首批打印件.jpg = their own printed parts, not a Pollen unit.</td></tr>
+<tr><td>7</td><td>https://www.bilibili.com/video/BV1R2tH6tEsK/ &#x27;Microduck硬件架构拆解&#x27; by Z-Rob</td><td>api.bilibili.com/x/web-interface/view</td><td class="n">2026-09-03</td><td>desc &#x27;一段拆解分析报告&#x27; (an analysis report), 1358 s, published 2026-08-30 10:28:18 UTC — three days after pre-orders opened and months before the Christmas-2026 ship date, so it cannot be a physical teardown; cover archived (bili_cover).</td></tr>
+<tr><td>8</td><td>163.com article L5J9PIJ30556722C, rcdrone.top hardware-explained, cnx-software 2026-08-28, awesome-microduck list, web searches (EN + ZH: &#x27;teardown&#x27;, &#x27;internals&#x27;, &#x27;拆解 内部结构&#x27;)</td><td>WebFetch/WebSearch</td><td class="n">2026-09-03</td><td>no interior photograph anywhere; every article reuses Pollen&#x27;s press renders and the simulator meshes.</td></tr>
+<tr><td>9</td><td>local: ~/Downloads, ~/Desktop (7 screenshots 22:26-22:28 tonight), images/ (CATALOG.md, 65 files)</td><td>ls -newermt, Read</td><td class="n">2026-09-03</td><td>tonight&#x27;s screenshots are Leif reviewing COMPARISON.html / HEAD-RECONSTRUCTION.html / INDEX.html in Chrome with a WeChat &#x27;A-Team&#x27; chat open beside them — not an internals image. Nothing new in Downloads besides the MakerWorld zip (22:11).</td></tr></tbody>
+  </table>
+</section>
+
+<section id="real">
+  <h2><span class="n">2</span>Real photographs of opened units — beside our render at the nearest view</h2>
+  <p class="note">Both source photographs are in Pollen's press kit (<code>images/press/press_desk.jpg</code> 4233 × 2380, <code>press_morning.jpg</code> 4240 × 2650; fetched 2026-09-01 from https://pollen-robotics.com/microduck/press-kit/, © Pollen Robotics, press use). The crops are 2× LANCZOS of the stated pixel windows, nothing retouched. They show workbench units, not a labelled layout; each pair states what can and cannot be read off it.</p>
+  
+  <h3>Head with the lower beak removed</h3>
+  <div class="pair">
+    <figure><span class="tag">Real · Pollen press kit</span><a href="out/sources/internals/real_desk_head_jaw_off.png"><img src="out/sources/internals/real_desk_head_jaw_off.png" alt="press_desk.jpg (560,870)-(1260,1400) at 2×: lavender unit, jaw off — a green camera PCB stands vertically behind the face plate, the mouth-servo XL330 below it, eye ring and M12 lens in place"></a><figcaption>press_desk.jpg (560,870)-(1260,1400) at 2×: lavender unit, jaw off — a green camera PCB stands vertically behind the face plate, the mouth-servo XL330 below it, eye ring and M12 lens in place</figcaption></figure>
+    <figure><span class="tag ours">Ours · CAD render</span><a href="out/sources/internals/head-shells-off-iso.png"><img src="out/sources/internals/head-shells-off-iso.png" alt="Head, shells removed"></a><figcaption>Head, shells removed — az 210°, el -12°, 0.3 m, lookat (40.000, 0.000, 240.000) mm · 16 labels, 0 off-frame</figcaption></figure>
+  </div>
+  <p class="note">Ours has NO camera PCB: the M12 lens holder is placed straight onto the compute-board proxy and interpenetrates it (check 3, FAIL, overlap 1.600 × 24.000 × 16.000 mm). The product has a board there.</p>
+
+  <h3>Trunk with both shells removed</h3>
+  <div class="pair">
+    <figure><span class="tag">Real · Pollen press kit</span><a href="out/sources/internals/real_desk_trunk_shells_off.png"><img src="out/sources/internals/real_desk_trunk_shells_off.png" alt="press_desk.jpg (0,600)-(560,1330) at 2×: cream/mint unit — two XL330 stacked, a small dark PCB with white silkscreen on the trunk plate below them, mint yaw2roll clevises with the 22 mm flanged bearings"></a><figcaption>press_desk.jpg (0,600)-(560,1330) at 2×: cream/mint unit — two XL330 stacked, a small dark PCB with white silkscreen on the trunk plate below them, mint yaw2roll clevises with the 22 mm flanged bearings</figcaption></figure>
+    <figure><span class="tag ours">Ours · CAD render</span><a href="out/sources/internals/trunk-shells-off-iso.png"><img src="out/sources/internals/trunk-shells-off-iso.png" alt="Trunk, shells removed"></a><figcaption>Trunk, shells removed — az 225°, el -14°, 0.26 m, lookat (-8.000, 0.000, 122.000) mm · 10 labels, 0 off-frame</figcaption></figure>
+  </div>
+  <p class="note">Ours carries the trunk IMU as a SITE only (blue label 12), 4.076 mm in front of the battery face (check 1, PASS); the product has a whole board (imu_to_dxl) with connectors — outline and connector count CANNOT DETERMINE (not published).</p>
+
+  <h3>Head from behind and below</h3>
+  <div class="pair">
+    <figure><span class="tag">Real · Pollen press kit</span><a href="out/sources/internals/real_morning_head_rear_open.png"><img src="out/sources/internals/real_morning_head_rear_open.png" alt="press_morning.jpg (3050,1100)-(4240,2000): yellow bottom head shell from behind, the rectangular neck opening, the yaw/roll servo stack inside, cables running down the neck"></a><figcaption>press_morning.jpg (3050,1100)-(4240,2000): yellow bottom head shell from behind, the rectangular neck opening, the yaw/roll servo stack inside, cables running down the neck</figcaption></figure>
+    <figure><span class="tag ours">Ours · CAD render</span><a href="out/sources/internals/head-shells-off-rear-low.png"><img src="out/sources/internals/head-shells-off-rear-low.png" alt="Head, shells removed — from behind and below (the press_morning view)"></a><figcaption>Head, shells removed — from behind and below (the press_morning view) — az 20°, el -25°, 0.28 m, lookat (40.000, 0.000, 240.000) mm · 16 labels, 0 off-frame</figcaption></figure>
+  </div>
+  <p class="note">Same stack order (head-pitch servo → neck_pitch bracket → yaw servo → yaw_roll_motion → roll servo). Ours draws no cable; the product&#x27;s harness runs down the neck&#x27;s outside (§5 is a floor length, not a route).</p>
+
+  <h3>Head yaw/roll stack and a trunk shell</h3>
+  <div class="pair">
+    <figure><span class="tag">Real · Pollen press kit</span><a href="out/sources/internals/real_desk_head_yawroll_stack.png"><img src="out/sources/internals/real_desk_head_yawroll_stack.png" alt="press_desk.jpg (2450,180)-(3200,780) at 2×: graphite/orange unit lying down — the head yaw/roll servo pair on its printed brackets, its cabling, a graphite trunk shell"></a><figcaption>press_desk.jpg (2450,180)-(3200,780) at 2×: graphite/orange unit lying down — the head yaw/roll servo pair on its printed brackets, its cabling, a graphite trunk shell</figcaption></figure>
+    <figure><span class="tag ours">Ours · CAD render</span><a href="out/sources/internals/head-seethrough-profile.png"><img src="out/sources/internals/head-seethrough-profile.png" alt="Head, see-through — true left profile"></a><figcaption>Head, see-through — true left profile — az 270°, el 0°, 0.3 m, lookat (40.000, 0.000, 240.000) mm · 21 labels, 0 off-frame</figcaption></figure>
+  </div>
+  <p class="note">Bracket family matches (yaw_roll_motion carrying the roll servo). Cable exits on the servo flank match the XL330&#x27;s two JST EH sockets (wiring/README.md §1).</p>
+
+  <h3>Inside a top head shell</h3>
+  <div class="pair">
+    <figure><span class="tag">Real · Pollen press kit</span><a href="out/sources/internals/real_desk_top_shell_interior.png"><img src="out/sources/internals/real_desk_top_shell_interior.png" alt="press_desk.jpg (2400,120)-(2900,620) at 2×: an orange top head shell upside down — its interior ribs and bosses"></a><figcaption>press_desk.jpg (2400,120)-(2900,620) at 2×: an orange top head shell upside down — its interior ribs and bosses</figcaption></figure>
+    <figure><span class="tag ours">Ours · CAD render</span><a href="out/sources/internals/head-exploded.png"><img src="out/sources/internals/head-exploded.png" alt="Head, exploded — dome +55 z, bottom −40 z, beak −70 z, face/eye/lens +45/+70/+95 x, boards −45 y"></a><figcaption>Head, exploded — dome +55 z, bottom −40 z, beak −70 z, face/eye/lens +45/+70/+95 x, boards −45 y — az 210°, el -12°, 0.4 m, lookat (40.000, 0.000, 240.000) mm · 21 labels, 0 off-frame</figcaption></figure>
+  </div>
+  <p class="note">Our top_head_shell (label 13, lifted +55 mm) shows two longitudinal ribs and the eye-side cut-out; the product&#x27;s rib count and boss positions are not measurable from this photograph — CANNOT DETERMINE.</p>
+  <h3>What a pixel instrument gets from the two most useful crops</h3>
+  <p class="note">A colour mask for the green camera PCB and the longest dark run on three rows (an XL330 face, 20.0 or 26.0 mm wide depending on which face shows — CANNOT DETERMINE from one photograph, so no mm value is claimed). Recorded so the next attempt starts from numbers. What settles it: one photograph with an XL330 label face square-on and a ruler in frame.</p>
+  <table class="data"><thead><tr><th>crop</th><th>px</th><th>green mask bbox (x0,y0,x1,y1)</th><th>longest dark runs per row (x, len)</th><th>mm</th></tr></thead>
+  <tbody><tr><td><code>real_desk_trunk_shells_off.png</code></td><td class="n">1120 × 1460</td><td class="n">[96, 121, 1086, 1310] (140 px)</td><td class="n">{&quot;1000&quot;: [[230, 258], [0, 169], [792, 162]], &quot;1100&quot;: [[386, 266], [812, 243], [148, 100]], &quot;1200&quot;: [[34, 237], [276, 114], [418, 54]]}</td><td><span class="chip cd">CANNOT DETERMINE</span></td></tr>
+<tr><td><code>real_desk_head_jaw_off.png</code></td><td class="n">1400 × 1060</td><td class="n">[756, 282, 1125, 662] (1525 px)</td><td class="n">{&quot;700&quot;: [[948, 74], [899, 19], [1128, 14]], &quot;800&quot;: [[334, 274], [1145, 255], [656, 28]], &quot;900&quot;: [[296, 314], [1226, 174], [714, 56]]}</td><td><span class="chip cd">CANNOT DETERMINE</span></td></tr></tbody></table>
+</section>
+
+<section id="trunk">
+  <h2><span class="n">3</span>Trunk — see-through, shells off, from the rear, exploded</h2>
+  <div class="grid">
+    <figure><span class="tag ours">Ours · CAD render</span><a href="out/sources/internals/trunk-seethrough-iso.png"><img src="out/sources/internals/trunk-seethrough-iso.png" alt="Trunk, see-through — shells at 16 % opacity"></a><figcaption>Trunk, see-through — shells at 16 % opacity — az 225°, el -14°, 0.26 m, lookat (-8.000, 0.000, 122.000) mm · 12 labels, 0 off-frame</figcaption></figure>
+    <figure><span class="tag ours">Ours · CAD render</span><a href="out/sources/internals/trunk-shells-off-iso.png"><img src="out/sources/internals/trunk-shells-off-iso.png" alt="Trunk, shells removed"></a><figcaption>Trunk, shells removed — az 225°, el -14°, 0.26 m, lookat (-8.000, 0.000, 122.000) mm · 10 labels, 0 off-frame</figcaption></figure>
+    <figure><span class="tag ours">Ours · CAD render</span><a href="out/sources/internals/trunk-shells-off-rear.png"><img src="out/sources/internals/trunk-shells-off-rear.png" alt="Trunk, shells removed — from the rear (battery side)"></a><figcaption>Trunk, shells removed — from the rear (battery side) — az 30°, el -10°, 0.26 m, lookat (-8.000, 0.000, 122.000) mm · 10 labels, 0 off-frame</figcaption></figure>
+    <figure><span class="tag ours">Ours · CAD render</span><a href="out/sources/internals/trunk-exploded.png"><img src="out/sources/internals/trunk-exploded.png" alt="Trunk, exploded — shells ±55 mm y, battery −55 mm x, cradle −25 mm x"></a><figcaption>Trunk, exploded — shells ±55 mm y, battery −55 mm x, cradle −25 mm x — az 225°, el -14°, 0.34 m, lookat (-8.000, 0.000, 122.000) mm · 12 labels, 0 off-frame</figcaption></figure>
+  </div>
+  <div id="components">
+  <table class="data"><thead><tr><th>#</th><th>component</th><th>triad ref</th><th>body / mesh</th><th>position, world mm (x, y, z)</th><th>AABB size mm</th><th>function</th></tr></thead>
+  <tbody><tr><td class="n">1</td><td>hip-yaw servo R (ID 10)</td><td><a href="ce-parts/xl330-m288-t/"><code>part:xl330-m288-t</code></a></td><td><code>trunk_base</code> / <code>xl330</code></td><td class="n">(-0.910, 17.500, 131.367)</td><td class="n">(34.000, 20.000, 29.000)</td><td>drives right_hip_yaw about -z</td></tr>
+<tr><td class="n">2</td><td>hip-yaw servo L (ID 20)</td><td><a href="ce-parts/xl330-m288-t/"><code>part:xl330-m288-t</code></a></td><td><code>trunk_base</code> / <code>xl330</code></td><td class="n">(-0.910, -17.500, 131.367)</td><td class="n">(34.000, 20.000, 29.000)</td><td>drives left_hip_yaw about -z</td></tr>
+<tr><td class="n">3</td><td>battery NP-F550 (mesh named np_f970)</td><td><a href="ce-parts/np-f550/"><code>part:np-f550</code></a></td><td><code>trunk_base</code> / <code>np_f970</code></td><td class="n">(-35.593, -0.007, 115.906)</td><td class="n">(21.757, 38.608, 71.051)</td><td>2S Li-ion 2600 mAh, removable, 6.6-8.2 V</td></tr>
+<tr><td class="n">4</td><td>power_support (battery cradle)</td><td><a href="ce-parts/microduck-power-support/"><code>part:microduck-power-support</code></a></td><td><code>trunk_base</code> / <code>power_support__ours</code></td><td class="n">(-24.383, 0.005, 123.082)</td><td class="n">(17.000, 54.466, 83.130)</td><td>holds the pack; carries the contact board</td></tr>
+<tr><td class="n">5</td><td>banana_pcb_locker</td><td><a href="ce-parts/microduck-banana-pcb-locker/"><code>part:microduck-banana-pcb-locker</code></a></td><td><code>trunk_base</code> / <code>banana_pcb_locker__ours</code></td><td class="n">(-31.274, -0.012, 154.545)</td><td class="n">(3.800, 54.015, 6.626)</td><td>retaining bar for the battery-contact PCB</td></tr>
+<tr><td class="n">6</td><td>trunk_base plate</td><td><a href="ce-parts/microduck-trunk-base/"><code>part:microduck-trunk-base</code></a></td><td><code>trunk_base</code> / <code>trunk_base__ours</code></td><td class="n">(0.181, 0.000, 119.596)</td><td class="n">(36.000, 57.000, 3.000)</td><td>chassis plate both hip-yaw servos hang from; neck servo bolts on top</td></tr>
+<tr><td class="n">7</td><td>trunk shell L</td><td><a href="ce-parts/microduck-trunk-shell-left/"><code>part:microduck-trunk-shell-left</code></a></td><td><code>trunk_base</code> / <code>left_shell</code></td><td class="n">(-10.311, 20.495, 143.725)</td><td class="n">(80.890, 33.714, 41.691)</td><td>colourway half-shell</td></tr>
+<tr><td class="n">8</td><td>trunk shell R</td><td><a href="ce-parts/microduck-trunk-shell-right/"><code>part:microduck-trunk-shell-right</code></a></td><td><code>trunk_base</code> / <code>right_shell</code></td><td class="n">(-10.306, -21.407, 143.836)</td><td class="n">(80.898, 31.764, 41.693)</td><td>colourway half-shell</td></tr>
+<tr><td class="n">9</td><td>bearing 22x16x4 (hip-yaw idler L)</td><td><a href="ce-parts/bearing-22x16x4/"><code>part:bearing-22x16x4</code></a></td><td><code>trunk_base</code> / <code>seeed_bearing__configuration__22x16x4</code></td><td class="n">(6.000, 17.500, 117.000)</td><td class="n">(22.000, 22.000, 4.000)</td><td>idler opposite the yaw horn</td></tr>
+<tr><td class="n">10</td><td>bearing 22x16x4 (hip-yaw idler R)</td><td><a href="ce-parts/bearing-22x16x4/"><code>part:bearing-22x16x4</code></a></td><td><code>trunk_base</code> / <code>seeed_bearing__configuration__22x16x4</code></td><td class="n">(6.000, -17.500, 117.000)</td><td class="n">(22.000, 22.000, 4.000)</td><td>idler opposite the yaw horn</td></tr>
+<tr><td class="n">11</td><td>neck-pitch servo (ID 30)</td><td><a href="ce-parts/xl330-m288-t/"><code>part:xl330-m288-t</code></a></td><td><code>neck</code> / <code>xl330</code></td><td class="n">(26.000, 0.133, 159.331)</td><td class="n">(20.000, 29.000, 34.000)</td><td>neck_pitch about -y, at the trunk</td></tr>
+<tr><td class="n">12</td><td>trunk IMU LSM6DSV16X on imu_to_dxl (DXL ID 200)</td><td><a href="ce-parts/microduck-imu-to-dxl/"><code>part:microduck-imu-to-dxl</code></a></td><td>site <code>imu</code></td><td class="n">(-21.000, 0.066, 105.302)</td><td class="n"><span class="dash">site — no mesh</span></td><td>control IMU; the DXL bus branch point</td></tr></tbody></table>
+  </div>
+  <p class="note">Positions are the geom's placement origin at the INIT pose (trunk_base at (0, 0, 120)); the AABB is computed off the mesh vertices in world. The battery mesh is named <code>np_f970</code> in the source but measures (21.757, 38.608, 71.051) mm — an NP-F550 envelope (SPEC.md §4.1).</p>
+</section>
+
+<section id="head">
+  <h2><span class="n">4</span>Head — see-through, shells off, from behind-below, profile, exploded</h2>
+  <div class="grid">
+    <figure><span class="tag ours">Ours · CAD render</span><a href="out/sources/internals/head-seethrough-iso.png"><img src="out/sources/internals/head-seethrough-iso.png" alt="Head, see-through — shells, face, beak at 14 % opacity"></a><figcaption>Head, see-through — shells, face, beak at 14 % opacity — az 210°, el -12°, 0.3 m, lookat (40.000, 0.000, 240.000) mm · 21 labels, 0 off-frame</figcaption></figure>
+    <figure><span class="tag ours">Ours · CAD render</span><a href="out/sources/internals/head-shells-off-iso.png"><img src="out/sources/internals/head-shells-off-iso.png" alt="Head, shells removed"></a><figcaption>Head, shells removed — az 210°, el -12°, 0.3 m, lookat (40.000, 0.000, 240.000) mm · 16 labels, 0 off-frame</figcaption></figure>
+    <figure><span class="tag ours">Ours · CAD render</span><a href="out/sources/internals/head-shells-off-rear-low.png"><img src="out/sources/internals/head-shells-off-rear-low.png" alt="Head, shells removed — from behind and below (the press_morning view)"></a><figcaption>Head, shells removed — from behind and below (the press_morning view) — az 20°, el -25°, 0.28 m, lookat (40.000, 0.000, 240.000) mm · 16 labels, 0 off-frame</figcaption></figure>
+    <figure><span class="tag ours">Ours · CAD render</span><a href="out/sources/internals/head-seethrough-profile.png"><img src="out/sources/internals/head-seethrough-profile.png" alt="Head, see-through — true left profile"></a><figcaption>Head, see-through — true left profile — az 270°, el 0°, 0.3 m, lookat (40.000, 0.000, 240.000) mm · 21 labels, 0 off-frame</figcaption></figure>
+  </div>
+  <div class="grid one">
+    <figure><span class="tag ours">Ours · CAD render</span><a href="out/sources/internals/head-exploded.png"><img src="out/sources/internals/head-exploded.png" alt="Head, exploded — dome +55 z, bottom −40 z, beak −70 z, face/eye/lens +45/+70/+95 x, boards −45 y"></a><figcaption>Head, exploded — dome +55 z, bottom −40 z, beak −70 z, face/eye/lens +45/+70/+95 x, boards −45 y — az 210°, el -12°, 0.4 m, lookat (40.000, 0.000, 240.000) mm · 21 labels, 0 off-frame</figcaption></figure>
+  </div>
+  <div id="components">
+  <table class="data"><thead><tr><th>#</th><th>component</th><th>triad ref</th><th>body / mesh</th><th>position, world mm (x, y, z)</th><th>AABB size mm</th><th>function</th></tr></thead>
+  <tbody><tr><td class="n">1</td><td>compute (Radxa Zero 3W; mesh is a Pi Zero 2 W proxy)</td><td><a href="ce-parts/radxa-zero-3w/"><code>part:radxa-zero-3w</code></a></td><td><code>jaw_soft</code> / <code>pcb__raspberry_pi_zero_2_w</code></td><td class="n">(68.110, -0.012, 252.596)</td><td class="n">(1.600, 65.000, 30.000)</td><td>RK3566 host, 65 x 30 mm, camera CSI, /dev/ttyS2 servo UART</td></tr>
+<tr><td class="n">2</td><td>RPI Robot HAT</td><td><a href="ce-parts/microduck-robot-hat-pcb/"><code>part:microduck-robot-hat-pcb</code></a></td><td><code>jaw_soft</code> / <code>elec_rpi_robot_hat_pcb</code></td><td class="n">(59.580, -1.146, 252.397)</td><td class="n">(0.840, 65.025, 30.025)</td><td>audio codec, ToF I2C, half-duplex DXL transceiver, battery power in</td></tr>
+<tr><td class="n">3</td><td>M12 lens</td><td><a href="ce-parts/microduck-m12-lens/"><code>part:microduck-m12-lens</code></a></td><td><code>jaw_soft</code> / <code>lens</code></td><td class="n">(81.366, -0.091, 251.115)</td><td class="n">(18.920, 16.940, 16.940)</td><td>wide-angle lens over the IMX219</td></tr>
+<tr><td class="n">4</td><td>M12 lens holder</td><td><a href="ce-parts/microduck-m12-lens-holder/"><code>part:microduck-m12-lens-holder</code></a></td><td><code>jaw_soft</code> / <code>m12_lens_holder</code></td><td class="n">(70.083, -0.091, 251.112)</td><td class="n">(14.800, 24.000, 16.000)</td><td>seats the lens; the IMX219 board sits behind it</td></tr>
+<tr><td class="n">5</td><td>eye ring (noenoeil)</td><td><a href="ce-parts/microduck-eye-ring/"><code>part:microduck-eye-ring</code></a></td><td><code>jaw_soft</code> / <code>noenoeil</code></td><td class="n">(85.229, -0.091, 251.115)</td><td class="n">(9.500, 30.000, 30.000)</td><td>accent-colour bezel around the lens</td></tr>
+<tr><td class="n">6</td><td>face_part</td><td><a href="ce-parts/microduck-face-part/"><code>part:microduck-face-part</code></a></td><td><code>jaw_soft</code> / <code>face_part</code></td><td class="n">(77.763, 1.840, 250.780)</td><td class="n">(12.500, 87.651, 44.626)</td><td>front plate: lens aperture + ToF window</td></tr>
+<tr><td class="n">7</td><td>speaker (35 x 25 x 7 placeholder)</td><td><a href="ce-parts/microduck-speaker/"><code>part:microduck-speaker</code></a></td><td><code>jaw_soft</code> / <code>speaker</code></td><td class="n">(-5.423, 0.714, 249.115)</td><td class="n">(25.000, 35.000, 7.000)</td><td>voice out; placeholder box in the source</td></tr>
+<tr><td class="n">8</td><td>motor_support</td><td><a href="ce-parts/microduck-motor-support/"><code>part:microduck-motor-support</code></a></td><td><code>jaw_soft</code> / <code>motor_support</code></td><td class="n">(25.665, -4.013, 241.918)</td><td class="n">(54.200, 73.500, 18.800)</td><td>plate carrying the roll + mouth servos and the boards</td></tr>
+<tr><td class="n">9</td><td>mouth servo (ID 34)</td><td><a href="ce-parts/xl330-m288-t/"><code>part:xl330-m288-t</code></a></td><td><code>jaw_soft</code> / <code>xl330</code></td><td class="n">(33.010, 25.633, 238.615)</td><td class="n">(34.000, 29.000, 20.000)</td><td>opens the lower beak -5..+30 deg</td></tr>
+<tr><td class="n">10</td><td>head-roll servo (ID 33)</td><td><a href="ce-parts/xl330-m288-t/"><code>part:xl330-m288-t</code></a></td><td><code>jaw_soft</code> / <code>xl330</code></td><td class="n">(-6.267, -6.910, 235.615)</td><td class="n">(29.000, 34.000, 20.000)</td><td>head_roll about -x</td></tr>
+<tr><td class="n">11</td><td>head-yaw servo (ID 32)</td><td><a href="ce-parts/xl330-m288-t/"><code>part:xl330-m288-t</code></a></td><td><code>yaw_roll_motion</code> / <code>xl330</code></td><td class="n">(26.000, -6.910, 235.482)</td><td class="n">(20.000, 34.000, 29.000)</td><td>head_yaw about +z</td></tr>
+<tr><td class="n">12</td><td>yaw_roll_motion</td><td><a href="ce-parts/microduck-yaw-roll-motion/"><code>part:microduck-yaw-roll-motion</code></a></td><td><code>yaw_roll_motion</code> / <code>yaw_roll_motion</code></td><td class="n">(25.331, -4.207, 240.972)</td><td class="n">(35.900, 34.000, 22.500)</td><td>head-yaw output carrying the roll servo</td></tr>
+<tr><td class="n">13</td><td>top head shell</td><td><a href="ce-parts/microduck-top-head-shell/"><code>part:microduck-top-head-shell</code></a></td><td><code>jaw_soft</code> / <code>top_head_shell</code></td><td class="n">(29.658, 0.002, 254.147)</td><td class="n">(122.690, 91.759, 46.336)</td><td>colourway dome</td></tr>
+<tr><td class="n">14</td><td>bottom head shell</td><td><a href="ce-parts/microduck-bottom-head-shell/"><code>part:microduck-bottom-head-shell</code></a></td><td><code>jaw_soft</code> / <code>bottom_head_shell</code></td><td class="n">(21.090, -1.532, 226.484)</td><td class="n">(116.748, 91.763, 20.136)</td><td>accent underside, carries the upper beak</td></tr>
+<tr><td class="n">15</td><td>jaw (lower beak)</td><td><a href="ce-parts/microduck-jaw/"><code>part:microduck-jaw</code></a></td><td><code>jaw_soft</code> / <code>jaw</code></td><td class="n">(53.315, -0.234, 226.595)</td><td class="n">(68.710, 91.416, 29.448)</td><td>mouth DoF, hinged at the rear sides</td></tr>
+<tr><td class="n">16</td><td>bearing 15x10x3 (jaw idler)</td><td><a href="ce-parts/bearing-15x10x3/"><code>part:bearing-15x10x3</code></a></td><td><code>jaw_soft</code> / <code>seeed_bearing__configuration_default</code></td><td class="n">(26.101, -38.501, 238.815)</td><td class="n">(15.000, 3.000, 15.000)</td><td>jaw hinge opposite the mouth servo</td></tr>
+<tr><td class="n">17</td><td>head-pitch servo (ID 31)</td><td><a href="ce-parts/xl330-m288-t/"><code>part:xl330-m288-t</code></a></td><td><code>neck</code> / <code>xl330</code></td><td class="n">(26.000, 0.133, 195.512)</td><td class="n">(20.000, 29.000, 34.000)</td><td>head_pitch about +y, top of the neck</td></tr>
+<tr><td class="n">18</td><td>neck_pitch bracket</td><td><a href="ce-parts/microduck-neck-pitch-bracket/"><code>part:microduck-neck-pitch-bracket</code></a></td><td><code>neck_pitch</code> / <code>neck_pitch</code></td><td class="n">(26.000, -0.000, 209.630)</td><td class="n">(18.000, 35.000, 27.693)</td><td>head-pitch output bracket</td></tr>
+<tr><td class="n">19</td><td>camera IMX219 (site)</td><td><a href="ce-parts/microduck-camera-module/"><code>part:microduck-camera-module</code></a></td><td>site <code>head_camera</code></td><td class="n">(81.400, -0.091, 251.115)</td><td class="n"><span class="dash">site — no mesh</span></td><td>front camera, mounted upside down</td></tr>
+<tr><td class="n">20</td><td>ToF VL53L5CX/L8CX 8x8 (site)</td><td><a href="ce-parts/microduck-tof-module/"><code>part:microduck-tof-module</code></a></td><td>site <code>tof</code></td><td class="n">(81.400, 22.409, 249.115)</td><td class="n"><span class="dash">site — no mesh</span></td><td>depth matrix behind the pill window</td></tr>
+<tr><td class="n">21</td><td>head IMU (site; BMI088 on the HAT, dormant)</td><td><a href="ce-parts/bmi088/"><code>part:bmi088</code></a></td><td>site <code>head_imu</code></td><td class="n">(59.160, 0.111, 250.847)</td><td class="n"><span class="dash">site — no mesh</span></td><td>second IMU, in the head</td></tr></tbody></table>
+  </div>
+  <h3>Sites — placed by the source without a mesh</h3>
+  <table class="data"><thead><tr><th>site</th><th>what</th><th>triad ref</th><th>position, world mm</th><th>function</th></tr></thead>
+  <tbody><tr><td><code>imu</code></td><td>trunk IMU LSM6DSV16X on imu_to_dxl (DXL ID 200)</td><td><a href="ce-parts/microduck-imu-to-dxl/"><code>part:microduck-imu-to-dxl</code></a></td><td class="n">(-21.000, 0.066, 105.302)</td><td>control IMU; the DXL bus branch point</td></tr>
+<tr><td><code>head_camera</code></td><td>camera IMX219 (site)</td><td><a href="ce-parts/microduck-camera-module/"><code>part:microduck-camera-module</code></a></td><td class="n">(81.400, -0.091, 251.115)</td><td>front camera, mounted upside down</td></tr>
+<tr><td><code>tof</code></td><td>ToF VL53L5CX/L8CX 8x8 (site)</td><td><a href="ce-parts/microduck-tof-module/"><code>part:microduck-tof-module</code></a></td><td class="n">(81.400, 22.409, 249.115)</td><td>depth matrix behind the pill window</td></tr>
+<tr><td><code>head_imu</code></td><td>head IMU (site; BMI088 on the HAT, dormant)</td><td><a href="ce-parts/bmi088/"><code>part:bmi088</code></a></td><td class="n">(59.160, 0.111, 250.847)</td><td>second IMU, in the head</td></tr>
+<tr><td><code>mouth_tip</code></td><td>mouth tip (site)</td><td><span class="dash">—</span></td><td class="n">(85.838, 0.000, 227.521)</td><td>beak tip reference</td></tr></tbody></table>
+</section>
+
+<section id="cables">
+  <h2><span class="n">5</span>Cable routes — whole robot, see-through</h2>
+  <div class="grid one">
+    <figure><span class="tag ours">Ours · CAD render</span><a href="out/sources/internals/cables-seethrough.png"><img src="out/sources/internals/cables-seethrough.png" alt="Cable routes, see-through"></a><figcaption>Cable routes, see-through — az 235°, el -10°, 0.5 m, lookat (10.000, 0.000, 150.000) mm · 0 labels, 0 off-frame</figcaption></figure>
+  </div>
+  <p class="note">Each polyline is <code>wiring/cables.json</code>'s from-point → the world anchor of every hinge the cable crosses → to-point, at the zero pose, which is the wiring lane's floor-length rule (wiring/README.md §1). It is the shortest a cable can be over the joint's full range, drawn where the rule puts it; it is NOT the path the harness takes along the parts. Total 1615 mm over 23 cables.</p>
+  <table class="data"><thead><tr><th>cable</th><th>group</th><th>points, world mm</th><th>floor mm</th><th>cable mm</th></tr></thead>
+  <tbody><tr><td><code>dxl-hat-id34</code></td><td>dynamixel-chain</td><td class="n">(59.580, 0.000, 251.060) → (35.100, 18.650, 248.610)</td><td class="n">30.900</td><td class="n">35</td></tr>
+<tr><td><code>dxl-id34-id33</code></td><td>dynamixel-chain</td><td class="n">(35.100, 18.650, 228.610) → (-13.250, -9.000, 225.610)</td><td class="n">55.800</td><td class="n">60</td></tr>
+<tr><td><code>dxl-id33-id32</code></td><td>dynamixel-chain</td><td class="n">(-13.250, -9.000, 245.610) → (8.100, 0.000, 235.615) → (16.000, -9.000, 242.460)</td><td class="n">39.000</td><td class="n">50</td></tr>
+<tr><td><code>dxl-id32-id31</code></td><td>dynamixel-chain</td><td class="n">(36.000, -9.000, 242.460) → (26.000, 0.000, 221.115) → (26.000, 14.500, 202.421) → (16.000, -6.850, 193.420)</td><td class="n">74.100</td><td class="n">165</td></tr>
+<tr><td><code>dxl-id31-id30</code></td><td>dynamixel-chain</td><td class="n">(36.000, -6.850, 193.420) → (36.000, -6.850, 161.420)</td><td class="n">32.000</td><td class="n">35</td></tr>
+<tr><td><code>dxl-id30-imu200</code></td><td>dynamixel-chain</td><td class="n">(36.000, -6.850, 161.420) → (26.000, 14.500, 152.421) → (-21.000, 0.000, 105.300)</td><td class="n">93.400</td><td class="n">120</td></tr>
+<tr><td><code>dxl-imu200-id20</code></td><td>dynamixel-chain</td><td class="n">(-21.000, 0.000, 105.300) → (-3.000, 7.500, 138.350)</td><td class="n">38.400</td><td class="n">40</td></tr>
+<tr><td><code>dxl-id20-id21</code></td><td>dynamixel-chain</td><td class="n">(-3.000, 7.500, 138.350) → (6.000, 17.500, 115.000) → (-0.850, 7.500, 93.500)</td><td class="n">51.600</td><td class="n">65</td></tr>
+<tr><td><code>dxl-id21-id22</code></td><td>dynamixel-chain</td><td class="n">(-0.850, 7.500, 93.500) → (22.500, 17.500, 102.500) → (4.000, 42.500, 102.500) → (-5.000, 61.850, 112.500)</td><td class="n">81.600</td><td class="n">125</td></tr>
+<tr><td><code>dxl-id22-id23</code></td><td>dynamixel-chain</td><td class="n">(-5.000, 61.850, 92.500) → (-21.780, 61.850, 89.500)</td><td class="n">17.000</td><td class="n">20</td></tr>
+<tr><td><code>dxl-id23-id24</code></td><td>dynamixel-chain</td><td class="n">(-21.780, 61.850, 89.500) → (-31.777, 38.500, 80.500) → (-21.780, 43.150, 47.500)</td><td class="n">61.700</td><td class="n">95</td></tr>
+<tr><td><code>dxl-imu200-id10</code></td><td>dynamixel-chain</td><td class="n">(-21.000, 0.000, 105.300) → (-3.000, -7.500, 138.350)</td><td class="n">38.400</td><td class="n">40</td></tr>
+<tr><td><code>dxl-id10-id11</code></td><td>dynamixel-chain</td><td class="n">(-3.000, -27.500, 138.350) → (6.000, -17.500, 115.000) → (-0.850, -27.500, 93.500)</td><td class="n">51.600</td><td class="n">65</td></tr>
+<tr><td><code>dxl-id11-id12</code></td><td>dynamixel-chain</td><td class="n">(-0.850, -27.500, 93.500) → (22.500, -17.500, 102.500) → (4.000, -42.500, 102.500) → (-5.000, -61.850, 92.500)</td><td class="n">81.600</td><td class="n">125</td></tr>
+<tr><td><code>dxl-id12-id13</code></td><td>dynamixel-chain</td><td class="n">(-5.000, -61.850, 92.500) → (-21.780, -61.850, 89.500)</td><td class="n">17.000</td><td class="n">20</td></tr>
+<tr><td><code>dxl-id13-id14</code></td><td>dynamixel-chain</td><td class="n">(-21.780, -61.850, 89.500) → (-31.777, -38.500, 80.500) → (-21.780, -43.150, 47.500)</td><td class="n">61.700</td><td class="n">95</td></tr>
+<tr><td><code>tof-hat</code></td><td>hat-harness</td><td class="n">(59.580, 0.000, 251.060) → (81.400, 22.400, 249.100)</td><td class="n">31.300</td><td class="n">35</td></tr>
+<tr><td><code>spk-hat</code></td><td>hat-harness</td><td class="n">(59.580, 0.000, 251.060) → (-5.420, 0.710, 249.110)</td><td class="n">65.000</td><td class="n">70</td></tr>
+<tr><td><code>csi-radxa-camera</code></td><td>hat-harness</td><td class="n">(68.110, -0.010, 251.050) → (81.400, 0.000, 251.100)</td><td class="n">13.300</td><td class="n">15</td></tr>
+<tr><td><code>bat-hat</code></td><td>power</td><td class="n">(-35.350, 0.000, 151.540) → (26.000, 14.500, 152.421) → (26.000, 14.500, 202.421) → (26.000, 0.000, 221.115) → (8.100, 0.000, 235.615) → (59.580, 0.000, 251.060)</td><td class="n">213.500</td><td class="n">340</td></tr>
+<tr><td><code>mic-hat</code></td><td colspan="3">no endpoint coordinates in cables.json (length_undetermined)</td><td><span class="chip cd">CANNOT DETERMINE</span></td></tr>
+<tr><td><code>hat-radxa-40pin</code></td><td colspan="3">no endpoint coordinates in cables.json (length_undetermined)</td><td><span class="chip cd">CANNOT DETERMINE</span></td></tr>
+<tr><td><code>hat-dxl-port</code></td><td colspan="3">no endpoint coordinates in cables.json (length_undetermined)</td><td><span class="chip cd">CANNOT DETERMINE</span></td></tr></tbody></table>
+</section>
+
+<section id="checks">
+  <h2><span class="n">6</span>Layout checks — measured off the same model</h2>
+  <table class="data"><thead><tr><th>check</th><th>verdict</th><th>measured</th><th>why it matters</th></tr></thead>
+  <tbody><tr><td>trunk IMU site outside the battery envelope</td><td><span class="chip pass">PASS</span></td><td class="n small">imu_site_mm = (-21.000, 0.066, 105.302); battery_aabb_mm = (-46.833, -19.308, 80.620) to (-25.076, 19.300, 151.671)</td><td>a board carrying the IMU cannot occupy the same space as the battery pack; both come from the source MJCF (site &#x27;imu&#x27; on trunk_base, mesh np_f970)</td></tr>
+<tr><td>compute board and Robot HAT do not interpenetrate</td><td><span class="chip pass">PASS</span></td><td class="n small">compute_aabb_mm = (67.310, -32.511, 236.050) to (68.910, 32.489, 266.050); hat_aabb_mm = (59.160, -32.511, 236.045) to (60.000, 32.514, 266.070); overlap_mm = ; board_gap_x_mm = 7.31</td><td>two rigid PCBs stacked on a 40-pin header: their AABBs may touch, not cross; the x gap is the header stack height available</td></tr>
+<tr><td>room for a camera PCB between the M12 lens holder and the compute board</td><td><span class="chip no">FAIL</span></td><td class="n small">holder_aabb_mm = (63.680, -12.091, 243.115) to (78.480, 11.909, 259.115); gap_x_mm = -5.23; overlap_mm = (1.600, 24.000, 16.000)</td><td>press_desk.jpg shows a separate green camera PCB standing behind the face with the lens holder on it (out/sources/internals/real_desk_head_jaw_off.png); an IMX219 module board is ~1.0 mm FR4 plus its connector, so &lt; 1.0 mm of x between holder and compute means our head has no place for the board the product has</td></tr></tbody></table>
+</section>
+
+<section id="notcad">
+  <h2><span class="n">7</span>Not in the CAD</h2>
+  <p class="note">Every physical thing the product has that our model does not place. Each stays CANNOT DETERMINE until a measurement or a published drawing settles it; none gets a plausible default (GOAL.md house rules).</p>
+  <table class="data"><thead><tr><th>what</th><th>triad ref</th><th>why it is missing / what settles it</th><th></th></tr></thead>
+  <tbody><tr><td>microphone(s)</td><td><a href="ce-parts/microduck-mic/"><code>part:microduck-mic</code></a></td><td>Pollen: &#x27;mic + speaker&#x27;; no mesh, no site — CANNOT DETERMINE placement</td><td><span class="chip cd">CANNOT DETERMINE</span></td></tr>
+<tr><td>NFC antenna, head</td><td><a href="ce-parts/st25r3916/"><code>part:st25r3916</code></a></td><td>Pollen: two NFC antennas (head + beak); no mesh — CANNOT DETERMINE</td><td><span class="chip cd">CANNOT DETERMINE</span></td></tr>
+<tr><td>NFC antenna, beak</td><td><a href="ce-parts/st25r3916/"><code>part:st25r3916</code></a></td><td>as above</td><td><span class="chip cd">CANNOT DETERMINE</span></td></tr>
+<tr><td>battery contact board (banana)</td><td><span class="dash">—</span></td><td>the locker implies a PCB; no mesh — CANNOT DETERMINE outline</td><td><span class="chip cd">CANNOT DETERMINE</span></td></tr>
+<tr><td>imu_to_dxl board outline</td><td><a href="ce-parts/microduck-imu-to-dxl/"><code>part:microduck-imu-to-dxl</code></a></td><td>only the IMU site exists; board size/connector count CANNOT DETERMINE</td><td><span class="chip cd">CANNOT DETERMINE</span></td></tr>
+<tr><td>power switch / USB-C / status LED</td><td><span class="dash">—</span></td><td>trunk top rear holes seen in photos (CATALOG.md); nothing in the MJCF</td><td><span class="chip cd">CANNOT DETERMINE</span></td></tr>
+<tr><td>every fastener, insert, cable</td><td><span class="dash">—</span></td><td>GOAL.md standing order 1: bom.json 38 rows, zero fasteners</td><td><span class="chip cd">CANNOT DETERMINE</span></td></tr></tbody></table>
+</section>
+
+<section id="sources">
+  <h2><span class="n">8</span>Sources archived by this lane</h2>
+  <table class="data"><thead><tr><th>source</th><th>archived as</th><th>licence / attribution</th><th>what it is</th></tr></thead>
+  <tbody>
+  <tr><td>MakerWorld model 3250889</td><td><code>out/sources/makerworld-3250889-api.json</code></td><td>BY-NC-SA (API field <code>license</code>); creator "Peter Pan's Techland" (handle foo00); created 2026-09-02T04:01:04Z</td><td>15 STL "simulation model export" — the page's own summary: derived from the microduck_rl MJCF, not official CAD. No internals image.</td></tr>
+  <tr><td>pollen-robotics/microduck_rl, branch develop</td><td>SHA <code>29e887ecfbf5d37144759e5a9f8a176dfb83d547</code> (2026-09-02T20:20:08Z)</td><td>CC BY-SA-NC (sim assets, SPEC.md §1)</td><td>47 STL + 47 .part in the assets dir; zero image files anywhere in the tree.</td></tr>
+  <tr><td>HF Space mishig/microduck-anatomy</td><td><code>out/sources/hf-space-mishig-microduck-anatomy-api.json</code>, <code>…-blueprint.tsx</code></td><td>author mishig; sha 5329ff5d; last modified 2026-08-31T17:56:13Z; licence not stated on the card</td><td>Three.js viewer over the same simulator glb; its own strings: "CAD uses a legacy Pi Zero proxy", "placement from simulator geometry".</td></tr>
+  <tr><td>fanhao375/microduck-replica assembly drawings</td><td><code>out/sources/internals/fanhao375_06_exploded_threequarter.png</code>, <code>…_07_colour_assembled.png</code></td><td>CC BY-SA-NC 4.0 (their README); master 28d8ee92 (2026-09-03T13:51:06Z)</td><td>Exploded and colour-coded views of the 15 MJCF bodies with MJCF masses; "unverified against physical hardware".</td></tr>
+  <tr><td>bilibili BV1R2tH6tEsK "Microduck硬件架构拆解"</td><td><code>out/sources/internals/bili_BV1R2tH6tEsK_cover.jpg</code></td><td>uploader Z-Rob (Aetheron Robotics branding on the cover); published 2026-08-30 10:28 UTC</td><td>1358 s "analysis report" from public pages, GitHub, Radxa and ROBOTIS documents (cover text) — not a physical teardown.</td></tr>
+  </tbody></table>
+  <div class="grid">
+    <figure><span class="tag">Community · MJCF-derived</span><a href="out/sources/internals/fanhao375_06_exploded_threequarter.png"><img src="out/sources/internals/fanhao375_06_exploded_threequarter.png" alt="Community (fanhao375): exploded view of the 15 MJCF bodies, MJCF masses printed. CC BY-SA-NC 4.0."></a><figcaption>Community (fanhao375): exploded view of the 15 MJCF bodies, MJCF masses printed. CC BY-SA-NC 4.0.</figcaption></figure>
+    <figure><span class="tag ours">Ours · exploded head, for comparison</span><a href="out/sources/internals/head-exploded.png"><img src="out/sources/internals/head-exploded.png" alt="Head, exploded — dome +55 z, bottom −40 z, beak −70 z, face/eye/lens +45/+70/+95 x, boards −45 y"></a><figcaption>Head, exploded — dome +55 z, bottom −40 z, beak −70 z, face/eye/lens +45/+70/+95 x, boards −45 y — az 210°, el -12°, 0.4 m, lookat (40.000, 0.000, 240.000) mm · 21 labels, 0 off-frame</figcaption></figure>
+  </div>
+</section>
+
+<section id="method">
+  <h2><span class="n">9</span>Method</h2>
+  <p class="note">Renders: <code>tools/internals_render.py</code> compiles <code>sim/microduck_ours.xml</code> through <code>sim/compare_render.studio_scene</code> (white studio, product materials on the rebuilt meshes), resets to the INIT keyframe, and for each view sets geom alpha (see-through / removed) or moves geoms in their body frame by a stated world offset (exploded). Every label anchor is the geom's <code>geom_xpos</code> or the site's <code>site_xpos</code> projected through the renderer's own <code>mjvGLCamera</code> frustum, so a leader ends on the thing it names; the renderer counts labels that fall off-frame and the count is printed under each figure. AABBs are the transformed mesh vertices. Checks are AABB/point tests on the same arrays. Page: <code>tools/gen_internals.py</code> from <code>out/sources/internals.json</code>; nothing here is typed. Read-back: <code>tools/shot_page.py INTERNALS.html</code>.</p>
+</section>
+
+<footer class="foot">
+  <span>Generated 2026-09-04 02:05 by tools/gen_internals.py</span>
+</footer>
+</div>
+</body>
+</html>
