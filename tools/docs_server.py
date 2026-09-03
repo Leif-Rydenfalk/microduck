@@ -114,6 +114,7 @@ FRAME_CSS = """
   body.mdb>main.doc h1.fh{font-size:28px;margin:0 0 6px;line-height:1.15;font-weight:700}
   body.mdb>main.doc .fh-sub{color:var(--ink-2);max-width:42em;margin:0 0 18px;font-size:15px}
   body.mdb>main.doc .rec{border-top:1.5px solid var(--rule,#1a1a1a);border-bottom:1px solid var(--line);padding:10px 0 6px;margin:8px 0 22px}
+  body.mdb>main.doc .rec.rec-head{border-bottom:none;padding-bottom:0;margin-bottom:10px}
   body.mdb>main.doc .rec .rec-v{font-family:var(--sans);font-size:11.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px}
   body.mdb>main.doc .rec .rec-v .src{font-weight:400;letter-spacing:0;text-transform:none;color:var(--ink-2);margin-left:10px}
   body.mdb>main.doc .rec .rec-t{font-size:16px;margin:0 0 8px}
@@ -463,7 +464,9 @@ def frame(title, rel, body, head_extra="", is_dir=False, fp=None):
             "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n"
             "<meta name=\"generator\" content=\"%s\">\n<title>%s — Microduck</title>\n%s\n"
             "<link rel=\"stylesheet\" href=\"/tools/doc.css\">\n%s\n<style>%s</style>\n</head>\n"
-            "<body class=\"mdb\">\n<aside class=\"nav\">%s</aside>\n<main class=\"doc\">%s\n%s\n</main>\n</body>\n</html>\n"
+            "<body class=\"mdb\">\n<aside class=\"nav\">%s</aside>\n<main class=\"doc\">%s\n%s\n</main>\n"
+            "<script>(function(){var a=document.querySelector('aside.nav a.nav-a.on');if(a){var s=a.closest('aside');"
+            "if(s&&a.offsetTop>s.clientHeight-60){s.scrollTop=a.offsetTop-s.clientHeight/2;}}})();</script>\n</body>\n</html>\n"
             % (MARKER, esc(title), FONTS, head_extra, FRAME_CSS, nav_html(rel), bar, body))
 
 
@@ -503,7 +506,7 @@ def rewrite_links(doc_html, doc_dir):
 _HEAD = re.compile(r"<head[^>]*>(.*?)</head>", re.S | re.I)
 _BODY = re.compile(r"<body[^>]*>(.*?)</body>", re.S | re.I)
 _TITLE = re.compile(r"<title>(.*?)</title>", re.S | re.I)
-_DROP = re.compile(r"<(title|meta)\b[^>]*>(?:</title>)?", re.S | re.I)
+_DROP = re.compile(r"<title\b[^>]*>.*?</title>|<meta\b[^>]*>", re.S | re.I)
 
 
 def split_document(text):
@@ -597,8 +600,9 @@ def page_image(fp, rel):
 def render_record(d, rel):
     """The folder's own statement — result.json / component.json / trust.json — as a
     framed note: verdict, title, scalar fields, lists. Generic: it prints what the
-    file says and names the file; it invents no field."""
-    blocks = []
+    file says and names the file; it invents no field. Returns (head, details)
+    so the folder page can put its pictures between the verdict and the fields."""
+    heads, blocks = [], []
     for name in RECORD_FILES:
         fp = os.path.join(d, name)
         if not os.path.isfile(fp):
@@ -654,9 +658,11 @@ def render_record(d, rel):
         dl = "".join('<dt>%s</dt><dd%s>%s</dd>' % (esc(k.replace("_", " ")), ' class="num"' if num else "", vv) for k, vv, num in rows)
         ul = "".join('<dt>%s</dt><dd><ul>%s</ul></dd>' % (esc(k.replace("_", " ")), "".join("<li>%s</li>" % esc(x) for x in items)) for k, items in lists)
         title = rec.get("title") or j.get("title") or ""
-        blocks.append('<div class="rec"><div class="rec-v">%s%s</div>%s<dl>%s%s</dl>%s</div>'
-                      % (head, src, ('<p class="rec-t">%s</p>' % esc(title)) if title else "", dl, ul, why))
-    return "".join(blocks)
+        heads.append('<div class="rec rec-head"><div class="rec-v">%s%s</div>%s</div>'
+                     % (head, src, ('<p class="rec-t">%s</p>' % esc(title)) if title else ""))
+        blocks.append('<div class="rec"><div class="rec-v"><span class="v none">%s</span></div><dl>%s%s</dl>%s</div>'
+                      % (esc(name), dl, ul, why))
+    return "".join(heads), "".join(blocks)
 
 
 def page_dir(d, rel):
@@ -664,7 +670,8 @@ def page_dir(d, rel):
     dirs, files = listdir(d)
     name = os.path.basename(rel) if rel else "microduck"
     parts = ['<h1 class="fh">%s</h1>' % esc(name + "/" if rel else name)]
-    parts.append(render_record(d, rel))
+    rec_head, rec_details = render_record(d, rel)
+    parts.append(rec_head)
     imgs = [f for f in files if f.lower().endswith(IMG_EXT)]
     if imgs:
         cap = 120
@@ -678,6 +685,7 @@ def page_dir(d, rel):
         parts.append('<div class="gal">%s</div>' % "".join(figs))
         if len(imgs) > cap:
             parts.append('<p class="empty">%d images; the first %d are shown above, all are in the table.</p>' % (len(imgs), cap))
+    parts.append(rec_details)
     rows = []
     for dd in dirs:
         r = (rel + "/" + dd) if rel else dd
