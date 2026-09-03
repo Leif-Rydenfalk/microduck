@@ -263,6 +263,33 @@ def sheet_card(r):
                  ((r.get("recheck") or {}).get("svg_header") or {}).get("size")))
              if r.get("recheck") else
              "not run — tools/verify_drawings.py has not been over this sheet"),
+            ("Orthographic views the extents earn",
+             ("%s (primary %s) — cecad.autosheet.choose_views off the "
+              "bounding box; %s"
+              % (", ".join(r["views_chosen"]), r.get("views_primary"),
+                 ("a third view of this part would be its own edge, which "
+                  "docs/MANUFACTURING-REQUIREMENTS.md §A.2 orders suppressed"
+                  if len(r["views_chosen"]) < 3
+                  else "the full third-angle set")))
+             if isinstance(r.get("views_chosen"), list)
+             else str(r.get("views_chosen")
+                      or "not recorded — redraw with the current "
+                         "tools/draw_part.py")),
+            ("Radii the builder's own text names",
+             ", ".join("R%.2f" % x for x in
+                       (r.get("design_radii_named_in_builder") or []))
+             or "none — cad/part.py names no radius in its text"),
+            ("Arc radii cecad.inspect measures on the solid",
+             (", ".join("R%.2f" % x for x in r["arc_radii_on_solid"])
+              or "none")
+             if isinstance(r.get("arc_radii_on_solid"), list)
+             else str(r.get("arc_radii_on_solid") or "not recorded")),
+            ("Named-but-not-an-edge radii",
+             r.get("design_radii_gap")
+             or ("none — every radius the builder names is a circular edge "
+                 "on the solid, or the builder names none. A radius that is "
+                 "not an edge cannot carry a leader; where one exists the "
+                 "sheet states it in one line and this row carries the rest.")),
             ("Content the search had to give up", _gave_up_line(r)),
             ("§A.5 radii dimensioned", _radius_line(r)),
             ("§A.6 feature census",
@@ -390,6 +417,48 @@ def open_table(rows):
                  % (E(d["slug"]), chip(d["verdict"]), E(d["state"]),
                     E(str(d["why"])[:700]), E(d["settles"])))
     h.append("</tbody></table></div>")
+    return "\n".join(h)
+
+
+FINDINGS = os.path.join(ROOT, "tools", "data", "drawings_findings.json")
+
+
+def findings_section():
+    """§7 — the sixteen problems an outside reader measured on this deliverable
+    on 2026-09-03, and what each one turned out to be.
+
+    Generated from `tools/data/drawings_findings.json` so a finding cannot be
+    dropped from the page by editing prose, and so the verdict on a finding
+    sits beside the measurement that earned it. A finding whose verdict is
+    CANNOT DETERMINE carries what would settle it; the others carry the
+    before and after they were judged on.
+    """
+    if not os.path.exists(FINDINGS):
+        return ('<p class="note">tools/data/drawings_findings.json is not on '
+                'disk — the review ledger cannot be rendered, and its absence '
+                'is not evidence that there was nothing to review.</p>')
+    d = json.load(open(FINDINGS, encoding="utf-8"))
+    h = ['<p class="lede">%s</p>' % E(d.get("about", "")),
+         '<div class="tablewrap"><table class="data">',
+         "<thead><tr><th>#</th><th>what was reported</th><th>verdict</th>"
+         "<th>measured before</th><th>measured after</th></tr></thead><tbody>"]
+    for f in d["findings"]:
+        after = f.get("after") or ""
+        if f.get("settles"):
+            after += ("  WHAT SETTLES IT: " + f["settles"])
+        h.append("<tr><th scope=\"row\">%s</th><td><b>%s</b><br><span "
+                 "class=\"kindtag\">%s</span></td><td>%s</td><td>%s</td>"
+                 "<td>%s</td></tr>"
+                 % (E(str(f["id"])), E(f["title"]), E(f.get("where") or ""),
+                    chip(f["verdict"]), E(f.get("before") or ""), E(after)))
+    h.append("</tbody></table></div>")
+    n = len(d["findings"])
+    fixed = sum(1 for f in d["findings"] if f["verdict"].startswith("FIXED"))
+    nd = sum(1 for f in d["findings"] if f["verdict"].startswith("NOT A"))
+    cd = n - fixed - nd
+    h.append('<p class="note">%d reported, %d fixed, %d measured to be a '
+             'defect somewhere other than where it was reported, %d still '
+             'open.</p>' % (n, fixed, nd, cd))
     return "\n".join(h)
 
 
@@ -532,6 +601,7 @@ def main():
   <a href="#print-sheets">4 Print sheets</a>
   <a href="#no-sheet">5 Parts with no sheet</a>
   <a href="#open">6 What could not be settled</a>
+  <a href="#review">7 The outside review</a>
 </nav>
 
 <section id="how">
@@ -640,6 +710,11 @@ def main():
   the cards above, so an item cannot be dropped from this list by editing prose. A row here is
   a work item, not a shrug.</p>
   {open_table(rows)}
+</section>
+
+<section id="review">
+  <h2><span class="n">7</span>What an outside reader found, and what it turned out to be</h2>
+  {findings_section()}
 </section>
 
 </div>

@@ -1,0 +1,150 @@
+{
+ "$schema": "microduck/tools/data/drawings_findings.json v1",
+ "about": "The sixteen problems an independent reader measured on the drawings deliverable of 2026-09-03, and what each one turned out to be. One row per finding; the page section is generated from this file by tools/gen_drawings_index.py so a finding cannot be quietly dropped by editing prose. VERDICT is about the FINDING, not about the sheet: FIXED means the defect existed and is gone and the fix is measured; NOT A DEFECT means the reader measured something real and the defect was elsewhere; CANNOT DETERMINE means it is still open, and then `settles` says what closes it.",
+ "findings": [
+  {
+   "id": 1,
+   "title": "Two detail bubbles on microduck-power-support point at nothing",
+   "verdict": "NOT A DEFECT IN THE SHEET",
+   "before": "tools/verify_drawings.py and a direct verify_sheet(verbose=True) rebuild both FAILed the shipped sheet on 'detail A: ring drawn on front at the region — no Ø25.9 mm ring near (313.6, 226.7) on the parent view — a bubble with nothing to point at', and the same for detail B.",
+   "after": "MEASURED off the shipped SVG with no kernel at all (regex over <circle> and <text>, page height 594.0 mm, y flipped to paper coordinates): the file carries exactly two rings of r 12.94 mm — Ø25.9 mm, the diameter the checker was looking for — at (313.6, 222.2) and (313.6, 246.0), with the letter 'A' at (328.0, 236.7) and 'B' at (328.0, 260.5), the same +14.5 mm label offset on both. The bubbles point at real rings. What was 4.5 mm out was the CHECKER: it rebuilt the Sheet with _layout() while Sheet.write calls build(), which appends the wall, radius, census and fit notes and then lays the sheet out around a taller notes column. The rebuild has to end in the same state as the file or its verdict is about a different drawing. tools/verify_drawings.py calls sh.build() now.",
+   "settles": null,
+   "where": "tools/verify_drawings.py"
+  },
+  {
+   "id": 2,
+   "title": "microduck-yaw2roll: 5 of 11 distinct arc radii on no view and no NOT LEADERED note; the cutting plane drawn through a hole callout",
+   "verdict": "FIXED",
+   "before": "R1.10, R1.35, R2.20, R2.42 and R2.75 appeared nowhere on the paper, and the red cutting-plane line ran through the callout '2x Ø2.05 x 4.00 DP'. The sheet was written 2026-09-03 00:18:49, before ce-cad 9626f3d (03:49, 'state every radius'), 02501b6 (04:15) and df8c63c (04:55, 'a radius leader dodges the cutting plane').",
+   "after": "Redrawn 2026-09-03 17:21:55, A1 at 5:1. Every R token on the finished SVG, read back by regex: 1.02, 1.10, 1.20, 1.35, 2.00, 2.20, 2.42, 2.50, 2.75, 8.00, 9.50 — identical to the eleven radii cecad.inspect measures on the solid. All eleven are LEADERED, so the sheet needs no 'NOT LEADERED' note. verify_sheet PASS, including the lines_over_labels rule.",
+   "settles": null,
+   "where": "out/drawings/microduck-yaw2roll/"
+  },
+  {
+   "id": 3,
+   "title": "microduck-upper-leg-rigidity-plate: only R11.50 of R1.10/R9.50/R11.50 on the sheet",
+   "verdict": "FIXED",
+   "before": "The sheet was written 2026-09-03 03:12, before the radius rule existed, and shipped a PASS earned under a weaker verifier.",
+   "after": "Redrawn 2026-09-03 17:23:24. R tokens on the finished SVG: 1.10, 9.50, 11.50 — the solid's three, all present. verify_sheet PASS.",
+   "settles": null,
+   "where": "out/drawings/microduck-upper-leg-rigidity-plate/"
+  },
+  {
+   "id": 4,
+   "title": "'Regenerate EVERY sheet' was not done: four sheets predate the ce-cad fixes",
+   "verdict": "FIXED",
+   "before": "microduck-yaw2roll (00:18:49), -upper-leg-left (03:00), -upper-leg-right (03:11) and -upper-leg-rigidity-plate (03:12) appeared in no draw_part argv and predate ce-cad 9626f3d, 02501b6 and df8c63c. Worse, the reader stopped one measurement short: EVERY sheet on the shelf predated the Ø fix — microduck-power-support's result.json of 05:11 still records 'SMALL HOLES O1.55/1.60' and 'A: 4x O1.60 cluster', the ASCII form. The 04:55 batch had also died after 22 of 49 slugs.",
+   "after": "Every slug on the shelf redrawn from scratch against the current ce-cad, in one ordered run, with the result recorded per part.",
+   "settles": null,
+   "where": "out/drawings/"
+  },
+  {
+   "id": 5,
+   "title": "index.json is 76 minutes older than the sheets it indexes",
+   "verdict": "FIXED",
+   "before": "index.json generated 2026-09-03 04:08:24 against sheets whose newest was 05:24; re-running tools/collect_drawings.py changed 9 of 54 rows — the page called microduck-sole-right and -speaker 'no sheet has been generated for it yet' with finished sheets on disk, and microduck-foot-right FAIL when it PASSed. The lane reported while its own draw batch was still running.",
+   "after": "collect_drawings.py and gen_drawings_index.py are the last two steps of the regeneration run, after the draw pass, the feature census and the independent re-check, so the data file cannot predate the sheets it describes. collect_drawings already measures the reverse drift (a sheet NEWER than its result.json) per row and states it.",
+   "settles": null,
+   "where": "out/drawings/index.json"
+  },
+  {
+   "id": 6,
+   "title": "INDEX.html does not regenerate byte-identically from its own data file",
+   "verdict": "FIXED",
+   "before": "tools/gen_drawings_index.py on the unchanged index.json differed on 21 lines; the page's statbar said 6 stale rows and the data file said 4. The published page had been built from a superseded index.json.",
+   "after": "The page is regenerated from the current index.json, and the generator run twice on unchanged data produces byte-identical output (cmp).",
+   "settles": null,
+   "where": "out/drawings/INDEX.html"
+  },
+  {
+   "id": 7,
+   "title": "The whole deliverable is uncommitted",
+   "verdict": "FIXED",
+   "before": "102 paths modified or untracked under out/drawings, INDEX.html and index.json among them; the newest commit touching out/drawings predated every file.",
+   "after": "Committed with tools/commit-lane.sh, sheets and data and page together.",
+   "settles": null,
+   "where": "out/drawings/"
+  },
+  {
+   "id": 8,
+   "title": "tools/verify_drawings.py publishes a FAIL with no reason",
+   "verdict": "FIXED",
+   "before": "`d[\"failed\"] = []` was assigned unconditionally on the drawing branch, so out/drawings/verify.json read {\"verdict\": \"FAIL\", \"failed\": []} — a verdict without its evidence, in the one tool whose entire purpose is independent evidence.",
+   "after": "verify_sheet prints its detail rather than returning it, so the detail is captured off its own stdout the way autosheet._verify does it; a FAIL with no captured line records the raw output instead of an empty list.",
+   "settles": null,
+   "where": "tools/verify_drawings.py"
+  },
+  {
+   "id": 9,
+   "title": "microduck-sole-left, -sole-right and -speaker are classed 'dimensioned drawing' and dimension almost nothing",
+   "verdict": "FIXED",
+   "before": "sole-left's 1400x990 sheet carried exactly three numbers (41.07, 54.00, 12.90 mm) over a full-tessellation wireframe in all three views, with radii [], 0 holes, no section, no hole table and no detail callout — the 'unusable detail / textures ... random lines' MANUFACTURING-REQUIREMENTS A.1-A.2 orders removed. Its own part.py names heel R7.2, toe R6.9 and side R7.9 that the drawing does not carry.",
+   "after": "Two different answers, both measured. (a) The soles are ROUTED TO A PRINT SHEET by tools/drawing_facts._seam_forest, which fires only when the solid has 0 holes AND 0 arc radii in the R0.2..R60 band AND more than 300 visible edges in its primary view: sole-left has 1363 (TechDraw.projectEx) against 131 for microduck-shin, 78 for -trunk-base and 4 for -speaker. The lines are construction seams of a station-to-station loft through a measured 27 x 31 table, not features to manufacture. Both soles now PASS as print sheets. (b) microduck-speaker is a 35 x 25 x 7 mm rectangular prism built by one p.box, so 0 holes and 0 radii is the complete truth about it and it keeps its drawing — with a FEATURE CENSUS note stating the counts, so a reader can tell 'this part has no such features' from 'this sheet lost them'. The three R values are stated on the sole's sheet with the measurement that explains them: cecad.inspect.arc_radii finds no arc on that solid at all, because lofted blends are sampled points and not circular edges, so no leader can be drawn to one.",
+   "settles": null,
+   "where": "tools/drawing_facts.py, ce-cad/cecad/sheets.py"
+  },
+  {
+   "id": 10,
+   "title": "The lane's own verdict 4 cited evidence that is not on the sheet it names",
+   "verdict": "FIXED",
+   "before": "The report claimed microduck-trunk-base carries 'DETAIL A/B/C at SCALE 2:1, 2:1, 5:1'. Its SVG, its PNG and its result.json (details: []) show none, and 17 of 21 drawing sheets carried no detail callout at all.",
+   "after": "The claim is withdrawn and is not repeated. §A.7 is answered ON THE PAPER now by Sheet._detail_note — either _rescale_details' own measured drop reason (the region's diameter against the free width of the bottom band) or the statement that autosheet.detail_regions proposed no cluster — and the count of sheets that carry a callout is in the §1 census, computed from the same rows as the cards.",
+   "settles": null,
+   "where": "ce-cad/cecad/sheets.py"
+  },
+  {
+   "id": 11,
+   "title": "INDEX.html §1 opens with a blanket claim the cards beneath it contradict",
+   "verdict": "FIXED",
+   "before": "'Each sheet below carries ... every radius and fillet dimensioned with a leader, detail callouts at a larger stated scale on the dense regions, a hole table, a section ...' — with 17 rows reading 'Detail callouts: none' directly underneath, and verify_sheet failing yaw2roll on two of those rules.",
+   "after": "The paragraph is a COUNT: a per-item table of carried / applicable with every sheet that does not carry an item named, computed from the same index.json rows the cards are drawn from, so the table and the cards cannot disagree. Items that do not apply to a part are outside the denominator and are named; items no pass has measured are reported as unmeasured, never as carried.",
+   "settles": null,
+   "where": "tools/gen_drawings_index.py"
+  },
+  {
+   "id": 12,
+   "title": "The page's own §A.5 field reads 'not measured' on every card and features.json does not exist",
+   "verdict": "FIXED",
+   "before": "'not measured — run tools/measure_features.py' on every card, no out/drawings/features.json, and the counter reading '0 independently rechecked'. The acceptance criterion was unmeasured inside the artifact that is supposed to record it.",
+   "after": "The 06:13 run of measure_features.py died on part 41 of 64 and wrote nothing: three of its four returns leaked a FreeCAD document per part. The document is closed in a finally now and the file is written after EVERY part, so a death costs one row rather than the census. The census and the independent re-check are steps of the regeneration run, not an afterthought.",
+   "settles": null,
+   "where": "tools/measure_features.py"
+  },
+  {
+   "id": 13,
+   "title": "An ASCII capital O printed where every other diameter carries Ø",
+   "verdict": "FIXED",
+   "before": "autosheet.py:451 wrote 'SMALL HOLES O1.60 PRINT UNDERSIZE' and detail_regions labelled a bubble '4x O1.60 cluster'; shipped on microduck-foot-left, -foot-right, -power-support and -robot-hat-pcb.",
+   "after": "Ø in both places. Read back on the redrawn sheets: no token matching \\bO\\d+\\.\\d\\d anywhere on microduck-hip-bracket or -upper-leg-rigidity-plate. tools/drawing_facts.py's ASCII '+/-' had already become ± and 'H7/p6 at O3' had already become 'Ø3'.",
+   "settles": null,
+   "where": "ce-cad/cecad/autosheet.py"
+  },
+  {
+   "id": 14,
+   "title": "A counterbore on a face the code could not name: 'C'BORE Ø4.84x2.95 ?X'",
+   "verdict": "FIXED",
+   "before": "sheets.py:963 read `side = \"?\" if abs(d_lo - d_hi) < 1e-6 ...`, and the sheet's own legend ('C'BORE side is the face it opens on') did not explain '?'.",
+   "after": "It was not the right question. An enlargement equidistant from both ends of the bore it sits in opens on NEITHER face — it is an internal relief, and the table says INT, with the footnote extended to define it. The tolerance is _CBORE_END_TOL = 0.05 mm, the same figure inspect._STACK_GAP uses to decide two coaxial cylinders are one hole. Read back on the redrawn hip-bracket: 'C'BORE Ø4.84x5.50 +Y' and 'C'BORE Ø4.84x2.95 INT X', with the legend line 'INT = centred in the bore, opening on neither face.'",
+   "settles": null,
+   "where": "ce-cad/cecad/sheets.py"
+  },
+  {
+   "id": 15,
+   "title": "11 of 21 sheets print a thinnest wall below the printability floor with no verdict",
+   "verdict": "FIXED",
+   "before": "Figures from 0.008 to 0.376 mm against a 0.80 mm floor, with no PASS/FAIL/CANNOT DETERMINE beside them, while note 3 on the same sheet said that number 'IS NOT A PRINTABLE WALL'. The 2026-09-02 fix had replaced a wrong number (a scan of one cutting plane) with a knowingly-not-a-wall number, no sheet stated a printable minimum wall at all, and the DFM block printed 2 dp where the note printed 4 dp.",
+   "after": "cecad.inspect.printable_wall_detail measures the thinnest wall that is thin OVER A REGION — the smallest neighbourhood-median thickness, rays capped at 4.0 mm, samples with no hit recorded as censored rather than as a measurement — and both figures are printed, each named for what it is, both to 4 dp, with the floor, its source (cecad/printed.py:801, 2 perimeters at a 0.4 mm nozzle) and the verdict. Read back on the redrawn hip-bracket: 'PRINTABLE MINIMUM WALL: 1.3580 mm, AT X=34.000 Y=9.163 Z=-0.564 ... AGAINST THE 0.8000 mm FLOOR: VERDICT PASS'.",
+   "settles": null,
+   "where": "ce-cad/cecad/inspect.py, ce-cad/cecad/sheets.py, ce-cad/cecad/autosheet.py"
+  },
+  {
+   "id": 16,
+   "title": "One empty folder and four folders holding a result.json and no sheet",
+   "verdict": "FIXED",
+   "before": "out/drawings/microduck-trunk-shell-left was an empty directory, and -bottom-head-shell, -face-part, -m12-lens and -m12-lens-holder held a result.json and nothing else.",
+   "after": "Two different states, and the difference is the answer. microduck-trunk-shell-left was the slug the 04:55 batch died on — draw_part.py makes the output folder before it loads the part — and it is drawn now. The other four raise NotImplementedError from their own build(): they are `bin/triad new part` stubs with no solid, so a result.json recording CANNOT DETERMINE and the kernel's own reason is the correct and complete output. They appear in §5 with what settles them.",
+   "settles": null,
+   "where": "out/drawings/"
+  }
+ ]
+}

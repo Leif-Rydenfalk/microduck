@@ -195,18 +195,24 @@ def draw(slug):
             # these are exactly the radii the solid has NOT got — writing
             # them as "R7.20" would fail the sheet on the note that explains
             # why they are absent.
+            # SHORT, AND ONLY WHAT IS MEASURED. The first version of this
+            # note ran to 430 characters and explained the gap as "design
+            # blends of a lofted surface, sampled station to station" — true
+            # of microduck-sole-left, where the finding was made, and an
+            # unmeasured assertion about every other part. MEASURED
+            # 2026-09-03: on microduck-hip-bracket it cost the sheet its
+            # verdict, running the notes column down into the title block at
+            # A1 and 77.92 mm past the frame at A2, across 21 attempts. The
+            # fact goes on the paper in one line; the reasoning lives in this
+            # result.json and on out/drawings/INDEX.html, which is where a
+            # reader who wants it is.
             radii_gap = (
-                "RADII NAMED IN THE BUILDER THAT ARE NOT ARCS ON THIS SOLID: "
-                "%s. cecad.inspect.arc_radii measures %d arc(s) on it%s. "
-                "These are DESIGN blends of a lofted surface — real curvature, "
-                "sampled station to station — and no circular edge carries "
-                "them, so no leader can be drawn to one and no dimension on "
-                "this document is missing. What settles them for a shop: the "
-                "printed geometry file named on this sheet."
-                % (", ".join("%.2f mm" % r for r in missing), len(onsolid),
-                   ("" if not onsolid else
-                    " (" + ", ".join("%.2f mm" % v for v in onsolid[:12])
-                    + ")")))
+                "RADII NAMED IN cad/part.py THAT ARE NOT CIRCULAR EDGES ON "
+                "THIS SOLID: %s. cecad.inspect.arc_radii measures %d ARC(S) "
+                "HERE AND EVERY ONE IS DIMENSIONED ABOVE. NO DIMENSION IS "
+                "MISSING: A LEADER NEEDS AN EDGE. THE GEOMETRY FILE CARRIES "
+                "THE SURFACE."
+                % (", ".join("%.2f mm" % r for r in missing), len(onsolid)))
     out["design_radii_gap"] = radii_gap
 
     # HOW MANY ORTHOGRAPHIC VIEWS THE PART EARNS, and why — on the record and
@@ -225,14 +231,11 @@ def draw(slug):
         out["views_chosen"] = list(chosen)
         out["views_primary"] = primary
         views_note = (
-            "ORTHOGRAPHIC VIEWS: %d (%s), CHOSEN OFF THE BOUNDING BOX "
-            "%.4f x %.4f x %.4f mm BY cecad.autosheet.choose_views — "
-            "THINNEST/LONGEST EXTENT RATIO %.4f. %s"
+            "ORTHOGRAPHIC VIEWS: %d (%s) — cecad.autosheet.choose_views ON "
+            "THE %.3f x %.3f x %.3f mm BBOX, THIN/LONG %.4f. %s"
             % (len(chosen), ", ".join(chosen).upper(), ex, ey, ez, thin,
-               ("A THIRD ORTHOGRAPHIC VIEW OF THIS PART WOULD BE THE PART "
-                "SEEN EDGE-ON — A PAIR OF LINES CARRYING NO FEATURE, WHICH "
-                "docs/MANUFACTURING-REQUIREMENTS.md A.2 ORDERS SUPPRESSED. "
-                "THE SECTION AND THE ISOMETRIC CARRY THE THIRD DIRECTION."
+               ("A THIRD VIEW WOULD BE THIS PART EDGE-ON, WHICH A.2 ORDERS "
+                "SUPPRESSED; THE SECTION AND THE ISOMETRIC CARRY IT."
                 if len(chosen) < 3 else
                 "THE FULL THIRD-ANGLE SET IS DRAWN.")))
         out["views_note"] = views_note
