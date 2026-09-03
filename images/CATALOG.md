@@ -104,3 +104,27 @@ Published numbers: **25 cm tall, 14 cm wide, under 800 g (store: 780 g), 15 moto
 
 ## CAD renders of the published MJCF (`../cad/renders/`)
 `STAND_front.png`, `STAND_side.png`, `STAND_back.png`, `STAND_top.png`, `INIT_front.png` — orthographic, 4 px/mm, 50 mm grid, generated from `microduck_rl/robot_walk.xml` + STLs. These are exact geometry (alpha CAD; production shell colours differ but shapes match photos).
+
+---
+
+## Internals — what exists and what does not (appended 2026-09-03 by the src-internals lane)
+
+Leif asked for "an new image covering the components of the microduck internals". Searched 2026-09-03
+(full log with URLs and dates: `out/sources/internals.json` → `search_log`): MakerWorld 3250889, Pollen's
+site/press kit/blog, both Pollen GitHub repos (zero image files in either tree), the HF
+`mishig/microduck-anatomy` space (simulator meshes), the fanhao375 replica exploded drawings (MJCF-derived,
+"unverified against physical hardware"), the bilibili "硬件架构拆解" video (a pre-ship analysis), and
+EN/ZH web search. **No public photograph or diagram of the full internal layout exists** — units ship at
+Christmas 2026. What DOES exist is two press-kit photographs of partially disassembled units, already in
+this directory; the lane cropped them at 2x into `out/sources/internals/`:
+
+| crop | from | shows |
+|---|---|---|
+| `real_desk_head_jaw_off.png` | `press/press_desk.jpg` (560,870)-(1260,1400) | lavender unit, lower beak removed: a green camera PCB standing vertically behind the face plate, the mouth-servo XL330 under it (label readable), the eye ring + M12 lens |
+| `real_desk_trunk_shells_off.png` | `press_desk.jpg` (0,600)-(560,1330) | cream/mint unit, trunk shells off: two XL330 stacked, a small dark PCB with white silkscreen ("3V" legible) on the trunk plate below them, mint yaw2roll clevises with 22 mm flanged bearings; behind it an orange top head shell upside down showing its interior ribs |
+| `real_desk_head_yawroll_stack.png` | `press_desk.jpg` (2450,180)-(3200,780) | graphite/orange unit lying down: the head yaw/roll servo pair with its printed brackets, cabling, and a graphite trunk shell |
+| `real_desk_top_shell_interior.png` | `press_desk.jpg` (2400,120)-(2900,620) | inside of an orange top head shell |
+| `real_morning_head_rear_open.png` | `press/press_morning.jpg` (3050,1100)-(4240,2000) | yellow bottom head shell seen from behind, the rectangular neck opening with the yaw/roll servo stack inside |
+
+Our own labelled internals (see-through, shells-off, exploded, cable routes) are `INTERNALS.html`
+(tools/gen_internals.py from out/sources/internals.json, renders by tools/internals_render.py).
