@@ -131,3 +131,57 @@ MEASURED on `out/drawings/microduck-foot-left/microduck-foot-left-sheet.png`
 Acceptance is MEASURED by `ce-cad/bin/sheetcheck` (line-count ratio, coverage,
 minimum font size, iso count and area) and by READING THE RENDERED PNG BACK —
 a sheet nobody has looked at is not a sheet.
+
+## A3 · RENDERED COLOUR VIEWS ARE PRIMARY — Leif, 2026-09-03, verbatim
+
+> the lines for curved shapes in the blueprints is very ugly. use colored
+> properly rendered blueprints as references with the same and more detailed
+> informatio nand even more angles and more detail for the blueprints so that
+> they are actually manufacturable and use all empty space no white space fill
+> everything with images and redners and dimesions and information for
+> manufacturers.
+
+This AMENDS §A2. §A2 rule 1 said the fix for the tessellation hatch was to
+suppress facet lines. That is still true for the orthographic views, but it is
+only half the answer: **a doubly-curved organic shell (this whole robot) does
+not read as a line drawing at all.** A silhouette-plus-feature-edge projection
+of a shin or a head shell tells a manufacturer almost nothing about the surface
+between the edges. So:
+
+### The new rules
+
+1. **SHADED COLOUR RENDERS ARE FIRST-CLASS SHEET CONTENT, not decoration.**
+   Every sheet carries **at least six** properly rendered colour views —
+   material-coloured, lit, anti-aliased, read off the SOLID through the kernel —
+   at a size where a shop can see the form: **each ≥ 12 % of sheet area**, and
+   the largest ≥ 20 %. They sit beside the dimensioned orthographic views and
+   carry their own callouts.
+2. **MANY MORE ANGLES.** At minimum: 4 isometric corners (front-left,
+   front-right, rear-left, rear-right), top-down and bottom-up, plus one view
+   per face that carries a manufacturable feature, plus a detail render at
+   larger scale for every feature cluster (a boss group, a latch, a bearing
+   seat, a cable channel). More angles is always better than more empty paper.
+3. **NO LINE-ART HATCH ON A CURVED SURFACE.** Where a surface is curved, the
+   shaded render carries the form and the line view carries only the silhouette,
+   the true feature edges and the dimensions. If a line view of a curved region
+   would be a thicket, replace that view with a shaded render plus a section.
+4. **ZERO WHITE SPACE.** §A2 rule 3 set coverage ≥ 60 %; this raises it:
+   **≥ 85 % of the drawing frame carries content** — a view, a render, a table,
+   a dimension, a note or the title block — and the largest empty rectangle is
+   **< 5 % of frame area**. Empty paper is a defect the generator must fill by
+   adding another angle, another detail render, or another table, not by
+   scaling one view up to fill space it does not need.
+5. **EVERYTHING A MANUFACTURER NEEDS IS ON THE SHEET**, not in a linked file:
+   full dimension set including every radius; hole table; section views;
+   material and its source; process; tolerance basis; surface finish; print
+   orientation and support strategy; the fasteners that land in this part with
+   their sizes; the mating parts named by triad ref; mass and volume measured
+   off the solid; and the CANNOT DETERMINE list for anything unmeasured.
+
+### Acceptance
+`ce-cad/bin/sheetcheck` gains: shaded-render count and each one's area
+percentage, total frame coverage ≥ 85 %, largest empty rectangle < 5 %, and a
+curved-region check that FAILS a line view whose local line density exceeds a
+stated threshold inside a region the solid says is curved. Plus the human
+read-back: open the PNG and answer "could a shop cut this part from this sheet
+alone, and does the surface form read at a glance?"
