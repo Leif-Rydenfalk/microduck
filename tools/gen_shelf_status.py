@@ -442,20 +442,42 @@ def svg_class_bars(refs, by_class, classes):
     return "\n".join(o)
 
 
+def reason_key(x):
+    """Everything about one reason row that this page PRINTS.
+
+    `why` is the checker's own output and `bin/_triadlib.py` cuts it at 400
+    characters with no marker, so `why` alone is blind to anything a folder
+    wrote past that point — and section 4 of this page prints `why_full`, the
+    whole sentence read back from the folder's record. MEASURED 2026-09-03 on
+    the live shelf: 33 of 90 reason rows on 29 refs carry a tail the checker
+    dropped, 30 680 characters in all (184 shortest, 1849 longest). All of that
+    is on the page and none of it was in the digest. `where` and the row's own
+    verdict are covered for the same reason: both are printed, and a row moving
+    from one file to another, or from CANNOT DETERMINE to FAIL while the ref's
+    overall verdict stays put, is a change a reader can see.
+    """
+    return [x.get("verdict", ""), x.get("class", ""), x.get("where", ""),
+            trim(x.get("why_full") or x.get("why", ""))]
+
+
 def fingerprint(refs):
     """A canonical digest of the WHOLE shelf reading: every ref, its verdict, and
-    every reason sentence the checker printed for it.
+    every reason row this page prints for it — the row's verdict, its defect
+    class, where the checker found it, and the folder's WHOLE sentence.
 
     Why this exists: until 2026-09-03 `--verify` compared only totals['checked'],
     ['pass'], ['not_pass'] and the SET of ref names. Those three totals are blind
     to the one movement that matters most — a ref going CANNOT DETERMINE -> FAIL
     keeps `not_pass` identical — and the committed page was materially wrong about
     which folders FAIL while `--verify` printed CURRENT and exited 0. A staleness
-    detector that cannot see a verdict change is a decoration. This digest covers
-    the verdict and the reasons, so any of them moving makes the page stale.
+    detector that cannot see a verdict change is a decoration.
+
+    The first repair of it covered `trim(why)` only, which left the second half
+    of the same hole open: see reason_key() for the measurement. The digest now
+    covers every field the page renders.
     """
     rows = sorted(
-        [r["ref"], r["verdict"], sorted(trim(x["why"]) for x in r["reasons"])]
+        [r["ref"], r["verdict"], sorted(reason_key(x) for x in r["reasons"])]
         for r in refs)
     blob = json.dumps(rows, ensure_ascii=False, sort_keys=True).encode("utf-8")
     return hashlib.sha256(blob).hexdigest()
@@ -696,12 +718,18 @@ def render(refs, totals, before, exit_code, root, recovered_n=0, recoverable_n=0
       'CURRENT or STALE with the difference, exit 0 or 1, writing nothing. '
       '<code>python3 tools/gen_shelf_status.py</code> then brings it up to date.</div>')
     A('<h3>What <code>--verify</code> compares, and what it used to miss</h3>')
-    A('<p>It builds a SHA-256 digest over every ref name, its verdict, and every reason '
-      'sentence printed for it — sorted and canonically encoded — from a live run of the checker, '
-      'and compares it with the same digest recomputed from the committed '
-      '<code>out/laneT/shelf-status.json</code>. Recomputed, not read: a digest stored in the file '
-      'could be edited to certify a page that does not match it. This run’s digest is '
-      '<code>%s</code>, printed in the header above and in the JSON as '
+    n_tail = sum(1 for r in refs for x in r["reasons"] if x.get("dropped_by_checker"))
+    tail_chars = sum(x.get("dropped_by_checker") or 0 for r in refs for x in r["reasons"])
+    tail_refs = len({r["ref"] for r in refs for x in r["reasons"]
+                     if x.get("dropped_by_checker")})
+    A('<p>It builds a SHA-256 digest from a live run of the checker over <em>every field this '
+      'page renders</em> — each ref name, its verdict, and for each of its reason rows the '
+      'row\u2019s own verdict, its defect class, the file the checker raised it against, and the '
+      'folder\u2019s WHOLE sentence (<code>why_full</code>, not the checker\u2019s 400-character '
+      'cut) — sorted and canonically encoded, and compares it with the same digest recomputed '
+      'from the committed <code>out/laneT/shelf-status.json</code>. Recomputed, not read: a digest '
+      'stored in the file could be edited to certify a page that does not match it. This run\u2019s '
+      'digest is <code>%s</code>, printed in the header above and in the JSON as '
       '<code>fingerprint_sha256</code>. When it differs, <code>--verify</code> names every ref '
       'whose verdict moved, in which direction, and every ref whose reasons changed.</p>'
       % e(fingerprint(refs)))
@@ -719,6 +747,26 @@ def render(refs, totals, before, exit_code, root, recovered_n=0, recoverable_n=0
       'detector could not see it. A detector that cannot go red is a decoration. It now compares '
       'the digest above and, on the same pair of files, printed STALE with all eight verdict '
       'moves named.</div>')
+    A('<div class="note"><b>The same hole, second half \u2014 measured and closed the same day.</b> '
+      'That first repair hashed the checker\u2019s <code>why</code> string only. But '
+      '<code>bin/_triadlib.py:1482</code> cuts that string at 400 characters, and section&nbsp;4 '
+      'of this page prints <code>why_full</code>, the whole sentence read back from the '
+      'folder\u2019s own record. Measured on this run: <b>%d of the %d reason rows</b>, across '
+      '<b>%d refs</b>, carry a tail the checker dropped \u2014 <b>%s characters</b> in all. Every '
+      'one of those characters is printed on this page and none of them was in the digest, so a '
+      'folder could rewrite the second half of its own reason and <code>--verify</code> would '
+      'still say CURRENT. Neither was a reason row\u2019s own verdict (a row going CANNOT '
+      'DETERMINE&nbsp;&rarr;&nbsp;FAIL under a ref whose overall verdict does not move), nor '
+      '<code>where</code> (the same complaint raised against a different file). All four fields '
+      'are in the digest now. Proved by deliberate breakage on copies of this JSON, checker run '
+      'live each time: <b>(A)</b> two characters changed at offset 600 of one '
+      '<code>why_full</code> \u2014 old digest <code>c5b0c5865cc2</code> UNCHANGED, new digest '
+      'moved, STALE, exit&nbsp;1; <b>(B)</b> one reason row CANNOT DETERMINE&nbsp;&rarr;&nbsp;FAIL '
+      'with the ref verdict and all three totals untouched \u2014 old digest UNCHANGED, new moved, '
+      'STALE, exit&nbsp;1; <b>(C)</b> one <code>where</code> repointed at another file \u2014 old '
+      'digest UNCHANGED, new moved, STALE, exit&nbsp;1; <b>the untouched control</b> \u2014 '
+      'CURRENT, exit&nbsp;0. A detector is only worth what you have watched it catch.</div>'
+      % (n_tail, n_rows, tail_refs, "{:,}".format(tail_chars).replace(",", "\u2009")))
     A('</section>')
     A('<footer><span>MD-SHELF-001 Rev A</span><span>%s</span>'
       '<span>generated by tools/gen_shelf_status.py</span>'
@@ -781,9 +829,12 @@ def main(argv=None):
            "command": "bin/triad check --all", "checker_exit_code": code,
            "totals": totals, "refs": refs,
            "fingerprint_sha256": fingerprint(refs),
-           "fingerprint_covers": "every ref name, its verdict, and every reason sentence "
-                                 "printed for it — sorted, canonically encoded, SHA-256. "
-                                 "--verify recomputes it from a live run and compares.",
+           "fingerprint_covers": "every ref name, its verdict, and for every reason row "
+                                 "printed for it: the row's own verdict, its defect class, "
+                                 "where the checker found it, and the folder's WHOLE sentence "
+                                 "(why_full, not the checker's 400-character cut) — sorted, "
+                                 "canonically encoded, SHA-256. --verify recomputes it from a "
+                                 "live run and compares.",
            "verdict_counts": verdict_counts(refs)}
     if a.verify:
         try:
@@ -812,17 +863,20 @@ def main(argv=None):
             if ov_ != nv_:
                 moved.append((ref, ov_, nv_))
                 continue
-            os_ = sorted(trim(x["why"]) for x in old_by[ref]["reasons"])
-            ns_ = sorted(trim(x["why"]) for x in new_by[ref]["reasons"])
+            os_ = sorted(reason_key(x) for x in old_by[ref]["reasons"])
+            ns_ = sorted(reason_key(x) for x in new_by[ref]["reasons"])
             if os_ != ns_:
                 reworded.append((ref, len(os_), len(ns_)))
         if old_fp == new_fp:
             print("CURRENT  page written %s  checked %d  PASS %d  not-PASS %d  "
                   "digest %s" % (old.get("date"), n["checked"], n["pass"],
                                  n["not_pass"], new_fp[:16]))
-            print("         the digest covers every ref, its verdict and every reason "
-                  "sentence — %d refs, %d reason rows." %
-                  (len(refs), sum(len(r["reasons"]) for r in refs)))
+            nfull = sum(1 for r in refs for x in r["reasons"]
+                        if x.get("dropped_by_checker"))
+            print("         the digest covers every ref, its verdict, and per reason row its "
+                  "verdict, class, where and WHOLE sentence — %d refs, %d reason rows, "
+                  "%d of them longer than the checker's 400-character cut." %
+                  (len(refs), sum(len(r["reasons"]) for r in refs), nfull))
             return 0
         print("STALE    page written %s" % old.get("date"))
         print("  digest    page %s  ->  now %s" % (old_fp[:16], new_fp[:16]))
