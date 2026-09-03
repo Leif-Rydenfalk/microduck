@@ -1,0 +1,227 @@
+{
+ "$triad": 1,
+ "kind": "open-items",
+ "lane": "resolve class 4 -- tolerances, fits and what they cost",
+ "status": "PARTIAL CHECKPOINT 1 -- evidence fetched and archived; stack not yet recomputed",
+ "written": "2026-09-03T23:01:47Z",
+ "owns": [
+  "out/open/tolerance-fits.json",
+  "out/open/tolerance-evidence/",
+  "out/open/tolerance-stations.json",
+  "ce-connections/press-fit-bearing-22x16x4/current/compat.py",
+  "ce-connections/press-fit-bearing-15x10x3/current/compat.py",
+  "ce-connections/press-fit-bearing-*/current/evidence/ledger.jsonl (append only)",
+  "tools/tolerance_fits.py",
+  "tools/tolerance_stations.py"
+ ],
+ "harvest_items_owned": [
+  7,
+  8,
+  11,
+  12,
+  25,
+  26,
+  27,
+  68,
+  91
+ ],
+ "sources": {
+  "NTN-2203E-a06": {
+   "what": "NTN Ball and Roller Bearings catalogue CAT. No. 2203-E, section A-54/55 'Bearing Tolerances', Table 6.4 'Tolerance of radial bearings (except tapered roller bearings)' (1) Inner rings, (2) Outer rings, Unit um; Table 6.2 says JIS B 1514 / ISO 492 / DIN 620 'have the same specification level' and ABEC-1 = Class 0",
+   "url": "https://www.ntnglobal.com/en/products/catalog/pdf/2203E_a06.pdf",
+   "fetched": "2026-09-04 (WebFetch saved bytes; pdftotext -layout)",
+   "archived": "out/open/tolerance-evidence/ntn-tolerances.pdf + ntn.txt (lines 189-236)",
+   "rows_verbatim_class0": {
+    "inner d over 2.5 incl 10": {
+     "delta_dmp_um": [
+      0,
+      -8
+     ],
+     "Kia_max_um": 10,
+     "delta_Bs_um": [
+      0,
+      -120
+     ],
+     "line": "ntn.txt:201 '2.5 10  0 −8 ... 10 ... 0 −120'"
+    },
+    "inner d over 10 incl 18": {
+     "delta_dmp_um": [
+      0,
+      -8
+     ],
+     "Kia_max_um": 10,
+     "delta_Bs_um": [
+      0,
+      -120
+     ],
+     "line": "ntn.txt:202 '10 18  0 −8 ... 10 ... 0 −120'"
+    },
+    "outer D over 6 incl 18": {
+     "delta_Dmp_um": [
+      0,
+      -8
+     ],
+     "Kea_max_um": 15,
+     "line": "ntn.txt:235 '6 18  0 −8 ... 15'"
+    },
+    "outer D over 18 incl 30": {
+     "delta_Dmp_um": [
+      0,
+      -9
+     ],
+     "Kea_max_um": 15,
+     "line": "ntn.txt:236 '18 30  0 −9 ... 15'"
+    }
+   },
+   "column_mapping_check": "header lines 190-199 / 224-233: first Class-0 Upper/Lower pair under 'Deviation of mean bore diameter in a single plane Δdmp'; Kia is the 'Radial runout of inner ring of assembled bearing' Class 0 column; ΔBs 'Deviation of a single inner ring width, Normal bearings, Class 0 Upper Lower'. Class 6 shares the same Δdmp (0/-7) row values printed beside; not used."
+  },
+  "NSK-TI-tolerances": {
+   "what": "NSK 'BEARING TOLERANCES Standard Values' -- used only for the class-equivalence table (Normal = JIS Class 0 = ABEC 1 = ISO Normal) and the sentence 'The tolerances of the accuracy class Normal (P0) are sufficient for general applications in most cases.'",
+   "url": "https://www.nsk.com/content/dam/nsk/am/en_us/documents/bearings-americas/TI%20Bearing%20Tolerances.pdf",
+   "fetched": "2026-09-04",
+   "archived": "out/open/tolerance-evidence/nsk-tolerances.pdf + nsk.txt (lines 33-62)"
+  },
+  "coolenbearings-clearance": {
+   "what": "'Radial internal clearance table of deep groove ball bearings' (ISO 5753-1 values as reproduced by a distributor; the page does not name the standard)",
+   "url": "https://www.coolenbearings.com/tech/rolling-bearings/internal-clearance/bearing-internal-clearance-chart-table",
+   "fetched": "2026-09-04 (WebFetch; not archived -- fetch returned a rendered table only)",
+   "rows_um": {
+    "d over 6 to 10": {
+     "C2": [
+      0,
+      7
+     ],
+     "CN": [
+      2,
+      13
+     ],
+     "C3": [
+      8,
+      23
+     ],
+     "C4": [
+      14,
+      29
+     ],
+     "C5": [
+      20,
+      37
+     ]
+    },
+    "d over 10 to 18": {
+     "C2": [
+      0,
+      9
+     ],
+     "CN": [
+      3,
+      18
+     ],
+     "C3": [
+      11,
+      25
+     ],
+     "C4": [
+      18,
+      33
+     ],
+     "C5": [
+      25,
+      45
+     ]
+    },
+    "d over 18 to 24": {
+     "C2": [
+      0,
+      10
+     ],
+     "CN": [
+      5,
+      20
+     ],
+     "C3": [
+      13,
+      28
+     ],
+     "C4": [
+      20,
+      36
+     ],
+     "C5": [
+      28,
+      48
+     ]
+    }
+   },
+   "cross_check": "ISO 5753:1981 sample page (cdn.standards.iteh.ai/samples/11878/...) confirms the bore steps 2.5, 6, 10, 18, 24 ... and that C0 = CN (search result, 2026-09-04); values not re-read from the ISO sample itself"
+  },
+  "roymech-designations": {
+   "what": "'Deep groove ball bearing dimensions and designation systems comply with ISO 15 rolling bearing boundary dimension standards and ISO 5753 internal clearance classifications'; ISO bore code table: 00=10, 01=12, 02=15, 03=17, 04=20 mm, then code x5; series 618 'Thin section', 619 'Extra thin section'",
+   "url": "https://www.roymech.co.uk/Useful_Tables/Drive/deep-groove-ball-bearings-designations/",
+   "fetched": "2026-09-04 curl 200",
+   "archived": "out/open/tolerance-evidence/roymech.html"
+  },
+  "bearingsize-61700": {
+   "what": "'Bearing 61700 (ISO) | Size and Specification' -- 'd - 10 mm, D - 15 mm, B - 3 mm, C - 3 mm, Weight - 0,0015 Kg'",
+   "url": "https://bearingsize.info/catalogue-online/deep-groove-ball-bearings/bearing-61700-iso-obj104859.html",
+   "fetched": "2026-09-04 WebFetch"
+  },
+  "123bearing-61700-EZO": {
+   "what": "'61700-INOX-EZO ... inner diameter of 10 mm, an outer diameter of 15 mm and a thickness of 3 mm', brand EZO, stainless, 14,91 EUR excl. VAT",
+   "url": "https://www.123bearing.eu/bearing-housing/deep-groove-bearing/single-row/61700-inox-ezo",
+   "fetched": "2026-09-04 curl 200",
+   "archived": "out/open/tolerance-evidence/123b-61700.html"
+  },
+  "123bearing-ET2216-EZO": {
+   "what": "'ET2216-EZO ... inner diameter of 16 mm, an outer diameter of 22 mm and a thickness of 4 mm', brand EZO, weight 2 g, $26.29",
+   "url": "https://www.123bearing.com/bearing-housing/deep-groove-bearing/single-row/et2216-ezo",
+   "fetched": "2026-09-04 curl 200",
+   "archived": "out/open/tolerance-evidence/123b-et2216.html"
+  },
+  "nzminiature-MR1622": {
+   "what": "'Bearing Model: MR1622-ZZ', 'Also Known As: ET2216ZZ, DDA2216, DDA2216ZZ, MR1622ZZ', 'Material: GCR15 Bearing Steel', metal shields both sides; page states NO ABEC grade, NO clearance class, NO load rating",
+   "url": "https://nzminiaturebearings.com/product/16x22x4-mm-mr1622-zz-bearing-sku-00206030.html",
+   "fetched": "2026-09-04 WebFetch"
+  },
+  "bambu-store-vision-encoder": {
+   "what": "'Below 50μm Motion Accuracy', 'a matrix of 10⁴ Encode Markers and 5μm-resolution optical measurements, this advanced XY-axis calibration solution delivers motion accuracy within 50μm', 'Compatibility X2D H2 Series', 'only used for motion accuracy calibration' -- MOTION accuracy of the toolhead, never a part dimension",
+   "url": "https://us.store.bambulab.com/products/vision-encoder",
+   "fetched": "2026-09-04 curl 200",
+   "archived": "out/open/tolerance-evidence/store-ve.html"
+  },
+  "bambu-wiki-motion-accuracy": {
+   "what": "'Motion accuracy calibration aims to solve the absolute positioning problem in the 3D printing process'; 'Improve the dimensional accuracy of printed objects, especially for objects with larger sizes'; 'if your printer is in good condition, there may be no visible difference in precision between prints before and after' -- no numeric part tolerance anywhere on the page",
+   "url": "https://wiki.bambulab.com/en/h2/manual/motion-accuracy",
+   "fetched": "2026-09-04 curl 200",
+   "archived": "out/open/tolerance-evidence/wiki-motion.html"
+  },
+  "bambu-wiki-auto-circle": {
+   "what": "'only applicable to complete circular holes/shafts on a horizontal plane, with a diameter size within 50mm'; 'limits the print speed of the identified circular features ... (print speed 200mm/s)'; 'only compatible with some Bambu Official filaments'; 'we recommend using a step value of 0.02mm for fine-tuning' -- no achieved-accuracy number published",
+   "url": "https://wiki.bambulab.com/en/software/bambu-studio/manual/auto-circle-contour-compensation",
+   "fetched": "2026-09-04 curl 200",
+   "archived": "out/open/tolerance-evidence/wiki-autocircle.html"
+  },
+  "bambu-wiki-xy-hole": {
+   "what": "worked example, verbatim: 'the original measurment was 5.66 mm which means the hole is 0.24 mm undersized. After inserting half of that value in Bambu Studio, the hole is now 0.04 Oversized' -- i.e. a Ø6 printed hole 0.24 mm under with compensation 0, 0.04 mm over after; 'The hole diameter will increase by twice the compensation value'",
+   "url": "https://wiki.bambulab.com/en/software/bambu-studio/xy-hole-contour-compensation",
+   "fetched": "2026-09-04 curl 200",
+   "archived": "out/open/tolerance-evidence/wiki-xyhole.html"
+  },
+  "3dpi-h2s-launch": {
+   "what": "3D Printing Industry, 2025-08-27, 'Bambu Lab Launches the New H2S': 'the H2S can achieve distance-independent motion accuracy under 50 μm' (with the Vision Encoder, 'optional upgrade for an additional $105'); spec table 'Build Volume 340 x 320 x 340 mm³', 'XY Positioning Accuracy: < 0.3 mm', 'Z Height Measuring Accuracy: ± 0.1 mm' (the latter two are the laser/live-spatial-alignment rows of the table, not a part tolerance)",
+   "url": "https://3dprintingindustry.com/news/bambu-lab-launches-the-new-h2s-technical-specifications-and-pricing-243603/",
+   "fetched": "2026-09-04 WebFetch"
+  },
+  "bambulab-tech-specs-pages": {
+   "what": "bambulab.com/en-us/h2s/tech-specs, /h2d/tech-specs, /x2d/tech-specs and web.archive.org copies all returned HTTP 403 to WebFetch and to curl with a browser UA on 2026-09-04; NOT read. The vendor's own spec page is therefore cited only through the 3DPI transcription and the store page.",
+   "status": "CANNOT FETCH"
+  }
+ },
+ "farm": {
+  "printers": "ce-cad/cecad/data/printers.json: H2D x2 (0947BJ622800578, 0947BJ622800686), H2S x2 (0938BC5C1800794, 0938BC612100527 'Bóbr'), X2D x1 (20P8BJ5A1000040). No X1C on the farm.",
+  "presets": "ce-slice slice_presets 2026-09-04: slicer 02.08.02.61; 'Bambu Lab H2S 0.4 nozzle' PLA -> 'Bambu PLA Basic @BBL H2S'; ce-print-scheduler config.py:82-83 default process layer '0.20mm' quality 'Standard'",
+  "measured_coupons": "NONE. ce-cad/cecad/data/print_fits.json = {machines:{}, schema:1}; grep of ce-parts, ce-print-scheduler, ce-slice, ce-cad/cecad/data for caliper/coupon/as-printed finds only prescriptions (insert-m4-heatset docs, wheel-scooter-608 TESTING.md, GEOMETRY.md) -- no as-printed diameter has ever been recorded on this farm (2026-09-04)."
+ },
+ "resolved": [],
+ "still_open": []
+}
