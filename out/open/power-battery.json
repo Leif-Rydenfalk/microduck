@@ -1,0 +1,70 @@
+{
+ "study": "power-battery",
+ "status": "PARTIAL \u2014 checkpoint 1",
+ "date": "2026-09-04",
+ "owner": "resolve-power lane (CLASS 2 \u2014 power, battery, runtime). OWNS out/open/power-battery.json, out/open/trunk-inertial-fit.json, tools/trunk_inertial_fit.py, ce-parts/np-f550/*, ce-parts/radxa-zero-3w/* (electrical/component/docs records only).",
+ "items": {
+  "trunk_inertial_includes_battery": {
+   "verdict": "PASS \u2014 RESOLVED: Pollen's trunk_base inertial (0.199224 kg) INCLUDES the battery",
+   "method": "tools/trunk_inertial_fit.py: signed volume + centroid of every visual geom parented directly under trunk_base in reference/pollen-microduck-simulator/robot_allcollisions.xml, placed by the MJCF pos/quat; fit against the inertial's mass and COM x/z",
+   "measured": {
+    "geoms_cm3": {
+     "np_f970": 51.59,
+     "xl330 x2": 15.821,
+     "right_shell": 11.858,
+     "left_shell": 11.416,
+     "power_support": 9.562,
+     "trunk_base": 1.342,
+     "banana_pcb_locker": 0.429,
+     "seeed_bearing x2": 0.493
+    },
+    "mjcf_inertial": {
+     "mass_kg": 0.199224,
+     "com_m": [
+      -0.0226332,
+      -2.70828e-05,
+      0.00280064
+     ]
+    },
+    "fixed_density_check_PLA1240_steel7850_servo18g": {
+     "battery_0g": {
+      "mass_g": 86.65,
+      "com_mm": [
+       -7.0,
+       -0.3,
+       12.8
+      ]
+     },
+     "battery_99g": {
+      "mass_g": 185.65,
+      "com_mm": [
+       -22.4,
+       -0.1,
+       3.8
+      ]
+     },
+     "battery_95g": {
+      "mass_g": 181.65,
+      "com_mm": [
+       -22.1,
+       -0.1,
+       4.0
+      ]
+     }
+    },
+    "least_squares_battery_excluded": {
+     "rho_printed_kg_m3": 4389.2,
+     "note": "3.5x PLA's 1240 and STILL misses the M*COM equations by 2.34e-3 / 2.40e-3 kg.m (= 11.7 / 12.0 mm of COM)"
+    },
+    "least_squares_battery_included": {
+     "rho_printed_kg_m3": 1111.1,
+     "m_batt_kg": 0.11162,
+     "note": "exact fit (3 eq / 3 unknowns) with physically plausible values: printed 1111 kg/m3 (PLA with infill), battery 111.6 g"
+    }
+   },
+   "reading": "The battery mesh np_f970 (51.59 cm3) is the only geom that can put the trunk's COM 22.6 mm behind the origin at z 2.8 mm; every battery-out case leaves the COM at x -7..-11 mm, z 12.8..14.8 mm. So the 0.199224 kg is battery-IN, and the MJCF total 737.24 g is the robot WITH pack. Consequence: the 'battery-out' gait perturbation is a -99..-112 g change to trunk_base, not a +99 g one, and the 780 g Pollen shipping mass minus 737.24 g leaves 42.8 g for cables, screws, inserts and the mouth servo \u2014 a plausible remainder, where a battery-out reading would leave -56 g.",
+   "residual_uncertainty": "the fitted battery mass 111.6 g is what a lumped fit gives when the printed density is also free; with PLA fixed at 1240 the remainder is 99-113 g. Between 95 g (Sony's own F550) and 112 g the fit cannot discriminate; a scale on a built unit does (E6).",
+   "what_settles_it_beyond_this": "Nothing further is needed for the sim question. For the physical robot: weigh one built unit with and without the pack (TEST-PLAN E6)."
+  }
+ }
+}
