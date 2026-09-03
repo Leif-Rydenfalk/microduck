@@ -110,3 +110,48 @@ every claim in the repo is either measured, cited, or explicitly marked CANNOT D
 6. **Renders**: `sim/compare_render.py` (MuJoCo studio; camera front=az180, profile-left=az270, profile-right=az90, ¾ front-left=az225, ¾ back-right=az45; joint zooms need distance ≥ 0.16 m or the near plane clips to a blank white frame). `sim/assembly_steps_mj.py` for cumulative assembly frames. Every render of ours sits beside the real photo (Leif's rule).
 7. `INDEX.html` (tools/gen_index.py) is the repo front door; it stats every entry before writing. Regenerate it after adding a document.
 8. **LANE OWNERSHIP (Leif, 2026-09-02: "be highly parallel. use fable 5.1 for difficult tasks").** Read `out/handover/LANE-OWNERSHIP.json` before starting. If your lane letter is listed under `owned_elsewhere` and you are an agent of workflow wf_b277547c-936, do NOT do the work: return immediately as that file instructs. Lanes A, F, H run in a parallel workflow.
+
+## STANDING ORDERS ADDED 2026-09-03 — Leif, verbatim. These bind every agent and every workflow.
+
+> lots of details like joints and screws and bolts are mising from our cad
+> everything muyst be there. all everything including ball joints and it must
+> match exactly this is your job and the job of your agents tell them they have
+> more freedom to explore and create their own tools and whatever they need this
+> is their machine
+
+> make more detailed everything tell agents and workflows to do this divide the
+> work prioperly were making this for real a lot more detail and attention to
+> details.
+
+> the wiring should b e in our cad designs add it proeprly do even more details
+> and poses and even more detailed joint pictures and comparrisons
+
+**What this means in practice, and it is not negotiable:**
+
+1. **EVERY PHYSICAL THING IS IN THE CAD.** Screws, nuts, heat-set inserts,
+   washers, ball joints/ball studs, bearings, cables, connectors, adhesive
+   joints, the lot. MEASURED 2026-09-03: `ce-assemblies/microduck/current/bom.json`
+   holds **38 rows and ZERO fastener rows** — because the assembly was seeded
+   from Pollen's MJCF, which carries only visual and collision geometry. Yet
+   `SPEC.md:75-76` reads the robot as an **M2 system: Ø2.2000 clearance ×77,
+   Ø4.4000 counterbore ×28, Ø1.6000 tap ×20, Ø2.7000/2.8000 ×20**. Those 145
+   holes each imply a fastener that is not in our model. Find every one by
+   MEASURING the geometry, put it in the assembly through a connection (never a
+   literal transform), and let the BOM and the drawings carry it.
+2. **IT MUST MATCH EXACTLY.** Where our model and the reference disagree, the
+   disagreement is measured and reported, never smoothed. A part nobody measured
+   is CANNOT DETERMINE with what settles it.
+3. **THE AGENTS OWN THIS MACHINE.** Leif: *"they have more freedom to explore and
+   create their own tools and whatever they need this is their machine"*. So:
+   write the tool you wish existed rather than working around its absence
+   (PROTOCOLS.md P11 — a capability a core app lacks is part of your task, and a
+   one-off script that dies with the session is the defect). Promote anything
+   reusable into `ce-cad`, `ce-struct`, `ce-wire` or `bin/` with its docs and its
+   self-test. Explore: read the reference, take a measurement nobody asked for,
+   follow the thing that looks wrong.
+4. **DIVIDE THE WORK PROPERLY.** Every lane states what it OWNS (paths) before it
+   starts; two agents never write one file; a lane too big for one agent is split
+   by artifact, not by adjective.
+5. **MORE DETAIL, EVERYWHERE.** More poses, more joint pictures, more sections,
+   more comparisons against the real photographs, more dimensions on every sheet.
+   Depth is the deliverable.

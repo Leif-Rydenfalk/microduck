@@ -6,6 +6,27 @@
 <title>Microduck — Goal</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
+/* doc.css — the shared academic style for every document in this repo.
+   Link it, do not copy it.
+
+   THE FONT LINK: the axis is `opsz`, NOT `opt_sz`. Measured 2026-09-03 (lane T
+   fix pass), headless Chrome, document.fonts:
+
+     family=Source+Serif+4:opt_sz,wght@...   ->  HTTP 400, 0 @font-face rules
+                                                 declared, {} families
+     family=Source+Serif+4:opsz,wght@...     ->  HTTP 200, 42 @font-face rules,
+                                                 {Source Serif 4: 18,
+                                                  Source Sans 3: 14,
+                                                  IBM Plex Mono: 10}
+
+   One malformed axis name 400s the WHOLE css2 request, so it did not merely
+   drop the serif — it dropped Source Sans 3 and IBM Plex Mono with it, and
+   every one of the 21 documents that carried the typo silently fell back to
+   Georgia / system sans / Menlo with no error anywhere. Nothing on the page
+   says it happened; the only way to see it is to count faces. If you edit the
+   link, re-run that count before you commit.
+   (document.fonts.check() is not the test: it returns true for a family with
+   no faces at all. Count document.fonts.size.) */
   :root{
     --paper:#ffffff;--card:#fbfaf7;--ink:#1a1a1a;--ink-2:#565656;--ink2:#565656;
     --line:#d7d3ca;--hair:#d7d3ca;--rule:#1a1a1a;--accent:#243b53;--wire:#243b53;--wire-ink:#243b53;
@@ -93,7 +114,18 @@
   hr{border:none;border-top:1px solid var(--hair);margin:22px 0}
   strong{font-weight:700}
   table.data td{max-width:none}
+  /* compact: a wide evidence table that must still fit the 920px sheet in print/PDF,
+     where .tablewrap's horizontal scroll does not exist. Added 2026-09-03 (lane F2). */
+  table.data.compact{font-size:11.5px}
+  table.data.compact th{padding:5px 6px;font-size:9.5px;letter-spacing:.03em;white-space:normal}
+  table.data.compact td{padding:4px 6px}
+  table.data.compact td code{font-size:.94em;word-break:break-all}
+  table.data.compact .chip{font-size:10px}
 
+
+  table.data.compact td{overflow-wrap:anywhere}
+  table.data.compact th{overflow-wrap:break-word}
+  table.data.compact td a,table.data.compact td code{word-break:break-all}
 </style>
 </head>
 <body>
@@ -197,6 +229,12 @@ custom board has a design or a quoted SOW, the assembly and test procedures are 
 every claim in the repo is either measured, cited, or explicitly marked CANNOT DETERMINE.</pre>
 <h3>HANDOVER CORRECTIONS — read before acting on the findings above (added 2026-09-02 21:25 by the orchestrator, from the previous session&#x27;s handover)</h3>
 <ol><li><strong>Finding 1 (head) is CANNOT DETERMINE, not confirmed.</strong> <code>tools/head_analysis.py</code> → <code>out/verify/head_analysis.json</code> measured scale-free silhouette ratios: head length / robot height agrees to 3.76 % (product 0.4233, ours 0.4392) — the head is NOT markedly longer. The aspect ratio differs +69 % (1.206 vs 2.042) but the reference photo has the beak OPEN and the head TILTED, which inflates apparent head height. Verdict CANNOT DETERMINE (commit 960943a, COMPARISON.html §5). <strong>Lane A must first SETTLE it</strong>: photogrammetric scaling against the XL330-M288-T visible in the same frame (body face 20.000 × 34.000 mm, ROBOTIS drawing cited), then measure the head shell in mm against the mesh&#x27;s 91.751 × 122.688 × 46.339 mm, posing jaw_soft open to match the photo (the jaw is NOT an actuated joint in the published model). Re-model the head ONLY if the measured deviation exceeds the 1.0 mm p95 / 1.5 mm bbox rule of docs/REBUILD-PROTOCOL.md; otherwise the deliverable is the measurement and the eye-bezel question.</li><li><strong>Electronics component verification already ran</strong> (previous session, 14 Opus agents, each component: MPN, package, dims, pinout, voltage, ≥2 distributors with price at 1/100/1000, MOQ, lead time, cited). Results: <code>out/verify/electronics_verify.json</code> (canonical, commit 1fe090a; <code>out/handover/elec-verify-wf_969f3a4c.json</code> is the same journal copied earlier). Its five design-changing findings are in <code>workflows/RUNNING.md</code>. Lanes C, D, E and every verify/fix stage: CONSUME it (merge into electronics/elec-spec.json and spec/sourcing.json, re-check citations), do not redo it.</li><li>**A manufacturing workflow (DFM / process / assembly+jigs / QA / sourcing ×3 / synth) died with the previous session and was RELAUNCHED by the orchestrator from <code>workflows/manufacturing.js</code> (5 DFM groups + process + assembly + QA + 3 sourcing + synth, Opus). Its results land in <code>out/handover/manufacturing.json</code> when it returns. Lane G and its fix stage: check that file and merge rather than duplicate.</li><li><strong>Detached FEA is running</strong>: <code>sim/stress_matrix.py</code> → <code>out/stress/matrix.json</code> + <code>matrix.log</code> (buffered; read the file). 4 structural parts × 3 load cases (standing 20 N / landing 60 N / lateral 15 N) in PLA with a gmsh mesh-size fallback [None, 2.0, 1.5, 1.2, 1.0, 0.8], then mesh convergence on the governing case, then a material sweep PLA/PETG/ABS/NYLON/ASA. The upper-leg gmsh failure is a MESHER SIZE issue — the solid is valid, closed, 462 faces. Lane F: consume matrix.json, do not restart it, do not run a second copy.</li><li><strong>Unit trap</strong>: Pollen&#x27;s reference assets are in METRES (×1000); our rebuilds are native mm. <code>sim/mech_dims.py</code> handles it. Do not repeat that mistake.</li><li><strong>Renders</strong>: <code>sim/compare_render.py</code> (MuJoCo studio; camera front=az180, profile-left=az270, profile-right=az90, ¾ front-left=az225, ¾ back-right=az45; joint zooms need distance ≥ 0.16 m or the near plane clips to a blank white frame). <code>sim/assembly_steps_mj.py</code> for cumulative assembly frames. Every render of ours sits beside the real photo (Leif&#x27;s rule).</li><li><code>INDEX.html</code> (tools/gen_index.py) is the repo front door; it stats every entry before writing. Regenerate it after adding a document.</li><li><strong>LANE OWNERSHIP (Leif, 2026-09-02: &quot;be highly parallel. use fable 5.1 for difficult tasks&quot;).</strong> Read <code>out/handover/LANE-OWNERSHIP.json</code> before starting. If your lane letter is listed under <code>owned_elsewhere</code> and you are an agent of workflow wf_b277547c-936, do NOT do the work: return immediately as that file instructs. Lanes A, F, H run in a parallel workflow.</li></ol>
+<h3>STANDING ORDERS ADDED 2026-09-03 — Leif, verbatim. These bind every agent and every workflow.</h3>
+<blockquote>lots of details like joints and screws and bolts are mising from our cad<br>everything muyst be there. all everything including ball joints and it must<br>match exactly this is your job and the job of your agents tell them they have<br>more freedom to explore and create their own tools and whatever they need this<br>is their machine</blockquote>
+<blockquote>make more detailed everything tell agents and workflows to do this divide the<br>work prioperly were making this for real a lot more detail and attention to<br>details.</blockquote>
+<blockquote>the wiring should b e in our cad designs add it proeprly do even more details<br>and poses and even more detailed joint pictures and comparrisons</blockquote>
+<p><strong>What this means in practice, and it is not negotiable:</strong></p>
+<ol><li><strong>EVERY PHYSICAL THING IS IN THE CAD.</strong> Screws, nuts, heat-set inserts, washers, ball joints/ball studs, bearings, cables, connectors, adhesive joints, the lot. MEASURED 2026-09-03: <code>ce-assemblies/microduck/current/bom.json</code> holds <strong>38 rows and ZERO fastener rows</strong> — because the assembly was seeded from Pollen&#x27;s MJCF, which carries only visual and collision geometry. Yet <code>SPEC.md:75-76</code> reads the robot as an <strong>M2 system: Ø2.2000 clearance ×77, Ø4.4000 counterbore ×28, Ø1.6000 tap ×20, Ø2.7000/2.8000 ×20</strong>. Those 145 holes each imply a fastener that is not in our model. Find every one by MEASURING the geometry, put it in the assembly through a connection (never a literal transform), and let the BOM and the drawings carry it.</li><li><strong>IT MUST MATCH EXACTLY.</strong> Where our model and the reference disagree, the disagreement is measured and reported, never smoothed. A part nobody measured is CANNOT DETERMINE with what settles it.</li><li><strong>THE AGENTS OWN THIS MACHINE.</strong> Leif: <em>&quot;they have more freedom to explore and create their own tools and whatever they need this is their machine&quot;</em>. So: write the tool you wish existed rather than working around its absence (PROTOCOLS.md P11 — a capability a core app lacks is part of your task, and a one-off script that dies with the session is the defect). Promote anything reusable into <code>ce-cad</code>, <code>ce-struct</code>, <code>ce-wire</code> or <code>bin/</code> with its docs and its self-test. Explore: read the reference, take a measurement nobody asked for, follow the thing that looks wrong.</li><li><strong>DIVIDE THE WORK PROPERLY.</strong> Every lane states what it OWNS (paths) before it starts; two agents never write one file; a lane too big for one agent is split by artifact, not by adjective.</li><li><strong>MORE DETAIL, EVERYWHERE.</strong> More poses, more joint pictures, more sections, more comparisons against the real photographs, more dimensions on every sheet. Depth is the deliverable.</li></ol>
 </div>
 </body>
 </html>
