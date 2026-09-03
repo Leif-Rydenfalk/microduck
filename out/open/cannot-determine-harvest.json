@@ -1,0 +1,697 @@
+[
+ {
+  "what": "What a real Microduck walks in 8.0 s at a commanded vx 0.25 m/s",
+  "why": "No real-robot walk figure exists in this repository or in any Pollen document. Our MuJoCo run of Pollen's own alpha_walking.onnx on Pollen's own physics measured 0.7925 m (stock-mesh and swapped-mesh trajectories bit-identical), but the sim already under-tracks its own command (0.1053 m/s achieved against 0.25 commanded) with position actuators standing in for the BAM model the policy was trained with",
+  "what_settles_it": "WK-02 and WK-03 on the first five built units. Replace the 75 % fraction with the measured mean minus three standard deviations and regenerate. Best-supported option today: keep 0.594 m and label the fraction a decision, which the document does; the alternative it beat was quoting 0.7925 m as the gate, which would fail every real robot for a reason that is not a defect"
+ },
+ {
+  "what": "Whether the XL330 servos see the raw 6.6-8.4 V pack, above their published 3.7-6.0 V band",
+  "why": "Pollen's runtime maps the pack 6.6-8.2 V through the servos' own Present Input Voltage(144) (model.rs:99-113) and writes Shutdown(63)=52, clearing exactly the Input Voltage Error bit \u2014 both consistent with stock servos on the raw pack. But the firmware's Max Voltage Limit(32) cannot be set above 7.0 V, and ROBOTIS publishes no absolute maximum. Code cannot settle it",
+  "what_settles_it": "TEST-PLAN EB-04: a meter on pin 2 of the servo bus at four points, at 8.20 V and 6.60 V supply. Both outcomes are stated in the gate; if SERVO_V is inside 3.7-6.0 V, docs/ELECTRONICS-AND-SOFTWARE.md 3.4 must be corrected"
+ },
+ {
+  "what": "What a Microduck draws, walking",
+  "why": "ROBOTIS publishes no running or no-load current at any voltage for the XL330-M288-T \u2014 only Standby 17 mA and stall 1.11/1.47/1.74 A at 3.7/5.0/6.0 V, and above 6.0 V no stall figure at all. No measured figure exists for the assembled robot, so every rail budget in the repo (including the 1 A-per-moving-servo basis behind wiring/CABLES.md's voltage-drop model) rests on an assumption",
+  "what_settles_it": "TEST-PLAN EB-07: pack current and per-servo Present Current(126) in three states (torque off / home held / walking 8 s), gated on Current Limit(38) = 1750 mA so the per-servo half needs no clamp"
+ },
+ {
+  "what": "Whether any joint's servo-positive direction is inverted relative to the MJCF joint sign",
+  "why": "The home-count column of \u00a74.1 is computed as 2048 + rad x 4096/(2pi) from DEFAULT_POSITION. That mapping assumes servo-positive equals joint-positive with no inversion, and no published source gives a per-joint inversion table \u2014 Pollen's code never needs one because the robots were built with a known convention",
+  "what_settles_it": "SV-05 on the first unit: a joint that lands the same distance the wrong side of 2048 is an inversion, not a calibration error. The measured table becomes a column of \u00a74.1 and the document is regenerated"
+ },
+ {
+  "what": "NFC reader IC, bus and antenna geometry; and the GPIO behind the camera-use indicator LED",
+  "why": "Zero hits for nfc/pn532/st25 in duck-ipc-proto_lib.rs and research/microduck-elec-grep.txt, and zero hits for the LED. No reader is named anywhere. Two candidate readers are datasheeted on the shelf and neither is confirmed fitted: ST25R3916 (two single-ended antenna drives, which would suit the press kit's two antennas) and PN7150 (one antenna path)",
+  "what_settles_it": "A teardown identifying the reader and tracing the LED, or a later pollen-robotics/microduck release exposing an NFC service. Recorded as SN-09 and SN-10 \u2014 rows that exist so the absence is on the record, and deliberately kept OFF the end-of-line checklist so nobody is trained to tick an unanswerable question"
+ },
+ {
+  "what": "The friction coefficient of the printed TPU sole against the acceptance surface",
+  "why": "The simulation uses foot friction 1.0, condim 3 on the foot collision geoms only, against a rigid floor (constants.py:100-104). Nothing in this repository measures the real sole against any real material",
+  "what_settles_it": "A coefficient-of-friction measurement of the printed sole against the chosen bench material. Until then \u00a77.1 specifies the surface by description (hard, flat, dry, matte laminate or sealed MDF; not carpet, not glass, not rubber) and requires the level to be measured and logged, which is the closest specification that can be written without inventing a number"
+ },
+ {
+  "what": "XL330-M288-T winding-to-case thermal resistance and lumped thermal capacitance",
+  "why": "ROBOTIS publishes no thermal model, no winding resistance and no continuous-torque rating \u2014 only the three stall rows and the 70 degC Temperature Limit(31). So every case temperature computed is a lower bound on the winding, and time-to-limit is reported as a CURVE over cp (500\u20131700 J/kgK on the vendor's 18 g), not a number. At cp=500 with no radiation the knee reaches 70 degC in 12.33 min; at cp=1700, 41.92 min; with black-body radiation it never does.",
+  "what_settles_it": "A step test on one servo: hold a known constant torque against a fixture and log Present Temperature(146) (RAM 146, 1 degC) to steady state. The asymptote gives R_th and the knee gives C in the same run \u2014 and it converts both knees' CANNOT DETERMINE into a verdict."
+ },
+ {
+  "what": "This workshop's own printed dimensional band (the whole tolerance stack rests on it)",
+  "why": "ce-cad/cecad/data/print_fits.json is {\"machines\": {}, \"schema\": 1} \u2014 no machine on the farm has ever been measured, so every tolerance number in the stack rests on a published SERVICE tolerance (Protolabs Network) rather than on the printer that will make these parts. Those service bands make a \u00d816 bearing seat coarser than IT15, which is not survivable, yet the parts evidently work \u2014 the gap between the two is exactly the unmeasured quantity.",
+  "what_settles_it": "Build cecad.coupon.coupon() with the \u00d810 and \u00d816 rungs, print it, measure with calipers and store with cecad.coupon.record_measurements(); cecad.coupon.offsets_for() then answers per machine + material instead of returning CANNOT DETERMINE."
+ },
+ {
+  "what": "The bolted flange's face parallelism (which governs the angular misalignment on every joint)",
+  "why": "The published FDM standards state DIMENSIONAL accuracy, not form. Applying the dimensional band as if it were parallelism across the \u00d815.9\u201319 disc gives 3.0128\u20133.5988 deg, which is an UPPER BOUND of unknown tightness, not a measurement. Both flange faces come off the same layer stack so the true error is expected to be far smaller \u2014 but 'expected' is not measured, and this is the term that governs every joint's angle.",
+  "what_settles_it": "Print a flange coupon and read face parallelism across \u00d816 with a dial indicator on a surface plate; store it beside the bore/pin ladder of cecad.coupon."
+ },
+ {
+  "what": "The Radxa Zero 3W's board-level dissipation and the RK3566's junction-to-air resistance",
+  "why": "ce-parts/radxa-zero-3w/electrical.host.json unknowns[1] verbatim: 'Board current draw (idle / policy running / video encoding): no fetched document states it.' and power[4]: 'Board-level current draw: NOT stated in any fetched document - CANNOT DETERMINE.' Rockchip publishes no theta_JA. The only sourced electrical figure is the 5 V / 2 A supply RATING = 10.0 W ceiling. So the internal leg is not modelled \u2014 it is measured, at 95 degC.",
+  "what_settles_it": "An inline meter on the 5 V path in the three states electrical.host.json itself names (idle, policy running, video encoding), plus /sys/class/thermal/thermal_zone*/temp logged beside a thermocouple on the head shell at a known load."
+ },
+ {
+  "what": "The pack's self-heating and the servo-bus regulator's",
+  "why": "ce-parts/np-f550/electrical.part.json uncertainties verbatim: 'INTERNAL RESISTANCE, MAX CONTINUOUS DISCHARGE, CHARGE RATE: stated by neither fetched page.' \u2014 no cell internal resistance means no I^2 R to compute, and the fitted pack's maker is itself CANNOT DETERMINE. The servo-bus regulator lives on the Robot HAT, one of the three custom PCBs with no published design, so there is no part number, no package and no theta_JA. The 6.4194 W bus lower bound is what such a study would start from.",
+  "what_settles_it": "The pack's own datasheet once the fitted maker is identified (lane E), and the Robot HAT schematic (lane D) naming the regulator."
+ },
+ {
+  "what": "The bearings' radial internal clearance and width tolerance, and the XL330 gearbox backlash / horn-disc tolerance",
+  "why": "The reference names the rings only 'seeed_bearing' \u2014 no designation, no vendor sheet, so no ISO 5753 clearance class (both connection folders say so in their 'interference' check). ROBOTIS publishes no gearbox backlash anywhere on E1, E2 or D1, and D1 ('XL,XC-330.pdf') is stamped '[FOR REFERENCE ONLY]' / 'Nonescale' with no tolerance block. All four terms are listed in the stack's open_terms and NOT folded into any number, so every figure reported understates the real stack.",
+  "what_settles_it": "A micrometer on the actual rings and a dial gauge on an assembled joint; for backlash, lock a servo case, load the horn both ways and read Present Position(132) (4096 pulse/rev = 0.0879 deg/count)."
+ },
+ {
+  "what": "Seat length for the knee bearings",
+  "why": "A 22x16x4 bearing is on both knee axes but no part folder declares a bearing_seat interface for it, so engagement, bearing cocking freedom and the axial-vs-engagement ratio are all blank for left_knee and right_knee.",
+  "what_settles_it": "Measure the seat off microduck-upper-leg-left/right with cecad.meshfeatures and add the bearing_seat interface to its cad/interfaces.json \u2014 the same measurement every other consumer already carries."
+ },
+ {
+  "what": "The Radxa ZERO 3W's actual power consumption (and with it, a single battery-runtime number)",
+  "why": "No vendor document states it. Radxa's hardware page states only a supply REQUIREMENT \u2014 'Requires 5V/2A power adapter' (https://docs.radxa.com/en/zero/zero3, fetched 2026-09-02) \u2014 which is a 10.0 W ceiling, not a draw. The product brief PDF (https://dl.radxa.com/zero3/docs/hw/3w/radxa_zero_3w_product_brief.pdf, fetched 2026-09-02) states no consumption figure. out/handover/elec-verify-wf_969f3a4c.json's Radxa row records the same '5V/2A' and no current. Search-engine answer boxes quoting '0.35-0.45 A idle' were seen and are NOT recorded \u2014 an answer box is not a source. The HAT, ToF, IMX219 and imu_to_dxl board add to it with no published system figure either.",
+  "what_settles_it": "An ammeter in series with the pack lead of a running unit, with Present Current(126) summed off the Dynamixel bus at the same time so the servo and board halves separate. Best option this evidence supports: publish runtime as a function of the unknown (done \u2014 7 compute levels x 3 modes). The alternative it beat: asserting ~2 W from a search-engine summary, which would have produced one confident wrong number."
+ },
+ {
+  "what": "The XL330-M288-T's no-load current",
+  "why": "ROBOTIS's Specifications table publishes three stall rows, three no-load SPEEDS and 'Standby Current | 17 [mA]' \u2014 and no no-load current. ce-parts/xl330-m288-t/electrical.chip.json already records current_mA.typical = null for the same reason.",
+  "what_settles_it": "Present Current(126) read off an unloaded servo turning at speed, or a bench ammeter. Consequence recorded rather than papered over: I = tau/kT goes to zero at zero torque, so every motor-power figure in battery-runtime.json is an explicit LOWER bound, and this is the most likely home for the 2x gap against Pollen's ~1 h."
+ },
+ {
+  "what": "How much of the pack's 18.7 Wh is actually delivered before the 6.6 V cutoff",
+  "why": "robotd shuts down on a ~10 s EMA at 6.6 V (robotd.toml [safety] battery_empty_shutdown), and no discharge curve exists for the fitted cell because the fitted cell is unidentified.",
+  "what_settles_it": "A discharge run on the real pack at the measured walking current. Until then every hour in battery-runtime.json credits 100 % of nominal and is stated as an upper bound on that account."
+ },
+ {
+  "what": "Which NP-F550-shape pack is actually fitted",
+  "why": "Pre-existing and unchanged: 'NP-F550' is Sony's shape and Sony's own cell is 1500 mAh / 10.8 Wh, so a 2600 mAh 'NP-F550' is necessarily third-party, and no Pollen source names the maker (ce-parts/np-f550/component.json). Duracell's DR5 is the representative part on the shelf, not a proven fit.",
+  "what_settles_it": "The label on a shipped pack (maker, cell, Wh, certification marks), or Pollen naming the supplier."
+ },
+ {
+  "what": "Whether Pollen's trunk inertial already includes the 99 g battery",
+  "why": "The MJCF has no battery body; trunk_base carries a single lumped inertial of 0.199224 kg out of a 0.737243 kg total, and nothing in the published model says what that lump contains. 99 g is 13.43 % of the total, so a true battery-in/battery-out pair is a bigger perturbation than +/-10 %.",
+  "what_settles_it": "Weighing a built robot with and without the pack, or a Pollen mass breakdown. Best option this evidence supports: sweep +/-10 % as the brief specifies and say so, rather than assert a battery-out case. The gait proved insensitive across that range (1.1614 m vs 1.2894 m walked, no fall either way), so the finding is unlikely to move."
+ },
+ {
+  "what": "Which of the two bodies a joint joins physically carries the servo housing, and which carries the horn",
+  "why": "A joint declared inside MJCF body C joins C to its parent P. The kinematic file says which two bodies a joint joins and says nothing about which side the actuator case is bolted to. The old hand-typed column asserted one of the two per row and was measurably inconsistent (9 parent, 5 child), so it has been replaced by both measured bodies rather than a better guess. The mouth (ID 34) is not in the MJCF at all.",
+  "what_settles_it": "spec/mesh-placements.json read against the xl330 body geometry \u2014 the housing is the body whose frame the servo case is fixed in, the horn is the body that rotates with the output; lane B's per-joint drawings settle it visually; and SV-02's jig has to know it anyway, because the mechanical zero is measured against whichever body the horn indexes to. Written into the document's open-questions table (\u00a713, against SV-02) with exactly this text."
+ },
+ {
+  "what": "Whether any gate in this plan is the right gate",
+  "why": "No Microduck has been built here. Every PASS band is a prediction: the walk gate is 75 % of a simulated distance and that fraction is stated as a decision of the plan, not a measurement; no real-robot walk distance exists in this repository or in Pollen's published material.",
+  "what_settles_it": "One built unit run through the plan. The document's \u00a713 lists 15 such questions, each naming the test that closes it; most are answered the first time a unit is on a bench."
+ },
+ {
+  "what": "Head shell length/width/height of the product vs the mesh at the 1.5 mm per-axis rule",
+  "why": "the two usable photographs (cream +4.52 \u00b1 1.04 mm, graphite \u22126.27 \u00b1 1.44 mm) disagree by 5.13 mm rms \u2014 a systematic error (pose fit at 46\u201362\u00b0 yaw, mask edges, the graphite scale servo sitting 44 mm nearer the camera than the head with the camera distance unknown) larger than each photo's own uncertainty; combined +0.79 \u00b1 5.29 mm",
+  "what_settles_it": "a calliper on one product head (top_head_shell length 122.690 / width 91.760 / height 46.336 mm to 0.1 mm), or one purpose-shot photograph: pure profile, beak closed, head level, a ruler or the XL330 label face in the head's focal plane, \u22654000 px \u2014 scale uncertainty then <0.5 % (0.6 mm)"
+ },
+ {
+  "what": "Eye ring outer diameter at the 1.5 mm rule",
+  "why": "profiles say \u22120.02 \u00b1 0.32 mm (PASS) but the true front view implies +1.16 mm with \u00b10.6 mm from the flat-lay's 11\u00b0 tilt, so |d|+u = 1.76 > 1.5",
+  "what_settles_it": "a calliper across the ring's outer edge (mesh 30.000 mm) or Pollen's part drawing"
+ },
+ {
+  "what": "Camera distance of the store photographs (D)",
+  "why": "no EXIF, no ruler; the ankle-vs-neck servo bracket only gives 700\u20131650 mm",
+  "what_settles_it": "a ruler in frame or the original files' EXIF; it moves r by \u00b10.0105 only, so it is not what blocks the verdict"
+ },
+ {
+  "what": "How the eye ring's \u00d819.0 x 1.5 rear spigot is fixed in the face panel",
+  "why": "the decimated face_part.stl registers only the \u00d814.5 lens hole on that axis (cecad.meshfeatures), no \u00d819 recess or screw",
+  "what_settles_it": "the undecimated face part, or a product face panel in hand"
+ },
+ {
+  "what": "ToF window slot on the mesh side (photo: 9.8 x 5.4 mm implied, 22.53 mm right of the eye)",
+  "why": "the mesh has no ToF window geom; only the MJCF site (22.4 mm) exists",
+  "what_settles_it": "the face-part rebuild must carry the slot; a product face panel gives its size"
+ },
+ {
+  "what": "Whether the last 0.0500 mm of the 4.0000 mm bearing ring is carried at the six hip joints",
+  "why": "the part folder declares a 1.9500 mm printed boss; the servo placement in joint-geometry.json measures the same boss at 2.0000 mm. The 0.0500 mm difference is below the resolution of the decimated xl330.stl those placements come from, so support is graded 98.75 % CANNOT DETERMINE rather than rounded to 100 %.",
+  "what_settles_it": "a caliper on a real XL330 horn disc and on a printed bracket boss \u2014 one measurement of each."
+ },
+ {
+  "what": "The coaxiality step between the printed \u00d816 boss and the servo's \u00d816 horn boss that share one bore",
+  "why": "worst case 0.6000 mm at FDM-A against 0.2500 mm of radial clearance, so it binds at all three bands \u2014 but the dominant term (the printed position of the boss relative to its own bolt circle) is an UPPER BOUND, not a measurement: no published FDM standard states a POSITIONAL tolerance, Protolabs' rows are DIMENSIONAL. The ring's own radial internal clearance is also unknown ('seeed_bearing', no designation).",
+  "what_settles_it": "print one bracket, put it on a real XL330 horn, read the runout of the printed boss against the horn boss with a dial indicator on the assembled pair; and micrometer the ring's bore and both bosses."
+ },
+ {
+  "what": "This workshop's own printed tolerance band (FDM-C)",
+  "why": "ce-cad/cecad/data/print_fits.json is {\"machines\": {}, \"schema\": 1} \u2014 no machine on the farm has ever been measured. Bambu publishes no part dimensional tolerance for the H2S (only <50 um MOTION accuracy with the optional Vision Encoder), so no vendor spec substitutes. Best available evidence is a published measured study (FDM-D, \u00b10.150 mm, IT09-IT11) on a different machine and a different part.",
+  "what_settles_it": "cecad.coupon.coupon() built with the \u00d810 and \u00d816 rungs, printed on the farm's own H2S in the production PLA, measured with calipers and stored with cecad.coupon.record_measurements(). This single coupon closes the whole tolerance study."
+ },
+ {
+  "what": "Whether the failing duty cells are ever sustained long enough to reach steady state",
+  "why": "vx_0.60, vx_0.80, slope5_side_left, slope5_down and endurance_60s_slope5_up are COMMANDS the policy accepts, measured here for 12 s (60 s for the endurance cell). Steady state assumes the cell is held indefinitely. How long a Microduck is actually walked at them is a product decision nobody has made \u2014 it is not measurable from the repo.",
+  "what_settles_it": "a stated duty cycle for the product, plus the one-servo step test (hold a known torque, log Present Temperature(146) to steady state) that gives R_th and C in the same run."
+ },
+ {
+  "what": "The exact free-air volume of the head cavity",
+  "why": "at 1.00 mm four head meshes still disagree with their own exact solid volume by 15-25 % (face_part 84.4 %, elec_rpi_robot_hat_pcb 119.2 %, soft_mouth_top 50.5 %, pcb__raspberry_pi_zero_2_w 125.1 %). Over 100 % is an open/thin shell mesh that the ray-parity test fills; under 100 % is a feature the grid is still too coarse for. The cross-check verdict is therefore CANNOT DETERMINE.",
+  "what_settles_it": "the effect is already bounded by the 1.50 \u2192 1.00 mm convergence (free air moved -0.574 %); a 0.75 mm run would tighten it further, and a watertight-mesh repair on the four shell meshes would remove the parity artefact entirely. Neither changes the study's conclusion, which rests on a 95 degC MEASUREMENT, not on the air volume."
+ },
+ {
+  "what": "The winding temperature (as opposed to the case temperature) of any XL330 joint",
+  "why": "unchanged from the original study and still true: ROBOTIS publishes no winding-to-case thermal resistance, no thermal capacitance and no continuous-torque rating. Every temperature in the study is a LOWER BOUND on the winding, which makes the four FAILing duty cells worse, not better.",
+  "what_settles_it": "the one-servo step test above."
+ },
+ {
+  "what": "Thigh housing (part:microduck-upper-leg-left) FEA \u2014 walk 19.0636 N and drop 109.556 N cases declared, never solved",
+  "why": "every tessellation of the solid self-intersects at (x 66.6..66.7, y -12.19..-12.21, z 0.0): the R12.2 back-plate outline arc about A0 is tangent to the -y side wall there, leaving a 0.15077 mm2 sliver face (gmsh surface 350, min edge 0.00397 mm) that no surface mesher can triangulate; 6 sizes x 12 strategies refused, including STL routes and mesh repair; the solid is isValid/isClosed to OCC (462 faces, 3838.5671 mm3)",
+  "what_settles_it": "in ce-parts/microduck-upper-leg-left/current/cad/part.py break the arc/wall tangency at (y -12.2, z 0) \u2014 extend the -y wall 0.05 mm past the arc or fuse outline + wall in one sketch (< 0.05 mm, inside the 1.0 mm p95 rule); re-run cad-refcheck, then `ce-cad/bin/cad sim/stress_all.py --force microduck-upper-leg-left`"
+ },
+ {
+  "what": "Peak force of a 0.250 m fall onto one foot (and onto the head)",
+  "why": "the value spans 127.35 N (MuJoCo's default contact, equivalent 1940 N/m) to 10214 N (rigid robot on the TPU floor stiffness, confirmed by MuJoCo at that solref: 12763 N); the Hertz heel model (779-1062 N) indents past the 2.000 mm sole floor so the sole bottoms out onto the PLA ribs; the head apex is not spherical (sphere fit rms 1.843 mm) so no Hertz radius exists",
+  "what_settles_it": "one instrumented 0.250 m drop of a printed unit: trunk accelerometer at >= 5 kHz or a force plate under the foot \u2014 peak force and duration; the structural verdicts already state each part's linear failure load (shin 58.8 N, hip bracket 68.4 N, foot 138.3 N, yaw2roll 184.3 N, motor support 9.0 N) so the measured peak maps straight onto them"
+ },
+ {
+  "what": "Trunk base (part:microduck-trunk-base) safety factor",
+  "why": "as a plate alone it cannot carry the stance leg's 18.09 N (walk) / 104.35 N (drop): SF 0.344 / 0.062 held at its four edge screws, 1.609 / 0.242 as a hip-to-hip cantilever; in the product it is clamped between the two trunk shells and the hip-yaw XL330 case, a load path with an unmeasured share",
+  "what_settles_it": "a two-body solve (shells + base plate, bolted, cecad.stress or ce-struct multi-body) or a printed trunk loaded to 20 N at one hip on a bench"
+ },
+ {
+  "what": "Upper-leg rigidity plate (part:microduck-upper-leg-rigidity-plate) safety factor and buckling",
+  "why": "the bounding case (100 % of the thigh force through the 1 mm plate) reads SF 1.037 walk / 0.136 drop, which proves nothing about a plate sharing the load with the housing it closes; ce-struct buckling returned three eigen-factors within 0.1 % of 1.000 (a localised end-face mode at 0.33 mm voxels, not a plate mode)",
+  "what_settles_it": "the thigh housing meshed (item 1) and a two-body solve of housing + plate through the four M2 screws; or a printed plate compressed in a rig"
+ },
+ {
+  "what": "Strength of the fitted filament in the printed orientation (every SF rests on it)",
+  "why": "Pollen publishes only 'PLA' and 'TPU'; cecad's table is class-tier with no source and its polymer 'yields' are ultimates; the fetched Prusament PLA / NinjaFlex sheets are representative, not the spool; no part.py declares print_up, so the across-layer axis (17 +- 3 MPa interlayer) is unknown per part",
+  "what_settles_it": "ISO 527-1 coupons from the spool used, 5 per orientation (flat, on-edge, vertical), pulled to yield; declare printed.print_up() in each part.py"
+ },
+ {
+  "what": "Battery mass for the power-support load",
+  "why": "the fitted NP-F550-form pack is CANNOT DETERMINE (part:np-f550); the study uses the Duracell DR5's 99 g (ce-parts/np-f550/electrical.part.json:74) as the class figure",
+  "what_settles_it": "the label on a shipped pack (maker, Wh, mass)"
+ },
+ {
+  "what": "Ankle convergence at 0.7 mm",
+  "why": "the 0.7 mm solve did not complete (837 s wall; reason not recorded by that run \u2014 the code now stores it); the 1.5 -> 1.0 mm pair already agrees to 2.17 %",
+  "what_settles_it": "re-run `sim/stress_all.py --force microduck-ankle-left` on an idle machine (load was 46-64 during this run)"
+ },
+ {
+  "what": "Whether the real neck_pitch bracket and its 22x16x4 bearing physically interfere with bottom_head_shell and jaw in the STAND pose",
+  "why": "MuJoCo collides the CONVEX HULL of a mesh. Measured: those geoms interpenetrate 2.1106-4.4723 mm in the STAND keyframe and generate 84.75-179.73 N of contact force in a model where all bodies collide. A part correctly nested inside another part's concave shell reads as penetration to a hull, which is what a neck bracket inside a head shell is \u2014 so the simulation cannot distinguish 'nested as designed' from 'interfering'. The pair is named and excluded from the census, and the exclusion is the one thing the census cannot see.",
+  "what_settles_it": "A solid-solid boolean intersection of neck_pitch + seeed_bearing__configuration__22x16x4 against bottom_head_shell + jaw, posed at the STAND keyframe, in ce-cad. A non-empty common() with a stated volume is an interference; an empty one confirms the hull artefact. Recorded in gait-peaks/gait-robustness known_limitations[2] and in the census file."
+ },
+ {
+  "what": "The true lateral tipping threshold under a 0.2 s trunk push",
+  "why": "The 5 N figure is a property of a model in which only the two soles meet the ground. On sim/microduck_ours_fullcontact.xml the same push does NOT knock the robot over (max tilt 14.795 deg, trunk never below 0.10463 m) \u2014 but that model is not a valid comparison: MEASURED, four extra ankle/foot geoms touch the floor there (ankle_left #26 and #28, ankle_right #72 and #75, from outputs.contacts.floor_contact_points_by_geom_summed_over_control_frames), so it has a different foot and a different gait. Neither model settles it.",
+  "what_settles_it": "A collision set with real body shells that meet the floor \u2014 Pollen publishes none \u2014 or a physical push test on a built unit with an instrumented trunk. Between 1 N and 2 N survived and 5 N fell, so the threshold lies between 0.28 and 0.69 body weights for 0.2 s (an impulse between 0.2 and 1.0 N.s) in the sole-only model."
+ },
+ {
+  "what": "The voltage at which the XL330-M288-T's 17 mA standby current should be billed",
+  "why": "ROBOTIS's Specifications table prints 'Standby Current | 17 [mA]' with no voltage attached \u2014 verified verbatim in the local copy at ce-parts/xl330-m288-t/iterations/v0.0.1/docs/fetched/robotis-emanual-xl330-m288.html. Billed at the pack rail it is 1.887 W; billed at the 5.0 V row it is 1.275 W, 32.4 % less. That difference is the WHOLE of the 'idle, torque off' mode.",
+  "what_settles_it": "An ammeter on a powered XL330-M288-T with Torque Enable(64)=0, read at 5.0 V and again at 7.4 V \u2014 or a ROBOTIS statement of the test condition. Both figures are published; the pack-rail one is used because it is conservative for runtime."
+ },
+ {
+  "what": "A single battery-runtime number (unchanged from the original lane, restated)",
+  "why": "No vendor publishes the Radxa ZERO 3W's consumption (only a 5 V/2 A supply REQUIREMENT), so the compute+sensor half is swept, never assumed. The servo half is measured: walking 8.9553 W mean / 15.215 W peak, standing 2.8301 W, idle 1.8870 W.",
+  "what_settles_it": "An ammeter in the pack lead of a running unit, plus Present Current(126) summed off the bus so the servo and board halves separate. One measurement also closes the pack's usable-energy question."
+ },
+ {
+  "what": "Which of {eye ring OD, head width} deviates from the mesh by >1.5 mm (the front-view ring/width ratio is +9.1 %, FAIL at every camera distance)",
+  "why": "The only true front view gives a ratio; the profile ring/head-length agreement (+0.49 \u00b1 0.45 mm) supports the ring being 30.000 mm and the width being ~84.10 mm (\u22127.67 mm), but no photograph carries a width in millimetres",
+  "what_settles_it": "A calliper on one product head: ring OD (mesh 30.000), beak width and shell-rim width (mesh 91.763 / 91.760), length (122.690), height (46.336) to 0.1 mm \u2014 or one true front view with a ruler in the plane of the face"
+ },
+ {
+  "what": "Head length at the 1.5 mm rule (combined \u22120.348 \u00b1 4.738 mm; cream +5.23 \u00b1 3.68 vs graphite \u22124.37 \u00b1 3.13 disagree beyond their own u)",
+  "why": "The store frames carry no EXIF and no ruler; the camera distance is only bracketed 700\u20131650 mm and the servo-scaled ratio moves with it (cream r 1.0026..1.0600 over D 600..2000)",
+  "what_settles_it": "The calliper above; or the EXIF focal length + sensor of the store photographs; or one pure-profile photograph, beak closed, head level, the XL330 label face in the head's focal plane, \u22654000 px on the long side"
+ },
+ {
+  "what": "The README pure-profile frame's mm/px (both halves)",
+  "why": "Real half: the servo's right case edge is behind the grey horn bracket (x\u22481950\u20131995 at 4\u00d7); simulator half: the servo and the grey neck plate have the same luminance and saturation, no threshold separates them \u2014 both pictured in out/head/profile_frame_servo_zoom.png",
+  "what_settles_it": "A cleaner pure-profile frame from Pollen's video with the neck servo's case edges clear of the bracket"
+ },
+ {
+  "what": "Eye centre below the shell top (+2.34 \u00b1 5.52 mm) and the beak-lip row (+1.94 \u00b1 5.55 mm) in the front view",
+  "why": "The shell top row moves 25 px across the silhouette threshold sweep (soft edge against the white ground), which dominates their propagated u",
+  "what_settles_it": "A gradient-based top-edge read of the dome, or the calliper above"
+ },
+ {
+  "what": "Trunk base (walk SF 0.344 linear / 0.319 nonlinear; foot drop 0.062 / 0.053) and rigidity plate (walk 1.037 / 0.816; drop 0.136 / 0.061)",
+  "why": "single-part solves of parts that carry their force in parallel with a body not in the model (shells; thigh housing) \u2014 100 % applied as a bound; a FAIL at 100 % proves only the bound is not enough",
+  "what_settles_it": "a two-body bolted solve (shells + base; plate + a housing that meshes) in cecad.stress / ce-struct, or a printed trunk / thigh loaded to the walk peak on a bench with strain gauges"
+ },
+ {
+  "what": "Upper-leg-left (thigh housing) walk and drop",
+  "why": "gmsh refuses the solid at the R12.2-arc / side-wall tangency (6 sizes x 12 strategies, fea_meshability_microduck-upper-leg-left.json)",
+  "what_settles_it": "break the arc-wall tangency by < 0.05 mm in the rebuild, then the declared cases (walk 19.0636 N, drop 109.4988 N)"
+ },
+ {
+  "what": "Neck plate buckling",
+  "why": "the measured axial component is tensile on that member at both drop peaks (+7.6216 N foot drop, +11.6360 N head drop); no compressive case exists in the measured loads",
+  "what_settles_it": "a load case that compresses the plate (a face-down fall onto the beak) measured in MuJoCo, then the same ce-struct study"
+ },
+ {
+  "what": "Rigidity plate buckling",
+  "why": "the three lowest eigen-factors cluster at 1.000 under both loads at 0.33 mm cells \u2014 a local end-face crushing mode, not a plate mode",
+  "what_settles_it": "a shell/solid model loaded through the four screw holes instead of the end face, or a printed plate compressed in a rig"
+ },
+ {
+  "what": "Shin full-vector buckling factor as a converged number",
+  "why": "drift 5.03 % between the 0.7 and 0.5 mm cells (1.004 -> 0.898 -> 0.945); the verdict FAIL is decided by the whole bracket [0.898, 1.110] < 2, the number is not",
+  "what_settles_it": "a 0.35 mm cell or a tetrahedral eigen-solve of the same case"
+ },
+ {
+  "what": "Fatigue of the TPU sole",
+  "why": "no cited S-N curve for NinjaFlex 85A was fetched; the Ezeh & Susmel curve is PLA only (walk peak 0.0307 MPa vs TDS yield 4 MPa)",
+  "what_settles_it": "a cited TPU 85A S-N dataset (R = 0, 100 % infill) or a flex-fatigue coupon of the sole filament"
+ },
+ {
+  "what": "Drop peak force (127 N MuJoCo default-contact lower bound to 10214 N rigid-on-TPU)",
+  "why": "MuJoCo's default contact is ~14871x softer than the TPU floor; the Hertz heel model bottoms out through the 2.000 mm sole floor",
+  "what_settles_it": "one instrumented 0.250 m drop of a printed unit (trunk accelerometer >= 5 kHz or a force plate)"
+ },
+ {
+  "what": "Drop height as a requirement",
+  "why": "0.250 m is the lane brief's input; no requirement document sets a height (robot stands 0.27443 m)",
+  "what_settles_it": "a written drop requirement (height, surface, orientation, pass criterion) in docs/MANUFACTURING-REQUIREMENTS.md, then one MuJoCo re-run at that height (Table 8a scales the analytic models)"
+ },
+ {
+  "what": "Fitted filament and print orientation",
+  "why": "Pollen publishes 'PLA' and 'TPU' with no brand; no part.py declares print_up; every SF rests on the class table and one representative TDS per material",
+  "what_settles_it": "tensile coupons of the spool in the print orientation (ISO 527-1, 5 per orientation) and a fatigue coupon set (R = 0, 10 Hz, 4 levels x 2, run-out 2e6)"
+ },
+ {
+  "what": "Which load the head-drop FEAs should be graded at: the vector at the drop's peak frame (what the decks carry, 27.5654\u201368.4005 N) or the max-over-record magnitude the studies quote (31.604\u201375.8051 N)",
+  "why": "F1's studies quote force_magnitude_N as the headline but apply force_N_part_frame; both are measured numbers from loads_mujoco.json at different instants. The page prints both and the SF re-scaled to the quoted magnitude for the linear solves (neck-plate 2.849704 \u2192 2.4855; the motor-support case is nonlinear and does not scale).",
+  "what_settles_it": "Lane F1 declaring in fea_evidence.py which instant is the load case (peak-frame vector or per-body max) and re-solving the four head-drop decks at the max-over-record vector if that is the intent"
+ },
+ {
+  "what": "37 of the 76 distinct CANNOT DETERMINE items name nothing that settles them in their own file",
+  "why": "The synth records what the files say; inventing a test the study did not specify would be an assertion. Best supported option: leave them listed as the studies' own gaps (done), over the alternative of cross-referencing a generic coupon test to every item.",
+  "what_settles_it": "The owning lane adding what_settles_it to each item (battery-runtime inputs.pack.identity, buckling_microduck-neck-plate top level, tolerance-stack-hinges bearing_bore_support_flags[6..7], out/stress/matrix.json mesh_convergence rows, out/stress/corrected.json results[7])"
+ },
+ {
+  "what": "ROBOTIS OEM / volume price for XL330-M288-T at 225, 1 500 and 15 000 servos",
+  "why": "ROBOTIS publishes no XL330 bulk pack (robotis.us/bulk-pack lists only AX/MX 6-piece packs) and no tier table at either shop. The only volume signal published anywhere is AX-12A single $57.39 vs 6pcs bulk $310.39 = -9.9 %, for a different servo. RobotShop 403, AliExpress blank.",
+  "what_settles_it": "One written quote. america@robotis.com / contactus2@robotis.com. RFQ.html #rfq-robotis is drafted and says in its own words that this is the single largest open number in the cost model \u2014 the servos are 61 % of the readable subtotal and the only line that does not move between 1 and 1 000 robots."
+ },
+ {
+  "what": "Which Radxa ZERO 3W SKU the product actually uses, and any lead time for it",
+  "why": "The specified 1 GB / 32 GB does not exist in Radxa's SKU table, and every 1 GB variant was sold out at every distributor reached on 2026-09-02. Radxa direct pricing is partner-only; OKdo answered 'Socket is closed' x5 and RS Online hung.",
+  "what_settles_it": "`lsblk` on a production unit (does it report 8 GB or 32 GB of eMMC?), or Pollen naming the SKU. Failing both, a Radxa partner quote for RS107-D1E8H1W15 and RS107-D4E32H1W15 \u2014 RFQ.html #rfq-radxa asks for exactly that."
+ },
+ {
+  "what": "The camera ribbon: length, end configuration, and whether any catalogue part fits",
+  "why": "Two distributors now carry a 22-pin 0.5 mm ribbon at a read price (Adafruit #5211 $3.95/$3.16@100; Pimoroni SC0004 GBP 2.00), but the SHORTEST buyable part found anywhere is 38 mm against our measured 13.3 mm route floor and 15 mm cut. Both are 22-to-15 adaptors; whether the camera end is 22-pin 0.5 mm or 15-pin 1.0 mm depends on which module ships.",
+  "what_settles_it": "Pick the camera module (line B6), then either accept ~23 mm of folded flex inside a tight head cavity or order a custom-length FFC (Molex Premo-Flex quotes 4-80 conductors at 0.5 mm with MOQ 1). This is a mechanical decision, not a price one, and it belongs to whoever owns the head cavity."
+ },
+ {
+  "what": "The fitted speaker, microphone(s), NFC controller and camera-in-use LED",
+  "why": "Pollen's mesh for the speaker is a 12-triangle box with no part number; the microphone has no mesh at all, so even its cable length is unmeasurable; nothing in Pollen's runtime source mentions NFC (only the press kit does); the LED's GPIO is unidentified. No distributor anywhere prices a 35 x 25 x 7 mm 8 ohm 2 W speaker \u2014 both priced substitutes are oversize in at least one axis.",
+  "what_settles_it": "Opening a production unit and reading the markings. Until then each line carries priced CANDIDATES clearly labelled as candidates: PN7150 and ST25R3916 both fully tiered at DigiKey and LCSC; Soberton SPM-2035NU and Visaton K 28.40 for the speaker."
+ },
+ {
+  "what": "M2 fasteners other than M2x6, and A2 stainless M2 nuts, at any volume",
+  "why": "Every US and UK fastener shop refused the fetcher: Accu 403 (re-tried today), Bolt Depot 403, McMaster blank, Misumi 403, Fastenal 403, Albany County no price, Westfield renders prices only in JavaScript. ModelFixings (UK) gave M2x4/x8/x12 and a nut, but at 25-piece packs, in GBP inc VAT, one shop only \u2014 and its nut is steel BZP, not A2 stainless. No vendor anywhere publishes a tier above 100 pieces.",
+  "what_settles_it": "A browser session (not the text fetcher) on the five URLs listed in SOURCING.html \u00a75, or a quote \u2014 RFQ.html #rfq-fasteners asks for DIN 912 A2 in all five lengths plus DIN 934 A2 nuts at 100 / 10 000 / 100 000."
+ },
+ {
+  "what": "Etek ET7301B (the USB-C PD controller Radxa actually fits) at any price",
+  "why": "LCSC's site search returns no ET7301B result and DigiKey's own ETEK Microelectronics supplier centre lists no ET7301 part number at all (both checked 2026-09-02). The manufacturer datasheet is public; no distributor carrying it was found.",
+  "what_settles_it": "Asking LCSC directly \u2014 RFQ.html #rfq-lcsc carries the question. It matters only for a compute-board re-spin or a repair; on the robot it arrives soldered to the Radxa. The onsemi FUSB302BMPX (the name Pollen's device tree uses) is fully priced at two distributors as the second-source footprint."
+ },
+ {
+  "what": "The S-8252 option suffix inside the NP-F550 pack",
+  "why": "Two distributors now carry the series with full tier tables \u2014 but for two DIFFERENT option codes (-AAX at DigiKey, -AAC at LCSC), and the S-8252 series has roughly thirty detection-voltage options that are not interchangeable. Two prices for two parts that are not the part is not two prices for the part.",
+  "what_settles_it": "Opening a pack and reading the die marking. It only matters if a bespoke pack is built; the bought pack includes it."
+ },
+ {
+  "what": "Volume pricing for filament, and for the 22x16x4 bearing in USD",
+  "why": "No filament vendor publishes any tier (Bambu's own store answers HTTP 402 to the fetcher; MatterHackers renders no price). For the bearing, only an NZD retail price and a factory RANGE of US$1.00-4.00 at MOQ 1 000 were readable \u2014 a range is not a price, so the HIGH end is recorded, which makes that line a $44/robot ceiling.",
+  "what_settles_it": "Two quotes, both drafted: RFQ.html #rfq-filament asks for 218.3 kg of PLA and 26.2 kg of TPU per 1 000 robots; #rfq-bearings asks for MR1622/ET2216 at 11 / 1 100 / 11 000 pieces in USD, in ZZ, 2RS and open."
+ },
+ {
+  "what": "Tightening torque for M2 into the XL330's own D1.6 x 6.0 tapped holes",
+  "why": "ROBOTIS publishes none. Four searches across robotis.us, docs.robotis.com, emanual.robotis.com, the XL-series TDS PDF and forum.robotis.com thread 5999 surfaced specification and dimension pages only; the case material is not stated on any fetched page either (part:xl330-m288-t cad/part.py records MATERIAL='PA' with that caveat), so it cannot be derived. The alternative it beat is the DIN 912 class 12.9 chart value for M2 (0.60 N.m self-colour / 0.43 N.m zinc-plated, hillcofasteners.com) - rejected because that is a steel screw into a steel nut and would strip the servo.",
+  "what_settles_it": "Torque-to-strip on 5 sacrificial XL330s x 4 holes with a calibrated 0-0.5 N.m driver and the M2x6 PHS TAP screws ROBOTIS ships with the servo. Assembly torque = 0.50 x the lowest of the 20."
+ },
+ {
+  "what": "Tightening torque for M2 self-tapped into a printed PLA pilot (D1.55-1.65)",
+  "why": "No source read gives one, and it is not a material constant: it depends on the pilot diameter as printed, the boss wall, the layer direction across the thread and the print temperature, all outcomes of the specific profile in \u00a74.",
+  "what_settles_it": "10 coupons printed on the production profile carrying the same D1.60 x 4.0 blind pilot as power-support, in the real part's build orientation. Drive M2x6 to failure, record peak and failure mode (thread shear vs boss split vs delamination). Assembly torque = 0.50 x the lowest. Publish the histogram, not the mean."
+ },
+ {
+  "what": "Torque-out and pull-out for M2 brass heat-set inserts in printed PLA",
+  "why": "No readable manufacturer figure. Tappex's own ETP51 General Performance Data PDF was fetched and its text is not extractable; Prusa publishes the M2 insert's dimensions only; Markforged and the insert-guide pages give qualitative guidance. The insert's own thread rating is not the answer because the joint fails at the insert-to-plastic interface.",
+  "what_settles_it": "10 coupons per boss geometry, insert set with the production iron and depth stop. (a) torque-out until the insert spins in the plastic; (b) tensile pull-out to extraction. Assembly torque = 0.50 x the lowest torque-out; both numbers go on the drawing note."
+ },
+ {
+  "what": "The interference at every printed bearing seat",
+  "why": "No interference is specified anywhere in the repo. The seats are modelled at nominal (D16.000 boss, D22.000 bore, D10.000 boss, D15.000 pocket) and the real fit is whatever the printer delivers; docs/PARTS.md \u00a75 only says FDM holes print 0.1-0.3 mm undersize.",
+  "what_settles_it": "Bore-gauge 10 printed seats per machine and set the model's seat diameter from that distribution. Until then the press force is unknown, so the printed pushers cannot be graded for strength and the anvil's own capacity is unverified - stated on the jig drawings and in \u00a78."
+ },
+ {
+  "what": "Whether Pollen's mesh horn pose is the servo's Goal Position 2048",
+  "why": "No fetched ROBOTIS source states the horn's angular datum relative to the case. The mesh has the four D1.6 tapped holes at 12/3/6/9 o'clock (FACE_AT on FACE_PCD 12.0), but nothing ties that to 2048.",
+  "what_settles_it": "A ROBOTIS drawing, or one measured servo. Until then the gauge is designed and documented as an INDEX gauge: S3 commands 2048, fits the gauge, and records Present Position(132) as that unit's horn-zero offset, with a fleet band as the reject criterion."
+ },
+ {
+  "what": "Cosmetic acceptance standard for a printed shell",
+  "why": "\u00a72's arithmetic keeps the nine visible parts on FDM at every quantity a cost model can justify, so the case for tooling them rests entirely on surface finish and throughput - and nobody has written down what layer-line visibility is acceptable on a consumer product. This is the argument that would move the shells to a mould, and it is not a number anyone has.",
+  "what_settles_it": "A limit sample, agreed and kept at station S1. It is a product-quality decision with a real cost behind it (9 tools, $13,455-90,000), so it is flagged for Leif rather than resolved here."
+ },
+ {
+  "what": "TPU durometer for the four soft parts",
+  "why": "Pollen states nothing; community says 90-95A; the H2S 0.4 preset resolves to Bambu TPU 85A, which is what was sliced. Carried forward from out/print/PRINT.md's own flag.",
+  "what_settles_it": "A production lip on a Shore gauge."
+ },
+ {
+  "what": "Box dimensions, board grade, print and insert design",
+  "why": "Nothing is published and no unit has been delivered. The only handle is Pollen's Shopify shipping weight of 1200 g against a 780 g robot, leaving 420 g for box + controller + cable + insert.",
+  "what_settles_it": "A delivered unit. The insert in particular is a regulated part (IATA E.08, no power switch on the robot) with no design and no supplier in this repository."
+ },
+ {
+  "what": "Which Radxa ZERO 3W SKU Pollen fits",
+  "why": "Pollen's store listing says '1GB RAM + 32GB storage' and Radxa's own SKU table (RAD-DOC-0084 Rev 1.10 section 7 p.8) has NO 1 GB + 32 GB eMMC row \u2014 32 GB eMMC pairs only with 4 GB DRAM (RS107-D4E32H1W15). The obvious reconciliation, that the 32 GB is the microSD, is contradicted by Pollen's own updater design saying twice that the storage it rewrites is eMMC (updater-design.md:592, :718). Narrowed to two surviving options: an ODM 1 GB + 32 GB build, or RS107-D1E0H1W15 with the 32 GB being the SD card. Both keep the '1GB' a vendor has no incentive to understate; the 4 GB / 32 GB option requires Pollen to advertise a quarter of the RAM it ships.",
+  "what_settles_it": "Two commands on a production robot: `cat /proc/meminfo | head -1` and `lsblk`. Failing that, the SKU sticker on the board, or Radxa confirming an ODM part number."
+ },
+ {
+  "what": "imu_to_dxl connector count",
+  "why": "Pollen has published no photograph, schematic or BOM. THE REPO'S OWN REASON FOR WHY IT MATTERS WAS WRONG and is corrected: it argued that because an XL330 has two connectors the chain can only branch at a three-port device. A Dynamixel bus is MULTIDROP and forks at a Y-splice \u2014 Open Duck Mini v2's published wiring diagram (images/open_duck_mini/wiring_v2.png) shows a two-port Waveshare Bus Servo Adapter and a T. So option A (3 ports, what wiring/cables.json assumes) and option B (2 ports plus a splice) are electrically identical and indistinguishable without a photo. Option C (a single linear chain, no fork) is the one the measurement rules out: the return run id24 -> id10 is 105.7 mm straight-line in Pollen's own frame plus ~87 mm of slack for four crossed joints, ~200 mm of extra 21 AWG through moving joints, and it moves the right leg from 5 hops behind the branch to 11.",
+  "what_settles_it": "One photograph of the board \u2014 a trunk with the shells off. Consequence if wrong is only the assembly BOM (option B adds a Y-splitter and one short lead); the 23-cable net list is correct either way."
+ },
+ {
+  "what": "Which microphone, which speaker, which camera module, which ToF breakout, which F550-shape pack",
+  "why": "Five bought parts nobody names. What IS settled about each is on the page: the mic is one mono analog capsule on codec pin 16; the speaker needs an amplifier; the camera sensor is an IMX219 but the BOARD is unknown; the ToF breakout must regulate and level-shift because the socket takes either generation; the pack is an F550 body in a bay with 0.1231 mm on the tightest axis.",
+  "what_settles_it": "One teardown of one head and one trunk, plus an ohmmeter across the speaker leads and a label read off a pack."
+ },
+ {
+  "what": "Radxa PCB thickness, corner radius, board mass, and which corner of the 40-pin header is pin 1",
+  "why": "None of the four is in RAD-DOC-0084, the Radxa wiki, or the product page. cad/part.py's 1.6 mm and R3.0 are the Pi-Zero-2-W STAND-IN mesh's, not a Radxa's, and the page now says so. Pin 1 matters most: a HAT laid out with pin 1 at the wrong end is a scrapped board.",
+  "what_settles_it": "A calipered production board and a scale. Radxa publishes no DXF and no STEP for this board \u2014 section 4's raster is the whole of its mechanical publication."
+ },
+ {
+  "what": "The NFC subsystem",
+  "why": "The press kit and store list two NFC antennas (head and beak). A grep of Pollen's published runtime for NFC returns zero hits. part:pn7150 and part:st25r3916 are researched candidates and neither is confirmed; the ST25R3916 is notable only because it drives two antennas, which is suggestive and is not evidence.",
+  "what_settles_it": "A teardown, or Pollen documenting it."
+ },
+ {
+  "what": "Which connector each of Radxa's unlabelled section-4 callouts names ('12. 5', '41. 5', '54. 7', '14. 4', '15. 5')",
+  "why": "They dimension connector/feature lines on the component-side view and Radxa labels none of them; the p.3 photo names the ports but is not dimensioned. Feature lines were located (54.5186 and 54.8379 mm from the top edge, bracketing the printed 54.7; vertical lines 4.9425 and 20.4285 mm from the left edge, 15.486 mm apart) but no callout could be attached to a named connector. This is exactly the interface a head-shell cutout needs.",
+  "what_settles_it": "A Radxa DXF or STEP (none published as of 2026-09-02), or a calipered production board."
+ },
+ {
+  "what": "What a real Microduck walks in 8 s at vx 0.25, and therefore whether the 0.594 m gate is right",
+  "why": "No real-robot walk distance exists in this repository or in any Pollen material. 0.594 m is 75 % of our simulated 0.7925 m and the 75 % is a decision, not a measurement.",
+  "what_settles_it": "WK-02 and WK-03 on the first five built units; replace the fraction with the measured mean minus three standard deviations and regenerate."
+ },
+ {
+  "what": "Whether the XL330 servos are fed the raw 2S pack above their 6.0 V rating",
+  "why": "Pollen's runtime maps 6.6-8.2 V read through the servos' own Present Input Voltage(144) and clears Shutdown bit 0 (Input Voltage Error), which is consistent with battery-direct VDD \u2014 but that is an inference from code, and the vendor band is 3.7-6.0 V with Max Voltage Limit(32) refusing above 7.0 V.",
+  "what_settles_it": "EB-04: a meter on pin 2 of the servo bus with the pack fitted. Either outcome is informative and one of them requires docs/ELECTRONICS-AND-SOFTWARE.md 3.4 to be corrected."
+ },
+ {
+  "what": "What an assembled Microduck draws while walking",
+  "why": "No vendor figure exists between standby 17 mA and stall 1.47 A per servo; Radxa publishes a 5 V/2 A supply requirement and no consumption. Our runtime study sweeps compute 1-5 W because of it, and our model disagrees with Pollen's published ~1 h by about a factor of two.",
+  "what_settles_it": "EB-07 for three instantaneous states, EN-01 for a whole pack with compute-and-sensor watts taken by difference against Present Current(126) summed off the bus."
+ },
+ {
+  "what": "The NFC reader IC, and the GPIO behind the camera-use indicator",
+  "why": "Zero hits for nfc/pn532/st25 and zero hits for a GPIO or LED class device in the published runtime. Two candidate readers are datasheeted on our shelf (ST25R3916, PN7150) and neither is confirmed.",
+  "what_settles_it": "A teardown, or a Pollen release exposing an NFC service; for the LED, `ls /sys/class/leds` with the camera streaming \u2014 SN-10 steps 1 and 4 record it either way."
+ },
+ {
+  "what": "Whether a unit will actually leave the line with a pairing PIN other than 000000",
+  "why": "A process gap, not a missing fact: the factory default authenticates anyone who has read the public repository, and MANUFACTURING-PLAYBOOK station S10 (pack-out) carries no PIN step today.",
+  "what_settles_it": "A PIN step in lane G's pack-out station with the per-unit record RD-03 already specifies. Until then RD-03 is the only place the requirement lives."
+ },
+ {
+  "what": "What touch-temperature limit applies to the head shell",
+  "why": "TH-02 gates at 50.0 degC, which is the Radxa board's own maximum ambient \u2014 a limit that speaks for the computer, not for a hand on a toy-sized robot. No touch-temperature standard is on our shelf.",
+  "what_settles_it": "The applicable IEC 62368-1 touch-temperature table for the material and contact duration, or a stated customer requirement; then TH-02 carries two gates and the tighter governs."
+ },
+ {
+  "what": "Which ToF firmware size figure is the real wire upload",
+  "why": "Pollen's own comments disagree inside one crate: tof/src/main.rs:7 says '~90 KB of firmware over I2C', tof/src/lib.rs:15 says each ULD is '40 KB of register sequences plus a 550 KB firmware blob'.",
+  "what_settles_it": "The byte count of the blob in the vendored ULD, or an I2C capture of one start-up. Recorded in firmware/upstream.json rather than resolved by preference."
+ },
+ {
+  "what": "Whether the 14 mesh-backed loader folders build a closed SOLID \u2014 the question six of them (jaw, jaw-soft, soft-mouth-top, top-head-shell, both trunk shells) and both bearings name as their own blocker",
+  "why": "The check exists and is committed (tools/build_mesh_loaders.py: runs each folder's own build() through cecad.triad.load and reports solids, shells, closedness, volume and bbox off the BUILT object). It was started 2026-09-02 22:57 and had consumed 131 minutes of CPU over 3 h 43 min of wall clock without emitting a single line, on a Mac whose 1-minute load average ran 41-80 from other lanes' concurrent FreeCAD jobs \u2014 Part.from_mesh sewing 20 000-triangle decimated meshes is the cost. I stopped my own job rather than keep starving the other lanes. That measurement about the measurement is now written into all eight folders' component.json why, so the reason is specific rather than 'nobody ran it'.",
+  "what_settles_it": "ce-cad/bin/cad tools/build_mesh_loaders.py on an idle machine, one slug at a time; it writes out/laneT/build-report.json and exits 1 if any folder produced neither a solid nor a shell."
+ },
+ {
+  "what": "Four IC interface rows still carry a null frame: mcp73213 pcb_land, pn7150 pcb_land + antenna, s-8252 pcb_land, st25r3916 pcb_land + antenna_1",
+  "why": "No datasheet PDF is on disk in those folders, so no mechanical drawing could be read. For PN7150 I fetched NXP's product page, which names the package 'HVQFN40' and carries no outline dimensions at all \u2014 so I wrote NO frame rather than a package name with a null frame, which would have added a second unmeasured frame instead of removing one. For ST25R3916 the vendor page does give an envelope, so a package_outline row was added (UFQFPN32 5.0000 x 5.0000 x 0.5500) with the three-package ambiguity stated; its pcb_land row is another lane's refusal and stands.",
+  "what_settles_it": "Fetch each vendor datasheet into its folder with the sha256 in PROVENANCE.json, then write a row citing the package-outline drawing's page \u2014 exactly the way the seven ICs that DID have a local datasheet were done in this lane."
+ },
+ {
+  "what": "Retention on three of the four new connections: press-fit-tube-15's cradle, press-fit-sole-foot's pull-off force, snap-fit-roller-axle's insertion/retention force",
+  "why": "Each is refused BY NAME in compat.py with the reason, not left blank. tube-15: 210.94 deg of the arch is open air and NOTHING closes it in any of Pollen's five MJCF files \u2014 so the holding force is not a bench number waiting to be taken, it is zero unless an unpublished part closes the arch. sole-foot: zero modelled clearance between printed TPU and printed PLA \u2014 the grip is set by two processes' as-built dimensions and the elastomer's modulus, none of which is in any file here. roller-axle: deflection (0.9000 mm/finger), finger run (10.0000 mm) and lead-in angle (33.47 deg) are all measured, but the beam formula needs the printed PLA's modulus and permissible strain AT THIS LAYER ORIENTATION, and a handbook formula fed a guessed modulus is a number with a citation and no source.",
+  "what_settles_it": "A gauge and a printed pair: push the ankle plate past the barbs and record the peak, pull the sole off a foot and record that, and photograph or tear down a real Microduck head to see what closes the \u00d815 cradle."
+ },
+ {
+  "what": "part:microduck-face-part 'front_pair' \u2014 2 x \u00d82.0500 x 4.0000 at (32.4000, -53.2000, 20.0000) and (12.6000, -53.2000, 20.0000)",
+  "why": "The only asymmetric pattern on the part (both on the +x side of the optical axis), matched by no mesh in any of Pollen's five MJCF files and named in no document in this repo.",
+  "what_settles_it": "A photograph of the face plate's front with the bezel off, or Pollen's head assembly."
+ },
+ {
+  "what": "part:microduck-robot-hat-pcb board thickness \u2014 the mesh models 0.8400 mm where a Raspberry Pi HAT is fabricated at 1.6000 mm",
+  "why": "Either the mesh is a simplified placeholder or the board really is 0.84 mm; a mesh carries no fab stack-up. It matters for the head stack-up. Likewise WHICH connectors the 14 x \u00d80.9500 holes in two 2.5000 mm-pitch blocks are: a mesh has no silkscreen and no refdes.",
+  "what_settles_it": "The board file the PCB lane is producing in electronics/robot-hat/, or a caliper and a photograph of a real Robot HAT."
+ },
+ {
+  "what": "Whether either bearing is an ISO 15 boundary-dimension part (which would make it T4-eligible)",
+  "why": "A 10x15x3 deep-groove ball bearing looks like an ISO 15 part and I deliberately did NOT assert it: nobody here has checked the 6700 series against ISO 15's table, and asserting it would earn a T4 tier on a guess. record.standard is left empty and the folder says why.",
+  "what_settles_it": "Read ISO 15's dimension table for the 6700 / MR1622 series and record it in record.standard, or drop the idea for good."
+ },
+ {
+  "what": "The remaining 34 not-PASS refs, all CANNOT DETERMINE, all self-graded",
+  "why": "By TRIAD.md ('Coverage is part of the verdict') no reader may grade a folder better than the folder grades itself. 34 of them grade themselves CANNOT DETERMINE for reasons that are mostly electrical identity on unpublished Pollen boards (imu_to_dxl v2, Robot HAT, banana contact \u2014 COMPARISON.html finding 6) and geometry not yet built. Lane T removed every FAIL and every mechanical reason it could measure; it did not and should not overwrite another lane's honest refusal.",
+  "what_settles_it": "SHELF-STATUS.html section 2 lists all 34 with each folder's own sentence, grouped by defect class; out/laneT/shelf-status.json carries the untruncated text per ref."
+ },
+ {
+  "what": "Whether the remaining 16 documents (sole-left/right, yaw-roll-motion, both trunk shells, robot-hat-pcb, the 4 mesh print sheets, the 6 bought parts) verify",
+  "why": "They are in the regeneration run now in flight (pid 62531, started 02:47), which redraws all 33 with the fixed generator. Nothing about them has been measured yet.",
+  "what_settles_it": "Wait for DRAW-SUMMARY in /private/tmp/laneB-drawings/run2.log, then `ce-cad/bin/cad tools/verify_drawings.py` and `python3 tools/collect_drawings.py && python3 tools/gen_drawings_index.py`."
+ },
+ {
+  "what": "Whether \u00a7A.6's remaining feature classes \u2014 rib thickness and pitch, boss height, slot width/length, chamfers, angles \u2014 are dimensioned on any sheet",
+  "why": "The sheets dimension the envelope (both overall dims per view), every hole (callout + table), every distinct radius (leader) and the wall (section scan + whole solid). Slots, annular grooves, external diameters and chamfers are MEASURABLE by cecad.inspect and are not called out. Nothing in this repo measures a chamfer or an angle as a feature at all.",
+  "what_settles_it": "tools/measure_features.py is written and committed but has not been run \u2014 it counts, per part, which of the nine \u00a7A.6 classes the sheet actually dimensions by reading every number off the finished SVG and holding it against inspect.slots / grooves / shafts / arc_radii. Run it after the drawing run and the index prints the census per part."
+ },
+ {
+  "what": "Whether a cutting-plane letter can always find clear paper on a very dense sheet",
+  "why": "The letter now slides along its own cutting line through six offsets; if none is clear it is drawn where it belongs and FAILS the read-back rather than being dropped, which is the right refusal but means a dense sheet can be unresolvable at every paper size.",
+  "what_settles_it": "A sheet that fails on 'no two labels are printed on top of each other' naming a section letter at A1 with the details already shed. None has been seen since the fix; shin went 11 -> 5 -> 3 attempts."
+ },
+ {
+  "what": "Whether the shelf's PASSing parts would still pass if drawn with the radius fix",
+  "why": "The 12 PASSes on disk were drawn with the old ink-derived radii. They passed verify_sheet, so every R they print IS a radius of the solid \u2014 but the new code may print a different SET of radii (it drops obliquely-seen edges and may add ones the projection never made an arc for).",
+  "what_settles_it": "The run in flight redraws all 12; tools/verify_drawings.py then re-reads each finished SVG against a freshly built solid, independently of the run's own verdict."
+ },
+ {
+  "what": "The FOV the Microduck's M12 lens must deliver (line B7)",
+  "why": "Pollen's press kit says the camera FOV is 'still being finalised'; the only figure anywhere is a community ~62 deg HFOV, flagged unverified at docs/ELECTRONICS-AND-SOFTWARE.md:225. Both lenses that carry a read price are far wider \u2014 110 deg (Arducam LN180) and 118 deg (Pi Hut LN007) measured on a 1/4-inch sensor, per the vendor pages. This is why B7 is CANNOT DETERMINE and not PASS.",
+  "what_settles_it": "Pollen stating the FOV, or a lens measured off a production unit. Failing that, the Arducam LK001 lens kit ($89.99, 10 lenses 10-200 deg, 1/4-inch) fixes it on a bench \u2014 it is recorded as B7's alternate for exactly that reason, one kit not one per robot. The RFQ to the camera supplier now asks for FOV quoted on a 1/4-inch sensor and for the barrel outside diameter."
+ },
+ {
+  "what": "Whether The Pi Hut LN007's 20.0000 mm barrel physically clashes with the robot, or is merely not the modelled part",
+  "why": "The 3.0600 mm oversize is measured against Pollen's own `lens` mesh (16.9400 mm diameter, out/verify/mech_dims.json), not against the aperture in face_part that the barrel actually passes through. That aperture was not measured in this pass.",
+  "what_settles_it": "Measuring the lens aperture in face_part off the mesh. It is a bounded CAD job; it was not run here because the finding it would sharpen (B7 is CANNOT DETERMINE) does not depend on it."
+ },
+ {
+  "what": "VXB's price for the 3,000 bearings a 1,000-robot build of B11 needs",
+  "why": "The product page prints 'OEM Buy 1,000+ Only for Manufacturers (Lead Time is 30-60 Days)' with NO price. The 1,000-robot column therefore falls back to VXB's 100+ tier ($5.4390) as a ceiling, and this is stated on the line.",
+  "what_settles_it": "A VXB OEM quote \u2014 added to the bearings RFQ as the one figure the public pages do not carry. It does not move the roll-up either way: Bearings Direct is cheaper at every quantity read."
+ },
+ {
+  "what": "Which Neewer/NextBatteries price is the true per-pack cost of B4",
+  "why": "Both retail offers that could be read are 2-pack-plus-charger sets ($49.90 and $49.99), so the $24.95 / $24.9950 per-pack figures each carry half a charger a robot does not need.",
+  "what_settles_it": "A pack-only quote. Added to the battery RFQ's also-ask: quote packs alone and the charger separately at 1 / 100 / 1 000."
+ },
+ {
+  "what": "Whether the playbook's tables would also fit an actual printed A4 page, as opposed to the 840 px screen sheet",
+  "why": "tools/tablefit.py measures against .wrap's content box (920 px max-width minus 40 px padding each side = 840.0 px measured live). That is the bar lane F2 set when it added .data.compact to tools/doc.css for 'a wide evidence table that must still fit the 920px sheet in print/PDF'. An A4 sheet at 96 dpi with Chrome's default margins is roughly 717 px of paper, less the same 80 px of padding \u2014 tighter than 840 px. No document in this repository sets @page or any print width, so the printed bar has never actually been defined here, and grading against a number I invented would be inventing a standard.",
+  "what_settles_it": "A decision on the print target (@page size and margin in tools/doc.css), after which tablefit takes a --sheet argument and every document in the repo is re-measured against it. Until then the honest statement is: 0 of 15 tables overflow the 840 px screen sheet, and the printed page has no stated width to test."
+ },
+ {
+  "what": "M2 assembly torque, into the XL330's own tapped holes and into a printed PLA pilot",
+  "why": "Unchanged from the lane's own \u00a75.3 and still correct: ROBOTIS publishes no tightening torque on any page reachable from four searches (robotis.us, docs.robotis.com, emanual, the XL-series TDS PDF, forum thread 5999), and no readable M2-in-PLA figure exists \u2014 Tappex's ETP51 performance PDF was fetched and is not machine-readable, Prusa publishes dimensions only. The DIN 912 class 12.9 figure (0.60 N\u00b7m self-colour, 0.43 N\u00b7m zinc, stress area 2.07 mm\u00b2, 2530 N) is a steel screw into a STEEL nut and is published in the document only so nobody uses it.",
+  "what_settles_it": "The torque-to-strip coupon tests already specified in \u00a75.3: 5 sacrificial XL330s \u00d7 4 holes with a calibrated 0\u20130.5 N\u00b7m driver and the M2\u00d76 PHS TAP shipped with the servo, and 10 printed coupons on the production profile carrying the same \u00d81.60 \u00d7 4.0 blind pilot in the same build orientation. Assembly torque = 0.50 \u00d7 the lowest peak; publish the histogram, not the mean."
+ },
+ {
+  "what": "Which breakout board carries the ToF die, and therefore whether it regulates and level-shifts",
+  "why": "No vendor document describes the module; Pollen publishes no photograph, no schematic and no part number for it. What IS settled is that the board must carry a 1.8 V regulator and level translation, because the driver takes both generations (research/raw/tof_src_lib.rs:8-11) and the L8CX has no 3.3 V IOVDD configuration at all \u2014 abs max 1.98 V (DS14161 Rev 12 Tables 11-12 p.20) \u2014 while the socket is a Stemma J5 fed from the Radxa's 3.3 V rail. Best-supported option: a commodity Stemma/Qwiic ST breakout with an onboard LDO and translator (that is the only topology that satisfies both datasheets on one 4-pin socket); the alternative it beats is a bare-die carrier, which would destroy an L8CX and is therefore excluded by the driver's own claim that both generations run.",
+  "what_settles_it": "A teardown photograph of the head's ToF board readable enough to name the breakout, or a meter on the Stemma J5's 3V3 pin AND on the die's IOVDD pin of a production robot."
+ },
+ {
+  "what": "The 1 case of 18 in the board-mount interchange matrix that neither passes nor fails: Pi-Zero-pattern posts + a Radxa board on M2.5",
+  "why": "It fits by 0.0086 mm of radius, which is inside the 0.0396 mm 1\u03c3 of the raster measurement the Radxa pattern comes from (1\u03c3 of the eight measured edge insets on a drawing whose pixel is 0.05321 mm). The measurement cannot separate 'fits' from 'does not' at that margin, and the tool says so rather than rounding to PASS. This case does not affect the build \u2014 face_part is on the Radxa pattern, not the Pi-Zero one.",
+  "what_settles_it": "A calipered production Radxa ZERO 3W, or a Radxa DXF/STEP. Radxa publishes neither as of 2026-09-03 (RAD-DOC-0084 Rev 1.10 \u00a74 is a raster with no text layer)."
+ },
+ {
+  "what": "The Pi Zero 2 W stand-in mesh's positional uncertainty, which every interchange case involving it inherits",
+  "why": "cecad.meshfeatures published no residual for that cylinder fit, and SPEC.md \u00a78 puts Pollen's mesh decimation floor at p95 surface distance 1.0 mm \u2014 so the error is neither measured nor negligible. The tool records it as sigma_mm: None and prints a CAVEAT on every case that involves it rather than folding an unknown in as zero.",
+  "what_settles_it": "Re-running the cylinder fit with residuals reported, or a calipered Pi Zero 2 W. The former is a change to tools/measure_mesh_features.py and belongs to whoever owns it."
+ },
+ {
+  "what": "Whether the fitted battery pack's mass is anything like the 99 g this document carries",
+  "why": "The 99 g is a Duracell DR5 shipping weight for a replacement NP-F550 \u2014 a different pack from the one Pollen fits, whose maker, cell and protection IC are all unpublished. It is carried as the best available figure and marked \u2021 wherever it appears; the 411 g unaccounted of the robot's 780 g is therefore a floor, not a figure.",
+  "what_settles_it": "A scale, and one production robot stripped. \u00a713 row E6."
+ },
+ {
+  "what": "The mass of every electronic board and module in the roster (22 rows, 1 with a mass of the fitted part)",
+  "why": "Radxa states no weight in the Product Brief, the wiki or the product page; ameriDroid's listing carries none; no distributor page for the HAT, imu_to_dxl, banana PCB, camera module, ToF module, speaker or mic states one, and three of those parts have no published identity at all. The bare-FR4 5.7329 g that ce-cad reports when it builds the Radxa outline is volume \u00d7 FR4 density and EXCLUDES every component, so it is not the board's mass and is not used as one.",
+  "what_settles_it": "A scale. \u00a713 row E6."
+ },
+ {
+  "what": "Whether limp_fall_tilt_z = -0.90 and fall_gravity_z = -0.5 are robotd's compiled-in defaults",
+  "why": "Both lines are COMMENTED OUT in the only copy of that file in the repository (research/raw/deploy_robotd.toml:224 and :173) and robotd's source is not published, so no file here shows the compiled-in value. Three independent things say the commented values ARE the defaults, and none of them is the file's own assignment: the file's convention (it comments '# limp_fall = true' in the same block while the prose beside it reads 'ON by default since it was validated on a robot'); the prose at deploy_robotd.toml:216 and at research/raw/microduck_main_docs_design_robotd-design.md:476, which independently put the trigger at 'about 26 deg' / 'about 26 deg', against acos(0.90) = 25.842 deg; and robotd-design.md:456-457, whose 'debounced 0.2 s' matches the commented fall_debounce_ms = 200 exactly. The evidence supports the values the document uses; it does not prove them.",
+  "what_settles_it": "The step added to SW-02: `sudo robotctl configure` on a built unit prints every key's current value against its default, out of the same crate robotd parses the file with, and marks in yellow only the keys that diverge \u2014 a property Pollen's own cheatsheet states at research/raw/microduck_main_docs_robot_cheatsheet.md:116-119. If either default differs, the 25.842 deg gate in section 9 and the limp thresholds in the same section move and the document is regenerated. Written into the document as open question 16, visible in out/testplan/h-open-toml.png."
+ },
+ {
+  "what": "Which ToF generation is fitted to any particular unit, and therefore which datasheet column governs SN-06 in a lit room",
+  "why": "Both generations ship \u2014 tof/src/lib.rs lines 8-11: 'Both generations, decided at runtime ... Ducks in the field have both.' The two parts differ in the Ambient light (5 klx) column: VL53L8CX +/-5 %, VL53L5CX +/-8 %.",
+  "what_settles_it": "It is settled per unit, at test time, by the header line robotctl monitor prints \u2014 which SN-06 step 4 now requires be recorded BEFORE anything else, in capitals, because it decides which datasheet row the run is gated on. Below 0.05 klx the question does not arise: both parts publish +/-5 % dark on a white 88 % target across 250-1000 mm."
+ },
+ {
+  "what": "Whether the shelf's PASS count as published (17 of 64 at 04:06) is the count a reader will see",
+  "why": "The shelf is written by several lanes at once and moved three times during this pass: at 03:48 the checker reported 26 ledger FAILs, at 04:05 the same 26 had become SUPERSEDED notices because the FEA lane had appended its rows, and at 04:06 three new mismatches existed because sim/fea_nlgeom.py (pid 98303, ccx live) was writing out/sim-evidence/buckling_*.json at 04:04. No snapshot of a moving shelf can be current for long, and pretending otherwise would be the defect.",
+  "what_settles_it": "Nothing settles it permanently, and the page no longer pretends: it is stamped to the minute, it says in \u00a74 that it is a snapshot, and `python3 tools/gen_shelf_status.py --verify` re-runs the checker and answers CURRENT or STALE with the difference (exit 0/1). RELEASE.html \u00a77 quotes no count at all for the same reason \u2014 it states the four kinds of open item and sends the reader to the page."
+ },
+ {
+  "what": "Whether a ref whose ledger carries a SUPERSEDED row can ever return to PASS",
+  "why": "TRIAD.md's append-only ledger keeps a re-measured artifact's earlier row and the checker REPORTS it as CANNOT DETERMINE rather than skipping or deleting it. 10 refs (part:microduck-ankle-left, -foot-left, -hip-bracket, -motor-support, -neck-pitch-bracket, -power-support, -sole-left, -trunk-base, -yaw-roll-motion, -yaw2roll at the 04:06 reading) are therefore not-PASS with nothing wrong in the folder: their current measurement passed and the old one is kept as history. Nothing a part lane can do inside those folders changes it.",
+  "what_settles_it": "A decision about the checker's contract in TRIAD.md \u2014 for example, letting a superseded row be reported without lowering the folder's verdict when a later row for the same artifact hashes clean. That is a contract change, not a part defect, and it is not this lane's to make. The page names those refs explicitly so the decision has a list to work from."
+ },
+ {
+  "what": "Whether the two/three live ledger sha256 mismatches at 04:05\u201304:06 are defects or a run in flight",
+  "why": "part:microduck-neck-plate and part:microduck-shin cite out/sim-evidence/buckling_*.json whose mtime is 2026-09-03 04:04, one minute before the reading, while sim/fea_nlgeom.py was measurably running. A mismatch and an in-flight rewrite are indistinguishable from the hash alone.",
+  "what_settles_it": "The FEA lane appending a ledger row per re-run artifact when it finishes, at which point the rows become SUPERSEDED like the other 29. The page now DATES every changed artifact from disk so a reader can see the file was written after the row rather than having to guess \u2014 resolving the ledger's relative path against the ITERATION directory, which is what bin/_triadlib.artifact_path does (resolving it against evidence/ silently dated nothing, measured and fixed)."
+ },
+ {
+  "what": "The mated height of the 2x20 socket the Robot HAT needs (J1)",
+  "why": "Pollen's mesh puts the compute board 7.310 mm above the HAT. The generic 2.54 mm header model is 8.500 mm. Searching distributor and maker listings (Pololu 'Stackable 0.100\" Female Header: 2x20-Pin', GeeekPi, Geekworm kits) returned parts advertised only as 'various height specifications' with no published mated dimension.",
+  "what_settles_it": "A vendor drawing for a specific 2x20 socket giving its mated board-to-board height, or a caliper on a production Microduck head."
+ },
+ {
+  "what": "Whether the Pololu D30V30F5 (U2, decision D1) can be used at all",
+  "why": "It is 7.700 mm tall and the measured space above the board is 7.310 mm. Bounding boxes, not solids, so the 0.390 mm shortfall is a lower bound on the problem, not proof of a specific collision.",
+  "what_settles_it": "cecad.pcbview.board_assembly() with the real solids \u2014 it needs FreeCAD's kernel and was not run. If it confirms the collision, D1 is reversed toward the discrete regulator it originally beat, or U2 moves to the bottom side where the nearest measured neighbour is the m12_lens_holder at 3.680 mm."
+ },
+ {
+  "what": "The NP-F550 terminal pitch",
+  "why": "Not published by Sony; not present in Pollen's np_f970 mesh, which is a plain box with no terminal detail; not in any distributor listing found.",
+  "what_settles_it": "A caliper across the terminal block of a physical NP-F550 pack. Until then 4.000 mm is derived from the 12.000 mm window and marked derived everywhere."
+ },
+ {
+  "what": "The connector family behind the 14 through-holes measured in Pollen's HAT mesh",
+  "why": "2.500 mm pitch and 0.950 mm holes are the JST XH/EH signature, but the 4.800 mm gap between the two columns of each pair is too tight for two same-side vertical headers (B*B-XH-A body 5.75 deep, B3B-EH-A housing 10.0 long) and matches no dual-row family found \u2014 JST's JFA J2000, the nearest 2.5 mm dual-row through-hole series, has a 2.5 mm row pitch.",
+  "what_settles_it": "One photograph of a production HAT's connector side, or a teardown."
+ },
+ {
+  "what": "Fab price at qty 10 (JLCPCB) and qty 100 (both fabs)",
+  "why": "Neither vendor publishes a rate card; both quote interactively.",
+  "what_settles_it": "Uploading each board's out/fab/*-fab.zip to jlcpcb.com/quote or pcbway.com/orderonline.aspx and reading the number back. That needs an account, so it is a human action, not this lane's."
+ },
+ {
+  "what": "Whether the imu_to_dxl outline fits the trunk cavity",
+  "why": "The outline is our choice (E8). The site's neighbours ARE measured \u2014 the pack is 0.524 mm above it, power_support 15.179 mm, the trunk baseplate 16.600 mm, both hip-yaw XL330s 12.500 mm \u2014 which fixes the ORIENTATION (flat under the battery, component side facing away) but not the fit, because left_shell and right_shell were not included and the space BELOW the board, which limits the 6.500 mm JST EH housings, was not measured.",
+  "what_settles_it": "A solid-level clearance study of the trunk with the shells in place."
+ },
+ {
+  "what": "The current every power net actually carries",
+  "why": "ROBOTIS publishes 17 mA standby and 1.47 A stall at 5 V for the XL330 and no running current; Sony publishes no maximum continuous discharge for the pack. wiring/CABLES.md's 1 A per moving servo is stated there as an assumption.",
+  "what_settles_it": "A clamp meter on a production servo bus. What the boards state instead is what the COPPER carries, computed by the file: 2.034 A per 0.800 mm HAT power track, 3.953 A per 2.000 mm imu comb layer, 3.209 A per 1.500 mm banana track, all at dT 10 degC by IPC-2221 6.2."
+ },
+ {
+  "what": "Whether the product head's overall width is Pollen's 91.763 mm or the measured 89.386 mm",
+  "why": "Best estimate 89.386 \u00b1 1.815 mm from two ring-free photographic lines; |d| \u2212 u = 0.56 mm < the 1.5 mm rule, so the measurement cannot discriminate at the rule's level even though both lines fall below the mesh.",
+  "what_settles_it": "A calliper across one product head at its widest row, to 0.1 mm \u2014 an order of magnitude better than any photograph here. Or Pollen's production CAD (the published meshes are the alpha CAD; the Onshape document is private)."
+ },
+ {
+  "what": "Whether the eye ring's outer diameter is the mesh's 30.000 mm or the measured 31.239 mm",
+  "why": "31.239 \u00b1 1.065 mm; |d| \u2212 u = 0.17 mm < 1.5 mm. The two profile photographs cannot constrain it at all \u2014 their ring sweeps terminate on opposite ends of the swept range.",
+  "what_settles_it": "A calliper across one product eye ring's OD, or a true front view with a ruler in the plane of the face."
+ },
+ {
+  "what": "WHERE the band's 3.07 mm inset comes out of the head section",
+  "why": "A thinner side wall, a narrower core and a different shell profile all produce the same external silhouette, and the photographs see only the silhouette. No internal geometry was invented.",
+  "what_settles_it": "A section through a product head, or Pollen's production CAD. This is why no corrected head geometry was shelved: the external feature is measured, the internal redistribution is not."
+ },
+ {
+  "what": "Whether the ToF window sits level with the eye axis (photograph) or 2.219 mm below it (mesh)",
+  "why": "The photograph's window is a dark-threshold blob inside the aperture, the mesh's is the aperture boundary; the two centroids are not proved to be the same point, and the \u22122.018 mm difference is the size of that ambiguity.",
+  "what_settles_it": "A sharper front view where the aperture's edge (not its dark interior) is resolvable, or a calliper from the lens axis to the ToF window on a product head."
+ },
+ {
+  "what": "Whether the band inset is a design feature of every unit or a print/unit-to-unit difference",
+  "why": "The finding rests on the only published TRUE front view of the head. Compositing and pose are ruled out (a ratio of two widths in one image survives any x-rescale of the robot layer; the mesh's own band/shell stays 0.99855\u20131.00000 over every admitted pose), but a single unit is a single unit.",
+  "what_settles_it": "A second true front view of a different unit, or a calliper across the band and the shell rim on one head."
+ },
+ {
+  "what": "The camera distance of the store photographs",
+  "why": "No EXIF and no ruler in any published frame; the near ankle servo brackets it only to 700\u20131650 mm.",
+  "what_settles_it": "EXIF focal length + sensor size, or one frame with a ruler. It would remove the D term from every servo-scaled ratio."
+ },
+ {
+  "what": "Which NP-F550-shape battery pack actually ships (maker, cell, protection IC, marked capacity, marked Wh, UN 38.3 / IEC 62133-2 marks)",
+  "why": "'NP-F550' names Sony's original L-series pack, which Sony rates 1500 mAh / 10.8 Wh, so a 2600 mAh 'NP-F550' is necessarily a third-party pack in Sony's shape and no source names whose. Every Sony host answered 403/404 on 2026-09-02 (recorded in ce-parts/np-f550). No unit has been delivered and no photograph of a shipped pack's label exists in the repo.",
+  "what_settles_it": "The label on one shipped pack, or Pollen naming the supplier. Recorded in \u00a77.2 and \u00a78 with the measurement that bounds it: over every sourced candidate the shipping regime does not move (UN 3481, PI 967/966 II), so what is open is the marked value and the S0 lot record, not the classification."
+ },
+ {
+  "what": "Whether microduck-m12-lens-holder is a printed part or a bought standard M12 holder",
+  "why": "docs/PARTS.md:89 row 27 reads '**bought** (standard M12 holder) or printed \u2014 CANNOT DETERMINE', and out/print/slice.json's first flag says it was 'sliced anyway'. Nothing in the sources decides it.",
+  "what_settles_it": "One teardown photograph of the camera stack, or a Pollen BOM line. Until then the document costs it as printed and publishes exactly what that is worth ($0.2161, 1.3982 g, 0.1121 h; 29 slugs / 35 pieces without it), so a reader can subtract it."
+ },
+ {
+  "what": "Whether the three TPU parts that cross N* < 1,000 under the failure buffer should be tooled",
+  "why": "The break-even exists (jaw-soft 796 at \u00d71.30, sole-left/right 852) but the sourced $0.50\u20135.00 moulded-piece band was quoted for small injection-moulded rigid parts; no soft-tool or LSR piece price was sourced, and the \u00a72.4 note already says a moulded version of this geometry is a redesign, not a re-quote.",
+  "what_settles_it": "One quote for a silicone or LSR tool and piece price on jaw-soft and sole-left at 1,000 off. The playbook already names the silicone route (ML source, $500\u20133,000 per tool, 20\u201330 pulls) but has no piece price for it."
+ },
+ {
+  "what": "Which of the three shipped ST25R3916 packages the Microduck actually carries (UFQFPN32 5.000 x 5.000 x 0.550 Active, VFQFPN32 5.000 x 5.000 x 0.900 NRND, WLCSP36 3.213 x 3.203 x 0.590 Active)",
+  "why": "the board that carries the chip is Pollen's, and it is unpublished. All three packages are now measured off DS12484 Rev 8 \u00a76 (Tables 134/135/136, pp.150-155 of 160) so whichever is chosen has its numbers; nothing in the datasheet says which one this product uses.",
+  "what_settles_it": "one photograph of the board, or a BOM line for it. A 5 mm square QFN and a 3.2 mm CSP are told apart by eye at any resolution that shows the chip."
+ },
+ {
+  "what": "The land PATTERN a board should etch for the LSM6DSV16X LGA-14L",
+  "why": "the mechanical drawing (Figure 33, p.175 of DS13510 Rev 4) gives the package's own lands \u2014 14 lands, pitch 0.5, 0.25 \u00b10.05 x 0.475 \u00b10.05 \u2014 and its own note sends a reader to ST technical note TN0018 for the land pattern and soldering, which is a different document and is not in this folder.",
+  "what_settles_it": "fetching ST TN0018 into ce-parts/lsm6dsv16x and hashing it in PROVENANCE.json, the same way the datasheet is."
+ },
+ {
+  "what": "The five head folders (top-head-shell, bottom-head-shell, face-part, eye-ring, jaw) FAIL on out/head/front_fit.json \u2014 a ledgered artifact re-measured with no later row naming it",
+  "why": "the artifact belongs to lane A, which regenerated it after those rows were written. The ledger is append-only and the last row's hash is the one checked, so nothing this lane can do inside the five folders closes it, and editing a row would be the wrong repair.",
+  "what_settles_it": "lane A appending one row per folder for the new front_fit.json run. SHELF-STATUS.html \u00a71 lists all five with that remedy, read out of the checker run rather than typed."
+ },
+ {
+  "what": "Whether a ref that was PASS at the 2026-09-02 snapshot is still PASS today",
+  "why": "out/laneT/shelf-before.json was written by a generator that named only not-PASS refs \u2014 its totals say 59 checked and it carries 40 rows \u2014 so a ref PASS then and PASS now appears in neither file.",
+  "what_settles_it": "nothing retroactive; the current generator names PASS refs, so the next before/after comparison will not have this asymmetry. The page states the limit rather than papering over it."
+ },
+ {
+  "what": "TRIAD.md's ledger `kind` vocabulary has no term for a dimension read off a vendor's mechanical drawing",
+  "why": "bin/triad accepts sim|bench|field|standard|use|failure|export. A first attempt with kind 'dimension' was FAILED by the checker as an unknown kind and corrected to 'standard' before ever being committed \u2014 nothing append-only was rewritten \u2014 but 'standard' is a poor fit for a dimensional reading.",
+  "what_settles_it": "a decision on TRIAD.md's ledger schema, which is a workshop-wide contract and not this repo's to change unilaterally. Both rows carry a kind_note saying exactly this."
+ },
+ {
+  "what": "Turnkey ASSEMBLY price for P1 and P2 at 3 / 100 / 1000 boards",
+  "why": "Both fabs that gave a bare-board price quote bare board only. The two that advertise assembly publish a floor with no BOM attached \u2014 JLCPCB 'PCB Assembly From $8.00', PCBWay '$29 free shipping for 1-20pcs assembly' \u2014 and both instant-quote engines are JavaScript that WebFetch does not run (pcbway.com/orderonline.aspx, jlcpcb.com/quote, seeedstudio.com/fusion_pcb.html all recorded as blocked with the reason).",
+  "what_settles_it": "A written quotation against the shipped bom.csv and positions.csv. The request is drafted in RFQ.html for all three fabs and has not been sent."
+ },
+ {
+  "what": "A second fab for P3 that will build a 45.8000 x 4.6000 mm board AND name ENIG on the order",
+  "why": "OSH Park is measured-refused: both its service pages publish a minimum board size of 0.25 in (6.35 mm) square, against this board's 4.6000 mm short axis \u2014 short by 1.7500 mm. AdvancedPCB's $33 Each Special clears every published restriction but specifies lead-free HAL and only PERMITS ENIG at the fab's option, which is permission, not a specification, and this board is a sliding spring contact where a HASL pad cold-flows and oxidises.",
+  "what_settles_it": "A quotation from JLCPCB \u2014 its published minimum board size is 3 x 3 mm and it lists ENIG on this process \u2014 or any fab that will price the board (or its array) with ENIG named on the order. Letter drafted, not sent."
+ },
+ {
+  "what": "The NP-F spring contact part for P3, and the 4.000 mm contact pitch it lands on",
+  "why": "There is no identified bought part for the contacts at all: no manufacturer, no part number. Sony publishes no NP-F terminal drawing; the only public description found names the three terminals '+', 'C', '-' and gives no dimension. The 4.000 mm pitch is DERIVED \u2014 the 12.000 mm window measured in power_support.stl divided into three cells \u2014 and footprint P1 is marked UNCONFIRMED in the board's own bom.csv.",
+  "what_settles_it": "A caliper across a physical NP-F550 pack. Nothing else does."
+ },
+ {
+  "what": "Whether OSH Park bills the bounding rectangle or the routed outline",
+  "why": "Neither service page says. The bounding rectangle is used throughout (3.022506 and 1.364003 sq in), so every OSH Park number on P1 and P2 is a CEILING \u2014 by at most $0.0834 per set of three on P1.",
+  "what_settles_it": "One sentence from OSH Park; it is asked in that supplier's RFQ letter."
+ },
+ {
+  "what": "Prices for five lines that carry none at all",
+  "why": "B13 microphone(s) \u2014 nothing is known, not the part, type, count or placement, so there is no URL to try. B15 camera-in-use LED \u2014 placement is a mechanical and regulatory question, not a price one. B16 gamepad and B17 USB-C cable \u2014 both included in Pollen's $399 retail bundle, so no price for either alone exists on any Pollen page, and neither model is named. B18b M2 screws in the other lengths \u2014 one shop, one currency, four of five sizes.",
+  "what_settles_it": "For B13/B15: teardown or a Pollen answer. For B16/B17: naming the model. For B18b: a second shop, which is what the fastener RFQ asks for. None is summed as zero anywhere."
+ }
+]
