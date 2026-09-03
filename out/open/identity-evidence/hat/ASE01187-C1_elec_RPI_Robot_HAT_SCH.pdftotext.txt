@@ -1,0 +1,635 @@
+              1                                                   2                               3                                       4                                        5                                          6
+
+
+
+
+    "RPI_Robot_HAT" is a raspberry PI HAT designed for small/medium
+    size robots. It has an IMU, Dynamixel connectors and audio. Its
+    dimensions   fits a raspberry PI zero
+                                                                                                                                   Cabled buses on Raspberry PIs
+                                                                                                                                    - PI zero 2W:
+                                                                                                                                        - I2C0 (             pin 27/28 ID_SD/C):       reserved, but can be on J6 with   0R
+A                                                                                                                                                                                                                             A
+    Release       Date                     Designer       Check       Comments                                                          - I2C1 (IO    2/ 3 - pin  3/ 5 SDA/SCL):       IMU + Audio + Qwiic J5
+                                                                                                                                    - PI 4:
+                                                                                                                                        - same I2C0/1
+    A1            06/03/2026               EB              SN         Initial   drawing                                                 - I2C3 (IO    4/ 5 - pin  7/29 SDA/SCL):       Qwiic J6
+                                                                                                                                        - I2C4 (IO    8/ 9 - pin 24/21 SDA/SCL):       Qwiic J7
+    B1            06/05/2026               EB              SN         [fixed] Acc. is at 0x19 I2C address                               - I2C5 (IO 10/11 - pin 19/23 SDA/SCL):         Qwiic J8
+                                                                      [fixed] Soft reset of the audio DAC                           - PI 5:
+                                                                      [fixed] Ideal diode                                               - same I2C0/1
+                                                                                                                                        - I2C2 (IO    2/ 3 - pin  3/ 5 SDA/SCL):       Qwiic J5
+                                                                      [fixed] Know position of IMU
+                                                                      [update]  Dynamixel_dir  is based on Tx
+                                                                      [added] IMU can be disconnected
+                                                                                                                                    Cabled GPIOs on the 40-way       Header:
+                                                                      [added] IMU_IT is cabled
+                                                                                                                                     - GPIO00/01:  HAT identification    over I2C (reserved)
+                                                                      [added] Access to I2C0
+                                                                                                                                     - GPIO02: IMU + Audio + Stemma/QT          - SDA
+                                                                      [added] Switch off detection
+                                                                                                                                     - GPIO03: IMU + Audio + Stemma/QT          - SCL
+                                                                                                                                     - GPIO04: Stemma/QT     - SDA
+    C1            08/07/2026               EB              SN         [fix] 3V3 on IO10/11
+                                                                                                                                     - GPIO05: Stemma/QT     - SCL
+B
+                                                                      [fix] MOS direction  of Ideal diode                                                                                                                     B
+                                                                                                                                     - GPIO06: Switch off detection
+                                                                      [update]  I2C3 is by default instead   of reserved   I2C
+                                                                                                                                     - GPIO07
+                                                                                                                                     - GPIO08: Stemma/QT     - SDA
+                                                                                                                                     - GPIO09: Stemma/QT     - SCL
+                                                                                                                                     - GPIO10: Stemma/QT     - SDA
+                                                                                                                                     - GPIO11: Stemma/QT     - SCL
+                                                                                                                                     - GPIO12
+                                                                                                                                     - GPIO13:
+                                                                                                                                     - GPIO14: Dynamixel - UART_Tx
+                         Schematic                                                                                                   - GPIO15: Dynamixel - UART_Rx
+                                                                                                                                     - GPIO16
+                                                                                                                                     - GPIO17
+                                                                                                                                     - GPIO18: Audio, PCM Clk
+                                                                                                                                     - GPIO19: Audio, PCM FS
+                                                                                                                                     - GPIO20: Audio, Din
+C                                                                                                                                    - GPIO21: Audio, Dout                                                                    C
+                                                                                                                                     - GPIO22: IMU_IT
+                                                                                                                                     - GPIO23
+                                                                                                                                     - GPIO24
+                                                                                                                                     - GPIO25
+                                                      Fiducials                                                                      - GPIO26
+                  PCB01186                                                                                                           - GPIO27
+                  ASE01187
+
+                               Logo HF
+                             Logo Pollen
+
+
+
+
+                                                                                                                                 Pollen Robotics / Hugging Face
+                                                                                                                                 Sheet: /
+D                                                                                                                                File: elec_RPI_Robot_HAT.kicad_sch                                                           D
+
+                                                                                                                                 Title:       elec   RPI Robot   HAT
+                                                                                                                                 Size: A4           Date: 2026-05-06                                        Rev: B1
+                                                                                                                                 KiCad E.D.A. 9.0.9                                                         Id: 1/6
+              1                                                   2                               3                                       4                                        5                                          6
+    1                2                                                            3                      4                                                  5             6
+
+
+
+
+A                                                                                                                                                                         A
+
+
+
+
+                                                                                                             +3V3                         +5V
+        Power            Dynamixel
+                                                                                                                          J4
+
+                                                                                                                     1                2
+                                                              {GPIO}                               IO_02             3                4
+                                                                                                   IO_03             5                6
+                                                                                                   IO_04             7                8            IO_14
+                                                                                                                     9               10            IO_15
+                                                                                                      IO_17         11               12            IO_18
+                         Sensors
+                                                                                                      IO_27         13               14
+                                                                                                   IO_22            15               16     IO_23
+                                                                                                                    17               18
+                                                              {GPIO}                                                                        IO_24
+                                                                                                   IO_10            19               20
+                                                                                                   IO_09            21               22    IO_25
+                                                                                                   IO_11            23               24             IO_08
+B                                                                                                                                                                         B
+                                                                                                                    25               26
+                                                                                                                                           IO_07
+                         Audio                                                                     ID_SD            27               28             ID_SC
+                                                                                                   IO_05            29               30
+                                                                                                   IO_06            31               32
+                                                                                                                                            IO_12
+                                                              {GPIO}                                                33               34
+                                                                                                        IO_13
+                                                                                                   IO_19            35               36
+                                                                                                                                            IO_16
+                                                                                                                    37               38             IO_20
+                                                                                                         IO_26
+                                                                                                                    39               40             IO_21
+                                                                                                                          Mounting
+
+
+
+                                                                                                                         MP
+
+
+            {GPIO}
+
+                                                    +3V3               +3V3                           40Way GPIO Header
+
+
+                                                        C25      DNP-10k
+
+                                                   DNP-100n      R10
+C                                                                R11                                                                                                      C
+                                 U4     8
+
+
+
+                                         GND VCC
+                             1                         5   ID_SD
+                               A0                  SDA
+                             2                         6   ID_SC
+                               A1                  SCL
+                             3                         7
+                               A2                   WP
+                                                                   HAT Identification:
+                                        4
+                                      DNP-CAT24C32HU4                I2C add. 0x50
+                                                                     Standard Class      HAT+
+
+
+                           See: https://github.com/raspberrypi/utils/tree/master/eeptools
+
+
+
+
+                                                                                                Pollen Robotics /                    Hugging        Face
+                                                                                                Sheet: /Schematic/
+D                                                                                               File: main.kicad_sch                                                      D
+
+                                                                                                Title:       elec        RPI Robot                   HAT
+                                                                                                Size: A4           Date: 2026-05-06                             Rev: B1
+                                                                                                KiCad E.D.A. 9.0.9                                              Id: 2/6
+    1                2                                                            3                      4                                                  5             6
+       1                                             2                                                                       3                                               4                                                                  5                          6
+
+
+
+
+    Power
+A                                                                                                                                                                                                                                                                          A
+
+
+
+
+              24V
+            (i.e. 7s/25c,
+            from 21V to 29V)
+
+
+
+
+             +BATT                                                                                                                                                                                                                   +5V
+                                                                                       U9                                       L4
+                                                                                       AP63205                               6,8u 2A                                                          Q2
+                                                                                                                                                                                                          5A
+                                                                                   3                        5                                                                            2            3
+                                                                                       IN                SW
+                                                                                                            6
+                                                                                                        BST                                  C21         C22
+                                                                                                 GND
+                                                                                   2                        1
+                                          C19                                          EN                FB
+                                                                                                                                                                                              1
+                                                                                                                  100n 50V                   22u   6V3                                                U10
+                                                                                               4
+                                           10u    63V                                                                C20                                                                              LM5050-1
+                                                                                                                                                                                              5
+B                                                                                                                                                                                                                             R8                                           B
+                                                                                                                                                                                               GATE
+                                                                                                                                                                        3
+                                                                                                                                                                   D1                                                         100R
+                                                                                                                                                               BAT54W               4                 6
+                                                                                                                 2A                                                                      IN       OUT
+                                                                                                                                                                        1                             1
+                                                                                                       Fsw: 1,1 MHz                                                                                VS
+                                                                                                                                                                                    3
+                                                                                                                                                                                         OFF
+                                                                                                                                                                                               GND
+                                                                                                                                                                                                                              C39
+
+                                                                                                                                                                                              2                               100n   6V3
+
+
+
+
+                                                                                                                                                                                        R24
+                                                                                                                                                                                                                                                    Switch off
+                                                                                                                                                                                        10k                                                {GPIO}
+                                                                                                                                                                                                                         IO_06                      detection
+
+
+                                                                                                                                                                                       D2                        C44
+C                                                                                                                                                                       3V3 Zener   Diode                        10n                                                       C
+
+
+                               ModelIdle                                                 (W)Charge      max.   (W)"Usage     moyen"*   (W)
+                               -------------------------------------------------------
+                               Raspberry Pi 52,4                                       - 3,39           - 104,0
+                               Raspberry Pi 4 B2,5                                - 3,46           -    7,63,5
+                               Raspberry Pi Zero 2 W0,61,50,8
+
+
+
+
+                                                                                                                                                                    Pollen Robotics / Hugging                          Face
+                                                                                                                                                                    Sheet: /Schematic/Power/
+D                                                                                                                                                                   File: power.kicad_sch                                                                                  D
+
+                                                                                                                                                                    Title:       elec         RPI Robot                 HAT
+                                                                                                                                                                    Size: A4           Date: 2026-05-06                                                          Rev: B1
+                                                                                                                                                                    KiCad E.D.A. 9.0.9                                                                           Id: 3/6
+       1                                             2                                                                       3                                               4                                                                  5                          6
+               1                                                             2                                              3                                                                        4                                                5                                            6
+
+
+
+
+             Dynamixel
+A                                                                                                                                                                                                                                                                                                  A
+        See: https://emanual.robotis.com/docs/en/parts/interface/dynamixel_shield/
+        as a reference.
+
+
+
+                                                                                                      +3V3
+
+
+
+
+                                                                                      10k
+                                                                                      R26
+                                                                                                       2
+                                                                                                  1          MMBT3906
+                                                                                            R27              Q1
+                                                                                                       3
+                                                                                            10k                          Dynamixel_dir
+
+                                                                                                           20k
+                                                                                                           R28
+
+B   {GPIO}                                                                                                                                                                                                                                                                                         B
+
+
+
+
+                       IO_14
+                       DynUART_Tx
+
+                                                                                                                     +3V3                                +3V3
+
+
+
+
+                                                                                                                                                      R31
+                                                                                                                        5
+                                                                                                                                  1                   10k
+                                                                                                                                       U6
+
+
+                                                                                                                        GND VCC
+                                                                                                                 2                                4
+
+                                                                                                                                                                                                         +3V3
+
+                                                                                                                        3     SN74LVC1G125DBV
+
+                                                                                                                                                                                                                R32
+C                                                                                                                                                                                                               10k                                                                                C
+
+
+
+
+                                                                                                                     +3V3
+
+
+
+
+                                                                                                                        5                                                                                                                                 +BATT
+                                                                                                                                  1     U7                                                                                               TH1
+                                                                                                                                                                                                                        R33                                                Dynamixel-3
+
+
+                                                                                                                        GND VCC
+                                                                                                                                                                                                                                  100R   thermistor
+                                                                                                                                                                                                                       150R
+                                                                                                                 2                                4                                                                                                                   3
+                                                                                                                                                                                                                                                                      2
+                                                                                                                                                                                                                                                                                  J13
+D                                                                                                                                                                                                                                                                     1                            D
+                                                                                                                        3         SN74LVC1G126DBVR
+                                                                                                                                                                                                                           D4
+                                                                                                                                                                                                                          5V1
+                                                                                                                                                                                                                                                                      3
+                                                                                                                                                                                                                                                                      2
+                                                                                                                                                                                                                                                                                  J14
+                                                                                                                                                                                                                                                                      1
+
+
+
+
+                                                                         +3V3
+
+
+
+                                                                           5
+                                                            U5
+
+
+
+                                                                            GND VCC
+                                                        74LVC1G08                     1
+                          IO_15                                  4
+                                                                                                                                             +3V3
+                          DynUART_Rx                                                  2
+
+                                                                                                                                                            100n
+                                                                           3
+E                                                                                                                                                                                                                                                                                                  E
+                                                                                                                                            C16          C17               C18
+
+
+
+
+F                                                                                                                                                                                                                                                                                                  F
+                                                                                                                                                                   +3V3
+
+
+
+
+                                                                                                                                        +3V3
+                                                                                                                                                                 C15        100n
+
+                                                                                                                                                                                         U8                                                               +BATT
+                                                                                                                                      R29                                                SIT3088E                                                                         Dynamixel-4
+                                                                                                                                                                                   8
+
+                                                                                                                                                                                   VCC
+                                                                                                                                      10k                                                                                                                         4         J11
+                                                                                                                                                                                                6                                                                 3
+                                                                                                                                                                                            A
+                                                                                                                                                                       1                                                                                          2
+                                                                                                                                                                         RO
+                                                                                                                                              R40           0R         2                        7                                                                 1         3A max
+                                                                                                                                                                         ~{RE}              B
+                                                       Dynamixel_dir                                                                                                   3
+                                                                                                                                                                         DE
+
+                       IO_14                                                                                                                                           4
+                                                                                                                                                                           DI
+                       DynUART_Tx
+                                                                                                                                                      DNP-0R
+                                                                                                                                                                                   GND
+                                                                                                                                                         R41                                                                                              +BATT
+G                                                                                                                                                                                  5                                                                                                               G
+
+                                                                                                                                                                                                                                                                  4         J3
+                                                                                                                                                                                                                                                                  3
+                                                                                                                                                                                                                                                                  2
+                                                                                                                                                                                                                                                                  1
+
+
+
+
+H                                                                                                                                                                                                                                                                                                  H
+
+                                                                                                                                                                                            Pollen Robotics / Hugging             Face
+                                                                                                                                                                                            Sheet: /Schematic/Dynamixel/
+                                                                                                                                                                                            File: dynamixel.kicad_sch
+
+                                                                                                                                                                                            Title:        elec        RPI Robot     HAT
+                                                                                                                                                                                            Size: A3           Date: 2026-05-06                                                          Rev: B1
+                                                                                                                                                                                            KiCad E.D.A. 9.0.9                                                                           Id: 4/6
+               1                                                             2                                              3                                                                        4                                                5                                            6
+       1                                2                                               3                        4                                                                 5                             6
+
+
+
+
+    Sensors
+A                                                                                                                                                                                                                A
+
+
+
+
+                            {GPIO}
+
+                                                                                                                                                              IMU
+                                                            +3V3
+
+
+                                                                                                             +3V3
+                                                            10k
+                                                                         1
+                                                            R12
+                                     SDA                    R13          2                                            R9     0R
+                                                                                        J5
+                                     IO_02                               3
+                                                                                        JST SH
+                                     IO_03                               4                                                         C23           C24
+                                     SCL                                     Mounting
+
+
+
+                                                                             MP                                             100n   6V3
+
+                                                                                                                                                                       U11
+B                                                                                                {GPIO}                                                                                                          B
+                                                                                                                                                                       BMI088
+                                                                                                                                                       3      11
+
+                                                                                                                                                       VDD
+                                                            +3V3
+                                                                                                                                                               VDDIO
+                                                                                                                                                                                   R25   0R           {GPIO}
+                                     SDA R18                                                                                             14                                   16              IO_22
+                                                   0R                                                                                       ~{CSB1}                    INT1
+                                     IO_04                                                                                                5
+                                                                                                                                            ~{CSB2}
+                                     IO_05                                                                                  SCL IO_03     8                                   1
+                                                                                                                                            SCK/SCL                    INT2
+                                     SCL                           10k                                                      SDA IO_02     9
+                                             R19   0R                    1                                                                  SDI/SDA
+                                                                   R20                                                       R14   0R    15                                   12
+                                                                   R21   2                                +3V3                              SDO1                       INT3
+                                                                                                                             R15   0R    10
+                                                   DNP-0R                               J6
+                                     ID_SD R17                           3                                                                  SDO2
+                                                                                        JST SH                                                                                13
+
+                                                                                                                                                       GNDA    GNDIO
+                                     ID_SC                               4                                                                                             INT4
+                                                                                                                                         7
+                                             R16   DNP-0R                    Mounting                                       +3V3             PS
+                                                                             MP
+                                                                                                                                                       4      6
+
+
+           STEMMA QT 1mm
+                                                            +3V3
+              3V3 Default
+
+
+
+                                                            10k
+                                                                         1                                                                       I2C add.:
+C                                                           R34                                                                                                                                                  C
+                                     SDA                    R35          2                                                                   -     acc.: 0x19
+                                                                                        J7
+                                     IO_08                               3                                                                   -      gyr.: 0x68
+                                                                                        JST SH
+                                     IO_09                               4
+                                     SCL                                     Mounting
+
+
+
+                                                                             MP
+
+
+
+
+                                                            +3V3
+
+
+
+
+                                                            10k
+                                                                         1
+                                                            R38
+                                     SDA                    R39          2
+                                                                                        J8
+                                     IO_10                               3
+                                                                                        JST SH
+                                     IO_11                               4
+                                     SCL                                     Mounting
+
+
+
+                                                                             MP                       Pollen Robotics / Hugging                  Face
+                                                                                                      Sheet: /Schematic/Sensors/
+D                                                                                                     File: sensors.kicad_sch                                                                                    D
+
+                                                                                                      Title:         elec    RPI Robot             HAT
+                                                                                                      Size: A4           Date: 2026-05-06                                                              Rev: B1
+                                                                                                      KiCad E.D.A. 9.0.9                                                                               Id: 5/6
+       1                                2                                               3                        4                                                                 5                             6
+               1                                                                      2                                                     3                               4                                                                        5                                                     6
+                                                                                                                                                                                                                              +5V
+
+                                                                                                                                                                                                                             C42                           R23
+                                                                                                                                                                                                                             C43                           R22
+                                                                                                                                                                                                                              1u                           10k                  Mics
+    Audio                                                                                                                                                                                                                                                                         2
+                                                                                                                                                                                                                 C41         1u                                                   1
+                                                                                                                                                                                                                                                                                           J2
+                                                                                                                                                                                                                                                                                  2             Wago-2
+A                                                                                                                                                                                                                                                                                                          A
+                                                                                                                                                                                                                 C40         1u                                                   1
+                                                                                                                                                                                                                                                             R36                           J9
+                                                                                                                                                                                                                                                             R37
+                                                                                                                                                                                                                                                         DNP-1M
+
+                                                                                                                                                           +5V                                                                            +5V
+                                                                                                                                                                                                        PWR_FLAG
+     {GPIO}
+                                                                                                                                                                      FB1
+                                                                                                                   U2
+                                                                                                          TLV320AIC3104IRHBR
+                                                                                                                                                                                 C33                C34                C4           C5          C6          C7
+                                                                              IO_03       8                                                23                                     1u                10n
+                                                                                               SCL                               HPROUT                                                                                1u           10u
+                                                                              IO_02       9                                                22
+                                                                                               SDA                               HPRCOM
+       +3V3
+                                                                                                                                           19
+                                                                              IO_19       3                                      HPLOUT
+                                                                                               WCLK                                        20
+                                                                              IO_18       2                                      HPLCOM
+     C14                                                                                       BCLK                                                              C1
+                                                Y1                            IO_21       4                                                                                      R1
+                                                                                               DIN                                                               1u                                U1     6
+                                                                                                                                                                                                                         4
+                                                                              IO_20       5                                                                                      10k
+    100n                                      12 MHz                                                                                                                                                              PVDDL
+                                                                                                                                                                                                           VDD
+                               4                                                               DOUT                                        10                                                 7
+                                                                                                                       MIC1LP/LINE1LP                                                              INL
+                                                                                                                                                                                                                        13
+
+
+                                    GND VDD
+                                                                                                                                           11                                                                                       1
+                                                                                                                       MIC1LM/LINE1LM                                 C2         R2                               PVDDR      +OUT_L                  TP3
+                    1                                    3                                1                                                                                                   10                                    3
+                        Tri-State               OUT                                            MCLK                                                                                                INR                       -OUT_L                  TP4
+B
+                                                                            +3V3                                      MIC1RP/LINE1RP
+                                                                                                                                           12                                                                                                                                   5W LS                      B
+                                                                                                                                           13
+                                                                                                                      MIC1RM/LINE1RM
+                               2                                            10k                                                                                             0R         R3     12                                                     FB2
+                                                                                                                                                           +5V                                   ~{SHND}                                                           FB3
+                                                                            R6                                                             27                               0R         R4      5                                    14                                            2
+                                                                                                                                LEFT_LOP                                                         ~{MUTE}                     -OUT_R                                                        Wago-2
+                                                                                                                                                                            0R                                     2
+                                                                                          31                                               28                                          R5      9                                    16                                            1
+     +3V3                                                                                      ~{RESET}                         LEFT_LOM                                                         MODE                        +OUT_R                                                        J1
+                                                                                                                                                                                                                     PGNDL
+                                                                                                                                                                                                           GND
+                                                                             C38                                                                                                               8
+                                                                                                                                                                                                 VREF
+                                                                                                                                           29                                           C3                        15                                   C8                  C9
+                                                                                                                               RIGHT_LOP
+                                                                            100n                                                           30                                                             11         PGNDR   PAM8406D                220n                  220n
+                                                                                                                               RIGHT_LOM
+                                                                   C30                                                                                                                  1u
+                                                     C29
+                                                                                                                                           16
+                                                      1u           100n                                                   MIC2R/LINE2R
+                                                                                                                                           14   0R   R7
+                                                                                                                  MIC2L/LINE2L/MICDET
+
+                                                                                                                                           15
+                                                                                                                                 MICBIAS             TP2
+                                                                   C36                                                                                                                                                                                                                +3V3      PWR_FLAG
+                                                     C35
+                                                      1u           100n                   25                                               33
+                C37                                                                            AVDD                                  EP
+                                                                                          18                                               17                                                                                                                             C11
+                                                                                               DRVDD                              AVSS1
+                10u                                                                       24                                               26
+                                                                                               DRVDD                              AVSS2                                                                                                                                  100n
+                                                                   C32                     7                                               21
+                                                     C31                                       IOVDD                              DRVSS                                                                                                                                                      MK1
+                                                                                          32                                                6
+C                                                     1u           100n                        DVDD                                DVSS                                                                                                                                                4                   C
+                                                                                                                                                                                                                                                            C10    1u
+                                                                                                                                                                                                                                                                                  1
+
+                                                                                                                                                                                                                                                                                      2
+                                                                                                                                                                                                                                                                                      3
+
+                                                     C27           C28                                 I2C   address:          0x18
+                                                      1u           100n
+
+
+                                                                                                                                                                                                                                                                         Onboard             Mic.
+                                                                     +1V8
+                                U3
+                          XC6206P182MR
+                           3                             2
+                               VI                   VO
+              C13                             GND            C12     C26
+                                          1
+              10u                                            10u     100n
+
+
+                                                                                                                                                                 Pollen Robotics / Hugging                        Face
+                                                                                                                                                                 Sheet: /Schematic/Audio/
+D                                                                                                                                                                File: audio.kicad_sch                                                                                                                     D
+
+                                                                                                                                                                 Title:          elec        RPI Robot                 HAT
+                                                                                                                                                                 Size: A4           Date: 2026-05-06                                                                                  Rev: B1
+                                                                                                                                                                 KiCad E.D.A. 9.0.9                                                                                                   Id: 6/6
+               1                                                                      2                                                     3                               4                                                                        5                                                     6
+

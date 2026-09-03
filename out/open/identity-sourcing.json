@@ -1,0 +1,70 @@
+{
+ "$doc": "out/open/identity-sourcing.json - CLASS 5 (part identity and sourcing) resolution of the CANNOT DETERMINE harvest. Written incrementally; every entry carries its source and fetch date. Owned by the resolve-identity lane; nothing here is estimated.",
+ "lane": "resolve-identity (class 5)",
+ "checkpoint": 1,
+ "written_utc": "2026-09-03T23:01:49Z",
+ "status": "PARTIAL - checkpoint 1: Robot HAT identity, ToF blob and generation, camera overlay settled; Radxa SKU, NFC, LED, speaker transducer, ROBOTIS volume still in progress",
+ "owned_paths": [
+  "out/open/identity-sourcing.json",
+  "out/open/identity-evidence/",
+  "ce-parts/microduck-speaker/",
+  "ce-parts/microduck-mic/",
+  "ce-parts/microduck-camera-module/",
+  "ce-parts/microduck-tof-module/",
+  "ce-parts/radxa-zero-3w/sourcing.json",
+  "ce-parts/microduck-robot-hat-pcb/component.json",
+  "spec/sourcing.json"
+ ],
+ "items": [
+  {
+   "id": "ID-01",
+   "harvest_ids": [
+    85
+   ],
+   "what": "Which ToF firmware size figure is the real wire upload (90 KB vs 550 KB)",
+   "verdict": "RESOLVED",
+   "answer": "86,016 bytes (0x15000 = 84.0 KiB) per generation is the firmware uploaded over I2C. Both VL53L5CX_FIRMWARE[] and VL53L8CX_FIRMWARE[] in Pollen's vendored ULD headers contain exactly 86,016 byte literals (counted). The '550 KB' is the SIZE OF THE SOURCE FILE: tof/vendor/vl53l5cx/vl53l5cx_buffers.h is 552,567 bytes and vl53l8cx_buffers.h is 549,954 bytes of C text (each also carries DEFAULT_CONFIGURATION 971 bytes and DEFAULT_XTALK 776 bytes). main.rs's '~90 KB' is the wire figure rounded up; lib.rs's '550 KB firmware blob' conflates the header file with the blob.",
+   "source": "https://github.com/pollen-robotics/microduck at main bc41fb5c9a9b39894669c1e022e375cf83800382 (fetched 2026-09-03T18:03Z via raw.githubusercontent.com): tof/vendor/vl53l5cx/vl53l5cx_buffers.h, tof/vendor/vl53l8cx/vl53l8cx_buffers.h; counted with a regex over 0xNN literals inside each array initialiser (/private/tmp/resolve-identity/pollen/)",
+   "consequence": "firmware/upstream.json may record 86,016 bytes as the upload and 552,567 / 549,954 bytes as the vendored header sizes; at 400 kHz I2C with ~9 bits/byte the floor is 86016*9/400000 = 1.935 s of bus time, which matches main.rs 'taking seconds'."
+  },
+  {
+   "id": "ID-02",
+   "harvest_ids": [
+    109
+   ],
+   "what": "ToF generation actually fitted (VL53L5CX vs VL53L8CX) and how the runtime tells them apart",
+   "verdict": "RESOLVED as a per-unit fact with a stated majority",
+   "answer": "Runtime probe: tof/vendor/probe.c selects register bank 0 (write 0x7FFF=0x00), reads two bytes at 0x0000 = device_id, revision_id, restores bank 2. tof/src/sensor.rs:86-92 maps revision 0x02 -> VL53L5CX and 0x0C -> VL53L8CX (device_id 0xF0 in the unit tests, lines 393-396). sensor.rs:76 verbatim: 'Revision 0x02 - the older sensor, and the one most ducks in the field have.' So the MAJORITY fitted generation per Pollen's own source is the VL53L5CX; both ship. Community replica (fanhao375, research/raw/fanhao375_microduck-replica_README.md:90) lists VL53L8CX for ITS build, which is a replica choice, not a teardown.",
+   "source": "pollen-robotics/microduck main bc41fb5 tof/src/sensor.rs lines 68-100, 388-402; tof/vendor/probe.c (fetched 2026-09-03T18:03Z)",
+   "what_settles_it_per_unit": "the header line `robotctl monitor` prints (Generation::as_str -> 'VL53L5CX' / 'VL53L8CX'), or `i2ctransfer -y 3 w3@0x29 0x7f 0xff 0x00 && i2ctransfer -y 3 w2@0x29 0x00 0x00 r2` and read byte 2: 0x02 = L5CX, 0x0C = L8CX"
+  },
+  {
+   "id": "ID-03",
+   "harvest_ids": [
+    60,
+    75,
+    116,
+    90,
+    74
+   ],
+   "what": "The Robot HAT's design: amplifier, microphone, connectors, board stack-up - and whether it is published",
+   "verdict": "RESOLVED for the design family; outline revision differs from the Microduck mesh (measured)",
+   "answer": "Pollen PUBLISHED the HAT: github.com/pollen-robotics/elec_RPI_Robot_HAT (Apache-2.0, KiCad 9, pushed 2026-08-24, HEAD 23eab11927f95ceca0dfa35bf182caeb7db39ea0). Production BOM ASE01187-C1 names: U2 TLV320AIC3104IRHBR codec (LCSC C181753); U1 PAM8406D 5 W class-D/AB stereo amplifier (C86270) on the codec's LEFT_LOP/RIGHT_LOP line outputs - the speaker amplifier the runtime's aic3104-init.sh describes; MK1 LinkMems LMA2718T421-OA5-2 analog MEMS microphone (C7587901), omni, -42 dBV/Pa sensitivity, 55 dB(A) SNR, 300 ohm Zout, VDD 1.6-3.6 V, 2.75 x 1.85 mm, fed from +3V3 (kicad_pcb net) - the 'Onboard Mic.' of the schematic and the 'onboard microphone ... Mic3R -> Right PGA' of aic3104-init.sh; U11 BMI088 IMU (dormant per Pollen's dts); U8 SIT3088E RS-485 transceiver; U9 AP63205 5 V buck; U10 LM5050-1 ideal-diode controller; U3 XC6206P182 1.8 V LDO; U4 CAT24C32 HAT EEPROM (DNP). CONNECTORS: J3/J11 JST EH B4B-EH-A 4-pin 2.50 mm 'Dynamixel-4' (nets GND, +BATT, D+/D-), J13/J14 JST EH B3B-EH-A 3-pin 2.50 mm 'Dynamixel-3' (GND, +BATT, DATA) - i.e. exactly the 4+3 = 7 holes x 2 blocks = 14 x D0.95 on a 2.50 mm pitch that the Microduck mesh carries; J4 2x20 SMD female header (C2685112) on B.Cu; J5-J8 JST SH BM04B-SRSS-TB 1.00 mm 4-pin 'STEMMA QT' (GND, +3V3, SDA, SCL) - J5 on I2C1/GPIO2-3 (header pins 3/5) shared with IMU+codec = the ToF socket Pollen's dts names 'Stemma J5'; J6 on GPIO4/5, J7 on GPIO8/9, J8 on GPIO10/11; J1 Wago 2059-302 2-pin (C2765060, pads at +-1.50 mm = 3.00 mm pitch) = loudspeaker on PAM8406 +OUT_R/-OUT_R; J2 and J9 Wago 2059-302 = external microphone inputs (GND + signal). Board measured off the kicad_pcb: 65.000 x 48.500 mm, thickness 1.000 mm (4-layer: Cu 0.07/0.035/0.035/0.07 over dielectric 0.1/0.57/0.1), copper_finish 'None', NO mounting holes.",
+   "does_it_match_the_microduck_mesh": "PARTLY. Pollen's elec_rpi_robot_hat_pcb.stl is 65.025 x 30.025 x 0.840 mm with 4 x D2.7 holes on 58 x 23 (ce-parts/microduck-robot-hat-pcb/component.json); the public board is 65.0 x 48.5 x 1.0 mm with no holes. Same schematic family (the dts's 'R12/R13 10k pull-up pair' exist verbatim in the BOM: R12, R13 = 10k; the 'Stemma J5' name and the 400 kHz codec/BMI088 bus match), different outline revision. The fitted Microduck board is therefore a Pi-Zero-outline sibling of Rev B1 that Pollen has not published; the ICs and connector families are the best-supported answer, the outline is NOT.",
+   "source": "out/open/identity-evidence/hat/ (README, BOM, POS, schematic pdftotext, SOURCE.txt with SHA256SUMS), fetched 2026-09-03T18:0xZ; mic datasheet docs/part - LMA2718 - C7587901.pdf in the same repo (pdftotext: Sensitivity -43/-42/-41 dB, SNR 55 dB(A), Zout 300 ohm, VDD 1.6-3.6 V, L 2.75 +-0.10 mm, W 1.85 +-0.10 mm); PAM8406 DS43342 Rev 2-2 ('5W Output at 10% THD with a 2 ohm load and 5V', '3W ... 4 ohm ... 5V', supply 2.5-5.5 V)",
+   "what_settles_the_outline": "one photograph of a production Microduck HAT's component side (silkscreen carries the ASE/PCB number: the public one is PCB01186-C1), or Pollen publishing the Microduck-outline revision"
+  },
+  {
+   "id": "ID-04",
+   "harvest_ids": [
+    75,
+    59
+   ],
+   "what": "The camera module (sensor + board) and its device tree",
+   "verdict": "RESOLVED sensor and overlay; board/ribbon PARTLY",
+   "answer": "Sensor IMX219, probed as 'imx219 2-0010: Model ID 0x0219' (docs/project/media-bringup.md:312), overlay radxa-zero3-rpi-camera-v2 = 'Pi Cam v2 / IMX219' (scripts/setup-board.sh:738-748; only that overlay 'has ever been used here'), mounted 'a quarter turn off' and 'upside down' (media-bringup.md:337, :472 rotation=180). The Radxa ZERO 3W host connector is '22-Pin MIPI CSI with 0.5mm Pitch' (radxa.com/products/zeros/zero3w/, fetched 2026-09-03). A stock Pi Camera v2 board has a fixed lens; the Microduck mesh carries an M12 lens + printed holder (part:microduck-m12-lens, :microduck-m12-lens-holder), so the board is an IMX219 M12-mount variant (Arducam B0183 family, line B6) whose camera-end connector is 15-pin 1.0 mm on every catalogue IMX219 board found - hence a 22-to-15 adaptor ribbon.",
+   "source": "pollen-robotics/microduck main bc41fb5 scripts/setup-board.sh, docs/project/media-bringup.md (local copies research/raw/); radxa.com product page fetched 2026-09-03",
+   "still_open": "exact board vendor and ribbon length - see ID-08 (pending)"
+  }
+ ]
+}
