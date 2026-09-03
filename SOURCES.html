@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sources — MakerWorld 3250889</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="tools/doc.css">
+<style>
+  .thumbs{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:10px 0}
+  .thumbs figure{margin:0;border:1px solid var(--hair);background:#fff}
+  .thumbs img{width:100%;display:block}
+  .thumbs figcaption{font-family:var(--sans);font-size:11px;padding:4px 6px;color:var(--ink-2)}
+  .pair{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:10px 0}
+  .pair figure{margin:0} .pair img{width:100%;border:1px solid var(--hair);display:block}
+  figcaption{font-family:var(--sans);font-size:12px;color:var(--ink-2);padding:4px 0}
+  table.data{width:100%;border-collapse:collapse;font-size:13px}
+  table.data th,table.data td{border-bottom:1px solid var(--hair);padding:5px 6px;text-align:left;vertical-align:top}
+  table.data th{font-family:var(--sans);font-size:11.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2);background:var(--head)}
+  td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;font-family:var(--mono);font-size:12px}
+  .small{font-family:var(--sans);font-size:11.5px;color:var(--ink-2)}
+  .chip{font-family:var(--sans);font-size:11px;font-weight:600;letter-spacing:.04em;padding:1px 6px;border:1px solid;border-radius:2px;white-space:nowrap}
+  .chip.pass{color:var(--pass-ink);border-color:var(--pass-ink)} .chip.fail{color:var(--no);border-color:var(--no)}
+  .chip.cd{color:var(--cd-ink);border-color:var(--cd-ink)} .chip.ref{color:var(--ink-2);border-color:var(--hair)}
+  .verdict{border-left:3px solid var(--rule);padding:8px 14px;margin:10px 0;background:var(--card)}
+  .verdict.no{border-left-color:var(--no)} .verdict.ok{border-left-color:var(--ready)}
+  .tw{overflow-x:auto} pre{background:var(--mono-bg);border:1px solid var(--hair);padding:8px 10px;font-size:12px;overflow-x:auto}
+  .kv td:first-child{width:22%;font-family:var(--sans);font-size:12px;color:var(--ink-2)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<p class="backlink"><a href="INDEX.html">← Document index</a></p>
+<header class="hero">
+  <p class="eyebrow">Microduck reverse-engineering · new sources · 1 of 3</p>
+  <h1>MakerWorld 3250889 — "structural parts (simulation model export · 15 parts)"</h1>
+  <p class="sub">What the page states, what the files are, where they come from, and what they measure against Pollen's meshes and against our rebuild. Generated from <code>out/sources/makerworld-3250889.json</code>.</p>
+  <div class="rev"><span>MD-SRC-001 · Rev A</span><span>2026-09-04T07:02:05+08:00</span><span>fetched 2026-09-03 23:12-23:14 Europe/Stockholm</span><span>licence CC BY-NC-SA</span></div>
+</header>
+<div class="statbar">
+  <div class="stat"><b>15</b><span>STL files</span></div>
+  <div class="stat"><b>796,792</b><span>triangles</span></div>
+  <div class="stat"><b>8.4e-06 mm</b><span>worst vertex delta vs Pollen rl 5946fd9</span></div>
+  <div class="stat"><b>15/15</b><span>identical to upstream</span></div>
+  <div class="stat"><b>0/15</b><span>printable as shipped</span></div>
+  <div class="stat"><b>15/15</b><span>PASS vs our rebuild (0 not yet run)</span></div>
+  <div class="stat"><b>0</b><span>print parameters stated</span></div>
+</div>
+<nav class="toc">
+  <a href="#verdict">1 Verdict</a><a href="#page">2 What the page states</a><a href="#lineage">3 Where the files come from</a>
+  <a href="#files">4 The 15 files, measured</a><a href="#contents">5 What each file contains</a><a href="#parts">6 Per part, against our rebuild</a>
+  <a href="#dfm">7 Print profile vs our DFM</a><a href="#cannot">8 What a simulation mesh cannot carry</a><a href="#method">9 Method and limits</a>
+</nav>
+
+<section id="verdict">
+  <h2><span class="n">1</span>Verdict — NOT READY TO BUILD FROM, and not a new source of geometry</h2>
+  <div class="verdict no"><b>The files add no geometry we did not already have.</b> Each of the 15 STLs is the concatenation of every visual mesh of one MJCF body from Pollen's <code>microduck_rl</code> assets at commit <code>5946fd9</code>, placed at qpos 0 with the trunk at the origin and scaled to millimetres. Measured order-matched against our own placement of those assets: worst vertex delta <b>8.4e-06 mm</b> over all 796,792 triangles — float32 re-serialisation, nothing else. Bytes 80..end of every file are identical to <code>cad/</code> of <a href="https://github.com/fanhao375/microduck-replica">fanhao375/microduck-replica</a> at <code>28d8ee9</code>.</div>
+  <div class="verdict no"><b>Not printable as shipped.</b> 15 of 15 files fuse vendor bodies — XL330 servos, bearings, the battery, both PCBs, the lens, the speaker box — into the printed shells. A slicer unions overlapping shells, so the servo pocket prints solid. The page's own title says "simulation model export" and its summary says "非官方 CAD … 本模型仅为外壳/结构参考" (not official CAD; shell/structural reference only).</div>
+  <div class="verdict"><b>No print profile, no BOM, no guide.</b> MakerWorld's design record has <code>instances: []</code>, <code>isPrintable: false</code>, empty <code>projectSettings</code> on all 15 files, <code>design_guide []</code>, <code>design_bom []</code>. The upstream repo's build log has a Print Records table that reads "(TBD)". There is nothing to agree or disagree with per parameter (§7).</div>
+  <div class="verdict ok"><b>What it does give us.</b> (a) A pinned, independent placement of the rl assets that agrees with ours to 1e-5 mm — a second opinion on <code>cecad.mjcf</code>. (b) The origin of SPEC.md:75-76's community hole census, now archived per hole (<code>docs/hole_analysis.json</code>, 47 meshes). (c) The first photograph of parts printed from these meshes with M2 screws fitted (2026-09-02), which is evidence about the hole pattern, not about print settings.</div>
+</section>
+
+<section id="page">
+  <h2><span class="n">2</span>What the page states — verbatim, from the design API</h2>
+  <p class="lede">The HTML is behind a Cloudflare challenge for curl, WebFetch and headless Chrome alike (403, archived). The design API answered anonymously and is archived at <code>reference/makerworld-3250889/page/api-design-3250889.json</code>.</p>
+  <table class="data kv">
+    <tr><td>URL</td><td><a href="https://makerworld.com/en/models/3250889-microduck-robotic-duck-structural-parts-simulation">https://makerworld.com/en/models/3250889-microduck-robotic-duck-structural-parts-simulation</a></td></tr>
+    <tr><td>Title</td><td>Microduck 机器鸭结构件（仿真模型导出 · 15 分件）<br><span class="small">MakerWorld's translation: Microduck robotic duck structural parts (simulation model export · 15 separate parts)</span></td></tr>
+    <tr><td>Author</td><td>Peter Pan&#x27;s Techland · handle <code>foo00</code> · uid 2020122555 · level 6</td></tr>
+    <tr><td>Created / files uploaded</td><td>2026-09-02T04:01:04Z / 2026-09-02T03:49:30Z</td></tr>
+    <tr><td>Licence</td><td>API <code>BY-NC-SA</code>; author's text "非商用 · CC BY-SA-NC"; allowReCreation True; originals on MakerWorld: []</td></tr>
+    <tr><td>Lineage stated</td><td>pollen-robotics/microduck_rl MJCF simulation model, world transform applied (author&#x27;s summary)</td></tr>
+    <tr><td>Summary (zh)</td><td><pre>25cm 双足机器鸭外观结构件，15 个部件分开打印
+来源官方 microduck_rl 仿真 MJCF，非官方 CAD
+需自行采购 Dynamixel XL330 ×15 等硬件，本模型仅为外壳/结构参考
+非商用 · CC BY-SA-NC
+ 
+文件来源
+从 Pollen Robotics 官方公开的 
+`microduck_rl`
+ MJCF 仿真模型反推导出，已应用世界坐标变换，可直接导入切片软件。
+原始几何来源：[
+pollen-robotics/microduck_rl
+]
+(
+https://github.com/pollen-robotics/microduck_rl
+)</pre></td></tr>
+    <tr><td>Summary (MakerWorld translation)</td><td><pre>25cm biped robotic duck exterior structural parts, 15 separate parts for printing
+Sourced from official microduck_rl simulation MJCF, not official CAD
+You need to purchase hardware such as Dynamixel XL330 ×15 separately, this model is only for shell/structural reference
+Non-commercial · CC BY-SA-NC
+ 
+File source
+Derived from Pollen Robotics official public 
+`microduck_rl`
+ MJCF simulation model with world coordinate transformation applied, can be imported directly into slicing software
+Original geometry source: [
+pollen-robotics/microduck_rl
+]
+(
+https://github.com/pollen-robotics/microduck_rl
+)</pre></td></tr>
+    <tr><td>Tags / category</td><td>microduck, pollen robotics, 双足机器人, rl, 3D 打印, 复刻研究 (microduck, pollen robotics, Biped robot, rl, 3D Printing, Replication research) · Education &gt; Other Education Models</td></tr>
+    <tr><td>Counters at fetch</td><td>downloads 5 · likes 2 · prints 0 · comments 0</td></tr>
+    <tr><td>Print profiles</td><td>instances 0 · isPrintable False · preset type "" · all 15 projectSettings empty: True</td></tr>
+    <tr><td>Guide / BOM / pictures / steps</td><td>[] / [] / [] / []</td></tr>
+    <tr><td>Download</td><td>/api/v1/design-service/design/3250889/model → <code>403 {&quot;code&quot;:1,&quot;error&quot;:&quot;Please log in to download models.&quot;}</code> (measured 2026-09-03). Archive here is Leif's logged-in download: Leif, logged in, 2026-09-03 22:11:54 local (file mtime), 16,124,216 bytes, sha256 <code>910ac19a11c90278…</code>; entry names UTF-8 with zip flag 0x800 (measured on the raw central directory); re-extraction by <code>tools/extract_makerworld.py (re-extraction sha256-identical to files/)</code></td></tr>
+  </table>
+  <div class="pair">
+    <figure><img src="reference/makerworld-3250889/page/images/cover.jpg" alt="cover"><figcaption>The page's cover: a product photograph of the Sky colourway (not a print of these files).</figcaption></figure>
+    <figure><img src="reference/makerworld-3250889/page/images/coverPortrait.webp" alt="portrait cover"><figcaption>The portrait cover: Hugging Face / Pollen comic art.</figcaption></figure>
+  </div>
+  <p class="lede">The 15 per-file renders MakerWorld generated (grey, unlit, no scale):</p>
+  <div class="thumbs"><figure><img src="reference/makerworld-3250889/page/images/01_躯干主体.jpeg" alt="01_躯干主体.stl"><figcaption>01 · torso main body</figcaption></figure>
+<figure><img src="reference/makerworld-3250889/page/images/02_左髋yaw-roll.jpeg" alt="02_左髋yaw-roll.stl"><figcaption>02 · left hip, yaw-roll stage</figcaption></figure>
+<figure><img src="reference/makerworld-3250889/page/images/03_左髋roll.jpeg" alt="03_左髋roll.stl"><figcaption>03 · left hip, roll stage</figcaption></figure>
+<figure><img src="reference/makerworld-3250889/page/images/04_左大腿.jpeg" alt="04_左大腿.stl"><figcaption>04 · left thigh</figcaption></figure>
+<figure><img src="reference/makerworld-3250889/page/images/05_左小腿.jpeg" alt="05_左小腿.stl"><figcaption>05 · left shin</figcaption></figure>
+<figure><img src="reference/makerworld-3250889/page/images/06_左踝脚.jpeg" alt="06_左踝脚.stl"><figcaption>06 · left ankle + foot</figcaption></figure>
+<figure><img src="reference/makerworld-3250889/page/images/07_颈根.jpeg" alt="07_颈根.stl"><figcaption>07 · neck root</figcaption></figure>
+<figure><img src="reference/makerworld-3250889/page/images/08_颈俯仰.jpeg" alt="08_颈俯仰.stl"><figcaption>08 · neck pitch stage</figcaption></figure>
+<figure><img src="reference/makerworld-3250889/page/images/09_头yaw-roll.jpeg" alt="09_头yaw-roll.stl"><figcaption>09 · head yaw-roll stage</figcaption></figure>
+<figure><img src="reference/makerworld-3250889/page/images/10_头部总成.jpeg" alt="10_头部总成.stl"><figcaption>10 · head assembly</figcaption></figure>
+<figure><img src="reference/makerworld-3250889/page/images/11_右髋yaw-roll.jpeg" alt="11_右髋yaw-roll.stl"><figcaption>11 · right hip, yaw-roll stage</figcaption></figure>
+<figure><img src="reference/makerworld-3250889/page/images/12_右髋roll.jpeg" alt="12_右髋roll.stl"><figcaption>12 · right hip, roll stage</figcaption></figure>
+<figure><img src="reference/makerworld-3250889/page/images/13_右大腿.jpeg" alt="13_右大腿.stl"><figcaption>13 · right thigh</figcaption></figure>
+<figure><img src="reference/makerworld-3250889/page/images/14_右小腿.jpeg" alt="14_右小腿.stl"><figcaption>14 · right shin</figcaption></figure>
+<figure><img src="reference/makerworld-3250889/page/images/15_右踝脚.jpeg" alt="15_右踝脚.stl"><figcaption>15 · right ankle + foot</figcaption></figure></div>
+</section>
+
+<section id="lineage">
+  <h2><span class="n">3</span>Where the files come from — the chain, pinned</h2>
+  <ol><li>pollen-robotics/microduck_rl @ 5946fd9cdbc58956424420153e51975af3b30d77 — src/mjlab_microduck/robot/microduck/assets (47 STL, metres, part frames) + robot_allcollisions.xml</li><li>fanhao375/microduck-replica @ 28d8ee92638c42c8547aae5b194f357e25d51fc9 — scripts/export_assembly_stl.py: MuJoCo mj_forward at qpos 0, group-2 (visual) geoms concatenated per body, x1000 to mm, 80 zero bytes header -&gt; cad/01..15</li><li>MakerWorld 3250889 (Peter Pan&#x27;s Techland, 2026-09-02T03:49:30Z) — the same 15 files; MakerWorld re-serialises the header to &#x27;MW 1.0 3250889 US&#x27; on download</li></ol>
+  <table class="data kv">
+    <tr><td>GitHub repo</td><td><a href="https://github.com/fanhao375/microduck-replica">fanhao375/microduck-replica</a> — Microduck 复刻 · 从官方 MJCF 与 Rust 源码反推出的装配图、CAD 装配体与完整电控方案 | Mechanical + electronics reconstruction of Pollen Robotics&#x27; Microduck</td></tr>
+    <tr><td>Created / last push / stars / forks</td><td>2026-08-28T13:42:48Z / 2026-09-03T13:51:07Z / 414 / 73</td></tr>
+    <tr><td>Licence</td><td>dual: scripts/ Apache-2.0; assembly-drawings/ and cad/ CC BY-SA-NC 4.0 (LICENSE, NOTICE.md)</td></tr>
+    <tr><td>Pinned commit</td><td><code>28d8ee92638c42c8547aae5b194f357e25d51fc9</code>, fetched 2026-09-04, archived at <code>reference/makerworld-3250889/upstream-github-fanhao375-microduck-replica</code></td></tr>
+    <tr><td>Body identity</td><td>bytes 80..end of each MakerWorld file == bytes 80..end of the GitHub cad/ file at the pinned commit; the first 80 bytes are the STL header — <b>all 15 identical: True</b>. GitHub header: 80 zero bytes; MakerWorld header: <code>MW 1.0 3250889 US</code>.</td></tr>
+    <tr><td>Uploader ↔ repo owner</td><td>CANNOT DETERMINE — the MakerWorld uploader (foo00 / GitHub peterpanstechland, a maker who forked mjlab on 2026-08-29) and the repo owner (fanhao375) are different account names; nothing on either side names the other. The bytes are the same either way.</td></tr>
+  </table>
+  <h3>What the replica repo adds beyond the STLs</h3>
+  <ul><li>cad/零件对照表.json — the same per-body source-mesh list this lane measured (tri counts agree on all 15)</li><li>docs/紧固件反推.md + docs/hole_analysis.json — the hole census SPEC.md:75-76 already cites as [C]: Ø2.2 x77, Ø4.4 x28, Ø1.6 x20, ~146 structural clearance holes; per-hole diameter/depth/coverage for all 47 meshes</li><li>assembly-drawings/ — 7 MuJoCo renders incl. two exploded views with body masses</li><li>build-log/photos/2026-09-02-首批打印件.jpg — first photograph of parts printed from these meshes: head shell (white/black/red multi-colour), trunk shell, black leg parts WITH M2 screws fitted, two feet (red/yellow). The Print Records table (material, layer, infill, time, printer) is &#x27;(TBD)&#x27; — no print parameters are recorded anywhere in the repo either</li><li>the repo&#x27;s own caveat, verbatim: &#x27;仿真 STL ≠ 可打印工程件。仿真只关心外形与惯量，不保证配合公差、螺纹孔、热熔螺母座和走线空间。直接打印大概率装不起来&#x27;</li></ul>
+  <div class="pair">
+    <figure><img src="reference/makerworld-3250889/upstream-github-fanhao375-microduck-replica/build-log/photos/2026-09-02-首批打印件.jpg" alt="first printed parts"><figcaption>Replica repo build log, 2026-09-02: head shell, trunk shell, leg parts with M2 screws, two feet. Printer, material, layer height: "(TBD)".</figcaption></figure>
+    <figure><img src="reference/makerworld-3250889/upstream-github-fanhao375-microduck-replica/assembly-drawings/06_爆炸图_四分之三.png" alt="exploded view"><figcaption>Replica repo exploded view (MuJoCo render) with the MJCF body masses — the same 15 bodies as the 15 files.</figcaption></figure>
+  </div>
+</section>
+
+<section id="files">
+  <h2><span class="n">4</span>The 15 files, measured</h2>
+  <p class="lede">Bounding box in the file's own frame (trunk body at origin, mm), triangle and unique-vertex counts, boundary edges (0 = every shell closed), the order-matched max vertex delta against Pollen's rl <code>5946fd9</code> assets placed by <code>cecad.mjcf</code>, and <code>cecad.meshcompare</code> p95 surface distance (15 000 samples each way, bbox-centre aligned, tol 1.0 mm / 1.5 mm) against Pollen's decimated simulator body and against OUR rebuild assembled per body.</p>
+  <div class="tw"><table class="data">
+    <thead><tr><th>#</th><th>File</th><th class="n">Size x × y × z (mm)</th><th class="n">Tris</th><th class="n">Verts</th><th class="n">Open edges</th><th class="n">Δ vs rl 5946fd9 (mm)</th><th class="n">p95 vs Pollen sim body (mm)</th><th class="n">p95 vs our rebuild (mm)</th><th>Verdict vs ours</th></tr></thead>
+    <tbody><tr><td class='n'>01</td><td><code>01_躯干主体.stl</code><br><span class='small'>躯干主体 · torso main body</span></td><td class='n'>81.333 × 64.029 × 86.094</td><td class='n'>131,020</td><td class='n'>65344</td><td class='n'>0</td><td class='n'>3.8e-06</td><td class='n'>0.0278 / 0.0342</td><td class='n'>0.1887 / 0.1924</td><td><span class="chip pass">PASS</span></td></tr>
+<tr><td class='n'>02</td><td><code>02_左髋yaw-roll.stl</code><br><span class='small'>左髋yaw-roll · left hip, yaw-roll stage</span></td><td class='n'>31.000 × 23.000 × 40.000</td><td class='n'>39,920</td><td class='n'>19884</td><td class='n'>0</td><td class='n'>2.6e-06</td><td class='n'>0.0238 / 0.1335</td><td class='n'>0.0499 / 0.0251</td><td><span class="chip pass">PASS</span></td></tr>
+<tr><td class='n'>03</td><td><code>03_左髋roll.stl</code><br><span class='small'>左髋roll · left hip, roll stage</span></td><td class='n'>36.000 × 34.500 × 22.000</td><td class='n'>41,940</td><td class='n'>20912</td><td class='n'>0</td><td class='n'>2.4e-06</td><td class='n'>0.0337 / 0.0583</td><td class='n'>0.2029 / 0.1369</td><td><span class="chip pass">PASS</span></td></tr>
+<tr><td class='n'>04</td><td><code>04_左大腿.stl</code><br><span class='small'>左大腿 · left thigh</span></td><td class='n'>60.997 × 32.000 × 47.659</td><td class='n'>45,072</td><td class='n'>22461</td><td class='n'>0</td><td class='n'>4.2e-06</td><td class='n'>0.0286 / 0.0591</td><td class='n'>0.0888 / 0.0900</td><td><span class="chip pass">PASS</span></td></tr>
+<tr><td class='n'>05</td><td><code>05_左小腿.stl</code><br><span class='small'>左小腿 · left shin</span></td><td class='n'>20.000 × 32.000 × 61.500</td><td class='n'>18,902</td><td class='n'>9431</td><td class='n'>0</td><td class='n'>4.6e-06</td><td class='n'>0.0204 / 0.1070</td><td class='n'>0.0225 / 0.0489</td><td><span class="chip pass">PASS</span></td></tr>
+<tr><td class='n'>06</td><td><code>06_左踝脚.stl</code><br><span class='small'>左踝脚 · left ankle + foot</span></td><td class='n'>54.000 × 41.099 × 34.226</td><td class='n'>61,658</td><td class='n'>30580</td><td class='n'>0</td><td class='n'>4.7e-06</td><td class='n'>0.0196 / 0.0182</td><td class='n'>0.0676 / 0.0745</td><td><span class="chip pass">PASS</span></td></tr>
+<tr><td class='n'>07</td><td><code>07_颈根.stl</code><br><span class='small'>颈根 · neck root</span></td><td class='n'>20.000 × 29.000 × 69.000</td><td class='n'>11,188</td><td class='n'>5570</td><td class='n'>0</td><td class='n'>4.2e-06</td><td class='n'>0.0190 / 0.1622</td><td class='n'>0.0063 / 0.0149</td><td><span class="chip pass">PASS</span></td></tr>
+<tr><td class='n'>08</td><td><code>08_颈俯仰.stl</code><br><span class='small'>颈俯仰 · neck pitch stage</span></td><td class='n'>22.000 × 35.000 × 29.793</td><td class='n'>28,090</td><td class='n'>13905</td><td class='n'>0</td><td class='n'>4.0e-06</td><td class='n'>0.0377 / 0.0515</td><td class='n'>0.0082 / 0.0083</td><td><span class="chip pass">PASS</span></td></tr>
+<tr><td class='n'>09</td><td><code>09_头yaw-roll.stl</code><br><span class='small'>头yaw-roll · head yaw-roll stage</span></td><td class='n'>38.000 × 35.500 × 29.000</td><td class='n'>51,880</td><td class='n'>25747</td><td class='n'>0</td><td class='n'>7.9e-06</td><td class='n'>0.0375 / 0.0697</td><td class='n'>0.0429 / 0.0483</td><td><span class="chip pass">PASS</span></td></tr>
+<tr><td class='n'>10</td><td><code>10_头部总成.stl</code><br><span class='small'>头部总成 · head assembly</span></td><td class='n'>122.690 × 91.763 × 59.282</td><td class='n'>159,540</td><td class='n'>79414</td><td class='n'>0</td><td class='n'>8.4e-06</td><td class='n'>0.0612 / 0.0685</td><td class='n'>0.0800 / 0.0886</td><td><span class="chip pass">PASS</span></td></tr>
+<tr><td class='n'>11</td><td><code>11_右髋yaw-roll.stl</code><br><span class='small'>右髋yaw-roll · right hip, yaw-roll stage</span></td><td class='n'>31.000 × 23.000 × 40.000</td><td class='n'>39,920</td><td class='n'>19884</td><td class='n'>0</td><td class='n'>2.6e-06</td><td class='n'>0.0240 / 0.1335</td><td class='n'>0.0500 / 0.0272</td><td><span class="chip pass">PASS</span></td></tr>
+<tr><td class='n'>12</td><td><code>12_右髋roll.stl</code><br><span class='small'>右髋roll · right hip, roll stage</span></td><td class='n'>36.000 × 34.500 × 22.000</td><td class='n'>41,940</td><td class='n'>20912</td><td class='n'>0</td><td class='n'>2.4e-06</td><td class='n'>0.0340 / 0.0608</td><td class='n'>0.1920 / 0.1411</td><td><span class="chip pass">PASS</span></td></tr>
+<tr><td class='n'>13</td><td><code>13_右大腿.stl</code><br><span class='small'>右大腿 · right thigh</span></td><td class='n'>60.997 × 32.000 × 47.659</td><td class='n'>45,072</td><td class='n'>22461</td><td class='n'>0</td><td class='n'>4.2e-06</td><td class='n'>0.0280 / 0.0833</td><td class='n'>0.0894 / 0.0825</td><td><span class="chip pass">PASS</span></td></tr>
+<tr><td class='n'>14</td><td><code>14_右小腿.stl</code><br><span class='small'>右小腿 · right shin</span></td><td class='n'>20.000 × 32.000 × 61.500</td><td class='n'>18,902</td><td class='n'>9431</td><td class='n'>0</td><td class='n'>4.6e-06</td><td class='n'>0.0207 / 0.0917</td><td class='n'>0.0241 / 0.0500</td><td><span class="chip pass">PASS</span></td></tr>
+<tr><td class='n'>15</td><td><code>15_右踝脚.stl</code><br><span class='small'>右踝脚 · right ankle + foot</span></td><td class='n'>54.000 × 41.099 × 34.227</td><td class='n'>61,748</td><td class='n'>30640</td><td class='n'>0</td><td class='n'>4.7e-06</td><td class='n'>0.0183 / 0.0176</td><td class='n'>0.0672 / 0.0645</td><td><span class="chip pass">PASS</span></td></tr></tbody>
+  </table></div>
+  <p class="small">Worst p95 against our rebuild so far: 0.2029 / 0.1924 mm (MW→ours / ours→MW). The Pollen simulator bodies are 4.2× coarser (decimated) than the rl assets, which is why they show 0.02–0.16 mm; the rl-asset comparison is exact and is the one that matters.</p>
+</section>
+
+<section id="contents">
+  <h2><span class="n">5</span>What each file contains — and why none prints as shipped</h2>
+  <p class="lede">Read off the vertex blocks (each file preserves the source-mesh order of the MJCF body). Vendor bodies are in bold: they are inside the file as closed shells overlapping the printed pocket that holds them.</p>
+  <div class="tw"><table class="data">
+    <thead><tr><th>#</th><th>File</th><th>MJCF body</th><th>Printed structural meshes</th><th>Soft (TPU)</th><th>Vendor bodies fused in</th><th>Printable as shipped</th></tr></thead>
+    <tbody><tr><td class='n'>01</td><td><code>01_躯干主体.stl</code></td><td><code>trunk_base</code></td><td><code>right_shell</code>, <code>banana_pcb_locker</code>, <code>trunk_base</code>, <code>power_support</code>, <code>left_shell</code></td><td>—</td><td><b><code>seeed_bearing__configuration__22x16x4</code>, <code>xl330</code>, <code>np_f970</code>, <code>xl330</code>, <code>seeed_bearing__configuration__22x16x4</code></b></td><td><span class="chip fail">FAIL</span></td></tr>
+<tr><td class='n'>02</td><td><code>02_左髋yaw-roll.stl</code></td><td><code>yaw2roll</code></td><td><code>yaw2roll</code>, <code>bearing_roll</code></td><td>—</td><td><b><code>xl330</code>, <code>seeed_bearing__configuration__22x16x4</code></b></td><td><span class="chip fail">FAIL</span></td></tr>
+<tr><td class='n'>03</td><td><code>03_左髋roll.stl</code></td><td><code>hip_l</code></td><td><code>hip_l</code></td><td>—</td><td><b><code>seeed_bearing__configuration__22x16x4</code></b></td><td><span class="chip fail">FAIL</span></td></tr>
+<tr><td class='n'>04</td><td><code>04_左大腿.stl</code></td><td><code>upper_leg_left</code></td><td><code>upper_leg_left</code>, <code>upper_leg_rigidity_plate</code></td><td>—</td><td><b><code>xl330</code>, <code>seeed_bearing__configuration__22x16x4</code>, <code>xl330</code></b></td><td><span class="chip fail">FAIL</span></td></tr>
+<tr><td class='n'>05</td><td><code>05_左小腿.stl</code></td><td><code>leg</code></td><td><code>leg</code></td><td>—</td><td><b><code>xl330</code></b></td><td><span class="chip fail">FAIL</span></td></tr>
+<tr><td class='n'>06</td><td><code>06_左踝脚.stl</code></td><td><code>ankle_left</code></td><td><code>foot_left</code>, <code>ankle_left</code></td><td><code>sole_left</code></td><td><b><code>seeed_bearing__configuration_default</code></b></td><td><span class="chip fail">FAIL</span></td></tr>
+<tr><td class='n'>07</td><td><code>07_颈根.stl</code></td><td><code>neck</code></td><td><code>neck</code>, <code>neck</code></td><td>—</td><td><b><code>xl330</code>, <code>xl330</code></b></td><td><span class="chip fail">FAIL</span></td></tr>
+<tr><td class='n'>08</td><td><code>08_颈俯仰.stl</code></td><td><code>neck_pitch</code></td><td><code>neck_pitch</code></td><td>—</td><td><b><code>seeed_bearing__configuration__22x16x4</code></b></td><td><span class="chip fail">FAIL</span></td></tr>
+<tr><td class='n'>09</td><td><code>09_头yaw-roll.stl</code></td><td><code>yaw_roll_motion</code></td><td><code>yaw_roll_motion</code></td><td>—</td><td><b><code>xl330</code>, <code>seeed_bearing__configuration__22x16x4</code>, <code>seeed_bearing__configuration__22x16x4</code></b></td><td><span class="chip fail">FAIL</span></td></tr>
+<tr><td class='n'>10</td><td><code>10_头部总成.stl</code></td><td><code>jaw_soft</code></td><td><code>face_part</code>, <code>motor_support</code>, <code>top_head_shell</code>, <code>noenoeil</code>, <code>jaw</code>, <code>bottom_head_shell</code>, <code>m12_lens_holder</code></td><td><code>jaw_soft</code>, <code>soft_mouth_top</code></td><td><b><code>lens</code>, <code>xl330</code>, <code>xl330</code>, <code>seeed_bearing__configuration_default</code>, <code>elec_rpi_robot_hat_pcb</code>, <code>pcb__raspberry_pi_zero_2_w</code>, <code>speaker</code></b></td><td><span class="chip fail">FAIL</span></td></tr>
+<tr><td class='n'>11</td><td><code>11_右髋yaw-roll.stl</code></td><td><code>bearing_roll</code></td><td><code>yaw2roll</code>, <code>bearing_roll</code></td><td>—</td><td><b><code>xl330</code>, <code>seeed_bearing__configuration__22x16x4</code></b></td><td><span class="chip fail">FAIL</span></td></tr>
+<tr><td class='n'>12</td><td><code>12_右髋roll.stl</code></td><td><code>hip_l_2</code></td><td><code>hip_l</code></td><td>—</td><td><b><code>seeed_bearing__configuration__22x16x4</code></b></td><td><span class="chip fail">FAIL</span></td></tr>
+<tr><td class='n'>13</td><td><code>13_右大腿.stl</code></td><td><code>upper_leg_right</code></td><td><code>upper_leg_rigidity_plate</code>, <code>upper_leg_right</code></td><td>—</td><td><b><code>xl330</code>, <code>seeed_bearing__configuration__22x16x4</code>, <code>xl330</code></b></td><td><span class="chip fail">FAIL</span></td></tr>
+<tr><td class='n'>14</td><td><code>14_右小腿.stl</code></td><td><code>leg_2</code></td><td><code>leg</code></td><td>—</td><td><b><code>xl330</code></b></td><td><span class="chip fail">FAIL</span></td></tr>
+<tr><td class='n'>15</td><td><code>15_右踝脚.stl</code></td><td><code>ankle_right</code></td><td><code>ankle_right</code>, <code>foot_right</code></td><td><code>sole_right</code></td><td><b><code>seeed_bearing__configuration_default</code></b></td><td><span class="chip fail">FAIL</span></td></tr></tbody>
+  </table></div>
+</section>
+
+<section id="parts">
+  <h2><span class="n">6</span>Per constituent part — does it match our model?</h2>
+  <p class="lede">Because the files are the rl assets, the per-part question is already answered by our refcheck grades against those same assets (<code>out/refcheck/&lt;slug&gt;/verify/</code>, read-only here): p95 both ways and the hole/boss feature match. "NO REBUILD" means our assembly carries the vendor mesh itself, so the match is trivial and says nothing.</p>
+  <div class="tw"><table class="data">
+    <thead><tr><th>Mesh</th><th>Role</th><th>Our part</th><th>In files</th><th>Refcheck</th><th class="n">p95 ref→ours / ours→ref (mm)</th><th>Features</th><th>Graded against</th></tr></thead>
+    <tbody><tr><td><code>ankle_left</code></td><td>printed structural part</td><td><code>part:microduck-ankle-left</code></td><td>06</td><td><span class="chip pass">PASS</span></td><td class='n'>0.0118 / 0.0119</td><td>PASS · 13 matched, 0 ref unmatched, 0 extra</td><td><code>reference/pollen-microduck-rl/assets/ankle_left.stl</code></td></tr>
+<tr><td><code>ankle_right</code></td><td>printed structural part</td><td><code>part:microduck-ankle-right</code></td><td>15</td><td><span class="chip pass">PASS</span></td><td class='n'>0.0122 / 0.0117</td><td>PASS · 13 matched, 0 ref unmatched, 0 extra</td><td><code>reference/pollen-microduck-rl/assets/ankle_right.stl</code></td></tr>
+<tr><td><code>banana_pcb_locker</code></td><td>printed structural part</td><td><code>part:microduck-banana-pcb-locker</code></td><td>01</td><td><span class="chip pass">PASS</span></td><td class='n'>0.0130 / 0.0125</td><td>PASS · 2 matched, 0 ref unmatched, 0 extra</td><td><code>reference/pollen-microduck-rl/assets/banana_pcb_locker.stl</code></td></tr>
+<tr><td><code>bearing_roll</code></td><td>printed structural part</td><td><code>part:microduck-bearing-roll</code></td><td>02, 11</td><td><span class="chip pass">PASS</span></td><td class='n'>0.0014 / 0.0017</td><td>PASS · 5 matched, 0 ref unmatched, 1 extra</td><td><code>reference/pollen-microduck-rl/assets/bearing_roll.stl</code></td></tr>
+<tr><td><code>bottom_head_shell</code></td><td>printed structural part</td><td><code>part:microduck-bottom-head-shell</code></td><td>10</td><td><span class="chip ref">NO REBUILD</span></td><td class='n'>— / —</td><td>—</td><td><code>—</code></td></tr>
+<tr><td><code>face_part</code></td><td>printed structural part</td><td><code>part:microduck-face-part</code></td><td>10</td><td><span class="chip ref">NO REBUILD</span></td><td class='n'>— / —</td><td>—</td><td><code>—</code></td></tr>
+<tr><td><code>foot_left</code></td><td>printed structural part</td><td><code>part:microduck-foot-left</code></td><td>06</td><td><span class="chip pass">PASS</span></td><td class='n'>0.3733 / 0.2840</td><td>PASS · 2 matched, 0 ref unmatched, 0 extra</td><td><code>reference/pollen-microduck-rl/assets/foot_left.stl</code></td></tr>
+<tr><td><code>foot_right</code></td><td>printed structural part</td><td><code>part:microduck-foot-right</code></td><td>15</td><td><span class="chip pass">PASS</span></td><td class='n'>0.3229 / 0.2502</td><td>PASS · 2 matched, 0 ref unmatched, 0 extra</td><td><code>reference/pollen-microduck-rl/assets/foot_right.stl</code></td></tr>
+<tr><td><code>hip_l</code></td><td>printed structural part</td><td><code>part:microduck-hip-bracket</code></td><td>03, 12</td><td><span class="chip pass">PASS</span></td><td class='n'>0.1577 / 0.2539</td><td>PASS · 21 matched, 0 ref unmatched, 3 extra</td><td><code>reference/pollen-microduck-rl/assets/hip_l.stl</code></td></tr>
+<tr><td><code>jaw</code></td><td>printed structural part</td><td><code>part:microduck-jaw</code></td><td>10</td><td><span class="chip ref">NO REBUILD</span></td><td class='n'>— / —</td><td>—</td><td><code>—</code></td></tr>
+<tr><td><code>left_shell</code></td><td>printed structural part</td><td><code>part:microduck-trunk-shell-left</code></td><td>01</td><td><span class="chip ref">NO REBUILD</span></td><td class='n'>— / —</td><td>—</td><td><code>—</code></td></tr>
+<tr><td><code>leg</code></td><td>printed structural part</td><td><code>part:microduck-shin</code></td><td>05, 14</td><td><span class="chip ref">NO REBUILD</span></td><td class='n'>— / —</td><td>—</td><td><code>—</code></td></tr>
+<tr><td><code>m12_lens_holder</code></td><td>printed structural part</td><td><code>part:microduck-m12-lens-holder</code></td><td>10</td><td><span class="chip ref">NO REBUILD</span></td><td class='n'>— / —</td><td>—</td><td><code>—</code></td></tr>
+<tr><td><code>motor_support</code></td><td>printed structural part</td><td><code>part:microduck-motor-support</code></td><td>10</td><td><span class="chip pass">PASS</span></td><td class='n'>0.3495 / 0.4510</td><td>PASS · 6 matched, 0 ref unmatched, 0 extra</td><td><code>reference/pollen-microduck-rl/assets/motor_support.stl</code></td></tr>
+<tr><td><code>neck</code></td><td>printed structural part</td><td><code>part:microduck-neck-plate</code></td><td>07</td><td><span class="chip pass">PASS</span></td><td class='n'>0.0008 / 0.0009</td><td>PASS · 5 matched, 0 ref unmatched, 0 extra</td><td><code>reference/pollen-microduck-rl/assets/neck.stl</code></td></tr>
+<tr><td><code>neck_pitch</code></td><td>printed structural part</td><td><code>part:microduck-neck-pitch-bracket</code></td><td>08</td><td><span class="chip pass">PASS</span></td><td class='n'>0.0069 / 0.0074</td><td>PASS · 21 matched, 0 ref unmatched, 0 extra</td><td><code>reference/pollen-microduck-rl/assets/neck_pitch.stl</code></td></tr>
+<tr><td><code>noenoeil</code></td><td>printed structural part</td><td><code>part:microduck-eye-ring</code></td><td>10</td><td><span class="chip ref">NO REBUILD</span></td><td class='n'>— / —</td><td>—</td><td><code>—</code></td></tr>
+<tr><td><code>power_support</code></td><td>printed structural part</td><td><code>part:microduck-power-support</code></td><td>01</td><td><span class="chip pass">PASS</span></td><td class='n'>0.2133 / 0.2284</td><td>PASS · 14 matched, 0 ref unmatched, 7 extra</td><td><code>reference/pollen-microduck-rl/assets/power_support.stl</code></td></tr>
+<tr><td><code>right_shell</code></td><td>printed structural part</td><td><code>part:microduck-trunk-shell-right</code></td><td>01</td><td><span class="chip ref">NO REBUILD</span></td><td class='n'>— / —</td><td>—</td><td><code>—</code></td></tr>
+<tr><td><code>top_head_shell</code></td><td>printed structural part</td><td><code>part:microduck-top-head-shell</code></td><td>10</td><td><span class="chip ref">NO REBUILD</span></td><td class='n'>— / —</td><td>—</td><td><code>—</code></td></tr>
+<tr><td><code>trunk_base</code></td><td>printed structural part</td><td><code>part:microduck-trunk-base</code></td><td>01</td><td><span class="chip pass">PASS</span></td><td class='n'>0.0005 / 0.0008</td><td>PASS · 6 matched, 0 ref unmatched, 0 extra</td><td><code>reference/pollen-microduck-rl/assets/trunk_base.stl</code></td></tr>
+<tr><td><code>upper_leg_left</code></td><td>printed structural part</td><td><code>part:microduck-upper-leg-left</code></td><td>04</td><td><span class="chip pass">PASS</span></td><td class='n'>0.2000 / 0.2000</td><td>PASS · 6 matched, 0 ref unmatched, 0 extra</td><td><code>reference/pollen-microduck-rl/assets/upper_leg_left.stl</code></td></tr>
+<tr><td><code>upper_leg_right</code></td><td>printed structural part</td><td><code>part:microduck-upper-leg-right</code></td><td>13</td><td><span class="chip pass">PASS</span></td><td class='n'>0.2000 / 0.2000</td><td>PASS · 6 matched, 0 ref unmatched, 0 extra</td><td><code>reference/pollen-microduck-rl/assets/upper_leg_right.stl</code></td></tr>
+<tr><td><code>upper_leg_rigidity_plate</code></td><td>printed structural part</td><td><code>part:microduck-upper-leg-rigidity-plate</code></td><td>04, 13</td><td><span class="chip pass">PASS</span></td><td class='n'>0.0078 / 0.0077</td><td>PASS · 6 matched, 0 ref unmatched, 1 extra</td><td><code>reference/pollen-microduck-rl/assets/upper_leg_rigidity_plate.stl</code></td></tr>
+<tr><td><code>yaw2roll</code></td><td>printed structural part</td><td><code>part:microduck-yaw2roll</code></td><td>02, 11</td><td><span class="chip pass">PASS</span></td><td class='n'>0.0500 / 0.0500</td><td>PASS · 19 matched, 0 ref unmatched, 0 extra</td><td><code>reference/pollen-microduck-rl/assets/yaw2roll.stl</code></td></tr>
+<tr><td><code>yaw_roll_motion</code></td><td>printed structural part</td><td><code>part:microduck-yaw-roll-motion</code></td><td>09</td><td><span class="chip pass">PASS</span></td><td class='n'>0.4223 / 0.9337</td><td>PASS · 6 matched, 0 ref unmatched, 13 extra</td><td><code>reference/pollen-microduck-simulator/meshes/yaw_roll_motion.stl</code></td></tr>
+<tr><td><code>jaw_soft</code></td><td>soft part (TPU)</td><td><code>part:microduck-jaw-soft</code></td><td>10</td><td><span class="chip ref">NO REBUILD</span></td><td class='n'>— / —</td><td>—</td><td><code>—</code></td></tr>
+<tr><td><code>soft_mouth_top</code></td><td>soft part (TPU)</td><td><code>part:microduck-soft-mouth-top</code></td><td>10</td><td><span class="chip ref">NO REBUILD</span></td><td class='n'>— / —</td><td>—</td><td><code>—</code></td></tr>
+<tr><td><code>sole_left</code></td><td>soft part (TPU)</td><td><code>part:microduck-sole-left</code></td><td>06</td><td><span class="chip pass">PASS</span></td><td class='n'>0.0513 / 0.0521</td><td>PASS · 0 matched, 0 ref unmatched, 0 extra</td><td><code>reference/pollen-microduck-rl/assets/sole_left.stl</code></td></tr>
+<tr><td><code>sole_right</code></td><td>soft part (TPU)</td><td><code>part:microduck-sole-right</code></td><td>15</td><td><span class="chip pass">PASS</span></td><td class='n'>0.0534 / 0.0545</td><td>PASS · 0 matched, 0 ref unmatched, 0 extra</td><td><code>reference/pollen-microduck-rl/assets/sole_right.stl</code></td></tr>
+<tr><td><code>elec_rpi_robot_hat_pcb</code></td><td>vendor part (not printed) — Robot HAT PCB</td><td><code>part:microduck-robot-hat-pcb</code></td><td>10</td><td><span class="chip pass">PASS</span></td><td class='n'>0.0081 / 0.0076</td><td>PASS · 61 matched, 0 ref unmatched, 0 extra</td><td><code>reference/pollen-microduck-rl/assets/elec_rpi_robot_hat_pcb.stl</code></td></tr>
+<tr><td><code>lens</code></td><td>vendor part (not printed) — M12 lens</td><td><code>part:microduck-m12-lens</code></td><td>10</td><td><span class="chip ref">NO REBUILD</span></td><td class='n'>— / —</td><td>—</td><td><code>—</code></td></tr>
+<tr><td><code>np_f970</code></td><td>vendor part (not printed) — NP-F battery</td><td><code>part:np-f550</code></td><td>01</td><td><span class="chip pass">PASS</span></td><td class='n'>0.8009 / 0.6052</td><td>PASS · 6 matched, 0 ref unmatched, 0 extra</td><td><code>reference/pollen-microduck-rl/assets/np_f970.stl</code></td></tr>
+<tr><td><code>pcb__raspberry_pi_zero_2_w</code></td><td>vendor part (not printed) — compute board (Radxa Zero 3W footprint)</td><td><code>part:radxa-zero-3w</code></td><td>10</td><td><span class="chip pass">PASS</span></td><td class='n'>0.0065 / 0.0056</td><td>PASS · 44 matched, 0 ref unmatched, 0 extra</td><td><code>reference/pollen-microduck-rl/assets/pcb__raspberry_pi_zero_2_w.stl</code></td></tr>
+<tr><td><code>seeed_bearing__configuration__22x16x4</code></td><td>vendor part (not printed) — 22x16x4 ball bearing</td><td><code>part:bearing-22x16x4</code></td><td>01, 02, 03, 04, 08, 09, 11, 12, 13</td><td><span class="chip pass">PASS</span></td><td class='n'>0.0187 / 0.0092</td><td>PASS · 2 matched, 0 ref unmatched, 4 extra</td><td><code>reference/pollen-microduck-rl/assets/seeed_bearing__configuration__22x16x4.stl</code></td></tr>
+<tr><td><code>seeed_bearing__configuration_default</code></td><td>vendor part (not printed) — 15x10x3 ball bearing</td><td><code>part:bearing-15x10x3</code></td><td>06, 10, 15</td><td><span class="chip pass">PASS</span></td><td class='n'>0.0925 / 0.0323</td><td>PASS · 2 matched, 0 ref unmatched, 4 extra</td><td><code>reference/pollen-microduck-rl/assets/seeed_bearing__configuration_default.stl</code></td></tr>
+<tr><td><code>speaker</code></td><td>vendor part (not printed) — speaker placeholder box</td><td><code>part:microduck-speaker</code></td><td>10</td><td><span class="chip pass">PASS</span></td><td class='n'>0.0000 / 0.0000</td><td>PASS · 0 matched, 0 ref unmatched, 0 extra</td><td><code>reference/pollen-microduck-rl/assets/speaker.stl</code></td></tr>
+<tr><td><code>xl330</code></td><td>vendor part (not printed) — Dynamixel XL330-M288-T servo</td><td><code>part:xl330-m288-t</code></td><td>01, 02, 04, 05, 07, 09, 10, 11, 13, 14</td><td><span class="chip pass">PASS</span></td><td class='n'>0.0500 / 0.0075</td><td>PASS · 14 matched, 0 ref unmatched, 0 extra</td><td><code>reference/pollen-microduck-rl/assets/xl330.stl</code></td></tr></tbody>
+  </table></div>
+</section>
+
+<section id="dfm">
+  <h2><span class="n">7</span>Print profile — the source beside docs/DFM.md, parameter by parameter</h2>
+  <div class="tw"><table class="data">
+    <thead><tr><th>Parameter</th><th>MakerWorld 3250889 states</th><th>Ours (docs/DFM.md)</th><th>Agree / disagree</th></tr></thead>
+    <tbody><tr><td><b>printer / bed</b></td><td>not stated (no instance, no preset)</td><td>prusa_mk4 bed for the geometry checks; the farm is a Bambu Lab H2S (docs/DFM.md)</td><td><span class="chip cd">CANNOT DETERMINE</span> <span class='small'>the source states nothing to agree or disagree with</span></td></tr>
+<tr><td><b>nozzle</b></td><td>not stated</td><td>0.4 mm</td><td><span class="chip cd">CANNOT DETERMINE</span> <span class='small'>the source states nothing to agree or disagree with</span></td></tr>
+<tr><td><b>layer height</b></td><td>not stated (projectSettings.layerHeight &#x27;&#x27;)</td><td>0.20 mm</td><td><span class="chip cd">CANNOT DETERMINE</span> <span class='small'>the source states nothing to agree or disagree with</span></td></tr>
+<tr><td><b>walls / perimeters</b></td><td>not stated (projectSettings.wallLoops &#x27;&#x27;)</td><td>2 perimeters minimum; 0.80 mm floor for a real wall</td><td><span class="chip cd">CANNOT DETERMINE</span> <span class='small'>the source states nothing to agree or disagree with</span></td></tr>
+<tr><td><b>infill</b></td><td>not stated (projectSettings.sparseInfillDensity &#x27;&#x27;)</td><td>not fixed in DFM.md; grams come from the farm&#x27;s slice (out/print/slice.json)</td><td><span class="chip cd">CANNOT DETERMINE</span> <span class='small'>the source states nothing to agree or disagree with</span></td></tr>
+<tr><td><b>material</b></td><td>not stated</td><td>PLA 1.26 g/cm3 for structure, TPU for the soles</td><td><span class="chip cd">CANNOT DETERMINE</span> <span class='small'>the source states nothing to agree or disagree with</span></td></tr>
+<tr><td><b>supports</b></td><td>not stated</td><td>support area measured per orientation; 5 parts need none, 15 need some (DFM.md summary table)</td><td><span class="chip cd">CANNOT DETERMINE</span> <span class='small'>the source states nothing to agree or disagree with</span></td></tr>
+<tr><td><b>orientation</b></td><td>not stated; geometry is in the robot&#x27;s standing pose (world transform applied)</td><td>chosen per part on elevated overhang area (tools/dfm_orient.py)</td><td><span class="chip fail">DISAGREE</span> <span class='small'>the source&#x27;s orientation is the robot pose, not a print orientation</span></td></tr>
+<tr><td><b>brim</b></td><td>not stated</td><td>workshop rule: no brim on any print; DFM.md flags shin&#x27;s 3.6 mm2 foot as the conflict</td><td><span class="chip cd">CANNOT DETERMINE</span> <span class='small'>the source states nothing to agree or disagree with</span></td></tr>
+<tr><td><b>part grouping</b></td><td>15 files, one per MJCF body, each with its servos/bearings/battery/PCBs fused in</td><td>one file per printed part; vendor parts are separate BOM rows (38 rows, 0 fasteners as of 2026-09-03)</td><td><span class="chip fail">DISAGREE</span> <span class='small'>the source&#x27;s unit of printing is the MJCF body with vendor parts fused in; ours is the printed part</span></td></tr>
+<tr><td><b>assembly guide / fasteners</b></td><td>none (design_guide [], design_bom [], boms* empty)</td><td>docs/BOM.md, ce-assemblies/microduck/current/bom.json; fastener census 145 M2 holes (SPEC.md:75-76)</td><td><span class="chip cd">CANNOT DETERMINE</span> <span class='small'>the source states nothing to agree or disagree with</span></td></tr>
+<tr><td><b>stated dimension / mass</b></td><td>&#x27;25cm&#x27; in the summary only</td><td>envelope 144.1 x 141.0 x 264.0 mm, 737.2 g summed MJCF (SPEC.md §2)</td><td><span class="chip cd">CANNOT DETERMINE</span> <span class='small'>the source states nothing to agree or disagree with</span></td></tr></tbody>
+  </table></div>
+</section>
+
+<section id="cannot">
+  <h2><span class="n">8</span>What a simulation mesh cannot carry — and this one does not</h2>
+  <p>The hope was that a "printable" source would carry fastener seats, insert bosses, ball sockets, cable channels, clearances and split lines that a simulation mesh omits. Measured: the files carry exactly the rl asset surfaces (§4), so they carry exactly what those assets carry. What those assets DO carry is the hole geometry the replica repo censused — Ø2.2 ×77, Ø4.4 ×28, Ø1.6 ×20, Ø2.4 ×22, Ø2.0 ×12, Ø2.7/2.8 ×20, Ø4.8 ×10 complete circular holes across the structural meshes — and what they do NOT carry, in the repo's own words: fit tolerances, thread detail, heat-set insert bosses, cable routing space. The one physical datum is the 2026-09-02 photograph: M2 screws went into the black leg parts printed from these meshes, with hole diameters "(待测)" — still unmeasured.</p>
+  <p>Consequence for our CAD: the 145-hole / zero-fastener gap in <code>bom.json</code> is not closed by this source. It is closed by putting the fasteners the census implies into the assembly through connections, which is the fastener lane's work; the per-hole table (<code>docs/hole_analysis.json</code>, diameter / depth / angular coverage per hole per mesh) is archived for it.</p>
+</section>
+
+<section id="method">
+  <h2><span class="n">9</span>Method and honest limits</h2>
+  <ul>
+    <li><b>Page.</b> HTML 403 (Cloudflare) three ways; the design API JSON is the record. Signed thumbnail URLs expire within the hour; the images were fetched inside that window.</li>
+    <li><b>Identity.</b> <code>cecad.mjcf.load</code> on the simulator MJCF with <code>mesh_dir</code> pointed at the rl assets, <code>bodies_world(root_at_origin=True)</code>, visual geoms only, ×1000; per file the vertex blocks are compared in order (max |Δ|), and the tri counts are compared per tree (sim / rl 5946fd9 / rl develop 29e887e) — <code>15_右踝脚</code> (61 748) matches only the old tree; develop's foot_right/sole_right would give 61 800.</li>
+    <li><b>p95.</b> <code>cecad.meshcompare.compare</code>, 15 000 area-weighted samples each way, bbox-centre alignment (the shift reported is exactly (0, 0, 120.0) mm for the Pollen bodies: the trunk body sits at z = 120 in the simulator world). A first run matched bodies by bbox size and confused four mirror pairs; those rows were re-run against the right body and the JSON says which.</li>
+    <li><b>Our rebuild per body.</b> <code>out/refcheck/&lt;slug&gt;/verify/ours.stl</code> (Pollen file frame, mm) placed by the same MJCF; meshes with no rebuild use the Pollen mesh and are marked vendor in §6. The head body is mostly vendor meshes in our assembly, so its PASS is weak evidence.</li>
+    <li><b>Not measured.</b> Hole diameters on any printed part; whether the uploader and the repo owner are the same person; anything on the MakerWorld page that only a logged-in browser renders (comments, remix list) — the API says 0 comments and no originals.</li>
+  </ul>
+</section>
+</div>
+</body>
+</html>
