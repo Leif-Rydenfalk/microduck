@@ -63,7 +63,9 @@ lic_lines = [(i + 1, l) for i, l in enumerate(readme) if "licen" in l.lower() or
 lic_quote = "\n".join(f"{n}: {l}" for n, l in lic_lines)
 
 # ---- our own documents that carry a number this source moved or superseded ----
+SELF_TOOLS = ("tools/gen_upstream_develop.py", "tools/upstream_meshdiff.py", "tools/upstream_mjcfdiff.py", "tools/upstream_render.py")
 def repo_hits(pattern, exclude=("out/", "reference/", "research/raw/", "trash/", ".git/", "__pycache__", "node_modules")):
+    """Every line in OUR repo (not out/, reference/, raw mirrors, or this lane's own instruments) matching `pattern`."""
     hits = []
     for root, dirs, fs in os.walk(R):
         rel = os.path.relpath(root, R) + "/"
@@ -73,6 +75,8 @@ def repo_hits(pattern, exclude=("out/", "reference/", "research/raw/", "trash/",
             if f.endswith((".png", ".jpg", ".stl", ".step", ".glb", ".pdf", ".mp4", ".bin", ".pyc")):
                 continue
             p = os.path.join(root, f)
+            if os.path.relpath(p, R) in SELF_TOOLS:
+                continue
             try:
                 for i, line in enumerate(open(p, errors="ignore")):
                     if re.search(pattern, line):
@@ -132,7 +136,7 @@ findings = [
   "changes_what": "out/sim-sweep/scene_walk_allcollisions.xml and every 'allcollisions' run in SIMULATION.html modelled a robot whose thighs and egg shells cannot touch the floor. Sit/stand/roulade and fall results that rest on that model need re-judging against robot_allcollisions.xml (F7)."},
  {"id": "F9", "finding": "Licence, settled from the primary text: README.md:260-261 at 29e887e reads 'This project is licensed under the Apache 2.0 License. See the LICENSE file for details.' / '3D model files are licensed under Creative Commons BY-SA-NC.' — no version number, and the CC text is not shipped (LICENSE is Apache-2.0 only). The same two lines were at README.md:195-196 in our 5946fd9 copy.",
   "evidence": "reference/pollen-microduck-rl-develop/microduck_rl_README.md:258-261; reference/pollen-microduck-rl-develop/LICENSE-Apache-2.0.txt",
-  "changes_what": "Cite 'CC BY-SA-NC (version not stated)'. " + (f"{len(licence_40_hits)} lines of ours assert '4.0' that the source does not: " + ", ".join(h for h in licence_40_hits if not h.startswith("research/")) if licence_40_hits else "No file of ours asserts a version.") + " — ce-parts/microduck-eye-ring/component.json:15 already has it right ('version not stated'); the two '4.0' strings are lane A's to drop."},
+  "changes_what": "Cite 'CC BY-SA-NC (version not stated)'. " + (f"{len([h for h in licence_40_hits if not h.startswith('research/')])} lines of ours assert '4.0' that the source does not, across {len(set(h.split('/')[1] for h in licence_40_hits if h.startswith('ce-parts/')))} ce-parts folders (component.json, cad/part.py, docs/README.md) plus tools/head_eye_ring_shelve.py:28 — full list in §11" if licence_40_hits else "No file of ours asserts a version.") + ". ce-parts/microduck-eye-ring/component.json:15 already has it right ('version not stated'). Each folder's owner drops the '4.0' in an append-only ledger row; this lane does not edit other lanes' folders."},
  {"id": "F10", "finding": "Runtime constants read off pollen-robotics/microduck (bc41fb5) corroborate SPEC.md: mouth travel -5 deg closed / +30 deg open (duck-control/src/model.rs:62-63); battery window 6.6-8.2 V (model.rs:109,113 BATTERY_EMPTY_V/BATTERY_FULL_V); servo position gain 200 (deploy/robotd.toml:136 'gain = 200', joints_properties.xml '200 kp', microduck_constants.py kp_fw=200); IDs 30-34 = neck, head, mouth (model.rs:17); bus /dev/ttyS2 at 50 Hz (robotd.toml:20,41). The ToF is named specifically: 'tof VL53L8CX · 15 Hz · 8x8 · 48/64 ranged · 0.12-3.54 m' (docs/robot/cheatsheet.md:691) where SPEC.md §5 hedges 'VL53L5CX/L8CX'. BAM actuator domain randomisation upstream: vin 6.5-8.2 V, load sag gain 0-0.2, vin_min 6.0, 3-6 tick delay, backlash +-1 deg (2 deg total).",
   "evidence": "reference/pollen-microduck-rl-develop/sibling-pollen-microduck-main/deploy/robotd.toml; microduck_constants.py:132-144; microduck_rl add_backlash.py:26-28",
   "changes_what": ("SPEC.md §5 ToF row can name VL53L8CX (cheatsheet line 691 is the live monitor's own header). " + (", ".join(tof_hits) if tof_hits else "")) },
@@ -228,6 +232,8 @@ H.append(f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta na
  table.data{{font-size:12.5px;border-collapse:collapse;width:100%}} table.data th,table.data td{{padding:3px 6px;border-bottom:1px solid var(--hair);text-align:left;vertical-align:top}}
  table.data td code{{font-size:11.5px}} figure{{margin:12px 0}} figure img{{width:100%;background:#fff;border:1px solid var(--hair)}} figcaption{{font-family:var(--sans);font-size:12.5px;color:var(--ink-2)}}
  pre.q{{font-size:12px;background:#faf8f3;border-left:3px solid var(--hair);padding:8px 12px;white-space:pre-wrap}}
+ /* 11-column mesh table MEASURED 1015 px in an 840 px sheet at the inherited size (shot_page 2026-09-03): fixed layout + wrapping keeps every column on the printed page */
+ #meshes table.data{{font-size:10.5px;table-layout:fixed;width:100%}} #meshes td,#meshes th{{overflow-wrap:anywhere}} #meshes table.data th,#meshes table.data td{{padding:2px 3px}} #meshes td code{{font-size:10px}}
  #findings table.data{{table-layout:fixed}} #findings td:nth-child(1){{width:32px}} #findings td:nth-child(2){{width:44%}} #findings td:nth-child(3){{width:22%}} #findings td{{overflow-wrap:anywhere}}
 </style></head><body><div class="wrap">
 <p class="backlink"><a href="../../INDEX.html">← Repository index</a> · <a href="../../GOAL.md">GOAL.md</a> · <a href="../../SPEC.md">SPEC.md</a></p>
