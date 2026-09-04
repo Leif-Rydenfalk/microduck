@@ -93,6 +93,26 @@ def main():
     rows = json.load(open(os.path.join(R, "ce-assemblies", "microduck", "current",
                                        "placements.json")))["record"]["rows"]
     inst = collections.Counter(r["part"] for r in rows)
+    # The harness lane places connector housings in a DIFFERENT file. Counting only
+    # placements.json read 28 placed JST EH housings as "no placement" and would have
+    # published three CANNOT DETERMINEs that are already settled.
+    # PLACED GEOMETRY and A BOM LINE ARE NOT THE SAME THING and are counted apart.
+    # The harness carries 30 EHR-3 housings each with a checked 4x4 mate, and it also
+    # adds 90 crimp contacts and 2 board headers to the BOM that no geometry places.
+    harness_src, harness, harness_bom = None, {}, {}
+    hp = os.path.join(R, "ce-assemblies", "microduck", "iterations", "v0.0.1", "harness.json")
+    if os.path.exists(hp):
+        hr = json.load(open(hp))
+        hr = hr.get("record", hr)
+        harness_src = "ce-assemblies/microduck/iterations/v0.0.1/harness.json"
+        for c in hr.get("connectors", []):
+            if c.get("part"):
+                harness[c["part"]] = harness.get(c["part"], 0) + 1
+        for b in hr.get("bom_added", []):
+            if b.get("ref"):
+                harness_bom[b["ref"]] = b.get("qty", 0)
+        for k, v in harness.items():
+            inst[k] += v
 
     shelf = []
     for d in sorted(glob.glob(os.path.join(R, "ce-parts", "*", "component.json"))):
@@ -105,15 +125,25 @@ def main():
         if sector not in ("chip", "board", "electronics", "electronic", "power", "actuator",
                           "connector"):
             continue
-        n = inst.get("part:" + slug, 0)
+        ref = "part:" + slug
+        n = inst.get(ref, 0)
         w, verdict, why = WHERE.get(slug, (None, None, None))
         if slug == "microduck-robot-hat-pcb":
             w, verdict, why = ("the head, on Pollen's own geom transform", "PLACED",
                                "1 instance in placements.json, now carrying 112 component "
                                "bodies instead of a bare 0.840 mm plate")
         elif n:
+            src = ("%s (%d) + %s (%d, each with a checked mate)"
+                   % ("placements.json", n - harness.get(ref, 0), harness_src, harness[ref])
+                   if harness.get(ref) else "placements.json")
             w, verdict, why = ("placed in the assembly", "PLACED",
-                               "%d instance(s) in ce-assemblies/microduck/current/placements.json" % n)
+                               "%d instance(s) of real geometry, from %s" % (n, src))
+        elif harness_bom.get(ref):
+            w, verdict, why = ("on the harness BOM, no geometry", "CANNOT DETERMINE",
+                               "%s adds %d of these to the BOM and places none of them: a crimp "
+                               "contact or a board-side header that nothing in the model puts in "
+                               "space. A BOM line is not a placement."
+                               % (harness_src, harness_bom[ref]))
         elif verdict is None:
             w, verdict, why = ("no placement", "CANNOT DETERMINE",
                                "no row in placements.json and no published position")
@@ -133,10 +163,17 @@ def main():
                      all_bodies_placed=meas["counts"]["bodies_placed"],
                      fitted_placements=meas["counts"]["fitted_placements"],
                      devices=actives),
+        sources=dict(placements="ce-assemblies/microduck/current/placements.json",
+                     harness=harness_src,
+                     harness_note="connector housings are placed by the harness lane in a "
+                                  "separate file; counting only placements.json read 28 placed "
+                                  "JST EH housings as unplaced"),
         shelf=dict(electronic_part_folders=len(shelf),
                    with_an_assembly_placement=sum(1 for s in shelf if s["assembly_instances"]),
                    assembly_instances=sum(s["assembly_instances"] for s in shelf),
                    cannot_determine=sum(1 for s in shelf if s["verdict"] == "CANNOT DETERMINE"),
+                   on_a_bom_but_not_placed=sum(1 for s in shelf
+                                               if s["where"] == "on the harness BOM, no geometry"),
                    rows=sorted(shelf, key=lambda s: (-s["assembly_instances"], s["slug"]))),
         remaining_work=[
             "%d of the %d active devices on the Robot HAT's own BOM have no ce-parts folder: "
