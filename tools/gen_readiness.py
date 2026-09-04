@@ -361,6 +361,10 @@ summary["sheets_graded"] = {"sheets": len(SC["sheets"]), "pass": sum(1 for s in 
 summary["triad_refs"] = {"checked": TR["checked"], "pass": sum(1 for r in TR["results"] if r["verdict"] == "PASS"), "fail": sum(1 for r in TR["results"] if r["verdict"] == "FAIL"), "cannot_determine": sum(1 for r in TR["results"] if r["verdict"] == "CANNOT DETERMINE")}
 summary["bom_fasteners"] = {"bom_rows": len(BOM["rows"]), "fastener_rows": len(fast_rows), "hole_census": sum(holes)}
 summary["unknowns"] = len(HARV)
+_bq = [r for r in rows if r["class"] == "bought"]
+summary["bought_gaps"] = {"lines": len(_bq),
+                          "no_priced_offer": [r["id"] for r in _bq if not any(o.get("tiers") for o in r["offers"])],
+                          "no_lead_time_stated": [r["id"] for r in _bq if not r["lead_time_stated"]]}
 summary["print_licence"] = {"vendor_mesh_stls": sum(1 for r in rows if r["class"] == "print" and r.get("vendor_mesh")), "ours": sum(1 for r in rows if r["class"] == "print" and not r.get("vendor_mesh"))}
 closers = {}
 for r in rows:
@@ -491,6 +495,12 @@ A.append('</table></section>')
 
 # 5 bought
 A.append('<section id="bought"><h2><span class="n">5</span>Bought lines — spec/sourcing.json rev C · 外购件</h2>')
+_b = [r for r in rows if r["class"] == "bought"]
+_nopr = [r["id"] for r in _b if not any(o.get("tiers") for o in r["offers"])]
+_nolead = [r["id"] for r in _b if not r["lead_time_stated"]]
+A.append('<p class="lede">Counted over all %d lines: <b>%d</b> line(s) have no offer with a price read off a live page (%s) and <b>%d</b> line(s) have no lead time stated by any vendor (%s). A quotation cannot be built from those rows without asking the vendor directly — they are the first calls the purchasing engineer makes. · 全部 %d 行中，<b>%d</b> 行无任何已读取报价（%s），<b>%d</b> 行无任何供应商注明交期（%s）。这些行需采购工程师直接询价。</p>' % (
+    len(_b), len(_nopr), E(", ".join(_nopr) or "none"), len(_nolead), E(", ".join(_nolead) or "none"),
+    len(_b), len(_nopr), E(", ".join(_nopr) or "none"), len(_nolead), E(", ".join(_nolead) or "none")))
 A.append('<table>%s<tr>%s%s%s%s%s%s%s%s</tr>' % (cols(6, 20, 12, 7, 8, 8, 7, 32), th("Line", "行"), th("Item", "物料"), th("Grade", "评级"), th("Qty/robot", "每台数量"), th("Offers (priced)", "报价数"), th("MOQ", "最小起订量"), th("Lead time stated", "已注明交期"), th("Why not ready", "未就绪原因")))
 for r in [r for r in rows if r["class"] == "bought"]:
     offs = r["offers"]
