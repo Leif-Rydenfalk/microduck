@@ -103,7 +103,7 @@ def thread_for(dia, role, dias=None):
 rows = []
 parts_seen = 0
 for path in sorted(glob.glob(os.path.join(ROOT, "ce-parts", "*", "current", "cad", "interfaces.json"))):
-    slug = path.split(os.sep)[-5]
+    slug = path.split(os.sep)[-4]   # .../ce-parts/<slug>/current/cad/interfaces.json — [-5] was "ce-parts" for every row (defect found 2026-09-04)
     try:
         with open(path, encoding="utf-8") as f:
             doc = json.load(f)
