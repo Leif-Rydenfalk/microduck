@@ -36,11 +36,34 @@ def check(p):
     vol=float(np.sum(np.einsum('ij,ij->i',a,np.cross(b,c3)))/6.0)
     return dict(file=os.path.relpath(p),format=fmt,triangles=n,vertices=int(len(uniq)),degenerate=degenerate,open_edges=open_edges,nonmanifold_edges=nonmanifold,misoriented_edges=misoriented,
                 watertight=(open_edges==0 and nonmanifold==0),consistently_oriented=(misoriented==0),signed_volume_mm3=round(vol,3),bbox_mm=[round(float(x),3) for x in bbox])
+# ARGUMENTS (added 2026-09-05, own-geometry lane): the tool used to glob a
+# single hard-coded directory and IGNORE argv, so `stlcheck.py <file>` printed
+# the whole print folder and said nothing about the file asked for — a check
+# that answers a question you did not ask. Named paths now win; with none, the
+# old sweep runs unchanged. `--json <path>` moves the report; the default is
+# still /private/tmp/factory-readiness/stlcheck.json, and the directory is
+# created rather than raising FileNotFoundError. Exit 1 if any file is not
+# watertight, consistently oriented and free of degenerate facets.
+argv = [a for a in sys.argv[1:]]
+report = '/private/tmp/factory-readiness/stlcheck.json'
+if '--json' in argv:
+    i = argv.index('--json'); report = argv[i+1]; del argv[i:i+2]
+paths = []
+for a in argv:
+    paths.extend(sorted(glob.glob(a)) if any(c in a for c in '*?[') else [a])
+if not paths:
+    paths = sorted(glob.glob('out/print/stl/*/*.stl'))
 out=[]
-for p in sorted(glob.glob('out/print/stl/*/*.stl')):
+for p in paths:
     try: out.append(check(p))
     except Exception as e: out.append(dict(file=p,error=str(e)))
-json.dump(out,open('/private/tmp/factory-readiness/stlcheck.json','w'),indent=1)
+os.makedirs(os.path.dirname(report) or '.', exist_ok=True)
+json.dump(out,open(report,'w'),indent=1)
+bad=0
 for r in out:
-    if 'error' in r: print('ERR',r); continue
-    print(f"{r['file'][14:]:45s} {r['format']:6s} tri={r['triangles']:6d} deg={r['degenerate']:3d} open={r['open_edges']:4d} nonman={r['nonmanifold_edges']:3d} misor={r['misoriented_edges']:4d} vol={r['signed_volume_mm3']:12.1f} bbox={r['bbox_mm']}")
+    if 'error' in r: print('ERR',r); bad+=1; continue
+    if not (r['watertight'] and r['consistently_oriented'] and r['degenerate']==0): bad+=1
+    name=r['file'].split('/')[-1]
+    print(f"{name:45s} {r['format']:6s} tri={r['triangles']:6d} deg={r['degenerate']:3d} open={r['open_edges']:4d} nonman={r['nonmanifold_edges']:3d} misor={r['misoriented_edges']:4d} vol={r['signed_volume_mm3']:12.1f} bbox={r['bbox_mm']} {'WATERTIGHT' if r['watertight'] and r['consistently_oriented'] else 'NOT WATERTIGHT'}")
+print(f"{len(out)} file(s), {bad} FAIL -> {report}")
+sys.exit(1 if bad else 0)
