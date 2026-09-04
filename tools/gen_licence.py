@@ -173,6 +173,35 @@ def verify_evidence(data):
     return out
 
 
+def count_drawing_sheets():
+    """How many drawing sheets exist RIGHT NOW.
+
+    The ours-vs-upstream table used to carry a hand-typed '28 sheets'. It went
+    stale within a day (the drawing-sheet rebuild is another lane's live work),
+    and a hand-typed count in a document a factory reads is exactly the kind of
+    number this project refuses to keep. Measured here instead, and the row
+    interpolates it.
+
+    Authority order: this lane's own sheetcheck record if it exists (it knows
+    which folders are drawings and which are a bench fixture), else a direct
+    count of drawing folders that hold an SVG.
+    """
+    rec = os.path.join(REPO, "out", "factory", "measure", "sheetcheck.json")
+    if os.path.isfile(rec):
+        try:
+            d = json.load(open(rec, encoding="utf-8"))
+            dd = d.get("$dedup", {})
+            return {"n": dd.get("sheets_graded", len(d.get("sheets", []))),
+                    "basis": "out/factory/measure/sheetcheck.json, generated %s" % d.get("generated", "?"),
+                    "note": "%d unique slugs, %d graded as drawings; the difference is a bench fixture the record names"
+                            % (dd.get("unique_slugs", 0), dd.get("sheets_graded", 0))}
+        except Exception as ex:
+            return {"n": None, "basis": "sheetcheck record unreadable: %s" % ex, "note": ""}
+    dirs = [d for d in glob.glob(os.path.join(REPO, "out", "drawings", "*"))
+            if os.path.isdir(d) and glob.glob(os.path.join(d, "*.svg"))]
+    return {"n": len(dirs), "basis": "direct count of out/drawings/*/ folders holding an SVG", "note": ""}
+
+
 def repo_licence_file():
     # Exact licence-file names only. A bare LICENCE* glob matched LICENCE-POSITION.html
     # (this page) and reported a false PASS — caught by reading the screenshot back.
@@ -199,7 +228,7 @@ def quote_block(q):
     return '<blockquote class="q">%s</blockquote>' % e(q).replace("\n", "<br>")
 
 
-def render(data, census, wide, readme_checks, evidence, lic_file, now):
+def render(data, census, wide, readme_checks, evidence, lic_file, now, sheets):
     o = []
     A = o.append
     facts = data["facts"]
@@ -401,7 +430,10 @@ def render(data, census, wide, readme_checks, evidence, lic_file, now):
     A('<h3>3.1 Ours <span class="zh">我方资产</span></h3>')
     A('<div class="tablewrap"><table class="data"><thead><tr>%s%s%s</tr></thead><tbody>' % (th("Asset", "资产"), th("Origin", "来源"), th("Terms", "条款")))
     for r in q4["ours_table"]:
-        A('<tr><td>%s</td><td>%s</td><td>%s</td></tr>' % (e(r["asset"]), e(r["origin"]), e(r["terms"])))
+        # {sheets} is interpolated from the live count — see count_drawing_sheets()
+        asset = r["asset"].replace("{sheets}", ("%s" % sheets["n"]) if sheets["n"] is not None else "CANNOT DETERMINE")
+        terms = r["terms"].replace("{sheets_basis}", sheets["basis"])
+        A('<tr><td>%s</td><td>%s</td><td>%s</td></tr>' % (e(asset), e(r["origin"]), e(terms)))
     A('</tbody></table></div>')
     A('<h3>3.2 Upstream <span class="zh">上游资产</span></h3>')
     A('<div class="tablewrap"><table class="data"><thead><tr>%s%s%s</tr></thead><tbody>' % (th("Asset", "资产"), th("Owner", "权利人"), th("Terms", "条款")))
@@ -510,7 +542,8 @@ def main():
     evidence = verify_evidence(data)
     lic_file = repo_licence_file()
     now = _dt.datetime.now(_dt.timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
-    page = render(data, census, wide, readme_checks, evidence, lic_file, now)
+    sheets = count_drawing_sheets()
+    page = render(data, census, wide, readme_checks, evidence, lic_file, now, sheets)
     with open(OUT, "w", encoding="utf-8") as f:
         f.write(page)
     summary = {
