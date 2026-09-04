@@ -188,10 +188,35 @@ def main():
     feats = _side("features").get("parts", {})
     ver = _side("verify").get("parts", {})
     sc, sc_when, sc_err = sheetcheck_rows()
-    rows, seen = [], set()
+    rows, seen, not_a_part = [], set(), []
+    #: THE FOLDER IS NOT THE PART. `out/drawings/` is shared: other lanes
+    #: write probe directories into it, and a directory holding a result.json
+    #: is not thereby a part. MEASURED 2026-09-04: out/drawings/edgeclass/ is
+    #: the edge-classification lane's probe dir; its result.json carries no
+    #: `slug` at all, and this generator CRASHED on it —
+    #: `KeyError: 'slug'` in the row sort, so the whole index failed to
+    #: build rather than one row being wrong.
+    #:
+    #: `ce-cad/bin/sheetcheck` already refuses exactly this (commit ae3817e2,
+    #: self-test case `sweep-nonpart-dir-skipped`) by asking the triad FIRST,
+    #: for every directory. The same question is asked here, against the same
+    #: shelf, and the skip is REPORTED — a silent skip and a silent inclusion
+    #: are the same defect from opposite sides.
+    shelf = set(shelf_slugs())
     for slug in sorted(os.listdir(DRAWINGS)) if os.path.isdir(DRAWINGS) else []:
         rj = os.path.join(DRAWINGS, slug, "result.json")
         if not os.path.exists(rj):
+            continue
+        if slug.startswith(("_", ".")):
+            not_a_part.append({"dir": slug, "why": "directory name starts "
+                               "with %r — drawer scratch, not a part folder"
+                               % slug[0]})
+            continue
+        if slug not in shelf:
+            not_a_part.append({"dir": slug, "why": "no part:%s in the triad — "
+                               "there is no folder ce-parts/%s, so this "
+                               "directory cannot hold that part's sheet "
+                               "whatever is inside it" % (slug, slug)})
             continue
         try:
             r = json.load(open(rj, encoding="utf-8"))
@@ -205,6 +230,12 @@ def main():
             continue
         rec = part_record(slug)
         row = dict(r)
+        #: THE FOLDER NAME IS THE IDENTITY, not whatever the file claims.
+        #: `row = dict(r)` took the slug from result.json's own key, so a
+        #: file written without one produced a row with no slug and a file
+        #: written with the WRONG one would have filed the row under another
+        #: part in silence. Both are closed here.
+        row["slug"] = slug
         # TWO SUBJECTS, TWO KEYS, NO AMBIGUOUS THIRD. `verdict` is deleted
         # rather than passed through: a reader who finds it beside a sheet
         # reads it as "a machinist can cut this", and what it graded was "the
@@ -333,6 +364,12 @@ def main():
             "ce-cad/bin/sheetcheck. ONLY sheet_verdict answers 'can a "
             "machinist cut this part from this sheet'."),
         "generator": "tools/collect_drawings.py",
+        #: Directories under out/drawings/ that hold a result.json and are
+        #: NOT a part of this design, each with the reason. Published rather
+        #: than dropped, for the same reason sheetcheck publishes its own:
+        #: a silent skip and a silent inclusion are the same defect from
+        #: opposite sides.
+        "dirs_skipped_not_a_part": not_a_part,
         "rows": rows,
         "totals": {
             "shelf": len(shelf_slugs()),
