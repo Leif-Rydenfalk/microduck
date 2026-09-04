@@ -27,6 +27,7 @@ import numpy as np
 from scipy.spatial import cKDTree
 
 R = "/Users/leifrydenfalk/dev/ce-workshop/ce-designs/microduck"
+GRID_OVERRIDE = {}
 sys.path.insert(0, "/Users/leifrydenfalk/dev/ce-workshop/ce-cad")
 sys.path.insert(0, R + "/sim")
 from route3d_grid import load_rows, world_tris          # noqa: E402
@@ -142,6 +143,21 @@ def main():
 
     cab = json.load(open(R + "/out/wiring/cables3d.json"))["record"]
     paths = json.load(open(R + "/out/wiring/paths.json"))["record"]["paths"]
+    # A RE-ROUTE REPLACES ITS RUN. paths-hat.json holds the runs re-planned once
+    # the HAT's connectors were located off Pollen's published board; measuring
+    # the superseded route would report a clearance for a path nothing carries.
+    _hp = R + "/out/wiring/paths-hat.json"
+    if os.path.exists(_hp):
+        over = json.load(open(_hp))["record"]["paths"]
+        say("paths-hat.json overrides %d run(s): %s" % (len(over), sorted(over)))
+        paths.update(over)
+    # and the grid figure a re-routed run is compared against must come from the
+    # SAME sweep as its path, or the difference is between two different routes
+    _hc = R + "/out/wiring/cables3d-hat.json"
+    if os.path.exists(_hc):
+        globals()["GRID_OVERRIDE"] = {
+            c["id"]: c.get("min_clearance_mm")
+            for c in json.load(open(_hc))["record"]["cables"] if c.get("routed")}
     out = []
     for c in cab["cables"]:
         rid = c["id"]

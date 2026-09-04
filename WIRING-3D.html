@@ -40,8 +40,8 @@
   <div class="stat"><b>16</b><span>routed as 3D paths</span></div>
   <div class="stat"><b>16</b><span>swept as solids</span></div>
   <div class="stat"><b>30</b><span>housings placed through mate()</span></div>
-  <div class="stat"><b>1068.5 mm</b><span>routed cable</span></div>
-  <div class="stat"><b>16.96 g</b><span>nominal harness mass</span></div>
+  <div class="stat"><b>1047.4 mm</b><span>routed cable</span></div>
+  <div class="stat"><b>16.70 g</b><span>nominal harness mass</span></div>
   <div class="stat"><b>0 / 6 / 17</b><span>PASS / FAIL / CANNOT DETERMINE</span></div>
 </div>
 
@@ -62,6 +62,18 @@
     <b>0.000000&nbsp;deg</b> over all 30.
   </div>
   <div class="verdict warn">
+    <b>CORRECTION, and it is the most important number on this page: measured against the
+    TRIANGLES rather than the routing grid, 8 of the 16 routed runs sit under the
+    stated 1.0000&nbsp;mm clearance floor.</b> The grid the router plans on resolves distance to
+    the nearest marked 1.0&nbsp;mm cell centre, so it overstates clearance &mdash; on
+    16 of 16 runs here, worst 0.6358&nbsp;mm. The tightest is
+    <code>dxl-imu200-id20</code> at <b>0.1648&nbsp;mm</b> from <code>trunk_base</code>, where the
+    grid reported 0.6739. Any clearance verdict in the table below that rests on the grid column
+    is optimistic by that much, and <code>tof-hat</code> is the case to watch: locating its HAT
+    end moved it from 0.4557&nbsp;mm exact to 0.9555&nbsp;mm exact &mdash; a real improvement that
+    is still <i>below</i> the floor, not the PASS the grid column shows.
+  </div>
+  <div class="verdict warn">
     <b>No run is a PASS, and that is the honest state.</b> 6 FAIL and 17 CANNOT
     DETERMINE. Bend radius is CANNOT DETERMINE on every routed run <i>by construction</i>:
     ROBOTIS publishes no minimum bend radius for the X3P lead, so only the ACHIEVED radius is
@@ -73,38 +85,47 @@
 
 <section id="runs">
   <h2><span class="n">2</span>Every run</h2>
+  <p><b>Two clearance columns, and the EXACT one is the number to read.</b> The grid figure is a
+  distance to the nearest marked 1.0&nbsp;mm cell centre and carries up to 0.8660&nbsp;mm of grid
+  error; the exact figure is point-to-triangle against the actual triangles of the actual meshes,
+  which is why it can also name the body the cable comes closest to. Measured over the
+  16 runs that have both: the grid <b>overstates</b> clearance on 16 of them, worst
+  0.6358&nbsp;mm, and understates on 0. <b>8 of 16 runs are under the
+  stated 1.0000&nbsp;mm floor when measured exactly</b> &mdash; so the grid-based clearance
+  verdicts in this table are optimistic, and the exact column is what a verdict should rest on.</p>
   <p>Routed length and <code>cables.json</code>&rsquo;s <code>cable_mm</code> are BOTH printed and
   neither overwrites the other: the routed figure is the length at the zero pose, the
   <code>cable_mm</code> figure is a floor plus a slack allowance over each crossed joint&rsquo;s
   whole range. Volume is the divergence theorem over the cable&rsquo;s own closed mesh.</p>
   <table class="data">
     <thead><tr><th>run</th><th>ends</th><th>OD mm</th><th>routed mm</th><th>cables.json mm</th>
-    <th>&Delta; mm</th><th>min clear mm</th><th>bend R mm</th><th>pierce</th><th>vol mm&sup3;</th>
+    <th>&Delta; mm</th><th>grid clear mm</th><th>EXACT clear mm</th><th>nearest body</th>
+    <th>bend R mm</th><th>pierce</th><th>vol mm&sup3;</th>
     <th>verdict</th></tr></thead>
     <tbody>
-<tr><td><code>dxl-hat-id34</code></td><td>hat <code>J14</code> &rarr; id34</td><td class='n'>3.1243</td><td class='n'>31.932</td><td class='n'>35</td><td class='n'>-3.068</td><td class='n'>1.2663</td><td class='n'>2.581</td><td class='n'>0</td><td class='n'>246.35</td><td><span class="chip cd">CANNOT DETERMINE</span></td></tr>
-<tr><td><code>dxl-id34-id33</code></td><td>id34 &rarr; id33</td><td class='n'>3.1243</td><td class='n'>67.404</td><td class='n'>60</td><td class='n'>7.404</td><td class='n'>1.2663</td><td class='n'>5.443</td><td class='n'>0</td><td class='n'>500.69</td><td><span class="chip cd">CANNOT DETERMINE</span></td></tr>
-<tr><td><code>dxl-id33-id32</code></td><td>id33 &rarr; id32</td><td class='n'>3.1243</td><td class='n'>&mdash;</td><td class='n'>50</td><td class='n'>&mdash;</td><td class='n'>&mdash;</td><td class='n'>&mdash;</td><td class='n'>&mdash;</td><td class='n'>&mdash;</td><td><span class="chip no">FAIL</span></td></tr>
-<tr><td><code>dxl-id32-id31</code></td><td>id32 &rarr; id31</td><td class='n'>3.1243</td><td class='n'>117.571</td><td class='n'>165</td><td class='n'>-47.429</td><td class='n'>0.6739</td><td class='n'>3.035</td><td class='n'>0</td><td class='n'>873.51</td><td><span class="chip no">FAIL</span></td></tr>
-<tr><td><code>dxl-id31-id30</code></td><td>id31 &rarr; id30</td><td class='n'>3.1243</td><td class='n'>32.042</td><td class='n'>35</td><td class='n'>-2.958</td><td class='n'>1.2663</td><td class='n'>117.600</td><td class='n'>0</td><td class='n'>239.39</td><td><span class="chip cd">CANNOT DETERMINE</span></td></tr>
-<tr><td><code>dxl-id30-imu200</code></td><td>id30 &rarr; imu200 <span class='dim'>(unlocated)</span></td><td class='n'>3.1243</td><td class='n'>93.703</td><td class='n'>120</td><td class='n'>-26.297</td><td class='n'>1.2663</td><td class='n'>5.036</td><td class='n'>0</td><td class='n'>699.49</td><td><span class="chip cd">CANNOT DETERMINE</span></td></tr>
-<tr><td><code>dxl-imu200-id20</code></td><td>imu200 <span class='dim'>(unlocated)</span> &rarr; id20</td><td class='n'>3.1243</td><td class='n'>124.639</td><td class='n'>40</td><td class='n'>84.639</td><td class='n'>0.6739</td><td class='n'>3.782</td><td class='n'>0</td><td class='n'>927.44</td><td><span class="chip no">FAIL</span></td></tr>
-<tr><td><code>dxl-id20-id21</code></td><td>id20 &rarr; id21</td><td class='n'>3.1243</td><td class='n'>132.457</td><td class='n'>65</td><td class='n'>67.457</td><td class='n'>1.2663</td><td class='n'>2.955</td><td class='n'>0</td><td class='n'>987.16</td><td><span class="chip cd">CANNOT DETERMINE</span></td></tr>
-<tr><td><code>dxl-id21-id22</code></td><td>id21 &rarr; id22</td><td class='n'>3.1243</td><td class='n'>74.989</td><td class='n'>125</td><td class='n'>-50.011</td><td class='n'>1.2663</td><td class='n'>2.833</td><td class='n'>0</td><td class='n'>556.81</td><td><span class="chip cd">CANNOT DETERMINE</span></td></tr>
-<tr><td><code>dxl-id22-id23</code></td><td>id22 &rarr; id23</td><td class='n'>3.1243</td><td class='n'>14.286</td><td class='n'>20</td><td class='n'>-5.714</td><td class='n'>1.4378</td><td class='n'>&mdash;</td><td class='n'>0</td><td class='n'>106.73</td><td><span class="chip cd">CANNOT DETERMINE</span></td></tr>
-<tr><td><code>dxl-id23-id24</code></td><td>id23 &rarr; id24</td><td class='n'>3.1243</td><td class='n'>45.982</td><td class='n'>95</td><td class='n'>-49.018</td><td class='n'>1.4378</td><td class='n'>349.179</td><td class='n'>0</td><td class='n'>343.53</td><td><span class="chip cd">CANNOT DETERMINE</span></td></tr>
-<tr><td><code>dxl-imu200-id10</code></td><td>imu200 <span class='dim'>(unlocated)</span> &rarr; id10</td><td class='n'>3.1243</td><td class='n'>128.018</td><td class='n'>40</td><td class='n'>88.018</td><td class='n'>1.2663</td><td class='n'>3.499</td><td class='n'>0</td><td class='n'>951.81</td><td><span class="chip cd">CANNOT DETERMINE</span></td></tr>
-<tr><td><code>dxl-id10-id11</code></td><td>id10 &rarr; id11</td><td class='n'>3.1243</td><td class='n'>52.658</td><td class='n'>65</td><td class='n'>-12.342</td><td class='n'>1.2663</td><td class='n'>5.274</td><td class='n'>0</td><td class='n'>390.19</td><td><span class="chip cd">CANNOT DETERMINE</span></td></tr>
-<tr><td><code>dxl-id11-id12</code></td><td>id11 &rarr; id12</td><td class='n'>3.1243</td><td class='n'>32.967</td><td class='n'>125</td><td class='n'>-92.033</td><td class='n'>1.2663</td><td class='n'>7.895</td><td class='n'>0</td><td class='n'>246.16</td><td><span class="chip cd">CANNOT DETERMINE</span></td></tr>
-<tr><td><code>dxl-id12-id13</code></td><td>id12 &rarr; id13</td><td class='n'>3.1243</td><td class='n'>14.286</td><td class='n'>20</td><td class='n'>-5.714</td><td class='n'>1.4378</td><td class='n'>&mdash;</td><td class='n'>0</td><td class='n'>106.73</td><td><span class="chip cd">CANNOT DETERMINE</span></td></tr>
-<tr><td><code>dxl-id13-id14</code></td><td>id13 &rarr; id14</td><td class='n'>3.1243</td><td class='n'>45.982</td><td class='n'>95</td><td class='n'>-49.018</td><td class='n'>1.4378</td><td class='n'>349.178</td><td class='n'>0</td><td class='n'>343.53</td><td><span class="chip cd">CANNOT DETERMINE</span></td></tr>
-<tr><td><code>tof-hat</code></td><td>hat <code>J5</code> &rarr; tof <span class='dim'>(unlocated)</span></td><td class='n'>2.2000</td><td class='n'>38.501</td><td class='n'>35</td><td class='n'>3.501</td><td class='n'>1.1361</td><td class='n'>3.049</td><td class='n'>0</td><td class='n'>220.41</td><td><span class="chip cd">CANNOT DETERMINE</span></td></tr>
-<tr><td><code>spk-hat</code></td><td>hat <code>J1</code> &rarr; speaker <span class='dim'>(unlocated)</span></td><td class='n'>2.5000</td><td class='n'>&mdash;</td><td class='n'>70</td><td class='n'>&mdash;</td><td class='n'>&mdash;</td><td class='n'>&mdash;</td><td class='n'>&mdash;</td><td class='n'>&mdash;</td><td><span class="chip no">FAIL</span></td></tr>
-<tr><td><code>mic-hat</code></td><td>&mdash;</td><td class='n'>2.2000</td><td class='n'>&mdash;</td><td class='n'>&mdash;</td><td class='n'>&mdash;</td><td class='n'>&mdash;</td><td class='n'>&mdash;</td><td class='n'>&mdash;</td><td class='n'>&mdash;</td><td><span class="chip cd">CANNOT DETERMINE</span></td></tr>
-<tr><td><code>csi-radxa-camera</code></td><td>radxa <span class='dim'>(unlocated)</span> &rarr; camera <span class='dim'>(unlocated)</span></td><td class='n'>2.0000</td><td class='n'>&mdash;</td><td class='n'>15</td><td class='n'>&mdash;</td><td class='n'>&mdash;</td><td class='n'>&mdash;</td><td class='n'>&mdash;</td><td class='n'>&mdash;</td><td><span class="chip no">FAIL</span></td></tr>
-<tr><td><code>bat-hat</code></td><td>battery <span class='dim'>(unlocated)</span> &rarr; hat <code>J14</code></td><td class='n'>3.0000</td><td class='n'>&mdash;</td><td class='n'>340</td><td class='n'>&mdash;</td><td class='n'>&mdash;</td><td class='n'>&mdash;</td><td class='n'>&mdash;</td><td class='n'>&mdash;</td><td><span class="chip no">FAIL</span></td></tr>
-<tr><td><code>hat-radxa-40pin</code></td><td>&mdash;</td><td class='n'>3.0000</td><td class='n'>&mdash;</td><td class='n'>0</td><td class='n'>&mdash;</td><td class='n'>&mdash;</td><td class='n'>&mdash;</td><td class='n'>&mdash;</td><td class='n'>&mdash;</td><td><span class="chip cd">CANNOT DETERMINE</span></td></tr>
-<tr><td><code>hat-dxl-port</code></td><td>&mdash;</td><td class='n'>3.0000</td><td class='n'>&mdash;</td><td class='n'>&mdash;</td><td class='n'>&mdash;</td><td class='n'>&mdash;</td><td class='n'>&mdash;</td><td class='n'>&mdash;</td><td class='n'>&mdash;</td><td><span class="chip cd">CANNOT DETERMINE</span></td></tr>
+<tr><td><code>dxl-hat-id34</code></td><td>hat <code>J14</code> &rarr; id34</td><td class='n'>3.1243</td><td class='n'>31.932</td><td class='n'>35</td><td class='n'>-3.068</td><td class='n'>1.2663</td><td class='n'><b>1.2449</b></td><td>motor_support</td><td class='n'>2.581</td><td class='n'>0</td><td class='n'>246.35</td><td><span class="chip cd">CANNOT DETERMINE</span></td></tr>
+<tr><td><code>dxl-id34-id33</code></td><td>id34 &rarr; id33</td><td class='n'>3.1243</td><td class='n'>67.404</td><td class='n'>60</td><td class='n'>7.404</td><td class='n'>1.2663</td><td class='n'><b>0.6847</b></td><td>bottom_head_shell</td><td class='n'>5.443</td><td class='n'>0</td><td class='n'>500.69</td><td><span class="chip cd">CANNOT DETERMINE</span></td></tr>
+<tr><td><code>dxl-id33-id32</code></td><td>id33 &rarr; id32</td><td class='n'>3.1243</td><td class='n'>&mdash;</td><td class='n'>50</td><td class='n'>&mdash;</td><td class='n'>&mdash;</td><td class='n'><b>&mdash;</b></td><td>&mdash;</td><td class='n'>&mdash;</td><td class='n'>&mdash;</td><td class='n'>&mdash;</td><td><span class="chip no">FAIL</span></td></tr>
+<tr><td><code>dxl-id32-id31</code></td><td>id32 &rarr; id31</td><td class='n'>3.1243</td><td class='n'>117.571</td><td class='n'>165</td><td class='n'>-47.429</td><td class='n'>0.6739</td><td class='n'><b>0.4718</b></td><td>xl330</td><td class='n'>3.035</td><td class='n'>0</td><td class='n'>873.51</td><td><span class="chip no">FAIL</span></td></tr>
+<tr><td><code>dxl-id31-id30</code></td><td>id31 &rarr; id30</td><td class='n'>3.1243</td><td class='n'>32.042</td><td class='n'>35</td><td class='n'>-2.958</td><td class='n'>1.2663</td><td class='n'><b>1.2360</b></td><td>xl330</td><td class='n'>117.600</td><td class='n'>0</td><td class='n'>239.39</td><td><span class="chip cd">CANNOT DETERMINE</span></td></tr>
+<tr><td><code>dxl-id30-imu200</code></td><td>id30 &rarr; imu200 <span class='dim'>(unlocated)</span></td><td class='n'>3.1243</td><td class='n'>93.703</td><td class='n'>120</td><td class='n'>-26.297</td><td class='n'>1.2663</td><td class='n'><b>0.8875</b></td><td>trunk_base</td><td class='n'>5.036</td><td class='n'>0</td><td class='n'>699.49</td><td><span class="chip cd">CANNOT DETERMINE</span></td></tr>
+<tr><td><code>dxl-imu200-id20</code></td><td>imu200 <span class='dim'>(unlocated)</span> &rarr; id20</td><td class='n'>3.1243</td><td class='n'>124.639</td><td class='n'>40</td><td class='n'>84.639</td><td class='n'>0.6739</td><td class='n'><b>0.1648</b></td><td>trunk_base</td><td class='n'>3.782</td><td class='n'>0</td><td class='n'>927.44</td><td><span class="chip no">FAIL</span></td></tr>
+<tr><td><code>dxl-id20-id21</code></td><td>id20 &rarr; id21</td><td class='n'>3.1243</td><td class='n'>132.457</td><td class='n'>65</td><td class='n'>67.457</td><td class='n'>1.2663</td><td class='n'><b>0.9385</b></td><td>trunk_base</td><td class='n'>2.955</td><td class='n'>0</td><td class='n'>987.16</td><td><span class="chip cd">CANNOT DETERMINE</span></td></tr>
+<tr><td><code>dxl-id21-id22</code></td><td>id21 &rarr; id22</td><td class='n'>3.1243</td><td class='n'>74.989</td><td class='n'>125</td><td class='n'>-50.011</td><td class='n'>1.2663</td><td class='n'><b>0.6305</b></td><td>upper_leg_left</td><td class='n'>2.833</td><td class='n'>0</td><td class='n'>556.81</td><td><span class="chip cd">CANNOT DETERMINE</span></td></tr>
+<tr><td><code>dxl-id22-id23</code></td><td>id22 &rarr; id23</td><td class='n'>3.1243</td><td class='n'>14.286</td><td class='n'>20</td><td class='n'>-5.714</td><td class='n'>1.4378</td><td class='n'><b>1.1212</b></td><td>xl330</td><td class='n'>&mdash;</td><td class='n'>0</td><td class='n'>106.73</td><td><span class="chip cd">CANNOT DETERMINE</span></td></tr>
+<tr><td><code>dxl-id23-id24</code></td><td>id23 &rarr; id24</td><td class='n'>3.1243</td><td class='n'>45.982</td><td class='n'>95</td><td class='n'>-49.018</td><td class='n'>1.4378</td><td class='n'><b>1.0060</b></td><td>xl330</td><td class='n'>349.179</td><td class='n'>0</td><td class='n'>343.53</td><td><span class="chip cd">CANNOT DETERMINE</span></td></tr>
+<tr><td><code>dxl-imu200-id10</code></td><td>imu200 <span class='dim'>(unlocated)</span> &rarr; id10</td><td class='n'>3.1243</td><td class='n'>128.018</td><td class='n'>40</td><td class='n'>88.018</td><td class='n'>1.2663</td><td class='n'><b>0.7462</b></td><td>right_shell</td><td class='n'>3.499</td><td class='n'>0</td><td class='n'>951.81</td><td><span class="chip cd">CANNOT DETERMINE</span></td></tr>
+<tr><td><code>dxl-id10-id11</code></td><td>id10 &rarr; id11</td><td class='n'>3.1243</td><td class='n'>52.658</td><td class='n'>65</td><td class='n'>-12.342</td><td class='n'>1.2663</td><td class='n'><b>1.1337</b></td><td>right_shell</td><td class='n'>5.274</td><td class='n'>0</td><td class='n'>390.19</td><td><span class="chip cd">CANNOT DETERMINE</span></td></tr>
+<tr><td><code>dxl-id11-id12</code></td><td>id11 &rarr; id12</td><td class='n'>3.1243</td><td class='n'>32.967</td><td class='n'>125</td><td class='n'>-92.033</td><td class='n'>1.2663</td><td class='n'><b>1.1612</b></td><td>xl330</td><td class='n'>7.895</td><td class='n'>0</td><td class='n'>246.16</td><td><span class="chip cd">CANNOT DETERMINE</span></td></tr>
+<tr><td><code>dxl-id12-id13</code></td><td>id12 &rarr; id13</td><td class='n'>3.1243</td><td class='n'>14.286</td><td class='n'>20</td><td class='n'>-5.714</td><td class='n'>1.4378</td><td class='n'><b>1.1212</b></td><td>xl330</td><td class='n'>&mdash;</td><td class='n'>0</td><td class='n'>106.73</td><td><span class="chip cd">CANNOT DETERMINE</span></td></tr>
+<tr><td><code>dxl-id13-id14</code></td><td>id13 &rarr; id14</td><td class='n'>3.1243</td><td class='n'>45.982</td><td class='n'>95</td><td class='n'>-49.018</td><td class='n'>1.4378</td><td class='n'><b>1.0060</b></td><td>xl330</td><td class='n'>349.178</td><td class='n'>0</td><td class='n'>343.53</td><td><span class="chip cd">CANNOT DETERMINE</span></td></tr>
+<tr><td><code>tof-hat</code></td><td>hat <code>J5</code> &rarr; tof <span class='dim'>(unlocated)</span></td><td class='n'>2.2000</td><td class='n'>38.501</td><td class='n'>35</td><td class='n'>3.501</td><td class='n'>1.1361</td><td class='n'><b>0.9555</b></td><td>elec_rpi_robot_hat_pcb</td><td class='n'>3.049</td><td class='n'>0</td><td class='n'>220.41</td><td><span class="chip cd">CANNOT DETERMINE</span></td></tr>
+<tr><td><code>spk-hat</code></td><td>hat <code>J1</code> &rarr; speaker <span class='dim'>(unlocated)</span></td><td class='n'>2.5000</td><td class='n'>&mdash;</td><td class='n'>70</td><td class='n'>&mdash;</td><td class='n'>&mdash;</td><td class='n'><b>&mdash;</b></td><td>&mdash;</td><td class='n'>&mdash;</td><td class='n'>&mdash;</td><td class='n'>&mdash;</td><td><span class="chip no">FAIL</span></td></tr>
+<tr><td><code>mic-hat</code></td><td>&mdash;</td><td class='n'>2.2000</td><td class='n'>&mdash;</td><td class='n'>&mdash;</td><td class='n'>&mdash;</td><td class='n'>&mdash;</td><td class='n'><b>&mdash;</b></td><td>&mdash;</td><td class='n'>&mdash;</td><td class='n'>&mdash;</td><td class='n'>&mdash;</td><td><span class="chip cd">CANNOT DETERMINE</span></td></tr>
+<tr><td><code>csi-radxa-camera</code></td><td>radxa <span class='dim'>(unlocated)</span> &rarr; camera <span class='dim'>(unlocated)</span></td><td class='n'>2.0000</td><td class='n'>&mdash;</td><td class='n'>15</td><td class='n'>&mdash;</td><td class='n'>&mdash;</td><td class='n'><b>&mdash;</b></td><td>&mdash;</td><td class='n'>&mdash;</td><td class='n'>&mdash;</td><td class='n'>&mdash;</td><td><span class="chip no">FAIL</span></td></tr>
+<tr><td><code>bat-hat</code></td><td>battery <span class='dim'>(unlocated)</span> &rarr; hat <code>J14</code></td><td class='n'>3.0000</td><td class='n'>&mdash;</td><td class='n'>340</td><td class='n'>&mdash;</td><td class='n'>&mdash;</td><td class='n'><b>&mdash;</b></td><td>&mdash;</td><td class='n'>&mdash;</td><td class='n'>&mdash;</td><td class='n'>&mdash;</td><td><span class="chip no">FAIL</span></td></tr>
+<tr><td><code>hat-radxa-40pin</code></td><td>&mdash;</td><td class='n'>3.0000</td><td class='n'>&mdash;</td><td class='n'>0</td><td class='n'>&mdash;</td><td class='n'>&mdash;</td><td class='n'><b>&mdash;</b></td><td>&mdash;</td><td class='n'>&mdash;</td><td class='n'>&mdash;</td><td class='n'>&mdash;</td><td><span class="chip cd">CANNOT DETERMINE</span></td></tr>
+<tr><td><code>hat-dxl-port</code></td><td>&mdash;</td><td class='n'>3.0000</td><td class='n'>&mdash;</td><td class='n'>&mdash;</td><td class='n'>&mdash;</td><td class='n'>&mdash;</td><td class='n'><b>&mdash;</b></td><td>&mdash;</td><td class='n'>&mdash;</td><td class='n'>&mdash;</td><td class='n'>&mdash;</td><td><span class="chip cd">CANNOT DETERMINE</span></td></tr>
     </tbody>
   </table>
 </section>

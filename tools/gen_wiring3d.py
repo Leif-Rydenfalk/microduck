@@ -38,6 +38,8 @@ SOL = load("out/wiring/solids.json")
 HATC = load("out/wiring/hat-connectors.json")
 REN = load("out/wiring/render.json")
 HAR = load("ce-assemblies/microduck/current/harness.json")
+EXA = load("out/wiring/clearance-exact.json")
+EX = {r["id"]: r for r in EXA["record"]["runs"]} if EXA else {}
 
 MISSING = [n for n, v in (("wiring/cables.json", CAB), ("out/wiring/cables3d.json", C3),
                           ("out/wiring/solids.json", SOL),
@@ -81,13 +83,16 @@ def main():
         rows.append(
             "<tr><td><code>%s</code></td><td>%s</td><td class='n'>%s</td>"
             "<td class='n'>%s</td><td class='n'>%s</td><td class='n'>%s</td>"
-            "<td class='n'>%s</td><td class='n'>%s</td><td class='n'>%s</td>"
+            "<td class='n'>%s</td><td class='n'><b>%s</b></td><td>%s</td>"
+            "<td class='n'>%s</td><td class='n'>%s</td>"
             "<td class='n'>%s</td><td>%s</td></tr>"
             % (E(rid), endtxt, num(cc.get("od_mm")),
                num(cc.get("routed_length_mm"), 3),
                ("%g" % cc["cable_mm_from_cables_json"]) if cc.get("cable_mm_from_cables_json") is not None else "&mdash;",
                num(cc.get("delta_vs_cable_mm"), 3),
                num(cc.get("min_clearance_mm")),
+               (num(EX[rid]["min_clearance_exact_mm"]) if rid in EX else "&mdash;"),
+               (E(EX[rid]["nearest_part"].get("mesh") or "") if rid in EX else "&mdash;"),
                num(cc.get("min_bend_radius_mm"), 3),
                (str(cc.get("pierce_samples")) if cc.get("pierce_samples") is not None else "&mdash;"),
                (num(s["volume_mm3"], 2) if s else "&mdash;"),
@@ -105,6 +110,25 @@ def main():
                E(str(am["world_origin_mm"])) if am else "&mdash;",
                num(am["delta_to_as_built_mm"], 4) if am else "&mdash;",
                E(", ".join("%s:%s" % (k, v) for k, v in sorted((c.get("nets_by_pin") or {}).items()))[:60])))
+    # the exact-vs-grid comparison, COMPUTED here from the two columns actually
+    # printed, so the sentence cannot drift from the table above it
+    pairs = []
+    for c in c3["cables"]:
+        cc = hat_rows.get(c["id"], c)
+        ex = EX.get(c["id"])
+        if ex and cc.get("min_clearance_mm") is not None:
+            pairs.append((c["id"], cc["min_clearance_mm"], ex["min_clearance_exact_mm"]))
+    n_ex = len(pairs)
+    diffs = [g - e for _, g, e in pairs]
+    n_over = sum(1 for d in diffs if d > 0)
+    n_under = n_ex - n_over
+    max_over = max(diffs) if diffs else 0.0
+    n_tight = sum(1 for _, _, e in pairs if e < 1.0)
+    # totals from the PLACED harness, not from the first sweep: two runs were
+    # re-routed after it and their lengths changed
+    tot_len = sum(c["routed_length_mm"] for c in HAR["record"]["cables"]
+                  if c.get("routed_length_mm"))
+    tot_mass = sum(c["mass_total_g"] for c in HAR["record"]["cables"] if c.get("mass_total_g"))
     imgs = (REN or {}).get("record", {}).get("images", {})
     figs = "\n".join(
         '<figure class="shot"><img src="out/wiring/harness-%s.png" alt="harness %s">'
@@ -157,8 +181,8 @@ def main():
   <div class="stat"><b>{cn['cables_routed']}</b><span>routed as 3D paths</span></div>
   <div class="stat"><b>{cn['cables_with_geometry']}</b><span>swept as solids</span></div>
   <div class="stat"><b>{cn['housings_placed']}</b><span>housings placed through mate()</span></div>
-  <div class="stat"><b>{st['totals']['routed_length_mm']:.1f} mm</b><span>routed cable</span></div>
-  <div class="stat"><b>{st['totals']['mass_nominal_g']:.2f} g</b><span>nominal harness mass</span></div>
+  <div class="stat"><b>{tot_len:.1f} mm</b><span>routed cable</span></div>
+  <div class="stat"><b>{tot_mass:.2f} g</b><span>nominal harness mass</span></div>
   <div class="stat"><b>{n_pass} / {n_fail} / {n_cd}</b><span>PASS / FAIL / CANNOT DETERMINE</span></div>
 </div>
 
@@ -179,6 +203,18 @@ def main():
     <b>{cn['worst_axis_error_deg']:.6f}&nbsp;deg</b> over all {cn['housing_checks_PASS'] + cn['housing_checks_FAIL']}.
   </div>
   <div class="verdict warn">
+    <b>CORRECTION, and it is the most important number on this page: measured against the
+    TRIANGLES rather than the routing grid, {n_tight} of the {n_ex} routed runs sit under the
+    stated 1.0000&nbsp;mm clearance floor.</b> The grid the router plans on resolves distance to
+    the nearest marked 1.0&nbsp;mm cell centre, so it overstates clearance &mdash; on
+    {n_over} of {n_ex} runs here, worst {max_over:.4f}&nbsp;mm. The tightest is
+    <code>dxl-imu200-id20</code> at <b>0.1648&nbsp;mm</b> from <code>trunk_base</code>, where the
+    grid reported 0.6739. Any clearance verdict in the table below that rests on the grid column
+    is optimistic by that much, and <code>tof-hat</code> is the case to watch: locating its HAT
+    end moved it from 0.4557&nbsp;mm exact to 0.9555&nbsp;mm exact &mdash; a real improvement that
+    is still <i>below</i> the floor, not the PASS the grid column shows.
+  </div>
+  <div class="verdict warn">
     <b>No run is a PASS, and that is the honest state.</b> {n_fail} FAIL and {n_cd} CANNOT
     DETERMINE. Bend radius is CANNOT DETERMINE on every routed run <i>by construction</i>:
     ROBOTIS publishes no minimum bend radius for the X3P lead, so only the ACHIEVED radius is
@@ -190,13 +226,22 @@ def main():
 
 <section id="runs">
   <h2><span class="n">2</span>Every run</h2>
+  <p><b>Two clearance columns, and the EXACT one is the number to read.</b> The grid figure is a
+  distance to the nearest marked 1.0&nbsp;mm cell centre and carries up to 0.8660&nbsp;mm of grid
+  error; the exact figure is point-to-triangle against the actual triangles of the actual meshes,
+  which is why it can also name the body the cable comes closest to. Measured over the
+  {n_ex} runs that have both: the grid <b>overstates</b> clearance on {n_over} of them, worst
+  {max_over:.4f}&nbsp;mm, and understates on {n_under}. <b>{n_tight} of {n_ex} runs are under the
+  stated 1.0000&nbsp;mm floor when measured exactly</b> &mdash; so the grid-based clearance
+  verdicts in this table are optimistic, and the exact column is what a verdict should rest on.</p>
   <p>Routed length and <code>cables.json</code>&rsquo;s <code>cable_mm</code> are BOTH printed and
   neither overwrites the other: the routed figure is the length at the zero pose, the
   <code>cable_mm</code> figure is a floor plus a slack allowance over each crossed joint&rsquo;s
   whole range. Volume is the divergence theorem over the cable&rsquo;s own closed mesh.</p>
   <table class="data">
     <thead><tr><th>run</th><th>ends</th><th>OD mm</th><th>routed mm</th><th>cables.json mm</th>
-    <th>&Delta; mm</th><th>min clear mm</th><th>bend R mm</th><th>pierce</th><th>vol mm&sup3;</th>
+    <th>&Delta; mm</th><th>grid clear mm</th><th>EXACT clear mm</th><th>nearest body</th>
+    <th>bend R mm</th><th>pierce</th><th>vol mm&sup3;</th>
     <th>verdict</th></tr></thead>
     <tbody>
 {chr(10).join(rows)}
