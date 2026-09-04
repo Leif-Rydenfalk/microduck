@@ -59,8 +59,49 @@ def say(*a):
     s = " ".join(str(x) for x in a)
     sys.stdout.write(s + "\n")
     _pf.write(s + "\n")
-OUT_JSON = R + "/out/wiring/cables3d.json"
-PATHS_JSON = R + "/out/wiring/paths.json"
+# ROUTE A SUBSET WITHOUT CLOBBERING THE FULL SWEEP. CE_ROUTE_ONLY=a,b,c routes
+# only those run ids and writes to cables3d-<tag>.json / paths-<tag>.json, so a
+# re-route of four runs can never overwrite the twenty-three-run answer that is
+# already on disk and already cited.
+ONLY = [x for x in os.environ.get("CE_ROUTE_ONLY", "").split(",") if x.strip()]
+TAG = os.environ.get("CE_ROUTE_TAG", "hat") if ONLY else ""
+_sfx = ("-" + TAG) if ONLY else ""
+OUT_JSON = R + "/out/wiring/cables3d%s.json" % _sfx
+PATHS_JSON = R + "/out/wiring/paths%s.json" % _sfx
+HAT_CONNECTORS = R + "/out/wiring/hat-connectors.json"
+
+# THE HAT END OF EVERY RUN THAT HAS ONE, AND THE DOCUMENT THAT SETTLES IT.
+# cables3d.json (the 22:21 sweep) put five of these on the HAT's MESH CENTROID
+# with the reason "connector positions unpublished". They are published:
+# Pollen's own board is in reference/pollen-elec-rpi-robot-hat (Apache-2.0) and
+# tools/hat_connectors.py locates every connector on it in world coordinates.
+HAT_END = {
+    "dxl-hat-id34": {
+        "candidates": ["J13", "J14"],
+        "why": "the XL330 bus is 3-wire half-duplex TTL and the HAT's only 3-pin "
+               "Dynamixel connectors are J13 and J14 (Connector_JST:JST_EH_B3B-EH-A_1x03, "
+               "sheet /Schematic/Dynamixel/, pin 1 GND / pin 2 +BATT read off "
+               "elec_RPI_Robot_HAT.kicad_pcb). Which of the two is the chain and which is "
+               "the battery is decided per run BY MEASUREMENT below and the alternative is "
+               "reported."},
+    "bat-hat": {
+        "candidates": ["J13", "J14"],
+        "why": "the pack feeds the robot THROUGH the motor connector — hardware-teardown.en.md "
+               "line 210 'Input range 5-28 V, designed to be powered through the motor "
+               "connector' — and the +BATT net is on pin 2 of J13/J14/J3/J11 in the kicad_pcb. "
+               "So the battery lead lands on an EH connector, not on a barrel or a Wago."},
+    "tof-hat": {
+        "candidates": ["J5"],
+        "why": "hardware-teardown.en.md line 193 quotes Pollen's own wording 'Stemma J5 "
+               "connector' against J5-J8 = JST SH 1 mm 4P; J5 is on sheet /Schematic/Sensors/."},
+    "spk-hat": {
+        "candidates": ["J1", "J2", "J9"],
+        "why": "J1, J2 and J9 are Wago-2 screwless terminals on sheet /Schematic/Audio/ "
+               "(out/pcb/hat/components.json), and hardware-teardown.en.md line 205 reads them "
+               "'Screwless terminals: external speaker and second microphone'."},
+}
+EH_MATED_HEIGHT = 8.1     # JST eEH.pdf p.2 — housing wire face above the board when mated
+HAT_REV = os.environ.get("CE_HAT_REV", "as_built")
 
 # ---- the numbers, each with its basis -------------------------------------
 
@@ -152,6 +193,42 @@ def servo_socket_frame(row, side):
     }
 
 
+def load_hat_connectors():
+    if not os.path.exists(HAT_CONNECTORS):
+        return None
+    rec = json.load(open(HAT_CONNECTORS))["record"]
+    return {c["refdes"]: c for c in rec["connectors"] if c.get("as_built_world")}
+
+
+def hat_end_frame(conn, rev="as_built"):
+    """One HAT connector as a cable endpoint: where the wire leaves, and along what.
+
+    The wire leaves a MATED connector, not the bare header, so the start point is
+    lifted off the board by the mated stack height where a vendor publishes one
+    (EH: 8.1000 mm, eEH.pdf p.2) and by the header's own measured top face where
+    none is published (SH, Wago) — which is stated per row, never averaged in.
+    """
+    w = conn["as_built_world"]
+    o = np.asarray(w["origin_mm"], float)
+    z = np.asarray(w["z_axis"], float)
+    x = np.asarray(w["x_axis"], float) if w.get("x_axis") else None
+    if rev == "as_modelled" and conn.get("as_modelled"):
+        o = np.asarray(conn["as_modelled"]["world_origin_mm"], float)
+    ser = conn["series"]
+    if ser.startswith("EH"):
+        lift, basis, hp = EH_MATED_HEIGHT, "JST eEH.pdf p.2 mated height 8.1000 mm", "part:jst-ehr-03"
+    else:
+        zr = conn["board_frame"].get("z_range_mm")
+        top = (zr[1] - conn["board_frame"]["origin_mm"][2]) if zr else 0.0
+        lift, hp = float(top), None
+        basis = ("the header's OWN top face, %.4f mm above its seating surface (measured off the "
+                 "official STEP in out/pcb/hat/components.json). No mated height is published "
+                 "for this series here, so the housing's own stack is NOT added and the start "
+                 "point is a floor." % top)
+    return {"start": o + z * lift, "normal": z, "insertion": -z, "row": x,
+            "lift_mm": lift, "lift_basis": basis, "housing_part": hp}
+
+
 # ---- load -----------------------------------------------------------------
 
 def load_occ():
@@ -194,6 +271,8 @@ def main():
         say("  planning grid x%d: cell %.4f mm  shape %s  cells %d"
             % (f, COARSE[f].cell, COARSE[f].shape, int(np.prod(COARSE[f].shape))))
 
+    hatc = load_hat_connectors()
+    say("HAT connectors located: %s" % (sorted(hatc) if hatc else "NONE — run tools/hat_connectors.py"))
     cab = json.load(open(R + "/wiring/cables.json"))["record"]
     rows = json.load(open(R + "/ce-assemblies/microduck/current/placements.json"))["record"]["rows"]
     devices = cab["devices"]
@@ -211,6 +290,8 @@ def main():
     results, paths = [], {}
     for c in cab["cables"]:
         rid = c["id"]
+        if ONLY and rid not in ONLY:
+            continue
         gk = group_key(c)
         od, od_basis, cond = GROUP_OD[gk]
         r_cable = od / 2.0
@@ -255,6 +336,52 @@ def main():
                 e["start_mm"] = f["wire_face_mm"]
                 e["normal"] = f["out"]
                 e["housing_part"] = "part:jst-ehr-03"
+            elif dev == "hat" and hatc and rid in HAT_END:
+                spec = HAT_END[rid]
+                cands = [hatc[j] for j in spec["candidates"] if j in hatc]
+                if not cands:
+                    e["located"] = False
+                    e["kind"] = "board"
+                    e["why_unlocated"] = ("no connector of %s is in hat-connectors.json"
+                                          % spec["candidates"])
+                    e["start_mm"] = xyz
+                    e["normal"] = None
+                    e["housing_part"] = None
+                    ends.append(e)
+                    continue
+                # THE CHOICE IS A MEASUREMENT: take the candidate whose wire-exit
+                # point is nearest the run's other end, and report the others.
+                other = np.asarray(c[("to" if side == "from" else "from") + "_xyz_mm"], float)
+                scored = []
+                for cc in cands:
+                    fr = hat_end_frame(cc, HAT_REV)
+                    scored.append((float(np.linalg.norm(fr["start"] - other)), cc["refdes"], fr, cc))
+                scored.sort()
+                d0, ref0, fr, cc = scored[0]
+                e["located"] = True
+                e["kind"] = "HAT %s connector %s" % (cc["series"], ref0)
+                e["refdes"] = ref0
+                e["hat_revision"] = HAT_REV
+                e["why_this_connector"] = spec["why"]
+                e["chosen_by"] = ("shortest straight-line distance to the other end: %s"
+                                  % ", ".join("%s %.4f mm" % (r, d) for d, r, _, _ in scored))
+                e["nets_by_pin"] = cc.get("nets_by_pin")
+                e["mate_mm"] = [round(float(v), 4) for v in np.asarray(cc["as_built_world"]["origin_mm"], float)]
+                e["wire_face_mm"] = [round(float(v), 4) for v in fr["start"]]
+                e["mated_lift_mm"] = round(fr["lift_mm"], 4)
+                e["mated_lift_basis"] = fr["lift_basis"]
+                e["insertion_dir"] = [round(float(v), 6) for v in fr["insertion"]]
+                e["row_dir"] = ([round(float(v), 6) for v in fr["row"]] if fr["row"] is not None else None)
+                e["housing_part"] = fr["housing_part"]
+                e["start_mm"] = fr["start"]
+                e["normal"] = fr["normal"]
+                if cc.get("as_modelled"):
+                    e["revision_note"] = (
+                        "our CAD carries the PRE-RELEASE board (out/pcb/hat/mesh-revision.json). "
+                        "This endpoint is the RELEASED (C1) position; on the board actually in "
+                        "our mesh the same connector sits at %s, %.4f mm away."
+                        % (cc["as_modelled"]["world_origin_mm"],
+                           cc["as_modelled"]["delta_to_as_built_mm"]))
             else:
                 e["located"] = False
                 e["kind"] = devices.get(dev, {}).get("kind", "?")
@@ -443,6 +570,8 @@ def main():
                       "od_mm": round(od, 4),
                       "bend_target_mm": round(3.0 * od, 4),
                       "ends": [{"housing_part": e["housing_part"],
+                                "device": e.get("device"), "refdes": e.get("refdes"),
+                                "kind": e.get("kind"),
                                 "mate_mm": e.get("mate_mm"),
                                 "insertion_dir": e.get("insertion_dir"),
                                 "row_dir": e.get("row_dir")} for e in ends]}

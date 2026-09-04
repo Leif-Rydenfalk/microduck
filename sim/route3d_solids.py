@@ -42,6 +42,13 @@ def say(*a):
     m = " ".join(str(x) for x in a)
     sys.stdout.write(m + "\n")
     LOG.write(m + "\n")
+# A SUBSET SWEEP WRITES ITS OWN FILES. CE_SOLIDS_TAG=hat reads paths-hat.json and
+# writes solids-hat.json, so re-sweeping four re-routed runs cannot overwrite the
+# sixteen-run answer already on disk and already cited.
+TAG = os.environ.get("CE_SOLIDS_TAG", "").strip()
+_sfx = ("-" + TAG) if TAG else ""
+PATHS_IN = R + "/out/wiring/paths%s.json" % _sfx
+SOLIDS_OUT = R + "/out/wiring/solids%s.json" % _sfx
 OUTDIR = R + "/out/wiring/cad"
 CLEAR_MIN = 1.0
 
@@ -130,59 +137,138 @@ def servo_socket_iface(mate_mm, insertion_dir, row_dir):
                       "x_axis": list(row_dir)}}
 
 
+LOFT_STATION_MM = 1.5     # spacing of the loft's circular stations, mm
 STL_DEVIATION_MM = 0.25   # mm; a 3.1243 mm tube needs no finer, and 0.0500 mm cost 7.6 MB
                           # and six minutes for ONE 33 mm cable (measured)
 
 
+TUBE_SIDES = 16           # polygon sides of the cable cross-section
+
+
+def _tube_mesh(poly, od, sides=TUBE_SIDES):
+    """The cable as an explicit triangle tube, built with parallel transport.
+
+    WHY NOT THE KERNEL. Three kernel sweeps were tried on this data and every
+    one has a route that defeats it, MEASURED, not supposed:
+      * MakePipeShell over a b-spline (Frenet and corrected): dxl-hat-id34 does
+        not return in minutes.
+      * cecad.route.sweep_polyline's capsule-chain fallback: ~300 fused
+        primitives, minutes per cable, and a 7.6 MB STL.
+      * a ruled loft of circular stations: fast to build (0.1-2.2 s) but
+        dxl-id20-id21's 442-face result does not come back from .Volume OR from
+        .tessellate() in six minutes, because the ruled surface self-intersects
+        at the tight bends and OCCT integrates and meshes it the hard way.
+    A cable is a tube of constant radius along a known curve. Building it is
+    arithmetic, so it is done here as arithmetic: a PARALLEL-TRANSPORT frame
+    (the rotation-minimising frame — no roll accumulates and, unlike Frenet, it
+    does not flip where the curvature vanishes, which is what a relaxed route is
+    full of), a `sides`-gon at each station, two triangles per quad, and flat
+    caps. Deterministic, O(n), and the numbers it costs are stated: the polygon
+    inscribes the circle, so the modelled tube is smaller than the real one by
+    at most r(1 - cos(pi/sides)) = %.4f mm on a %.4f mm cable, and the volume it
+    reports is the mesh's own, by the divergence theorem, not an envelope
+    formula that assumes the path is straight.
+    """
+    P = [np.asarray(q, float) for q in poly]
+    r = od / 2.0
+    # tangents
+    T = []
+    for i in range(len(P)):
+        a = P[max(0, i - 1)]
+        b = P[min(len(P) - 1, i + 1)]
+        v = b - a
+        n = float(np.linalg.norm(v))
+        T.append(v / n if n > 1e-12 else np.array([0.0, 0.0, 1.0]))
+    # parallel transport of an initial normal
+    seed = np.array([0.0, 0.0, 1.0])
+    if abs(float(seed @ T[0])) > 0.9:
+        seed = np.array([1.0, 0.0, 0.0])
+    N = [seed - T[0] * float(seed @ T[0])]
+    N[0] /= float(np.linalg.norm(N[0]))
+    for i in range(1, len(P)):
+        v = N[i - 1] - T[i] * float(N[i - 1] @ T[i])
+        nn = float(np.linalg.norm(v))
+        N.append(v / nn if nn > 1e-9 else N[i - 1])
+    pts, ring = [], []
+    for i in range(len(P)):
+        b = np.cross(T[i], N[i])
+        base = len(pts)
+        for k in range(sides):
+            th = 2.0 * math.pi * k / sides
+            pts.append(P[i] + N[i] * (r * math.cos(th)) + b * (r * math.sin(th)))
+        ring.append(base)
+    fac = []
+    for i in range(len(P) - 1):
+        a, c = ring[i], ring[i + 1]
+        for k in range(sides):
+            k2 = (k + 1) % sides
+            fac.append((a + k, a + k2, c + k2))
+            fac.append((a + k, c + k2, c + k))
+    cap0, cap1 = len(pts), None
+    pts.append(P[0])
+    for k in range(sides):
+        fac.append((cap0, ring[0] + (k + 1) % sides, ring[0] + k))
+    cap1 = len(pts)
+    pts.append(P[-1])
+    for k in range(sides):
+        fac.append((cap1, ring[-1] + k, ring[-1] + (k + 1) % sides))
+    return pts, fac
+
+
+def _mesh_volume(pts, fac):
+    """Signed volume of a closed triangle mesh, divergence theorem."""
+    v = 0.0
+    for a, b, c in fac:
+        pa, pb, pc = pts[a], pts[b], pts[c]
+        v += float(pa @ np.cross(pb, pc)) / 6.0
+    return abs(v)
+
+
 def _sweep(poly, od):
-    """One cable as a solid: pipe shell first, Frenet then corrected, then the fallback.
-
-    cecad.route.sweep_polyline tries a FRENET-framed pipe shell and, on any
-    kernel refusal, fuses a capsule chain. The capsule chain is correct and
-    RUINOUS: ~300 fused primitives, a 7.6 MB STL and six minutes for a 33 mm
-    cable, measured. A Frenet frame is also the one that misbehaves on a curve
-    whose curvature vanishes — exactly what a relaxed route is full of — so the
-    corrected (auxiliary) frame is tried before giving up on a single shell.
-    """
+    """One cable as (mesh, solid, how). See _tube_mesh for why this is arithmetic."""
     import Part as _P
-    import FreeCAD as _App
-    V = _App.Vector
-    thin = [poly[0]]
-    for q in poly[1:]:
-        if float(np.linalg.norm(np.asarray(q) - np.asarray(thin[-1]))) > 0.05:
-            thin.append(q)
-    for frenet in (True, False):
-        try:
-            bs = _P.BSplineCurve()
-            bs.interpolate([V(*p) for p in thin])
-            wire = _P.Wire([bs.toShape()])
-            e0 = wire.Edges[0]
-            circ = _P.Wire([_P.Circle(e0.valueAt(e0.FirstParameter),
-                                      e0.tangentAt(e0.FirstParameter), od / 2.0).toShape()])
-            ps = _P.BRepOffsetAPI.MakePipeShell(wire)
-            ps.setFrenetMode(frenet)
-            ps.add(circ, False, False)
-            ps.build()
-            ps.makeSolid()
-            sh = ps.shape()
-            if sh.isValid() and sh.Volume > 0:
-                return sh, "makePipeShell/bspline/%s" % ("frenet" if frenet else "corrected")
-        except Exception:
-            pass
-    return sweep_polyline(poly, od)
+    pts, fac = _tube_mesh(poly, od)
+    sh = None
+    try:
+        s2 = _P.Shape()
+        s2.makeShapeFromMesh(([tuple(float(c) for c in p) for p in pts],
+                              [tuple(int(i) for i in f) for f in fac]), 1e-4)
+        sh = _P.Solid(_P.Shell(s2.Faces)) if s2.Faces else None
+    except Exception as e:
+        say("   solid from mesh refused: %s" % e)
+    return (pts, fac), sh, "parallel-transport tube, %d-gon" % TUBE_SIDES
 
 
-def _export_stl(shape, path):
-    """Write an STL and CHECK IT LANDED.
+def _write_shape_stl(shape, path):
+    """A COMPOUND (housings, or the whole harness) as a binary STL."""
+    import Mesh as _Mesh
+    vts, fcs = shape.tessellate(STL_DEVIATION_MM)
+    m = _Mesh.Mesh([((vts[a].x, vts[a].y, vts[a].z), (vts[b].x, vts[b].y, vts[b].z),
+                     (vts[c].x, vts[c].y, vts[c].z)) for a, b, c in fcs])
+    m.write(path)
+    if not os.path.exists(path) or os.path.getsize(path) == 0:
+        raise IOError("STL export wrote nothing: %s" % path)
+    return os.path.getsize(path)
 
-    MEASURED DEFECT, 2026-09-04: Part.export([shape], "x.stl") writes NOTHING in
-    this FreeCAD build — the .stl exporter belongs to the Mesh module, which this
-    script never imported, and Part.export neither writes nor raises. Sixteen
-    cables swept and reported "exported" with an empty directory behind them.
-    Shape.exportStl is the Part-side call that actually writes, and the file is
-    stat-ed afterwards so a silent failure can never be reported as an export.
+
+def _write_mesh(pts, fac, path):
+    """Write the tube mesh as a BINARY STL, and CHECK IT LANDED.
+
+    MEASURED DEFECTS, 2026-09-04, both of them silent:
+      * Part.export([shape], "x.stl") writes NOTHING in this FreeCAD build and
+        does not raise — the .stl exporter belongs to the Mesh module, which
+        this script never imported. Sixteen cables were reported "exported"
+        behind an empty directory.
+      * Shape.exportStl ignores the deviation it is handed: 8.5 MB of ASCII for
+        one 52 mm tube at both 0.0500 and 0.2500 mm.
+    The mesh here is this file's own, so it is simply written, and the file is
+    stat-ed afterwards because neither of those two failed loudly.
     """
-    shape.exportStl(path, STL_DEVIATION_MM)
+    import Mesh as _Mesh
+    m = _Mesh.Mesh([(tuple(float(c) for c in pts[a]),
+                     tuple(float(c) for c in pts[b]),
+                     tuple(float(c) for c in pts[c])) for a, b, c in fac])
+    m.write(path)
     if not os.path.exists(path) or os.path.getsize(path) == 0:
         raise IOError("STL export wrote nothing: %s" % path)
     return os.path.getsize(path)
@@ -202,7 +288,8 @@ def main():
     t0 = time.time()
     from mate import mate as eh_mate
     occ = load_occ()
-    paths = json.load(open(R + "/out/wiring/paths.json"))["record"]["paths"]
+    paths = json.load(open(PATHS_IN))["record"]["paths"]
+    say("paths from %s: %d runs" % (PATHS_IN, len(paths)))
     os.makedirs(OUTDIR, exist_ok=True)
     base_housing = housing_shape()
     say("part:jst-ehr-03 built: bbox %s volume %.4f mm3"
@@ -225,19 +312,29 @@ def main():
         # oscillate) and the deviation from the routed chain is MEASURED below,
         # never assumed.
         poly_in = _resample(wp, RESAMPLE_MM)
-        shape, how = _sweep(poly_in, od)
+        t_sw = time.time()
+        (mpts, mfac), shape, how = _sweep(poly_in, od)
+        say("   %-18s swept by %-34s in %5.1f s (%d tris)"
+            % (rid, how, time.time() - t_sw, len(mfac)))
         poly = poly_in
         L = path_length(poly)
         dev = _max_dev(wp, poly)
-        vol = shape.Volume
+        # THE VOLUME OF A LOFT THROUGH A TIGHT BEND CAN COST MINUTES, because the
+        # ruled surface self-intersects there and OCCT integrates it the hard
+        # way. Measured: dxl-imu200-id20 (124.6 mm, 0.6739 mm clearance, the
+        # tightest route in the set) lofted in 1.7 s and then did not return from
+        # .Volume in six minutes. A number that cannot be taken is CANNOT
+        # DETERMINE with the reason, not a number the run stalls waiting for.
+        vol = _mesh_volume(mpts, mfac)
         # mass, from the geometry and two named densities
         n_cond = 3 if rid.startswith("dxl") else 2
         a_cu = math.pi * (BARE_D_21 / 2.0) ** 2                    # mm2 per conductor
         m_cu = a_cu * n_cond * L * 1e-3 * RHO_CU                   # mm3 -> cm3 = 1e-3
         a_ins = math.pi * ((INS_OD_NOM / 2.0) ** 2 - (BARE_D_21 / 2.0) ** 2)
         m_pvc = a_ins * n_cond * L * 1e-3 * RHO_PVC
-        cable_shapes.append(shape)
-        _export_stl(shape, os.path.join(OUTDIR, rid + ".stl"))
+        if shape is not None:
+            cable_shapes.append(shape)
+        stl_bytes = _write_mesh(mpts, mfac, os.path.join(OUTDIR, rid + ".stl"))
         row = {"id": rid, "od_mm": od, "swept_by": how,
                "resampled_to_mm": RESAMPLE_MM,
                "resample_deviation_mm": round(dev, 4),
@@ -246,7 +343,12 @@ def main():
                                            "cables3d.json are measured on the routed chain, so "
                                            "this is how far the SOLID may sit from what was "
                                            "measured",
-               "length_mm": round(L, 4), "volume_mm3": round(vol, 4),
+               "length_mm": round(L, 4),
+               "volume_mm3": round(vol, 4),
+               "volume_basis": "the divergence theorem over this cable's own closed tube mesh",
+               "triangles": len(mfac), "stl_bytes": stl_bytes,
+               "solid_for_step": shape is not None,
+
                "envelope_volume_check_mm3": round(math.pi * (od / 2.0) ** 2 * L, 4),
                "conductors": n_cond,
                "mass_copper_g": round(m_cu, 4), "mass_jacket_g": round(m_pvc, 4),
@@ -274,18 +376,36 @@ def main():
                                     "at_device": e.get("device"),
                                     "adds_parts": mt.adds_parts})
         rows.append(row)
-        say("%-18s swept %-14s L %8.3f mm  vol %10.2f mm3  housings %d  mass %.3f g"
-              % (rid, how, L, vol, len(row["housings"]), m_cu + m_pvc))
+        json.dump({"$triad": 1, "kind": "harness-solids-partial",
+                   "generated_by": "sim/route3d_solids.py",
+                   "record": {"units": "mm, g", "complete": False, "cables": rows}},
+                  open(SOLIDS_OUT + ".partial", "w"), indent=1)
+        say("%-18s L %8.3f mm  vol %9.2f mm3  env %9.2f  stl %7d B  housings %d  mass %.3f g"
+            % (rid, L, vol, math.pi * (od / 2.0) ** 2 * L, stl_bytes,
+               len(row["housings"]), m_cu + m_pvc))
 
     allshapes = cable_shapes + housing_shapes
     comp = Part.Compound(allshapes)
-    Part.export([comp], os.path.join(OUTDIR, "harness.step"))
-    exported = {"harness.step": os.path.getsize(os.path.join(OUTDIR, "harness.step")),
-                "harness.stl": _export_stl(comp, os.path.join(OUTDIR, "harness.stl")),
-                "cables-only.stl": _export_stl(Part.Compound(cable_shapes),
-                                               os.path.join(OUTDIR, "cables-only.stl")),
-                "housings-only.stl": _export_stl(Part.Compound(housing_shapes),
-                                                 os.path.join(OUTDIR, "housings-only.stl"))}
+    # A RAW SHAPE EXPORTS AS AN EMPTY STEP. Measured: Part.export([compound], ...)
+    # wrote a 1 640-byte file — a valid ISO-10303-21 header with no geometry in
+    # it — for 42 solids, and raised nothing. The exporter wants DOCUMENT
+    # OBJECTS, so the compound is put in the document first and the size is
+    # checked afterwards against a floor no empty file can clear.
+    _doc = App.newDocument("harness_export")
+    _o = _doc.addObject("Part::Feature", "harness")
+    _o.Shape = comp
+    _doc.recompute()
+    _step = os.path.join(OUTDIR, "harness%s.step" % _sfx)
+    Part.export([_o], _step)
+    if os.path.getsize(_step) < 100_000:
+        raise IOError("STEP export wrote %d bytes for %d solids — that is an empty file "
+                      "with a header on it: %s" % (os.path.getsize(_step), len(allshapes), _step))
+    exported = {"harness%s.step" % _sfx: os.path.getsize(os.path.join(OUTDIR, "harness%s.step" % _sfx)),
+                "harness%s.stl" % _sfx: _write_shape_stl(comp, os.path.join(OUTDIR, "harness%s.stl" % _sfx)),
+                "cables-only%s.stl" % _sfx: _write_shape_stl(Part.Compound(cable_shapes),
+                                               os.path.join(OUTDIR, "cables-only%s.stl" % _sfx)),
+                "housings-only%s.stl" % _sfx: _write_shape_stl(Part.Compound(housing_shapes),
+                                                 os.path.join(OUTDIR, "housings-only%s.stl" % _sfx))}
     for k, v in sorted(exported.items()):
         say("exported %-20s %9d bytes" % (k, v))
     tot_L = sum(r["length_mm"] for r in rows)
@@ -317,7 +437,8 @@ def main():
                                             "size is checked",
                "stl_deviation_mm": STL_DEVIATION_MM,
                "cables": rows}}
-    json.dump(doc, open(R + "/out/wiring/solids.json", "w"), indent=1)
+    json.dump(doc, open(SOLIDS_OUT, "w"), indent=1)
+    say("wrote", SOLIDS_OUT)
     say("\n%d cables swept, %d housings placed, %d solids; routed %.3f mm, nominal mass %.3f g; %.1f s"
           % (len(rows), n_housing, len(allshapes), tot_L, tot_m, time.time() - t0))
 
