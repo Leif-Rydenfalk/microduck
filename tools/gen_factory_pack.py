@@ -573,6 +573,17 @@ for r in sorted(print_rows, key=lambda x: x["id"]):
 A.append('</table>')
 if SL.get("flags"):
     A.append('<p class="lede">Slicing flags carried forward: %s</p>' % E(" · ".join(SL["flags"])))
+    # STAT THE FLAG, do not repeat it: the flag line is prose in the data file and
+    # prose goes stale. Counting the rows instead (2026-09-04) gives 12 parts with a
+    # slicer_warning, while the flag sentence says 11 — the twelfth is
+    # microduck-yaw-roll-motion, which is also the one STL that is not watertight.
+    warn = [p["slug"] for p in SL.get("parts", []) if p.get("slicer_warning")]
+    claim = re.search(r"(\d+) parts carry slicer support warnings", " ".join(SL["flags"]))
+    if claim and int(claim.group(1)) != len(warn):
+        A.append('<p class="lede"><b>Correction, measured this hour:</b> that flag sentence says %s parts carry a slicer support warning; counting the rows gives <b>%d</b> (%s). The extra one is the row whose warning is not only about supports. Plan supports for %d parts, not %s.</p>'
+                 % (E(claim.group(1)), len(warn), E(", ".join(warn)), len(warn), E(claim.group(1))))
+        A.append('<p class="lede zh">本小时实测更正：该提示句称有 %s 个零件存在切片支撑警告；逐行计数为 <b>%d</b> 个。请按 %d 个零件准备支撑，而非 %s 个。</p>'
+                 % (E(claim.group(1)), len(warn), len(warn), E(claim.group(1))))
 
 # 3.3 bom
 A.append('<h3>3.3 Bought parts · 外购件</h3>')
