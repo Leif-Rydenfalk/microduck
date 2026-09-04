@@ -1,0 +1,555 @@
+#!/usr/bin/env python3
+"""gen_workplan.py — WORK-BREAKDOWN.html, the answer to "what needs to be done".
+
+    python3 tools/gen_workplan.py
+
+Reads, never invents:
+    out/factory/readiness.json          every artifact graded, with who closes it
+    out/factory/licence.json            the licence position
+    out/open/cannot-determine-harvest.json   the open unknowns
+
+Leif, 2026-09-04, verbatim: "We have a factory and 10 engineers to put on this.
+So just send the documents of what needs to be done."
+
+Every parcel is sized for ONE engineer and carries a deliverable, an ACCEPTANCE
+TEST that is a number or a command exit code (never an adjective), what it
+depends on, and what it unblocks. Work an agent is closing is marked IN FLIGHT
+so the factory does not duplicate it.
+
+EFFORT IS NOT INVENTED. No engineer-day estimate is stated, because this
+workshop has never built a physical unit and has no measured time-per-item for
+any of this work. Each parcel states its QUANTITY (the count of items) and its
+UNIT OF WORK instead, which is checkable; the schedule is the factory's to set
+from its own rates. That is a CANNOT DETERMINE, stated rather than guessed.
+"""
+import datetime
+import html
+import json
+import os
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.dirname(HERE)
+OUT_HTML = os.path.join(ROOT, "WORK-BREAKDOWN.html")
+OUT_JSON = os.path.join(ROOT, "out", "factory", "workplan.json")
+
+
+def J(rel, default=None):
+    p = os.path.join(ROOT, rel)
+    if not os.path.exists(p):
+        return default
+    with open(p, encoding="utf-8") as f:
+        return json.load(f)
+
+
+def E(s):
+    return html.escape(str(s if s is not None else ""))
+
+
+RD = J("out/factory/readiness.json")
+if RD is None:
+    raise SystemExit("out/factory/readiness.json missing — run tools/gen_readiness.py first")
+LIC = J("out/factory/licence.json", {})
+HARVEST = J("out/open/cannot-determine-harvest.json", [])
+
+rows = RD["rows"]
+summary = RD["summary"]
+in_flight = RD.get("in_flight", [])
+
+
+def sel(cls=None, closer=None, grade=None):
+    out = []
+    for r in rows:
+        if cls is not None and r["class"] != cls:
+            continue
+        if closer is not None and r.get("closer") != closer:
+            continue
+        if grade is not None and r.get("grade") != grade:
+            continue
+        out.append(r)
+    return out
+
+
+def ids(rs, n=None):
+    v = [r["id"] for r in rs]
+    return v if n is None else v[:n]
+
+
+# ---------------------------------------------------------------- the parcels
+# Each parcel: one engineer, one deliverable, one acceptance test that is a
+# number or a command. `needs` says what it cannot be done without.
+TRACKS = []
+
+
+def track(num, title_en, title_zh, why_en, why_zh, parcels):
+    TRACKS.append(dict(num=num, title_en=title_en, title_zh=title_zh,
+                       why_en=why_en, why_zh=why_zh, parcels=parcels))
+
+
+def P(pid, title_en, title_zh, deliverable, acceptance, qty, unit,
+      depends="none — can start on day one", unblocks="", needs="desk",
+      evidence="", state="OPEN"):
+    return dict(id=pid, title_en=title_en, title_zh=title_zh,
+                deliverable=deliverable, acceptance=acceptance, qty=qty,
+                unit=unit, depends=depends, unblocks=unblocks, needs=needs,
+                evidence=evidence, state=state)
+
+
+# --- Track 1: metrology on a physical sample -------------------------------
+triad_human = sel("triad", "human")
+track(
+    1, "Metrology on a physical Microduck",
+    "对实物 Microduck 进行测量",
+    "36 shelf records cannot be graded from published data alone — they need a "
+    "real unit on a bench. This is the single largest block of human work and "
+    "it unblocks the most other parcels, so it should start first.",
+    "36 项零件记录无法仅凭公开资料判定，必须在工作台上测量实物。这是人工工作量最大的一块，"
+    "解锁的后续工作也最多，应最先开始。",
+    [
+        P("M-1", "Buy or borrow one retail Microduck and log it in",
+          "购入或借用一台零售版 Microduck 并登记",
+          "A photographic teardown log: every part as removed, with its position, "
+          "orientation and fasteners, into images/teardown/ with a numbered index.",
+          "Every one of the 15 servos, 3 boards, battery and both shells appears "
+          "in at least one numbered photograph, and the index lists them all. "
+          "Count photographs against the part list: no part unphotographed.",
+          1, "unit", needs="a purchased retail unit (SPENDING — Leif approves)",
+          unblocks="every other parcel in this track, plus T2-1 and T5-1",
+          evidence="SPEC.md:24 — Pollen's mechanical CAD, BOM and PCBs are not published"),
+        P("M-2", "Caliper every printed part against our model",
+          "用卡尺测量每个打印件并与模型比对",
+          "out/factory/measure/caliper.json: measured L×W×H and every feature "
+          "dimension per part, to 0.01 mm, beside our modelled value and the delta.",
+          "Every part in the 30-part print list has a measured row; each row "
+          "carries an instrument reading, not a modelled number. Deltas over "
+          "1.5 mm are listed separately as findings.",
+          30, "parts", depends="M-1", needs="calipers, a real unit",
+          unblocks="closes the head-geometry CANNOT DETERMINE and the 1.5 mm rebuild rule",
+          evidence="HEAD-RECONSTRUCTION.html — photo scale uncertainty ≈4 % ≈5 mm on a 122 mm head"),
+        P("M-3", "Measure the head shell and eye ring to settle the +9.1 % ratio",
+          "测量头壳与眼圈，判定 +9.1 % 比例差",
+          "A verdict on which of {eye ring OD, head width} deviates from our mesh, "
+          "with the measured mm and the instrument.",
+          "Ring OD and shell-rim width both measured to 0.1 mm; the front-view "
+          "ratio recomputed from measurements rather than photographs; the "
+          "CANNOT DETERMINE in HEAD-RECONSTRUCTION.html is replaced by a verdict.",
+          2, "dimensions", depends="M-1", needs="calipers, a real unit",
+          unblocks="head tooling; the biggest open geometric question",
+          evidence="HEAD-RECONSTRUCTION.html §1 — front-view ring/width ratio +9.1 %"),
+        P("M-4", "Identify every unidentified component from the teardown",
+          "通过拆解确认所有未知元器件",
+          "A part number, package and vendor for the speaker, microphone, ToF "
+          "generation, NFC front-end, camera module and its ribbon.",
+          "Each line that currently reads CANNOT DETERMINE in "
+          "ELECTRONICS-DATASHEET.html carries a marking read off the physical "
+          "part, photographed.",
+          6, "components", depends="M-1", needs="a real unit, magnification",
+          unblocks="T3 sourcing lines and the electronics BOM",
+          evidence="readiness.json — 10 of 32 bought lines are CANNOT DETERMINE"),
+        P("M-5", "Measure the servo supply voltage on a running unit",
+          "测量运行中整机的舵机供电电压",
+          "A meter reading of servo VDD with the robot standing and walking, "
+          "against the XL330-M288-T published 3.7–6.0 V band.",
+          "A number in volts at both states, with the meter and the probe point "
+          "named. Either the servos see the raw 2S pack (6.6–8.4 V) or they do "
+          "not; the answer is recorded either way.",
+          1, "measurement", depends="M-1", needs="a multimeter, a running unit",
+          unblocks="the entire power-path design; the most consequential electrical unknown",
+          evidence="workflows/RUNNING.md finding 1 — the most important electrical finding in the project"),
+        P("M-6", "Grade the 36 shelf records that need the sample",
+          "根据实物判定 36 项零件记录",
+          "Each of the 36 triad part folders updated with the measured frame or "
+          "dimension it was missing, and re-graded.",
+          "`bin/triad check --all` reports fewer CANNOT DETERMINE than 47; every "
+          "row that changes cites the caliper reading that changed it.",
+          36, "part records", depends="M-2, M-4",
+          needs="the measurements from M-2 and M-4",
+          unblocks="the shelf reaching a defensible verdict",
+          evidence="readiness.json summary.triad_refs — 69 checked, 17 pass, 47 CANNOT DETERMINE"),
+    ])
+
+# --- Track 2: process capability -------------------------------------------
+track(
+    2, "Process capability and the tolerance basis",
+    "工艺能力与公差基准",
+    "Every structural safety factor and every fit in this design rests on an "
+    "assumed filament strength and an assumed printed dimensional band. Neither "
+    "has been measured. Until the factory states its own numbers, the whole "
+    "tolerance stack is provisional.",
+    "本设计的所有结构安全系数与配合公差，都建立在假设的材料强度与打印尺寸带上，二者均未实测。"
+    "在工厂给出自有数据前，整个公差链条都只是暂定值。",
+    [
+        P("C-1", "State the process capability for each process you would use",
+          "给出各拟用工艺的过程能力",
+          "Per process (FDM, SLA, injection moulding, CNC): the tolerance you "
+          "hold in production, the surface finish, and the minimum wall.",
+          "A number per process with the standard it is quoted against (e.g. "
+          "ISO 2768 class, or a Cpk with the sample size). 'As printed' is not "
+          "a tolerance and is rejected.",
+          4, "processes", needs="factory process data",
+          unblocks="every drawing's tolerance block; the joint tolerance stack",
+          evidence="docs/MANUFACTURING-REQUIREMENTS.md A4 — every dimension carries a tolerance from a stated basis"),
+        P("C-2", "Print and measure a tolerance coupon on your machines",
+          "在贵厂设备上打印并测量公差试片",
+          "A coupon carrying the feature set this design uses — Ø2.2 clearance, "
+          "Ø4.4 counterbore, Ø1.6 tap pilot, a 2 mm rib, a Ø16 boss and a Ø22 "
+          "bore — printed and measured on your machines, in your material.",
+          "Measured versus nominal for each feature, 5 specimens, with mean and "
+          "spread. This replaces the CANNOT DETERMINE that currently blocks the "
+          "whole tolerance stack.",
+          6, "features × 5 specimens", needs="a printer, calipers, material",
+          unblocks="every press fit and every bearing seat verdict",
+          evidence="out/open — 'This workshop's own printed dimensional band (the whole tolerance stack rests on it)'"),
+        P("C-3", "Provide the material datasheet for the filament you would ship",
+          "提供拟用耗材的材料数据表",
+          "Tensile and yield strength in the printed Z (interlayer) direction, "
+          "not just XY, with the print parameters they were measured at.",
+          "A datasheet page or a test report. If only XY data exists, say so — "
+          "our FEA currently derates an assumed figure and that derating must be "
+          "replaced by a measured one.",
+          2, "materials (PLA, TPU)", needs="factory material stock data",
+          unblocks="every safety factor in STRUCTURAL.html",
+          evidence="STRUCTURAL.html — 'Strength of the fitted filament in the printed orientation (every SF rests on it)'"),
+    ])
+
+# --- Track 3: sourcing ------------------------------------------------------
+bought_human = sel("bought", "human")
+track(
+    3, "Sourcing the unbuyable lines",
+    "解决无法采购的物料",
+    "19 of 32 bought lines are ready. The rest are not a paperwork problem: the "
+    "compute board's stated SKU does not exist in the vendor catalogue, and the "
+    "dominant cost line has no published volume price at any quantity.",
+    "32 项外购物料中 19 项已就绪。其余并非文书问题：主控板所述型号在厂商目录中并不存在，"
+    "而成本占比最大的物料在任何数量下都没有公开的批量价格。",
+    [
+        P("S-1", "Get a ROBOTIS OEM quote for the XL330-M288-T",
+          "取得 ROBOTIS XL330-M288-T 的 OEM 报价",
+          "A written quote at 225 / 1 500 / 15 000 units (15 servos × 15 / 100 / "
+          "1000 robots), with lead time and MOQ.",
+          "A quotation document. No distributor publishes a volume break for "
+          "this part, so this is the single biggest lever on unit cost and only "
+          "a quote can answer it.",
+          3, "quantity tiers", needs="a supplier relationship (CONTACT — factory does this)",
+          unblocks="the entire unit-cost model at volume",
+          evidence="readiness.json — servos are 77 % of electronics cost at $358.50 of $465.64"),
+        P("S-2", "Resolve the compute board",
+          "确定主控板型号",
+          "Either the real SKU fitted in a retail unit, or a chosen replacement "
+          "with its mechanical and electrical differences listed.",
+          "A board that can actually be ordered, in stock, with a lead time. "
+          "The 1 GB / 32 GB combination stated in the press kit is not a Radxa "
+          "catalogue SKU and every 1 GB variant read on 2026-09-02 was sold out.",
+          1, "decision", depends="M-1 teardown confirms what is fitted",
+          needs="distributor contact, and the teardown",
+          unblocks="the compute mount, the HAT connector layout, the power budget",
+          evidence="spec/sourcing.json line B3 — 5 offers, 0 with a stated lead time"),
+        P("S-3", "Close the remaining unpriced and lead-time-less lines",
+          "补齐其余物料的价格与交期",
+          "A priced offer with a lead time for every bought line that lacks one.",
+          "Zero lines in spec/sourcing.json with no priced offer; zero with no "
+          "lead time. Currently 4 lines have no priced offer and 11 have no "
+          "stated lead time.",
+          15, "lines", needs="distributor contact",
+          unblocks="a defensible unit cost and a build schedule",
+          evidence="readiness.json summary.bought_gaps"),
+    ])
+
+# --- Track 4: custom boards -------------------------------------------------
+track(
+    4, "The three custom circuit boards",
+    "三块自制电路板",
+    "Pollen publishes no design files for the Robot HAT, the IMU-to-Dynamixel "
+    "board or the battery contact board. Our reconstruction of the HAT fails its "
+    "own DRC and is a footprint-accurate stand-in, not a manufacturable copy.",
+    "Pollen 未公开 Robot HAT、IMU 转 Dynamixel 板与电池触点板的设计文件。"
+    "我们复原的 HAT 未通过自身 DRC，只是尺寸相符的替代件，并非可制造的复制品。",
+    [
+        P("B-1", "Reverse-engineer the three boards from the physical samples",
+          "从实物逆向三块电路板",
+          "A schematic per board with every component and every net, traced from "
+          "the board itself.",
+          "Every net traceable end to end; every component with a marking read "
+          "off the part. The two currently-guessed parts — the Dynamixel "
+          "half-duplex transceiver and the 2S→5V regulator — are identified, "
+          "not inferred.",
+          3, "boards", depends="M-1", needs="the physical boards, magnification, a meter",
+          unblocks="all fabrication; nothing ships without these",
+          evidence="PCB-PACKAGE.html — Robot HAT reconstruction fails its own DRC"),
+        P("B-2", "Lay out and fabricate the banana battery-contact board",
+          "设计并打样电池触点板",
+          "Gerbers, drill, pick-and-place and a BOM for the simplest of the three.",
+          "A DRC-clean board and five fabricated samples that fit the measured "
+          "pocket. This board is passive — VBAT and GND only — so it is the "
+          "fastest win of the three.",
+          1, "board", depends="B-1", needs="PCB fab",
+          unblocks="the power path; a buildable prototype",
+          evidence="workflows/RUNNING.md — 'the banana contact board is passive and is ~1 day of work after one measurement session'"),
+        P("B-3", "Lay out and fabricate the Robot HAT and the IMU board",
+          "设计并打样 Robot HAT 与 IMU 板",
+          "Gerbers, drill, pick-and-place, BOM and assembly drawings for both.",
+          "DRC clean with zero fails (ours currently has 10), the 1.8 V codec "
+          "rail terminated rather than dead-ending on a test point, and five "
+          "assembled samples that power up.",
+          2, "boards", depends="B-1", needs="PCB fab and assembly",
+          unblocks="a working prototype",
+          evidence="PCB-PACKAGE.html — 10 DRC fails; DVDD dead-ends on TP1"),
+    ])
+
+# --- Track 5: DFM review ----------------------------------------------------
+track(
+    5, "DFM review and the print files",
+    "可制造性审查与打印文件",
+    "18 of 30 print files are ready. The rest are vendor simulation meshes that "
+    "carry no manufacturable dimensions, and 22 of the 30 are under a "
+    "non-commercial licence that forbids selling what is printed from them.",
+    "30 个打印文件中 18 个已就绪。其余为供应商仿真网格，不含可制造尺寸；"
+    "且其中 22 个受非商业许可限制，不得用于销售。",
+    [
+        P("D-1", "DFM review every part against your processes",
+          "按贵厂工艺对每个零件做可制造性审查",
+          "Per part: what you would change to make it manufacturable, with the "
+          "reason and the cost or cycle-time impact.",
+          "A written finding per part, or an explicit 'no change needed'. "
+          "Silence on a part is not an answer.",
+          30, "parts", depends="C-1", needs="factory process knowledge",
+          unblocks="the production geometry; possibly a re-model",
+          evidence="MANUFACTURING-PLAYBOOK.html"),
+        P("D-2", "Quote injection moulding against the printed baseline",
+          "报价注塑方案并与打印方案比较",
+          "Tooling cost, tooling lead time, per-part price and MOQ for the shells, "
+          "against our printed cost, so the break-even quantity is a real number.",
+          "A quote per shell part. Our current break-even analysis uses published "
+          "list prices, not your rates, so it is indicative only.",
+          8, "candidate parts", needs="factory tooling quotes",
+          unblocks="the volume decision",
+          evidence="docs/PRODUCTION.md — cost at 1/10/100/1000"),
+    ])
+
+# --- Track 6: assembly and test ---------------------------------------------
+track(
+    6, "Assembly, fixtures and end-of-line test",
+    "装配、工装与下线测试",
+    "The assembly sequence and the test plan are written but have never been "
+    "executed by a person. The first build is the test of the paperwork.",
+    "装配顺序与测试方案已编写，但从未有人实际执行。首台装机就是对全部文件的检验。",
+    [
+        P("A-1", "Build one unit from the paper alone",
+          "仅依据文件装配一台整机",
+          "A build log recording every step where the document was wrong, "
+          "ambiguous, or assumed knowledge not on the page.",
+          "A working unit, or a log of exactly where it stopped. Every defect "
+          "found becomes a correction to MANUAL.md. This is the single best test "
+          "of whether this pack is real.",
+          1, "unit", depends="B-2, B-3, the printed parts",
+          needs="all parts, a bench",
+          unblocks="everything; it validates or refutes the whole pack",
+          evidence="ce-assemblies/microduck/current/manual/MANUAL.md"),
+        P("A-2", "Specify and build the assembly fixtures",
+          "设计并制作装配工装",
+          "The jigs the line needs: bearing press, servo-horn alignment, "
+          "harness form board.",
+          "Each fixture drawn and made, with the step it serves named. Our jig "
+          "drawings exist but have never been made or used.",
+          6, "fixtures", depends="A-1", needs="a workshop",
+          unblocks="repeatable assembly",
+          evidence="MANUFACTURING-PLAYBOOK.html — six assembly jigs with verified A3 drawings"),
+        P("A-3", "Run the end-of-line test plan on the built unit",
+          "对整机执行下线测试方案",
+          "A completed test record against TEST-PLAN.html's gates.",
+          "Every gate passed or failed with the measured value. The walk "
+          "acceptance thresholds come from simulation and have never been "
+          "checked against hardware — that comparison is the deliverable.",
+          1, "unit", depends="A-1", needs="a built unit, a test bench",
+          unblocks="the acceptance criteria becoming real",
+          evidence="TEST-PLAN.html — the only artifact class currently graded READY"),
+    ])
+
+# --- Track 7: licence -------------------------------------------------------
+track(
+    7, "The licence position",
+    "许可与授权",
+    "This design is reverse-engineered from Pollen Robotics' published assets. "
+    "22 of the 30 print files are their meshes under a non-commercial licence. "
+    "This must be settled before anyone cuts tooling.",
+    "本设计逆向自 Pollen Robotics 公开资料。30 个打印文件中 22 个是其网格，"
+    "且受非商业许可限制。开模之前必须先解决此问题。",
+    [
+        P("L-1", "Settle whether units may be sold",
+          "确认整机是否可销售",
+          "A written position on manufacturing and selling units derived from "
+          "CC BY-SA-NC assets, and on what is ours versus upstream.",
+          "A decision with the clause it rests on. Our reading: prototypes may "
+          "be printed, units may NOT be sold, and only the 8 parametric rebuilds "
+          "are ours. That reading is not legal advice.",
+          1, "decision", needs="counsel, or a licence enquiry to Pollen (Leif sends)",
+          unblocks="tooling, and any commercial plan",
+          evidence="LICENCE-POSITION.html; microduck_rl README §License"),
+        P("L-2", "Replace every non-commercial mesh with an owned rebuild",
+          "用自研重建件替换全部非商业网格",
+          "22 vendor meshes replaced by parametric parts we own, each graded "
+          "against the reference to the 1.0 mm p95 rule.",
+          "`out/verify/mech_dims.json` shows a rebuild for every part, each "
+          "passing the rebuild protocol. 8 of 30 are done today.",
+          22, "parts", depends="L-1 (only if selling is the goal), M-2",
+          needs="CAD work — an agent can do this, given the measurements",
+          unblocks="a commercially clean product",
+          evidence="readiness.json summary.print_licence — 22 vendor meshes, 8 ours"),
+    ])
+
+# ------------------------------------------------------------------ in flight
+IN_FLIGHT_PARCELS = [
+    dict(id="WF-SHEETS", en="Drawing sheets rebuilt to the A2/A3/A4 standard: "
+         "no tessellation texture, ≥6 shaded renders per sheet, ≥85 % sheet "
+         "coverage, ≥3.5 mm text, and 100 % dimension coverage proved by "
+         "bin/sheetcheck", zh="按 A2/A3/A4 标准重建图纸",
+         count=f"{summary['drawing']['not_yet']} sheets currently NOT YET"),
+    dict(id="WF-FASTENERS", en="Every screw, insert, washer and ball joint "
+         "measured off the geometry and placed into the assembly through a "
+         "connection, then audited so no hole is unaccounted for",
+         zh="测量并装入全部紧固件",
+         count=f"{summary['bom_fasteners']['bom_rows']} BOM rows, "
+               f"{summary['bom_fasteners']['fastener_rows']} fasteners, "
+               f"{summary['bom_fasteners']['hole_census']} holes"),
+    dict(id="WF-UNKNOWNS", en="The open CANNOT DETERMINE items researched to a "
+         "verdict or narrowed to a named physical test", zh="逐项解决未定项",
+         count=f"{summary['unknowns']} items"),
+    dict(id="WF-POSE", en="Photo pose-matching as a mechanical feasibility "
+         "proof, and the wiring made visible in our renders",
+         zh="姿态比对与线束可视化", count="per reference photograph"),
+    dict(id="WF-HARNESS", en="Cables and connectors as real shelf parts, routed "
+         "as solids in the assembly, with cut lengths and range-of-motion slack",
+         zh="线束进入 CAD", count="23 cables"),
+]
+
+# ---------------------------------------------------------------------- write
+now = datetime.datetime.now().astimezone().replace(microsecond=0).isoformat()
+n_parcels = sum(len(t["parcels"]) for t in TRACKS)
+
+CSS = """.zh{font-family:var(--sans);font-size:12px;color:var(--ink-2);display:block}
+table{border-collapse:collapse;width:100%;table-layout:fixed;font-size:12.5px;margin:8px 0 18px;overflow-wrap:anywhere}
+th{white-space:normal !important;padding:5px 6px;background:var(--head);font-family:var(--sans);font-size:12px}
+th,td{border-bottom:1px solid var(--hair);padding:5px 6px;text-align:left;vertical-align:top}
+td.m{font-family:var(--mono);font-size:11.5px;word-break:break-all}
+.g{font-family:var(--sans);font-weight:600;font-size:11px}
+.g.ok{color:var(--ready)}.g.no{color:var(--no)}.g.cd{color:var(--cd)}
+.front{border:2px solid var(--no);padding:12px 16px;margin:18px 0}
+.front h2{margin:0 0 6px;border:none;font-size:20px}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+.trk{border-top:2px solid var(--rule);margin:34px 0 0;padding-top:10px}
+.parcel{border-left:2px solid var(--hair);padding:2px 0 2px 14px;margin:16px 0}
+.parcel h4{margin:0 0 4px;font-size:15px}
+.pid{font-family:var(--mono);font-size:11.5px;color:var(--accent);margin-right:8px}
+.f{font-family:var(--sans);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2)}
+.inflight{color:var(--cd);font-family:var(--sans);font-weight:600;font-size:11px}"""
+
+h = []
+h.append("<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\">")
+h.append("<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">")
+h.append("<title>Work breakdown — 工作分解</title>")
+h.append("<link rel=\"stylesheet\" href=\"tools/doc.css\">")
+h.append(f"<style>{CSS}</style></head><body><div class=\"wrap\">")
+h.append("<p class=\"backlink\"><a href=\"INDEX.html\">← Document index</a></p>")
+h.append("<header class=\"hero\"><p class=\"eyebrow\">Microduck · factory pack · 工厂交付包</p>")
+h.append("<h1>What needs to be done <span class=\"zh\" style=\"font-size:22px;display:inline\">工作分解</span></h1>")
+h.append("<p class=\"sub\">Every open piece of work, divided into parcels sized for one "
+         "engineer. Each parcel names its deliverable, the acceptance test that says it is "
+         "done, what it depends on and what it unblocks. Work that a software agent is "
+         "closing is marked IN FLIGHT so nobody does it twice.</p>")
+h.append("<p class=\"sub zh\">全部待办工作，按单人可承担的粒度拆分。每个工作包给出交付物、"
+         "判定完成的验收测试、依赖项与解锁项。软件代理正在处理的工作标注为“进行中”，避免重复。</p>")
+h.append(f"<div class=\"rev\"><span>MD-FACT-WBS-001 · Rev A</span><span>generated {E(now)}</span>"
+         f"<span>tools/gen_workplan.py</span></div></header>")
+
+# honest state
+h.append("<div class=\"front\"><h2>Read this before assigning anyone · 分配任务前请先读这里</h2>")
+h.append("<div class=\"statbar\">")
+h.append(f"<div class=\"stat\"><b class=\"no\">{summary['drawing']['not_yet']} / {summary['drawing']['total']}</b>"
+         "<span>drawing sheets NOT YET<br>图纸尚未就绪</span></div>")
+h.append(f"<div class=\"stat\"><b class=\"no\">{summary['bom_fasteners']['fastener_rows']}</b>"
+         f"<span>fasteners in the assembly, against {summary['bom_fasteners']['hole_census']} holes<br>装配体中的紧固件数</span></div>")
+h.append(f"<div class=\"stat\"><b class=\"no\">{summary['unknowns']}</b><span>open CANNOT DETERMINE<br>未定项</span></div>")
+h.append(f"<div class=\"stat\"><b class=\"no\">0</b><span>physical units ever built<br>已制造实物台数</span></div>")
+h.append("</div>")
+h.append("<p><b>No physical Microduck has ever been built or measured by us.</b> Every "
+         "number in this repository comes from Pollen Robotics' published simulation assets, "
+         "from product photographs, or from our own simulation. That is why the first track "
+         "below is metrology on a real unit: it unblocks more work than anything else.</p>")
+h.append("<p class=\"zh\"><b>我们从未制造或测量过实物 Microduck。</b>本仓库中的每个数据都来自 "
+         "Pollen Robotics 公开的仿真资料、产品照片或我们自己的仿真。因此下面第一条工作线就是"
+         "对实物进行测量：它解锁的后续工作最多。</p>")
+h.append("</div>")
+
+# TOC
+h.append("<nav class=\"toc\"><ol>")
+for t in TRACKS:
+    h.append(f"<li><a href=\"#t{t['num']}\">Track {t['num']} · {E(t['title_en'])} · {E(t['title_zh'])} "
+             f"({len(t['parcels'])})</a></li>")
+h.append("<li><a href=\"#inflight\">In flight — do not assign · 进行中，请勿分配</a></li>")
+h.append("<li><a href=\"#effort\">On effort estimates · 关于工时估算</a></li>")
+h.append("</ol></nav>")
+
+h.append(f"<p class=\"lede\">{n_parcels} parcels across {len(TRACKS)} tracks. Tracks 1 and 2 "
+         "gate most of the others; tracks 3, 4, 5 and 7 can start on day one in parallel.</p>")
+
+for t in TRACKS:
+    h.append(f"<section class=\"trk\" id=\"t{t['num']}\">")
+    h.append(f"<h2>Track {t['num']} · {E(t['title_en'])} <span class=\"zh\" "
+             f"style=\"display:inline;font-size:15px\">{E(t['title_zh'])}</span></h2>")
+    h.append(f"<p>{E(t['why_en'])}</p><p class=\"zh\">{E(t['why_zh'])}</p>")
+    for p in t["parcels"]:
+        h.append("<div class=\"parcel\">")
+        h.append(f"<h4><span class=\"pid\">{E(p['id'])}</span>{E(p['title_en'])} "
+                 f"<span class=\"zh\" style=\"display:inline\">{E(p['title_zh'])}</span></h4>")
+        h.append("<table><colgroup><col style=\"width:20%\"><col></colgroup><tbody>")
+        h.append(f"<tr><th>Deliverable 交付物</th><td>{E(p['deliverable'])}</td></tr>")
+        h.append(f"<tr><th>Acceptance test 验收测试</th><td>{E(p['acceptance'])}</td></tr>")
+        h.append(f"<tr><th>Quantity 数量</th><td class=\"num\" style=\"text-align:left\">"
+                 f"{E(p['qty'])} {E(p['unit'])}</td></tr>")
+        h.append(f"<tr><th>Depends on 依赖</th><td>{E(p['depends'])}</td></tr>")
+        if p["unblocks"]:
+            h.append(f"<tr><th>Unblocks 解锁</th><td>{E(p['unblocks'])}</td></tr>")
+        h.append(f"<tr><th>Needs 需要</th><td>{E(p['needs'])}</td></tr>")
+        if p["evidence"]:
+            h.append(f"<tr><th>Evidence 依据</th><td class=\"m\">{E(p['evidence'])}</td></tr>")
+        h.append("</tbody></table></div>")
+    h.append("</section>")
+
+h.append("<section class=\"trk\" id=\"inflight\"><h2>In flight — do not assign "
+         "<span class=\"zh\" style=\"display:inline;font-size:15px\">进行中，请勿分配</span></h2>")
+h.append("<p>Software agents are closing these now. They are listed so the factory does not "
+         "duplicate them, and so that when they land the parcels above can be re-cut.</p>")
+h.append("<p class=\"zh\">以下工作由软件代理正在处理，列出以避免重复；完成后上述工作包将重新划分。</p>")
+h.append("<table><colgroup><col style=\"width:14%\"><col><col style=\"width:22%\"></colgroup>")
+h.append("<thead><tr><th>id</th><th>What 内容</th><th>Scale 规模</th></tr></thead><tbody>")
+for f in IN_FLIGHT_PARCELS:
+    h.append(f"<tr><td class=\"m\">{E(f['id'])}</td><td>{E(f['en'])}<span class=\"zh\">{E(f['zh'])}</span></td>"
+             f"<td class=\"m\">{E(f['count'])}</td></tr>")
+h.append("</tbody></table></section>")
+
+h.append("<section class=\"trk\" id=\"effort\"><h2>On effort estimates "
+         "<span class=\"zh\" style=\"display:inline;font-size:15px\">关于工时估算</span></h2>")
+h.append("<p><b>No engineer-day estimate is given, deliberately.</b> This workshop has never "
+         "built a physical unit and has no measured time-per-item for any of this work, so any "
+         "day figure would be invented. Each parcel states its quantity and its unit of work "
+         "instead, which the factory can price against its own rates. This is a stated CANNOT "
+         "DETERMINE, not an oversight.</p>")
+h.append("<p class=\"zh\"><b>本文件有意不给出人天估算。</b>我们从未制造过实物，也没有任何一项工作的"
+         "实测单件工时，任何天数都将是臆测。每个工作包改为给出数量与工作单位，由工厂按自身工时定额报价。"
+         "这是明确标注的“无法判定”，而非疏漏。</p></section>")
+
+h.append("<p class=\"backlink\" style=\"margin-top:40px\"><a href=\"INDEX.html\">← Document index</a> · "
+         "<a href=\"out/factory/readiness.html\">Readiness audit</a> · "
+         "<a href=\"LICENCE-POSITION.html\">Licence position</a></p>")
+h.append("</div></body></html>")
+
+with open(OUT_HTML, "w", encoding="utf-8") as f:
+    f.write("\n".join(h))
+
+os.makedirs(os.path.dirname(OUT_JSON), exist_ok=True)
+with open(OUT_JSON, "w", encoding="utf-8") as f:
+    json.dump(dict(generated=now, source="out/factory/readiness.json",
+                   tracks=TRACKS, in_flight=IN_FLIGHT_PARCELS,
+                   parcels=n_parcels), f, indent=1, ensure_ascii=False)
+
+print(f"wrote {OUT_HTML} ({os.path.getsize(OUT_HTML)} B) — {n_parcels} parcels, {len(TRACKS)} tracks")
+print(f"wrote {OUT_JSON}")

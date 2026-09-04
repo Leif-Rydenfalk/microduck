@@ -1,0 +1,410 @@
+{
+ "generated": "2026-09-04T17:11:59+08:00",
+ "source": "out/factory/readiness.json",
+ "tracks": [
+  {
+   "num": 1,
+   "title_en": "Metrology on a physical Microduck",
+   "title_zh": "对实物 Microduck 进行测量",
+   "why_en": "36 shelf records cannot be graded from published data alone — they need a real unit on a bench. This is the single largest block of human work and it unblocks the most other parcels, so it should start first.",
+   "why_zh": "36 项零件记录无法仅凭公开资料判定，必须在工作台上测量实物。这是人工工作量最大的一块，解锁的后续工作也最多，应最先开始。",
+   "parcels": [
+    {
+     "id": "M-1",
+     "title_en": "Buy or borrow one retail Microduck and log it in",
+     "title_zh": "购入或借用一台零售版 Microduck 并登记",
+     "deliverable": "A photographic teardown log: every part as removed, with its position, orientation and fasteners, into images/teardown/ with a numbered index.",
+     "acceptance": "Every one of the 15 servos, 3 boards, battery and both shells appears in at least one numbered photograph, and the index lists them all. Count photographs against the part list: no part unphotographed.",
+     "qty": 1,
+     "unit": "unit",
+     "depends": "none — can start on day one",
+     "unblocks": "every other parcel in this track, plus T2-1 and T5-1",
+     "needs": "a purchased retail unit (SPENDING — Leif approves)",
+     "evidence": "SPEC.md:24 — Pollen's mechanical CAD, BOM and PCBs are not published",
+     "state": "OPEN"
+    },
+    {
+     "id": "M-2",
+     "title_en": "Caliper every printed part against our model",
+     "title_zh": "用卡尺测量每个打印件并与模型比对",
+     "deliverable": "out/factory/measure/caliper.json: measured L×W×H and every feature dimension per part, to 0.01 mm, beside our modelled value and the delta.",
+     "acceptance": "Every part in the 30-part print list has a measured row; each row carries an instrument reading, not a modelled number. Deltas over 1.5 mm are listed separately as findings.",
+     "qty": 30,
+     "unit": "parts",
+     "depends": "M-1",
+     "unblocks": "closes the head-geometry CANNOT DETERMINE and the 1.5 mm rebuild rule",
+     "needs": "calipers, a real unit",
+     "evidence": "HEAD-RECONSTRUCTION.html — photo scale uncertainty ≈4 % ≈5 mm on a 122 mm head",
+     "state": "OPEN"
+    },
+    {
+     "id": "M-3",
+     "title_en": "Measure the head shell and eye ring to settle the +9.1 % ratio",
+     "title_zh": "测量头壳与眼圈，判定 +9.1 % 比例差",
+     "deliverable": "A verdict on which of {eye ring OD, head width} deviates from our mesh, with the measured mm and the instrument.",
+     "acceptance": "Ring OD and shell-rim width both measured to 0.1 mm; the front-view ratio recomputed from measurements rather than photographs; the CANNOT DETERMINE in HEAD-RECONSTRUCTION.html is replaced by a verdict.",
+     "qty": 2,
+     "unit": "dimensions",
+     "depends": "M-1",
+     "unblocks": "head tooling; the biggest open geometric question",
+     "needs": "calipers, a real unit",
+     "evidence": "HEAD-RECONSTRUCTION.html §1 — front-view ring/width ratio +9.1 %",
+     "state": "OPEN"
+    },
+    {
+     "id": "M-4",
+     "title_en": "Identify every unidentified component from the teardown",
+     "title_zh": "通过拆解确认所有未知元器件",
+     "deliverable": "A part number, package and vendor for the speaker, microphone, ToF generation, NFC front-end, camera module and its ribbon.",
+     "acceptance": "Each line that currently reads CANNOT DETERMINE in ELECTRONICS-DATASHEET.html carries a marking read off the physical part, photographed.",
+     "qty": 6,
+     "unit": "components",
+     "depends": "M-1",
+     "unblocks": "T3 sourcing lines and the electronics BOM",
+     "needs": "a real unit, magnification",
+     "evidence": "readiness.json — 10 of 32 bought lines are CANNOT DETERMINE",
+     "state": "OPEN"
+    },
+    {
+     "id": "M-5",
+     "title_en": "Measure the servo supply voltage on a running unit",
+     "title_zh": "测量运行中整机的舵机供电电压",
+     "deliverable": "A meter reading of servo VDD with the robot standing and walking, against the XL330-M288-T published 3.7–6.0 V band.",
+     "acceptance": "A number in volts at both states, with the meter and the probe point named. Either the servos see the raw 2S pack (6.6–8.4 V) or they do not; the answer is recorded either way.",
+     "qty": 1,
+     "unit": "measurement",
+     "depends": "M-1",
+     "unblocks": "the entire power-path design; the most consequential electrical unknown",
+     "needs": "a multimeter, a running unit",
+     "evidence": "workflows/RUNNING.md finding 1 — the most important electrical finding in the project",
+     "state": "OPEN"
+    },
+    {
+     "id": "M-6",
+     "title_en": "Grade the 36 shelf records that need the sample",
+     "title_zh": "根据实物判定 36 项零件记录",
+     "deliverable": "Each of the 36 triad part folders updated with the measured frame or dimension it was missing, and re-graded.",
+     "acceptance": "`bin/triad check --all` reports fewer CANNOT DETERMINE than 47; every row that changes cites the caliper reading that changed it.",
+     "qty": 36,
+     "unit": "part records",
+     "depends": "M-2, M-4",
+     "unblocks": "the shelf reaching a defensible verdict",
+     "needs": "the measurements from M-2 and M-4",
+     "evidence": "readiness.json summary.triad_refs — 69 checked, 17 pass, 47 CANNOT DETERMINE",
+     "state": "OPEN"
+    }
+   ]
+  },
+  {
+   "num": 2,
+   "title_en": "Process capability and the tolerance basis",
+   "title_zh": "工艺能力与公差基准",
+   "why_en": "Every structural safety factor and every fit in this design rests on an assumed filament strength and an assumed printed dimensional band. Neither has been measured. Until the factory states its own numbers, the whole tolerance stack is provisional.",
+   "why_zh": "本设计的所有结构安全系数与配合公差，都建立在假设的材料强度与打印尺寸带上，二者均未实测。在工厂给出自有数据前，整个公差链条都只是暂定值。",
+   "parcels": [
+    {
+     "id": "C-1",
+     "title_en": "State the process capability for each process you would use",
+     "title_zh": "给出各拟用工艺的过程能力",
+     "deliverable": "Per process (FDM, SLA, injection moulding, CNC): the tolerance you hold in production, the surface finish, and the minimum wall.",
+     "acceptance": "A number per process with the standard it is quoted against (e.g. ISO 2768 class, or a Cpk with the sample size). 'As printed' is not a tolerance and is rejected.",
+     "qty": 4,
+     "unit": "processes",
+     "depends": "none — can start on day one",
+     "unblocks": "every drawing's tolerance block; the joint tolerance stack",
+     "needs": "factory process data",
+     "evidence": "docs/MANUFACTURING-REQUIREMENTS.md A4 — every dimension carries a tolerance from a stated basis",
+     "state": "OPEN"
+    },
+    {
+     "id": "C-2",
+     "title_en": "Print and measure a tolerance coupon on your machines",
+     "title_zh": "在贵厂设备上打印并测量公差试片",
+     "deliverable": "A coupon carrying the feature set this design uses — Ø2.2 clearance, Ø4.4 counterbore, Ø1.6 tap pilot, a 2 mm rib, a Ø16 boss and a Ø22 bore — printed and measured on your machines, in your material.",
+     "acceptance": "Measured versus nominal for each feature, 5 specimens, with mean and spread. This replaces the CANNOT DETERMINE that currently blocks the whole tolerance stack.",
+     "qty": 6,
+     "unit": "features × 5 specimens",
+     "depends": "none — can start on day one",
+     "unblocks": "every press fit and every bearing seat verdict",
+     "needs": "a printer, calipers, material",
+     "evidence": "out/open — 'This workshop's own printed dimensional band (the whole tolerance stack rests on it)'",
+     "state": "OPEN"
+    },
+    {
+     "id": "C-3",
+     "title_en": "Provide the material datasheet for the filament you would ship",
+     "title_zh": "提供拟用耗材的材料数据表",
+     "deliverable": "Tensile and yield strength in the printed Z (interlayer) direction, not just XY, with the print parameters they were measured at.",
+     "acceptance": "A datasheet page or a test report. If only XY data exists, say so — our FEA currently derates an assumed figure and that derating must be replaced by a measured one.",
+     "qty": 2,
+     "unit": "materials (PLA, TPU)",
+     "depends": "none — can start on day one",
+     "unblocks": "every safety factor in STRUCTURAL.html",
+     "needs": "factory material stock data",
+     "evidence": "STRUCTURAL.html — 'Strength of the fitted filament in the printed orientation (every SF rests on it)'",
+     "state": "OPEN"
+    }
+   ]
+  },
+  {
+   "num": 3,
+   "title_en": "Sourcing the unbuyable lines",
+   "title_zh": "解决无法采购的物料",
+   "why_en": "19 of 32 bought lines are ready. The rest are not a paperwork problem: the compute board's stated SKU does not exist in the vendor catalogue, and the dominant cost line has no published volume price at any quantity.",
+   "why_zh": "32 项外购物料中 19 项已就绪。其余并非文书问题：主控板所述型号在厂商目录中并不存在，而成本占比最大的物料在任何数量下都没有公开的批量价格。",
+   "parcels": [
+    {
+     "id": "S-1",
+     "title_en": "Get a ROBOTIS OEM quote for the XL330-M288-T",
+     "title_zh": "取得 ROBOTIS XL330-M288-T 的 OEM 报价",
+     "deliverable": "A written quote at 225 / 1 500 / 15 000 units (15 servos × 15 / 100 / 1000 robots), with lead time and MOQ.",
+     "acceptance": "A quotation document. No distributor publishes a volume break for this part, so this is the single biggest lever on unit cost and only a quote can answer it.",
+     "qty": 3,
+     "unit": "quantity tiers",
+     "depends": "none — can start on day one",
+     "unblocks": "the entire unit-cost model at volume",
+     "needs": "a supplier relationship (CONTACT — factory does this)",
+     "evidence": "readiness.json — servos are 77 % of electronics cost at $358.50 of $465.64",
+     "state": "OPEN"
+    },
+    {
+     "id": "S-2",
+     "title_en": "Resolve the compute board",
+     "title_zh": "确定主控板型号",
+     "deliverable": "Either the real SKU fitted in a retail unit, or a chosen replacement with its mechanical and electrical differences listed.",
+     "acceptance": "A board that can actually be ordered, in stock, with a lead time. The 1 GB / 32 GB combination stated in the press kit is not a Radxa catalogue SKU and every 1 GB variant read on 2026-09-02 was sold out.",
+     "qty": 1,
+     "unit": "decision",
+     "depends": "M-1 teardown confirms what is fitted",
+     "unblocks": "the compute mount, the HAT connector layout, the power budget",
+     "needs": "distributor contact, and the teardown",
+     "evidence": "spec/sourcing.json line B3 — 5 offers, 0 with a stated lead time",
+     "state": "OPEN"
+    },
+    {
+     "id": "S-3",
+     "title_en": "Close the remaining unpriced and lead-time-less lines",
+     "title_zh": "补齐其余物料的价格与交期",
+     "deliverable": "A priced offer with a lead time for every bought line that lacks one.",
+     "acceptance": "Zero lines in spec/sourcing.json with no priced offer; zero with no lead time. Currently 4 lines have no priced offer and 11 have no stated lead time.",
+     "qty": 15,
+     "unit": "lines",
+     "depends": "none — can start on day one",
+     "unblocks": "a defensible unit cost and a build schedule",
+     "needs": "distributor contact",
+     "evidence": "readiness.json summary.bought_gaps",
+     "state": "OPEN"
+    }
+   ]
+  },
+  {
+   "num": 4,
+   "title_en": "The three custom circuit boards",
+   "title_zh": "三块自制电路板",
+   "why_en": "Pollen publishes no design files for the Robot HAT, the IMU-to-Dynamixel board or the battery contact board. Our reconstruction of the HAT fails its own DRC and is a footprint-accurate stand-in, not a manufacturable copy.",
+   "why_zh": "Pollen 未公开 Robot HAT、IMU 转 Dynamixel 板与电池触点板的设计文件。我们复原的 HAT 未通过自身 DRC，只是尺寸相符的替代件，并非可制造的复制品。",
+   "parcels": [
+    {
+     "id": "B-1",
+     "title_en": "Reverse-engineer the three boards from the physical samples",
+     "title_zh": "从实物逆向三块电路板",
+     "deliverable": "A schematic per board with every component and every net, traced from the board itself.",
+     "acceptance": "Every net traceable end to end; every component with a marking read off the part. The two currently-guessed parts — the Dynamixel half-duplex transceiver and the 2S→5V regulator — are identified, not inferred.",
+     "qty": 3,
+     "unit": "boards",
+     "depends": "M-1",
+     "unblocks": "all fabrication; nothing ships without these",
+     "needs": "the physical boards, magnification, a meter",
+     "evidence": "PCB-PACKAGE.html — Robot HAT reconstruction fails its own DRC",
+     "state": "OPEN"
+    },
+    {
+     "id": "B-2",
+     "title_en": "Lay out and fabricate the banana battery-contact board",
+     "title_zh": "设计并打样电池触点板",
+     "deliverable": "Gerbers, drill, pick-and-place and a BOM for the simplest of the three.",
+     "acceptance": "A DRC-clean board and five fabricated samples that fit the measured pocket. This board is passive — VBAT and GND only — so it is the fastest win of the three.",
+     "qty": 1,
+     "unit": "board",
+     "depends": "B-1",
+     "unblocks": "the power path; a buildable prototype",
+     "needs": "PCB fab",
+     "evidence": "workflows/RUNNING.md — 'the banana contact board is passive and is ~1 day of work after one measurement session'",
+     "state": "OPEN"
+    },
+    {
+     "id": "B-3",
+     "title_en": "Lay out and fabricate the Robot HAT and the IMU board",
+     "title_zh": "设计并打样 Robot HAT 与 IMU 板",
+     "deliverable": "Gerbers, drill, pick-and-place, BOM and assembly drawings for both.",
+     "acceptance": "DRC clean with zero fails (ours currently has 10), the 1.8 V codec rail terminated rather than dead-ending on a test point, and five assembled samples that power up.",
+     "qty": 2,
+     "unit": "boards",
+     "depends": "B-1",
+     "unblocks": "a working prototype",
+     "needs": "PCB fab and assembly",
+     "evidence": "PCB-PACKAGE.html — 10 DRC fails; DVDD dead-ends on TP1",
+     "state": "OPEN"
+    }
+   ]
+  },
+  {
+   "num": 5,
+   "title_en": "DFM review and the print files",
+   "title_zh": "可制造性审查与打印文件",
+   "why_en": "18 of 30 print files are ready. The rest are vendor simulation meshes that carry no manufacturable dimensions, and 22 of the 30 are under a non-commercial licence that forbids selling what is printed from them.",
+   "why_zh": "30 个打印文件中 18 个已就绪。其余为供应商仿真网格，不含可制造尺寸；且其中 22 个受非商业许可限制，不得用于销售。",
+   "parcels": [
+    {
+     "id": "D-1",
+     "title_en": "DFM review every part against your processes",
+     "title_zh": "按贵厂工艺对每个零件做可制造性审查",
+     "deliverable": "Per part: what you would change to make it manufacturable, with the reason and the cost or cycle-time impact.",
+     "acceptance": "A written finding per part, or an explicit 'no change needed'. Silence on a part is not an answer.",
+     "qty": 30,
+     "unit": "parts",
+     "depends": "C-1",
+     "unblocks": "the production geometry; possibly a re-model",
+     "needs": "factory process knowledge",
+     "evidence": "MANUFACTURING-PLAYBOOK.html",
+     "state": "OPEN"
+    },
+    {
+     "id": "D-2",
+     "title_en": "Quote injection moulding against the printed baseline",
+     "title_zh": "报价注塑方案并与打印方案比较",
+     "deliverable": "Tooling cost, tooling lead time, per-part price and MOQ for the shells, against our printed cost, so the break-even quantity is a real number.",
+     "acceptance": "A quote per shell part. Our current break-even analysis uses published list prices, not your rates, so it is indicative only.",
+     "qty": 8,
+     "unit": "candidate parts",
+     "depends": "none — can start on day one",
+     "unblocks": "the volume decision",
+     "needs": "factory tooling quotes",
+     "evidence": "docs/PRODUCTION.md — cost at 1/10/100/1000",
+     "state": "OPEN"
+    }
+   ]
+  },
+  {
+   "num": 6,
+   "title_en": "Assembly, fixtures and end-of-line test",
+   "title_zh": "装配、工装与下线测试",
+   "why_en": "The assembly sequence and the test plan are written but have never been executed by a person. The first build is the test of the paperwork.",
+   "why_zh": "装配顺序与测试方案已编写，但从未有人实际执行。首台装机就是对全部文件的检验。",
+   "parcels": [
+    {
+     "id": "A-1",
+     "title_en": "Build one unit from the paper alone",
+     "title_zh": "仅依据文件装配一台整机",
+     "deliverable": "A build log recording every step where the document was wrong, ambiguous, or assumed knowledge not on the page.",
+     "acceptance": "A working unit, or a log of exactly where it stopped. Every defect found becomes a correction to MANUAL.md. This is the single best test of whether this pack is real.",
+     "qty": 1,
+     "unit": "unit",
+     "depends": "B-2, B-3, the printed parts",
+     "unblocks": "everything; it validates or refutes the whole pack",
+     "needs": "all parts, a bench",
+     "evidence": "ce-assemblies/microduck/current/manual/MANUAL.md",
+     "state": "OPEN"
+    },
+    {
+     "id": "A-2",
+     "title_en": "Specify and build the assembly fixtures",
+     "title_zh": "设计并制作装配工装",
+     "deliverable": "The jigs the line needs: bearing press, servo-horn alignment, harness form board.",
+     "acceptance": "Each fixture drawn and made, with the step it serves named. Our jig drawings exist but have never been made or used.",
+     "qty": 6,
+     "unit": "fixtures",
+     "depends": "A-1",
+     "unblocks": "repeatable assembly",
+     "needs": "a workshop",
+     "evidence": "MANUFACTURING-PLAYBOOK.html — six assembly jigs with verified A3 drawings",
+     "state": "OPEN"
+    },
+    {
+     "id": "A-3",
+     "title_en": "Run the end-of-line test plan on the built unit",
+     "title_zh": "对整机执行下线测试方案",
+     "deliverable": "A completed test record against TEST-PLAN.html's gates.",
+     "acceptance": "Every gate passed or failed with the measured value. The walk acceptance thresholds come from simulation and have never been checked against hardware — that comparison is the deliverable.",
+     "qty": 1,
+     "unit": "unit",
+     "depends": "A-1",
+     "unblocks": "the acceptance criteria becoming real",
+     "needs": "a built unit, a test bench",
+     "evidence": "TEST-PLAN.html — the only artifact class currently graded READY",
+     "state": "OPEN"
+    }
+   ]
+  },
+  {
+   "num": 7,
+   "title_en": "The licence position",
+   "title_zh": "许可与授权",
+   "why_en": "This design is reverse-engineered from Pollen Robotics' published assets. 22 of the 30 print files are their meshes under a non-commercial licence. This must be settled before anyone cuts tooling.",
+   "why_zh": "本设计逆向自 Pollen Robotics 公开资料。30 个打印文件中 22 个是其网格，且受非商业许可限制。开模之前必须先解决此问题。",
+   "parcels": [
+    {
+     "id": "L-1",
+     "title_en": "Settle whether units may be sold",
+     "title_zh": "确认整机是否可销售",
+     "deliverable": "A written position on manufacturing and selling units derived from CC BY-SA-NC assets, and on what is ours versus upstream.",
+     "acceptance": "A decision with the clause it rests on. Our reading: prototypes may be printed, units may NOT be sold, and only the 8 parametric rebuilds are ours. That reading is not legal advice.",
+     "qty": 1,
+     "unit": "decision",
+     "depends": "none — can start on day one",
+     "unblocks": "tooling, and any commercial plan",
+     "needs": "counsel, or a licence enquiry to Pollen (Leif sends)",
+     "evidence": "LICENCE-POSITION.html; microduck_rl README §License",
+     "state": "OPEN"
+    },
+    {
+     "id": "L-2",
+     "title_en": "Replace every non-commercial mesh with an owned rebuild",
+     "title_zh": "用自研重建件替换全部非商业网格",
+     "deliverable": "22 vendor meshes replaced by parametric parts we own, each graded against the reference to the 1.0 mm p95 rule.",
+     "acceptance": "`out/verify/mech_dims.json` shows a rebuild for every part, each passing the rebuild protocol. 8 of 30 are done today.",
+     "qty": 22,
+     "unit": "parts",
+     "depends": "L-1 (only if selling is the goal), M-2",
+     "unblocks": "a commercially clean product",
+     "needs": "CAD work — an agent can do this, given the measurements",
+     "evidence": "readiness.json summary.print_licence — 22 vendor meshes, 8 ours",
+     "state": "OPEN"
+    }
+   ]
+  }
+ ],
+ "in_flight": [
+  {
+   "id": "WF-SHEETS",
+   "en": "Drawing sheets rebuilt to the A2/A3/A4 standard: no tessellation texture, ≥6 shaded renders per sheet, ≥85 % sheet coverage, ≥3.5 mm text, and 100 % dimension coverage proved by bin/sheetcheck",
+   "zh": "按 A2/A3/A4 标准重建图纸",
+   "count": "32 sheets currently NOT YET"
+  },
+  {
+   "id": "WF-FASTENERS",
+   "en": "Every screw, insert, washer and ball joint measured off the geometry and placed into the assembly through a connection, then audited so no hole is unaccounted for",
+   "zh": "测量并装入全部紧固件",
+   "count": "38 BOM rows, 0 fasteners, 145 holes"
+  },
+  {
+   "id": "WF-UNKNOWNS",
+   "en": "The open CANNOT DETERMINE items researched to a verdict or narrowed to a named physical test",
+   "zh": "逐项解决未定项",
+   "count": "139 items"
+  },
+  {
+   "id": "WF-POSE",
+   "en": "Photo pose-matching as a mechanical feasibility proof, and the wiring made visible in our renders",
+   "zh": "姿态比对与线束可视化",
+   "count": "per reference photograph"
+  },
+  {
+   "id": "WF-HARNESS",
+   "en": "Cables and connectors as real shelf parts, routed as solids in the assembly, with cut lengths and range-of-motion slack",
+   "zh": "线束进入 CAD",
+   "count": "23 cables"
+  }
+ ],
+ "parcels": 22
+}

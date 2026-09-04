@@ -1,0 +1,334 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Work breakdown — 工作分解</title>
+<link rel="stylesheet" href="tools/doc.css">
+<style>.zh{font-family:var(--sans);font-size:12px;color:var(--ink-2);display:block}
+table{border-collapse:collapse;width:100%;table-layout:fixed;font-size:12.5px;margin:8px 0 18px;overflow-wrap:anywhere}
+th{white-space:normal !important;padding:5px 6px;background:var(--head);font-family:var(--sans);font-size:12px}
+th,td{border-bottom:1px solid var(--hair);padding:5px 6px;text-align:left;vertical-align:top}
+td.m{font-family:var(--mono);font-size:11.5px;word-break:break-all}
+.g{font-family:var(--sans);font-weight:600;font-size:11px}
+.g.ok{color:var(--ready)}.g.no{color:var(--no)}.g.cd{color:var(--cd)}
+.front{border:2px solid var(--no);padding:12px 16px;margin:18px 0}
+.front h2{margin:0 0 6px;border:none;font-size:20px}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+.trk{border-top:2px solid var(--rule);margin:34px 0 0;padding-top:10px}
+.parcel{border-left:2px solid var(--hair);padding:2px 0 2px 14px;margin:16px 0}
+.parcel h4{margin:0 0 4px;font-size:15px}
+.pid{font-family:var(--mono);font-size:11.5px;color:var(--accent);margin-right:8px}
+.f{font-family:var(--sans);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2)}
+.inflight{color:var(--cd);font-family:var(--sans);font-weight:600;font-size:11px}</style></head><body><div class="wrap">
+<p class="backlink"><a href="INDEX.html">← Document index</a></p>
+<header class="hero"><p class="eyebrow">Microduck · factory pack · 工厂交付包</p>
+<h1>What needs to be done <span class="zh" style="font-size:22px;display:inline">工作分解</span></h1>
+<p class="sub">Every open piece of work, divided into parcels sized for one engineer. Each parcel names its deliverable, the acceptance test that says it is done, what it depends on and what it unblocks. Work that a software agent is closing is marked IN FLIGHT so nobody does it twice.</p>
+<p class="sub zh">全部待办工作，按单人可承担的粒度拆分。每个工作包给出交付物、判定完成的验收测试、依赖项与解锁项。软件代理正在处理的工作标注为“进行中”，避免重复。</p>
+<div class="rev"><span>MD-FACT-WBS-001 · Rev A</span><span>generated 2026-09-04T17:11:59+08:00</span><span>tools/gen_workplan.py</span></div></header>
+<div class="front"><h2>Read this before assigning anyone · 分配任务前请先读这里</h2>
+<div class="statbar">
+<div class="stat"><b class="no">32 / 32</b><span>drawing sheets NOT YET<br>图纸尚未就绪</span></div>
+<div class="stat"><b class="no">0</b><span>fasteners in the assembly, against 145 holes<br>装配体中的紧固件数</span></div>
+<div class="stat"><b class="no">139</b><span>open CANNOT DETERMINE<br>未定项</span></div>
+<div class="stat"><b class="no">0</b><span>physical units ever built<br>已制造实物台数</span></div>
+</div>
+<p><b>No physical Microduck has ever been built or measured by us.</b> Every number in this repository comes from Pollen Robotics' published simulation assets, from product photographs, or from our own simulation. That is why the first track below is metrology on a real unit: it unblocks more work than anything else.</p>
+<p class="zh"><b>我们从未制造或测量过实物 Microduck。</b>本仓库中的每个数据都来自 Pollen Robotics 公开的仿真资料、产品照片或我们自己的仿真。因此下面第一条工作线就是对实物进行测量：它解锁的后续工作最多。</p>
+</div>
+<nav class="toc"><ol>
+<li><a href="#t1">Track 1 · Metrology on a physical Microduck · 对实物 Microduck 进行测量 (6)</a></li>
+<li><a href="#t2">Track 2 · Process capability and the tolerance basis · 工艺能力与公差基准 (3)</a></li>
+<li><a href="#t3">Track 3 · Sourcing the unbuyable lines · 解决无法采购的物料 (3)</a></li>
+<li><a href="#t4">Track 4 · The three custom circuit boards · 三块自制电路板 (3)</a></li>
+<li><a href="#t5">Track 5 · DFM review and the print files · 可制造性审查与打印文件 (2)</a></li>
+<li><a href="#t6">Track 6 · Assembly, fixtures and end-of-line test · 装配、工装与下线测试 (3)</a></li>
+<li><a href="#t7">Track 7 · The licence position · 许可与授权 (2)</a></li>
+<li><a href="#inflight">In flight — do not assign · 进行中，请勿分配</a></li>
+<li><a href="#effort">On effort estimates · 关于工时估算</a></li>
+</ol></nav>
+<p class="lede">22 parcels across 7 tracks. Tracks 1 and 2 gate most of the others; tracks 3, 4, 5 and 7 can start on day one in parallel.</p>
+<section class="trk" id="t1">
+<h2>Track 1 · Metrology on a physical Microduck <span class="zh" style="display:inline;font-size:15px">对实物 Microduck 进行测量</span></h2>
+<p>36 shelf records cannot be graded from published data alone — they need a real unit on a bench. This is the single largest block of human work and it unblocks the most other parcels, so it should start first.</p><p class="zh">36 项零件记录无法仅凭公开资料判定，必须在工作台上测量实物。这是人工工作量最大的一块，解锁的后续工作也最多，应最先开始。</p>
+<div class="parcel">
+<h4><span class="pid">M-1</span>Buy or borrow one retail Microduck and log it in <span class="zh" style="display:inline">购入或借用一台零售版 Microduck 并登记</span></h4>
+<table><colgroup><col style="width:20%"><col></colgroup><tbody>
+<tr><th>Deliverable 交付物</th><td>A photographic teardown log: every part as removed, with its position, orientation and fasteners, into images/teardown/ with a numbered index.</td></tr>
+<tr><th>Acceptance test 验收测试</th><td>Every one of the 15 servos, 3 boards, battery and both shells appears in at least one numbered photograph, and the index lists them all. Count photographs against the part list: no part unphotographed.</td></tr>
+<tr><th>Quantity 数量</th><td class="num" style="text-align:left">1 unit</td></tr>
+<tr><th>Depends on 依赖</th><td>none — can start on day one</td></tr>
+<tr><th>Unblocks 解锁</th><td>every other parcel in this track, plus T2-1 and T5-1</td></tr>
+<tr><th>Needs 需要</th><td>a purchased retail unit (SPENDING — Leif approves)</td></tr>
+<tr><th>Evidence 依据</th><td class="m">SPEC.md:24 — Pollen&#x27;s mechanical CAD, BOM and PCBs are not published</td></tr>
+</tbody></table></div>
+<div class="parcel">
+<h4><span class="pid">M-2</span>Caliper every printed part against our model <span class="zh" style="display:inline">用卡尺测量每个打印件并与模型比对</span></h4>
+<table><colgroup><col style="width:20%"><col></colgroup><tbody>
+<tr><th>Deliverable 交付物</th><td>out/factory/measure/caliper.json: measured L×W×H and every feature dimension per part, to 0.01 mm, beside our modelled value and the delta.</td></tr>
+<tr><th>Acceptance test 验收测试</th><td>Every part in the 30-part print list has a measured row; each row carries an instrument reading, not a modelled number. Deltas over 1.5 mm are listed separately as findings.</td></tr>
+<tr><th>Quantity 数量</th><td class="num" style="text-align:left">30 parts</td></tr>
+<tr><th>Depends on 依赖</th><td>M-1</td></tr>
+<tr><th>Unblocks 解锁</th><td>closes the head-geometry CANNOT DETERMINE and the 1.5 mm rebuild rule</td></tr>
+<tr><th>Needs 需要</th><td>calipers, a real unit</td></tr>
+<tr><th>Evidence 依据</th><td class="m">HEAD-RECONSTRUCTION.html — photo scale uncertainty ≈4 % ≈5 mm on a 122 mm head</td></tr>
+</tbody></table></div>
+<div class="parcel">
+<h4><span class="pid">M-3</span>Measure the head shell and eye ring to settle the +9.1 % ratio <span class="zh" style="display:inline">测量头壳与眼圈，判定 +9.1 % 比例差</span></h4>
+<table><colgroup><col style="width:20%"><col></colgroup><tbody>
+<tr><th>Deliverable 交付物</th><td>A verdict on which of {eye ring OD, head width} deviates from our mesh, with the measured mm and the instrument.</td></tr>
+<tr><th>Acceptance test 验收测试</th><td>Ring OD and shell-rim width both measured to 0.1 mm; the front-view ratio recomputed from measurements rather than photographs; the CANNOT DETERMINE in HEAD-RECONSTRUCTION.html is replaced by a verdict.</td></tr>
+<tr><th>Quantity 数量</th><td class="num" style="text-align:left">2 dimensions</td></tr>
+<tr><th>Depends on 依赖</th><td>M-1</td></tr>
+<tr><th>Unblocks 解锁</th><td>head tooling; the biggest open geometric question</td></tr>
+<tr><th>Needs 需要</th><td>calipers, a real unit</td></tr>
+<tr><th>Evidence 依据</th><td class="m">HEAD-RECONSTRUCTION.html §1 — front-view ring/width ratio +9.1 %</td></tr>
+</tbody></table></div>
+<div class="parcel">
+<h4><span class="pid">M-4</span>Identify every unidentified component from the teardown <span class="zh" style="display:inline">通过拆解确认所有未知元器件</span></h4>
+<table><colgroup><col style="width:20%"><col></colgroup><tbody>
+<tr><th>Deliverable 交付物</th><td>A part number, package and vendor for the speaker, microphone, ToF generation, NFC front-end, camera module and its ribbon.</td></tr>
+<tr><th>Acceptance test 验收测试</th><td>Each line that currently reads CANNOT DETERMINE in ELECTRONICS-DATASHEET.html carries a marking read off the physical part, photographed.</td></tr>
+<tr><th>Quantity 数量</th><td class="num" style="text-align:left">6 components</td></tr>
+<tr><th>Depends on 依赖</th><td>M-1</td></tr>
+<tr><th>Unblocks 解锁</th><td>T3 sourcing lines and the electronics BOM</td></tr>
+<tr><th>Needs 需要</th><td>a real unit, magnification</td></tr>
+<tr><th>Evidence 依据</th><td class="m">readiness.json — 10 of 32 bought lines are CANNOT DETERMINE</td></tr>
+</tbody></table></div>
+<div class="parcel">
+<h4><span class="pid">M-5</span>Measure the servo supply voltage on a running unit <span class="zh" style="display:inline">测量运行中整机的舵机供电电压</span></h4>
+<table><colgroup><col style="width:20%"><col></colgroup><tbody>
+<tr><th>Deliverable 交付物</th><td>A meter reading of servo VDD with the robot standing and walking, against the XL330-M288-T published 3.7–6.0 V band.</td></tr>
+<tr><th>Acceptance test 验收测试</th><td>A number in volts at both states, with the meter and the probe point named. Either the servos see the raw 2S pack (6.6–8.4 V) or they do not; the answer is recorded either way.</td></tr>
+<tr><th>Quantity 数量</th><td class="num" style="text-align:left">1 measurement</td></tr>
+<tr><th>Depends on 依赖</th><td>M-1</td></tr>
+<tr><th>Unblocks 解锁</th><td>the entire power-path design; the most consequential electrical unknown</td></tr>
+<tr><th>Needs 需要</th><td>a multimeter, a running unit</td></tr>
+<tr><th>Evidence 依据</th><td class="m">workflows/RUNNING.md finding 1 — the most important electrical finding in the project</td></tr>
+</tbody></table></div>
+<div class="parcel">
+<h4><span class="pid">M-6</span>Grade the 36 shelf records that need the sample <span class="zh" style="display:inline">根据实物判定 36 项零件记录</span></h4>
+<table><colgroup><col style="width:20%"><col></colgroup><tbody>
+<tr><th>Deliverable 交付物</th><td>Each of the 36 triad part folders updated with the measured frame or dimension it was missing, and re-graded.</td></tr>
+<tr><th>Acceptance test 验收测试</th><td>`bin/triad check --all` reports fewer CANNOT DETERMINE than 47; every row that changes cites the caliper reading that changed it.</td></tr>
+<tr><th>Quantity 数量</th><td class="num" style="text-align:left">36 part records</td></tr>
+<tr><th>Depends on 依赖</th><td>M-2, M-4</td></tr>
+<tr><th>Unblocks 解锁</th><td>the shelf reaching a defensible verdict</td></tr>
+<tr><th>Needs 需要</th><td>the measurements from M-2 and M-4</td></tr>
+<tr><th>Evidence 依据</th><td class="m">readiness.json summary.triad_refs — 69 checked, 17 pass, 47 CANNOT DETERMINE</td></tr>
+</tbody></table></div>
+</section>
+<section class="trk" id="t2">
+<h2>Track 2 · Process capability and the tolerance basis <span class="zh" style="display:inline;font-size:15px">工艺能力与公差基准</span></h2>
+<p>Every structural safety factor and every fit in this design rests on an assumed filament strength and an assumed printed dimensional band. Neither has been measured. Until the factory states its own numbers, the whole tolerance stack is provisional.</p><p class="zh">本设计的所有结构安全系数与配合公差，都建立在假设的材料强度与打印尺寸带上，二者均未实测。在工厂给出自有数据前，整个公差链条都只是暂定值。</p>
+<div class="parcel">
+<h4><span class="pid">C-1</span>State the process capability for each process you would use <span class="zh" style="display:inline">给出各拟用工艺的过程能力</span></h4>
+<table><colgroup><col style="width:20%"><col></colgroup><tbody>
+<tr><th>Deliverable 交付物</th><td>Per process (FDM, SLA, injection moulding, CNC): the tolerance you hold in production, the surface finish, and the minimum wall.</td></tr>
+<tr><th>Acceptance test 验收测试</th><td>A number per process with the standard it is quoted against (e.g. ISO 2768 class, or a Cpk with the sample size). &#x27;As printed&#x27; is not a tolerance and is rejected.</td></tr>
+<tr><th>Quantity 数量</th><td class="num" style="text-align:left">4 processes</td></tr>
+<tr><th>Depends on 依赖</th><td>none — can start on day one</td></tr>
+<tr><th>Unblocks 解锁</th><td>every drawing&#x27;s tolerance block; the joint tolerance stack</td></tr>
+<tr><th>Needs 需要</th><td>factory process data</td></tr>
+<tr><th>Evidence 依据</th><td class="m">docs/MANUFACTURING-REQUIREMENTS.md A4 — every dimension carries a tolerance from a stated basis</td></tr>
+</tbody></table></div>
+<div class="parcel">
+<h4><span class="pid">C-2</span>Print and measure a tolerance coupon on your machines <span class="zh" style="display:inline">在贵厂设备上打印并测量公差试片</span></h4>
+<table><colgroup><col style="width:20%"><col></colgroup><tbody>
+<tr><th>Deliverable 交付物</th><td>A coupon carrying the feature set this design uses — Ø2.2 clearance, Ø4.4 counterbore, Ø1.6 tap pilot, a 2 mm rib, a Ø16 boss and a Ø22 bore — printed and measured on your machines, in your material.</td></tr>
+<tr><th>Acceptance test 验收测试</th><td>Measured versus nominal for each feature, 5 specimens, with mean and spread. This replaces the CANNOT DETERMINE that currently blocks the whole tolerance stack.</td></tr>
+<tr><th>Quantity 数量</th><td class="num" style="text-align:left">6 features × 5 specimens</td></tr>
+<tr><th>Depends on 依赖</th><td>none — can start on day one</td></tr>
+<tr><th>Unblocks 解锁</th><td>every press fit and every bearing seat verdict</td></tr>
+<tr><th>Needs 需要</th><td>a printer, calipers, material</td></tr>
+<tr><th>Evidence 依据</th><td class="m">out/open — &#x27;This workshop&#x27;s own printed dimensional band (the whole tolerance stack rests on it)&#x27;</td></tr>
+</tbody></table></div>
+<div class="parcel">
+<h4><span class="pid">C-3</span>Provide the material datasheet for the filament you would ship <span class="zh" style="display:inline">提供拟用耗材的材料数据表</span></h4>
+<table><colgroup><col style="width:20%"><col></colgroup><tbody>
+<tr><th>Deliverable 交付物</th><td>Tensile and yield strength in the printed Z (interlayer) direction, not just XY, with the print parameters they were measured at.</td></tr>
+<tr><th>Acceptance test 验收测试</th><td>A datasheet page or a test report. If only XY data exists, say so — our FEA currently derates an assumed figure and that derating must be replaced by a measured one.</td></tr>
+<tr><th>Quantity 数量</th><td class="num" style="text-align:left">2 materials (PLA, TPU)</td></tr>
+<tr><th>Depends on 依赖</th><td>none — can start on day one</td></tr>
+<tr><th>Unblocks 解锁</th><td>every safety factor in STRUCTURAL.html</td></tr>
+<tr><th>Needs 需要</th><td>factory material stock data</td></tr>
+<tr><th>Evidence 依据</th><td class="m">STRUCTURAL.html — &#x27;Strength of the fitted filament in the printed orientation (every SF rests on it)&#x27;</td></tr>
+</tbody></table></div>
+</section>
+<section class="trk" id="t3">
+<h2>Track 3 · Sourcing the unbuyable lines <span class="zh" style="display:inline;font-size:15px">解决无法采购的物料</span></h2>
+<p>19 of 32 bought lines are ready. The rest are not a paperwork problem: the compute board&#x27;s stated SKU does not exist in the vendor catalogue, and the dominant cost line has no published volume price at any quantity.</p><p class="zh">32 项外购物料中 19 项已就绪。其余并非文书问题：主控板所述型号在厂商目录中并不存在，而成本占比最大的物料在任何数量下都没有公开的批量价格。</p>
+<div class="parcel">
+<h4><span class="pid">S-1</span>Get a ROBOTIS OEM quote for the XL330-M288-T <span class="zh" style="display:inline">取得 ROBOTIS XL330-M288-T 的 OEM 报价</span></h4>
+<table><colgroup><col style="width:20%"><col></colgroup><tbody>
+<tr><th>Deliverable 交付物</th><td>A written quote at 225 / 1 500 / 15 000 units (15 servos × 15 / 100 / 1000 robots), with lead time and MOQ.</td></tr>
+<tr><th>Acceptance test 验收测试</th><td>A quotation document. No distributor publishes a volume break for this part, so this is the single biggest lever on unit cost and only a quote can answer it.</td></tr>
+<tr><th>Quantity 数量</th><td class="num" style="text-align:left">3 quantity tiers</td></tr>
+<tr><th>Depends on 依赖</th><td>none — can start on day one</td></tr>
+<tr><th>Unblocks 解锁</th><td>the entire unit-cost model at volume</td></tr>
+<tr><th>Needs 需要</th><td>a supplier relationship (CONTACT — factory does this)</td></tr>
+<tr><th>Evidence 依据</th><td class="m">readiness.json — servos are 77 % of electronics cost at $358.50 of $465.64</td></tr>
+</tbody></table></div>
+<div class="parcel">
+<h4><span class="pid">S-2</span>Resolve the compute board <span class="zh" style="display:inline">确定主控板型号</span></h4>
+<table><colgroup><col style="width:20%"><col></colgroup><tbody>
+<tr><th>Deliverable 交付物</th><td>Either the real SKU fitted in a retail unit, or a chosen replacement with its mechanical and electrical differences listed.</td></tr>
+<tr><th>Acceptance test 验收测试</th><td>A board that can actually be ordered, in stock, with a lead time. The 1 GB / 32 GB combination stated in the press kit is not a Radxa catalogue SKU and every 1 GB variant read on 2026-09-02 was sold out.</td></tr>
+<tr><th>Quantity 数量</th><td class="num" style="text-align:left">1 decision</td></tr>
+<tr><th>Depends on 依赖</th><td>M-1 teardown confirms what is fitted</td></tr>
+<tr><th>Unblocks 解锁</th><td>the compute mount, the HAT connector layout, the power budget</td></tr>
+<tr><th>Needs 需要</th><td>distributor contact, and the teardown</td></tr>
+<tr><th>Evidence 依据</th><td class="m">spec/sourcing.json line B3 — 5 offers, 0 with a stated lead time</td></tr>
+</tbody></table></div>
+<div class="parcel">
+<h4><span class="pid">S-3</span>Close the remaining unpriced and lead-time-less lines <span class="zh" style="display:inline">补齐其余物料的价格与交期</span></h4>
+<table><colgroup><col style="width:20%"><col></colgroup><tbody>
+<tr><th>Deliverable 交付物</th><td>A priced offer with a lead time for every bought line that lacks one.</td></tr>
+<tr><th>Acceptance test 验收测试</th><td>Zero lines in spec/sourcing.json with no priced offer; zero with no lead time. Currently 4 lines have no priced offer and 11 have no stated lead time.</td></tr>
+<tr><th>Quantity 数量</th><td class="num" style="text-align:left">15 lines</td></tr>
+<tr><th>Depends on 依赖</th><td>none — can start on day one</td></tr>
+<tr><th>Unblocks 解锁</th><td>a defensible unit cost and a build schedule</td></tr>
+<tr><th>Needs 需要</th><td>distributor contact</td></tr>
+<tr><th>Evidence 依据</th><td class="m">readiness.json summary.bought_gaps</td></tr>
+</tbody></table></div>
+</section>
+<section class="trk" id="t4">
+<h2>Track 4 · The three custom circuit boards <span class="zh" style="display:inline;font-size:15px">三块自制电路板</span></h2>
+<p>Pollen publishes no design files for the Robot HAT, the IMU-to-Dynamixel board or the battery contact board. Our reconstruction of the HAT fails its own DRC and is a footprint-accurate stand-in, not a manufacturable copy.</p><p class="zh">Pollen 未公开 Robot HAT、IMU 转 Dynamixel 板与电池触点板的设计文件。我们复原的 HAT 未通过自身 DRC，只是尺寸相符的替代件，并非可制造的复制品。</p>
+<div class="parcel">
+<h4><span class="pid">B-1</span>Reverse-engineer the three boards from the physical samples <span class="zh" style="display:inline">从实物逆向三块电路板</span></h4>
+<table><colgroup><col style="width:20%"><col></colgroup><tbody>
+<tr><th>Deliverable 交付物</th><td>A schematic per board with every component and every net, traced from the board itself.</td></tr>
+<tr><th>Acceptance test 验收测试</th><td>Every net traceable end to end; every component with a marking read off the part. The two currently-guessed parts — the Dynamixel half-duplex transceiver and the 2S→5V regulator — are identified, not inferred.</td></tr>
+<tr><th>Quantity 数量</th><td class="num" style="text-align:left">3 boards</td></tr>
+<tr><th>Depends on 依赖</th><td>M-1</td></tr>
+<tr><th>Unblocks 解锁</th><td>all fabrication; nothing ships without these</td></tr>
+<tr><th>Needs 需要</th><td>the physical boards, magnification, a meter</td></tr>
+<tr><th>Evidence 依据</th><td class="m">PCB-PACKAGE.html — Robot HAT reconstruction fails its own DRC</td></tr>
+</tbody></table></div>
+<div class="parcel">
+<h4><span class="pid">B-2</span>Lay out and fabricate the banana battery-contact board <span class="zh" style="display:inline">设计并打样电池触点板</span></h4>
+<table><colgroup><col style="width:20%"><col></colgroup><tbody>
+<tr><th>Deliverable 交付物</th><td>Gerbers, drill, pick-and-place and a BOM for the simplest of the three.</td></tr>
+<tr><th>Acceptance test 验收测试</th><td>A DRC-clean board and five fabricated samples that fit the measured pocket. This board is passive — VBAT and GND only — so it is the fastest win of the three.</td></tr>
+<tr><th>Quantity 数量</th><td class="num" style="text-align:left">1 board</td></tr>
+<tr><th>Depends on 依赖</th><td>B-1</td></tr>
+<tr><th>Unblocks 解锁</th><td>the power path; a buildable prototype</td></tr>
+<tr><th>Needs 需要</th><td>PCB fab</td></tr>
+<tr><th>Evidence 依据</th><td class="m">workflows/RUNNING.md — &#x27;the banana contact board is passive and is ~1 day of work after one measurement session&#x27;</td></tr>
+</tbody></table></div>
+<div class="parcel">
+<h4><span class="pid">B-3</span>Lay out and fabricate the Robot HAT and the IMU board <span class="zh" style="display:inline">设计并打样 Robot HAT 与 IMU 板</span></h4>
+<table><colgroup><col style="width:20%"><col></colgroup><tbody>
+<tr><th>Deliverable 交付物</th><td>Gerbers, drill, pick-and-place, BOM and assembly drawings for both.</td></tr>
+<tr><th>Acceptance test 验收测试</th><td>DRC clean with zero fails (ours currently has 10), the 1.8 V codec rail terminated rather than dead-ending on a test point, and five assembled samples that power up.</td></tr>
+<tr><th>Quantity 数量</th><td class="num" style="text-align:left">2 boards</td></tr>
+<tr><th>Depends on 依赖</th><td>B-1</td></tr>
+<tr><th>Unblocks 解锁</th><td>a working prototype</td></tr>
+<tr><th>Needs 需要</th><td>PCB fab and assembly</td></tr>
+<tr><th>Evidence 依据</th><td class="m">PCB-PACKAGE.html — 10 DRC fails; DVDD dead-ends on TP1</td></tr>
+</tbody></table></div>
+</section>
+<section class="trk" id="t5">
+<h2>Track 5 · DFM review and the print files <span class="zh" style="display:inline;font-size:15px">可制造性审查与打印文件</span></h2>
+<p>18 of 30 print files are ready. The rest are vendor simulation meshes that carry no manufacturable dimensions, and 22 of the 30 are under a non-commercial licence that forbids selling what is printed from them.</p><p class="zh">30 个打印文件中 18 个已就绪。其余为供应商仿真网格，不含可制造尺寸；且其中 22 个受非商业许可限制，不得用于销售。</p>
+<div class="parcel">
+<h4><span class="pid">D-1</span>DFM review every part against your processes <span class="zh" style="display:inline">按贵厂工艺对每个零件做可制造性审查</span></h4>
+<table><colgroup><col style="width:20%"><col></colgroup><tbody>
+<tr><th>Deliverable 交付物</th><td>Per part: what you would change to make it manufacturable, with the reason and the cost or cycle-time impact.</td></tr>
+<tr><th>Acceptance test 验收测试</th><td>A written finding per part, or an explicit &#x27;no change needed&#x27;. Silence on a part is not an answer.</td></tr>
+<tr><th>Quantity 数量</th><td class="num" style="text-align:left">30 parts</td></tr>
+<tr><th>Depends on 依赖</th><td>C-1</td></tr>
+<tr><th>Unblocks 解锁</th><td>the production geometry; possibly a re-model</td></tr>
+<tr><th>Needs 需要</th><td>factory process knowledge</td></tr>
+<tr><th>Evidence 依据</th><td class="m">MANUFACTURING-PLAYBOOK.html</td></tr>
+</tbody></table></div>
+<div class="parcel">
+<h4><span class="pid">D-2</span>Quote injection moulding against the printed baseline <span class="zh" style="display:inline">报价注塑方案并与打印方案比较</span></h4>
+<table><colgroup><col style="width:20%"><col></colgroup><tbody>
+<tr><th>Deliverable 交付物</th><td>Tooling cost, tooling lead time, per-part price and MOQ for the shells, against our printed cost, so the break-even quantity is a real number.</td></tr>
+<tr><th>Acceptance test 验收测试</th><td>A quote per shell part. Our current break-even analysis uses published list prices, not your rates, so it is indicative only.</td></tr>
+<tr><th>Quantity 数量</th><td class="num" style="text-align:left">8 candidate parts</td></tr>
+<tr><th>Depends on 依赖</th><td>none — can start on day one</td></tr>
+<tr><th>Unblocks 解锁</th><td>the volume decision</td></tr>
+<tr><th>Needs 需要</th><td>factory tooling quotes</td></tr>
+<tr><th>Evidence 依据</th><td class="m">docs/PRODUCTION.md — cost at 1/10/100/1000</td></tr>
+</tbody></table></div>
+</section>
+<section class="trk" id="t6">
+<h2>Track 6 · Assembly, fixtures and end-of-line test <span class="zh" style="display:inline;font-size:15px">装配、工装与下线测试</span></h2>
+<p>The assembly sequence and the test plan are written but have never been executed by a person. The first build is the test of the paperwork.</p><p class="zh">装配顺序与测试方案已编写，但从未有人实际执行。首台装机就是对全部文件的检验。</p>
+<div class="parcel">
+<h4><span class="pid">A-1</span>Build one unit from the paper alone <span class="zh" style="display:inline">仅依据文件装配一台整机</span></h4>
+<table><colgroup><col style="width:20%"><col></colgroup><tbody>
+<tr><th>Deliverable 交付物</th><td>A build log recording every step where the document was wrong, ambiguous, or assumed knowledge not on the page.</td></tr>
+<tr><th>Acceptance test 验收测试</th><td>A working unit, or a log of exactly where it stopped. Every defect found becomes a correction to MANUAL.md. This is the single best test of whether this pack is real.</td></tr>
+<tr><th>Quantity 数量</th><td class="num" style="text-align:left">1 unit</td></tr>
+<tr><th>Depends on 依赖</th><td>B-2, B-3, the printed parts</td></tr>
+<tr><th>Unblocks 解锁</th><td>everything; it validates or refutes the whole pack</td></tr>
+<tr><th>Needs 需要</th><td>all parts, a bench</td></tr>
+<tr><th>Evidence 依据</th><td class="m">ce-assemblies/microduck/current/manual/MANUAL.md</td></tr>
+</tbody></table></div>
+<div class="parcel">
+<h4><span class="pid">A-2</span>Specify and build the assembly fixtures <span class="zh" style="display:inline">设计并制作装配工装</span></h4>
+<table><colgroup><col style="width:20%"><col></colgroup><tbody>
+<tr><th>Deliverable 交付物</th><td>The jigs the line needs: bearing press, servo-horn alignment, harness form board.</td></tr>
+<tr><th>Acceptance test 验收测试</th><td>Each fixture drawn and made, with the step it serves named. Our jig drawings exist but have never been made or used.</td></tr>
+<tr><th>Quantity 数量</th><td class="num" style="text-align:left">6 fixtures</td></tr>
+<tr><th>Depends on 依赖</th><td>A-1</td></tr>
+<tr><th>Unblocks 解锁</th><td>repeatable assembly</td></tr>
+<tr><th>Needs 需要</th><td>a workshop</td></tr>
+<tr><th>Evidence 依据</th><td class="m">MANUFACTURING-PLAYBOOK.html — six assembly jigs with verified A3 drawings</td></tr>
+</tbody></table></div>
+<div class="parcel">
+<h4><span class="pid">A-3</span>Run the end-of-line test plan on the built unit <span class="zh" style="display:inline">对整机执行下线测试方案</span></h4>
+<table><colgroup><col style="width:20%"><col></colgroup><tbody>
+<tr><th>Deliverable 交付物</th><td>A completed test record against TEST-PLAN.html&#x27;s gates.</td></tr>
+<tr><th>Acceptance test 验收测试</th><td>Every gate passed or failed with the measured value. The walk acceptance thresholds come from simulation and have never been checked against hardware — that comparison is the deliverable.</td></tr>
+<tr><th>Quantity 数量</th><td class="num" style="text-align:left">1 unit</td></tr>
+<tr><th>Depends on 依赖</th><td>A-1</td></tr>
+<tr><th>Unblocks 解锁</th><td>the acceptance criteria becoming real</td></tr>
+<tr><th>Needs 需要</th><td>a built unit, a test bench</td></tr>
+<tr><th>Evidence 依据</th><td class="m">TEST-PLAN.html — the only artifact class currently graded READY</td></tr>
+</tbody></table></div>
+</section>
+<section class="trk" id="t7">
+<h2>Track 7 · The licence position <span class="zh" style="display:inline;font-size:15px">许可与授权</span></h2>
+<p>This design is reverse-engineered from Pollen Robotics&#x27; published assets. 22 of the 30 print files are their meshes under a non-commercial licence. This must be settled before anyone cuts tooling.</p><p class="zh">本设计逆向自 Pollen Robotics 公开资料。30 个打印文件中 22 个是其网格，且受非商业许可限制。开模之前必须先解决此问题。</p>
+<div class="parcel">
+<h4><span class="pid">L-1</span>Settle whether units may be sold <span class="zh" style="display:inline">确认整机是否可销售</span></h4>
+<table><colgroup><col style="width:20%"><col></colgroup><tbody>
+<tr><th>Deliverable 交付物</th><td>A written position on manufacturing and selling units derived from CC BY-SA-NC assets, and on what is ours versus upstream.</td></tr>
+<tr><th>Acceptance test 验收测试</th><td>A decision with the clause it rests on. Our reading: prototypes may be printed, units may NOT be sold, and only the 8 parametric rebuilds are ours. That reading is not legal advice.</td></tr>
+<tr><th>Quantity 数量</th><td class="num" style="text-align:left">1 decision</td></tr>
+<tr><th>Depends on 依赖</th><td>none — can start on day one</td></tr>
+<tr><th>Unblocks 解锁</th><td>tooling, and any commercial plan</td></tr>
+<tr><th>Needs 需要</th><td>counsel, or a licence enquiry to Pollen (Leif sends)</td></tr>
+<tr><th>Evidence 依据</th><td class="m">LICENCE-POSITION.html; microduck_rl README §License</td></tr>
+</tbody></table></div>
+<div class="parcel">
+<h4><span class="pid">L-2</span>Replace every non-commercial mesh with an owned rebuild <span class="zh" style="display:inline">用自研重建件替换全部非商业网格</span></h4>
+<table><colgroup><col style="width:20%"><col></colgroup><tbody>
+<tr><th>Deliverable 交付物</th><td>22 vendor meshes replaced by parametric parts we own, each graded against the reference to the 1.0 mm p95 rule.</td></tr>
+<tr><th>Acceptance test 验收测试</th><td>`out/verify/mech_dims.json` shows a rebuild for every part, each passing the rebuild protocol. 8 of 30 are done today.</td></tr>
+<tr><th>Quantity 数量</th><td class="num" style="text-align:left">22 parts</td></tr>
+<tr><th>Depends on 依赖</th><td>L-1 (only if selling is the goal), M-2</td></tr>
+<tr><th>Unblocks 解锁</th><td>a commercially clean product</td></tr>
+<tr><th>Needs 需要</th><td>CAD work — an agent can do this, given the measurements</td></tr>
+<tr><th>Evidence 依据</th><td class="m">readiness.json summary.print_licence — 22 vendor meshes, 8 ours</td></tr>
+</tbody></table></div>
+</section>
+<section class="trk" id="inflight"><h2>In flight — do not assign <span class="zh" style="display:inline;font-size:15px">进行中，请勿分配</span></h2>
+<p>Software agents are closing these now. They are listed so the factory does not duplicate them, and so that when they land the parcels above can be re-cut.</p>
+<p class="zh">以下工作由软件代理正在处理，列出以避免重复；完成后上述工作包将重新划分。</p>
+<table><colgroup><col style="width:14%"><col><col style="width:22%"></colgroup>
+<thead><tr><th>id</th><th>What 内容</th><th>Scale 规模</th></tr></thead><tbody>
+<tr><td class="m">WF-SHEETS</td><td>Drawing sheets rebuilt to the A2/A3/A4 standard: no tessellation texture, ≥6 shaded renders per sheet, ≥85 % sheet coverage, ≥3.5 mm text, and 100 % dimension coverage proved by bin/sheetcheck<span class="zh">按 A2/A3/A4 标准重建图纸</span></td><td class="m">32 sheets currently NOT YET</td></tr>
+<tr><td class="m">WF-FASTENERS</td><td>Every screw, insert, washer and ball joint measured off the geometry and placed into the assembly through a connection, then audited so no hole is unaccounted for<span class="zh">测量并装入全部紧固件</span></td><td class="m">38 BOM rows, 0 fasteners, 145 holes</td></tr>
+<tr><td class="m">WF-UNKNOWNS</td><td>The open CANNOT DETERMINE items researched to a verdict or narrowed to a named physical test<span class="zh">逐项解决未定项</span></td><td class="m">139 items</td></tr>
+<tr><td class="m">WF-POSE</td><td>Photo pose-matching as a mechanical feasibility proof, and the wiring made visible in our renders<span class="zh">姿态比对与线束可视化</span></td><td class="m">per reference photograph</td></tr>
+<tr><td class="m">WF-HARNESS</td><td>Cables and connectors as real shelf parts, routed as solids in the assembly, with cut lengths and range-of-motion slack<span class="zh">线束进入 CAD</span></td><td class="m">23 cables</td></tr>
+</tbody></table></section>
+<section class="trk" id="effort"><h2>On effort estimates <span class="zh" style="display:inline;font-size:15px">关于工时估算</span></h2>
+<p><b>No engineer-day estimate is given, deliberately.</b> This workshop has never built a physical unit and has no measured time-per-item for any of this work, so any day figure would be invented. Each parcel states its quantity and its unit of work instead, which the factory can price against its own rates. This is a stated CANNOT DETERMINE, not an oversight.</p>
+<p class="zh"><b>本文件有意不给出人天估算。</b>我们从未制造过实物，也没有任何一项工作的实测单件工时，任何天数都将是臆测。每个工作包改为给出数量与工作单位，由工厂按自身工时定额报价。这是明确标注的“无法判定”，而非疏漏。</p></section>
+<p class="backlink" style="margin-top:40px"><a href="INDEX.html">← Document index</a> · <a href="out/factory/readiness.html">Readiness audit</a> · <a href="LICENCE-POSITION.html">Licence position</a></p>
+</div></body></html>
