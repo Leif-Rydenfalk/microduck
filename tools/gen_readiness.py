@@ -295,13 +295,28 @@ fast_rows = [r for r in BOM["rows"] if re.search(r"screw|bolt|\bnut\b|insert|was
 spec = open(os.path.join(ROOT, "SPEC.md"), encoding="utf-8").read().splitlines()
 census = " ".join(spec[74:76])
 holes = [int(x) for x in re.findall(r"×(\d+)", census)]
+# RECONCILE the zero-fastener BOM against what SOURCING already buys. "0 fastener
+# rows" reads like "nobody knows what screws to buy", and that is not what is
+# wrong: spec/sourcing.json already carries M2 lines with quantities. What is
+# missing is the PER-HOLE SCHEDULE — which screw, which hole, what length, what
+# torque — not the purchase order. Measured here so the factory is not misled.
+_fast_bought = [(r["id"], r.get("qty_per_robot"), r["name"])
+                for r in rows if r["class"] == "bought"
+                and re.search(r"screw|\bnut\b|insert|washer", (r["name"] or "").lower())]
+_fast_pieces = sum(q for _, q, _ in _fast_bought if isinstance(q, (int, float)))
 row("assembly", "manual", "Assembly sequence — MANUAL.md + PLAYBOOK stations", "NOT_YET",
-    "MANUAL: 7 steps, %d numbered sub-steps, %d '[community]'/community-derived fastener flags, %d CANNOT DETERMINE; PLAYBOOK: %d stations, %d steps, torque 3/3 CANNOT DETERMINE; bom.json %d rows, %d fastener rows against a %d-hole M2 census (SPEC.md:75-76: %s); %d steps assume knowledge not on the page (list below)" % (
-        n_steps, n_comm, n_cd, len(stations), n_station_steps, len(BOM["rows"]), len(fast_rows), sum(holes), "+".join(str(h) for h in holes), len(D["manual_assumptions"])),
+    "MANUAL: 7 steps, %d numbered sub-steps, %d '[community]'/community-derived fastener flags, %d CANNOT DETERMINE; PLAYBOOK: %d stations, %d steps, torque 3/3 CANNOT DETERMINE; bom.json %d rows, %d fastener rows against a %d-hole M2 census (SPEC.md:75-76: %s) — but note SOURCING already buys the hardware: %s = %d pieces per robot, so what is missing is the PER-HOLE SCHEDULE (which screw in which hole, at what length and torque), not the purchase order; %d steps assume knowledge not on the page (list below)" % (
+        n_steps, n_comm, n_cd, len(stations), n_station_steps, len(BOM["rows"]), len(fast_rows), sum(holes), "+".join(str(h) for h in holes),
+        ", ".join("%s %s x%s" % (i, n.split(",")[0], q) for i, q, n in _fast_bought), _fast_pieces,
+        len(D["manual_assumptions"])),
     "ce-assemblies/microduck/iterations/v0.0.1/manual/MANUAL.md; tools/data/playbook.json stations/torque/open; ce-assemblies/microduck/current/bom.json; SPEC.md:75-76",
     "No screw-by-screw schedule (length per hole), no torque, no datums a caliper can use, no fixing method for ToF/speaker/mic, no software install step. A stranger stops at step 1.2.",
     "agent_tonight", "WF-FASTENERS (schedule) + WF-HARNESS (per-joint pictures); torque and bearing interference need a coupon test by a person",
-    {"manual_steps": n_steps, "community_flags": n_comm, "manual_cd": n_cd, "stations": len(stations), "station_steps": n_station_steps, "bom_rows": len(BOM["rows"]), "bom_fastener_rows": len(fast_rows), "hole_census": sum(holes), "assumptions": D["manual_assumptions"]})
+    {"manual_steps": n_steps, "community_flags": n_comm, "manual_cd": n_cd, "stations": len(stations), "station_steps": n_station_steps, "bom_rows": len(BOM["rows"]), "bom_fastener_rows": len(fast_rows), "hole_census": sum(holes),
+     "fasteners_already_sourced": [{"line": i, "qty_per_robot": q, "item": n} for i, q, n in _fast_bought],
+     "fastener_pieces_per_robot_sourced": _fast_pieces,
+     "reconciliation": "the assembly BOM carries 0 fastener rows, but spec/sourcing.json carries %d M2 lines totalling %d pieces per robot against a %d-hole census; the gap is the per-hole schedule, not the purchase" % (len(_fast_bought), _fast_pieces, sum(holes)),
+     "assumptions": D["manual_assumptions"]})
 
 # ---------------------------------------------------------------- 7 test plan
 TP = J("spec/test-plan.json")
