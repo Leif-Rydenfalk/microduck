@@ -2,13 +2,19 @@
  {
   "id": "B1",
   "item": "Dynamixel XL330-M288-T smart servo",
+  "category": "actuator",
   "ce_part": "part:xl330-m288-t",
   "qty_per_robot": 15,
+  "qty_basis": "docs/BOM.md row B1; 15 joints in spec/kinematics-all-models.json",
+  "mpn": "XL330-M288-T (ROBOTIS SKU 902-0163-000)",
+  "mpn_status": "community-derived sub-variant",
+  "mpn_note": "Pollen never states M288 vs M077 (SPEC.md §5). Both are $23.90 at ROBOTIS intl, so the price line does not depend on it; the gear ratio does.",
+  "rfq_spec": "ROBOTIS DYNAMIXEL XL330-M288-T, TTL half-duplex multidrop bus, Protocol 2.0, 288.4:1, 18 g. Horn hardware and X3P leads as supplied. Quantities are per robot x order size.",
   "verdict": "PASS",
-  "verdict_why": null,
   "offers": [
    {
     "vendor": "ROBOTIS International",
+    "sku": "902-0163-000",
     "url": "https://en.robotis.com/shop_en/item.php?it_id=902-0163-000",
     "currency": "USD",
     "tiers": [
@@ -17,12 +23,17 @@
       23.9
      ]
     ],
+    "no_tiers": true,
     "moq": 1,
     "lead_time": "Lead Time: 10 days (XL-series list page https://en.robotis.com/shop_en/list.php?ca_id=202030); item page: 'normally ships out within 3 working days when in stock'",
-    "fetched": "2026-09-02"
+    "stock": "not numerically stated",
+    "fetched": "2026-09-02",
+    "confidence": "read",
+    "note": "ships from Korea. No tier table anywhere on the shop."
    },
    {
     "vendor": "ROBOTIS US (robotis.us)",
+    "sku": "902-0163-000",
     "url": "https://www.robotis.us/dynamixel-xl330-m288-t/",
     "currency": "USD",
     "tiers": [
@@ -31,12 +42,17 @@
       27.49
      ]
     ],
+    "no_tiers": true,
     "moq": 1,
     "lead_time": "not stated",
-    "fetched": "2026-09-02"
+    "stock": "schema.org/InStock on the page; count not readable",
+    "fetched": "2026-09-02",
+    "confidence": "read",
+    "note": "cross-checked against ce-parts/xl330-m288-t/sourcing.json (same page, same price)."
    },
    {
     "vendor": "Generation Robots (FR)",
+    "sku": "403817",
     "url": "https://www.generationrobots.com/en/403817-dynamixel-xl330-m288-t-servo-motor.html",
     "currency": "EUR",
     "tiers": [
@@ -45,12 +61,17 @@
       33.5
      ]
     ],
+    "no_tiers": true,
     "moq": 1,
     "lead_time": "'Get it in 24/48h!'",
-    "fetched": "2026-09-02"
+    "stock": "373 Available",
+    "fetched": "2026-09-02",
+    "confidence": "read",
+    "note": "EUR 33.50 ex VAT / EUR 40.20 inc. EU stock; the only line with a real in-stock count."
    },
    {
     "vendor": "Tribotix (AU)",
+    "sku": "XL330-M288-T",
     "url": "https://tribotix.com/product/xl330-m288-t/",
     "currency": "AUD",
     "tiers": [
@@ -59,27 +80,54 @@
       38.0
      ]
     ],
+    "no_tiers": true,
     "moq": 1,
     "lead_time": "not stated",
-    "fetched": "2026-09-02"
+    "stock": "not stated",
+    "fetched": "2026-09-02",
+    "confidence": "read",
+    "note": "AUD 38.00 ex GST / 41.80 inc."
+   }
+  ],
+  "alternates": [
+   {
+    "mpn": "XL330-M077-T (902-0162-000)",
+    "why_equivalent": "same body, same bus, same mounting and same $23.90 list; 77.4:1 instead of 288.4:1, i.e. ~3.7x faster and ~3.7x weaker. It is a drop-in MECHANICALLY but NOT dynamically - Pollen's trained policies were identified on whatever ratio ships, so this is a substitution only with a re-tuned policy.",
+    "vendor": "ROBOTIS International",
+    "url": "https://en.robotis.com/shop_en/list.php?ca_id=202030",
+    "price_note": "$23.90, lead time 40 days on the same list page"
    }
   ],
   "unknowns": [
    "OEM / volume price at 225, 1 500 or 15 000 servos: CANNOT DETERMINE. ROBOTIS publishes no XL330 bulk pack (https://www.robotis.us/bulk-pack/ lists only AX/MX 6-piece packs) and no tier table. The only published volume signal is AX-12A single $57.39 vs 6pcs bulk $310.39 = -9.9 %, a different servo. A written quote settles it: america@robotis.com / contactus2@robotis.com.",
    "Whether production servos are stock parts at all: the design runs them on a 6.6-8.2 V pack against a published 3.7-6.0 V input band (part:xl330-m288-t record.why)."
   ],
-  "excluded_from_rollup": null
+  "blocked": [
+   {
+    "url": "https://www.robotshop.com/products/robotis-dynamixel-xl330-m288-t-smart-servo-actuator",
+    "reason": "HTTP 403 to the fetcher"
+   },
+   {
+    "url": "https://www.aliexpress.com/i/1005004403336577.html",
+    "reason": "page body blank to the fetcher"
+   }
+  ]
  },
  {
   "id": "B2",
   "item": "Robot Cable-X3P 180 mm, 10-pack (Dynamixel bus leads)",
+  "category": "connector",
   "ce_part": null,
   "qty_per_robot": 2,
+  "qty_basis": "16 leads needed (15 servos daisy-chained + imu_to_dxl, wiring/CABLES.md rows 1-16) -> 2 packs of 10",
+  "mpn": "903-0251-000 (Robot Cable-X3P Convertible 180 mm, 10 pcs)",
+  "mpn_status": "confirmed at vendor",
+  "rfq_spec": "ROBOTIS Robot Cable-X3P (convertible), 180 mm, 10 pieces per pack. JST EH 3-pin (EHR-03 housing, SEH-001T-P0.6 crimp) at both ends. Our measured cut lengths are 20-165 mm (wiring/CABLES.md); 180 mm is the shortest priced bracket, so every lead is over-length and must be routed with the slack recorded per cable.",
   "verdict": "PASS",
-  "verdict_why": null,
   "offers": [
    {
     "vendor": "ROBOTIS International",
+    "sku": "903-0251-000",
     "url": "https://en.robotis.com/shop_en/item.php?it_id=903-0251-000",
     "currency": "USD",
     "tiers": [
@@ -88,12 +136,17 @@
       15.5
      ]
     ],
+    "no_tiers": true,
     "moq": 1,
     "lead_time": "'Normally ships out within 3 working days when in stock'",
-    "fetched": "2026-09-02"
+    "stock": "not stated",
+    "fetched": "2026-09-02",
+    "confidence": "read",
+    "note": "$1.55 per cable."
    },
    {
     "vendor": "ROBOTIS US",
+    "sku": "Robot Cable-X3P 180mm (10 pcs)",
     "url": "https://www.robotis.us/robot-cable-x3p-180mm-10pcs/",
     "currency": "USD",
     "tiers": [
@@ -102,26 +155,46 @@
       21.85
      ]
     ],
+    "no_tiers": true,
     "moq": 1,
     "lead_time": "not stated",
-    "fetched": "2026-09-02"
+    "stock": "not stated",
+    "fetched": "2026-09-02",
+    "confidence": "read",
+    "note": "$2.19 per cable."
+   }
+  ],
+  "alternates": [
+   {
+    "mpn": "crimp our own: JST EHR-3 housing + SEH-001T-P0.6 contacts",
+    "why_equivalent": "the X3P lead IS a JST EH 3-pin assembly (wiring/CABLES.md connector column). Crimping to the measured lengths removes the 15-160 mm of dead slack per lead. Costed as line C1 below.",
+    "vendor": "DigiKey",
+    "url": "https://www.digikey.com/en/products/detail/jst-sales-america-inc/EHR-3/527225",
+    "price_note": "see line C1; $0.0588 housing + 3 x $0.0257 contact at 100 = $0.1359 per end, wire and labour extra"
    }
   ],
   "unknowns": [
    "Per-link cable lengths as Pollen ships them: CANNOT DETERMINE (docs/BOM.md B2). Our lengths are route floors + slack, measured off spec/mesh-placements.json."
   ],
-  "excluded_from_rollup": null
+  "blocked": []
  },
  {
   "id": "B3",
   "item": "Radxa ZERO 3W single-board computer",
+  "category": "compute",
   "ce_part": "part:radxa-zero-3w",
   "qty_per_robot": 1,
+  "qty_basis": "docs/BOM.md row B3; one compute board in the head (spec/mesh-placements.json)",
+  "mpn": "SKU as specified by Pollen (1 GB LPDDR4 / 32 GB eMMC) DOES NOT EXIST",
+  "mpn_status": "FAIL - the specified configuration is absent from the maker's own SKU table",
+  "mpn_note": "Radxa's product brief RAD-DOC-0084 rev 1.10 §7 'Models and SKU' (https://dl.radxa.com/zero3/docs/hw/3w/radxa_zero_3w_product_brief.pdf) lists 1GB/none, 1GB/8GB, 2GB/none, 2GB/16GB, 4GB/none, 4GB/32GB, 8GB/none, 8GB/64GB. There is no 1 GB / 32 GB part. Pollen's press-kit figure is therefore either a custom Radxa build or a mis-statement of the 1 GB / 8 GB catalogue part (RS107-D1E8H1W15). What settles it: lsblk on a production unit, or Pollen naming the SKU.",
+  "rfq_spec": "Radxa ZERO 3W, RK3566 quad Cortex-A55, 40-pin GPIO header PRE-SOLDERED, 22-pin MIPI CSI 0.5 mm, Wi-Fi 6 / BT 5.4, 2x USB-C. Configuration required: 1 GB LPDDR4 with 32 GB eMMC if Radxa will build it (no such catalogue SKU); otherwise quote RS107-D1E8H1W15 (1 GB / 8 GB, header) and RS107-D4E32H1W15 (4 GB / 32 GB, header) so the eMMC question can be priced.",
   "verdict": "FAIL",
   "verdict_why": "The line as specified is unbuyable: the 1 GB / 32 GB SKU is not in Radxa's catalogue, and every 1 GB variant read on 2026-09-02 was SOLD OUT at every distributor reached. Two distributors did render prices, so the failure is availability and specification - not readability.",
   "offers": [
    {
     "vendor": "ALLNET China",
+    "sku": "RS107-D1E8H1W15 (1 GB / 8 GB eMMC, header)",
     "url": "https://shop.allnetchina.cn/products/copy-of-radxa-zero-3w",
     "currency": "USD",
     "tiers": [
@@ -130,12 +203,18 @@
       23.0
      ]
     ],
+    "no_tiers": true,
     "moq": 1,
     "lead_time": "CANNOT DETERMINE",
-    "fetched": "2026-09-02"
+    "stock": "Sold out (every 1 GB and 2/4 GB-with-eMMC variant; only '2 GB / no eMMC, header' at $55.99 was in stock)",
+    "fetched": "2026-09-02",
+    "confidence": "read",
+    "note": "same page also read: 1GB/none no-header $18, 1GB/none header $19, 1GB/8GB no-header $22, 2GB/16GB $32.90/$33.90, 4GB/32GB $50/$51 - all sold out.",
+    "rollup_caveat": "prices RS107-D1E8H1W15, the 1 GB / 8 GB board - NOT the 1 GB / 32 GB configuration this line specifies, which is absent from Radxa's own SKU table - and that variant read 'Sold out' on the fetch date. The catalogue 32 GB part on the same page is $50 / $51. The line is graded FAIL"
    },
    {
     "vendor": "ameriDroid (US)",
+    "sku": "Radxa Zero 3W",
     "url": "https://ameridroid.com/products/radxa-zero-3w",
     "currency": "USD",
     "tiers": [
@@ -144,12 +223,17 @@
       41.95
      ]
     ],
+    "no_tiers": true,
     "moq": 1,
     "lead_time": "CANNOT DETERMINE",
-    "fetched": "2026-09-02"
+    "stock": "'Out of Stock!'; all variants sold out or unavailable",
+    "fetched": "2026-09-02",
+    "confidence": "read",
+    "note": "base price shown for the selector; per-variant prices not rendered."
    },
    {
     "vendor": "Arace Tech",
+    "sku": "Radxa Zero 3W",
     "url": "https://arace.tech/products/radxa-zero-3w",
     "currency": "USD",
     "tiers": [
@@ -158,12 +242,18 @@
       20.0
      ]
     ],
+    "no_tiers": true,
     "moq": 1,
     "lead_time": "CANNOT DETERMINE",
-    "fetched": "2026-09-02"
+    "stock": "every combination 'Sold Out'",
+    "fetched": "2026-09-02",
+    "confidence": "read",
+    "note": "$20.00 is the selector base, not a variant price.",
+    "excluded_from_rollup": "$20.00 is the variant selector's base figure, not the price of any configuration"
    },
    {
     "vendor": "Evelta (IN)",
+    "sku": "Radxa Zero 3W",
     "url": "https://evelta.com/radxa-zero-3w-tiny-rk3566-sbc/",
     "currency": "INR",
     "tiers": [
@@ -172,12 +262,17 @@
       2995.0
      ]
     ],
+    "no_tiers": true,
     "moq": 1,
     "lead_time": "not stated",
-    "fetched": "2026-09-02"
+    "stock": "in stock",
+    "fetched": "2026-09-02",
+    "confidence": "read",
+    "note": "Rs 2,995.00 ex GST / Rs 3,534.10 inc; base price, per-variant prices not rendered. No 1 GB/32 GB option in the selector."
    },
    {
     "vendor": "ThinkRobotics (IN)",
+    "sku": "Radxa ZERO 3W, all 16 variants",
     "url": "https://thinkrobotics.com/products/radxa-zero-3w",
     "currency": "INR",
     "tiers": [
@@ -186,27 +281,56 @@
       2649.99
      ]
     ],
+    "no_tiers": true,
     "moq": 1,
     "lead_time": "not stated",
-    "fetched": "2026-09-02"
+    "stock": "Out of stock",
+    "fetched": "2026-09-02",
+    "confidence": "read",
+    "note": "every one of the 16 variants is priced Rs 2,649.99 - the store is not pricing per configuration, so this price does not identify a configuration.",
+    "excluded_from_rollup": "all 16 configurations carry the same price, so the figure identifies no configuration"
+   }
+  ],
+  "alternates": [
+   {
+    "mpn": "RS107-D4E32H1W15 (4 GB / 32 GB, header)",
+    "why_equivalent": "same board, same 65 x 30 mm envelope, same 40-pin header and 22-pin CSI; it is the ONLY catalogue SKU that carries 32 GB of eMMC, so if Pollen's '32 GB' is real and not a custom build this is the part. More DRAM than specified is not a functional risk.",
+    "vendor": "ALLNET China",
+    "url": "https://shop.allnetchina.cn/products/copy-of-radxa-zero-3w",
+    "price_note": "$50 (no header) / $51 (header), sold out 2026-09-02"
    }
   ],
   "unknowns": [
    "Lead time from any distributor: CANNOT DETERMINE - every US/CN retailer read was sold out on 2026-09-02.",
    "Radxa direct / OEM price: CANNOT DETERMINE. radxa.com/products/zeros/zero3w/ shows no price and says the board is 'exclusively available through our network of Approved Partners'."
   ],
-  "excluded_from_rollup": null
+  "blocked": [
+   {
+    "url": "https://www.okdo.com/p/okdo-rock-zero-3w-1gb-with-wi-fi-ble-without-gpio/",
+    "reason": "'Socket is closed' x5 (OKdo is Radxa's EU/UK distributor)"
+   },
+   {
+    "url": "https://befr.rs-online.com/web/p/rock-sbc-boards/2564694",
+    "reason": "hang / timeout"
+   }
+  ]
  },
  {
   "id": "B4",
   "item": "NP-F550-form-factor 2S Li-ion pack, 7.2 V, 2600 mAh (+ dual-charger share)",
+  "category": "power",
   "ce_part": "part:np-f550",
   "qty_per_robot": 1,
+  "qty_basis": "docs/BOM.md row B4; one pack in the trunk on power_support (docs/PARTS.md row 35)",
+  "mpn": "CANNOT DETERMINE - the maker of the fitted pack is unidentified",
+  "mpn_status": "form factor known, part not",
+  "mpn_note": "LANE C's finding, read 2026-09-02 from ce-parts/np-f550/component.json: 'NP-F550' names Sony's ORIGINAL L-series pack, which Sony rates 1500 mAh / 10.8 Wh. A 2600 mAh 'NP-F550' is NECESSARILY a third-party pack in Sony's shape, and no source names whose. The mesh envelope is 38.6 x 20.6 x 70.8 mm (Pollen's np_f970 mesh); Duracell's DR5 page states 70 x 38 x 20 mm - consistent to the millimetre. THIS DOES NOT CHANGE THE SOURCING LINE: the shape, the 7.2 V 2S chemistry and the 2600 mAh capacity are what is bought, and the cradle was checked against 38.6 x 20.6 x 70.8. What it changes is that no MPN can be put on a purchase order - only a specification.",
+  "rfq_spec": "Rechargeable pack in the Sony InfoLITHIUM L-series (NP-F550) mechanical form factor, 7.2 V nominal 2-series Li-ion, >= 2600 mAh (>= 18.72 Wh), with integrated protection (over-charge / over-discharge / over-current), body 70 x 38 x 20 mm class, standard L-series contact block. Must sustain 6.6-8.2 V under a 15-servo load; the runtime maps 6.6 V empty / 8.2 V full. Certification marks and cell maker to be stated on the quote.",
   "verdict": "PASS",
-  "verdict_why": null,
   "offers": [
    {
     "vendor": "NextBatteries",
+    "sku": "NP-F550 2600 mAh 2-pack + dual charger",
     "url": "https://www.nextbatteries.com/products/sony-np-f550-battery-2-pack-2600mah-l-series-dual-charger",
     "currency": "USD",
     "tiers": [
@@ -215,12 +339,17 @@
       24.95
      ]
     ],
+    "no_tiers": true,
     "moq": 1,
     "lead_time": "not stated",
-    "fetched": "2026-09-02"
+    "stock": "In Stock",
+    "fetched": "2026-09-02",
+    "confidence": "read",
+    "note": "$49.90 for 2 packs + dual charger (EU plug + car adapter) = $24.95 per pack INCLUDING the charger share. A second listing on the same shop, 2 packs + single charger, is $53.90."
    },
    {
     "vendor": "Neewer",
+    "sku": "66601510 (4 x NP-F550 2600 mAh)",
     "url": "https://neewer.com/products/neewer-4-packs-7-4v-2600mah-np-f550-replacement-batteries-66601510",
     "currency": "USD",
     "tiers": [
@@ -229,12 +358,17 @@
       26.25
      ]
     ],
+    "no_tiers": true,
     "moq": 1,
     "lead_time": "'More stock coming soon'",
-    "fetched": "2026-09-02"
+    "stock": "0 in stock",
+    "fetched": "2026-09-02",
+    "confidence": "read",
+    "note": "$104.99 for 4 packs, no charger = $26.25 per pack. Neewer states 7.4 V; the pack chemistry is the same 2S."
    },
    {
     "vendor": "Neewer (charger set)",
+    "sku": "66600244 - NEEWER NP-F550 Battery Charger Set for Sony",
     "url": "https://neewer.com/products/batteries-chargers-66600244",
     "currency": "USD",
     "tiers": [
@@ -243,12 +377,18 @@
       24.995
      ]
     ],
+    "no_tiers": true,
     "moq": 1,
     "lead_time": "not stated",
-    "fetched": "2026-09-03"
+    "stock": "available (Shopify variant 37973290287297 available:true)",
+    "fetched": "2026-09-03",
+    "confidence": "read",
+    "note": "PRODUCT PAGE, read 2026-09-03 (the 2026-09-02 reading was https://neewer.com/collections/chargers, a collection page). Page data verbatim: sku 66600244, price 4999 (cents) = $49.99, barcode 191073009981, weight 320 g, available true. The set is 2 x NP-F550 2600 mAh packs + 1 dual USB charger + cable, so $49.99 / 2 = $24.9950 per pack INCLUDING the charger share - the same basis on which NextBatteries' $49.90 2-pack-plus-charger is recorded at $24.95. Previously excluded from the roll-up for pricing a set rather than a pack; that exclusion is withdrawn because the NextBatteries offer it was measured against is the same kind of set, and holding the two to different rules was the inconsistency. It does not change the roll-up: NextBatteries is $0.0450 cheaper per pack. The standalone dual-charger product pages 66600569 / 66600066 both 404.",
+    "page_kind": "product"
    },
    {
     "vendor": "Pollen Robotics (reference, not a supplier to us)",
+    "sku": "charger-pack",
     "url": "https://store.pollen-robotics.com/products/charger-pack",
     "currency": "EUR",
     "tiers": [
@@ -257,9 +397,30 @@
       33.0
      ]
     ],
+    "no_tiers": true,
     "moq": 1,
     "lead_time": "not stated",
-    "fetched": "2026-09-02"
+    "stock": "not stated",
+    "fetched": "2026-09-02",
+    "confidence": "read",
+    "note": "EUR 33 / $39 for 2 packs + dual charger - i.e. Pollen resells at roughly what NextBatteries charges.",
+    "excluded_from_rollup": "Pollen is the product's own maker, quoted as a reference point, not a supplier to us"
+   }
+  ],
+  "alternates": [
+   {
+    "mpn": "Duracell DR5 'Replacement Sony NP-F330/NP-F550 Battery 7.2V 2600mAh'",
+    "why_equivalent": "identical form factor, identical 7.2 V / 2600 mAh rating, and its published body 70 x 38 x 20 mm matches the cradle envelope in every axis. This is the vendor sheet lane C saved byte-for-byte (ce-parts/np-f550/docs/duracell-dr5-np-f550-2600mah.html, sha256 239e0651...). No price rendered on that page.",
+    "vendor": "Duracell Charge (PSA Parts Ltd)",
+    "url": "https://www.duracellcharge.info/en/product/replacement-sony-np-f330-np-f550-battery/",
+    "price_note": "CANNOT DETERMINE - the page carries no price"
+   },
+   {
+    "mpn": "Deity NP-F550 (3350 mAh, LG 18650 cells)",
+    "why_equivalent": "same shape and same 7.2 V 2S topology with a higher capacity; kept as vendor EVIDENCE of the cell type and protection in this shape, not as a substitution (the extra capacity changes pack mass and the runtime's 6.6/8.2 V map is unaffected).",
+    "vendor": "Deity Microphones",
+    "url": "https://deitymic.com/products/np-f550/",
+    "price_note": "CANNOT DETERMINE - datasheet fetched, product page price not read"
    }
   ],
   "unknowns": [
@@ -267,18 +428,36 @@
    "OEM pack price at volume: CANNOT DETERMINE. An Alibaba listing (Beston, MOQ 200/500) is indexed at $1.20-3.88/pc but the page body was BLANK to the fetcher, so that number was not read and is not used.",
    "Cell inside Pollen's pack: CANNOT DETERMINE. Two Samsung ICR18650-26J listings were read at $4.99 and both were SOLD OUT (imrbatteries.com, 18650batterystore.com); TME shows the cell 'withdrawn from the offer'."
   ],
-  "excluded_from_rollup": null
+  "blocked": [
+   {
+    "url": "https://www.bhphotovideo.com/c/product/1733125-REG/neewer_66600244_2_2600mah_f550.html",
+    "reason": "HTTP 403"
+   },
+   {
+    "url": "https://www.alibaba.com/product-detail/Beston-2600mAh-replacement-NP-F550-NP_60828272766.html",
+    "reason": "page body blank to the fetcher"
+   },
+   {
+    "url": "https://eu.nkon.nl/rechargeable/li-ion/18650-size/samsung-icr18650-26j3.html",
+    "reason": "HTTP 403"
+   }
+  ]
  },
  {
   "id": "B6",
   "item": "IMX219 camera board, M12 mount, with lens",
+  "category": "module",
   "ce_part": "part:imx219",
   "qty_per_robot": 1,
+  "qty_basis": "docs/BOM.md row B6; camera at world (81.4, 0, 251.1), mounted upside down (RELEASE.html §4 step 5)",
+  "mpn": "Arducam B0183 (representative). The module Pollen fits: CANNOT DETERMINE",
+  "mpn_status": "representative substitute",
+  "rfq_spec": "8 Mpx Sony IMX219 CMOS camera board with an M12 lens holder, 22-pin 0.5 mm MIPI CSI-2 FFC, board outline compatible with a 25 x 24 mm class mount behind face_part. Lens FOV to be specified - Pollen's press kit says the FOV is 'still being finalised', so quote the module both bare and with a 75 deg (H) low-distortion M12 lens.",
   "verdict": "PASS",
-  "verdict_why": null,
   "offers": [
    {
     "vendor": "UCTRONICS (Arducam's US shop)",
+    "sku": "B0183",
     "url": "https://www.uctronics.com/camera-modules/camera-for-nvidia/arducam-8-mp-sony-imx219-m12-mount-low-distortion-camera-module-for-nvidia-jetson-nano.html",
     "currency": "USD",
     "tiers": [
@@ -287,12 +466,17 @@
       23.99
      ]
     ],
+    "no_tiers": true,
     "moq": 1,
     "lead_time": "not stated",
-    "fetched": "2026-09-02"
+    "stock": "not stated",
+    "fetched": "2026-09-02",
+    "confidence": "read",
+    "note": "'Special Price' $23.99, regular $39.99. Package listed as '1pcs Arducam IMX219 Low Distortion Camera Module'; FOV 88 deg (D) x 75 deg (H) x 60 deg (V) - lens included."
    },
    {
     "vendor": "Seeed Studio",
+    "sku": "102110719",
     "url": "https://www.seeedstudio.com/IMX-219-CMOS-camera-module-M12-and-CS-camera-available-p-5372.html",
     "currency": "USD",
     "tiers": [
@@ -305,12 +489,17 @@
       12.5
      ]
     ],
+    "no_tiers": false,
     "moq": 1,
     "lead_time": "not stated",
-    "fetched": "2026-09-02"
+    "stock": "In stock",
+    "fetched": "2026-09-02",
+    "confidence": "read",
+    "note": "IMX219 M12/CS board WITHOUT a lens - the only line with a published tier. Pair with line B7 for the lens."
    },
    {
     "vendor": "Welectron (DE)",
+    "sku": "B0183",
     "url": "https://www.welectron.com/Arducam-B0183-IMX219-Low-Distortion-M12-Mount-Camera-Module-for-NVIDIA-Jetson-Nano-Xavier-NX_1",
     "currency": "EUR",
     "tiers": [
@@ -319,12 +508,17 @@
       38.57
      ]
     ],
+    "no_tiers": true,
     "moq": 1,
     "lead_time": "1 - 3 business days",
-    "fetched": "2026-09-02"
+    "stock": "On stock",
+    "fetched": "2026-09-02",
+    "confidence": "read",
+    "note": "EUR 45.90 inc 19 % VAT / EUR 38.57 ex."
    },
    {
     "vendor": "The Pi Hut (UK)",
+    "sku": "B0103",
     "url": "https://thepihut.com/products/8mp-sony-imx219-camera-module-with-m12-lens-for-raspberry-pi",
     "currency": "GBP",
     "tiers": [
@@ -333,12 +527,17 @@
       57.6
      ]
     ],
+    "no_tiers": true,
     "moq": 1,
     "lead_time": "not stated",
-    "fetched": "2026-09-02"
+    "stock": "Only 7 units left",
+    "fetched": "2026-09-02",
+    "confidence": "read",
+    "note": "B0103 = IMX219 + 70 deg M12 lens LS40136 + two FPC cables. GBP 57.60 inc VAT."
    },
    {
     "vendor": "The Engineer Store (IN)",
+    "sku": "B0183",
     "url": "https://www.theengineerstore.in/products/arducam-b0183-imx219-low-distortion-m12-mount-camera-module-for-nvidia-jetson-nano",
     "currency": "INR",
     "tiers": [
@@ -347,27 +546,50 @@
       3839.66
      ]
     ],
+    "no_tiers": true,
     "moq": 1,
     "lead_time": "3-5 Working Days Dispatch",
-    "fetched": "2026-09-02"
+    "stock": "listed",
+    "fetched": "2026-09-02",
+    "confidence": "read",
+    "note": "this page says the lens is sold separately, which CONTRADICTS UCTRONICS' package list for the same SKU. Unresolved."
+   }
+  ],
+  "alternates": [
+   {
+    "mpn": "Arducam B0188 (IMX219 NoIR M12)",
+    "why_equivalent": "same IMX219 sensor and M12 mount, IR-cut filter removed. Cheaper ($13.99 special / $24.99 regular at UCTRONICS) but arducam.com's index entry reads '[Discontinued]' and 'camera board is not included' - whether B0188 ships a sensor board at all is CANNOT DETERMINE, so this is a candidate, not a substitute.",
+    "vendor": "UCTRONICS",
+    "url": "https://www.uctronics.com/index.php/arducam-8-mp-sony-imx219-m12-mount-low-distortion-camera-module-for-raspberry-pi-nvidia-jetson-nano.html",
+    "price_note": "$13.99 special, $24.99 regular"
    }
   ],
   "unknowns": [
    "Which Arducam (or other) board Pollen fits, and the FFC length: CANNOT DETERMINE (docs/BOM.md B6/B8).",
    "Whether B0183 ships with the lens: UCTRONICS says yes, The Engineer Store says no, for the same SKU."
   ],
-  "excluded_from_rollup": null
+  "blocked": [
+   {
+    "url": "https://www.arducam.com/product/arducam-imx219-low-distortion-m12-mount-camera-module-drop-in-replacement-for-raspberry-pi-v2-camera/",
+    "reason": "HTTP 403 on every arducam.com URL"
+   }
+  ]
  },
  {
   "id": "B7",
   "item": "M12 wide-angle lens (only if the camera board is bought bare)",
+  "category": "module",
   "ce_part": "part:microduck-m12-lens",
   "qty_per_robot": 1,
+  "qty_basis": "docs/BOM.md row B7. Zero if B0183/B0103 is bought (both include a lens).",
+  "mpn": "Arducam M40180H13L (representative). Required FOV: CANNOT DETERMINE",
+  "mpn_status": "representative substitute; the required focal length is not fixed",
+  "rfq_spec": "M12 (S-mount) lens for a 1/4-inch IMX219 sensor. TARGET FOV IS NOT FIXED - Pollen's press kit says the camera FOV is 'still being finalised' and the only community figure is ~62 deg HFOV, unverified. Quote 70 deg, 90 deg and 140 deg options and state the FOV ON A 1/4-INCH SENSOR, not on the sensor the datasheet happens to use: the two lenses we have priced advertise 180 deg and 122 deg but deliver 118 deg and 110 deg diagonal on a 1/4-inch part. MECHANICAL LIMIT, MEASURED: the lens in Pollen's own published model is a body of revolution 16.9400 mm in diameter and 18.9200 mm long (out/verify/mech_dims.json, mesh `lens`), inside an m12_lens_holder of 24.0000 x 14.8000 x 16.0000 mm. Barrel diameter must not exceed 16.9400 mm. An FOV selection kit (e.g. Arducam LK001) is acceptable for prototyping and is what we would buy first.",
   "verdict": "CANNOT DETERMINE",
-  "verdict_why": "Downgraded from PASS on 2026-09-03 by the same standard that downgraded B12. Two distributors do carry a price on a real product page, but they price TWO DIFFERENT LENSES and neither is shown to be the right one. (1) Required FOV is CANNOT DETERMINE - Pollen's press kit says it is 'still being finalised' and the only community figure is ~62 deg HFOV (docs/ELECTRONICS-AND-SOFTWARE.md:225, flagged unverified). Both priced lenses are far wider than that: 110 deg (Arducam LN180) and 118 deg (Pi Hut LN007), both measured on a 1/4-inch sensor as the vendor pages state. (2) The Pi Hut part is 20.0000 mm across against Pollen's modelled `lens` at 16.9400 mm diameter (out/verify/mech_dims.json) - 3.0600 mm oversize, so it cannot be the modelled part. That leaves ONE candidate lens with one distributor, which is not a sourced line. The UCTRONICS price stays in Table 1 because it was read, and is broken out there as coming from a line this document does not grade buyable. What settles it: Pollen stating the FOV, or a lens measured off a production unit; then this line is one page away from PASS.",
   "offers": [
    {
     "vendor": "UCTRONICS",
+    "sku": "Arducam M40180H13L (SKU LN180)",
     "url": "https://www.uctronics.com/lens/m12-mount-lens/arducam-m12-mount-camera-lens-m40180h13l.html",
     "currency": "USD",
     "tiers": [
@@ -376,12 +598,19 @@
       7.99
      ]
     ],
+    "no_tiers": true,
     "moq": 1,
     "lead_time": "not stated",
-    "fetched": "2026-09-03"
+    "stock": "not stated",
+    "fetched": "2026-09-03",
+    "confidence": "read",
+    "note": "PRODUCT PAGE, read 2026-09-03 (the 2026-09-02 reading was the category page /lens/m12-mount-lens.html?product_list_mode=list, which is a listing, not this part's page). The page states: Optical Format 1/4\", EFL 1.8 mm, FOV on a 1/4\" sensor 122 deg D / 110 deg H / 94.5 deg V, FOV on a 1/4\" RPi camera 110 deg, F/NO 2.4, total length 17.23 mm, barrel 14 x 14.7 mm, holder height 13 mm, 6 g. The category page also priced M40205M11 (2.05 mm) $11.99 and M27195H15 (1.95 mm) $9.99; no stock figure is printed on either.",
+    "rollup_caveat": "prices ONE of three candidate focal lengths on an FOV that Pollen has not fixed ($7.99 / $9.99 / $11.99); the line is graded CANNOT DETERMINE",
+    "page_kind": "product"
    },
    {
     "vendor": "The Pi Hut (UK)",
+    "sku": "LN007 - M12 lens, 180 deg fisheye, 1/2.5 in, 1.7 mm",
     "url": "https://thepihut.com/products/m12-lens-180-degree-fisheye-1-2-5-optical-format-1-7mm-focal-length",
     "currency": "GBP",
     "tiers": [
@@ -390,9 +619,23 @@
       9.6
      ]
     ],
+    "no_tiers": true,
     "moq": 1,
     "lead_time": "not stated",
-    "fetched": "2026-09-03"
+    "stock": "In stock",
+    "fetched": "2026-09-03",
+    "confidence": "read",
+    "note": "PRODUCT PAGE, read 2026-09-03 (the 2026-09-02 reading was the collection page /collections/raspberry-pi-camera-lenses). GBP 9.60 incl VAT, SKU LN007. The page states: optical format 1/2.5\", EFL 1.7 mm, FOV 180/180/140 deg D/H/V on a 1/2\" sensor but 118 deg on a 1/4\" Pi camera, F/NO 2.0, M12 thread, holder height 13 mm, body 20 x 18.7 mm, 8 g. MEASURED AGAINST OUR GEOMETRY: Pollen's own `lens` mesh is 16.9400 x 18.9200 x 16.9400 mm (out/verify/mech_dims.json, i.e. a body of revolution of diameter 16.9400 mm and length 18.9200 mm). This lens is 20.0000 mm across - 3.0600 mm LARGER in diameter than the part Pollen models - so it is not the modelled lens, whatever its FOV. The Arducam LN180 above is 14.7000 mm across x 17.2300 mm long and sits inside the modelled envelope with 2.2400 mm diametral and 1.6900 mm axial clearance. The collection page also priced M12 75 deg GBP 14.40, 90 deg GBP 17.30, 140 deg GBP 21.20.",
+    "page_kind": "product"
+   }
+  ],
+  "alternates": [
+   {
+    "mpn": "Arducam LK001 lens kit (10 lenses, 10-200 deg, 1/4-inch)",
+    "why_equivalent": "not a production part - the instrument that FIXES the open FOV question on a bench before a lens is chosen. Buy one, not one per robot.",
+    "vendor": "UCTRONICS",
+    "url": "https://www.uctronics.com/lk001.html",
+    "price_note": "$89.99 per kit"
    }
   ],
   "unknowns": [
@@ -400,18 +643,25 @@
    "Neither priced lens is shown to be the fitted part. Measured: Pollen's `lens` mesh is 16.9400 mm diameter x 18.9200 mm long (out/verify/mech_dims.json). Arducam LN180 is 14.7000 x 17.2300 mm and fits inside it; Pi Hut LN007 is 20.0000 mm across and does not.",
    "What is NOT measured here: the aperture in `face_part` the barrel passes through. The comparison above is against Pollen's own lens mesh, not against the hole. A 20.0000 mm barrel may or may not clash with the face; measuring that aperture would settle whether the Pi Hut lens is merely a different part or a physically impossible one."
   ],
-  "excluded_from_rollup": null
+  "blocked": [],
+  "verdict_why": "Downgraded from PASS on 2026-09-03 by the same standard that downgraded B12. Two distributors do carry a price on a real product page, but they price TWO DIFFERENT LENSES and neither is shown to be the right one. (1) Required FOV is CANNOT DETERMINE - Pollen's press kit says it is 'still being finalised' and the only community figure is ~62 deg HFOV (docs/ELECTRONICS-AND-SOFTWARE.md:225, flagged unverified). Both priced lenses are far wider than that: 110 deg (Arducam LN180) and 118 deg (Pi Hut LN007), both measured on a 1/4-inch sensor as the vendor pages state. (2) The Pi Hut part is 20.0000 mm across against Pollen's modelled `lens` at 16.9400 mm diameter (out/verify/mech_dims.json) - 3.0600 mm oversize, so it cannot be the modelled part. That leaves ONE candidate lens with one distributor, which is not a sourced line. The UCTRONICS price stays in Table 1 because it was read, and is broken out there as coming from a line this document does not grade buyable. What settles it: Pollen stating the FOV, or a lens measured off a production unit; then this line is one page away from PASS."
  },
  {
   "id": "B8",
   "item": "22-pin 0.5 mm MIPI CSI FFC ribbon, Radxa to camera",
+  "category": "connector",
   "ce_part": "part:microduck-camera-module",
   "qty_per_robot": 1,
+  "qty_basis": "wiring/CABLES.md row 20; route floor 13.3 mm, cut length 15 mm",
+  "mpn": "22-pin 0.5 mm to 15-pin 1.0 mm FPC camera cable (the Pi-Zero-class part). The ribbon Pollen fits: CANNOT DETERMINE",
+  "mpn_status": "class identified; exact part and length unknown",
+  "rfq_spec": "MIPI CSI-2 flat flex, 22 positions, 0.5 mm pitch at the Radxa end, length ~15 mm (route floor 13.3 mm measured off spec/mesh-placements.json). Camera-board end is 22-pin 0.5 mm OR 15-pin 1.0 mm depending on the module chosen - quote both, and state contact side (same-side vs opposite-side).",
   "verdict": "PASS",
   "verdict_why": "Two distributors now carry a 22-pin 0.5 mm camera ribbon at a read price. The line is PASS on SOURCING and still open on LENGTH, and the two are not the same question: the shortest catalogue part found anywhere is Pimoroni's 38 mm SC0004, and our measured route floor is 13.3 mm with a 15 mm cut (wiring/CABLES.md row 20). Every buyable ribbon is at least 2.5x too long, so the head must either absorb ~23 mm of folded flex or a custom-length FFC must be ordered. That is a mechanical finding, not a price one.",
   "offers": [
    {
     "vendor": "Adafruit",
+    "sku": "#5211 Raspberry Pi Zero FPC Camera Cable, 30 cm",
     "url": "https://www.adafruit.com/product/5211",
     "currency": "USD",
     "tiers": [
@@ -428,12 +678,17 @@
       3.16
      ]
     ],
+    "no_tiers": false,
     "moq": 1,
     "lead_time": "not stated",
-    "fetched": "2026-09-02"
+    "stock": "In stock",
+    "fetched": "2026-09-02",
+    "confidence": "read",
+    "note": "22-pin 0.5 mm at the host end, for the Pi Zero's connector - the same connector family the Radxa ZERO 3W uses. 30 cm: 20x our 15 mm cut length. Adafruit also lists a 15 cm variant on the same page family."
    },
    {
     "vendor": "Pimoroni (UK)",
+    "sku": "SC0004 Camera Cable - Raspberry Pi Zero edition, 38 mm",
     "url": "https://shop.pimoroni.com/en-us/products/camera-cable-raspberry-pi-zero-edition",
     "currency": "GBP",
     "tiers": [
@@ -442,9 +697,22 @@
       2.0
      ]
     ],
+    "no_tiers": true,
     "moq": 1,
     "lead_time": "not stated",
-    "fetched": "2026-09-02"
+    "stock": "Out of stock",
+    "fetched": "2026-09-02",
+    "confidence": "read",
+    "note": "'small 22-pin/0.5mm pitch connector at one end; big 15-pin/1mm pitch connector at the other'. 38 mm is the SHORTEST 22-pin camera ribbon found at any vendor. The 150 mm SC0002 is GBP 2.60 (was 3.25) and IS in stock."
+   }
+  ],
+  "alternates": [
+   {
+    "mpn": "custom-length 22-pin 0.5 mm FFC, ~15 mm",
+    "why_equivalent": "Not a catalogue part. Our route floor is 13.3 mm and the cut length 15 mm; the shortest buyable ribbon is 38 mm. A custom FFC removes 23 mm of folded flex from a head cavity that is already tight, and FFC is one of the cheapest custom parts there is at volume. Below ~100 robots, folding the 38 mm part is almost certainly right.",
+    "vendor": "any FFC maker (Molex Premo-Flex is the catalogue family; Molex quotes 4-80 conductors at 0.5 mm with MOQ 1)",
+    "url": "https://www.digikey.com/en/product-highlight/m/molex-connector/premo-flex-ffc-jumpers",
+    "price_note": "CANNOT DETERMINE - no Premo-Flex 22-circuit part number was resolved to a price page"
    }
   ],
   "unknowns": [
@@ -452,18 +720,36 @@
    "The length Pollen fits: CANNOT DETERMINE (docs/BOM.md B8).",
    "NO CATALOGUE PART IS SHORT ENOUGH. Shortest found: 38 mm (Pimoroni SC0004) against a 15 mm cut. Measured, not assumed."
   ],
-  "excluded_from_rollup": null
+  "blocked": [
+   {
+    "url": "https://esp32s.com/product/radxa-camera-fpc-cable-for-radxa-camera-8m-219-and-rpi-camera-for-zero-3w-3e/",
+    "reason": "HTTP 403 (a search snippet claims $1.90 - NOT read, so not used)"
+   },
+   {
+    "url": "https://www.fabtolab.com/radxa-fpc-cable-zero-3-camera-8m-219-zero-3",
+    "reason": "Socket is closed"
+   },
+   {
+    "url": "https://docs.radxa.com/en/zero/zero3/accessories/camera",
+    "reason": "documentation, carries no price"
+   }
+  ]
  },
  {
   "id": "B9",
   "item": "Time-of-Flight 8x8 multizone ranger (module or bare die)",
+  "category": "sensor",
   "ce_part": "part:vl53l8cx",
   "qty_per_robot": 1,
+  "qty_basis": "docs/BOM.md row B9; ToF at world (81.4, 22.4, 249.1), I2C 0x29 on the HAT's Stemma J5",
+  "mpn": "VL53L8CX or VL53L5CX - which generation ships is CANNOT DETERMINE (both drivers are vendored in Pollen's source)",
+  "mpn_status": "generation unresolved",
+  "rfq_spec": "ST 8x8 multizone Time-of-Flight ranging sensor, I2C address 0x29, on a carrier with 3V3 regulation and level shifting, or as bare optical LGA-16 for placement on our own HAT. Note the VL53L8CX requires IOVDD 1.2/1.8 V only (part:vl53l8cx) - a 3V3 carrier is not optional if the host is 3V3.",
   "verdict": "PASS",
-  "verdict_why": null,
   "offers": [
    {
     "vendor": "Pololu",
+    "sku": "#3419 VL53L8CX carrier with voltage regulators, 400 cm",
     "url": "https://www.pololu.com/product/3419",
     "currency": "USD",
     "tiers": [
@@ -484,12 +770,17 @@
       19.43
      ]
     ],
+    "no_tiers": false,
     "moq": 1,
     "lead_time": "'Active and Preferred', backorders allowed",
-    "fetched": "2026-09-02"
+    "stock": "listed active",
+    "fetched": "2026-09-02",
+    "confidence": "read",
+    "note": "no tier published above 100."
    },
    {
     "vendor": "SparkFun",
+    "sku": "SEN-19013 Qwiic Mini ToF Imager (VL53L5CX)",
     "url": "https://www.sparkfun.com/sparkfun-qwiic-mini-tof-imager-vl53l5cx.html",
     "currency": "USD",
     "tiers": [
@@ -510,12 +801,17 @@
       22.06
      ]
     ],
+    "no_tiers": false,
     "moq": 1,
     "lead_time": "not stated",
-    "fetched": "2026-09-02"
+    "stock": "In stock",
+    "fetched": "2026-09-02",
+    "confidence": "read",
+    "note": "SEN-18642 (full-size Qwiic) on the same shop is $32.50 -> $27.63 @100."
    },
    {
     "vendor": "DigiKey",
+    "sku": "VL53L5CX-SATEL (ST's own breakout)",
     "url": "https://www.digikey.com/en/products/detail/stmicroelectronics/VL53L5CX-SATEL/14552430",
     "currency": "USD",
     "tiers": [
@@ -524,12 +820,17 @@
       22.7
      ]
     ],
+    "no_tiers": true,
     "moq": 1,
     "lead_time": "Manufacturer Standard Lead Time 51 Weeks",
-    "fetched": "2026-09-02"
+    "stock": "463",
+    "fetched": "2026-09-02",
+    "confidence": "read",
+    "note": "SATEL-VL53L8 (the L8 equivalent) is $32.95 with 0 in stock, 1 past due, lead 13 weeks."
    },
    {
     "vendor": "DigiKey",
+    "sku": "VL53L8CXV0GC/1 (bare optical LGA-16)",
     "url": "https://www.digikey.com/en/products/detail/stmicroelectronics/VL53L8CXV0GC-1/18085238",
     "currency": "USD",
     "tiers": [
@@ -566,12 +867,18 @@
       5.77
      ]
     ],
+    "no_tiers": false,
     "moq": 1,
     "lead_time": "22 weeks",
-    "fetched": "2026-09-02"
+    "stock": "6,174",
+    "fetched": "2026-09-02",
+    "confidence": "read",
+    "excluded_from_rollup": "the bare die needs regulators and a level shifter added to the HAT; it is costed as an alternate, not as this line's module",
+    "note": "The chip itself. IOVDD is 1.2/1.8 V ONLY (part:vl53l8cx), so a 3V3 host cannot drive it directly - that is what the $19-25 carrier buys."
    },
    {
     "vendor": "DigiKey",
+    "sku": "VL53L5CXV0GC/1 (bare optical LGA-16)",
     "url": "https://www.digikey.com/en/products/detail/stmicroelectronics/VL53L5CXV0GC-1/14552424",
     "currency": "USD",
     "tiers": [
@@ -608,12 +915,18 @@
       5.767
      ]
     ],
+    "no_tiers": false,
     "moq": 1,
     "lead_time": "22 weeks",
-    "fetched": "2026-09-02"
+    "stock": "7,067",
+    "fetched": "2026-09-02",
+    "confidence": "read",
+    "excluded_from_rollup": "previous-generation bare die; costed as an alternate",
+    "note": "The two bare-chip tier tables came back identical to the cent from their own separate DigiKey pages. Choose on IOVDD (L5CX accepts 3V3, L8CX does not), not on price."
    },
    {
     "vendor": "SparkFun",
+    "sku": "SEN-18642 Qwiic ToF Imager (VL53L5CX), full size",
     "url": "https://www.sparkfun.com/sparkfun-qwiic-tof-imager-vl53l5cx.html",
     "currency": "USD",
     "tiers": [
@@ -634,26 +947,65 @@
       27.63
      ]
     ],
+    "no_tiers": false,
     "moq": 1,
     "lead_time": "not stated",
-    "fetched": "2026-09-02"
+    "stock": "In stock",
+    "fetched": "2026-09-02",
+    "confidence": "read",
+    "excluded_from_rollup": "the Qwiic Mini SEN-19013 above is the same sensor on a smaller, cheaper board",
+    "note": "Recorded because it is a second SparkFun reading of the same silicon at a different board size."
+   }
+  ],
+  "alternates": [
+   {
+    "mpn": "VL53L8CXV0GC/1 (bare optical LGA-16, on our own HAT)",
+    "why_equivalent": "identical silicon to the carrier's; removes the $19-25 breakout and the Stemma cable. Costs the HAT two regulators and a level shifter. At >= 100 robots this is the correct part: $6.72 @100 and $6.06 @1000 vs $19.43 for the cheapest carrier.",
+    "vendor": "DigiKey",
+    "url": "https://www.digikey.com/en/products/detail/stmicroelectronics/VL53L8CXV0GC-1/18085238",
+    "price_note": "$8.77 @1 / $7.22 @25 / $6.72 @100 / $6.24 @500 / $6.06 @1000 / $5.77 @3600 reel; stock 6,174; lead 22 weeks"
+   },
+   {
+    "mpn": "VL53L5CXV0GC/1 (bare, previous generation)",
+    "why_equivalent": "the other generation the vendored driver supports; DigiKey's tier table is identical to the L8CX to the cent. Choose on IOVDD (L5CX accepts 3V3, L8CX does not) not on price.",
+    "vendor": "DigiKey",
+    "url": "https://www.digikey.com/en/products/detail/stmicroelectronics/VL53L5CXV0GC-1/14552424",
+    "price_note": "$8.77 @1 / $7.217 @25 / $6.718 @100 / $6.059 @1000; stock 7,067; lead 22 weeks"
+   },
+   {
+    "mpn": "Pololu #3418 (VL53L7CX, wide FOV)",
+    "why_equivalent": "same family and same carrier, 90 deg diagonal FOV instead of 65 deg. Cheaper. It is a DIFFERENT sensor and the vendored drivers do not name it - a candidate only if the FOV is found to be wrong.",
+    "vendor": "Pololu",
+    "url": "https://www.pololu.com/product/3418",
+    "price_note": "$19.95 @1 / $16.89 @25 / $15.53 @100"
    }
   ],
   "unknowns": [
    "Which generation (L5CX vs L8CX) and which breakout Pollen fits: CANNOT DETERMINE (ce-parts/microduck-tof-module/component.json)."
   ],
-  "excluded_from_rollup": null
+  "blocked": [
+   {
+    "url": "https://www.mouser.com/ProductDetail/STMicroelectronics/VL53L5CX-SATEL",
+    "reason": "timeout x3"
+   }
+  ]
  },
  {
   "id": "B10",
   "item": "Ball bearing 22 x 16 x 4 mm (thin section)",
+  "category": "bearing",
   "ce_part": "part:bearing-22x16x4",
   "qty_per_robot": 11,
+  "qty_basis": "docs/PARTS.md / RELEASE.html §4: 2 in trunk_base, 2 per hip side (yaw2roll + bracket) x2, 1 in upper leg x2, 1 in neck_pitch, 2 in yaw_roll_motion = 11",
+  "mpn": "MR1622-ZZ (aliases ET2216ZZ, SET2216, A2216, DDA2216(ZZ), 1622ZZ)",
+  "mpn_status": "designation confirmed from dimensions; Pollen's own MPN CANNOT DETERMINE",
+  "mpn_note": "16 x 22 x 4 is NOT an ISO 67xx/61xxx size (6700 = 10x15x4, 6702 = 15x21x4). SMB Bearings' drawing ET2216-thin-section-bearing-16x22x4mm.pdf gives SAE52100 chrome steel, pressed-steel cage, static 62 kgf, dynamic 97 kgf, 11 000 rpm.",
+  "rfq_spec": "Thin-section deep-groove ball bearing, bore 16.000 mm, OD 22.000 mm, width 4.000 mm, designation MR1622 / ET2216 / DDA2216. Chrome steel (GCr15 / SAE52100) or stainless. Shield variant to be quoted BOTH ways (ZZ metal shields and open) - which one the product fits is unresolved. Press-fit into a printed PLA seat, so OD tolerance and roundness matter more than the ABEC class.",
   "verdict": "PASS",
-  "verdict_why": null,
   "offers": [
    {
     "vendor": "NZ Miniature Bearings (NZ)",
+    "sku": "MR1622-ZZ (SKU 00206030)",
     "url": "https://nzminiaturebearings.com/product/16x22x4-mm-mr1622-zz-bearing-sku-00206030.html",
     "currency": "NZD",
     "tiers": [
@@ -662,12 +1014,17 @@
       5.9
      ]
     ],
+    "no_tiers": true,
     "moq": 1,
     "lead_time": "not stated",
-    "fetched": "2026-09-02"
+    "stock": "In Stock Now",
+    "fetched": "2026-09-02",
+    "confidence": "read",
+    "note": "NZD 5.90 + GST each. GCr15 bearing steel, ZZ shields. Alias list on the page matches the designation research."
    },
    {
     "vendor": "Jiang Xin Technology (Guangdong, via made-in-china.com)",
+    "sku": "MR1622 ZZ stainless",
     "url": "https://jiangxin2020.en.made-in-china.com/product/IvxJnUDERBpq/China-Stainless-Steel-Ball-Bearing-16-22-4-Et2216-Set2216-A2216-MR1622-Zz.html",
     "currency": "USD",
     "tiers": [
@@ -676,27 +1033,65 @@
       4.0
      ]
     ],
+    "no_tiers": true,
     "moq": 1000,
+    "moq_exceeds_need": true,
     "lead_time": "not stated",
-    "fetched": "2026-09-02"
+    "stock": "capacity '10,000,000 units'",
+    "fetched": "2026-09-02",
+    "confidence": "read",
+    "note": "the listing states a RANGE US$1.00-4.00 per piece at MOQ 1000. The HIGH end is recorded here because a range is not a price; the low end is what a quote might reach. ZZ / 2RS / open all offered.",
+    "price_is_range_high": true
+   }
+  ],
+  "alternates": [
+   {
+    "mpn": "ET2216-EZO (EZO, Japan)",
+    "why_equivalent": "the same 16x22x4 thin-section bearing under EZO's designation; a higher-grade Japanese alternative to the Chinese MR1622. Listed at 123Bearing but the page rendered no price.",
+    "vendor": "123Bearing (FR)",
+    "url": "https://www.123bearing.com/bearing-housing/deep-groove-bearing/single-row/et2216-ezo",
+    "price_note": "CANNOT DETERMINE - page rendered without a price on 2026-09-02 (re-checked, still no price)"
    }
   ],
   "unknowns": [
    "USD retail price at 11 / 1100 pieces: CANNOT DETERMINE. Only an NZD retail price and a 1000-MOQ factory RANGE were readable.",
    "Shield variant Pollen fits (ZZ / 2RS / open): CANNOT DETERMINE - the mesh's cage band stands in for balls and cage and shows no shield either way (ce-parts/bearing-22x16x4/sourcing.json)."
   ],
-  "excluded_from_rollup": null
+  "blocked": [
+   {
+    "url": "https://www.bocabearings.com/parts/10x15x3",
+    "reason": "HTTP 403"
+   },
+   {
+    "url": "https://vxb.com/search?q=16x22x4",
+    "reason": "0 bearing results"
+   },
+   {
+    "url": "https://bearingsdirect.com/search.php?search_query=16x22x4",
+    "reason": "0 results"
+   },
+   {
+    "url": "http://www.zotyindustrial.com/products/1622ZZ-16x22x4-thin-special-bearing-for-jumping-rope.html",
+    "reason": "HTTP 500 (tried 2026-09-02)"
+   }
+  ]
  },
  {
   "id": "B11",
   "item": "Ball bearing 15 x 10 x 3 mm",
+  "category": "bearing",
   "ce_part": "part:bearing-15x10x3",
   "qty_per_robot": 3,
+  "qty_basis": "one per ankle bracket (x2) + one mouth hinge in the head (RELEASE.html §4 steps 3 and 5)",
+  "mpn": "MR6700 open (aliases 61700J1, 61700R, 6700E, 6700; ISO 61700)",
+  "mpn_status": "designation confirmed from dimensions; width community-measured",
+  "mpn_note": "6700 / 6700ZZ is 10 x 15 x 4, NOT x3 - VXB, FastEddy and Bearings Direct all list 6700-ZZ as 10x15x4. The 3 mm-wide part is the OPEN MR6700 / ISO 61700. If a shielded 10x15x3 is wanted the designation is 61700-2Z (FAG lists 61700-2Z-HLC).",
+  "rfq_spec": "Deep-groove ball bearing, bore 10.000 mm, OD 15.000 mm, width 3.000 mm, designation MR6700 / 61700, OPEN. Quote 61700-2Z (shielded, same 10x15x3) alongside. Press-fit into printed PLA.",
   "verdict": "PASS",
-  "verdict_why": null,
   "offers": [
    {
     "vendor": "Bearings Direct (US)",
+    "sku": "MR6700 open",
     "url": "https://bearingsdirect.com/6700-ball-bearing-10x15x3-open-mr6700/",
     "currency": "USD",
     "tiers": [
@@ -717,12 +1112,17 @@
       4.131
      ]
     ],
+    "no_tiers": false,
     "moq": 1,
     "lead_time": "not stated",
-    "fetched": "2026-09-02"
+    "stock": "722",
+    "fetched": "2026-09-02",
+    "confidence": "read",
+    "note": "the page states the tiers as discounts: 'Buy 10 - 24 and get 5% off', '25 - 49 ... 10% off', '50 or above ... 15% off'. The unit prices here are those discounts applied to the read $4.86."
    },
    {
     "vendor": "VXB (US)",
+    "sku": "6700 Open (VXB SKU \"6700 Open\", UPC 00193019072509)",
     "url": "https://vxb.com/products/6700-ball-bearing-10mm-x-15mm-x-3mm-single-row-ope",
     "currency": "USD",
     "tiers": [
@@ -743,27 +1143,52 @@
       5.439
      ]
     ],
+    "no_tiers": false,
     "moq": 1,
     "lead_time": "\"Orders are currently taking 5-10 business days to process before shipping\" (page banner); OEM 1,000+ \"Lead Time is 30-60 Days\"",
-    "fetched": "2026-09-03"
+    "stock": "not stated as a number",
+    "fetched": "2026-09-03",
+    "confidence": "read",
+    "note": "PRODUCT PAGE, read 2026-09-03 by curl and parsed out of the page text (the 2026-09-02 reading was https://vxb.com/search?q=MR6700, a search-results page, and it carried $9.99 for a listing whose product page no longer resolves - https://vxb.com/products/mr6700-radial-ball-bearing-bore-dia-10mm-od-15mm-width-3mm returns 404). Page text verbatim: 'Regular price $7.77 Sale price $10.00 you save $2.23', 'SKU: 6700 Open', '10mm ID - 15mm OD - 3mm Wide - Open Type', chrome steel, dynamic 0.85 kN / static 0.44 kN, quantity 1 bearing. Tier schedule verbatim: 'Buy 10 You save 10%', 'Buy 20 You save 20%', 'Wholesale Buy Wholesale 100+ You save 30%', 'OEM Buy 1,000+ Only for Manufacturers (Lead Time is 30-60 Days)'. The tier unit prices recorded here are those percentages applied to the read $7.77: 6.9930 / 6.2160 / 5.4390. The 1,000+ OEM tier prints NO price, so it is CANNOT DETERMINE and this line's 1,000-robot column falls back to the 100+ tier.",
+    "page_kind": "product"
+   }
+  ],
+  "alternates": [
+   {
+    "mpn": "6700-ZZ (10 x 15 x 4, shielded)",
+    "why_equivalent": "NOT dimensionally equivalent - 1 mm wider. Recorded because it is what a shop will ship if the order says '6700ZZ', and because the true fitted width is community-measured '~3 mm', not measured on a unit. If the real part turns out to be 4 mm wide this is the cheapest source read.",
+    "vendor": "FastEddy Bearings (US)",
+    "url": "https://www.fasteddybearings.com/10x15x4-metal-shielded-bearing-6700-zz/",
+    "price_note": "$1.25, backorder 7-10 days"
    }
   ],
   "unknowns": [
    "Open vs shielded at this width: CANNOT DETERMINE from the mesh (ce-parts/bearing-15x10x3/sourcing.json). The true width is community-measured, not measured on a unit.",
    "VXB's 1,000+ tier is 'OEM ... Only for Manufacturers' with no price printed, so the 3,000-piece quantity a 1,000-robot build needs is priced at VXB's 100+ tier here, as a ceiling. Bearings Direct is cheaper at every quantity read, so this does not move the roll-up. What settles it: a VXB OEM quote."
   ],
-  "excluded_from_rollup": null
+  "blocked": [
+   {
+    "url": "https://www.123bearing.com/bearing-housing/deep-groove-bearing/single-row/6700",
+    "reason": "no price rendered"
+   }
+  ]
  },
  {
   "id": "B12",
   "item": "Speaker, 35 x 25 x 7 mm, 8 ohm, 2 W (head)",
+  "category": "module",
   "ce_part": "part:microduck-speaker",
   "qty_per_robot": 1,
+  "qty_basis": "docs/BOM.md row B12; one speaker in the head, 70 mm lead to the HAT (wiring/CABLES.md row 18)",
+  "mpn": "CANNOT DETERMINE - Pollen's mesh is a 12-triangle box, no part number anywhere",
+  "mpn_status": "unknown; two catalogued substitutes priced",
+  "rfq_spec": "Rectangular micro speaker, 8 ohm nominal, >= 2 W, body envelope 35.0 x 25.0 x 7.0 mm MAXIMUM (the cavity in the head shell), lead terminated JST GH 1.25 mm 2-pin or flying leads. Quote SPL at 1 W / 10 cm and the resonant frequency.",
   "verdict": "CANNOT DETERMINE",
   "verdict_why": "Downgraded from PASS by this document's own consistency check. The two priced parts are BOTH DigiKey lines, so there is one distributor, not two; the third reading is a different Visaton variant in another currency; and neither priced part FITS - Soberton's SPM-2035NU is 39 x 20 x 8.2 mm and Visaton's K 28.40 is 40 x 28 x 11.7 mm against a 35 x 25 x 7 mm cavity. No distributor anywhere prices a 35 x 25 x 7 part. Two prices for two parts that do not fit is not a sourced line.",
   "offers": [
    {
     "vendor": "DigiKey",
+    "sku": "Soberton SPM-2035NU",
     "url": "https://www.digikey.com/en/products/detail/soberton-inc/SPM-2035NU/10638200",
     "currency": "USD",
     "tiers": [
@@ -800,12 +1225,18 @@
       4.89
      ]
     ],
+    "no_tiers": false,
     "moq": 1,
     "lead_time": "9 weeks",
-    "fetched": "2026-09-02"
+    "stock": "75",
+    "fetched": "2026-09-02",
+    "confidence": "read",
+    "note": "8 ohm, 2 W (2.5 W max), 82 dB. Body 39 x 20 x 8.2 mm - 4 mm LONGER and 1.2 mm THICKER than the cavity. Does not fit as drawn.",
+    "rollup_caveat": "the Soberton SPM-2035NU body is 39.0000 x 20.0000 x 8.2000 mm against a 35.0000 x 25.0000 x 7.0000 mm cavity - it does not fit as drawn. The line is graded CANNOT DETERMINE"
    },
    {
     "vendor": "DigiKey",
+    "sku": "Visaton K 28.40 - 8 OHM",
     "url": "https://www.digikey.com/en/products/detail/visaton-gmbh-co-kg/K-28-40-8-OHM/2056-K28-40-8OHM-ND/9842383",
     "currency": "USD",
     "tiers": [
@@ -838,12 +1269,17 @@
       5.76
      ]
     ],
+    "no_tiers": false,
     "moq": 1,
     "lead_time": "11 weeks",
-    "fetched": "2026-09-02"
+    "stock": "919",
+    "fetched": "2026-09-02",
+    "confidence": "read",
+    "note": "8 ohm, 2 W rated / 3 W max. Body 40.00 x 28.00 x 11.70 mm - larger than the cavity in all three axes. Recorded as the second READ tier table for a 2 W 8 ohm rectangular driver, not as a fit."
    },
    {
     "vendor": "reichelt elektronik (DE)",
+    "sku": "VIS 2947 - Visaton K 28.40 H, 2 W, 8 Ohm",
     "url": "https://www.reichelt.de/de/de/shop/produkt/kleinlautsprecher_k_28_40_h_2_w_8_ohm-372617",
     "currency": "EUR",
     "tiers": [
@@ -852,40 +1288,82 @@
       10.95
      ]
     ],
+    "no_tiers": true,
     "moq": 1,
     "lead_time": "ab Lager, Lieferzeit: 1 - 2 Werktage",
-    "fetched": "2026-09-02"
+    "stock": "ab Lager",
+    "fetched": "2026-09-02",
+    "confidence": "read",
+    "excluded_from_rollup": "a DIFFERENT variant (K 28.40 H, not K 28.40) and a different currency",
+    "note": "EUR 10,95 incl 19 % VAT. NOTE THE SUFFIX: this is the K 28.40 **H**, not the K 28.40 DigiKey lists. Visaton's H variants differ; treating them as one part would be a guess. Recorded as a second European source for the FAMILY, not as a second price for the same part. The 33 x 16 x 69.5 mm on the page is reichelt's shipping box, not the driver."
+   }
+  ],
+  "alternates": [
+   {
+    "mpn": "'3525' waterproof 8 ohm 2 W cavity speaker",
+    "why_equivalent": "the commodity part that IS 35 x 25 mm - the size class Pollen's box mesh represents (35 x 25 x 6.2 mm on the vendor page). This is the right SHAPE; it is a generic Chinese part with no manufacturer designation, so it cannot be put on a purchase order as an MPN.",
+    "vendor": "Thingbits (IN)",
+    "url": "https://www.thingbits.net/products/3525-waterproof-8-ohm-2w-cavity-speaker",
+    "price_note": "Rs 89.00 ex GST (Rs 105.02 inc) - SOLD OUT on 2026-09-02"
+   },
+   {
+    "mpn": "Adafruit #4227 mini oval speaker",
+    "why_equivalent": "30 x 20 x 5 mm, 8 ohm but only 1 W - it FITS the cavity with room to spare and halves the power. A valid substitution if 1 W is acceptable acoustically; that has not been evaluated.",
+    "vendor": "Adafruit",
+    "url": "https://www.adafruit.com/product/4227",
+    "price_note": "$1.95 @1 / $1.76 @10-99 / $1.56 @100+ - Out of stock 2026-09-02"
    }
   ],
   "unknowns": [
    "The fitted speaker's manufacturer, part number, SPL and impedance: CANNOT DETERMINE.",
    "No exact 35 x 25 part with a tier table at any distributor was readable. Both priced substitutes are OVERSIZE for the modelled cavity."
   ],
-  "excluded_from_rollup": null
+  "blocked": [
+   {
+    "url": "https://www.amazon.com/CQRobot-Rectangle-Electronic-Application-Components/dp/B0CMQCQQV4",
+    "reason": "page body not served"
+   },
+   {
+    "url": "https://www.ebay.com/itm/277690727056",
+    "reason": "timeout x6 across three eBay 3525 listings"
+   }
+  ]
  },
  {
   "id": "B13",
   "item": "Microphone(s)",
+  "category": "module",
   "ce_part": "part:microduck-mic",
   "qty_per_robot": null,
+  "qty_basis": "UNKNOWN - the press kit says 'Microphones' (plural); the codec input the community names is Mic3R, which is MONO. Count is unresolved.",
+  "mpn": "CANNOT DETERMINE",
+  "mpn_status": "unknown",
+  "rfq_spec": "NOT QUOTABLE. Type (electret vs MEMS), count, package, sensitivity, position and connector are all unknown; there is no mesh for it in the MJCF, so even the cable length is unmeasurable (wiring/CABLES.md row 19 = CANNOT DETERMINE). No RFQ can be written until a production unit is opened.",
   "verdict": "CANNOT DETERMINE",
   "verdict_why": "Nothing about this line is known - not the part, not the type, not the count, not the placement. There is no URL to try because there is no part to look up.",
   "offers": [],
+  "alternates": [],
   "unknowns": [
    "Part number, type, count, position and connector: all CANNOT DETERMINE (ce-parts/microduck-mic/component.json)."
   ],
-  "excluded_from_rollup": null
+  "blocked": []
  },
  {
   "id": "B14",
   "item": "NFC reader IC + 2 antennas (head and beak)",
+  "category": "ic",
   "ce_part": "part:pn7150",
   "qty_per_robot": 1,
+  "qty_basis": "press kit names one antenna in the head and one in the beak. Nothing in Pollen's runtime source mentions NFC (docs/BOM.md B14), so the count of ICs is inferred (one controller drives both antennas through a switch, or there are two).",
+  "mpn": "CANNOT DETERMINE which IC ships. Two candidates are fully characterised in ce-parts (both graded PASS there): NXP PN7150 and ST ST25R3916.",
+  "mpn_status": "candidate set of two",
+  "rfq_spec": "NFC Forum controller for reader/writer + card-emulation on 13.56 MHz, host interface I2C (PN7150, NCI) or SPI/I2C (ST25R3916), driving TWO antennas (head, beak) - state whether an RF switch is required. Antennas: not specified, quote a 13.56 MHz PCB or FPC antenna to suit a ~30 mm aperture.",
   "verdict": "PASS",
   "verdict_why": "Two distributors with full read tier tables for EACH candidate. Which candidate is fitted is a separate unknown and is stated as such.",
   "offers": [
    {
     "vendor": "DigiKey",
+    "sku": "PN7150B0HN/C11002Y (568-12994-1-ND)",
     "url": "https://www.digikey.com/en/products/detail/nxp-usa-inc/PN7150B0HN-C11002Y/6128021",
     "currency": "USD",
     "tiers": [
@@ -922,12 +1400,17 @@
       7.48651
      ]
     ],
+    "no_tiers": false,
     "moq": 1,
     "lead_time": "Manufacturer Standard Lead Time 30 Weeks",
-    "fetched": "2026-09-02"
+    "stock": "7,761",
+    "fetched": "2026-09-02",
+    "confidence": "read",
+    "note": "HVQFN40 6x6. Candidate A."
    },
    {
     "vendor": "LCSC",
+    "sku": "PN7150B0HN/C11002Y (C702907)",
     "url": "https://www.lcsc.com/product-detail/C702907.html",
     "currency": "USD",
     "tiers": [
@@ -956,12 +1439,17 @@
       3.6339
      ]
     ],
+    "no_tiers": false,
     "moq": 1,
     "lead_time": "not stated",
-    "fetched": "2026-09-02"
+    "stock": "9,862",
+    "fetched": "2026-09-02",
+    "confidence": "read",
+    "note": "VQFN-40-EP(6x6), 4000/full reel. Candidate A - LESS THAN HALF DigiKey's price at every tier; that gap is worth a provenance check before committing."
    },
    {
     "vendor": "DigiKey",
+    "sku": "ST25R3916-AQWT (497-18366-1-ND)",
     "url": "https://www.digikey.com/en/products/detail/stmicroelectronics/ST25R3916-AQWT/9826051",
     "currency": "USD",
     "tiers": [
@@ -998,12 +1486,17 @@
       4.02893
      ]
     ],
+    "no_tiers": false,
     "moq": 1,
     "lead_time": "28 weeks",
-    "fetched": "2026-09-02"
+    "stock": "0 (estimated in-stock date unavailable)",
+    "fetched": "2026-09-02",
+    "confidence": "read",
+    "note": "VFQFPN32 5x5. Candidate B - cheaper than the PN7150 at DigiKey but out of stock with no restock date."
    },
    {
     "vendor": "LCSC",
+    "sku": "ST25R3916-AQWT (C2908147)",
     "url": "https://www.lcsc.com/product-detail/C2908147.html",
     "currency": "USD",
     "tiers": [
@@ -1032,9 +1525,22 @@
       3.294
      ]
     ],
+    "no_tiers": false,
     "moq": 1,
     "lead_time": "not stated",
-    "fetched": "2026-09-02"
+    "stock": "91",
+    "fetched": "2026-09-02",
+    "confidence": "read",
+    "note": "Candidate B. Only 91 pieces in stock - not a volume source as read."
+   }
+  ],
+  "alternates": [
+   {
+    "mpn": "ST25R3916B-AQWT",
+    "why_equivalent": "ST's B revision of the same reader in the same VFQFPN32 package; drop-in at the footprint. Listed at DigiKey (page not fetched for tiers).",
+    "vendor": "DigiKey",
+    "url": "https://www.digikey.com/en/products/detail/stmicroelectronics/ST25R3916B-AQWT/16516567",
+    "price_note": "CANNOT DETERMINE - page not fetched"
    }
   ],
   "unknowns": [
@@ -1042,67 +1548,96 @@
    "Which controller, how many, and the antenna part: CANNOT DETERMINE.",
    "The roll-up below uses the CHEAPER candidate at each quantity and says so; that is a costing convenience, not a design decision."
   ],
-  "excluded_from_rollup": null
+  "blocked": []
  },
  {
   "id": "B15",
   "item": "Camera-in-use indicator LED",
+  "category": "ic",
   "ce_part": null,
   "qty_per_robot": 1,
+  "qty_basis": "press kit; GPIO not identified",
+  "mpn": "CANNOT DETERMINE",
+  "mpn_status": "unknown",
+  "rfq_spec": "NOT QUOTABLE - colour, package, brightness, GPIO and whether it is on the HAT or a flying lead are all unknown.",
   "verdict": "CANNOT DETERMINE",
   "verdict_why": "Nothing is known beyond the press kit sentence. A 0603 LED is a five-cent part; the reason this stays open is that its placement is a mechanical and regulatory question (a privacy indicator), not a price question.",
   "offers": [],
+  "alternates": [],
   "unknowns": [
    "Part, colour, package, GPIO, mounting: CANNOT DETERMINE."
   ],
-  "excluded_from_rollup": null
+  "blocked": []
  },
  {
   "id": "B16",
   "item": "Bluetooth gamepad (Xbox-style)",
+  "category": "module",
   "ce_part": null,
   "qty_per_robot": 1,
+  "qty_basis": "Pollen ships one with the robot",
+  "mpn": "CANNOT DETERMINE",
+  "mpn_status": "unknown",
+  "rfq_spec": "Bluetooth HID gamepad, Xbox-compatible mapping, pairing to the Radxa's BT 5.4 radio. Model unspecified by Pollen.",
   "verdict": "CANNOT DETERMINE",
   "verdict_why": "The gamepad is INCLUDED in Pollen's $399 retail bundle, so no price for it alone exists on any Pollen page; and the model is unnamed, so no third-party price applies to it.",
   "offers": [
    {
     "vendor": "Pollen Robotics (bundle only)",
+    "sku": "microduck",
     "url": "https://store.pollen-robotics.com/products/microduck",
     "currency": "USD",
     "tiers": [],
+    "no_tiers": true,
     "moq": 1,
     "lead_time": "not stated",
-    "fetched": "2026-09-02"
+    "stock": "not stated",
+    "fetched": "2026-09-02",
+    "confidence": "read",
+    "note": "listed as included with the robot; no standalone price."
    }
   ],
+  "alternates": [],
   "unknowns": [
    "Model: CANNOT DETERMINE."
   ],
-  "excluded_from_rollup": null
+  "blocked": []
  },
  {
   "id": "B17",
   "item": "USB-C cable",
+  "category": "connector",
   "ce_part": null,
   "qty_per_robot": 1,
+  "qty_basis": "included with the robot",
+  "mpn": "CANNOT DETERMINE",
+  "mpn_status": "unknown",
+  "rfq_spec": "USB-C to USB-C or USB-A, length and current rating unspecified. Commodity.",
   "verdict": "CANNOT DETERMINE",
   "verdict_why": "Included in the retail bundle; no separate price and no specification.",
   "offers": [],
+  "alternates": [],
   "unknowns": [
    "Length, rating, whether it carries data or power only: CANNOT DETERMINE."
   ],
-  "excluded_from_rollup": null
+  "blocked": []
  },
  {
   "id": "B18a",
   "item": "M2 x 6 socket head cap screw, A2 stainless, DIN 912",
+  "category": "fastener",
   "ce_part": null,
   "qty_per_robot": 80,
+  "qty_basis": "docs/BOM.md §4 buy list - COMMUNITY-DERIVED from hole-fitting on the 47 meshes, NOT a Pollen BOM. Flagged everywhere it appears.",
+  "mpn": "DIN 912 / ISO 4762 M2x6 A2",
+  "mpn_status": "standard",
+  "rfq_spec": "Hex socket head cap screw, M2 x 6 mm, A2 (304) stainless, DIN 912 / ISO 4762. Quantity per robot 80 (community-derived; a measured schedule is still open). Quote at 100 / 8 000 / 80 000 pieces.",
   "verdict": "PASS",
   "verdict_why": "Two distributors with a read price (RST-Versand DE in EUR with tiers to 100; ModelFixings UK in GBP with tiers to 25). Neither publishes anything above 100 pieces, so the @1000-robot figure is a ceiling, and there is still NO USD price for this line - it does not enter the USD subtotal.",
   "offers": [
    {
     "vendor": "RST-Versand (DE)",
+    "sku": "Zylinderschraube Innensechskant M2 x 6 mm (A2 - DIN912)",
     "url": "https://www.rst-versand.de/Zylinderschraube-Innensechskant-M2-x-6-mm-A2-DIN912_1",
     "currency": "EUR",
     "tiers": [
@@ -1127,12 +1662,17 @@
       0.0434
      ]
     ],
+    "no_tiers": false,
     "moq": 1,
     "lead_time": "Lieferstatus: 1-2 Tage",
-    "fetched": "2026-09-02"
+    "stock": "not numerically stated",
+    "fetched": "2026-09-02",
+    "confidence": "read",
+    "note": "prices inc 19 % USt, ex shipping. Pack prices read verbatim: 1 Stk 0,06 EUR; 10 Stk 0,56; 25 Stk 1,30; 50 Stk 2,43; 100 Stk 4,34. The 100-pack is the LARGEST tier the shop publishes - there is no 1000-piece price anywhere."
    },
    {
     "vendor": "ModelFixings (UK)",
+    "sku": "M2 x 6 stainless socket cap screw",
     "url": "https://www.modelfixings.co.uk/miniature_cap_screws.htm",
     "currency": "GBP",
     "tiers": [
@@ -1145,9 +1685,23 @@
       0.144
      ]
     ],
+    "no_tiers": false,
     "moq": 5,
     "lead_time": "not stated",
-    "fetched": "2026-09-02"
+    "stock": "listed",
+    "fetched": "2026-09-02",
+    "confidence": "read",
+    "note": "read verbatim as pack prices: 5-pack GBP 0.90, 25-pack GBP 3.60; per-piece GBP 0.18 and GBP 0.144. 'All prices include 20% VAT'. The 25-pack is the largest pack this shop publishes - 3.3x RST-Versand's per-piece price at 100, so this is a second READING, not a second source of supply.",
+    "page_kind": "family-table"
+   }
+  ],
+  "alternates": [
+   {
+    "mpn": "DIN 912 M2.5x8 A2 (100-pack)",
+    "why_equivalent": "NOT equivalent - a different thread. Recorded only because der-schraubenladen served a price for it (EUR 4.67/100) while refusing to render the M2x6 price from the same dropdown, and it is the closest read data point at that shop.",
+    "vendor": "der-schraubenladen (DE)",
+    "url": "https://shop.der-schraubenladen.de/DIN-912-ISO-4762-Zylinderschraube-Innensechskant-Edelstahl-A2/SW11250.54",
+    "price_note": "EUR 4.67 / 100, 'Sofort verfuegbar, Lieferzeit: 1-3 Tage'"
    }
   ],
   "unknowns": [
@@ -1155,18 +1709,53 @@
    "1000+ piece pricing: CANNOT DETERMINE - the largest tier published anywhere read is 100 pieces.",
    "The COUNT itself (80) is community-derived from mesh hole-fitting, not measured on a unit."
   ],
-  "excluded_from_rollup": null
+  "blocked": [
+   {
+    "url": "https://www.accu.co.uk/socket-cap-screws/1077-SSCM2-6-A2",
+    "reason": "HTTP 403 (re-tried 2026-09-02)"
+   },
+   {
+    "url": "https://www.boltdepot.com/Product-Details?product=15964",
+    "reason": "HTTP 403"
+   },
+   {
+    "url": "https://www.mcmaster.com/91292A831/",
+    "reason": "blank to the fetcher"
+   },
+   {
+    "url": "https://us.misumi-ec.com/vona2/detail/221000348314/?HissuCode=SNSS-M2X6",
+    "reason": "HTTP 403"
+   },
+   {
+    "url": "https://www.albanycountyfasteners.com/Socket-Head-Cap-Screw-2MM-A2-Stainless-Steel-p/5020000.htm",
+    "reason": "page served without a price"
+   },
+   {
+    "url": "https://www.fastenal.com/product/details/MS2460006A20000",
+    "reason": "HTTP 403 (tried 2026-09-02)"
+   },
+   {
+    "url": "https://www.westfieldfasteners.co.uk/A2-ScrewBolt-SHCap-M2.html",
+    "reason": "page served with loading spinners where every price should be - prices are client-side only"
+   }
+  ]
  },
  {
   "id": "B18b",
   "item": "M2 socket head cap screws, other lengths (x4, x8, x12) + M2 nuts + M2.5x6",
+  "category": "fastener",
   "ce_part": null,
   "qty_per_robot": 185,
+  "qty_basis": "docs/BOM.md §4: M2x4 x60, M2x8 x40, M2x12 x15, M2 nuts x50, M2.5x6 x20 - all COMMUNITY-DERIVED",
+  "mpn": "DIN 912 M2x4 / M2x8 / M2x12 A2; DIN 934 M2 nut A2; DIN 912 M2.5x6 A2",
+  "mpn_status": "standard",
+  "rfq_spec": "Hex socket head cap screws DIN 912 / ISO 4762, A2 stainless: M2x4 (60), M2x8 (40), M2x12 (15), M2.5x6 (20). Hex nuts DIN 934 A2 M2 (50). Per robot; quote at 100 / 10 000 / 100 000.",
   "verdict": "CANNOT DETERMINE",
   "verdict_why": "Only ONE distributor rendered a price for these sizes (ModelFixings, GBP inc VAT, 25-piece packs), so the two-distributor bar is not met; the fifth size (M2.5x6) has no price anywhere; and the nut ModelFixings prices is steel BZP, not the A2 stainless the rest of the schedule specifies. The line moved from 'no price at all' to 'one shop, one currency, four of five sizes' - which is progress, and is not a price.",
   "offers": [
    {
     "vendor": "ModelFixings (UK)",
+    "sku": "M2 x 4 stainless socket cap screw",
     "url": "https://www.modelfixings.co.uk/miniature_cap_screws.htm",
     "currency": "GBP",
     "tiers": [
@@ -1179,12 +1768,19 @@
       0.144
      ]
     ],
+    "no_tiers": false,
     "moq": 5,
     "lead_time": "not stated",
-    "fetched": "2026-09-02"
+    "stock": "listed",
+    "fetched": "2026-09-02",
+    "confidence": "read",
+    "excluded_from_rollup": "prices ONE of the five sizes on this line; the line has no single unit price",
+    "note": "5-pack GBP 0.90, 25-pack GBP 3.60, inc 20 % VAT.",
+    "page_kind": "family-table"
    },
    {
     "vendor": "ModelFixings (UK)",
+    "sku": "M2 x 8 stainless socket cap screw",
     "url": "https://www.modelfixings.co.uk/miniature_cap_screws.htm",
     "currency": "GBP",
     "tiers": [
@@ -1197,12 +1793,19 @@
       0.144
      ]
     ],
+    "no_tiers": false,
     "moq": 5,
     "lead_time": "not stated",
-    "fetched": "2026-09-02"
+    "stock": "listed",
+    "fetched": "2026-09-02",
+    "confidence": "read",
+    "excluded_from_rollup": "prices ONE of the five sizes on this line",
+    "note": "5-pack GBP 0.90, 25-pack GBP 3.60, inc 20 % VAT.",
+    "page_kind": "family-table"
    },
    {
     "vendor": "ModelFixings (UK)",
+    "sku": "M2 x 12 stainless socket cap screw",
     "url": "https://www.modelfixings.co.uk/miniature_cap_screws.htm",
     "currency": "GBP",
     "tiers": [
@@ -1215,12 +1818,19 @@
       0.16
      ]
     ],
+    "no_tiers": false,
     "moq": 5,
     "lead_time": "not stated",
-    "fetched": "2026-09-02"
+    "stock": "listed",
+    "fetched": "2026-09-02",
+    "confidence": "read",
+    "excluded_from_rollup": "prices ONE of the five sizes on this line",
+    "note": "5-pack GBP 1.00, 25-pack GBP 4.00, inc 20 % VAT.",
+    "page_kind": "family-table"
    },
    {
     "vendor": "ModelFixings (UK)",
+    "sku": "M2 Steel BZP hex nut",
     "url": "https://www.modelfixings.co.uk/miniature_cap_screws.htm",
     "currency": "GBP",
     "tiers": [
@@ -1229,29 +1839,99 @@
       0.08
      ]
     ],
+    "no_tiers": true,
     "moq": 10,
     "lead_time": "not stated",
-    "fetched": "2026-09-02"
+    "stock": "listed",
+    "fetched": "2026-09-02",
+    "confidence": "read",
+    "excluded_from_rollup": "prices ONE of the five sizes on this line",
+    "note": "10-pack GBP 0.80, inc 20 % VAT. STEEL, BZP-plated - NOT the A2 stainless the rest of the schedule specifies. A different material in the same thread.",
+    "page_kind": "family-table"
+   }
+  ],
+  "alternates": [
+   {
+    "mpn": "price the whole screw set as if every screw were M2x6",
+    "why_equivalent": "NOT a substitution - a COSTING FLOOR. docs/production/components.md §14.3 prices all 195 screws at the RST M2x6 100-pack rate = EUR 8.46 per robot. Longer screws cost more, so this understates; it is recorded as a floor with the direction of the error stated, never as the price.",
+    "vendor": "RST-Versand (DE)",
+    "url": "https://www.rst-versand.de/Zylinderschraube-Innensechskant-M2-x-6-mm-A2-DIN912_1",
+    "price_note": "EUR 8.46 per robot for 195 screws - a FLOOR, understates"
    }
   ],
   "unknowns": [
    "A second distributor: CANNOT DETERMINE - Accu (403), Fastenal (403) and Westfield (JS-only prices) all refused on 2026-09-02.",
    "M2.5x6 at any vendor: CANNOT DETERMINE.",
    "A2 stainless M2 nuts: ModelFixings prices STEEL BZP nuts; the A2 equivalent was not read.",
-   "Whether these lengths are right at all: the counts and lengths come from hole-DEPTH inference on the meshes, not from a schedule. RELEASE.html \u00a77 item 4 has this as an open factory blocker."
+   "Whether these lengths are right at all: the counts and lengths come from hole-DEPTH inference on the meshes, not from a schedule. RELEASE.html §7 item 4 has this as an open factory blocker."
   ],
-  "excluded_from_rollup": null
+  "blocked": [
+   {
+    "url": "https://www.accu.co.uk/hexagon-nuts/7884-HPN-M2-A2",
+    "reason": "HTTP 403 (tried 2026-09-02)"
+   },
+   {
+    "url": "https://www.rst-versand.de/Sechskantmutter-M2-A2-DIN934",
+    "reason": "Socket is closed (tried 2026-09-02)"
+   },
+   {
+    "url": "https://www.fastenal.com/product/details/MS2460006A20000",
+    "reason": "HTTP 403 (tried 2026-09-02)"
+   },
+   {
+    "url": "https://www.westfieldfasteners.co.uk/A2-ScrewBolt-SHCap-M2.html",
+    "reason": "prices render only in JavaScript; the served page carries loading spinners"
+   }
+  ],
+  "basket": {
+   "currency": "GBP",
+   "note": "Four of the five sizes now have a read price, from ONE shop, at its 25-piece (or 10-piece) rate. This basket is stated in GBP including 20 % VAT and is NOT converted or added to the USD subtotal. M2.5x6 is still unpriced, so even this basket is incomplete - the total below is a FLOOR for the line, not the line.",
+   "rows": [
+    {
+     "what": "M2x4 socket cap, A2",
+     "qty": 60,
+     "unit": 0.144
+    },
+    {
+     "what": "M2x8 socket cap, A2",
+     "qty": 40,
+     "unit": 0.144
+    },
+    {
+     "what": "M2x12 socket cap, A2",
+     "qty": 15,
+     "unit": 0.16
+    },
+    {
+     "what": "M2 hex nut, steel BZP (not A2)",
+     "qty": 50,
+     "unit": 0.08
+    }
+   ],
+   "missing": [
+    {
+     "what": "M2.5x6 socket cap, A2",
+     "qty": 20,
+     "why": "no price read at any vendor"
+    }
+   ]
+  }
  },
  {
   "id": "B18c",
   "item": "M2 heat-set threaded inserts, brass, ~3.0 mm",
+  "category": "fastener",
   "ce_part": null,
   "qty_per_robot": 60,
+  "qty_basis": "docs/BOM.md §4 - community-derived; inserts vs tapped plastic on a production part is itself CANNOT DETERMINE",
+  "mpn": "M2 x 3.0 mm brass heat-set insert (no single industry designation)",
+  "mpn_status": "standard class, vendor-specific part",
+  "rfq_spec": "Brass heat-set threaded insert, M2 internal thread, ~3.0 mm length, knurled, for installation into FDM PLA with a soldering iron. Lead and cadmium free. 60 per robot (community-derived).",
   "verdict": "PASS",
-  "verdict_why": null,
   "offers": [
    {
     "vendor": "Prusa Research (US shop)",
+    "sku": "Heat-set inserts M2 short, 100 pcs",
     "url": "https://www.prusa3d.com/product/heat-set-inserts-m2-short-100-pcs/",
     "currency": "USD",
     "tiers": [
@@ -1260,12 +1940,17 @@
       0.1199
      ]
     ],
+    "no_tiers": true,
     "moq": 100,
     "lead_time": "not stated",
-    "fetched": "2026-09-02"
+    "stock": "In stock",
+    "fetched": "2026-09-02",
+    "confidence": "read",
+    "note": "$11.99 per 100 = $0.1199 each. No tier above 100 published."
    },
    {
     "vendor": "CNC Kitchen (DE)",
+    "sku": "Heat-Set Insert M2 x 3, 100 pieces",
     "url": "https://cnckitchen.store/products/heat-set-insert-m2-x-3-100-pieces",
     "currency": "EUR",
     "tiers": [
@@ -1274,12 +1959,17 @@
       0.099
      ]
     ],
+    "no_tiers": true,
     "moq": 100,
     "lead_time": "'Auf Lager - Versand vor 12 Uhr am gleichen Tag'",
-    "fetched": "2026-09-02"
+    "stock": "Auf Lager",
+    "fetched": "2026-09-02",
+    "confidence": "read",
+    "note": "EUR 9.90 per 100 = EUR 0.099 each. Brass, lead and cadmium free."
    },
    {
     "vendor": "Vector 3D (UK)",
+    "sku": "Heat-Set Insert M2 standard",
     "url": "https://vector3d.shop/products/heat-set-insert-m2-standard",
     "currency": "GBP",
     "tiers": [
@@ -1288,26 +1978,51 @@
       0.0974
      ]
     ],
+    "no_tiers": true,
     "moq": 100,
     "lead_time": "not stated",
-    "fetched": "2026-09-02"
+    "stock": "In stock",
+    "fetched": "2026-09-02",
+    "confidence": "read",
+    "note": "GBP 9.74 per 100 = GBP 0.0974 each."
+   }
+  ],
+  "alternates": [
+   {
+    "mpn": "tap the plastic instead (no insert)",
+    "why_equivalent": "removes 60 parts and 60 installation operations per robot at the cost of thread life in PLA. docs/DFM.md notes FDM holes print 0.1-0.3 mm undersize and must be reamed. Whether Pollen uses inserts or tapped plastic is CANNOT DETERMINE - the meshes cannot tell the difference.",
+    "vendor": null,
+    "url": null,
+    "price_note": "$0 of parts; changes the assembly line, not the BOM"
    }
   ],
   "unknowns": [
    "No vendor publishes a tier above 100 pieces, so the @1000-robot price (60 000 inserts) is the 100-piece rate used as a CEILING."
   ],
-  "excluded_from_rollup": null
+  "blocked": [
+   {
+    "url": "https://www.amazon.com/Heat-Set-Threaded-Inserts-Insert-Tips/dp/B0D4L464XG",
+    "reason": "HTTP 500"
+   }
+  ]
  },
  {
   "id": "B19a",
   "item": "PLA filament (hard printed parts)",
+  "category": "filament",
   "ce_part": null,
   "qty_per_robot": 0.2182946,
+  "qty_unit": "kg",
+  "qty_basis": "out/print/slice.json - 218.2946 g summed over every PLA part x its quantity. These are BambuStudio 02.08.02.61's OWN filament figures via ce-slice, never derived from volume x density.",
+  "mpn": "Bambu Lab PLA Basic, 1.75 mm, 1 kg spool",
+  "mpn_status": "matches the sliced preset exactly",
+  "mpn_note": "The slice was run with filament preset 'Bambu PLA Basic @BBL H2S' on a Bambu Lab H2S. Sourcing a DIFFERENT PLA invalidates the 218.2946 g and 9.935 h figures until re-sliced.",
+  "rfq_spec": "Bambu Lab PLA Basic, 1.75 mm, 1 kg spools. 0.2183 kg per robot -> 1 spool covers 4 robots. Colour per the product colourway (cream / graphite / sky). Quote spooled and refill.",
   "verdict": "PASS",
-  "verdict_why": null,
   "offers": [
    {
     "vendor": "GigaParts (US)",
+    "sku": "A00-K00-1.75-1000-SPL-US (Black)",
     "url": "https://www.gigaparts.com/bambu-lab-pla-basic-black-3d-printer-filament-1-75mm-1kg-spool.html",
     "currency": "USD",
     "tiers": [
@@ -1316,12 +2031,17 @@
       22.99
      ]
     ],
+    "no_tiers": true,
     "moq": 1,
     "lead_time": "not stated",
-    "fetched": "2026-09-02"
+    "stock": "In stock",
+    "fetched": "2026-09-02",
+    "confidence": "read",
+    "note": "$22.99 per 1 kg spool -> $5.0186 of PLA per robot at 0.2182946 kg."
    },
    {
     "vendor": "3D Universe (US)",
+    "sku": "Bambu Lab PLA Basic (1.75 mm, 1 kg)",
     "url": "https://shop3duniverse.com/products/bambu-lab-pla-basic-1-75mm-1kg",
     "currency": "USD",
     "tiers": [
@@ -1330,36 +2050,70 @@
       22.99
      ]
     ],
+    "no_tiers": true,
     "moq": 1,
     "lead_time": "not stated",
-    "fetched": "2026-09-02"
+    "stock": "most colours 'In-Stock Now'; Brown, Blue, Bronze, Mistletoe Green, Beige, Sunflower Yellow, Cocoa Brown, Yellow, Magenta, Blue Grey and Purple out of stock",
+    "fetched": "2026-09-02",
+    "confidence": "read",
+    "note": "$22.99 per 1 kg spool - to the cent the same as GigaParts, and uniform across every colour. Two independent readings of the same number."
    },
    {
     "vendor": "MatterHackers (US)",
+    "sku": "Bambu Lab PLA Basic 1.75 mm 1 kg",
     "url": "https://www.matterhackers.com/store/c/bambu-lab-pla-filament",
     "currency": "USD",
     "tiers": [],
+    "no_tiers": true,
     "moq": 1,
     "lead_time": "not stated",
-    "fetched": "2026-09-02"
+    "stock": "not read",
+    "fetched": "2026-09-02",
+    "confidence": "blocked",
+    "note": "PRICE NOT READ. The product page renders no price to the fetcher; a search-engine snippet says 'starts at $29.99' and that is NOT a source, so no price is recorded here."
+   }
+  ],
+  "alternates": [
+   {
+    "mpn": "Bambu Lab PLA Basic Refill (no spool)",
+    "why_equivalent": "identical filament without the reusable spool; cheaper per kilogram at volume and the correct SKU once the shop has spools. Price not read.",
+    "vendor": "GigaParts / Bambu Lab",
+    "url": "https://www.gigaparts.com/bambu-lab-pla-basic-black-3d-printer-filament-1-75mm-1kg-spool.html",
+    "price_note": "CANNOT DETERMINE"
    }
   ],
   "unknowns": [
    "Volume tiers on filament: none published anywhere read. At 1 000 robots this is 218.3 kg of PLA - a quantity that certainly has a quote, and none exists here.",
    "Bambu Lab's own store price: CANNOT DETERMINE (HTTP 402 to the fetcher); MatterHackers renders no price either."
   ],
-  "excluded_from_rollup": null
+  "blocked": [
+   {
+    "url": "https://us.store.bambulab.com/products/pla-basic-filament",
+    "reason": "HTTP 402 Payment Required"
+   },
+   {
+    "url": "https://www.matterhackers.com/store/l/bambu-lab-pla-basic-3d-printer-filament/sk/M2X0FQ9W",
+    "reason": "page served without a price"
+   }
+  ]
  },
  {
   "id": "B19b",
   "item": "TPU filament (soft parts: soles x2, jaw_soft, soft_mouth_top)",
+  "category": "filament",
   "ce_part": null,
   "qty_per_robot": 0.0262028,
+  "qty_unit": "kg",
+  "qty_basis": "out/print/slice.json - 26.2028 g summed over the 4 TPU parts. Slicer's own figure, preset 'Bambu TPU 85A @BBL H2S'.",
+  "mpn": "Bambu Lab TPU 85A, 1.75 mm, 1 kg spool",
+  "mpn_status": "matches the sliced preset exactly",
+  "mpn_note": "Pollen's durometer is CANNOT DETERMINE (docs/BOM.md; community says 90-95A). We sliced 85A because that is the preset the H2S resolves; if the real part is 95A the grams change and the sole friction changes.",
+  "rfq_spec": "Bambu Lab TPU 85A, 1.75 mm, 1 kg spools. 0.0262 kg per robot -> 1 spool covers 38 robots. NOT AMS-compatible (AMS HT only) - the print cell must feed it externally.",
   "verdict": "PASS",
-  "verdict_why": null,
   "offers": [
    {
     "vendor": "GigaParts (US)",
+    "sku": "U04-K0-1.75-1000-SPL (Black)",
     "url": "https://www.gigaparts.com/bambu-lab-tpu-85a-black-3d-printer-filament-1-75mm-1kg-spool.html",
     "currency": "USD",
     "tiers": [
@@ -1368,12 +2122,17 @@
       38.99
      ]
     ],
+    "no_tiers": true,
     "moq": 1,
     "lead_time": "not stated",
-    "fetched": "2026-09-02"
+    "stock": "In stock",
+    "fetched": "2026-09-02",
+    "confidence": "read",
+    "note": "$38.99 per 1 kg spool -> $1.0216 of TPU per robot at 0.0262028 kg."
    },
    {
     "vendor": "3D Universe (US)",
+    "sku": "Bambu Lab TPU 85A (1.75 mm, 1 kg)",
     "url": "https://shop3duniverse.com/products/bambu-lab-tpu-85a-1-75mm-1kg",
     "currency": "USD",
     "tiers": [
@@ -1382,27 +2141,50 @@
       44.99
      ]
     ],
+    "no_tiers": true,
     "moq": 1,
     "lead_time": "not stated",
-    "fetched": "2026-09-02"
+    "stock": "In-Stock Now (Lime Green: Not-in-stock)",
+    "fetched": "2026-09-02",
+    "confidence": "read",
+    "note": "page states 'AMS & AMS lite NOT Compatible' and 'MUST Dry out before use'."
+   }
+  ],
+  "alternates": [
+   {
+    "mpn": "Bambu Lab TPU 90A / 95A",
+    "why_equivalent": "the community durometer for these parts is 90-95A, not 85A. A harder sole changes the friction coefficient the sim uses (1.0 on the foot contact geom) and the sliced grams. Recorded as the alternate BECAUSE the choice is unresolved, not because it is cheaper.",
+    "vendor": "Bambu Lab",
+    "url": "https://us.store.bambulab.com/products/tpu-85a-tpu-90a",
+    "price_note": "CANNOT DETERMINE - the Bambu store returned HTTP 402 to the fetcher"
    }
   ],
   "unknowns": [
    "TPU durometer as Pollen ships it: CANNOT DETERMINE.",
    "Volume tiers: none published."
   ],
-  "excluded_from_rollup": null
+  "blocked": [
+   {
+    "url": "https://us.store.bambulab.com/products/tpu-85a-tpu-90a",
+    "reason": "HTTP 402 Payment Required"
+   }
+  ]
  },
  {
   "id": "P1c",
   "item": "TLV320AIC3104IRHBR stereo audio codec (on the Robot HAT)",
+  "category": "ic",
   "ce_part": "part:tlv320aic3104",
   "qty_per_robot": 1,
+  "qty_basis": "one codec on P1, the Robot HAT (docs/ELECTRONICS-AND-SOFTWARE.md)",
+  "mpn": "TLV320AIC3104IRHBR",
+  "mpn_status": "confirmed",
+  "rfq_spec": "TI TLV320AIC3104IRHBR, low-power stereo audio codec, I2C control + I2S, VQFN-32. 1 per board.",
   "verdict": "PASS",
-  "verdict_why": null,
   "offers": [
    {
     "vendor": "DigiKey (cut tape)",
+    "sku": "TLV320AIC3104IRHBR",
     "url": "https://www.digikey.com/en/products/detail/texas-instruments/TLV320AIC3104IRHBR/1906853",
     "currency": "USD",
     "tiers": [
@@ -1435,12 +2217,17 @@
       1.926
      ]
     ],
+    "no_tiers": false,
     "moq": 1,
     "lead_time": "Manufacturer Standard Lead Time 16 Weeks",
-    "fetched": "2026-09-02"
+    "stock": "64",
+    "fetched": "2026-09-02",
+    "confidence": "read",
+    "note": "Digi-Reel pricing is ~5 % lower per piece plus a $7.00 reeling fee."
    },
    {
     "vendor": "LCSC",
+    "sku": "C181753",
     "url": "https://lcsc.com/product-detail/Audio-OpAmps_TI_TLV320AIC3104IRHBR_TLV320AIC3104IRHBR_C181753.html",
     "currency": "USD",
     "tiers": [
@@ -1469,24 +2256,43 @@
       1.2288
      ]
     ],
+    "no_tiers": false,
     "moq": 1,
     "lead_time": "'ships now'",
-    "fetched": "2026-09-02"
+    "stock": "420",
+    "fetched": "2026-09-02",
+    "confidence": "read",
+    "note": "3000 per reel."
    }
   ],
+  "alternates": [],
   "unknowns": [],
-  "excluded_from_rollup": null
+  "blocked": [
+   {
+    "url": "https://www.mouser.com/ProductDetail/Texas-Instruments/TLV320AIC3104IRHBR",
+    "reason": "timeout x3"
+   },
+   {
+    "url": "https://www.ti.com/store/ti/en/p/product/?p=TLV320AIC3104IRHBR",
+    "reason": "requires login / blocked"
+   }
+  ]
  },
  {
   "id": "P2c",
   "item": "LSM6DSV16X 6-axis IMU (on the imu_to_dxl board, Dynamixel slave ID 200)",
+  "category": "ic",
   "ce_part": "part:lsm6dsv16x",
   "qty_per_robot": 1,
+  "qty_basis": "one IMU on P2 (docs/ELECTRONICS-AND-SOFTWARE.md; the bus scan expects ID 200)",
+  "mpn": "LSM6DSV16XTR",
+  "mpn_status": "confirmed",
+  "rfq_spec": "ST LSM6DSV16XTR, 6-axis IMU with on-chip sensor fusion (SFLP), LGA-14L 2.5 x 3.0 x 0.83 mm, I2C/SPI. 1 per imu_to_dxl board.",
   "verdict": "PASS",
-  "verdict_why": null,
   "offers": [
    {
     "vendor": "DigiKey (cut tape / Digi-Reel)",
+    "sku": "497-LSM6DSV16XTRCT-ND",
     "url": "https://www.digikey.com/en/products/detail/stmicroelectronics/LSM6DSV16XTR/16841485",
     "currency": "USD",
     "tiers": [
@@ -1523,12 +2329,17 @@
       4.13
      ]
     ],
+    "no_tiers": false,
     "moq": 1,
     "lead_time": "Manufacturer Standard Lead Time 24 Weeks",
-    "fetched": "2026-09-02"
+    "stock": "2,663",
+    "fetched": "2026-09-02",
+    "confidence": "read",
+    "note": "Tape & Reel 5 000 pcs at $3.65 + $7.00 reeling fee."
    },
    {
     "vendor": "LCSC",
+    "sku": "C5267406",
     "url": "https://www.lcsc.com/product-detail/C5267406.html",
     "currency": "USD",
     "tiers": [
@@ -1557,26 +2368,49 @@
       2.4445
      ]
     ],
+    "no_tiers": false,
     "moq": 1,
     "lead_time": "not stated",
-    "fetched": "2026-09-02"
+    "stock": "5,414",
+    "fetched": "2026-09-02",
+    "confidence": "read",
+    "note": "LGA-14(2.5x3), 5000/full reel."
+   }
+  ],
+  "alternates": [
+   {
+    "mpn": "LSM6DSV16BXTR",
+    "why_equivalent": "same LSM6DSV16 family and same LGA-14 footprint, different option code; ST's part-number suffix changes the trimmed feature set, so this is a footprint substitute only after checking the register map against Pollen's driver. Listed at DigiKey; tiers not fetched.",
+    "vendor": "DigiKey",
+    "url": "https://www.digikey.com/en/products/detail/stmicroelectronics/LSM6DSV16BXTR/16841542",
+    "price_note": "CANNOT DETERMINE - page not fetched"
    }
   ],
   "unknowns": [
    "The MCU and the half-duplex transceiver on the same imu_to_dxl board are unidentified (docs/BOM.md P2), so this line prices ONE of the board's chips, not the board."
   ],
-  "excluded_from_rollup": null
+  "blocked": [
+   {
+    "url": "https://www.mouser.com/ProductDetail/STMicroelectronics/LSM6DSV16XTR",
+    "reason": "product page access restricted; no price served"
+   }
+  ]
  },
  {
   "id": "P1d",
   "item": "BMI088 6-axis IMU (dormant footprint on the Robot HAT)",
+  "category": "ic",
   "ce_part": "part:bmi088",
   "qty_per_robot": 1,
+  "qty_basis": "one footprint on P1. Described as DORMANT in RELEASE.html §1 - populated or not is a board decision, so this line may be zero.",
+  "mpn": "BMI088",
+  "mpn_status": "confirmed",
+  "rfq_spec": "Bosch Sensortec BMI088, 16-bit +/-24 g accelerometer + 16-bit +/-2000 dps gyroscope, LGA-16 3.0 x 4.5 x 0.95 mm, SPI/I2C. 1 per HAT if populated.",
   "verdict": "PASS",
-  "verdict_why": null,
   "offers": [
    {
     "vendor": "DigiKey (cut tape / Digi-Reel)",
+    "sku": "828-1082-1-ND",
     "url": "https://www.digikey.com/en/products/detail/bosch-sensortec/BMI088/8634942",
     "currency": "USD",
     "tiers": [
@@ -1613,12 +2447,17 @@
       4.0698
      ]
     ],
+    "no_tiers": false,
     "moq": 1,
     "lead_time": "16 weeks",
-    "fetched": "2026-09-02"
+    "stock": "0 in stock; 5,000 expected 08-Sep-2026",
+    "fetched": "2026-09-02",
+    "confidence": "read",
+    "note": "Tape & Reel 5 000 at $3.77853."
    },
    {
     "vendor": "LCSC",
+    "sku": "C194919",
     "url": "https://www.lcsc.com/product-detail/C194919.html",
     "currency": "USD",
     "tiers": [
@@ -1639,26 +2478,50 @@
       6.8317
      ]
     ],
+    "no_tiers": false,
     "moq": 1,
     "lead_time": "not stated",
-    "fetched": "2026-09-02"
+    "stock": "5,016",
+    "fetched": "2026-09-02",
+    "confidence": "read",
+    "note": "no tier published above 100 - unusually, LCSC is the EXPENSIVE source for this part, 52 % above DigiKey at 100."
+   }
+  ],
+  "alternates": [
+   {
+    "mpn": "BMI085",
+    "why_equivalent": "Bosch's sibling in the same LGA-16 package and the same accel+gyro split; lower g-range (+/-16 g). Footprint-compatible, register-compatible enough that Bosch's own driver covers both, but it is a different part and the vibration-robustness claim that makes the BMI088 interesting does not transfer.",
+    "vendor": "LCSC",
+    "url": "https://www.lcsc.com/product-detail/Attitude-Sensor-Gyroscope_Bosch-Sensortec-BMI085_C2655097.html",
+    "price_note": "CANNOT DETERMINE - page not fetched"
    }
   ],
   "unknowns": [
    "Whether the HAT populates this at all: the footprint is described as dormant. If it is not populated this line is $0."
   ],
-  "excluded_from_rollup": null
+  "blocked": [
+   {
+    "url": "https://www.mouser.com/ProductDetail/Bosch-Sensortec/BMI088",
+    "reason": "'Access to this page has been denied'; no price served"
+   }
+  ]
  },
  {
   "id": "R1",
   "item": "USB-C CC/PD controller fitted on the Radxa ZERO 3W (reference line - NOT separately purchased)",
+  "category": "ic",
   "ce_part": "part:et7301b",
   "qty_per_robot": 0,
+  "qty_basis": "ZERO per robot: this chip arrives soldered on the Radxa board bought as line B3. Priced here only so a re-spin of the compute board, or a repair, has a number.",
+  "mpn": "ET7301B (Radxa's U6). Pollen's device tree names FUSB302, which is the DRIVER name, not the fitted die (part:fusb302 record.title).",
+  "mpn_status": "two names, one socket - resolved by lane C in favour of ET7301B on the schematic",
+  "rfq_spec": "USB Type-C CC / USB-PD 2.0 controller, I2C address 0x22, register-compatible with the Linux fusb302 driver. Etek ET7301B (WLCSP9 / QFN14) is what Radxa's schematic v1.12 places; onsemi FUSB302BMPX (MLP-14 2.5x2.5) is the part the driver is named for and is the second-source footprint.",
   "verdict": "CANNOT DETERMINE",
   "verdict_why": "The part actually fitted (ET7301B) has NO distributor with a readable price: LCSC's search returns nothing for ET7301B and DigiKey's own ETEK Microelectronics supplier centre lists no ET7301 part (both checked 2026-09-02). The FUSB302BMPX below is fully priced at two distributors, but it is the ALTERNATE, not the fitted part.",
   "offers": [
    {
     "vendor": "DigiKey",
+    "sku": "FUSB302BMPXCT-ND (onsemi FUSB302BMPX)",
     "url": "https://www.digikey.com/en/products/detail/onsemi/FUSB302BMPX/6138869",
     "currency": "USD",
     "tiers": [
@@ -1699,12 +2562,17 @@
       0.54316
      ]
     ],
+    "no_tiers": false,
     "moq": 1,
     "lead_time": "56 weeks",
-    "fetched": "2026-09-02"
+    "stock": "7,075",
+    "fetched": "2026-09-02",
+    "confidence": "read",
+    "note": "This is the SECOND-SOURCE part, not the fitted one. Max purchase 6 000 per 30 days."
    },
    {
     "vendor": "LCSC",
+    "sku": "C132291 (onsemi FUSB302BMPX)",
     "url": "https://www.lcsc.com/product-detail/C132291.html",
     "currency": "USD",
     "tiers": [
@@ -1733,27 +2601,54 @@
       0.5068
      ]
     ],
+    "no_tiers": false,
     "moq": 1,
     "lead_time": "not stated",
-    "fetched": "2026-09-02"
+    "stock": "16,140",
+    "fetched": "2026-09-02",
+    "confidence": "read",
+    "note": "WFQFN-14(2.5x2.5)."
+   }
+  ],
+  "alternates": [
+   {
+    "mpn": "onsemi FUSB302BMPX",
+    "why_equivalent": "the part Linux's fusb302 driver was written for, and the name in Pollen's own device tree. Different package (MLP-14 2.5x2.5) from the ET7301B's WLCSP9, so it is a schematic-level, not a footprint-level, substitution. Priced above at two distributors.",
+    "vendor": "DigiKey / LCSC",
+    "url": "https://www.digikey.com/en/products/detail/onsemi/FUSB302BMPX/6138869",
+    "price_note": "$1.10 @1 / $0.634 @100 / $0.55539 @1000 (DigiKey); $0.9413 / $0.6478 / $0.5068 (LCSC)"
    }
   ],
   "unknowns": [
    "ET7301B price at any quantity: CANNOT DETERMINE. The manufacturer's datasheet is public (https://www.etekmicro.com/wp-content/uploads/datasheets/ET7301BY_datasheet.pdf) but no distributor with a price was found.",
    "Whether a re-spin would keep the ET7301B (a Chinese-market part with no Western distribution) or move to the FUSB302: a design decision, not a sourcing one."
   ],
-  "excluded_from_rollup": null
+  "blocked": [
+   {
+    "url": "https://www.digikey.com/en/supplier-centers/etek-microelectronics",
+    "reason": "supplier centre lists no ET7301 part number at all (read 2026-09-02)"
+   },
+   {
+    "url": "https://www.lcsc.com/",
+    "reason": "site search returns no ET7301B result"
+   }
+  ]
  },
  {
   "id": "R2",
   "item": "MCP73213 2S Li-ion charge controller (in the external charger, not the robot)",
+  "category": "ic",
   "ce_part": "part:mcp73213",
   "qty_per_robot": 0,
+  "qty_basis": "ZERO per robot. The NP-F550 charger is a separate accessory (line B4 prices it as a shared cost). Priced here so a bespoke charger or dock can be costed.",
+  "mpn": "MCP73213-A6SI/MF (DFN-10 3x3)",
+  "mpn_status": "family confirmed (part:mcp73213 verdict PASS); the exact option suffix a bespoke charger needs depends on the chosen float voltage (8.2 / 8.4 / 8.7 / 8.8 V)",
+  "rfq_spec": "Microchip MCP73213, dual-cell (2S) Li-ion linear charge management controller with input over-voltage protection, DFN-10 3x3. Float voltage option to be selected: 8.4 V for a standard 2S pack. Fast-charge current set by one external resistor, 130-1100 mA.",
   "verdict": "PASS",
-  "verdict_why": null,
   "offers": [
    {
     "vendor": "DigiKey",
+    "sku": "MCP73213-A6SI/MF-ND",
     "url": "https://www.digikey.com/en/products/detail/microchip-technology/MCP73213-A6SI-MF/2125537",
     "currency": "USD",
     "tiers": [
@@ -1770,12 +2665,17 @@
       1.82
      ]
     ],
+    "no_tiers": false,
     "moq": 1,
     "lead_time": "30 weeks",
-    "fetched": "2026-09-02"
+    "stock": "5,407",
+    "fetched": "2026-09-02",
+    "confidence": "read",
+    "note": "Tube packaging. No tier published above 100."
    },
    {
     "vendor": "LCSC",
+    "sku": "C623836 (MCP73213T-A6AI/MF)",
     "url": "https://www.lcsc.com/product-detail/C623836.html",
     "currency": "USD",
     "tiers": [
@@ -1796,26 +2696,37 @@
       0.7147
      ]
     ],
+    "no_tiers": false,
     "moq": 1,
     "lead_time": "not stated",
-    "fetched": "2026-09-02"
+    "stock": "Out of Stock",
+    "fetched": "2026-09-02",
+    "confidence": "read",
+    "note": "DIFFERENT SUFFIX (T-A6AI vs -A6SI): tape-and-reel, and A6A vs A6S is a different option code. Priced as the same family, NOT as the same orderable part. 3,300/full reel. Out of stock."
    }
   ],
+  "alternates": [],
   "unknowns": [
    "Which option suffix a Microduck charger would need: depends on a float-voltage choice nobody has made. The two offers above are DIFFERENT suffixes and are not interchangeable on a purchase order."
   ],
-  "excluded_from_rollup": null
+  "blocked": []
  },
  {
   "id": "R3",
   "item": "S-8252 2S battery protection IC (inside the NP-F550 pack, not separately purchased)",
+  "category": "ic",
   "ce_part": "part:s-8252",
   "qty_per_robot": 0,
+  "qty_basis": "ZERO per robot - it arrives inside the pack bought as line B4. Priced so a bespoke pack can be costed.",
+  "mpn": "S-8252 series; exact suffix CANNOT DETERMINE (the series has ~30 detection-voltage options and the fitted pack is unidentified)",
+  "mpn_status": "series confirmed, option unknown",
+  "rfq_spec": "ABLIC S-8252 series protection IC for a 2-serial-cell Li-ion pack, SOT-23-6 or SNT-6A. Overcharge / overdischarge / overcurrent detection voltages to be selected against the pack's cells; the runtime's own thresholds are 6.6 V empty / 8.2 V full, which constrains the overdischarge option.",
   "verdict": "CANNOT DETERMINE",
   "verdict_why": "Two distributors now carry the series with full read tier tables - but for TWO DIFFERENT OPTION CODES (-AAX at DigiKey, -AAC at LCSC), and neither is known to be the one inside the pack. Two prices for two parts that are not the part is not two prices for the part. This stays CANNOT DETERMINE until a pack is opened and the die marking read.",
   "offers": [
    {
     "vendor": "DigiKey",
+    "sku": "1662-S-8252AAX-M6T1UCT-ND",
     "url": "https://www.digikey.com/en/products/detail/ablic-inc/S-8252AAX-M6T1U/6121465",
     "currency": "USD",
     "tiers": [
@@ -1856,12 +2767,17 @@
       1.10096
      ]
     ],
+    "no_tiers": false,
     "moq": 1,
     "lead_time": "16 weeks",
-    "fetched": "2026-09-02"
+    "stock": "0 in stock; 3,000 estimated 23-Dec-2026",
+    "fetched": "2026-09-02",
+    "confidence": "read",
+    "note": "SOT-23-6. The -AAX suffix is ONE of many detection-voltage options; it is a price sample for the series, not the fitted part."
    },
    {
     "vendor": "LCSC",
+    "sku": "C468219 (S-8252AAC-M6T1U)",
     "url": "https://www.lcsc.com/product-detail/C468219.html",
     "currency": "USD",
     "tiers": [
@@ -1890,27 +2806,37 @@
       1.1234
      ]
     ],
+    "no_tiers": false,
     "moq": 1,
     "lead_time": "not stated",
-    "fetched": "2026-09-02"
+    "stock": "Out of Stock",
+    "fetched": "2026-09-02",
+    "confidence": "read",
+    "note": "SOT-23-6, 3000/full reel. A DIFFERENT option code from DigiKey's -AAX: AAC and AAX are different detection-voltage sets and are NOT interchangeable. LCSC also lists AAG (C468221), AAO (C468216), ABB (C5904467), AAA-I6T1U (C7070591) - the series is well distributed; the fitted option is what is unknown."
    }
   ],
+  "alternates": [],
   "unknowns": [
    "The suffix: CANNOT DETERMINE until a pack is opened and the marking read.",
    "A second distributor for whatever suffix is right: not attempted, because there is nothing yet to look up."
   ],
-  "excluded_from_rollup": null
+  "blocked": []
  },
  {
   "id": "C1",
   "item": "JST EH 3-pin connector kit for the Dynamixel bus, if the harness is crimped rather than bought",
+  "category": "connector",
   "ce_part": null,
   "qty_per_robot": 1,
+  "qty_basis": "16 leads x 2 ends = 32 EHR-3 housings and 96 SEH-001T-P0.6 contacts (wiring/CABLES.md rows 1-16, connector column). ALTERNATIVE to line B2, not additional to it.",
+  "mpn": "JST EHR-3 (housing) + JST SEH-001T-P0.6 (crimp contact)",
+  "mpn_status": "confirmed - these are exactly the parts wiring/CABLES.md names",
+  "rfq_spec": "JST EH series, 2.50 mm pitch: EHR-3 3-position receptacle housing x 32 per robot; SEH-001T-P0.6 socket contact, 22-26 AWG, tin, x 96 per robot. Wire: 21 or 22 AWG per the voltage-drop check in wiring/CABLES.md (worst drop 0.550 V at 21 AWG, PASS).",
   "verdict": "PASS",
-  "verdict_why": "Two distributors for BOTH parts of the kit, all four tier tables read. LCSC is roughly 2.3-2.4x cheaper than DigiKey on both, which at 32 housings + 96 contacts per robot is $4.35 vs $1.86 of parts - a real difference, and still small beside the wire, the crimp tool and the 96 crimp operations this option adds.",
   "offers": [
    {
     "vendor": "DigiKey",
+    "sku": "455-1001-ND (EHR-3 housing)",
     "url": "https://www.digikey.com/en/products/detail/jst-sales-america-inc/EHR-3/527225",
     "currency": "USD",
     "tiers": [
@@ -1951,12 +2877,17 @@
       0.04533
      ]
     ],
+    "no_tiers": false,
     "moq": 1,
     "lead_time": "16 weeks",
-    "fetched": "2026-09-02"
+    "stock": "76,945",
+    "fetched": "2026-09-02",
+    "confidence": "read",
+    "note": "3 position, 2.50 mm, bulk."
    },
    {
     "vendor": "DigiKey",
+    "sku": "455-1042CT-ND (SEH-001T-P0.6 contact)",
     "url": "https://www.digikey.com/en/products/detail/jst-sales-america-inc/SEH-001T-P0-6/527267",
     "currency": "USD",
     "tiers": [
@@ -1989,12 +2920,17 @@
       0.0159
      ]
     ],
+    "no_tiers": false,
     "moq": 100,
     "lead_time": "16 weeks",
-    "fetched": "2026-09-02"
+    "stock": "777,956",
+    "fetched": "2026-09-02",
+    "confidence": "read",
+    "note": "MOQ 100 on cut tape; 9 000 on reel. 22-26 AWG socket contact, crimp, tin."
    },
    {
     "vendor": "LCSC",
+    "sku": "C161660 (EHR-3 housing)",
     "url": "https://www.lcsc.com/product-detail/C161660.html",
     "currency": "USD",
     "tiers": [
@@ -2023,12 +2959,18 @@
       0.0113
      ]
     ],
+    "no_tiers": false,
     "moq": 20,
     "lead_time": "not stated",
-    "fetched": "2026-09-02"
+    "stock": "13,560 In stock, ships now",
+    "fetched": "2026-09-02",
+    "confidence": "read",
+    "excluded_from_rollup": "second source for the housing; the kit above is costed at DigiKey",
+    "note": "P=2.5 mm, 2000/full bag. 2.4x cheaper than DigiKey at 100 pieces ($0.0245 at 20+ vs $0.0588 at 100)."
    },
    {
     "vendor": "LCSC",
+    "sku": "C263767 (SEH-001T-P0.6 contact)",
     "url": "https://www.lcsc.com/product-detail/C263767.html",
     "currency": "USD",
     "tiers": [
@@ -2057,26 +2999,59 @@
       0.0053
      ]
     ],
+    "no_tiers": false,
     "moq": 100,
     "lead_time": "not stated",
-    "fetched": "2026-09-02"
+    "stock": "25,400",
+    "fetched": "2026-09-02",
+    "confidence": "read",
+    "excluded_from_rollup": "second source for the contact; the kit above is costed at DigiKey",
+    "note": "9000/full reel. 2.3x cheaper than DigiKey at 100 ($0.0112 vs $0.0257)."
+   }
+  ],
+  "alternates": [
+   {
+    "mpn": "buy ROBOTIS X3P 180 mm leads instead (line B2)",
+    "why_equivalent": "the same JST EH 3-pin assembly, factory-crimped, at $1.55 per lead. Cheaper than crimping until labour is free: 32 housings + 96 contacts at the 100-piece rate is 32 x $0.0588 + 96 x $0.0257 = $4.35 of parts per robot vs $24.80 for two ROBOTIS packs - but the parts price excludes wire, crimp tooling and 96 crimp operations, and the ROBOTIS leads carry 15-160 mm of dead slack that this option removes.",
+    "vendor": "ROBOTIS",
+    "url": "https://en.robotis.com/shop_en/item.php?it_id=903-0251-000",
+    "price_note": "$15.50 per 10-pack"
    }
   ],
   "unknowns": [
    "Wire gauge and insulation as Pollen ships them: CANNOT DETERMINE; 21 AWG is our own check basis, not a measurement of the product."
   ],
-  "excluded_from_rollup": "ALTERNATIVE to line B2 (bought ROBOTIS X3P leads), never additional to it. Costed in the alternates column, not in the subtotal."
+  "blocked": [],
+  "kit": [
+   {
+    "offer": 0,
+    "qty_per_robot": 32,
+    "what": "EHR-3 housing"
+   },
+   {
+    "offer": 1,
+    "qty_per_robot": 96,
+    "what": "SEH-001T-P0.6 contact"
+   }
+  ],
+  "excluded_from_rollup": "ALTERNATIVE to line B2 (bought ROBOTIS X3P leads), never additional to it. Costed in the alternates column, not in the subtotal.",
+  "verdict_why": "Two distributors for BOTH parts of the kit, all four tier tables read. LCSC is roughly 2.3-2.4x cheaper than DigiKey on both, which at 32 housings + 96 contacts per robot is $4.35 vs $1.86 of parts - a real difference, and still small beside the wire, the crimp tool and the 96 crimp operations this option adds."
  },
  {
   "id": "C2",
   "item": "JST SH 4-pin (ToF / Stemma) and GH 2-pin (speaker) housings",
+  "category": "connector",
   "ce_part": null,
   "qty_per_robot": 1,
+  "qty_basis": "SHR-04V-S-B x2 (both ends of the 35 mm ToF cable, wiring/CABLES.md row 17); GHR-02V-S x2 (speaker lead, row 18 - the HAT end is CANNOT DETERMINE, so one of the two is provisional)",
+  "mpn": "JST SHR-04V-S-B (1.00 mm, 4 pos) + JST GHR-02V-S (1.25 mm, 2 pos)",
+  "mpn_status": "SH 4-pin confirmed at the HAT's J5; the ToF-board end and the HAT speaker end are CANNOT DETERMINE",
+  "rfq_spec": "JST SH series 1.00 mm 4-position receptacle housing (SHR-04V-S-B) and JST GH series 1.25 mm 2-position receptacle housing (GHR-02V-S), with matching crimp contacts. 2 of each per robot.",
   "verdict": "PASS",
-  "verdict_why": "Two distributors for both housings, four tier tables read. DigiKey is out of stock on the GHR-02V-S until 16-Dec-2026 and LCSC holds 1,125 - but LCSC is 2.7x dearer on that part, so the two sources are not interchangeable on price or on availability.",
   "offers": [
    {
     "vendor": "DigiKey",
+    "sku": "455-1379-ND (SHR-04V-S-B)",
     "url": "https://www.digikey.com/en/products/detail/jst-sales-america-inc/SHR-04V-S-B/759868",
     "currency": "USD",
     "tiers": [
@@ -2117,12 +3092,17 @@
       0.05763
      ]
     ],
+    "no_tiers": false,
     "moq": 1,
     "lead_time": "16 weeks",
-    "fetched": "2026-09-02"
+    "stock": "in stock",
+    "fetched": "2026-09-02",
+    "confidence": "read",
+    "note": "4 position, 1.00 mm, bulk."
    },
    {
     "vendor": "DigiKey",
+    "sku": "455-1592-ND (GHR-02V-S)",
     "url": "https://www.digikey.com/en/products/detail/jst-sales-america-inc/GHR-02V-S/807814",
     "currency": "USD",
     "tiers": [
@@ -2163,12 +3143,17 @@
       0.05035
      ]
     ],
+    "no_tiers": false,
     "moq": 1,
     "lead_time": "16 weeks",
-    "fetched": "2026-09-02"
+    "stock": "0; 3,000 expected 16-Dec-2026",
+    "fetched": "2026-09-02",
+    "confidence": "read",
+    "note": "2 position, 1.25 mm."
    },
    {
     "vendor": "LCSC",
+    "sku": "C394367 (SHR-04V-S-B)",
     "url": "https://www.lcsc.com/product-detail/C394367.html",
     "currency": "USD",
     "tiers": [
@@ -2197,12 +3182,18 @@
       0.0382
      ]
     ],
+    "no_tiers": false,
     "moq": 10,
     "lead_time": "not stated",
-    "fetched": "2026-09-02"
+    "stock": "49,850",
+    "fetched": "2026-09-02",
+    "confidence": "read",
+    "excluded_from_rollup": "second source; the kit above is costed at DigiKey",
+    "note": "P=1 mm, 2000/full box."
    },
    {
     "vendor": "LCSC",
+    "sku": "C160416 (GHR-02V-S)",
     "url": "https://www.lcsc.com/product-detail/C160416.html",
     "currency": "USD",
     "tiers": [
@@ -2231,27 +3222,61 @@
       0.1343
      ]
     ],
+    "no_tiers": false,
     "moq": 5,
     "lead_time": "not stated",
-    "fetched": "2026-09-02"
+    "stock": "1,125",
+    "fetched": "2026-09-02",
+    "confidence": "read",
+    "excluded_from_rollup": "second source; the kit above is costed at DigiKey",
+    "note": "P=1.25 mm, 9000/full bag. Here LCSC is 2.7x MORE expensive than DigiKey ($0.2665 at 5+ vs $0.10 at 1) - the direction is not always the same, which is why both are read."
+   }
+  ],
+  "alternates": [
+   {
+    "mpn": "Qwiic / Stemma QT pre-made 4-conductor cable",
+    "why_equivalent": "the ToF link is a standard Qwiic/Stemma bus (JST-SH 1.0 mm 4-pin, GND/3V3/SDA/SCL) and every ToF breakout in line B9 ships with one. Buying the breakout usually makes this line zero.",
+    "vendor": "SparkFun / Pololu / Adafruit",
+    "url": "https://www.sparkfun.com/sparkfun-qwiic-mini-tof-imager-vl53l5cx.html",
+    "price_note": "typically included with the breakout"
    }
   ],
   "unknowns": [
    "Crimp contacts (SSHL-002T-P0.2 for SH, SSHL-002T-P0.2 / SGHD-001T-P0.2 for GH) were not priced - no page fetched.",
    "The connector on the ToF board and on the HAT's speaker output: CANNOT DETERMINE (wiring/CABLES.md rows 17-18)."
   ],
-  "excluded_from_rollup": null
+  "blocked": [],
+  "kit": [
+   {
+    "offer": 0,
+    "qty_per_robot": 2,
+    "what": "SHR-04V-S-B"
+   },
+   {
+    "offer": 1,
+    "qty_per_robot": 2,
+    "what": "GHR-02V-S"
+   }
+  ],
+  "verdict_why": "Two distributors for both housings, four tier tables read. DigiKey is out of stock on the GHR-02V-S until 16-Dec-2026 and LCSC holds 1,125 - but LCSC is 2.7x dearer on that part, so the two sources are not interchangeable on price or on availability."
  },
  {
   "id": "P1",
   "item": "Robot HAT - custom PCB, bare board + assembly",
+  "category": "pcb",
   "ce_part": "part:microduck-robot-hat-pcb",
   "qty_per_robot": 1,
+  "qty_basis": "one HAT stacked on the Radxa 40-pin header",
+  "mpn": "microduck_robot_hat (this repository's own design; fab package electronics/robot-hat/out/fab/microduck_robot_hat-fab.zip)",
+  "mpn_status": "in-house design, DRC verdict FAIL - quotable as an outline and stackup, not releasable as artwork",
+  "mpn_note": "THE DESIGN EXISTS AND IS IN THIS REPOSITORY. electronics/robot-hat/out/fab/ holds microduck_robot_hat-fab.zip plus the loose Gerbers (F.Cu.GTL, B.Cu.GBL, F/B.Mask, F/B.Silk, F/B.Paste, Edge.Cuts.GKO), PTH.drl and NPTH.drl, positions.csv, bom.csv and the .kicad_pcb. Until 2026-09-03 this line read 'There is nothing to send a fab' - a refusal the repository itself contradicted, and the reason the largest unknown in the cost model stayed unpriced. Board data below is measured off that .kicad_pcb, not transcribed: 1 759 copper segments (879 at 0.1500 mm, 803 at 0.3000 mm, 61 at 0.8000 mm, 10 at 0.2500 mm, 4 at 0.2000 mm, 2 at 0.4000 mm), 33 vias at 0.800 mm pad / 0.300 mm drill, 64 through-hole pads, 97 drilled holes in all.",
+  "rfq_spec": "QUOTABLE NOW. Fab package: electronics/robot-hat/out/fab/microduck_robot_hat-fab.zip (Gerbers F/B.Cu, F/B.Mask, F/B.Silk, F/B.Paste, Edge.Cuts.GKO; PTH.drl + NPTH.drl; positions.csv; bom.csv). Board 65.0000 x 30.0000 mm bounding rectangle = 3.022506 sq in (routed outline 1939.24 mm2 = 3.005828 sq in), corner radius 3.5000 mm, 2 copper layers, FR-4 1.6 mm, 1 oz outer copper, green mask, white legend both sides. 28 placed parts, 21 nets, 859 tracks, 33 vias (0.800 mm pad / 0.300 mm drill), 97 drilled holes = 32.0926 per square inch. MINIMUM COPPER TRACK 0.1500 mm = 5.9055 mil, which is BELOW the 6 mil (0.1524 mm) floor that OSH Park and AdvancedPCB both publish and INSIDE JLCPCB's published 0.10/0.10 mm 2-layer process: quote it on a 4 mil process, or state the surcharge to hold 0.1500 mm on your standard one. Minimum drilled hole 0.3000 mm. Please quote (a) bare boards and (b) turnkey assembly against the shipped bom.csv and positions.csv, each at 3 / 100 / 1000 pieces. BE TOLD PLAINLY: this board's own design-rule check is FAIL - seven nets are unrouted (GND, HAT_1V8, HAT_3V3, SERVO_V, SPK_N, i2s3/DOUT, i2s3/WCLK) and one via pair violates hole-to-hole. We are asking for a price on this outline, stackup and drill count, not asserting the artwork is final.",
   "verdict": "FAIL",
   "verdict_why": "Two fabs published a price this document could compute for a board of this outline and stackup, and NEITHER WILL BUILD THIS ARTWORK: the minimum copper track is 0.1500 mm, measured over 879 segments in microduck_robot_hat.kicad_pcb, against a published floor of 6 mil = 0.1524 mm at OSH Park and 0.006\" at AdvancedPCB - short by 0.0024 mm. The board's own DRC is FAIL besides (7 unrouted nets). The bare-board money is therefore readable and is reported outside the headline subtotal; the assembly price is CANNOT DETERMINE. WHAT SETTLES IT: either lane D widens the minimum track to 0.1524 mm and re-routes, or a 4 mil fab quotes it - JLCPCB's published 2-layer process accepts 0.10 mm but publishes only a 'From $2.00 / 5 pcs' floor with no size attached, so the RFQ to JLCPCB in RFQ.html is the instrument that closes this.",
   "offers": [
    {
     "vendor": "OSH Park (US)",
+    "sku": "2-Layer Prototype (set of 3) / 2 Layer Medium Run",
     "url": "https://docs.oshpark.com/services/two-layer/",
     "currency": "USD",
     "tiers": [
@@ -2266,10 +3291,15 @@
     ],
     "moq": 3,
     "lead_time": "9-12 calendar days (prototype); 12-21 calendar days (medium run)",
-    "fetched": "2026-09-03"
+    "stock": "made to order - no stock concept",
+    "fetched": "2026-09-03",
+    "confidence": "read",
+    "page_kind": "family",
+    "note": "OSH Park publishes a RATE, not a per-part price, so the number here is that rate times the board's own measured area. 2-Layer Prototype: '$5 per square inch, which includes three copies of your design' (docs.oshpark.com/services/two-layer/, read 2026-09-03), 63 mil (1.6 mm) nominal, 1 oz copper, ENIG (Gold) to IPC-4552, purple mask, 6 mil (0.1524 mm) minimum trace and space, 10 mil (0.254 mm) minimum drill, minimum board 0.25 in (6.35 mm) square, maximum 16 x 22 in, 'orders ... will ship within 9-12 calendar days'. 3.022506 sq in x $5.00 = $15.112530 per set of three = $5.037510 per board, and three boards is the smallest order. 2 Layer Medium Run (docs.oshpark.com/services/two-layer-medium-run/, read 2026-09-03): '$1 per square inch, 100 square inch minimum', each design 'ordered in a multiple of 10 boards', same stackup and same ENIG, 12-21 calendar days. 100 sq in / 3.022506 sq in = 33.0851 boards, rounded up to a multiple of 10 = 40 boards, so the $1/sq in tier starts at 40 pieces at $3.022506 per board. AREA IS THE BOUNDING RECTANGLE 65.0000 x 30.0000 mm, which is a CEILING: the routed outline is 1939.24 mm2 (3.005828 sq in) once the corner radii are taken off, and OSH Park does not publish which of the two it bills."
    },
    {
     "vendor": "AdvancedPCB / Advanced Circuits (US)",
+    "sku": "$33 Each Special",
     "url": "https://www.advancedpcb.com/en-us/33-each-special/",
     "currency": "USD",
     "tiers": [
@@ -2278,46 +3308,94 @@
       33.0
      ]
     ],
+    "no_tiers": true,
     "moq": 3,
     "lead_time": "'Lead Time 5 Days'",
-    "fetched": "2026-09-03"
+    "stock": "made to order - no stock concept",
+    "fetched": "2026-09-03",
+    "confidence": "read",
+    "page_kind": "family",
+    "note": "'$33 Each Special' on 'ORDER 3 OR MORE BOARDS', flat per board regardless of size: '2-Layers, FR-4, 0.062\", 1 Ounce Finished Copper', 'Lead free HAL (AdvancedPCB May Also Use Other Lead-Free Finishes Such As ENIG Or Silver At No Additional Charge)', 'Green LPI Mask', 'White Legend (1 Or 2 Sides)', 'Maximum Size 60 Sq. Inches'. Restrictions read the same day: 'Minimum 0.006\" Line/Space', 'Minimum 0.010\" Hole Size', 'Maximum 35 Drilled Holes Per Square Inch', 'No Slots (Or Overlapping Drill Hits)', 'No Internal Routing (Cutouts)', 'No Scoring, Tab Rout, Or Drilled Hole Board Separations', 'Does Not Include Blind/Buried Vias', and '$50 Lot Charge For Multiple Images Or Step & Repeat'. This board measures 3.022506 sq in (inside 60) and 32.0926 drilled holes per square inch (inside 35). NO VOLUME TIER IS PUBLISHED, so $33.00 is carried unchanged to 100 and 1 000 pieces as a CEILING - at those quantities this is a quotation to ask for, not a price to budget. THE ARTWORK DOES NOT MEET THIS SPECIAL: minimum copper track 0.1500 mm = 0.005906\", under the published 0.006\" line/space. The price is recorded for the outline; the order would be refused as drawn."
    },
    {
     "vendor": "JLCPCB (CN)",
+    "sku": "FR-4 2-layer prototype",
     "url": "https://jlcpcb.com/",
     "currency": "USD",
     "tiers": [],
     "moq": 5,
     "lead_time": "'Build Time: 24 hours'",
-    "fetched": "2026-09-03"
+    "stock": "made to order - no stock concept",
+    "fetched": "2026-09-03",
+    "confidence": "read",
+    "page_kind": "family",
+    "note": "READ, BUT NOT A PRICE FOR THIS BOARD. The home page prints 'From $2.00 / 5 pcs' for FR-4 with 'Build Time: 24 hours' and 'PCB Assembly From $8.00'. Both are FLOORS with no board size, layer count or finish attached, and the quote engine that would attach them is JavaScript that WebFetch does not run. `tiers` is therefore EMPTY and this offer counts toward no distributor total. It is recorded because JLCPCB is the only fab read on this line whose published 2-layer process accepts the artwork: '0.10 / 0.10 mm (4 / 4 mil)' track/space at 1 oz, plated hole '0.15 - 6.3 mm', minimum board '3 x 3 mm', thicknesses '0.4/0.6/0.8/1.0/1.2/1.6/2.0 mm', finishes 'HASL (leaded / lead-free), ENIG, OSP' (jlcpcb.com/capabilities/pcb-capabilities, re-read 2026-09-03). Assembly of this board's 28 parts / 21 nets against the shipped bom.csv is a separate CANNOT DETERMINE - '$8.00' is a floor for somebody else's board."
    },
    {
     "vendor": "PCBWay (CN)",
+    "sku": "1-2 layer prototype",
     "url": "https://www.pcbway.com/",
     "currency": "USD",
     "tiers": [],
     "moq": 10,
     "lead_time": "'Build Time:24 hours'",
-    "fetched": "2026-09-03"
+    "stock": "made to order - no stock concept",
+    "fetched": "2026-09-03",
+    "confidence": "read",
+    "page_kind": "family",
+    "note": "READ, BUT NOT A PRICE FOR THIS BOARD. The home page prints '$ 5.00  10 pcs  1-2 layer' with 'Build Time:24 hours', and '$ 29 free shipping for 1-20pcs assembly'. Neither carries a board size, so neither is a price for a board of this outline; `tiers` is empty and this offer counts toward no distributor total. The instant-quote form at pcbway.com/orderonline.aspx is JavaScript and rendered no number."
    }
   ],
+  "alternates": [],
   "unknowns": [
    "Turnkey ASSEMBLY price at 3 / 100 / 1000 boards: CANNOT DETERMINE. Both fabs that gave a bare-board price quote bare board only; the two that advertise assembly (JLCPCB 'From $8.00', PCBWay '$29 free shipping for 1-20pcs assembly') publish a floor with no BOM attached. A quotation against the shipped bom.csv + positions.csv is the only thing that settles it - that request is drafted in RFQ.html.",
    "Whether OSH Park bills the bounding rectangle (3.022506 sq in) or the routed outline (3.005828 sq in): CANNOT DETERMINE - neither service page says. The bounding rectangle is used here, so every OSH Park number on this line is a CEILING by at most $0.0834 per set of three.",
    "Surcharge to hold 0.1500 mm track on a 6 mil process, if any fab will: CANNOT DETERMINE - no fab publishes one."
   ],
-  "excluded_from_rollup": null
+  "blocked": [
+   {
+    "url": "https://www.pcbway.com/orderonline.aspx",
+    "reason": "instant-quote form is JavaScript; the fetched page text carries no price (tried 2026-09-03)"
+   },
+   {
+    "url": "https://www.seeedstudio.com/fusion_pcb.html",
+    "reason": "every cost field renders as 'USD$0.00' until Gerbers are uploaded; no price in the page text (tried 2026-09-03)"
+   },
+   {
+    "url": "https://aisler.net/pricing",
+    "reason": "HTTP 404 (tried 2026-09-03)"
+   },
+   {
+    "url": "https://aisler.net/en/products/boards",
+    "reason": "publishes only 'Starting at just EUR 14.20' - no per-area rate, no quantity, no spec (tried 2026-09-03)"
+   },
+   {
+    "url": "https://aisler.net/help/general-information/pricing",
+    "reason": "HTTP 301 to community.aisler.net (tried 2026-09-03)"
+   },
+   {
+    "url": "https://jlcpcb.com/quote",
+    "reason": "the quote engine is JavaScript; no price is emitted in the fetched HTML (tried 2026-09-03)"
+   }
+  ]
  },
  {
   "id": "P2",
   "item": "imu_to_dxl v2 - custom PCB, bare board + assembly",
+  "category": "pcb",
   "ce_part": "part:microduck-imu-to-dxl",
   "qty_per_robot": 1,
+  "qty_basis": "one board on the bus at Dynamixel Protocol-2 slave ID 200",
+  "mpn": "microduck_imu_to_dxl (this repository's own design; fab package electronics/imu-to-dxl/out/fab/microduck_imu_to_dxl-fab.zip)",
+  "mpn_status": "in-house design, DRC verdict FAIL - quotable as an outline and stackup, not releasable as artwork",
+  "mpn_note": "THE DESIGN EXISTS AND IS IN THIS REPOSITORY: electronics/imu-to-dxl/out/fab/ holds the fab zip, the loose Gerbers, PTH/NPTH drills, positions.csv and bom.csv. Measured off the .kicad_pcb: 590 copper segments (383 at 0.1500 mm, 190 at 0.3000 mm, 9 at 0.4000 mm, 8 at 2.0000 mm), 27 vias (23 at 0.800 mm pad / 0.300 mm drill, 4 at 1.000 mm / 0.300 mm), 11 through-hole pads, 38 drilled holes in all.",
+  "rfq_spec": "QUOTABLE NOW. Fab package: electronics/imu-to-dxl/out/fab/microduck_imu_to_dxl-fab.zip (Gerbers F/B.Cu, F/B.Mask, F/B.Silk, F/B.Paste, Edge.Cuts.GKO; PTH.drl + NPTH.drl; positions.csv; bom.csv). Board 40.0000 x 22.0000 mm bounding rectangle = 1.364003 sq in (routed outline 876.49 mm2 = 1.358562 sq in), 2 copper layers, FR-4 1.6 mm, 1 oz outer copper. 24 placed parts, 17 nets, 272 tracks, 27 vias, 38 drilled holes = 27.8592 per square inch. MINIMUM COPPER TRACK 0.1500 mm = 5.9055 mil - below the 6 mil (0.1524 mm) floor OSH Park and AdvancedPCB publish, inside JLCPCB's 0.10/0.10 mm process. Minimum drilled hole 0.3000 mm. Quote (a) bare boards and (b) turnkey assembly against the shipped bom.csv and positions.csv at 3 / 100 / 1000 pieces. The board's own DRC is FAIL: three nets unrouted (GND, IMU_INT1, V3V3). We are pricing an outline and a stackup, not asserting final artwork.",
   "verdict": "FAIL",
   "verdict_why": "Same defect as P1 and the same evidence: a bare-board price is readable at two fabs for a board of this outline, and neither will build the artwork - minimum copper track 0.1500 mm over 383 segments against a published 6 mil (0.1524 mm) floor at both, short by 0.0024 mm - and the board's own DRC is FAIL with three unrouted nets. Assembly price CANNOT DETERMINE. WHAT SETTLES IT: a 0.1524 mm re-route, or a quotation from a 4 mil fab; the request is drafted in RFQ.html.",
   "offers": [
    {
     "vendor": "OSH Park (US)",
+    "sku": "2-Layer Prototype (set of 3) / 2 Layer Medium Run",
     "url": "https://docs.oshpark.com/services/two-layer/",
     "currency": "USD",
     "tiers": [
@@ -2332,10 +3410,15 @@
     ],
     "moq": 3,
     "lead_time": "9-12 calendar days (prototype); 12-21 calendar days (medium run)",
-    "fetched": "2026-09-03"
+    "stock": "made to order - no stock concept",
+    "fetched": "2026-09-03",
+    "confidence": "read",
+    "page_kind": "family",
+    "note": "OSH Park publishes a RATE, not a per-part price, so the number here is that rate times the board's own measured area. 2-Layer Prototype: '$5 per square inch, which includes three copies of your design' (docs.oshpark.com/services/two-layer/, read 2026-09-03), 63 mil (1.6 mm) nominal, 1 oz copper, ENIG (Gold) to IPC-4552, purple mask, 6 mil (0.1524 mm) minimum trace and space, 10 mil (0.254 mm) minimum drill, minimum board 0.25 in (6.35 mm) square, maximum 16 x 22 in, 'orders ... will ship within 9-12 calendar days'. 1.364003 sq in x $5.00 = $6.820014 per set of three = $2.273338 per board, and three boards is the smallest order. 2 Layer Medium Run (docs.oshpark.com/services/two-layer-medium-run/, read 2026-09-03): '$1 per square inch, 100 square inch minimum', each design 'ordered in a multiple of 10 boards', same stackup and same ENIG, 12-21 calendar days. 100 sq in / 1.364003 sq in = 73.3136 boards, rounded up to a multiple of 10 = 80 boards, so the $1/sq in tier starts at 80 pieces at $1.364003 per board. AREA IS THE BOUNDING RECTANGLE 40.0000 x 22.0000 mm, which is a CEILING: the routed outline is 876.49 mm2 (1.358562 sq in) once the corner radii are taken off, and OSH Park does not publish which of the two it bills."
    },
    {
     "vendor": "AdvancedPCB / Advanced Circuits (US)",
+    "sku": "$33 Each Special",
     "url": "https://www.advancedpcb.com/en-us/33-each-special/",
     "currency": "USD",
     "tiers": [
@@ -2344,46 +3427,90 @@
       33.0
      ]
     ],
+    "no_tiers": true,
     "moq": 3,
     "lead_time": "'Lead Time 5 Days'",
-    "fetched": "2026-09-03"
+    "stock": "made to order - no stock concept",
+    "fetched": "2026-09-03",
+    "confidence": "read",
+    "page_kind": "family",
+    "note": "'$33 Each Special' on 'ORDER 3 OR MORE BOARDS', flat per board regardless of size: '2-Layers, FR-4, 0.062\", 1 Ounce Finished Copper', 'Lead free HAL (AdvancedPCB May Also Use Other Lead-Free Finishes Such As ENIG Or Silver At No Additional Charge)', 'Green LPI Mask', 'White Legend (1 Or 2 Sides)', 'Maximum Size 60 Sq. Inches'. Restrictions read the same day: 'Minimum 0.006\" Line/Space', 'Minimum 0.010\" Hole Size', 'Maximum 35 Drilled Holes Per Square Inch', 'No Slots (Or Overlapping Drill Hits)', 'No Internal Routing (Cutouts)', 'No Scoring, Tab Rout, Or Drilled Hole Board Separations', 'Does Not Include Blind/Buried Vias', and '$50 Lot Charge For Multiple Images Or Step & Repeat'. This board measures 1.364003 sq in (inside 60) and 27.8592 drilled holes per square inch (inside 35). NO VOLUME TIER IS PUBLISHED, so $33.00 is carried unchanged to 100 and 1 000 pieces as a CEILING - at those quantities this is a quotation to ask for, not a price to budget. THE ARTWORK DOES NOT MEET THIS SPECIAL: minimum copper track 0.1500 mm = 0.005906\", under the published 0.006\" line/space."
    },
    {
     "vendor": "JLCPCB (CN)",
+    "sku": "FR-4 2-layer prototype",
     "url": "https://jlcpcb.com/",
     "currency": "USD",
     "tiers": [],
     "moq": 5,
     "lead_time": "'Build Time: 24 hours'",
-    "fetched": "2026-09-03"
+    "stock": "made to order - no stock concept",
+    "fetched": "2026-09-03",
+    "confidence": "read",
+    "page_kind": "family",
+    "note": "READ, BUT NOT A PRICE FOR THIS BOARD. The home page prints 'From $2.00 / 5 pcs' for FR-4 with 'Build Time: 24 hours' and 'PCB Assembly From $8.00'. Both are FLOORS with no board size, layer count or finish attached, and the quote engine that would attach them is JavaScript that WebFetch does not run. `tiers` is therefore EMPTY and this offer counts toward no distributor total. It is recorded because JLCPCB is the only fab read on this line whose published 2-layer process accepts the artwork: '0.10 / 0.10 mm (4 / 4 mil)' track/space at 1 oz, plated hole '0.15 - 6.3 mm', minimum board '3 x 3 mm', thicknesses '0.4/0.6/0.8/1.0/1.2/1.6/2.0 mm', finishes 'HASL (leaded / lead-free), ENIG, OSP' (jlcpcb.com/capabilities/pcb-capabilities, re-read 2026-09-03). Assembly of 24 parts / 17 nets is a separate CANNOT DETERMINE."
    },
    {
     "vendor": "PCBWay (CN)",
+    "sku": "1-2 layer prototype",
     "url": "https://www.pcbway.com/",
     "currency": "USD",
     "tiers": [],
     "moq": 10,
     "lead_time": "'Build Time:24 hours'",
-    "fetched": "2026-09-03"
+    "stock": "made to order - no stock concept",
+    "fetched": "2026-09-03",
+    "confidence": "read",
+    "page_kind": "family",
+    "note": "READ, BUT NOT A PRICE FOR THIS BOARD. The home page prints '$ 5.00  10 pcs  1-2 layer' with 'Build Time:24 hours', and '$ 29 free shipping for 1-20pcs assembly'. Neither carries a board size, so neither is a price for a board of this outline; `tiers` is empty and this offer counts toward no distributor total. The instant-quote form at pcbway.com/orderonline.aspx is JavaScript and rendered no number."
    }
   ],
+  "alternates": [],
   "unknowns": [
    "Turnkey ASSEMBLY price at 3 / 100 / 1000 boards: CANNOT DETERMINE - no fab quoted a BOM, only floors.",
    "Two of the three chips on this board are still unidentified (MCU and half-duplex transceiver); the LSM6DSV16X is priced separately as line P2c. An assembly quotation cannot be firm until they are named.",
    "Whether OSH Park bills the bounding rectangle (1.364003 sq in) or the routed outline (1.358562 sq in): CANNOT DETERMINE - the bounding rectangle is used, so the OSH Park numbers are a CEILING."
   ],
-  "excluded_from_rollup": null
+  "blocked": [
+   {
+    "url": "https://www.pcbway.com/orderonline.aspx",
+    "reason": "instant-quote form is JavaScript; the fetched page text carries no price (tried 2026-09-03)"
+   },
+   {
+    "url": "https://www.seeedstudio.com/fusion_pcb.html",
+    "reason": "every cost field renders as 'USD$0.00' until Gerbers are uploaded; no price in the page text (tried 2026-09-03)"
+   },
+   {
+    "url": "https://aisler.net/pricing",
+    "reason": "HTTP 404 (tried 2026-09-03)"
+   },
+   {
+    "url": "https://aisler.net/en/products/boards",
+    "reason": "publishes only 'Starting at just EUR 14.20' - no per-area rate, no quantity, no spec (tried 2026-09-03)"
+   },
+   {
+    "url": "https://aisler.net/help/general-information/pricing",
+    "reason": "HTTP 301 to community.aisler.net (tried 2026-09-03)"
+   }
+  ]
  },
  {
   "id": "P3",
   "item": "Banana battery-contact PCB - custom, bare board + contacts",
+  "category": "pcb",
   "ce_part": null,
   "qty_per_robot": 1,
+  "qty_basis": "one board clamped onto power_support's pins by banana_pcb_locker (RELEASE.html §4 step 1)",
+  "mpn": "microduck_banana_contact (this repository's own design; fab package electronics/banana-contact/out/fab/microduck_banana_contact-fab.zip)",
+  "mpn_status": "in-house design, DRC verdict CANNOT DETERMINE - the outline and stackup are quotable, the contact part is not",
+  "mpn_note": "THE OUTLINE IS NOT UNKNOWN. Measured off Edge.Cuts.GKO / the .kicad_pcb in electronics/banana-contact/out/fab/: a single closed rounded rectangle 45.8000 x 4.6000 mm, corner radius 0.5000 mm, no internal cut-outs, three 0.8000 mm plated holes, copper tracks 0.4000 mm (1) and 1.5000 mm (2). Until 2026-09-03 this line said 'Board outline, contact part, plating, current rating, price: all CANNOT DETERMINE'; three of those five were already answered on disk. PLATING is ENIG and the board's own fab README says why - 'A sliding spring contact on a HASL pad cold-flows and oxidises' - and JLCPCB publishes ENIG as an order option on this process. CURRENT CAPACITY is 3.21 A at a 10 degC rise (4.35 A at 20 degC) for the two 1.500 mm tracks on 1 oz outer copper, by IPC-2221 6.2 I = 0.048*dT^0.44*A^0.725; it is the current DEMAND that is CANNOT DETERMINE, because Sony publishes no maximum continuous discharge for the NP-F pack and wiring/CABLES.md's 1 A-per-moving-servo worst case is stated there as an assumption.",
+  "rfq_spec": "QUOTABLE AS A BARE BOARD. Fab package: electronics/banana-contact/out/fab/microduck_banana_contact-fab.zip. Board 45.8000 x 4.6000 mm rounded rectangle, corner radius 0.5000 mm, no internal routing = 0.326555 sq in bounding rectangle (routed outline 210.46 mm2 = 0.326214 sq in). 2 copper layers, FR-4 1.6 mm, 1 oz outer copper. SURFACE FINISH ENIG IS REQUIRED, NOT PREFERRED - this board is a sliding spring contact and a solder-coated pad cold-flows and oxidises; quote ENIG explicitly and say so on the quotation. Three 0.8000 mm plated holes for soldered AWG24 leads (1.400 mm pads, 0.300 mm annular ring); minimum copper track 0.4000 mm; the two power tracks are 1.5000 mm wide. The board is only 4.6000 mm across its short axis: please state (a) whether you will run it as a single piece or only in a scored/tab-routed array, (b) the array charge if so, and (c) your rout tolerance on the 4.6000 mm dimension - it enters a measured 4.696 mm pocket with 0.048 mm per side. Quote bare boards at 3 / 100 / 1000 pieces.",
   "verdict": "CANNOT DETERMINE",
   "verdict_why": "The bare board is now priced, but at ONE distributor, not two: AdvancedPCB's $33 Each Special covers it (0.326555 sq in inside the 60 sq in cap, 9.1868 drilled holes per square inch inside the 35 cap, 0.4000 mm track over the 0.006\" floor, 0.8000 mm hole over the 0.010\" floor, no slots, no internal routing), and OSH Park REFUSES it on a measured rule - the board is 4.6000 mm across its short axis and both OSH Park service pages publish a minimum board size of 0.25 in (6.35 mm) by 0.25 in, so it is short by 1.7500 mm. AdvancedPCB will not GUARANTEE the required ENIG either: its special states lead-free HAL and says it 'May Also Use Other Lead-Free Finishes Such As ENIG Or Silver At No Additional Charge', which is permission, not a specification. The spring contact itself has no part number at all. WHAT SETTLES IT: a quotation from a fab that will run a 4.6 mm board (or price the array) with ENIG named on the order - JLCPCB's published minimum board size is 3 x 3 mm and it lists ENIG on this process, so its RFQ closes both halves - and a caliper across a physical NP-F550 pack to fix the contact pitch, which is derived from a 12.000 mm window divided into three cells and is measured nowhere.",
   "offers": [
    {
     "vendor": "AdvancedPCB / Advanced Circuits (US)",
+    "sku": "$33 Each Special",
     "url": "https://www.advancedpcb.com/en-us/33-each-special/",
     "currency": "USD",
     "tiers": [
@@ -2392,27 +3519,51 @@
       33.0
      ]
     ],
+    "no_tiers": true,
     "moq": 3,
     "lead_time": "'Lead Time 5 Days'",
-    "fetched": "2026-09-03"
+    "stock": "made to order - no stock concept",
+    "fetched": "2026-09-03",
+    "confidence": "read",
+    "page_kind": "family",
+    "note": "'$33 Each Special' on 'ORDER 3 OR MORE BOARDS', flat per board regardless of size: '2-Layers, FR-4, 0.062\", 1 Ounce Finished Copper', 'Lead free HAL (AdvancedPCB May Also Use Other Lead-Free Finishes Such As ENIG Or Silver At No Additional Charge)', 'Green LPI Mask', 'White Legend (1 Or 2 Sides)', 'Maximum Size 60 Sq. Inches'. Restrictions read the same day: 'Minimum 0.006\" Line/Space', 'Minimum 0.010\" Hole Size', 'Maximum 35 Drilled Holes Per Square Inch', 'No Slots (Or Overlapping Drill Hits)', 'No Internal Routing (Cutouts)', 'No Scoring, Tab Rout, Or Drilled Hole Board Separations', 'Does Not Include Blind/Buried Vias', and '$50 Lot Charge For Multiple Images Or Step & Repeat'. This board measures 0.326555 sq in (inside 60) and 9.1868 drilled holes per square inch (inside 35). NO VOLUME TIER IS PUBLISHED, so $33.00 is carried unchanged to 100 and 1 000 pieces as a CEILING - at those quantities this is a quotation to ask for, not a price to budget. This board CLEARS every published restriction of the special. What it does not get is the ENIG this board requires: the special specifies lead-free HAL and only permits ENIG at the fab's option."
    },
    {
     "vendor": "JLCPCB (CN)",
+    "sku": "FR-4 2-layer prototype",
     "url": "https://jlcpcb.com/",
     "currency": "USD",
     "tiers": [],
     "moq": 5,
     "lead_time": "'Build Time: 24 hours'",
-    "fetched": "2026-09-03"
+    "stock": "made to order - no stock concept",
+    "fetched": "2026-09-03",
+    "confidence": "read",
+    "page_kind": "family",
+    "note": "READ, BUT NOT A PRICE FOR THIS BOARD. The home page prints 'From $2.00 / 5 pcs' for FR-4 with 'Build Time: 24 hours' and 'PCB Assembly From $8.00'. Both are FLOORS with no board size, layer count or finish attached, and the quote engine that would attach them is JavaScript that WebFetch does not run. `tiers` is therefore EMPTY and this offer counts toward no distributor total. It is recorded because JLCPCB is the only fab read on this line whose published 2-layer process accepts the artwork: '0.10 / 0.10 mm (4 / 4 mil)' track/space at 1 oz, plated hole '0.15 - 6.3 mm', minimum board '3 x 3 mm', thicknesses '0.4/0.6/0.8/1.0/1.2/1.6/2.0 mm', finishes 'HASL (leaded / lead-free), ENIG, OSP' (jlcpcb.com/capabilities/pcb-capabilities, re-read 2026-09-03). JLCPCB's published minimum board size is '3 x 3 mm', so unlike OSH Park it does not refuse a 4.6000 mm-wide board, and it lists ENIG on this process."
    },
    {
     "vendor": "PCBWay (CN)",
+    "sku": "1-2 layer prototype",
     "url": "https://www.pcbway.com/",
     "currency": "USD",
     "tiers": [],
     "moq": 10,
     "lead_time": "'Build Time:24 hours'",
-    "fetched": "2026-09-03"
+    "stock": "made to order - no stock concept",
+    "fetched": "2026-09-03",
+    "confidence": "read",
+    "page_kind": "family",
+    "note": "READ, BUT NOT A PRICE FOR THIS BOARD. The home page prints '$ 5.00  10 pcs  1-2 layer' with 'Build Time:24 hours', and '$ 29 free shipping for 1-20pcs assembly'. Neither carries a board size, so neither is a price for a board of this outline; `tiers` is empty and this offer counts toward no distributor total. The instant-quote form at pcbway.com/orderonline.aspx is JavaScript and rendered no number."
+   }
+  ],
+  "alternates": [
+   {
+    "mpn": "NP-F pack spring contact block - no part number",
+    "why_equivalent": "NOT an alternate: there is no identified bought part for the contacts at all. Sony publishes no NP-F terminal drawing, the 4.000 mm pitch on this board is DERIVED (the power_support head plate's 12.000 mm window divided into three cells) and footprint P1 is marked UNCONFIRMED in the board's own bom.csv. A caliper across a physical pack settles it and nothing else does.",
+    "vendor": null,
+    "url": null,
+    "price_note": "CANNOT DETERMINE - no part, therefore no price"
    }
   ],
   "unknowns": [
@@ -2421,6 +3572,31 @@
    "The spring contact part itself: CANNOT DETERMINE - no manufacturer, no part number, and a contact pitch derived rather than measured.",
    "Current DEMAND through the two 1.5000 mm tracks: CANNOT DETERMINE. The board's CAPACITY is 3.21 A at a 10 degC rise by IPC-2221 6.2; Sony publishes no maximum continuous discharge for the NP-F pack."
   ],
-  "excluded_from_rollup": null
+  "blocked": [
+   {
+    "url": "https://www.pcbway.com/orderonline.aspx",
+    "reason": "instant-quote form is JavaScript; the fetched page text carries no price (tried 2026-09-03)"
+   },
+   {
+    "url": "https://www.seeedstudio.com/fusion_pcb.html",
+    "reason": "every cost field renders as 'USD$0.00' until Gerbers are uploaded; no price in the page text (tried 2026-09-03)"
+   },
+   {
+    "url": "https://aisler.net/pricing",
+    "reason": "HTTP 404 (tried 2026-09-03)"
+   },
+   {
+    "url": "https://aisler.net/en/products/boards",
+    "reason": "publishes only 'Starting at just EUR 14.20' - no per-area rate, no quantity, no spec (tried 2026-09-03)"
+   },
+   {
+    "url": "https://aisler.net/help/general-information/pricing",
+    "reason": "HTTP 301 to community.aisler.net (tried 2026-09-03)"
+   },
+   {
+    "url": "https://docs.oshpark.com/services/two-layer/",
+    "reason": "read, and REFUSES this board: 'Minimum board size 0.25in (6.35mm) by 0.25in (6.35mm)' against this board's 4.6000 mm short axis - short by 1.7500 mm. The same minimum is published on docs.oshpark.com/services/two-layer-medium-run/ (both read 2026-09-03)"
+   }
+  ]
  }
 ]
