@@ -31,6 +31,9 @@ SECTIONS = [
      'The twenty-three runs in wiring/cables.json against the connectors on the board.'),
     ('E7', 'Is anything unpowered',
      'Every fitted active device, and every device that hangs off the board on a cable.'),
+    ('E9', 'Is every electrical thing in the model at all',
+     "Leif's standing order is that every physical thing is in the CAD. The BOM is counted off Pollen's MJCF, which carries "
+     'visual and collision geometry and nothing else — this is the electrical half of the gap that left it with zero fastener rows.'),
     ('E8', 'Where OUR model is wrong',
      'The framing of this repository is that the real Microduck works. So a check that fails is first a lead about our own record — '
      'and these are the nine places the copper contradicts or settles something we wrote down.'),

@@ -23,15 +23,15 @@
   "unpowered_fitted_devices": 0,
   "cable_runs_modelled": 23,
   "cable_runs_touching_the_hat": 7,
-  "checks_total": 81,
-  "checks_PASS": 62,
-  "checks_FAIL": 7,
-  "checks_CANNOT_DETERMINE": 12,
+  "checks_total": 86,
+  "checks_PASS": 63,
+  "checks_FAIL": 10,
+  "checks_CANNOT_DETERMINE": 13,
   "model_corrections": 9,
   "model_corrections_that_contradict_a_record": 5
  },
  "verdict": "FAIL",
- "verdict_why": "7 FAIL and 12 CANNOT DETERMINE of 81 checks. A CANNOT DETERMINE is not a pass.",
+ "verdict_why": "10 FAIL and 13 CANNOT DETERMINE of 86 checks. A CANNOT DETERMINE is not a pass.",
  "rows": [
   {
    "check": "E1",
@@ -599,6 +599,41 @@
    "verdict": "CANNOT DETERMINE",
    "measurement": "Every connectivity statement here is read from rev C1 (clone commit 23eab119, \"[added] Production file for C1\"), the revision Pollen publishes production files for. out/pcb/hat/mesh-revision.json measured that the board in POLLEN'S OWN SIMULATION MESH is a different, pre-release layout (fbd885d, before \"the 40-pin GPIO conn. is inverted\"), whose Dynamixel connectors sit at the other end of the board. The connector POSITIONS were compared across four revisions; THE NETS WERE NOT. So \"the servos are on +BATT\" is proven for C1 and is corroborated for every revision by two revision-independent sources \u2014 the README (\"designed to use of the motor connector as an power input\") and Pollen's own runtime, which reads the pack voltage out of the servos' supply register and clears their input-voltage shutdown \u2014 but it is not proven pad-by-pad on fbd885d, A1 or B1. WHAT SETTLES IT: re-fetch the repository's git history and diff the +BATT net across the four revisions; out/pcb/hat/mesh-revision.json did exactly that for the drill table on 2026-09-04.",
    "cite": "reference/pollen-elec-rpi-robot-hat/PROVENANCE.json clone_commit; out/pcb/hat/mesh-revision.json"
+  },
+  {
+   "check": "E9",
+   "item": "electrical part folders that reach the assembly BOM",
+   "verdict": "FAIL",
+   "measurement": "26 electrical folders on this repo's shelf; 6 of them are rows in ce-assemblies/microduck/current/bom.json (radxa-zero-3w, microduck-robot-hat-pcb, np-f550, xl330-m288-t, microduck-speaker, microduck-banana-pcb-locker); 20 are not. The BOM is 45 rows over 40 distinct refs and it is counted straight off Pollen's MJCF, which carries visual and collision geometry and nothing else \u2014 the same reason it held zero fastener rows until a previous lane placed 64 screws through connections.",
+   "cite": "ce-assemblies/microduck/current/bom.json record.rows and record.counted_from; ce-parts/ listing"
+  },
+  {
+   "check": "E9",
+   "item": "devices the wiring lane routes a cable TO that have no BOM row",
+   "verdict": "FAIL",
+   "measurement": "4 of them: microduck-camera-module, microduck-imu-to-dxl, microduck-mic, microduck-tof-module. Every one is a real object in the reference robot \u2014 the imu_to_dxl v2 is a whole custom board carrying the IMU the control loop actually reads, at bus ID 200; the ToF is what the theremin feature ranges with; the camera is the IMX219 the WebRTC stream comes from. Cables are routed to all of them and none of them is in the bill of materials.",
+   "cite": "wiring/cables.json record.cables endpoints; ce-assemblies/microduck/current/bom.json"
+  },
+  {
+   "check": "E9",
+   "item": "cables and connectors in the BOM",
+   "verdict": "FAIL",
+   "measurement": "23 cable runs are modelled with world endpoints, pin assignments, conductor counts and connector MPNs, and 4 connector/cable part folders exist on the shelf (cable-dxl-x3p, jst-ehr-03, jst-b3b-eh-a, jst-seh-001t-p0.6) \u2014 and the BOM has ZERO rows for any of them. Total modelled harness length is on record elsewhere; none of it is a line item.",
+   "cite": "wiring/cables.json; ce-assemblies/microduck/current/bom.json"
+  },
+  {
+   "check": "E9",
+   "item": "shelf chips that are correctly NOT BOM rows",
+   "verdict": "PASS",
+   "measurement": "bmi088, tlv320aic3104 and et7301b are components OF a board that is already a row (the HAT, the HAT, and the Radxa) \u2014 a BOM does not list a board twice. imx219, lsm6dsv16x, vl53l5cx and vl53l8cx are the same for the camera, imu_to_dxl and ToF modules, whose MODULE rows are the ones missing above. fusb302 is the part Pollen's overlay NAMES and disables; the Radxa actually fits an ET7301B, so fusb302 is a documentary record with used_by empty and belongs in no BOM at all.",
+   "cite": "ce-parts/*/electrical.chip.json used_by; ce-parts/fusb302 part_note"
+  },
+  {
+   "check": "E9",
+   "item": "shelf chips that belong to no board in this robot",
+   "verdict": "CANNOT DETERMINE",
+   "measurement": "FOUR. mcp73213 (2S Li-ion linear charger) and s-8252 (2S pack protection IC) cannot be on any board in the robot: THERE IS NO CHARGING CIRCUIT \u2014 the HAT's pwr_supply_charge.kicad_sch is an orphan sheet main.kicad_sch never instantiates, and none of CN3302, HY2120, a USB-C receptacle, a power switch or AO4435/FDS6630A is on the production BOM. They belong either to the pack's own internal protection board or to the external charger, neither of which is modelled. pn7150 and st25r3916 are NFC front-ends, and there is no NFC part among the 127 footprints on the HAT \u2014 they were shelved against part:microduck-robot-hat-pcb's \"NFC reader: CANNOT DETERMINE\", which the copper now answers NO. WHAT SETTLES IT: decide whether the pack's protection board is in scope, and retire the two NFC folders or record what they are for.",
+   "cite": "teardown \u00a74 \"1. There is no charging circuit and no USB-C input on this board\"; 127 footprints in elec_RPI_Robot_HAT.kicad_pcb; ce-parts/pn7150 and ce-parts/st25r3916 component.json"
   }
  ]
 }

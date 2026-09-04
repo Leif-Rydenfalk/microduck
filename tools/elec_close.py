@@ -887,6 +887,82 @@ def rows_e8_model(comps, cables):
     return out
 
 
+def rows_e9_bom(comps, cables):
+    """E9 — is every electrical thing IN THE MODEL AT ALL? Leif's standing order
+    is that every physical thing is in the CAD. The assembly BOM is derived from
+    Pollen's MJCF, which carries only visual and collision geometry — the same
+    root cause that left it with zero fastener rows until a previous lane placed
+    64 screws. This is the electrical half of that gap, counted."""
+    bom_path = os.path.join(ROOT, 'ce-assemblies/microduck/current/bom.json')
+    bom = json.load(open(bom_path))['record']['rows']
+    have = {r['ref'] for r in bom}
+    shelf = sorted(d for d in os.listdir(os.path.join(ROOT, 'ce-parts'))
+                   if os.path.isdir(os.path.join(ROOT, 'ce-parts', d)))
+    ELECTRICAL = ['radxa-zero-3w', 'microduck-robot-hat-pcb', 'np-f550', 'xl330-m288-t', 'microduck-speaker',
+                  'microduck-banana-pcb-locker', 'microduck-imu-to-dxl', 'microduck-tof-module',
+                  'microduck-camera-module', 'microduck-mic', 'imx219', 'lsm6dsv16x', 'bmi088',
+                  'tlv320aic3104', 'vl53l5cx', 'vl53l8cx', 'cable-dxl-x3p', 'jst-ehr-03', 'jst-b3b-eh-a',
+                  'jst-seh-001t-p0.6', 'pn7150', 'st25r3916', 'fusb302', 'et7301b', 'mcp73213', 's-8252']
+    ELECTRICAL = [e for e in ELECTRICAL if e in shelf]
+    inb = [e for e in ELECTRICAL if 'part:' + e in have]
+    missing = [e for e in ELECTRICAL if 'part:' + e not in have]
+    # devices the wiring lane routes a cable to
+    ends = set()
+    for x in cables['record']['cables']:
+        ends.add(x['from'])
+        ends.add(x['to'])
+    ROUTED_TO_PART = {'imu200': 'microduck-imu-to-dxl', 'tof': 'microduck-tof-module',
+                      'camera': 'microduck-camera-module', 'mic': 'microduck-mic',
+                      'speaker': 'microduck-speaker', 'hat': 'microduck-robot-hat-pcb',
+                      'radxa': 'radxa-zero-3w', 'battery': 'np-f550'}
+    routed_missing = sorted(v for k, v in ROUTED_TO_PART.items()
+                            if k in ends and 'part:' + v not in have)
+    out = []
+    out.append(dict(check='E9', item='electrical part folders that reach the assembly BOM', verdict=FAIL,
+                    measurement=f'{len(ELECTRICAL)} electrical folders on this repo\'s shelf; {len(inb)} of them are rows in '
+                                f'ce-assemblies/microduck/current/bom.json ({", ".join(inb)}); {len(missing)} are not. The BOM is '
+                                f'{len(bom)} rows over {len({r["ref"] for r in bom})} distinct refs and it is counted straight off '
+                                f'Pollen\'s MJCF, which carries visual and collision geometry and nothing else — the same reason it '
+                                f'held zero fastener rows until a previous lane placed 64 screws through connections.',
+                    cite='ce-assemblies/microduck/current/bom.json record.rows and record.counted_from; ce-parts/ listing'))
+    out.append(dict(check='E9', item='devices the wiring lane routes a cable TO that have no BOM row', verdict=FAIL,
+                    measurement=f'{len(routed_missing)} of them: {", ".join(routed_missing)}. Every one is a real object in the '
+                                f'reference robot — the imu_to_dxl v2 is a whole custom board carrying the IMU the control loop '
+                                f'actually reads, at bus ID 200; the ToF is what the theremin feature ranges with; the camera is the '
+                                f'IMX219 the WebRTC stream comes from. Cables are routed to all of them and none of them is in the '
+                                f'bill of materials.',
+                    cite='wiring/cables.json record.cables endpoints; ce-assemblies/microduck/current/bom.json'))
+    ncab = len(cables['record']['cables'])
+    conn_parts = [e for e in ('cable-dxl-x3p', 'jst-ehr-03', 'jst-b3b-eh-a', 'jst-seh-001t-p0.6') if e in shelf]
+    out.append(dict(check='E9', item='cables and connectors in the BOM', verdict=FAIL,
+                    measurement=f'{ncab} cable runs are modelled with world endpoints, pin assignments, conductor counts and '
+                                f'connector MPNs, and {len(conn_parts)} connector/cable part folders exist on the shelf '
+                                f'({", ".join(conn_parts)}) — and the BOM has ZERO rows for any of them. Total modelled harness '
+                                f'length is on record elsewhere; none of it is a line item.',
+                    cite='wiring/cables.json; ce-assemblies/microduck/current/bom.json'))
+    out.append(dict(check='E9', item='shelf chips that are correctly NOT BOM rows', verdict=PASS,
+                    measurement='bmi088, tlv320aic3104 and et7301b are components OF a board that is already a row '
+                                '(the HAT, the HAT, and the Radxa) — a BOM does not list a board twice. imx219, lsm6dsv16x, '
+                                'vl53l5cx and vl53l8cx are the same for the camera, imu_to_dxl and ToF modules, whose MODULE rows '
+                                'are the ones missing above. fusb302 is the part Pollen\'s overlay NAMES and disables; the Radxa '
+                                'actually fits an ET7301B, so fusb302 is a documentary record with used_by empty and belongs in no '
+                                'BOM at all.',
+                    cite='ce-parts/*/electrical.chip.json used_by; ce-parts/fusb302 part_note'))
+    out.append(dict(check='E9', item='shelf chips that belong to no board in this robot', verdict=CD,
+                    measurement='FOUR. mcp73213 (2S Li-ion linear charger) and s-8252 (2S pack protection IC) cannot be on any board '
+                                'in the robot: THERE IS NO CHARGING CIRCUIT — the HAT\'s pwr_supply_charge.kicad_sch is an orphan '
+                                'sheet main.kicad_sch never instantiates, and none of CN3302, HY2120, a USB-C receptacle, a power '
+                                'switch or AO4435/FDS6630A is on the production BOM. They belong either to the pack\'s own internal '
+                                'protection board or to the external charger, neither of which is modelled. pn7150 and st25r3916 are '
+                                'NFC front-ends, and there is no NFC part among the 127 footprints on the HAT — they were shelved '
+                                'against part:microduck-robot-hat-pcb\'s "NFC reader: CANNOT DETERMINE", which the copper now answers '
+                                'NO. WHAT SETTLES IT: decide whether the pack\'s protection board is in scope, and retire the two NFC '
+                                'folders or record what they are for.',
+                    cite='teardown §4 "1. There is no charging circuit and no USB-C input on this board"; '
+                         f'{len(comps)} footprints in elec_RPI_Robot_HAT.kicad_pcb; ce-parts/pn7150 and ce-parts/st25r3916 component.json'))
+    return out
+
+
 # ------------------------------------------------------------------- self-test
 
 def selftest():
@@ -968,6 +1044,7 @@ def main():
     rows += rows_e6_harness(comps, cables)
     rows += rows_e7_unpowered(comps, cables)
     rows += rows_e8_model(comps, cables)
+    rows += rows_e9_bom(comps, cables)
 
     c = collections.Counter(r['verdict'] for r in rows)
     verdict = FAIL if c[FAIL] else (CD if c[CD] else PASS)
