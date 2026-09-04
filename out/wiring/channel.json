@@ -1,0 +1,1061 @@
+{
+ "$triad": 1,
+ "kind": "wire-channel",
+ "generated_by": "sim/wire_channel.py",
+ "record": {
+  "units": "mm",
+  "method": "wire_channel \u2014 DOES THE CABLE GO THROUGH A CHANNEL THAT EXISTS, OR THROUGH\nA CREVICE WE ONLY DISCOVERED BY SEARCHING?\n\n    ce-cad/bin/cad sim/wire_channel.py\n\nroute3d.py proves a centreline pierces nothing and clears a stated floor. That\nis not the same question as this one. A path can clear 1.0000 mm everywhere and\nstill be a path no assembler could ever lay a cable into: a 4 mm slot between\ntwo shells that only exists because those two shells happen not to touch. A\nDESIGNED channel is a hole in ONE part -- somebody drew it for a cable. An\nincidental crevice is the gap BETWEEN parts. The difference is visible from\ninside the hole, so this pass looks from inside it.\n\nMETHOD -- ray marching in the same 1.0000 mm occupancy the route was planned in\n(/private/tmp/int-wire3d/occ.npz, route3d_grid.py), which also carries an OWNER\nfield naming the placed row every solid cell came from.\n\n  THE STUBS ARE EXCLUDED, and the first run of this pass proves why. From the\n  connector point the centreline runs straight out through the housing to the\n  first clear cell -- stub_from_mm / stub_to_mm in cables3d.json -- and that\n  length is INSIDE the servo case or the board by construction. Measured with\n  the stubs in, eight runs reported a 0.5000 mm aperture: both antipodal rays\n  hitting on their first 0.2500 mm step, i.e. the sample sitting in the\n  connector's own housing. route3d_exact.py excludes the same stubs for the\n  same reason and says so in its limits.\n\n  At every sample along the centreline, 64 directions on a Fibonacci sphere\n  (32 antipodal pairs) are marched at 0.2500 mm out to 15.0000 mm.\n    enclosure   = the fraction of directions that hit something inside 15 mm.\n    aperture    = min over antipodal PAIRS of (hit + hit): the narrowest free\n                  width through that point, which is what the cable has to fit\n                  in. Reported surface-to-surface against the bundle OD.\n    who         = the placed parts the hits belong to.\n  and the sample is classified:\n    CHANNEL   enclosure >= 0.75 and ONE part owns >= 0.75 of the hits -- the\n              cable is inside a hole in that part. Somebody drew this.\n    CREVICE   enclosure >= 0.50 and the top two parts each own >= 0.20 -- the\n              cable is in the gap between two parts, which is not a channel and\n              nobody drew it.\n    OPEN      anything else -- the cable is beside things, not inside anything.\n\nAND THE SECOND QUESTION, which is where the modelling errors are. For every run\nthe STRAIGHT line between the two launch points is marched through the same\ngrid. Where it is inside material, the part and the thickness of what it goes\nthrough are recorded, and the detour the router paid to get round it is the\ndifference between the routed length and that straight line. A run whose\nordered cable is far shorter than its route is a run where either the real part\nhas a pass-through our mesh set does not, or the connector we are launching\nfrom is in the wrong place. This pass names the wall.",
+  "counts": {
+   "runs": 16,
+   "runs_with_any_CHANNEL_sample": 2,
+   "runs_that_are_mostly_OPEN": 13,
+   "runs_whose_TIGHTEST_point_is_a_CHANNEL": 2,
+   "runs_whose_TIGHTEST_point_is_a_CREVICE": 9,
+   "runs_whose_TIGHTEST_point_is_OPEN": 5,
+   "runs_whose_tightest_aperture_is_under_the_bundle": 0,
+   "total_samples_classified": 1011,
+   "samples_CHANNEL": 5,
+   "samples_CREVICE": 250,
+   "samples_OPEN": 756,
+   "runs_whose_straight_line_pierces_material": 9,
+   "runs_with_a_detour_over_2x": 3
+  },
+  "runs": [
+   {
+    "id": "dxl-hat-id34",
+    "path_from": "paths-hat.json",
+    "od_mm": 3.1243,
+    "length_mm": 31.9317,
+    "stub_from_mm": 4.2926,
+    "stub_to_mm": 2.0,
+    "stub_note": "stubs excluded: 4.2926 mm at the hat end and 2.0000 mm at the id34 end, both inside a housing by construction",
+    "samples": 25,
+    "sample_step_mm": 1.0,
+    "rays_per_sample": 64,
+    "ray_max_mm": 15.0,
+    "classes": {
+     "CREVICE": 10,
+     "OPEN": 15
+    },
+    "pct_CHANNEL": 0.0,
+    "pct_CREVICE": 40.0,
+    "pct_OPEN": 60.0,
+    "min_aperture_mm": 6.25,
+    "min_aperture_minus_od_mm": 3.1257,
+    "min_aperture_at_mm": [
+     55.1496,
+     25.4751,
+     248.1658
+    ],
+    "min_aperture_class": "CREVICE",
+    "min_aperture_bounded_by": [
+     "part:microduck-robot-hat-pcb",
+     "part:microduck-motor-support"
+    ],
+    "min_aperture_enclosure": 0.75,
+    "median_aperture_mm": 15.5
+   },
+   {
+    "id": "dxl-id10-id11",
+    "path_from": "paths.json",
+    "od_mm": 3.1243,
+    "length_mm": 52.6577,
+    "stub_from_mm": 4.25,
+    "stub_to_mm": 0.0,
+    "stub_note": "stubs excluded: 4.2500 mm at the id10 end and 0.0000 mm at the id11 end, both inside a housing by construction",
+    "samples": 48,
+    "sample_step_mm": 1.0,
+    "rays_per_sample": 64,
+    "ray_max_mm": 15.0,
+    "classes": {
+     "OPEN": 41,
+     "CREVICE": 7
+    },
+    "pct_CHANNEL": 0.0,
+    "pct_CREVICE": 14.58,
+    "pct_OPEN": 85.42,
+    "min_aperture_mm": 10.0,
+    "min_aperture_minus_od_mm": 6.8757,
+    "min_aperture_at_mm": [
+     -5.6102,
+     -31.4743,
+     98.3514
+    ],
+    "min_aperture_class": "CREVICE",
+    "min_aperture_bounded_by": [
+     "part:xl330-m288-t",
+     "part:microduck-hip-bracket"
+    ],
+    "min_aperture_enclosure": 0.5,
+    "median_aperture_mm": 15.25
+   },
+   {
+    "id": "dxl-id11-id12",
+    "path_from": "paths.json",
+    "od_mm": 3.1243,
+    "length_mm": 32.9671,
+    "stub_from_mm": 0.0,
+    "stub_to_mm": 0.0,
+    "stub_note": "stubs excluded: 0.0000 mm at the id11 end and 0.0000 mm at the id12 end, both inside a housing by construction",
+    "samples": 33,
+    "sample_step_mm": 1.0,
+    "rays_per_sample": 64,
+    "ray_max_mm": 15.0,
+    "classes": {
+     "OPEN": 27,
+     "CREVICE": 6
+    },
+    "pct_CHANNEL": 0.0,
+    "pct_CREVICE": 18.18,
+    "pct_OPEN": 81.82,
+    "min_aperture_mm": 9.5,
+    "min_aperture_minus_od_mm": 6.3757,
+    "min_aperture_at_mm": [
+     -1.0245,
+     -30.878,
+     93.0565
+    ],
+    "min_aperture_class": "CREVICE",
+    "min_aperture_bounded_by": [
+     "part:xl330-m288-t",
+     "part:microduck-hip-bracket"
+    ],
+    "min_aperture_enclosure": 0.5,
+    "median_aperture_mm": 18.0
+   },
+   {
+    "id": "dxl-id12-id13",
+    "path_from": "paths.json",
+    "od_mm": 3.1243,
+    "length_mm": 14.2859,
+    "stub_from_mm": 0.0,
+    "stub_to_mm": 0.0,
+    "stub_note": "stubs excluded: 0.0000 mm at the id12 end and 0.0000 mm at the id13 end, both inside a housing by construction",
+    "samples": 15,
+    "sample_step_mm": 1.0,
+    "rays_per_sample": 64,
+    "ray_max_mm": 15.0,
+    "classes": {
+     "CREVICE": 15
+    },
+    "pct_CHANNEL": 0.0,
+    "pct_CREVICE": 100.0,
+    "pct_OPEN": 0.0,
+    "min_aperture_mm": 8.75,
+    "min_aperture_minus_od_mm": 5.6257,
+    "min_aperture_at_mm": [
+     -19.2771,
+     -61.85,
+     89.5
+    ],
+    "min_aperture_class": "CREVICE",
+    "min_aperture_bounded_by": [
+     "part:xl330-m288-t",
+     "part:microduck-upper-leg-right"
+    ],
+    "min_aperture_enclosure": 0.797,
+    "median_aperture_mm": 12.5
+   },
+   {
+    "id": "dxl-id13-id14",
+    "path_from": "paths.json",
+    "od_mm": 3.1243,
+    "length_mm": 45.9822,
+    "stub_from_mm": 0.0,
+    "stub_to_mm": 0.0,
+    "stub_note": "stubs excluded: 0.0000 mm at the id13 end and 0.0000 mm at the id14 end, both inside a housing by construction",
+    "samples": 46,
+    "sample_step_mm": 1.0,
+    "rays_per_sample": 64,
+    "ray_max_mm": 15.0,
+    "classes": {
+     "CREVICE": 8,
+     "OPEN": 38
+    },
+    "pct_CHANNEL": 0.0,
+    "pct_CREVICE": 17.39,
+    "pct_OPEN": 82.61,
+    "min_aperture_mm": 8.75,
+    "min_aperture_minus_od_mm": 5.6257,
+    "min_aperture_at_mm": [
+     -19.2771,
+     -61.85,
+     89.5
+    ],
+    "min_aperture_class": "CREVICE",
+    "min_aperture_bounded_by": [
+     "part:xl330-m288-t",
+     "part:microduck-upper-leg-right"
+    ],
+    "min_aperture_enclosure": 0.797,
+    "median_aperture_mm": 17.0
+   },
+   {
+    "id": "dxl-id20-id21",
+    "path_from": "paths.json",
+    "od_mm": 3.1243,
+    "length_mm": 132.4574,
+    "stub_from_mm": 0.0,
+    "stub_to_mm": 0.0,
+    "stub_note": "stubs excluded: 0.0000 mm at the id20 end and 0.0000 mm at the id21 end, both inside a housing by construction",
+    "samples": 133,
+    "sample_step_mm": 1.0,
+    "rays_per_sample": 64,
+    "ray_max_mm": 15.0,
+    "classes": {
+     "OPEN": 112,
+     "CREVICE": 21
+    },
+    "pct_CHANNEL": 0.0,
+    "pct_CREVICE": 15.79,
+    "pct_OPEN": 84.21,
+    "min_aperture_mm": 8.25,
+    "min_aperture_minus_od_mm": 5.1257,
+    "min_aperture_at_mm": [
+     -11.0227,
+     29.8267,
+     116.618
+    ],
+    "min_aperture_class": "OPEN",
+    "min_aperture_bounded_by": [
+     "part:microduck-trunk-base",
+     "part:microduck-yaw2roll"
+    ],
+    "min_aperture_enclosure": 0.438,
+    "median_aperture_mm": 17.0
+   },
+   {
+    "id": "dxl-id21-id22",
+    "path_from": "paths.json",
+    "od_mm": 3.1243,
+    "length_mm": 74.9892,
+    "stub_from_mm": 0.0,
+    "stub_to_mm": 3.0,
+    "stub_note": "stubs excluded: 0.0000 mm at the id21 end and 3.0000 mm at the id22 end, both inside a housing by construction",
+    "samples": 72,
+    "sample_step_mm": 1.0,
+    "rays_per_sample": 64,
+    "ray_max_mm": 15.0,
+    "classes": {
+     "OPEN": 61,
+     "CREVICE": 11
+    },
+    "pct_CHANNEL": 0.0,
+    "pct_CREVICE": 15.28,
+    "pct_OPEN": 84.72,
+    "min_aperture_mm": 11.5,
+    "min_aperture_minus_od_mm": 8.3757,
+    "min_aperture_at_mm": [
+     -11.5749,
+     16.4595,
+     98.2623
+    ],
+    "min_aperture_class": "CREVICE",
+    "min_aperture_bounded_by": [
+     "part:xl330-m288-t",
+     "part:microduck-power-support"
+    ],
+    "min_aperture_enclosure": 0.547,
+    "median_aperture_mm": 16.0
+   },
+   {
+    "id": "dxl-id22-id23",
+    "path_from": "paths.json",
+    "od_mm": 3.1243,
+    "length_mm": 14.2859,
+    "stub_from_mm": 0.0,
+    "stub_to_mm": 0.0,
+    "stub_note": "stubs excluded: 0.0000 mm at the id22 end and 0.0000 mm at the id23 end, both inside a housing by construction",
+    "samples": 15,
+    "sample_step_mm": 1.0,
+    "rays_per_sample": 64,
+    "ray_max_mm": 15.0,
+    "classes": {
+     "CREVICE": 12,
+     "CHANNEL": 3
+    },
+    "pct_CHANNEL": 20.0,
+    "pct_CREVICE": 80.0,
+    "pct_OPEN": 0.0,
+    "min_aperture_mm": 8.75,
+    "min_aperture_minus_od_mm": 5.6257,
+    "min_aperture_at_mm": [
+     -19.2771,
+     61.85,
+     89.5
+    ],
+    "min_aperture_class": "CHANNEL",
+    "min_aperture_bounded_by": [
+     "part:xl330-m288-t",
+     "part:microduck-upper-leg-left"
+    ],
+    "min_aperture_enclosure": 0.781,
+    "median_aperture_mm": 12.25
+   },
+   {
+    "id": "dxl-id23-id24",
+    "path_from": "paths.json",
+    "od_mm": 3.1243,
+    "length_mm": 45.9822,
+    "stub_from_mm": 0.0,
+    "stub_to_mm": 0.0,
+    "stub_note": "stubs excluded: 0.0000 mm at the id23 end and 0.0000 mm at the id24 end, both inside a housing by construction",
+    "samples": 46,
+    "sample_step_mm": 1.0,
+    "rays_per_sample": 64,
+    "ray_max_mm": 15.0,
+    "classes": {
+     "CHANNEL": 2,
+     "CREVICE": 4,
+     "OPEN": 40
+    },
+    "pct_CHANNEL": 4.35,
+    "pct_CREVICE": 8.7,
+    "pct_OPEN": 86.96,
+    "min_aperture_mm": 8.75,
+    "min_aperture_minus_od_mm": 5.6257,
+    "min_aperture_at_mm": [
+     -19.2771,
+     61.85,
+     89.5
+    ],
+    "min_aperture_class": "CHANNEL",
+    "min_aperture_bounded_by": [
+     "part:xl330-m288-t",
+     "part:microduck-upper-leg-left"
+    ],
+    "min_aperture_enclosure": 0.781,
+    "median_aperture_mm": 17.0
+   },
+   {
+    "id": "dxl-id30-imu200",
+    "path_from": "paths.json",
+    "od_mm": 3.1243,
+    "length_mm": 93.7032,
+    "stub_from_mm": 0.0,
+    "stub_to_mm": 3.2661,
+    "stub_note": "stubs excluded: 0.0000 mm at the id30 end and 3.2661 mm at the imu200 end, both inside a housing by construction",
+    "samples": 91,
+    "sample_step_mm": 1.0,
+    "rays_per_sample": 64,
+    "ray_max_mm": 15.0,
+    "classes": {
+     "OPEN": 60,
+     "CREVICE": 31
+    },
+    "pct_CHANNEL": 0.0,
+    "pct_CREVICE": 34.07,
+    "pct_OPEN": 65.93,
+    "min_aperture_mm": 9.5,
+    "min_aperture_minus_od_mm": 6.3757,
+    "min_aperture_at_mm": [
+     18.0161,
+     -1.0623,
+     116.7061
+    ],
+    "min_aperture_class": "CREVICE",
+    "min_aperture_bounded_by": [
+     "part:microduck-trunk-base",
+     "part:microduck-yaw2roll"
+    ],
+    "min_aperture_enclosure": 0.531,
+    "median_aperture_mm": 16.75
+   },
+   {
+    "id": "dxl-id31-id30",
+    "path_from": "paths.json",
+    "od_mm": 3.1243,
+    "length_mm": 32.0425,
+    "stub_from_mm": 0.0,
+    "stub_to_mm": 0.0,
+    "stub_note": "stubs excluded: 0.0000 mm at the id31 end and 0.0000 mm at the id30 end, both inside a housing by construction",
+    "samples": 33,
+    "sample_step_mm": 1.0,
+    "rays_per_sample": 64,
+    "ray_max_mm": 15.0,
+    "classes": {
+     "OPEN": 33
+    },
+    "pct_CHANNEL": 0.0,
+    "pct_CREVICE": 0.0,
+    "pct_OPEN": 100.0,
+    "min_aperture_mm": 16.75,
+    "min_aperture_minus_od_mm": 13.6257,
+    "min_aperture_at_mm": [
+     38.7304,
+     -6.8032,
+     189.4231
+    ],
+    "min_aperture_class": "OPEN",
+    "min_aperture_bounded_by": [
+     "part:xl330-m288-t",
+     "part:microduck-neck-pitch-bracket"
+    ],
+    "min_aperture_enclosure": 0.422,
+    "median_aperture_mm": 17.25
+   },
+   {
+    "id": "dxl-id32-id31",
+    "path_from": "paths.json",
+    "od_mm": 3.1243,
+    "length_mm": 117.5708,
+    "stub_from_mm": 10.25,
+    "stub_to_mm": 0.0,
+    "stub_note": "stubs excluded: 10.2500 mm at the id32 end and 0.0000 mm at the id31 end, both inside a housing by construction",
+    "samples": 107,
+    "sample_step_mm": 1.0,
+    "rays_per_sample": 64,
+    "ray_max_mm": 15.0,
+    "classes": {
+     "CREVICE": 49,
+     "OPEN": 58
+    },
+    "pct_CHANNEL": 0.0,
+    "pct_CREVICE": 45.79,
+    "pct_OPEN": 54.21,
+    "min_aperture_mm": 5.0,
+    "min_aperture_minus_od_mm": 1.8757,
+    "min_aperture_at_mm": [
+     15.0886,
+     11.6929,
+     249.2635
+    ],
+    "min_aperture_class": "CREVICE",
+    "min_aperture_bounded_by": [
+     "part:microduck-yaw-roll-motion",
+     "part:microduck-motor-support"
+    ],
+    "min_aperture_enclosure": 0.609,
+    "median_aperture_mm": 16.0
+   },
+   {
+    "id": "dxl-id34-id33",
+    "path_from": "paths.json",
+    "od_mm": 3.1243,
+    "length_mm": 67.404,
+    "stub_from_mm": 0.0,
+    "stub_to_mm": 6.25,
+    "stub_note": "stubs excluded: 0.0000 mm at the id34 end and 6.2500 mm at the id33 end, both inside a housing by construction",
+    "samples": 62,
+    "sample_step_mm": 1.0,
+    "rays_per_sample": 64,
+    "ray_max_mm": 15.0,
+    "classes": {
+     "CREVICE": 19,
+     "OPEN": 43
+    },
+    "pct_CHANNEL": 0.0,
+    "pct_CREVICE": 30.65,
+    "pct_OPEN": 69.35,
+    "min_aperture_mm": 7.0,
+    "min_aperture_minus_od_mm": 3.8757,
+    "min_aperture_at_mm": [
+     14.638,
+     17.94,
+     217.7735
+    ],
+    "min_aperture_class": "OPEN",
+    "min_aperture_bounded_by": [
+     "part:microduck-bottom-head-shell",
+     "part:microduck-neck-pitch-bracket"
+    ],
+    "min_aperture_enclosure": 0.469,
+    "median_aperture_mm": 15.875
+   },
+   {
+    "id": "dxl-imu200-id10",
+    "path_from": "paths.json",
+    "od_mm": 3.1243,
+    "length_mm": 128.0179,
+    "stub_from_mm": 3.2661,
+    "stub_to_mm": 0.0,
+    "stub_note": "stubs excluded: 3.2661 mm at the imu200 end and 0.0000 mm at the id10 end, both inside a housing by construction",
+    "samples": 125,
+    "sample_step_mm": 1.0,
+    "rays_per_sample": 64,
+    "ray_max_mm": 15.0,
+    "classes": {
+     "OPEN": 117,
+     "CREVICE": 8
+    },
+    "pct_CHANNEL": 0.0,
+    "pct_CREVICE": 6.4,
+    "pct_OPEN": 93.6,
+    "min_aperture_mm": 11.5,
+    "min_aperture_minus_od_mm": 8.3757,
+    "min_aperture_at_mm": [
+     -17.3738,
+     -3.9329,
+     107.0881
+    ],
+    "min_aperture_class": "OPEN",
+    "min_aperture_bounded_by": [
+     "part:microduck-power-support",
+     "part:microduck-yaw2roll"
+    ],
+    "min_aperture_enclosure": 0.594,
+    "median_aperture_mm": 17.75
+   },
+   {
+    "id": "dxl-imu200-id20",
+    "path_from": "paths.json",
+    "od_mm": 3.1243,
+    "length_mm": 124.6393,
+    "stub_from_mm": 3.2661,
+    "stub_to_mm": 0.0,
+    "stub_note": "stubs excluded: 3.2661 mm at the imu200 end and 0.0000 mm at the id20 end, both inside a housing by construction",
+    "samples": 121,
+    "sample_step_mm": 1.0,
+    "rays_per_sample": 64,
+    "ray_max_mm": 15.0,
+    "classes": {
+     "OPEN": 110,
+     "CREVICE": 11
+    },
+    "pct_CHANNEL": 0.0,
+    "pct_CREVICE": 9.09,
+    "pct_OPEN": 90.91,
+    "min_aperture_mm": 11.0,
+    "min_aperture_minus_od_mm": 7.8757,
+    "min_aperture_at_mm": [
+     -12.9557,
+     29.3479,
+     117.4165
+    ],
+    "min_aperture_class": "OPEN",
+    "min_aperture_bounded_by": [
+     "part:microduck-trunk-base",
+     "part:microduck-yaw2roll"
+    ],
+    "min_aperture_enclosure": 0.422,
+    "median_aperture_mm": 16.75
+   },
+   {
+    "id": "tof-hat",
+    "path_from": "paths-hat.json",
+    "od_mm": 2.2,
+    "length_mm": 38.5013,
+    "stub_from_mm": 0.0,
+    "stub_to_mm": 0.4252,
+    "stub_note": "stubs excluded: 0.0000 mm at the hat end and 0.4252 mm at the tof end, both inside a housing by construction",
+    "samples": 39,
+    "sample_step_mm": 1.0,
+    "rays_per_sample": 64,
+    "ray_max_mm": 15.0,
+    "classes": {
+     "CREVICE": 38,
+     "OPEN": 1
+    },
+    "pct_CHANNEL": 0.0,
+    "pct_CREVICE": 97.44,
+    "pct_OPEN": 2.56,
+    "min_aperture_mm": 4.75,
+    "min_aperture_minus_od_mm": 2.55,
+    "min_aperture_at_mm": [
+     70.216,
+     34.3916,
+     249.4734
+    ],
+    "min_aperture_class": "CREVICE",
+    "min_aperture_bounded_by": [
+     "part:microduck-top-head-shell",
+     "part:microduck-face-part"
+    ],
+    "min_aperture_enclosure": 0.812,
+    "median_aperture_mm": 7.5
+   }
+  ],
+  "walls": [
+   {
+    "id": "dxl-hat-id34",
+    "straight_launch_to_launch_mm": 21.9927,
+    "routed_length_mm": 31.9318,
+    "detour_mm": 9.9391,
+    "detour_ratio": 1.4519,
+    "ordered_cable_mm": 35,
+    "straight_line_pierces": [
+     {
+      "thickness_mm": 1.2496,
+      "at_mm": [
+       52.7075,
+       24.6438,
+       248.1786
+      ],
+      "part": "part:microduck-motor-support"
+     },
+     {
+      "thickness_mm": 3.4988,
+      "at_mm": [
+       49.5062,
+       23.554,
+       249.076
+      ],
+      "part": "part:microduck-motor-support"
+     },
+     {
+      "thickness_mm": 3.9987,
+      "at_mm": [
+       42.6461,
+       21.2188,
+       250.9991
+      ],
+      "part": "part:microduck-motor-support"
+     }
+    ],
+    "pierced_total_mm": 8.7471,
+    "parts_pierced": [
+     "part:microduck-motor-support"
+    ]
+   },
+   {
+    "id": "dxl-id10-id11",
+    "straight_launch_to_launch_mm": 45.1022,
+    "routed_length_mm": 52.6577,
+    "detour_mm": 7.5555,
+    "detour_ratio": 1.1675,
+    "ordered_cable_mm": 65,
+    "straight_line_pierces": [],
+    "pierced_total_mm": 0,
+    "parts_pierced": []
+   },
+   {
+    "id": "dxl-id11-id12",
+    "straight_launch_to_launch_mm": 32.3094,
+    "routed_length_mm": 32.9671,
+    "detour_mm": 0.6577,
+    "detour_ratio": 1.0204,
+    "ordered_cable_mm": 125,
+    "straight_line_pierces": [],
+    "pierced_total_mm": 0,
+    "parts_pierced": []
+   },
+   {
+    "id": "dxl-id12-id13",
+    "straight_launch_to_launch_mm": 14.2859,
+    "routed_length_mm": 14.2859,
+    "detour_mm": 0.0,
+    "detour_ratio": 1.0,
+    "ordered_cable_mm": 20,
+    "straight_line_pierces": [],
+    "pierced_total_mm": 0,
+    "parts_pierced": []
+   },
+   {
+    "id": "dxl-id13-id14",
+    "straight_launch_to_launch_mm": 45.9749,
+    "routed_length_mm": 45.9822,
+    "detour_mm": 0.0073,
+    "detour_ratio": 1.0002,
+    "ordered_cable_mm": 95,
+    "straight_line_pierces": [],
+    "pierced_total_mm": 0,
+    "parts_pierced": []
+   },
+   {
+    "id": "dxl-id20-id21",
+    "straight_launch_to_launch_mm": 44.9015,
+    "routed_length_mm": 132.4574,
+    "detour_mm": 87.5559,
+    "detour_ratio": 2.95,
+    "ordered_cable_mm": 65,
+    "straight_line_pierces": [
+     {
+      "thickness_mm": 1.9956,
+      "at_mm": [
+       -2.14,
+       5.0,
+       120.41
+      ],
+      "part": "part:microduck-trunk-base"
+     }
+    ],
+    "pierced_total_mm": 1.9956,
+    "parts_pierced": [
+     "part:microduck-trunk-base"
+    ]
+   },
+   {
+    "id": "dxl-id21-id22",
+    "straight_launch_to_launch_mm": 62.0435,
+    "routed_length_mm": 74.9892,
+    "detour_mm": 12.9457,
+    "detour_ratio": 1.2087,
+    "ordered_cable_mm": 125,
+    "straight_line_pierces": [
+     {
+      "thickness_mm": 0.9967,
+      "at_mm": [
+       -1.3667,
+       12.0777,
+       96.5502
+      ],
+      "part": "part:xl330-m288-t"
+     },
+     {
+      "thickness_mm": 1.9934,
+      "at_mm": [
+       -2.2833,
+       24.6349,
+       101.9618
+      ],
+      "part": "part:xl330-m288-t"
+     },
+     {
+      "thickness_mm": 0.9967,
+      "at_mm": [
+       -2.5333,
+       28.0596,
+       103.4378
+      ],
+      "part": "part:xl330-m288-t"
+     },
+     {
+      "thickness_mm": 0.9967,
+      "at_mm": [
+       -3.05,
+       35.1373,
+       106.488
+      ],
+      "part": "part:microduck-hip-bracket"
+     },
+     {
+      "thickness_mm": 7.7243,
+      "at_mm": [
+       -3.4833,
+       41.0735,
+       109.0462
+      ],
+      "part": "part:bearing-22x16x4"
+     },
+     {
+      "thickness_mm": 2.4917,
+      "at_mm": [
+       -4.15,
+       50.206,
+       112.9819
+      ],
+      "part": "part:xl330-m288-t"
+     },
+     {
+      "thickness_mm": 4.9834,
+      "at_mm": [
+       -4.5833,
+       56.1422,
+       115.5402
+      ],
+      "part": "part:microduck-upper-leg-left"
+     }
+    ],
+    "pierced_total_mm": 20.1829,
+    "parts_pierced": [
+     "part:bearing-22x16x4",
+     "part:microduck-hip-bracket",
+     "part:microduck-upper-leg-left",
+     "part:xl330-m288-t"
+    ]
+   },
+   {
+    "id": "dxl-id22-id23",
+    "straight_launch_to_launch_mm": 14.2859,
+    "routed_length_mm": 14.2859,
+    "detour_mm": 0.0,
+    "detour_ratio": 1.0,
+    "ordered_cable_mm": 20,
+    "straight_line_pierces": [],
+    "pierced_total_mm": 0,
+    "parts_pierced": []
+   },
+   {
+    "id": "dxl-id23-id24",
+    "straight_launch_to_launch_mm": 45.9749,
+    "routed_length_mm": 45.9822,
+    "detour_mm": 0.0073,
+    "detour_ratio": 1.0002,
+    "ordered_cable_mm": 95,
+    "straight_line_pierces": [],
+    "pierced_total_mm": 0,
+    "parts_pierced": []
+   },
+   {
+    "id": "dxl-id30-imu200",
+    "straight_launch_to_launch_mm": 79.6952,
+    "routed_length_mm": 93.7032,
+    "detour_mm": 14.008,
+    "detour_ratio": 1.1758,
+    "ordered_cable_mm": 120,
+    "straight_line_pierces": [
+     {
+      "thickness_mm": 1.499,
+      "at_mm": [
+       33.9132,
+       -6.2509,
+       156.8615
+      ],
+      "part": "part:xl330-m288-t"
+     },
+     {
+      "thickness_mm": 1.499,
+      "at_mm": [
+       19.7998,
+       -4.4077,
+       142.8306
+      ],
+      "part": "part:xl330-m288-t"
+     },
+     {
+      "thickness_mm": 1.2491,
+      "at_mm": [
+       -2.076,
+       -1.5506,
+       121.0827
+      ],
+      "part": "part:microduck-trunk-base"
+     }
+    ],
+    "pierced_total_mm": 4.2471,
+    "parts_pierced": [
+     "part:microduck-trunk-base",
+     "part:xl330-m288-t"
+    ]
+   },
+   {
+    "id": "dxl-id31-id30",
+    "straight_launch_to_launch_mm": 32.0,
+    "routed_length_mm": 32.0425,
+    "detour_mm": 0.0425,
+    "detour_ratio": 1.0013,
+    "ordered_cable_mm": 35,
+    "straight_line_pierces": [],
+    "pierced_total_mm": 0,
+    "parts_pierced": []
+   },
+   {
+    "id": "dxl-id32-id31",
+    "straight_launch_to_launch_mm": 60.4352,
+    "routed_length_mm": 117.5708,
+    "detour_mm": 57.1356,
+    "detour_ratio": 1.9454,
+    "ordered_cable_mm": 165,
+    "straight_line_pierces": [
+     {
+      "thickness_mm": 12.2369,
+      "at_mm": [
+       43.6519,
+       -8.689,
+       235.3716
+      ],
+      "part": "part:bearing-22x16x4"
+     },
+     {
+      "thickness_mm": 2.2476,
+      "at_mm": [
+       36.5145,
+       -8.2537,
+       225.4414
+      ],
+      "part": "part:xl330-m288-t"
+     },
+     {
+      "thickness_mm": 4.7449,
+      "at_mm": [
+       32.8729,
+       -8.0316,
+       220.3749
+      ],
+      "part": "part:bearing-22x16x4"
+     },
+     {
+      "thickness_mm": 1.2487,
+      "at_mm": [
+       29.6684,
+       -7.8362,
+       215.9165
+      ],
+      "part": "part:microduck-neck-pitch-bracket"
+     },
+     {
+      "thickness_mm": 1.2487,
+      "at_mm": [
+       26.9008,
+       -7.6674,
+       212.066
+      ],
+      "part": "part:xl330-m288-t"
+     },
+     {
+      "thickness_mm": 0.9989,
+      "at_mm": [
+       25.4442,
+       -7.5785,
+       210.0394
+      ],
+      "part": "part:xl330-m288-t"
+     },
+     {
+      "thickness_mm": 1.2487,
+      "at_mm": [
+       17.4329,
+       -7.0899,
+       198.8933
+      ],
+      "part": "part:xl330-m288-t"
+     }
+    ],
+    "pierced_total_mm": 23.9744,
+    "parts_pierced": [
+     "part:bearing-22x16x4",
+     "part:microduck-neck-pitch-bracket",
+     "part:xl330-m288-t"
+    ]
+   },
+   {
+    "id": "dxl-id34-id33",
+    "straight_launch_to_launch_mm": 56.4607,
+    "routed_length_mm": 67.404,
+    "detour_mm": 10.9433,
+    "detour_ratio": 1.1938,
+    "ordered_cable_mm": 60,
+    "straight_line_pierces": [
+     {
+      "thickness_mm": 0.4997,
+      "at_mm": [
+       22.2637,
+       11.3093,
+       223.6588
+      ],
+      "part": "part:bearing-22x16x4"
+     },
+     {
+      "thickness_mm": 2.9979,
+      "at_mm": [
+       19.4825,
+       9.7188,
+       223.1268
+      ],
+      "part": "part:bearing-22x16x4"
+     },
+     {
+      "thickness_mm": 0.2498,
+      "at_mm": [
+       17.3431,
+       8.4954,
+       222.7175
+      ],
+      "part": "part:bearing-22x16x4"
+     },
+     {
+      "thickness_mm": 1.2491,
+      "at_mm": [
+       10.7111,
+       4.7027,
+       221.4487
+      ],
+      "part": "part:microduck-bottom-head-shell"
+     },
+     {
+      "thickness_mm": 6.2456,
+      "at_mm": [
+       3.0093,
+       0.2982,
+       219.9752
+      ],
+      "part": "part:microduck-bottom-head-shell"
+     }
+    ],
+    "pierced_total_mm": 11.2421,
+    "parts_pierced": [
+     "part:bearing-22x16x4",
+     "part:microduck-bottom-head-shell"
+    ]
+   },
+   {
+    "id": "dxl-imu200-id10",
+    "straight_launch_to_launch_mm": 36.4621,
+    "routed_length_mm": 128.0179,
+    "detour_mm": 91.5558,
+    "detour_ratio": 3.511,
+    "ordered_cable_mm": 40,
+    "straight_line_pierces": [
+     {
+      "thickness_mm": 2.2477,
+      "at_mm": [
+       -10.9958,
+       -2.024,
+       120.5606
+      ],
+      "part": "part:microduck-trunk-base"
+     }
+    ],
+    "pierced_total_mm": 2.2477,
+    "parts_pierced": [
+     "part:microduck-trunk-base"
+    ]
+   },
+   {
+    "id": "dxl-imu200-id20",
+    "straight_launch_to_launch_mm": 36.3247,
+    "routed_length_mm": 124.6393,
+    "detour_mm": 88.3146,
+    "detour_ratio": 3.4313,
+    "ordered_cable_mm": 40,
+    "straight_line_pierces": [
+     {
+      "thickness_mm": 2.2392,
+      "at_mm": [
+       -10.9958,
+       2.5651,
+       120.5606
+      ],
+      "part": "part:microduck-trunk-base"
+     }
+    ],
+    "pierced_total_mm": 2.2392,
+    "parts_pierced": [
+     "part:microduck-trunk-base"
+    ]
+   },
+   {
+    "id": "tof-hat",
+    "straight_launch_to_launch_mm": 27.8345,
+    "routed_length_mm": 38.5013,
+    "detour_mm": 10.6668,
+    "detour_ratio": 1.3832,
+    "ordered_cable_mm": 35,
+    "straight_line_pierces": [
+     {
+      "thickness_mm": 1.9882,
+      "at_mm": [
+       60.3992,
+       27.007,
+       254.4086
+      ],
+      "part": "part:microduck-robot-hat-pcb"
+     },
+     {
+      "thickness_mm": 1.2426,
+      "at_mm": [
+       67.7348,
+       25.4193,
+       252.6701
+      ],
+      "part": "part:radxa-zero-3w"
+     },
+     {
+      "thickness_mm": 0.9941,
+      "at_mm": [
+       69.8645,
+       24.9584,
+       252.1653
+      ],
+      "part": "part:radxa-zero-3w"
+     }
+    ],
+    "pierced_total_mm": 4.2249,
+    "parts_pierced": [
+     "part:microduck-robot-hat-pcb",
+     "part:radxa-zero-3w"
+    ]
+   }
+  ]
+ }
+}
