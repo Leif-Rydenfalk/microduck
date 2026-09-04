@@ -463,6 +463,10 @@ A.append('</table></section>')
 
 # 4 print
 A.append('<section id="print"><h2><span class="n">4</span>Print files — ce-slice numbers, never derived from volume · 打印文件</h2>')
+A.append('<p class="lede">Every gram and second below is what BambuStudio %s itself reported through ce-slice, at the 0.20 mm Standard @BBL H2S process unless the row says otherwise. Checked against ce-slice\'s own append-only journal on %s: <b>%d of %d</b> published figures are traceable to a recorded run, and on <b>%d</b> of them the STL\'s sha256 is still the file on disk today. %d parts were ALSO sliced from our parametric rebuild — where those two disagree the row says by how much. · 下列克数与秒数均为 BambuStudio 经 ce-slice 实测输出，绝非由体积换算。%d/%d 项可追溯至切片日志记录，其中 %d 项 STL 的 sha256 与当前磁盘文件一致。</p>' % (
+    "02.08.02.61", E(SJ["read_at"][:16]), SJ["summary"]["published_number_traced_to_a_journal_run"], len(slice_["parts"]),
+    SJ["summary"]["stl_unchanged_since_that_run"], SJ["summary"]["with_a_rebuilt_alternative"],
+    SJ["summary"]["published_number_traced_to_a_journal_run"], len(slice_["parts"]), SJ["summary"]["stl_unchanged_since_that_run"]))
 A.append('<table>%s<tr>%s%s%s%s%s%s%s%s%s</tr>' % (cols(19, 12, 6, 5, 9, 8, 8, 12, 21), th("Part", "零件"), th("Grade", "评级"), th("Mat.", "材料"), th("Qty", "数量"), th("Watertight", "封闭网格"), th("g / piece", "克/件"), th("s / piece", "秒/件"), th("Source / licence", "来源 / 许可"), th("Problem", "问题")))
 for r in [r for r in rows if r["class"] == "print"]:
     short = []
@@ -473,6 +477,14 @@ for r in [r for r in rows if r["class"] == "print"]:
         short.append("Pollen's mesh; our PASSed rebuild exists (bbox delta <= %s mm) — re-export for provenance/licence" % rd.get("max_abs_bbox_delta_mm", "?"))
     if r["slicer_warning"]:
         short.append("supports needed; sliced numbers are a floor")
+    sjr = (r.get("slice_journal") or {}).get("rebuilt_alternative")
+    if sjr:
+        short.append("the rebuild slices to %.4f g / %.0f s (%+.2f %% filament, %+.2f %% time) — quote the file you print" % (
+            sjr["rebuilt_grams"], sjr["rebuilt_seconds"], sjr["d_grams_pct"], sjr["d_seconds_pct"]))
+    sjo = (r.get("slice_journal") or {}).get("orientation_spread")
+    if sjo:
+        short.append("orientation changes the number: same file, %.4f g / %.0f s auto-oriented vs %.4f g / %.0f s as modelled (%+.2f %% time)" % (
+            sjo["grams"][0], sjo["seconds"][0], sjo["grams"][1], sjo["seconds"][1], sjo["seconds_pct"]))
     A.append('<tr><td class="m">%s</td><td>%s</td><td>%s</td><td class="num">%d</td><td>%s</td><td class="num">%.4f</td><td class="num">%.0f</td><td>%s</td><td>%s</td></tr>' % (
         E(r["id"]), gchip(r), E(r["stl"].split("/")[3]), r["qty"], "yes" if r["watertight"] else "NO", r["grams_per_piece"], r["seconds_per_piece"], E(r["licence"]), E("; ".join(short))))
 A.append('</table></section>')
