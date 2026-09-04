@@ -34,12 +34,57 @@ def load_rows():
     return json.load(open(R + "/ce-assemblies/microduck/current/placements.json"))["record"]["rows"]
 
 
+SCREW_TESS_MM = 0.20     # tessellation deviation for a built fastener solid, mm
+
+
+def _screw_tris(doc, ref, params):
+    """A PLACED fastener as triangles, built from its own part folder.
+
+    placements.json grew 64 fastener rows (commit 3f3fda3) that carry no
+    mesh_file: they are parametric solids placed through a connection's mate().
+    A screw is material, so the router must see it — a cable through a screw
+    head is exactly the interference this lane exists to catch. Built with
+    cecad.triad.load (the same call tools/build_fastener_skeleton.py makes),
+    tessellated at %.4f mm, and cached on (ref, params) because these screws are
+    a FAMILY on length_mm (that trap is recorded in build_fastener_skeleton.py).
+    """ % SCREW_TESS_MM
+    import cecad.triad as triad
+    part = triad.load(doc, ref, dict(params or {}))
+    vts, fcs = part.shape.tessellate(SCREW_TESS_MM)
+    pts = np.array([[v.x, v.y, v.z] for v in vts], float)
+    fac = np.array(fcs, int)
+    return pts, fac
+
+
 def world_tris(rows):
-    """[(row_index, body, part, mesh, tris_mm_world)] — the x1000 is applied here, once."""
+    """[(row_index, body, part, mesh, tris_mm_world)] — the x1000 is applied here, once.
+
+    Mesh rows are Pollen STLs in METRES and get the x1000. Fastener rows are
+    parametric solids already in mm and get NO scale: the scale is applied per
+    row from the row's own kind, never globally.
+    """
     cache = {}
     out = []
+    doc = None
     for i, r in enumerate(rows):
-        f = r["mesh_file"]
+        f = r.get("mesh_file")
+        if not f:
+            ref = r.get("part")
+            if not ref:
+                raise ValueError("placements row %d has neither mesh_file nor part" % i)
+            import FreeCAD as App
+            if doc is None:
+                doc = App.newDocument("route3d_grid_parts")
+            key = (ref, tuple(sorted((r.get("params") or {}).items())))
+            if key not in cache:
+                cache[key] = _screw_tris(doc, ref, r.get("params"))
+            pts, fac = cache[key]
+            Rm = quat_matrix(r["world_quat_wxyz"])
+            p = np.asarray(r["world_pos_mm"], float)
+            wp = pts @ Rm.T + p
+            out.append((i, r.get("body") or "fastener", ref,
+                        r.get("instance") or ref, wp[fac]))
+            continue
         if f not in cache:
             m = Mesh.Mesh(f)
             pts = np.array([[p.x, p.y, p.z] for p in m.Points], float) * 1000.0
@@ -59,7 +104,9 @@ def main():
     tri = world_tris(rows)
     allp = np.concatenate([t[4].reshape(-1, 3) for t in tri], axis=0)
     lo, hi = allp.min(0), allp.max(0)
-    print("placed rows %d  vertices %d" % (len(rows), len(allp)))
+    n_mesh = sum(1 for r in rows if r.get("mesh_file"))
+    print("placed rows %d (%d mesh, %d built fastener solids)  vertices %d"
+          % (len(rows), n_mesh, len(rows) - n_mesh, len(allp)))
     print("assembly bbox mm  lo %s  hi %s" % (np.round(lo, 4).tolist(), np.round(hi, 4).tolist()))
     occ = Occupancy(lo, hi, CELL, pad_mm=20.0)
     print("grid shape", occ.shape, "cells", int(np.prod(occ.shape)))
