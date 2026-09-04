@@ -82,6 +82,10 @@ PB = J("tools/data/playbook.json", {})
 LIC = J("out/factory/licence.json", {})
 WP = J("out/factory/workplan.json", {})
 SC = J("out/factory/measure/sheetcheck.json", {})
+PCB_PATH_NOTE = "reference/pollen-elec-rpi-robot-hat/elec_RPI_Robot_HAT.kicad_pcb"
+RC = J("out/factory/reconcile.json")
+if RC is None:
+    raise SystemExit("out/factory/reconcile.json missing — run tools/reconcile.py first")
 
 rows = RD["rows"]
 S = RD["summary"]
@@ -157,8 +161,22 @@ NOT_READY = [
     {"k": "fastener rows in the assembly BOM against the M2 hole census",
      "k_zh": "装配 BOM 中的紧固件行数 / M2 孔数",
      "n": "%d / %d" % (S["bom_fasteners"]["fastener_rows"], S["bom_fasteners"]["hole_census"]),
-     "why": "The hardware is already bought — see the M2 lines in section 3.3 — but no document says which screw goes in which hole, at what length, to what torque.",
-     "why_zh": "硬件其实已列入采购（见 3.3 节 M2 项），但没有任何文件说明哪颗螺钉装在哪个孔、用多长、拧到多大扭矩。",
+     "why": ("READ THE RECONCILIATION IN SECTION 3.3 BEFORE ORDERING ANYTHING. Four different "
+             "fastener counts exist in this repository and they count different things: %d hole "
+             "features (counterbores double-counted), %s measured interface features, %s screws "
+             "placed in the model so far, and %s pieces on the buy list including nuts and inserts. "
+             "The hardware IS already on the buy list; what is missing is the per-hole schedule — "
+             "which screw in which hole, at what length, to what torque."
+             % (S["bom_fasteners"]["hole_census"],
+                RC["fasteners"]["counts"][1]["n"], RC["fasteners"]["counts"][2]["n"],
+                RC["fasteners"]["counts"][3]["n"])),
+     "why_zh": ("下单前请先阅读 3.3 节的对账表。本仓库中存在四个互不相同的紧固件计数，统计对象各异："
+                "%d 个孔特征（沉孔被重复计数）、%s 项实测接口特征、目前已装入模型的 %s 颗螺钉、"
+                "以及含螺母与热熔螺母的采购件数 %s 件。硬件其实已列入采购；缺的是逐孔明细——"
+                "哪颗螺钉装在哪个孔、用多长、拧到多大扭矩。"
+                % (S["bom_fasteners"]["hole_census"],
+                   RC["fasteners"]["counts"][1]["n"], RC["fasteners"]["counts"][2]["n"],
+                   RC["fasteners"]["counts"][3]["n"])),
      "who": "agent, tonight (WF-FASTENERS) for the census; a person for the torque",
      "who_zh": "普查由软件代理今晚完成（WF-FASTENERS）；扭矩必须由人确定",
      "src": "ce-assemblies/microduck/current/bom.json, SPEC.md:75-76"},
@@ -184,13 +202,33 @@ NOT_READY = [
      "why_zh": "以下项价格可查但无法排产：" + "、".join(S["bought_gaps"]["no_lead_time_stated"]) + "。",
      "who": "a buyer — an RFQ, not a search", "who_zh": "需采购人员发询价单（非网络搜索可得）",
      "src": "spec/sourcing.json rev %s" % SRC.get("revision", "?")},
-    {"k": "open CANNOT DETERMINE items across the repository", "k_zh": "全仓库未定项",
+    {"k": "open CANNOT DETERMINE items on the CURATED work queue", "k_zh": "已整理未定项工作队列",
      "n": str(S["unknowns"]),
-     "why": "Every one names what would settle it. They are not unknowns we are ignoring; they are unknowns we have refused to guess.",
-     "why_zh": "每一项都写明了如何才能定案。它们不是被忽略的未知，而是我方拒绝臆测的未知。",
+     "why": ("This is a CURATED harvest, not a repository-wide count, and the difference matters. "
+             "All %d name what would settle them. The repository-wide census in the file beside it, "
+             "out/open/cannot-determine.json, reads %s distinct subjects over %s occurrences in %s "
+             "files — an UPPER BOUND, because one item republished across generated documents is "
+             "counted once per wording. The real defect is neither number: only %s of those %s "
+             "subjects state what would close them, so %s have no closure route written down."
+             % (S["unknowns"], RC["unknowns"]["repository_census"]["distinct_subjects"],
+                RC["unknowns"]["repository_census"]["occurrences"],
+                RC["unknowns"]["repository_census"]["files_scanned"],
+                RC["unknowns"]["repository_census"]["stating_what_settles_them"],
+                RC["unknowns"]["repository_census"]["distinct_subjects"],
+                RC["unknowns"]["repository_census"]["no_closure_route"])),
+     "why_zh": ("这是<b>人工整理</b>的工作队列，不是全仓库计数，二者区别重要。这 %d 项均写明了如何定案。"
+                "旁边的全仓库普查文件 out/open/cannot-determine.json 在 %s 个文件中得到 %s 个独立主题、"
+                "%s 处出现——那是<b>上限</b>，因为同一项在多份生成文档中重复出现会被多次计入。"
+                "真正的缺陷不在数字：%s 个主题中只有 %s 个写明了如何定案，其余 %s 个根本没有写下解决路径。"
+                % (S["unknowns"], RC["unknowns"]["repository_census"]["files_scanned"],
+                   RC["unknowns"]["repository_census"]["distinct_subjects"],
+                   RC["unknowns"]["repository_census"]["occurrences"],
+                   RC["unknowns"]["repository_census"]["distinct_subjects"],
+                   RC["unknowns"]["repository_census"]["stating_what_settles_them"],
+                   RC["unknowns"]["repository_census"]["no_closure_route"])),
      "who": "agent, tonight (WF-UNKNOWNS) for the desk-answerable ones",
      "who_zh": "可查证部分由软件代理今晚完成（WF-UNKNOWNS）",
-     "src": "out/open/cannot-determine-harvest.json"},
+     "src": "out/open/cannot-determine-harvest.json (%d) AND out/open/cannot-determine.json (%s); reconciled in out/factory/reconcile.json unknowns" % (S["unknowns"], RC["unknowns"]["repository_census"]["distinct_subjects"])},
     {"k": "physical units ever built or measured", "k_zh": "已制造或测量过的实物样机",
      "n": "0",
      "why": "The test plan is complete and has been exercised zero times. Every dynamic figure in this repository is simulation.",
@@ -604,6 +642,43 @@ A.append('<p><b>USD subtotal, one robot: %.4f USD over %d of %d lines.</b> %s</p
 A.append('<p class="zh">单台美元小计：%.4f USD，覆盖 %d / %d 项。该小计仅对<b>以美元标价</b>的项按每台数量 x 最低美元单价求和；不含无报价的 %d 项，也不含仅有其他币种报价的 %d 项（换算汇率属于臆造）。因此它是单台外购成本的<b>下限</b>，不是成本。</p>'
          % (priced_total, usd_lines, len(bom_table), len(unpriced_lines), len(non_usd_lines)))
 
+
+# 3.3a HOW MANY FASTENERS. Four counts of "the fasteners in one Microduck" exist in
+# this repository and the pack used to quote two of them in different sections
+# without saying they were different quantities: 145 in section 2, 325 in the buy
+# list here. At 1000 robots that spread is 180 000 pieces and no purchase order can
+# be cut against it. Every count, what it counts, and which one to order against —
+# from out/factory/reconcile.json fasteners, which measures all four.
+FA = RC["fasteners"]
+A.append('<h4>3.3a How many fasteners are in one robot — the four counts reconciled '
+         '<span class="zh" style="display:inline;font-size:13px">一台机器上有多少紧固件——四个计数的对账</span></h4>')
+A.append('<p class="lede"><b>Verdict: %s.</b> %s</p>' % (E(FA["verdict"]), E(FA["why_they_differ_en"])))
+A.append('<p class="lede zh">%s</p>' % E(FA["why_they_differ_zh"]))
+A.append('<table>' + cols(9, 24, 22, 21, 24) + '<tr>' + th("Count", "计数")
+         + th("What it counts", "统计对象") + th("Breakdown", "构成")
+         + th("Read from", "读取自") + th("May a buyer order against it?", "可否据此下单？") + '</tr>')
+for c in FA["counts"]:
+    A.append('<tr><td class="num"><b>%s</b></td><td>%s<br><span class="zh">%s</span></td>'
+             '<td>%s<br><span class="zh">%s</span></td><td class="m">%s</td>'
+             '<td>%s<br><span class="zh">%s</span></td></tr>'
+             % (E(str(c["n"])), E(c["what_en"]), E(c["what_zh"]),
+                E(c.get("breakdown_en") or "—"), E(c.get("breakdown_zh") or "—"),
+                E(c["source"]),
+                E(c["may_a_buyer_order_against_it"]),
+                E(c["counts_what_zh"].replace("<b>", "").replace("</b>", ""))))
+A.append('</table>')
+A.append('<p><b>Order against this:</b> %s</p>' % E(FA["what_a_buyer_orders_against_en"]))
+A.append('<p class="zh">%s</p>' % E(FA["what_a_buyer_orders_against_zh"].replace("<b>", "").replace("</b>", "")))
+A.append('<p class="lede">Spread at 1000 robots: %s to %s pieces. <b>What closes it:</b> %s</p>'
+         % (E("{:,}".format(FA["spread_at_1000_robots"]["low"])),
+            E("{:,}".format(FA["spread_at_1000_robots"]["high"])), E(FA["what_closes_it"])))
+A.append('<p class="lede zh">按 1000 台计，四个计数之间相差 %s 至 %s 件。'
+         '解决办法有二，按顺序：(1) 完成逐孔明细，使“已装入”成为真正的物料清单（软件代理进行中，WF-FASTENERS）；'
+         '(2) 拆解实物时清点真实螺钉数量（工作包 M-2）并与之比对。在 (2) 完成之前，此处所有计数都源自 Pollen 的仿真网格，'
+         '没有一个与实物核对过。</p>'
+         % (E("{:,}".format(FA["spread_at_1000_robots"]["low"])),
+            E("{:,}".format(FA["spread_at_1000_robots"]["high"]))))
+
 # 3.4 pcb
 def _routed(v):
     """The routing cell must be a count or nothing. electronics/pcb-package.json
@@ -627,6 +702,41 @@ for r in cls("pcb"):
                 E(_routed(r.get("routed"))), E(r.get("missing") or r.get("measurement", ""))))
 A.append('</table>')
 
+# 3.4a THE ROBOT HAT OUTLINE, MEASURED. A factory reviewer refused to answer Q5.4
+# because the dimension it turns on was contradicted by a file in this repository.
+# It was: 65.0 x 48.5 was the bbox of the kicad_pcb's ANNOTATION layer, not the
+# board. The board is measured here, off Edge.Cuts, every time this pack is built.
+HAT = RC["robot_hat_outline"]
+A.append('<h4>3.4a Pollen\'s published Robot HAT — the outline, measured tonight '
+         '<span class="zh" style="display:inline;font-size:13px">Pollen 公开版 Robot HAT 外形尺寸（今夜实测）</span></h4>')
+A.append('<p class="lede"><b>%s x %s mm.</b> %s</p>'
+         % (E(str(HAT["measurement_mm"]["width"])), E(str(HAT["measurement_mm"]["height"])), E(HAT["measured_how"])))
+A.append('<p class="lede zh">实测板外形 %s x %s mm。测量方法：解析该 KiCad 板文件，取 Edge.Cuts 层全部顶层图元的包络框。</p>'
+         % (E(str(HAT["measurement_mm"]["width"])), E(str(HAT["measurement_mm"]["height"]))))
+A.append('<table>' + cols(30, 20, 50) + '<tr>' + th("Board", "板") + th("Outline mm", "外形 mm")
+         + th("Source", "来源") + '</tr>')
+_cmp = HAT["comparison"]
+for _lbl, _zh, _v, _src in [
+        ("Pollen's published Apache-2.0 board", "Pollen 公开的 Apache-2.0 板", _cmp["pollen_published_board"],
+         "measured here off Edge.Cuts of %s" % PCB_PATH_NOTE),
+        ("Our reconstruction", "我方重构版", _cmp["our_reconstruction"], "electronics/pcb-package.json boards[robot-hat].outline_mm"),
+        ("Pollen's simulation mesh (what the Microduck carries)", "Pollen 仿真网格（Microduck 实际所载）",
+         _cmp["pollen_simulation_mesh"], "ce-parts/microduck-robot-hat-pcb/component.json board_outline")]:
+    A.append('<tr><td>%s<br><span class="zh">%s</span></td><td class="m">%s</td><td class="m">%s</td></tr>'
+             % (E(_lbl), E(_zh), E(" x ".join(str(x) for x in (_v or [])) or "CANNOT DETERMINE"), E(_src)))
+A.append('</table>')
+A.append('<p><b>Correction, and it changes the answer to question Q5.4.</b> %s</p>' % E(HAT["what_this_changes"]))
+A.append('<p class="zh">更正说明，且这会改变 Q5.4 的答案：Pollen 公开板与我方重构版仅在一个轴上相差 %s mm，'
+         '而非此前所述的 18.5 mm。采用公开板是一次间隙核对，不是重做电机支架。</p>'
+         % E(str((_cmp.get("delta_published_vs_ours_mm") or [None, None])[1])))
+A.append('<p class="lede">Two files in this repository still carry the wrong figure or did until this build: %s</p>'
+         % E("; ".join("%s (%s) — %s" % (c["file"], c.get("line", ""), c["verdict"]) for c in HAT["contradicted"])))
+_so = HAT["still_open"]
+A.append('<p class="lede"><b>Still open — %s.</b> %s Why: %s. What settles it: %s</p>'
+         % (E(_so["verdict"]), E(_so["question"]), E(_so["why"]), E(_so["what_settles_it"])))
+A.append('<p class="lede zh">仍未定（CANNOT DETERMINE）：%s 我方从未测量过该板槽尺寸；解决办法见工作分解中的相应工作包。</p>'
+         % E(_so["question"]))
+
 # 3.5 harness
 A.append('<h3>3.5 Harness · 线束</h3>')
 A.append('<p class="lede">%s</p><p class="lede zh">%s</p>' % (E(D["sections"]["harness"]["en"]), E(D["sections"]["harness"]["zh"])))
@@ -641,8 +751,8 @@ for c in cables:
     A.append('<tr><td class="m">%s</td><td class="m">%s</td><td class="m">%s</td><td class="num">%s</td><td class="num">%s</td><td>%s</td><td>%s</td></tr>'
              % (E(str(c.get("id"))), E(str(c.get("from"))), E(str(c.get("to"))),
                 E("%.4f" % ln if isinstance(ln, (int, float)) else "CANNOT DETERMINE"),
-                E(str(c.get("conductors", "—"))), E(str(c.get("connector", "—"))[:180]),
-                E(("floor %.1f mm + slack %.1f mm; " % (c.get("floor_mm") or 0, c.get("slack_mm") or 0)) + str(c.get("how", ""))[:120])))
+                E(str(c.get("conductors", "—"))), E(str(c.get("connector", "—"))),
+                E(("floor %.1f mm + slack %.1f mm; " % (c.get("floor_mm") or 0, c.get("slack_mm") or 0)) + str(c.get("how", "")))))
 A.append('</table>')
 
 # 3.6 assembly
@@ -657,7 +767,7 @@ A.append('<table>' + cols(10, 19, 7, 7, 29, 28) + '<tr>' + th("Station", "工位
 for s in stations:
     A.append('<tr><td class="m">%s</td><td>%s</td><td class="num">%s</td><td class="num">%s</td><td>%s</td><td>%s</td></tr>'
              % (E(str(s.get("id"))), E(str(s.get("name"))), len(s.get("steps", [])), len(s.get("gates", [])),
-                E(str(s.get("inputs") or "—")[:220]), E(str(s.get("takt_note") or "—")[:160])))
+                E(str(s.get("inputs") or "—")), E(str(s.get("takt_note") or "—"))))
 A.append('</table>')
 A.append('<p class="lede">%d stations, %d steps, %d in-station gates. No station has a measured takt time: no unit has been built, so the takt column is the basis a time would be measured against, not a time.</p>'
          % (len(stations), sum(len(s.get("steps", [])) for s in stations), sum(len(s.get("gates", [])) for s in stations)))
@@ -669,8 +779,8 @@ if torque:
              + th("Why it is CANNOT DETERMINE", "为何无法判定") + '</tr>')
     for t in torque:
         A.append('<tr><td>%s</td><td class="m">%s</td><td>%s</td></tr>'
-                 % (E(str(t.get("joint"))[:200]), E(str(t.get("value")) if t.get("value") is not None else "CANNOT DETERMINE"),
-                    E(str(t.get("why", ""))[:600])))
+                 % (E(str(t.get("joint"))), E(str(t.get("value")) if t.get("value") is not None else "CANNOT DETERMINE"),
+                    E(str(t.get("why", "")))))
     A.append('</table>')
 assum = (asm.get("assumptions") or [])
 if assum:
@@ -702,13 +812,38 @@ A.append('</section>')
 
 # ---------------------------------------------------------------- 4 acceptance
 sec(4, "Acceptance of a finished unit", "整机验收", D["sections"]["acceptance"]["en"], D["sections"]["acceptance"]["zh"])
-A.append('<p class="lede">%s</p>' % E(str(TP.get("eol_note", ""))[:400]))
+# NOT CLIPPED, AND THE LIST IT PROMISES IS RENDERED. This paragraph asserts the gate
+# table is "COMPLETE by construction ... either on this list or on the exemption list
+# below it with a reason". It used to be cut at 400 of its 725 characters — the sentence
+# stopped mid-clause at "because a person can see" — and no exemption list was rendered
+# anywhere in this document, so a reader could not check the completeness claim at all.
+# A completeness claim a reader cannot check is worse than no claim. Both are fixed, and
+# the arithmetic behind the claim is now printed and asserted by tools/reconcile.py.
+A.append('<p class="lede">%s</p>' % E(str(TP.get("eol_note", ""))))
 A.append('<table>' + cols(10, 66, 24) + '<tr>' + th("Gate", "判据编号") + th("Passes when", "合格条件")
          + th("Instrument", "仪器") + '</tr>')
 for gid, gate, inst in EOL_ROWS:
     A.append('<tr><td class="m">%s</td><td>%s</td><td class="m">%s</td></tr>' % (E(gid), E(gate), E(inst)))
 A.append('</table>')
 A.append('<p class="lede">Provenance of this table: %s.</p>' % E(EOL_NOTE))
+# the exemption list the note above promises, and the arithmetic that makes the
+# completeness claim checkable rather than assertable
+EG = RC["eol_gates"]
+A.append('<h4>Gated tests that are deliberately NOT ship gates '
+         '<span class="zh" style="display:inline;font-size:13px">刻意不列入下线判据的带判据测试</span></h4>')
+A.append('<p class="lede"><b>%s.</b> Completeness of the table above: <b>%s</b>. Every gated test in '
+         'spec/test-plan.json is on one of these two lists; a test on neither would fail the build of '
+         'this document.</p>' % (E(EG["arithmetic"]), E(EG["verdict"])))
+A.append('<p class="lede zh">上表完整性：%s，判定 <b>%s</b>。spec/test-plan.json 中每一项带判据的测试'
+         '不是列于上表，就是列于下表；若两表皆无，本文件将拒绝生成。</p>'
+         % (E(EG["arithmetic"]), E(EG["verdict"])))
+A.append('<table>' + cols(10, 58, 32) + '<tr>' + th("Test", "测试编号")
+         + th("Why it is not a ship gate", "为何不作为下线判据")
+         + th("Where it runs instead", "改在何处执行") + '</tr>')
+for _e in EG["exemptions"]:
+    A.append('<tr><td class="m">%s</td><td>%s</td><td>%s</td></tr>'
+             % (E(_e["id"]), E(_e["why"]), E(_e.get("where_it_runs_instead") or "CANNOT DETERMINE")))
+A.append('</table>')
 A.append('<p>None of these gates has ever been run. The first unit off your line is the first time any of them is exercised; log every result against the unit serial and send us the log — that is how our simulated numbers become measured ones.</p>')
 A.append('<p class="zh">上述判据从未执行过。贵厂下线的第一台机器将是首次执行；请按整机序列号记录每项结果并回传日志——这是把我方仿真数据变为实测数据的唯一途径。</p>')
 A.append('</section>')
@@ -746,18 +881,26 @@ A.append('<table>' + cols(26, 44, 14, 16) + '<tr>' + th("Document", "文件") + 
          + th("Size", "大小") + th("Last changed", "最后修改") + '</tr>')
 for p, en, zh, st in DOCS:
     link = ('<a href="%s">%s</a>' % (E(p), E(p))) if st else E(p)
-    size = ("%d files" % st["files"]) if st and st["kind"] == "dir" else (("%.1f kB" % (st["bytes"] / 1000.0)) if st else "NOT PRESENT")
-    A.append('<tr><td class="m">%s</td><td>%s<br><span class="zh">%s</span></td><td class="num">%s</td><td class="m">%s</td></tr>'
-             % (link, E(en), E(zh), E(size), E(st["mtime"] if st else "—")))
+    A.append('<tr><td class="m">%s</td><td>%s<br><span class="zh">%s</span></td><td class="num">@@SIZE:%s@@</td><td class="m">@@MTIME:%s@@</td></tr>'
+             % (link, E(en), E(zh), p, p))
 A.append('</table>')
 A.append('<h3>Data and source artifacts · 数据与源文件</h3>')
 A.append('<table>' + cols(26, 44, 14, 16) + '<tr>' + th("Path", "路径") + th("What it is", "内容")
          + th("Size", "大小") + th("Last changed", "最后修改") + '</tr>')
 for p, en, zh, st in ARTIFACTS:
-    size = ("%d files" % st["files"]) if st and st["kind"] == "dir" else (("%.1f kB" % (st["bytes"] / 1000.0)) if st else "NOT PRESENT")
-    A.append('<tr><td class="m">%s</td><td>%s<br><span class="zh">%s</span></td><td class="num">%s</td><td class="m">%s</td></tr>'
-             % (E(p), E(en), E(zh), E(size), E(st["mtime"] if st else "—")))
+    A.append('<tr><td class="m">%s</td><td>%s<br><span class="zh">%s</span></td><td class="num">@@SIZE:%s@@</td><td class="m">@@MTIME:%s@@</td></tr>'
+             % (E(p), E(en), E(zh), p, p))
 A.append('</table>')
+A.append('<p class="lede"><b>These sizes and timestamps were taken AFTER this document was written, '
+         'and verified afterwards.</b> The defect this fixes, found by a factory reviewer on 2026-09-04: '
+         'the generator stat()ed the documents at start-up and then rewrote three of them, so this table '
+         '— whose stated purpose is to let a reader check that the file they opened is the file this pack '
+         'was generated from — disagreed with the filesystem on its own three rows. It is now filled by a '
+         'second pass and re-checked; if any row still disagreed the pack would print CHANGED WHILE WRITING '
+         'in that cell rather than a number.</p>')
+A.append('<p class="lede zh">上表的大小与时间戳<b>在本文件写入之后</b>采集，并于写入后复核。此前的缺陷是：'
+         '生成器在启动时读取文件属性，随后又重写了其中三份文件，导致这张“用于核对文件一致性”的表格'
+         '在自己的三行上与磁盘不符。</p>')
 A.append('<p class="lede">Repository: this pack was generated at commit %s. Re-take every measurement in it with <code>python3 tools/measure_readiness.py</code>, then <code>python3 tools/gen_readiness.py</code>, then <code>python3 tools/gen_factory_pack.py</code>. If your numbers differ from ours, your repository moved — tell us which row.</p>'
          % E(pack["commit"]))
 A.append('<p class="lede zh">本包生成于提交 %s。可依次运行上述三条命令重新采集全部测量并重建本文件。若数字与我方不符，说明仓库已变动，请告知具体行。</p>' % E(pack["commit"]))
@@ -768,8 +911,64 @@ A.append('<footer class="foot"><p>Generated by <code>tools/gen_factory_pack.py</
          % (E(RD["measured_at"]), E(RD["measured_at"])))
 A.append('</div></body></html>')
 
-with open(OUT_HTML, "w", encoding="utf-8") as f:
-    f.write("\n".join(A))
+# ------------------------------------------------------- write, then stat, then verify
+# THE DEFECT THIS FIXES (factory reviewer, 2026-09-04): section 6's stated purpose is
+# "so a reader can check that the file they opened is the file this pack was generated
+# from", and it printed FACTORY-PACK.html at 18:33, WORK-BREAKDOWN.html at 18:25 and
+# FACTORY-QUESTIONS.html at 18:12 when all three were 18:48 on disk — because every
+# stat() was taken at start-up and three of the files were rewritten afterwards. Three
+# of twelve rows in the integrity table failed the integrity check they exist to
+# support. So: the table is written with tokens, the file is written, THEN every path
+# is stat'd, THEN the tokens are filled and the file rewritten, THEN the rendered
+# values are compared against a fresh stat. Rewriting changes this file's own mtime,
+# which is why it loops: within one minute the second pass converges, and at a minute
+# boundary it takes one more. A cell that will not converge prints the refusal, never
+# a number that is wrong.
+_TOKPATHS = sorted({p for p, _e, _z, _s in DOCS} | {p for p, _e, _z, _s in ARTIFACTS})
+
+
+def _fmt_stat(rel):
+    st = stat(rel)
+    if not st:
+        return "NOT PRESENT", "—"
+    size = ("%d files" % st["files"]) if st["kind"] == "dir" else ("%.1f kB" % (st["bytes"] / 1000.0))
+    return size, st["mtime"]
+
+
+doc_html = "\n".join(A)
+final_stats, converged = {}, False
+for _attempt in range(1, 5):
+    final_stats = {rel: _fmt_stat(rel) for rel in _TOKPATHS}
+    out = doc_html
+    for rel, (size, mt) in final_stats.items():
+        out = out.replace("@@SIZE:%s@@" % rel, E(size)).replace("@@MTIME:%s@@" % rel, E(mt))
+    with open(OUT_HTML, "w", encoding="utf-8") as f:
+        f.write(out)
+    disagree = [rel for rel in _TOKPATHS if _fmt_stat(rel)[1] != final_stats[rel][1]]
+    if not disagree:
+        converged = True
+        break
+if not converged:
+    out = doc_html
+    for rel in _TOKPATHS:
+        size, mt = _fmt_stat(rel)
+        good = _fmt_stat(rel)[1] == mt
+        out = out.replace("@@SIZE:%s@@" % rel, E(size)).replace(
+            "@@MTIME:%s@@" % rel, E(mt) if good else "CHANGED WHILE WRITING")
+    with open(OUT_HTML, "w", encoding="utf-8") as f:
+        f.write(out)
+assert "@@SIZE:" not in open(OUT_HTML, encoding="utf-8").read(), "gen_factory_pack: a stat token was left unfilled"
+
+# pack.json carries the SAME post-write stats the page shows, so the data file and the
+# document cannot disagree about when a file last changed.
+pack["stat_taken"] = "after writing FACTORY-PACK.html; verified by re-stat (converged=%s)" % converged
+_post = {rel: stat(rel) for rel in _TOKPATHS}
+pack["documents"] = [{"path": p, "en": en, "zh": zh, "stat": _post.get(p)} for p, en, zh, _s in DOCS]
+pack["artifacts"] = [{"path": p, "en": en, "zh": zh, "stat": _post.get(p)} for p, en, zh, _s in ARTIFACTS]
+with open(OUT_JSON, "w", encoding="utf-8") as f:
+    json.dump(pack, f, indent=1, ensure_ascii=False)
+
 print("wrote %s (%d B) and %s" % (OUT_HTML, os.path.getsize(OUT_HTML), OUT_JSON))
+print("  section 6 stats taken AFTER the write; converged=%s on pass %d" % (converged, _attempt))
 print("  sections: product(%d envelope rows, %d renders) not-ready(%d) drawings(%d) print(%d) bought(%d) pcb(%d) cables(%d) stations(%d) eol(%d) artifacts(%d)"
       % (len(ENV), len(RENDERS), len(NOT_READY), len(dr), len(print_rows), len(bom_table), len(cls("pcb")), len(cables), len(stations), len(EOL_ROWS), len(ARTIFACTS)))

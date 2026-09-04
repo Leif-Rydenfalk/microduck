@@ -121,7 +121,7 @@ for s in print_slugs:
     if os.path.isdir(d):
         rj = os.path.join(d, "result.json")
         if os.path.exists(rj):
-            why = (J(rj).get("why") or "result.json without a why")[:160]
+            why = (J(rj).get("why") or "result.json without a why")
         else:
             why = "directory exists, no SVG, no result.json"
     no_sheet.append(s)
@@ -231,7 +231,12 @@ for l in SRC:
     row("bought", l["id"], l["item"], grade,
         "verdict %s; %d offer(s), %d priced; MOQ %s; lead time stated on %d offer(s); qty/robot %s" % (l["verdict"], len(offs), len(priced), moqs or "none", len(lead_stated), l.get("qty_per_robot")),
         "spec/sourcing.json line %s (SOURCING.html); offers: %s" % (l["id"], "; ".join((o.get("vendor") or "?") + " " + (o.get("url") or "") for o in offs[:3])),
-        (l.get("verdict_why") or "")[:400], closer, by,
+        # NOT CLIPPED. A factory reviewer found on 2026-09-04 that seven of these
+        # cells were cut mid-word at 400 characters — B7 ended "flagged u", B12
+        # "No distributor anywhere prices a 35", P2 "a 0.1524 mm re-rout" — and the
+        # clipped half was in every case the sentence that says HOW TO CLOSE the
+        # blocker. This column is the whole point of the audit; it prints whole.
+        (l.get("verdict_why") or ""), closer, by,
         {"ce_part": l.get("ce_part"), "qty_per_robot": l.get("qty_per_robot"), "offers": offs, "lead_time_stated": len(lead_stated)})
 
 # ---------------------------------------------------------------- 4 PCBs
@@ -347,7 +352,7 @@ for r in TR["results"]:
         else:
             closer, by = "agent_later", "measure the declared interface frame"
     row("triad", r["ref"], r["ref"], grade, "bin/triad check: %s (%s, %d measurements)" % (r["verdict"], r.get("iteration"), r.get("measured", 0)),
-        "out/factory/measure/triad.json (bin/triad check --all --json, %s)" % TR.get("$generated", NOW), why[:300], closer, by,
+        "out/factory/measure/triad.json (bin/triad check --all --json, %s)" % TR.get("$generated", NOW), why, closer, by,
         {"iteration": r.get("iteration"), "folder": r.get("folder")})
 
 # ---------------------------------------------------------------- 9 open unknowns
@@ -582,7 +587,7 @@ A.append('<table>%s<tr>%s%s%s%s%s%s%s%s</tr>' % (cols(6, 20, 12, 7, 8, 8, 7, 32)
 for r in [r for r in rows if r["class"] == "bought"]:
     offs = r["offers"]
     A.append('<tr><td class="m">%s</td><td>%s</td><td>%s</td><td class="num">%s</td><td class="num">%d (%d)</td><td class="num">%s</td><td class="num">%d</td><td>%s</td></tr>' % (
-        E(r["id"]), E(r["name"]), gchip(r), E(str(r["qty_per_robot"])), len(offs), sum(1 for o in offs if o.get("tiers")), E(", ".join(str(o.get("moq")) for o in offs if o.get("moq") is not None) or "—"), r["lead_time_stated"], E(r["missing"][:260])))
+        E(r["id"]), E(r["name"]), gchip(r), E(str(r["qty_per_robot"])), len(offs), sum(1 for o in offs if o.get("tiers")), E(", ".join(str(o.get("moq")) for o in offs if o.get("moq") is not None) or "—"), r["lead_time_stated"], E(r["missing"])))
 A.append('</table></section>')
 
 # 6 pcb
@@ -613,7 +618,7 @@ for sec, ident, title in [("harness", "wiring", "7 Harness · 线束"), ("assemb
 A.append('<section id="shelf"><h2><span class="n">10</span>Triad shelf — bin/triad check --all · 货架</h2>')
 A.append('<table>%s<tr>%s%s%s%s</tr>' % (cols(24, 13, 45, 18), th("Ref", "条目"), th("Grade", "评级"), th("First finding", "首个发现"), th("Closer", "负责方")))
 for r in [r for r in rows if r["class"] == "triad"]:
-    A.append('<tr><td class="m">%s</td><td>%s</td><td>%s</td><td>%s<span class="zh">%s</span></td></tr>' % (E(r["id"]), gchip(r), E(r["missing"][:200]), E(r["closer_en"]), E(r["closer_zh"])))
+    A.append('<tr><td class="m">%s</td><td>%s</td><td>%s</td><td>%s<span class="zh">%s</span></td></tr>' % (E(r["id"]), gchip(r), E(r["missing"]), E(r["closer_en"]), E(r["closer_zh"])))
 A.append('</table></section>')
 A.append('<footer class="foot"><p>Generated %s by tools/gen_readiness.py from out/factory/measure/*.json · every number traces to a file · 由脚本生成，每个数字均可溯源</p></footer>' % E(NOW))
 A.append('</div></body></html>')
