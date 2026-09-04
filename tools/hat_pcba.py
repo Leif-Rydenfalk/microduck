@@ -129,6 +129,12 @@ def bb6(sh):
 
 def main():
     t0 = time.time()
+    # Clear the library first. A stale file from an earlier run under an older key
+    # is indistinguishable from a current one once it is on disk.
+    if os.path.isdir(GEOL):
+        for f in os.listdir(GEOL):
+            if f.endswith(".step"):
+                os.remove(os.path.join(GEOL, f))
     os.makedirs(GEOL, exist_ok=True)
     comps = json.load(open(os.path.join(OUT, "components.json")))
     drills = json.load(open(os.path.join(OUT, "drills.json")))["holes"]
@@ -332,24 +338,21 @@ def main():
         rep.Placement = placement(c0["pos_mm"][0], c0["pos_mm"][1],
                                   conv[side_of(c0)] * (c0["pos_rot_deg"] or 0.0),
                                   side_of(c0)).inverse().multiply(rep.Placement)
-        # BAKE the placement into the geometry before export. Import.export writes a
-        # Part::Feature's RAW geometry and drops the placement, so exporting the shape
-        # with its localising placement still attached writes the body at the position
-        # it had in the vendor's assembly -- which is exactly the defect that made
-        # out/pcb/hat/geometry/ unusable and that this tool exists to fix. Caught here
-        # by reading every file back (below); it was NOT caught by the round trip,
-        # which used the in-memory shape.
-        m = rep.Placement.toMatrix()
-        rep = rep.copy()
-        rep.Placement = App.Placement()
-        rep = rep.transformGeometry(m)
         lb = bb6(rep)
         # a localised body must sit on the origin: its xy centre is the pick point
         cx, cy = (lb[0] + lb[3]) / 2.0, (lb[1] + lb[4]) / 2.0
-        lo = doc.addObject("Part::Feature", "loc_" + key.replace("-", "_")[:40])
-        lo.Shape = rep
+        # Shape.exportStep, NEVER Import.export. MEASURED 2026-09-04 with a two-shape
+        # probe (/private/tmp/int-pcbchips/exp2.log): a box whose shape carries the
+        # placement (-0.5,-0.25,-0.47) rot 90 reads back
+        #   Import.export      -> [0, 0, 0, 1, 0.5, 0.35]        the placement is GONE
+        #   Shape.exportStep   -> [-1, -0.25, -0.47, -0.5, 0.75, -0.12]   exact
+        #   Shape.exportBrep   -> the same, exact
+        # and setting the Part::Feature's own Placement explicitly does NOT help --
+        # Import.export writes raw geometry either way. That silent drop is the root
+        # cause of the previous lane's unusable out/pcb/hat/geometry/ folder AND of
+        # this tool's own first two attempts. Nothing about it is visible in a render.
         path = os.path.join(GEOL, key + ".step")
-        Import.export([lo], path)
+        rep.exportStep(path)
         # READ IT BACK. A library file nobody re-opened is a claim, not a measurement.
         back = Part.Shape()
         back.read(path)
@@ -418,9 +421,7 @@ def main():
     cb = comp.BoundBox
     P("PCBA bbox", [round(v, 4) for v in (cb.XMin, cb.YMin, cb.ZMin, cb.XMax, cb.YMax, cb.ZMax)],
       "size", [round(cb.XLength, 4), round(cb.YLength, 4), round(cb.ZLength, 4)])
-    allo = doc.addObject("Part::Feature", "pcba")
-    allo.Shape = comp
-    Import.export([allo], os.path.join(OUT, "robot-hat-pcba.step"))
+    comp.exportStep(os.path.join(OUT, "robot-hat-pcba.step"))   # not Import.export; see above
 
     tallest = max((p for p in placed if p["side"] == "top"), key=lambda p: p["z"][1])
     lowest = min((p for p in placed if p["side"] == "bottom"), key=lambda p: p["z"][0])
@@ -492,6 +493,17 @@ def main():
                      for c in nomodel],
         dnp_bodies_excluded=dnp_bodies,
         unmatched_bodies=unmatched_body, unmatched_placements=unmatched_cand,
+        finding_import_export_drops_placement=dict(
+            what="FreeCAD's Import.export() writes a Part::Feature's RAW geometry and DISCARDS "
+                 "the placement, silently. Part.Shape.exportStep() and exportBrep() keep it.",
+            measured="a box with placement (-0.5,-0.25,-0.47) rot 90 deg about z read back as "
+                     "[0,0,0,1,0.5,0.35] through Import.export and as "
+                     "[-1,-0.25,-0.47,-0.5,0.75,-0.12] through Shape.exportStep; setting the "
+                     "object's own Placement first changes nothing",
+            cost="it produced two unusable geometry libraries in this repo before anything read "
+                 "a written file back",
+            fix="every file this tool writes now goes through Shape.exportStep, and every one is "
+                "re-opened and compared with the shape that was written"),
         library_read_back=dict(files=len(local_lib), disagreeing=len(file_err), detail=file_err,
                                what="every exported geometry-local/*.step re-opened and its bbox "
                                     "compared with the shape that was written, to 1e-4 mm"),

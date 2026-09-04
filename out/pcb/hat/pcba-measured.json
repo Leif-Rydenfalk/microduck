@@ -34,7 +34,7 @@
   "layers": 4
  },
  "assignment": {
-  "method": "scipy.optimize.linear_sum_assignment over xy distance + KiCad F.Fab body-size error, side-gated, 6.0 mm radius",
+  "method": "scipy.optimize.linear_sum_assignment over xy distance + KiCad F.Fab body-size error; side-gated; per-part radius = half the F.Fab body diagonal + 1.0 mm; only placements that declare a 3D model compete",
   "bodies_in_step": 121,
   "candidate_placements": 122,
   "pairs": 121,
@@ -522,6 +522,18 @@
    "cannot_determine": "the production STEP carries no body inside this placement's F.Fab match radius (2.601 mm) on side bottom"
   }
  ],
+ "finding_import_export_drops_placement": {
+  "what": "FreeCAD's Import.export() writes a Part::Feature's RAW geometry and DISCARDS the placement, silently. Part.Shape.exportStep() and exportBrep() keep it.",
+  "measured": "a box with placement (-0.5,-0.25,-0.47) rot 90 deg about z read back as [0,0,0,1,0.5,0.35] through Import.export and as [-1,-0.25,-0.47,-0.5,0.75,-0.12] through Shape.exportStep; setting the object's own Placement first changes nothing",
+  "cost": "it produced two unusable geometry libraries in this repo before anything read a written file back",
+  "fix": "every file this tool writes now goes through Shape.exportStep, and every one is re-opened and compared with the shape that was written"
+ },
+ "library_read_back": {
+  "files": 53,
+  "disagreeing": 0,
+  "detail": [],
+  "what": "every exported geometry-local/*.step re-opened and its bbox compared with the shape that was written, to 1e-4 mm"
+ },
  "local_library": {
   "0r-r-0402-1005metric-bottom": {
    "representative": "R40",
