@@ -237,6 +237,109 @@ RAIL_SOURCE = {
 }
 
 
+
+# Where OUR model disagrees with the copper. This is the work list the framing of
+# this repo asks for: the real robot works, so each of these is a place we wrote
+# down something we could not see. Nothing here is applied by this tool — the
+# files belong to the wiring and shelf lanes and are open in another session.
+MODEL_CORRECTIONS = [
+    dict(item='the HAT is not unpublished any more',
+         verdict=FAIL,
+         our_record='part:microduck-robot-hat-pcb title: "Pollen RPI Robot HAT — the UNPUBLISHED custom PCB on the Radxa\'s 40-pin header"',
+         now_measured='It is published, Apache-2.0, with KiCad 9 schematic, 4-layer PCB, Gerbers, a 47-line BOM, pick-and-place '
+                      'and a STEP assembly, cloned into this repo on 2026-09-04.',
+         change='drop the word "unpublished" from the title and point the record at reference/pollen-elec-rpi-robot-hat.',
+         where='ce-parts/microduck-robot-hat-pcb/electrical.part.json record.title',
+         evidence='reference/pollen-elec-rpi-robot-hat/PROVENANCE.json; LICENSE'),
+    dict(item='"Connector types on the HAT are CANNOT DETERMINE"',
+         verdict=FAIL,
+         our_record='part:microduck-robot-hat-pcb uncertainties[0]: "Connector types on the HAT (servo header, J5, battery input, '
+                    'speaker/mic) are CANNOT DETERMINE"',
+         now_measured='J13/J14 = Dynamixel-3 (JST EH 2.5 mm, 3-pin, wired in PARALLEL — same GND, same +BATT, same data net); '
+                      'J3/J11 = Dynamixel-4 (JST EH 4-pin, RS-485, driven by U8 SIT3088E); J5-J8 = JST SH 1.0 mm 4-pin '
+                      '(Stemma/Qwiic); J1, J2, J9 = Wago-2 screwless terminals (speaker, and two external mic inputs); '
+                      'J4 = 2x20 SMD female header. AND THERE IS NO BATTERY INPUT CONNECTOR AT ALL — the pack arrives on a '
+                      'motor connector.',
+         change='replace the uncertainty with the measured connector list, and record that the battery input IS a motor connector.',
+         where='ce-parts/microduck-robot-hat-pcb/electrical.part.json record.uncertainties[0]',
+         evidence='copper: J1/J2/J3/J4/J5/J6/J7/J8/J9/J11/J13/J14 footprints and pad->net; README.md'),
+    dict(item='"Transceiver, regulators, fusing ... CANNOT DETERMINE"',
+         verdict=FAIL,
+         our_record='part:microduck-robot-hat-pcb uncertainties[1]: "Transceiver, regulators, fusing, NFC reader, REC LED: CANNOT DETERMINE"',
+         now_measured='Transceiver: the TTL half-duplex path is discrete — U7 SN74LVC1G126 (non-inverting, active-high enable) drives '
+                      'the bus, U6 SN74LVC1G125 (active-low enable) and U5 74LVC1G08 return it, all three steered by one net, '
+                      'Dynamixel_dir, which is generated on the board by Q1 (MMBT3906) off the host TX line through R27 with R28 20 k '
+                      'to ground — a self-steering circuit with NO direction GPIO, exactly as the teardown deduced from the absence of '
+                      'one in the source. The RS-485 side is U8 SIT3088E on J3/J11. Regulators: U9 AP63205 (fixed 5.0 V, 2 A) with '
+                      'L4 6.8 uH, U3 XC6206P182MR (1.8 V from 3.3 V), U10 LM5050-1 + Q2 SI2312 as an ideal diode OR-ing the buck '
+                      'output with header 5 V. Fusing: TH1, a 100 R PTC thermistor, IS ON THE DATA LINE, not on power — the chain is '
+                      'transceiver -> R33 150 R -> D4 5V1 zener to ground -> TH1 -> J13/J14 pin 3. NFC reader: THERE IS NONE, in any '
+                      'of the 127 footprints.',
+         change='replace the uncertainty with the measured part list; delete the NFC reader from the open questions.',
+         where='ce-parts/microduck-robot-hat-pcb/electrical.part.json record.uncertainties[1]',
+         evidence='copper: U3, U5, U6, U7, U8, U9, U10, Q1, Q2, R27, R28, R33, TH1, D4, L4 pad->net'),
+    dict(item='the I2S3 mux was an assertion and is now a measurement',
+         verdict=FAIL,
+         our_record='part:microduck-robot-hat-pcb uncertainties[2] and part:radxa-zero-3w unknowns[4]: "I2S3 mux M0 (pins '
+                    '12/13/35/38/40) vs M1 (19/21/23/24): the dts pinctrl was not read — the M0 pins are the wiring lane\'s assertion"',
+         now_measured='M0, and pin 13 is NOT part of it. The HAT wires I2S to header pins 12, 35, 38 and 40 only. Pin 13 '
+                      '(I2S3_MCLK_M0) is explicitly unconnected; the codec\'s MCLK comes from Y1, a 12 MHz oscillator on the HAT. '
+                      'M1 is not merely unused, it is OCCUPIED: pins 19/21/23/24 are wired to the Stemma headers J7 and J8.',
+         change='record M0 as MEASURED, list the four pins 12/35/38/40, and state that MCLK is board-local.',
+         where='ce-parts/microduck-robot-hat-pcb uncertainties[2]; ce-parts/radxa-zero-3w unknowns[4]; wiring/measure.py:322',
+         evidence='copper: J4 pads 12/13/19/21/23/24/35/38/40, Y1, U2.1'),
+    dict(item='wiring/cables.json run hat-radxa-40pin names a pin the HAT does not connect',
+         verdict=FAIL,
+         our_record='wiring/measure.py:322 pins: "40-pin header: 5 V (pins 2/4), GND, UART2 (8/10), I2C3 (3/5), I2S3 (M0: '
+                    '12/13/35/38/40 asserted)"',
+         now_measured='Pin 13 is unconnected-(J4-Pin_13-Pad13). The correct string is "I2S3 (M0: 12/35/38/40, MEASURED; MCLK is '
+                      'Y1 on the HAT, not a header pin)".',
+         change='one string in wiring/measure.py, then re-run it. NOT APPLIED HERE: wiring/measure.py is modified in the working '
+                'tree by another lane and two agents never write one file.',
+         where='wiring/measure.py:322 -> wiring/cables.json record.cables[hat-radxa-40pin].pins',
+         evidence='copper: J4 pad 13'),
+    dict(item='wiring/cables.json run spk-hat can drop its CANNOT DETERMINE',
+         verdict=PASS,
+         our_record='wiring/measure.py:305 pins: "SPK+, SPK- (codec line/HP out, or an amplifier: CANNOT DETERMINE)"',
+         now_measured='An amplifier. J1.1 <- C9 / FB3 <- U1.16 (+OUT_R) and J1.2 <- C8 / FB2 <- U1.14 (-OUT_R): the PAM8406D\'s '
+                      'BRIDGED right channel through ferrites. The codec\'s LEFT_LOP / RIGHT_LOP go the other way, through C1 / C2 '
+                      'into the amplifier inputs. The speaker therefore sees a bridged class-D output referenced to 5 V, not a line '
+                      'level — which is what decides whether the fitted 8 ohm 2 W speaker is adequate.',
+         change='replace the CANNOT DETERMINE with "PAM8406D bridged right channel through FB2/FB3 (measured)".',
+         where='wiring/measure.py:305',
+         evidence='copper: U1, FB2, FB3, C8, C9, J1'),
+    dict(item='only ONE of the amplifier\'s two channels leaves the board',
+         verdict=PASS,
+         our_record='nothing in this repo says how many audio channels the robot has.',
+         now_measured='One. U1.1 (+OUT_L) reaches TP3 and nothing else; U1.3 (-OUT_L) reaches TP4 and nothing else. The left channel '
+                      'is a test point pair. So the Microduck is MONO by construction, and the 5 V rail\'s audio budget is one '
+                      'channel, not two.',
+         change='record the robot as mono in part:microduck-speaker and in any audio document.',
+         where='ce-parts/microduck-speaker/electrical.part.json',
+         evidence='copper: U1 pads 1, 3, 14, 16; TP3, TP4, FB2, FB3'),
+    dict(item='the head microphone may be a cable our model invented',
+         verdict=CD,
+         our_record='wiring/cables.json run mic-hat, 3 conductors, cable_mm null; part:microduck-mic "transducer CANNOT DETERMINE"',
+         now_measured='The HAT carries its own microphone: MK1, an LMA2718 MEMS part, on +3V3, coupled through C10 into U2.16 '
+                      '(the MIC2R/LINE2R pin, which Pollen\'s ALSA config calls Mic3R). Two Wago terminals J2 and J9 are also wired '
+                      'to codec mic inputs with 10 k bias resistors to +5V and DNP 1 M loads. So the head mic is EITHER MK1 with no '
+                      'cable at all, OR an external capsule on J2/J9 with one — and our model asserts the second without evidence.',
+         change='hold the run as CANNOT DETERMINE and name MK1 as the alternative. WHAT SETTLES IT: a teardown photograph showing '
+                'whether anything is landed in J2 or J9.',
+         where='wiring/measure.py:308; ce-parts/microduck-mic/electrical.part.json',
+         evidence='copper: MK1, C10, U2.16, J2, J9, R22, R23, R36, R37'),
+    dict(item='there is a battery-present GPIO nobody had recorded',
+         verdict=PASS,
+         our_record='nothing in this repo mentions it; the teardown says "There is no fuel gauge and no ADC", which is true and '
+                    'has been read as "the HAT tells the host nothing about the battery".',
+         now_measured='Header pin 31 (GPIO3_B4) carries +BATT divided by R24 10 k and clamped by D2, a 3V3 zener, with C44 10 n to '
+                      'ground. At the pack top of 8.2 V that is 0.490 mA into the zener and 3.3 V at the pin. It is a logic '
+                      'battery-present line. No Pollen source read here uses it.',
+         change='add it to part:microduck-robot-hat-pcb as a provided signal, and to the HAT-to-Radxa run\'s pin list.',
+         where='ce-parts/microduck-robot-hat-pcb/electrical.part.json record.provides',
+         evidence='copper: R24, D2, C44, J4 pad 31'),
+]
+
 # --------------------------------------------------------------------- checks
 
 def rows_e1_i2c(comps, nets):
@@ -720,6 +823,36 @@ def rows_e7_unpowered(comps, cables):
     return out
 
 
+def rows_e8_model(comps, cables):
+    """E8 — WHERE OUR MODEL IS WRONG. The framing of this repo is that the real
+    Microduck works, so a check that fails is first a lead about our own record.
+    Every row here is a place where the copper settles something our records
+    still carry as an assertion or a CANNOT DETERMINE, or contradicts them
+    outright. Each names the file to change and what to change it to."""
+    out = []
+    j4 = comps['J4']['pads']
+    C = MODEL_CORRECTIONS
+    for c in C:
+        out.append(dict(check='E8', item=c['item'], verdict=c['verdict'],
+                        measurement=c['now_measured'] + '  ||  OUR RECORD SAYS: ' + c['our_record'] +
+                                    '  ||  CHANGE: ' + c['change'],
+                        cite=c['where'] + ' | ' + c['evidence']))
+    out.append(dict(check='E8', item='which board revision this whole study is about', verdict=CD,
+                    measurement='Every connectivity statement here is read from rev C1 (clone commit 23eab119, "[added] Production '
+                                'file for C1"), the revision Pollen publishes production files for. out/pcb/hat/mesh-revision.json '
+                                'measured that the board in POLLEN\'S OWN SIMULATION MESH is a different, pre-release layout '
+                                '(fbd885d, before "the 40-pin GPIO conn. is inverted"), whose Dynamixel connectors sit at the other '
+                                'end of the board. The connector POSITIONS were compared across four revisions; THE NETS WERE NOT. '
+                                'So "the servos are on +BATT" is proven for C1 and is corroborated for every revision by two '
+                                'revision-independent sources — the README ("designed to use of the motor connector as an power '
+                                'input") and Pollen\'s own runtime, which reads the pack voltage out of the servos\' supply register '
+                                'and clears their input-voltage shutdown — but it is not proven pad-by-pad on fbd885d, A1 or B1. '
+                                'WHAT SETTLES IT: re-fetch the repository\'s git history and diff the +BATT net across the four '
+                                'revisions; out/pcb/hat/mesh-revision.json did exactly that for the drill table on 2026-09-04.',
+                    cite='reference/pollen-elec-rpi-robot-hat/PROVENANCE.json clone_commit; out/pcb/hat/mesh-revision.json'))
+    return out
+
+
 # ------------------------------------------------------------------- self-test
 
 def selftest():
@@ -800,6 +933,7 @@ def main():
     rows += rows_e5_budget(comps, runtime)
     rows += rows_e6_harness(comps, cables)
     rows += rows_e7_unpowered(comps, cables)
+    rows += rows_e8_model(comps, cables)
 
     c = collections.Counter(r['verdict'] for r in rows)
     verdict = FAIL if c[FAIL] else (CD if c[CD] else PASS)
@@ -841,8 +975,18 @@ def main():
         'verdict_why': f'{c[FAIL]} FAIL and {c[CD]} CANNOT DETERMINE of {len(rows)} checks. A CANNOT DETERMINE is not a pass.',
         'rows': rows,
     }
+    doc['counts']['model_corrections'] = len(MODEL_CORRECTIONS)
+    doc['counts']['model_corrections_that_contradict_a_record'] = sum(1 for m in MODEL_CORRECTIONS if m['verdict'] == FAIL)
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     json.dump(doc, open(OUT, 'w'), indent=1)
+    json.dump({'what': 'Places where the copper settles or contradicts something our own records assert. '
+                       'NOT APPLIED by this tool: wiring/measure.py and the ce-parts records belong to other lanes '
+                       'and wiring/measure.py is modified in the working tree.',
+               'generated_by': 'tools/elec_close.py',
+               'count': len(MODEL_CORRECTIONS),
+               'contradicts_a_record': sum(1 for m in MODEL_CORRECTIONS if m['verdict'] == FAIL),
+               'corrections': MODEL_CORRECTIONS},
+              open(os.path.join(ROOT, 'out/elec/model-corrections.json'), 'w'), indent=1)
     print(f'{OUT}\n{verdict}: {c[PASS]} PASS / {c[FAIL]} FAIL / {c[CD]} CANNOT DETERMINE of {len(rows)}')
     for r in rows:
         if r['verdict'] != PASS:
