@@ -222,9 +222,15 @@ def classify(g):
         n_features=len(g), meshes=meshes, bodies=bodies,
         axis_world=g[0]["axis_world"],
         span_mm=[round(g[0]["s_lo"], 4), round(max(h["s_hi"] for h in g), 4)],
+        # residual_mm and cover_deg travel with every feature: a downstream
+        # check that compares a deficit against the fit's OWN noise cannot do it
+        # without them, and dropping them made tools/fastener_audit.py call a
+        # 0.012 mm interference a FAIL against a 0.0316 mm residual it could not
+        # see (measured 2026-09-04).
         features=[{k: h[k] for k in ("mesh", "index", "role", "d_mm", "size",
                                      "cls", "depth_mm", "through", "s_lo", "s_hi",
-                                     "center_world", "reads_as")} for h in g],
+                                     "center_world", "reads_as", "residual_mm",
+                                     "cover_deg")} for h in g],
         size=(sizes.most_common(1)[0][0] if sizes else None),
         has_seat=bool(seats), has_thread=bool(threads), n_pass=len(passes))
 
@@ -279,12 +285,50 @@ def classify(g):
         direction = scale(run["axis_world"], -1.0)
     grip = abs(s_thread_start - s_head)
     engage_avail = abs(s_thread_end - s_thread_start)
-    size = run["size"]
-    d = NOMINAL_MM.get(size)
-    if d is None:
-        run.update(verdict="CANNOT DETERMINE", kind="unsized",
-                   why="size %r has no nominal diameter in NOMINAL_MM" % size)
+    # ---- WHICH SCREW, AND IT IS DERIVED FROM THE HOLES, NOT VOTED ON ----
+    # The first version took the commonest `size` label in the chain. That is a
+    # majority vote among independent per-hole classifications and it produced a
+    # screw that could not physically exist: MEASURED 2026-09-04, four runs
+    # bearing_roll -> yaw2roll came out M2.5 from one Ø2.05 pilot outvoting one
+    # Ø2.2 clearance — an M2.5 shank is Ø2.50 and cannot pass a Ø2.2 hole.
+    # The geometry states the constraint directly: the shank must CLEAR every
+    # clearance hole on the chain and must be LARGER than the pilot it forms a
+    # thread in. Take the largest standard size that satisfies both, or refuse.
+    clearances = [h["d_mm"] for h in g
+                  if h["cls"] in PASSES_THROUGH and h["d_mm"] is not None]
+    d_pilot = pilot["d_mm"]
+    min_clear = min(clearances) if clearances else None
+    cands = []
+    for nm, dn in sorted(NOMINAL_MM.items(), key=lambda kv: -kv[1]):
+        if nm not in STOCKED_MM:
+            continue
+        if min_clear is not None and dn >= min_clear:
+            continue
+        if d_pilot is not None and dn <= d_pilot:
+            continue
+        cands.append(nm)
+    if not cands:
+        run.update(verdict="CANNOT DETERMINE", kind="no screw fits this chain",
+                   why=("NO standard screw satisfies this chain's own geometry. The shank must "
+                        "clear the tightest clearance hole (Ø%s mm) and must be LARGER than the "
+                        "pilot it forms a thread in (Ø%s mm); with the pilot that wide there is "
+                        "nothing for a thread that also passes the clearance to bite. The per-hole "
+                        "classifier labelled this chain %r by diameter alone; that label is not a "
+                        "screw. Most likely the blind Ø%s feature is not a pilot at all — a "
+                        "locating-pin bore or a boss seat reads the same to a diameter table."
+                        % (min_clear, d_pilot, run["size"], d_pilot)),
+                   settled_by=("a section view or a caliper on that blind feature: is a screw "
+                               "threaded into it, or is it a pin seat? THE REAL ROBOT WORKS, so "
+                               "this is a reading error somewhere, not a broken joint."),
+                   size_candidates=[], min_clearance_mm=min_clear, pilot_d_mm=d_pilot)
         return run
+    size = cands[0]
+    d = NOMINAL_MM[size]
+    run["size"] = size
+    run["size_why"] = ("largest standard size whose shank Ø%.2f mm clears the tightest clearance "
+                       "hole on the chain (Ø%s mm) and exceeds the pilot it bites (Ø%s mm). "
+                       "Candidates that satisfy both: %s. Derived from the holes, not voted on."
+                       % (d, min_clear, d_pilot, cands))
     l_min = grip + MIN_ENGAGE_D * d          # rule: 1.5d of thread, stated as a rule
     l_max = grip + engage_avail              # measurement: bottoming on the pilot floor
     stock = STOCKED_MM.get(size, [])

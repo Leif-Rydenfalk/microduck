@@ -1,0 +1,5233 @@
+{
+ "doc": {
+  "id": "MD-FAST-AUDIT-001",
+  "rev": "A",
+  "title": "Does this fastening actually work? Eight physical checks per screw run",
+  "generated_by": "tools/fastener_audit.py",
+  "reads": [
+   "out/fasteners/runs.json",
+   "out/fasteners/placed.json"
+  ]
+ },
+ "framing": "THE REAL MICRODUCK WORKS. A failing row is FIRST a place our model is wrong, not a design flaw. Every row names the measurement that separates the two, and nothing here moves the model away from the reference.",
+ "screw_table": {
+  "M2": {
+   "d": 2.0,
+   "dk_max": 3.8,
+   "dk_min": 3.62,
+   "k_max": 2.0,
+   "key": 1.5
+  },
+  "M2.5": {
+   "d": 2.5,
+   "dk_max": 4.5,
+   "dk_min": 4.32,
+   "k_max": 2.5,
+   "key": 2.0
+  }
+ },
+ "counts": {
+  "runs_audited": 64,
+  "screws_placed": 64,
+  "assembly_wide_checks": 2,
+  "per_run_checks": 320,
+  "runs_all_PASS": 63,
+  "runs_with_a_FAIL": 0,
+  "runs_with_a_CANNOT_DETERMINE": 1,
+  "by_check": {
+   "head passes and seats / PASS": 28,
+   "shank clears / PASS": 64,
+   "engagement / PASS": 64,
+   "protrusion / PASS": 64,
+   "driver access / PASS": 64,
+   "head seats / PASS": 35,
+   "head passes and seats / CANNOT DETERMINE": 1
+  }
+ },
+ "assembly_wide": [
+  {
+   "check": "duplicate",
+   "verdict": "PASS",
+   "what": "no two screws claim the same head point",
+   "measured": {
+    "screws": 64,
+    "duplicate_points": 0,
+    "examples": []
+   },
+   "settled_by": "if two runs land on one point the coaxial grouping merged or split wrong"
+  },
+  {
+   "check": "head clash",
+   "verdict": "PASS",
+   "what": "no two screw heads overlap; two heads clear when their centres are further apart than the mean of their head radii sum, i.e. (dk_a + dk_b)/2",
+   "measured": {
+    "closest_pair_mm": 8.4839,
+    "needed_mm": 3.8,
+    "margin_mm": 4.6839,
+    "screws": [
+     1,
+     21
+    ],
+    "sizes": [
+     "M2",
+     "M2"
+    ]
+   },
+   "settled_by": "a negative margin means two screws were derived where the robot has one"
+  }
+ ],
+ "runs_with_a_finding": [
+  {
+   "size": "M2",
+   "length_mm": 10.0,
+   "meshes": [
+    "left_shell",
+    "right_shell"
+   ],
+   "head_seat": "right_shell/counterbore",
+   "pilot": "right_shell \u00d81.6",
+   "checks": [
+    {
+     "check": "head passes and seats",
+     "verdict": "CANNOT DETERMINE",
+     "what": "the head (dk max 3.800 mm) must pass down and seat in a \u00d83.788 mm bore 26.237 mm deep",
+     "measured": {
+      "bore_d_mm": 3.788,
+      "dk_max_mm": 3.8,
+      "clearance_mm": -0.012,
+      "bore_depth_mm": 26.237,
+      "dk_min_mm": 3.62,
+      "clearance_at_dk_min_mm": 0.168,
+      "mesh_fit_residual_mm": 0.0316,
+      "bore_cover_deg": 355.8,
+      "deficit_vs_residual": "deficit 0.0120 mm is INSIDE the patch's own 0.0316 mm fit residual \u2014 the instrument cannot separate them"
+     },
+     "settled_by": "A caliper on the printed bore. THE REFERENCE WORKS, so a negative clearance is first a modelling error: compare it against the mesh's own fit residual \u2014 where the residual is larger than the deficit the measurement cannot tell them apart and this is CANNOT DETERMINE, not a design flaw."
+    },
+    {
+     "check": "shank clears",
+     "verdict": "PASS",
+     "what": "every clearance/ambiguous hole on the run must be wider than the shank (\u00d82.00 mm)",
+     "measured": {
+      "holes_checked": 1,
+      "too_tight": []
+     },
+     "settled_by": "a hole narrower than the screw is either a pilot the classifier mis-sized or a different screw size on this line"
+    },
+    {
+     "check": "engagement",
+     "verdict": "PASS",
+     "what": "the screw must reach 1.5 d = 3.000 mm of thread (a RULE) and must not bottom in the 4.700 mm pilot (a MEASUREMENT)",
+     "measured": {
+      "screw_length_mm": 10.0,
+      "grip_mm": 5.9254,
+      "engaged_mm": 4.0746,
+      "min_rule_mm": 3.0,
+      "pilot_depth_mm": 4.7,
+      "window_mm": [
+       8.9254,
+       10.6254
+      ]
+     },
+     "settled_by": "a sourced length inside the window, or a re-measurement of grip / pilot depth"
+    },
+    {
+     "check": "protrusion",
+     "verdict": "PASS",
+     "what": "the thread must stop inside the pilot, not emerge from the far face",
+     "measured": {
+      "engaged_mm": 4.0746,
+      "pilot_depth_mm": 4.7,
+      "overshoot_mm": 0.0,
+      "chain_span_mm": [
+       -5.5,
+       31.3624
+      ]
+     },
+     "settled_by": "a section view of that part, or a caliper on the boss depth"
+    },
+    {
+     "check": "driver access",
+     "verdict": "PASS",
+     "what": "a 1.5 mm across-flats hex key (ISO 4762) must reach the head; every bore above it must be at least that wide",
+     "measured": {
+      "key_af_mm": 1.5,
+      "bores_wide_enough": 3,
+      "bores_too_narrow": []
+     },
+     "settled_by": "cecad.install.driver_clearance() on the built solid, which sweeps the volume the key needs to turn \u2014 this check only compares diameters"
+    }
+   ],
+   "verdict": "CANNOT DETERMINE"
+  }
+ ],
+ "runs": [
+  {
+   "size": "M2",
+   "length_mm": 10.0,
+   "meshes": [
+    "hip_l",
+    "xl330"
+   ],
+   "head_seat": "hip_l/counterbore",
+   "pilot": "xl330 \u00d81.6",
+   "checks": [
+    {
+     "check": "head passes and seats",
+     "verdict": "PASS",
+     "what": "the head (dk max 3.800 mm) must pass down and seat in a \u00d85.229 mm bore 0.213 mm deep",
+     "measured": {
+      "bore_d_mm": 5.229,
+      "dk_max_mm": 3.8,
+      "clearance_mm": 1.429,
+      "bore_depth_mm": 0.213,
+      "dk_min_mm": 3.62,
+      "clearance_at_dk_min_mm": 1.609,
+      "mesh_fit_residual_mm": 0.0053,
+      "bore_cover_deg": 355.0,
+      "deficit_vs_residual": "no deficit"
+     },
+     "settled_by": "A caliper on the printed bore. THE REFERENCE WORKS, so a negative clearance is first a modelling error: compare it against the mesh's own fit residual \u2014 where the residual is larger than the deficit the measurement cannot tell them apart and this is CANNOT DETERMINE, not a design flaw."
+    },
+    {
+     "check": "shank clears",
+     "verdict": "PASS",
+     "what": "every clearance/ambiguous hole on the run must be wider than the shank (\u00d82.00 mm)",
+     "measured": {
+      "holes_checked": 2,
+      "too_tight": []
+     },
+     "settled_by": "a hole narrower than the screw is either a pilot the classifier mis-sized or a different screw size on this line"
+    },
+    {
+     "check": "engagement",
+     "verdict": "PASS",
+     "what": "the screw must reach 1.5 d = 3.000 mm of thread (a RULE) and must not bottom in the 6.000 mm pilot (a MEASUREMENT)",
+     "measured": {
+      "screw_length_mm": 10.0,
+      "grip_mm": 6.2728,
+      "engaged_mm": 3.7272,
+      "min_rule_mm": 3.0,
+      "pilot_depth_mm": 6.0,
+      "window_mm": [
+       9.2728,
+       12.2728
+      ]
+     },
+     "settled_by": "a sourced length inside the window, or a re-measurement of grip / pilot depth"
+    },
+    {
+     "check": "protrusion",
+     "verdict": "PASS",
+     "what": "the thread must stop inside the pilot, not emerge from the far face",
+     "measured": {
+      "engaged_mm": 3.7272,
+      "pilot_depth_mm": 6.0,
+      "overshoot_mm": 0.0,
+      "chain_span_mm": [
+       34.0142,
+       69.5
+      ]
+     },
+     "settled_by": "a section view of that part, or a caliper on the boss depth"
+    },
+    {
+     "check": "driver access",
+     "verdict": "PASS",
+     "what": "a 1.5 mm across-flats hex key (ISO 4762) must reach the head; every bore above it must be at least that wide",
+     "measured": {
+      "key_af_mm": 1.5,
+      "bores_wide_enough": 4,
+      "bores_too_narrow": []
+     },
+     "settled_by": "cecad.install.driver_clearance() on the built solid, which sweeps the volume the key needs to turn \u2014 this check only compares diameters"
+    }
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "size": "M2",
+   "length_mm": 10.0,
+   "meshes": [
+    "hip_l",
+    "xl330"
+   ],
+   "head_seat": "hip_l/ambiguous",
+   "pilot": "xl330 \u00d81.6",
+   "checks": [
+    {
+     "check": "head seats",
+     "verdict": "PASS",
+     "what": "the head lands on the outer FACE (no counterbore) and stands 2.000 mm proud",
+     "measured": {
+      "seat_class": "ambiguous",
+      "head_height_mm": 2.0
+     },
+     "settled_by": "a photograph of that face on a real unit: a head that should be flush and is not means the counterbore was not detected"
+    },
+    {
+     "check": "shank clears",
+     "verdict": "PASS",
+     "what": "every clearance/ambiguous hole on the run must be wider than the shank (\u00d82.00 mm)",
+     "measured": {
+      "holes_checked": 3,
+      "too_tight": []
+     },
+     "settled_by": "a hole narrower than the screw is either a pilot the classifier mis-sized or a different screw size on this line"
+    },
+    {
+     "check": "engagement",
+     "verdict": "PASS",
+     "what": "the screw must reach 1.5 d = 3.000 mm of thread (a RULE) and must not bottom in the 6.000 mm pilot (a MEASUREMENT)",
+     "measured": {
+      "screw_length_mm": 10.0,
+      "grip_mm": 6.4561,
+      "engaged_mm": 3.5439,
+      "min_rule_mm": 3.0,
+      "pilot_depth_mm": 6.0,
+      "window_mm": [
+       9.4561,
+       12.4561
+      ]
+     },
+     "settled_by": "a sourced length inside the window, or a re-measurement of grip / pilot depth"
+    },
+    {
+     "check": "protrusion",
+     "verdict": "PASS",
+     "what": "the thread must stop inside the pilot, not emerge from the far face",
+     "measured": {
+      "engaged_mm": 3.5439,
+      "pilot_depth_mm": 6.0,
+      "overshoot_mm": 0.0,
+      "chain_span_mm": [
+       34.0439,
+       69.5
+      ]
+     },
+     "settled_by": "a section view of that part, or a caliper on the boss depth"
+    },
+    {
+     "check": "driver access",
+     "verdict": "PASS",
+     "what": "a 1.5 mm across-flats hex key (ISO 4762) must reach the head; every bore above it must be at least that wide",
+     "measured": {
+      "key_af_mm": 1.5,
+      "bores_wide_enough": 3,
+      "bores_too_narrow": []
+     },
+     "settled_by": "cecad.install.driver_clearance() on the built solid, which sweeps the volume the key needs to turn \u2014 this check only compares diameters"
+    }
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "size": "M2",
+   "length_mm": 10.0,
+   "meshes": [
+    "left_shell",
+    "right_shell"
+   ],
+   "head_seat": "right_shell/counterbore",
+   "pilot": "right_shell \u00d81.6",
+   "checks": [
+    {
+     "check": "head passes and seats",
+     "verdict": "CANNOT DETERMINE",
+     "what": "the head (dk max 3.800 mm) must pass down and seat in a \u00d83.788 mm bore 26.237 mm deep",
+     "measured": {
+      "bore_d_mm": 3.788,
+      "dk_max_mm": 3.8,
+      "clearance_mm": -0.012,
+      "bore_depth_mm": 26.237,
+      "dk_min_mm": 3.62,
+      "clearance_at_dk_min_mm": 0.168,
+      "mesh_fit_residual_mm": 0.0316,
+      "bore_cover_deg": 355.8,
+      "deficit_vs_residual": "deficit 0.0120 mm is INSIDE the patch's own 0.0316 mm fit residual \u2014 the instrument cannot separate them"
+     },
+     "settled_by": "A caliper on the printed bore. THE REFERENCE WORKS, so a negative clearance is first a modelling error: compare it against the mesh's own fit residual \u2014 where the residual is larger than the deficit the measurement cannot tell them apart and this is CANNOT DETERMINE, not a design flaw."
+    },
+    {
+     "check": "shank clears",
+     "verdict": "PASS",
+     "what": "every clearance/ambiguous hole on the run must be wider than the shank (\u00d82.00 mm)",
+     "measured": {
+      "holes_checked": 1,
+      "too_tight": []
+     },
+     "settled_by": "a hole narrower than the screw is either a pilot the classifier mis-sized or a different screw size on this line"
+    },
+    {
+     "check": "engagement",
+     "verdict": "PASS",
+     "what": "the screw must reach 1.5 d = 3.000 mm of thread (a RULE) and must not bottom in the 4.700 mm pilot (a MEASUREMENT)",
+     "measured": {
+      "screw_length_mm": 10.0,
+      "grip_mm": 5.9254,
+      "engaged_mm": 4.0746,
+      "min_rule_mm": 3.0,
+      "pilot_depth_mm": 4.7,
+      "window_mm": [
+       8.9254,
+       10.6254
+      ]
+     },
+     "settled_by": "a sourced length inside the window, or a re-measurement of grip / pilot depth"
+    },
+    {
+     "check": "protrusion",
+     "verdict": "PASS",
+     "what": "the thread must stop inside the pilot, not emerge from the far face",
+     "measured": {
+      "engaged_mm": 4.0746,
+      "pilot_depth_mm": 4.7,
+      "overshoot_mm": 0.0,
+      "chain_span_mm": [
+       -5.5,
+       31.3624
+      ]
+     },
+     "settled_by": "a section view of that part, or a caliper on the boss depth"
+    },
+    {
+     "check": "driver access",
+     "verdict": "PASS",
+     "what": "a 1.5 mm across-flats hex key (ISO 4762) must reach the head; every bore above it must be at least that wide",
+     "measured": {
+      "key_af_mm": 1.5,
+      "bores_wide_enough": 3,
+      "bores_too_narrow": []
+     },
+     "settled_by": "cecad.install.driver_clearance() on the built solid, which sweeps the volume the key needs to turn \u2014 this check only compares diameters"
+    }
+   ],
+   "verdict": "CANNOT DETERMINE"
+  },
+  {
+   "size": "M2",
+   "length_mm": 8.0,
+   "meshes": [
+    "left_shell",
+    "right_shell",
+    "xl330"
+   ],
+   "head_seat": "right_shell/clearance",
+   "pilot": "xl330 \u00d81.6",
+   "checks": [
+    {
+     "check": "head seats",
+     "verdict": "PASS",
+     "what": "the head lands on the outer FACE (no counterbore) and stands 2.000 mm proud",
+     "measured": {
+      "seat_class": "clearance",
+      "head_height_mm": 2.0
+     },
+     "settled_by": "a photograph of that face on a real unit: a head that should be flush and is not means the counterbore was not detected"
+    },
+    {
+     "check": "shank clears",
+     "verdict": "PASS",
+     "what": "every clearance/ambiguous hole on the run must be wider than the shank (\u00d82.00 mm)",
+     "measured": {
+      "holes_checked": 2,
+      "too_tight": []
+     },
+     "settled_by": "a hole narrower than the screw is either a pilot the classifier mis-sized or a different screw size on this line"
+    },
+    {
+     "check": "engagement",
+     "verdict": "PASS",
+     "what": "the screw must reach 1.5 d = 3.000 mm of thread (a RULE) and must not bottom in the 6.000 mm pilot (a MEASUREMENT)",
+     "measured": {
+      "screw_length_mm": 8.0,
+      "grip_mm": 3.9,
+      "engaged_mm": 4.1,
+      "min_rule_mm": 3.0,
+      "pilot_depth_mm": 6.0,
+      "window_mm": [
+       6.9,
+       9.9
+      ]
+     },
+     "settled_by": "a sourced length inside the window, or a re-measurement of grip / pilot depth"
+    },
+    {
+     "check": "protrusion",
+     "verdict": "PASS",
+     "what": "the thread must stop inside the pilot, not emerge from the far face",
+     "measured": {
+      "engaged_mm": 4.1,
+      "pilot_depth_mm": 6.0,
+      "overshoot_mm": 0.0,
+      "chain_span_mm": [
+       -18.4,
+       17.9
+      ]
+     },
+     "settled_by": "a section view of that part, or a caliper on the boss depth"
+    },
+    {
+     "check": "driver access",
+     "verdict": "PASS",
+     "what": "a 1.5 mm across-flats hex key (ISO 4762) must reach the head; every bore above it must be at least that wide",
+     "measured": {
+      "key_af_mm": 1.5,
+      "bores_wide_enough": 2,
+      "bores_too_narrow": []
+     },
+     "settled_by": "cecad.install.driver_clearance() on the built solid, which sweeps the volume the key needs to turn \u2014 this check only compares diameters"
+    }
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "size": "M2",
+   "length_mm": 8.0,
+   "meshes": [
+    "left_shell",
+    "right_shell",
+    "xl330"
+   ],
+   "head_seat": "right_shell/clearance",
+   "pilot": "xl330 \u00d81.6",
+   "checks": [
+    {
+     "check": "head seats",
+     "verdict": "PASS",
+     "what": "the head lands on the outer FACE (no counterbore) and stands 2.000 mm proud",
+     "measured": {
+      "seat_class": "clearance",
+      "head_height_mm": 2.0
+     },
+     "settled_by": "a photograph of that face on a real unit: a head that should be flush and is not means the counterbore was not detected"
+    },
+    {
+     "check": "shank clears",
+     "verdict": "PASS",
+     "what": "every clearance/ambiguous hole on the run must be wider than the shank (\u00d82.00 mm)",
+     "measured": {
+      "holes_checked": 2,
+      "too_tight": []
+     },
+     "settled_by": "a hole narrower than the screw is either a pilot the classifier mis-sized or a different screw size on this line"
+    },
+    {
+     "check": "engagement",
+     "verdict": "PASS",
+     "what": "the screw must reach 1.5 d = 3.000 mm of thread (a RULE) and must not bottom in the 6.000 mm pilot (a MEASUREMENT)",
+     "measured": {
+      "screw_length_mm": 8.0,
+      "grip_mm": 3.9,
+      "engaged_mm": 4.1,
+      "min_rule_mm": 3.0,
+      "pilot_depth_mm": 6.0,
+      "window_mm": [
+       6.9,
+       9.9
+      ]
+     },
+     "settled_by": "a sourced length inside the window, or a re-measurement of grip / pilot depth"
+    },
+    {
+     "check": "protrusion",
+     "verdict": "PASS",
+     "what": "the thread must stop inside the pilot, not emerge from the far face",
+     "measured": {
+      "engaged_mm": 4.1,
+      "pilot_depth_mm": 6.0,
+      "overshoot_mm": 0.0,
+      "chain_span_mm": [
+       -18.4,
+       17.9
+      ]
+     },
+     "settled_by": "a section view of that part, or a caliper on the boss depth"
+    },
+    {
+     "check": "driver access",
+     "verdict": "PASS",
+     "what": "a 1.5 mm across-flats hex key (ISO 4762) must reach the head; every bore above it must be at least that wide",
+     "measured": {
+      "key_af_mm": 1.5,
+      "bores_wide_enough": 2,
+      "bores_too_narrow": []
+     },
+     "settled_by": "cecad.install.driver_clearance() on the built solid, which sweeps the volume the key needs to turn \u2014 this check only compares diameters"
+    }
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "size": "M2",
+   "length_mm": 8.0,
+   "meshes": [
+    "left_shell",
+    "right_shell",
+    "xl330"
+   ],
+   "head_seat": "right_shell/clearance",
+   "pilot": "xl330 \u00d81.6",
+   "checks": [
+    {
+     "check": "head seats",
+     "verdict": "PASS",
+     "what": "the head lands on the outer FACE (no counterbore) and stands 2.000 mm proud",
+     "measured": {
+      "seat_class": "clearance",
+      "head_height_mm": 2.0
+     },
+     "settled_by": "a photograph of that face on a real unit: a head that should be flush and is not means the counterbore was not detected"
+    },
+    {
+     "check": "shank clears",
+     "verdict": "PASS",
+     "what": "every clearance/ambiguous hole on the run must be wider than the shank (\u00d82.00 mm)",
+     "measured": {
+      "holes_checked": 2,
+      "too_tight": []
+     },
+     "settled_by": "a hole narrower than the screw is either a pilot the classifier mis-sized or a different screw size on this line"
+    },
+    {
+     "check": "engagement",
+     "verdict": "PASS",
+     "what": "the screw must reach 1.5 d = 3.000 mm of thread (a RULE) and must not bottom in the 6.000 mm pilot (a MEASUREMENT)",
+     "measured": {
+      "screw_length_mm": 8.0,
+      "grip_mm": 3.9,
+      "engaged_mm": 4.1,
+      "min_rule_mm": 3.0,
+      "pilot_depth_mm": 6.0,
+      "window_mm": [
+       6.9,
+       9.9
+      ]
+     },
+     "settled_by": "a sourced length inside the window, or a re-measurement of grip / pilot depth"
+    },
+    {
+     "check": "protrusion",
+     "verdict": "PASS",
+     "what": "the thread must stop inside the pilot, not emerge from the far face",
+     "measured": {
+      "engaged_mm": 4.1,
+      "pilot_depth_mm": 6.0,
+      "overshoot_mm": 0.0,
+      "chain_span_mm": [
+       -18.4,
+       17.9
+      ]
+     },
+     "settled_by": "a section view of that part, or a caliper on the boss depth"
+    },
+    {
+     "check": "driver access",
+     "verdict": "PASS",
+     "what": "a 1.5 mm across-flats hex key (ISO 4762) must reach the head; every bore above it must be at least that wide",
+     "measured": {
+      "key_af_mm": 1.5,
+      "bores_wide_enough": 2,
+      "bores_too_narrow": []
+     },
+     "settled_by": "cecad.install.driver_clearance() on the built solid, which sweeps the volume the key needs to turn \u2014 this check only compares diameters"
+    }
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "size": "M2",
+   "length_mm": 8.0,
+   "meshes": [
+    "left_shell",
+    "right_shell",
+    "xl330"
+   ],
+   "head_seat": "right_shell/clearance",
+   "pilot": "xl330 \u00d81.6",
+   "checks": [
+    {
+     "check": "head seats",
+     "verdict": "PASS",
+     "what": "the head lands on the outer FACE (no counterbore) and stands 2.000 mm proud",
+     "measured": {
+      "seat_class": "clearance",
+      "head_height_mm": 2.0
+     },
+     "settled_by": "a photograph of that face on a real unit: a head that should be flush and is not means the counterbore was not detected"
+    },
+    {
+     "check": "shank clears",
+     "verdict": "PASS",
+     "what": "every clearance/ambiguous hole on the run must be wider than the shank (\u00d82.00 mm)",
+     "measured": {
+      "holes_checked": 2,
+      "too_tight": []
+     },
+     "settled_by": "a hole narrower than the screw is either a pilot the classifier mis-sized or a different screw size on this line"
+    },
+    {
+     "check": "engagement",
+     "verdict": "PASS",
+     "what": "the screw must reach 1.5 d = 3.000 mm of thread (a RULE) and must not bottom in the 6.000 mm pilot (a MEASUREMENT)",
+     "measured": {
+      "screw_length_mm": 8.0,
+      "grip_mm": 3.9,
+      "engaged_mm": 4.1,
+      "min_rule_mm": 3.0,
+      "pilot_depth_mm": 6.0,
+      "window_mm": [
+       6.9,
+       9.9
+      ]
+     },
+     "settled_by": "a sourced length inside the window, or a re-measurement of grip / pilot depth"
+    },
+    {
+     "check": "protrusion",
+     "verdict": "PASS",
+     "what": "the thread must stop inside the pilot, not emerge from the far face",
+     "measured": {
+      "engaged_mm": 4.1,
+      "pilot_depth_mm": 6.0,
+      "overshoot_mm": 0.0,
+      "chain_span_mm": [
+       -18.4,
+       17.9
+      ]
+     },
+     "settled_by": "a section view of that part, or a caliper on the boss depth"
+    },
+    {
+     "check": "driver access",
+     "verdict": "PASS",
+     "what": "a 1.5 mm across-flats hex key (ISO 4762) must reach the head; every bore above it must be at least that wide",
+     "measured": {
+      "key_af_mm": 1.5,
+      "bores_wide_enough": 2,
+      "bores_too_narrow": []
+     },
+     "settled_by": "cecad.install.driver_clearance() on the built solid, which sweeps the volume the key needs to turn \u2014 this check only compares diameters"
+    }
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "size": "M2",
+   "length_mm": 6.0,
+   "meshes": [
+    "xl330",
+    "yaw2roll"
+   ],
+   "head_seat": "yaw2roll/counterbore",
+   "pilot": "xl330 \u00d81.6",
+   "checks": [
+    {
+     "check": "head passes and seats",
+     "verdict": "PASS",
+     "what": "the head (dk max 3.800 mm) must pass down and seat in a \u00d84.400 mm bore 2.000 mm deep",
+     "measured": {
+      "bore_d_mm": 4.4,
+      "dk_max_mm": 3.8,
+      "clearance_mm": 0.6,
+      "bore_depth_mm": 2.0,
+      "dk_min_mm": 3.62,
+      "clearance_at_dk_min_mm": 0.78,
+      "mesh_fit_residual_mm": 0.0,
+      "bore_cover_deg": 355.0,
+      "deficit_vs_residual": "no deficit"
+     },
+     "settled_by": "A caliper on the printed bore. THE REFERENCE WORKS, so a negative clearance is first a modelling error: compare it against the mesh's own fit residual \u2014 where the residual is larger than the deficit the measurement cannot tell them apart and this is CANNOT DETERMINE, not a design flaw."
+    },
+    {
+     "check": "shank clears",
+     "verdict": "PASS",
+     "what": "every clearance/ambiguous hole on the run must be wider than the shank (\u00d82.00 mm)",
+     "measured": {
+      "holes_checked": 1,
+      "too_tight": []
+     },
+     "settled_by": "a hole narrower than the screw is either a pilot the classifier mis-sized or a different screw size on this line"
+    },
+    {
+     "check": "engagement",
+     "verdict": "PASS",
+     "what": "the screw must reach 1.5 d = 3.000 mm of thread (a RULE) and must not bottom in the 6.000 mm pilot (a MEASUREMENT)",
+     "measured": {
+      "screw_length_mm": 6.0,
+      "grip_mm": 3.0,
+      "engaged_mm": 3.0,
+      "min_rule_mm": 3.0,
+      "pilot_depth_mm": 6.0,
+      "window_mm": [
+       6.0,
+       9.0
+      ]
+     },
+     "settled_by": "a sourced length inside the window, or a re-measurement of grip / pilot depth"
+    },
+    {
+     "check": "protrusion",
+     "verdict": "PASS",
+     "what": "the thread must stop inside the pilot, not emerge from the far face",
+     "measured": {
+      "engaged_mm": 3.0,
+      "pilot_depth_mm": 6.0,
+      "overshoot_mm": 0.0,
+      "chain_span_mm": [
+       112.0,
+       146.0
+      ]
+     },
+     "settled_by": "a section view of that part, or a caliper on the boss depth"
+    },
+    {
+     "check": "driver access",
+     "verdict": "PASS",
+     "what": "a 1.5 mm across-flats hex key (ISO 4762) must reach the head; every bore above it must be at least that wide",
+     "measured": {
+      "key_af_mm": 1.5,
+      "bores_wide_enough": 2,
+      "bores_too_narrow": []
+     },
+     "settled_by": "cecad.install.driver_clearance() on the built solid, which sweeps the volume the key needs to turn \u2014 this check only compares diameters"
+    }
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "size": "M2",
+   "length_mm": 6.0,
+   "meshes": [
+    "xl330",
+    "yaw2roll"
+   ],
+   "head_seat": "yaw2roll/counterbore",
+   "pilot": "xl330 \u00d81.6",
+   "checks": [
+    {
+     "check": "head passes and seats",
+     "verdict": "PASS",
+     "what": "the head (dk max 3.800 mm) must pass down and seat in a \u00d84.400 mm bore 2.000 mm deep",
+     "measured": {
+      "bore_d_mm": 4.4,
+      "dk_max_mm": 3.8,
+      "clearance_mm": 0.6,
+      "bore_depth_mm": 2.0,
+      "dk_min_mm": 3.62,
+      "clearance_at_dk_min_mm": 0.78,
+      "mesh_fit_residual_mm": 0.0,
+      "bore_cover_deg": 355.0,
+      "deficit_vs_residual": "no deficit"
+     },
+     "settled_by": "A caliper on the printed bore. THE REFERENCE WORKS, so a negative clearance is first a modelling error: compare it against the mesh's own fit residual \u2014 where the residual is larger than the deficit the measurement cannot tell them apart and this is CANNOT DETERMINE, not a design flaw."
+    },
+    {
+     "check": "shank clears",
+     "verdict": "PASS",
+     "what": "every clearance/ambiguous hole on the run must be wider than the shank (\u00d82.00 mm)",
+     "measured": {
+      "holes_checked": 1,
+      "too_tight": []
+     },
+     "settled_by": "a hole narrower than the screw is either a pilot the classifier mis-sized or a different screw size on this line"
+    },
+    {
+     "check": "engagement",
+     "verdict": "PASS",
+     "what": "the screw must reach 1.5 d = 3.000 mm of thread (a RULE) and must not bottom in the 6.000 mm pilot (a MEASUREMENT)",
+     "measured": {
+      "screw_length_mm": 6.0,
+      "grip_mm": 3.0,
+      "engaged_mm": 3.0,
+      "min_rule_mm": 3.0,
+      "pilot_depth_mm": 6.0,
+      "window_mm": [
+       6.0,
+       9.0
+      ]
+     },
+     "settled_by": "a sourced length inside the window, or a re-measurement of grip / pilot depth"
+    },
+    {
+     "check": "protrusion",
+     "verdict": "PASS",
+     "what": "the thread must stop inside the pilot, not emerge from the far face",
+     "measured": {
+      "engaged_mm": 3.0,
+      "pilot_depth_mm": 6.0,
+      "overshoot_mm": 0.0,
+      "chain_span_mm": [
+       112.0,
+       146.0
+      ]
+     },
+     "settled_by": "a section view of that part, or a caliper on the boss depth"
+    },
+    {
+     "check": "driver access",
+     "verdict": "PASS",
+     "what": "a 1.5 mm across-flats hex key (ISO 4762) must reach the head; every bore above it must be at least that wide",
+     "measured": {
+      "key_af_mm": 1.5,
+      "bores_wide_enough": 2,
+      "bores_too_narrow": []
+     },
+     "settled_by": "cecad.install.driver_clearance() on the built solid, which sweeps the volume the key needs to turn \u2014 this check only compares diameters"
+    }
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "size": "M2",
+   "length_mm": 6.0,
+   "meshes": [
+    "xl330",
+    "yaw2roll"
+   ],
+   "head_seat": "yaw2roll/counterbore",
+   "pilot": "xl330 \u00d81.6",
+   "checks": [
+    {
+     "check": "head passes and seats",
+     "verdict": "PASS",
+     "what": "the head (dk max 3.800 mm) must pass down and seat in a \u00d84.400 mm bore 2.000 mm deep",
+     "measured": {
+      "bore_d_mm": 4.4,
+      "dk_max_mm": 3.8,
+      "clearance_mm": 0.6,
+      "bore_depth_mm": 2.0,
+      "dk_min_mm": 3.62,
+      "clearance_at_dk_min_mm": 0.78,
+      "mesh_fit_residual_mm": 0.0,
+      "bore_cover_deg": 355.0,
+      "deficit_vs_residual": "no deficit"
+     },
+     "settled_by": "A caliper on the printed bore. THE REFERENCE WORKS, so a negative clearance is first a modelling error: compare it against the mesh's own fit residual \u2014 where the residual is larger than the deficit the measurement cannot tell them apart and this is CANNOT DETERMINE, not a design flaw."
+    },
+    {
+     "check": "shank clears",
+     "verdict": "PASS",
+     "what": "every clearance/ambiguous hole on the run must be wider than the shank (\u00d82.00 mm)",
+     "measured": {
+      "holes_checked": 1,
+      "too_tight": []
+     },
+     "settled_by": "a hole narrower than the screw is either a pilot the classifier mis-sized or a different screw size on this line"
+    },
+    {
+     "check": "engagement",
+     "verdict": "PASS",
+     "what": "the screw must reach 1.5 d = 3.000 mm of thread (a RULE) and must not bottom in the 6.000 mm pilot (a MEASUREMENT)",
+     "measured": {
+      "screw_length_mm": 6.0,
+      "grip_mm": 3.0,
+      "engaged_mm": 3.0,
+      "min_rule_mm": 3.0,
+      "pilot_depth_mm": 6.0,
+      "window_mm": [
+       6.0,
+       9.0
+      ]
+     },
+     "settled_by": "a sourced length inside the window, or a re-measurement of grip / pilot depth"
+    },
+    {
+     "check": "protrusion",
+     "verdict": "PASS",
+     "what": "the thread must stop inside the pilot, not emerge from the far face",
+     "measured": {
+      "engaged_mm": 3.0,
+      "pilot_depth_mm": 6.0,
+      "overshoot_mm": 0.0,
+      "chain_span_mm": [
+       112.0,
+       146.0
+      ]
+     },
+     "settled_by": "a section view of that part, or a caliper on the boss depth"
+    },
+    {
+     "check": "driver access",
+     "verdict": "PASS",
+     "what": "a 1.5 mm across-flats hex key (ISO 4762) must reach the head; every bore above it must be at least that wide",
+     "measured": {
+      "key_af_mm": 1.5,
+      "bores_wide_enough": 2,
+      "bores_too_narrow": []
+     },
+     "settled_by": "cecad.install.driver_clearance() on the built solid, which sweeps the volume the key needs to turn \u2014 this check only compares diameters"
+    }
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "size": "M2",
+   "length_mm": 6.0,
+   "meshes": [
+    "xl330",
+    "yaw2roll"
+   ],
+   "head_seat": "yaw2roll/counterbore",
+   "pilot": "xl330 \u00d81.6",
+   "checks": [
+    {
+     "check": "head passes and seats",
+     "verdict": "PASS",
+     "what": "the head (dk max 3.800 mm) must pass down and seat in a \u00d84.400 mm bore 2.000 mm deep",
+     "measured": {
+      "bore_d_mm": 4.4,
+      "dk_max_mm": 3.8,
+      "clearance_mm": 0.6,
+      "bore_depth_mm": 2.0,
+      "dk_min_mm": 3.62,
+      "clearance_at_dk_min_mm": 0.78,
+      "mesh_fit_residual_mm": 0.0,
+      "bore_cover_deg": 355.0,
+      "deficit_vs_residual": "no deficit"
+     },
+     "settled_by": "A caliper on the printed bore. THE REFERENCE WORKS, so a negative clearance is first a modelling error: compare it against the mesh's own fit residual \u2014 where the residual is larger than the deficit the measurement cannot tell them apart and this is CANNOT DETERMINE, not a design flaw."
+    },
+    {
+     "check": "shank clears",
+     "verdict": "PASS",
+     "what": "every clearance/ambiguous hole on the run must be wider than the shank (\u00d82.00 mm)",
+     "measured": {
+      "holes_checked": 1,
+      "too_tight": []
+     },
+     "settled_by": "a hole narrower than the screw is either a pilot the classifier mis-sized or a different screw size on this line"
+    },
+    {
+     "check": "engagement",
+     "verdict": "PASS",
+     "what": "the screw must reach 1.5 d = 3.000 mm of thread (a RULE) and must not bottom in the 6.000 mm pilot (a MEASUREMENT)",
+     "measured": {
+      "screw_length_mm": 6.0,
+      "grip_mm": 3.0,
+      "engaged_mm": 3.0,
+      "min_rule_mm": 3.0,
+      "pilot_depth_mm": 6.0,
+      "window_mm": [
+       6.0,
+       9.0
+      ]
+     },
+     "settled_by": "a sourced length inside the window, or a re-measurement of grip / pilot depth"
+    },
+    {
+     "check": "protrusion",
+     "verdict": "PASS",
+     "what": "the thread must stop inside the pilot, not emerge from the far face",
+     "measured": {
+      "engaged_mm": 3.0,
+      "pilot_depth_mm": 6.0,
+      "overshoot_mm": 0.0,
+      "chain_span_mm": [
+       112.0,
+       146.0
+      ]
+     },
+     "settled_by": "a section view of that part, or a caliper on the boss depth"
+    },
+    {
+     "check": "driver access",
+     "verdict": "PASS",
+     "what": "a 1.5 mm across-flats hex key (ISO 4762) must reach the head; every bore above it must be at least that wide",
+     "measured": {
+      "key_af_mm": 1.5,
+      "bores_wide_enough": 2,
+      "bores_too_narrow": []
+     },
+     "settled_by": "cecad.install.driver_clearance() on the built solid, which sweeps the volume the key needs to turn \u2014 this check only compares diameters"
+    }
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "size": "M2",
+   "length_mm": 6.0,
+   "meshes": [
+    "xl330",
+    "yaw2roll"
+   ],
+   "head_seat": "yaw2roll/counterbore",
+   "pilot": "xl330 \u00d81.6",
+   "checks": [
+    {
+     "check": "head passes and seats",
+     "verdict": "PASS",
+     "what": "the head (dk max 3.800 mm) must pass down and seat in a \u00d84.400 mm bore 2.000 mm deep",
+     "measured": {
+      "bore_d_mm": 4.4,
+      "dk_max_mm": 3.8,
+      "clearance_mm": 0.6,
+      "bore_depth_mm": 2.0,
+      "dk_min_mm": 3.62,
+      "clearance_at_dk_min_mm": 0.78,
+      "mesh_fit_residual_mm": 0.0,
+      "bore_cover_deg": 355.0,
+      "deficit_vs_residual": "no deficit"
+     },
+     "settled_by": "A caliper on the printed bore. THE REFERENCE WORKS, so a negative clearance is first a modelling error: compare it against the mesh's own fit residual \u2014 where the residual is larger than the deficit the measurement cannot tell them apart and this is CANNOT DETERMINE, not a design flaw."
+    },
+    {
+     "check": "shank clears",
+     "verdict": "PASS",
+     "what": "every clearance/ambiguous hole on the run must be wider than the shank (\u00d82.00 mm)",
+     "measured": {
+      "holes_checked": 1,
+      "too_tight": []
+     },
+     "settled_by": "a hole narrower than the screw is either a pilot the classifier mis-sized or a different screw size on this line"
+    },
+    {
+     "check": "engagement",
+     "verdict": "PASS",
+     "what": "the screw must reach 1.5 d = 3.000 mm of thread (a RULE) and must not bottom in the 6.000 mm pilot (a MEASUREMENT)",
+     "measured": {
+      "screw_length_mm": 6.0,
+      "grip_mm": 3.0,
+      "engaged_mm": 3.0,
+      "min_rule_mm": 3.0,
+      "pilot_depth_mm": 6.0,
+      "window_mm": [
+       6.0,
+       9.0
+      ]
+     },
+     "settled_by": "a sourced length inside the window, or a re-measurement of grip / pilot depth"
+    },
+    {
+     "check": "protrusion",
+     "verdict": "PASS",
+     "what": "the thread must stop inside the pilot, not emerge from the far face",
+     "measured": {
+      "engaged_mm": 3.0,
+      "pilot_depth_mm": 6.0,
+      "overshoot_mm": 0.0,
+      "chain_span_mm": [
+       112.0,
+       146.0
+      ]
+     },
+     "settled_by": "a section view of that part, or a caliper on the boss depth"
+    },
+    {
+     "check": "driver access",
+     "verdict": "PASS",
+     "what": "a 1.5 mm across-flats hex key (ISO 4762) must reach the head; every bore above it must be at least that wide",
+     "measured": {
+      "key_af_mm": 1.5,
+      "bores_wide_enough": 2,
+      "bores_too_narrow": []
+     },
+     "settled_by": "cecad.install.driver_clearance() on the built solid, which sweeps the volume the key needs to turn \u2014 this check only compares diameters"
+    }
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "size": "M2",
+   "length_mm": 6.0,
+   "meshes": [
+    "xl330",
+    "yaw2roll"
+   ],
+   "head_seat": "yaw2roll/counterbore",
+   "pilot": "xl330 \u00d81.6",
+   "checks": [
+    {
+     "check": "head passes and seats",
+     "verdict": "PASS",
+     "what": "the head (dk max 3.800 mm) must pass down and seat in a \u00d84.400 mm bore 2.000 mm deep",
+     "measured": {
+      "bore_d_mm": 4.4,
+      "dk_max_mm": 3.8,
+      "clearance_mm": 0.6,
+      "bore_depth_mm": 2.0,
+      "dk_min_mm": 3.62,
+      "clearance_at_dk_min_mm": 0.78,
+      "mesh_fit_residual_mm": 0.0,
+      "bore_cover_deg": 355.0,
+      "deficit_vs_residual": "no deficit"
+     },
+     "settled_by": "A caliper on the printed bore. THE REFERENCE WORKS, so a negative clearance is first a modelling error: compare it against the mesh's own fit residual \u2014 where the residual is larger than the deficit the measurement cannot tell them apart and this is CANNOT DETERMINE, not a design flaw."
+    },
+    {
+     "check": "shank clears",
+     "verdict": "PASS",
+     "what": "every clearance/ambiguous hole on the run must be wider than the shank (\u00d82.00 mm)",
+     "measured": {
+      "holes_checked": 1,
+      "too_tight": []
+     },
+     "settled_by": "a hole narrower than the screw is either a pilot the classifier mis-sized or a different screw size on this line"
+    },
+    {
+     "check": "engagement",
+     "verdict": "PASS",
+     "what": "the screw must reach 1.5 d = 3.000 mm of thread (a RULE) and must not bottom in the 6.000 mm pilot (a MEASUREMENT)",
+     "measured": {
+      "screw_length_mm": 6.0,
+      "grip_mm": 3.0,
+      "engaged_mm": 3.0,
+      "min_rule_mm": 3.0,
+      "pilot_depth_mm": 6.0,
+      "window_mm": [
+       6.0,
+       9.0
+      ]
+     },
+     "settled_by": "a sourced length inside the window, or a re-measurement of grip / pilot depth"
+    },
+    {
+     "check": "protrusion",
+     "verdict": "PASS",
+     "what": "the thread must stop inside the pilot, not emerge from the far face",
+     "measured": {
+      "engaged_mm": 3.0,
+      "pilot_depth_mm": 6.0,
+      "overshoot_mm": 0.0,
+      "chain_span_mm": [
+       112.0,
+       146.0
+      ]
+     },
+     "settled_by": "a section view of that part, or a caliper on the boss depth"
+    },
+    {
+     "check": "driver access",
+     "verdict": "PASS",
+     "what": "a 1.5 mm across-flats hex key (ISO 4762) must reach the head; every bore above it must be at least that wide",
+     "measured": {
+      "key_af_mm": 1.5,
+      "bores_wide_enough": 2,
+      "bores_too_narrow": []
+     },
+     "settled_by": "cecad.install.driver_clearance() on the built solid, which sweeps the volume the key needs to turn \u2014 this check only compares diameters"
+    }
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "size": "M2",
+   "length_mm": 6.0,
+   "meshes": [
+    "xl330",
+    "yaw2roll"
+   ],
+   "head_seat": "yaw2roll/counterbore",
+   "pilot": "xl330 \u00d81.6",
+   "checks": [
+    {
+     "check": "head passes and seats",
+     "verdict": "PASS",
+     "what": "the head (dk max 3.800 mm) must pass down and seat in a \u00d84.400 mm bore 2.000 mm deep",
+     "measured": {
+      "bore_d_mm": 4.4,
+      "dk_max_mm": 3.8,
+      "clearance_mm": 0.6,
+      "bore_depth_mm": 2.0,
+      "dk_min_mm": 3.62,
+      "clearance_at_dk_min_mm": 0.78,
+      "mesh_fit_residual_mm": 0.0,
+      "bore_cover_deg": 355.0,
+      "deficit_vs_residual": "no deficit"
+     },
+     "settled_by": "A caliper on the printed bore. THE REFERENCE WORKS, so a negative clearance is first a modelling error: compare it against the mesh's own fit residual \u2014 where the residual is larger than the deficit the measurement cannot tell them apart and this is CANNOT DETERMINE, not a design flaw."
+    },
+    {
+     "check": "shank clears",
+     "verdict": "PASS",
+     "what": "every clearance/ambiguous hole on the run must be wider than the shank (\u00d82.00 mm)",
+     "measured": {
+      "holes_checked": 1,
+      "too_tight": []
+     },
+     "settled_by": "a hole narrower than the screw is either a pilot the classifier mis-sized or a different screw size on this line"
+    },
+    {
+     "check": "engagement",
+     "verdict": "PASS",
+     "what": "the screw must reach 1.5 d = 3.000 mm of thread (a RULE) and must not bottom in the 6.000 mm pilot (a MEASUREMENT)",
+     "measured": {
+      "screw_length_mm": 6.0,
+      "grip_mm": 3.0,
+      "engaged_mm": 3.0,
+      "min_rule_mm": 3.0,
+      "pilot_depth_mm": 6.0,
+      "window_mm": [
+       6.0,
+       9.0
+      ]
+     },
+     "settled_by": "a sourced length inside the window, or a re-measurement of grip / pilot depth"
+    },
+    {
+     "check": "protrusion",
+     "verdict": "PASS",
+     "what": "the thread must stop inside the pilot, not emerge from the far face",
+     "measured": {
+      "engaged_mm": 3.0,
+      "pilot_depth_mm": 6.0,
+      "overshoot_mm": 0.0,
+      "chain_span_mm": [
+       112.0,
+       146.0
+      ]
+     },
+     "settled_by": "a section view of that part, or a caliper on the boss depth"
+    },
+    {
+     "check": "driver access",
+     "verdict": "PASS",
+     "what": "a 1.5 mm across-flats hex key (ISO 4762) must reach the head; every bore above it must be at least that wide",
+     "measured": {
+      "key_af_mm": 1.5,
+      "bores_wide_enough": 2,
+      "bores_too_narrow": []
+     },
+     "settled_by": "cecad.install.driver_clearance() on the built solid, which sweeps the volume the key needs to turn \u2014 this check only compares diameters"
+    }
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "size": "M2",
+   "length_mm": 6.0,
+   "meshes": [
+    "xl330",
+    "yaw2roll"
+   ],
+   "head_seat": "yaw2roll/counterbore",
+   "pilot": "xl330 \u00d81.6",
+   "checks": [
+    {
+     "check": "head passes and seats",
+     "verdict": "PASS",
+     "what": "the head (dk max 3.800 mm) must pass down and seat in a \u00d84.400 mm bore 2.000 mm deep",
+     "measured": {
+      "bore_d_mm": 4.4,
+      "dk_max_mm": 3.8,
+      "clearance_mm": 0.6,
+      "bore_depth_mm": 2.0,
+      "dk_min_mm": 3.62,
+      "clearance_at_dk_min_mm": 0.78,
+      "mesh_fit_residual_mm": 0.0,
+      "bore_cover_deg": 355.0,
+      "deficit_vs_residual": "no deficit"
+     },
+     "settled_by": "A caliper on the printed bore. THE REFERENCE WORKS, so a negative clearance is first a modelling error: compare it against the mesh's own fit residual \u2014 where the residual is larger than the deficit the measurement cannot tell them apart and this is CANNOT DETERMINE, not a design flaw."
+    },
+    {
+     "check": "shank clears",
+     "verdict": "PASS",
+     "what": "every clearance/ambiguous hole on the run must be wider than the shank (\u00d82.00 mm)",
+     "measured": {
+      "holes_checked": 1,
+      "too_tight": []
+     },
+     "settled_by": "a hole narrower than the screw is either a pilot the classifier mis-sized or a different screw size on this line"
+    },
+    {
+     "check": "engagement",
+     "verdict": "PASS",
+     "what": "the screw must reach 1.5 d = 3.000 mm of thread (a RULE) and must not bottom in the 6.000 mm pilot (a MEASUREMENT)",
+     "measured": {
+      "screw_length_mm": 6.0,
+      "grip_mm": 3.0,
+      "engaged_mm": 3.0,
+      "min_rule_mm": 3.0,
+      "pilot_depth_mm": 6.0,
+      "window_mm": [
+       6.0,
+       9.0
+      ]
+     },
+     "settled_by": "a sourced length inside the window, or a re-measurement of grip / pilot depth"
+    },
+    {
+     "check": "protrusion",
+     "verdict": "PASS",
+     "what": "the thread must stop inside the pilot, not emerge from the far face",
+     "measured": {
+      "engaged_mm": 3.0,
+      "pilot_depth_mm": 6.0,
+      "overshoot_mm": 0.0,
+      "chain_span_mm": [
+       112.0,
+       146.0
+      ]
+     },
+     "settled_by": "a section view of that part, or a caliper on the boss depth"
+    },
+    {
+     "check": "driver access",
+     "verdict": "PASS",
+     "what": "a 1.5 mm across-flats hex key (ISO 4762) must reach the head; every bore above it must be at least that wide",
+     "measured": {
+      "key_af_mm": 1.5,
+      "bores_wide_enough": 2,
+      "bores_too_narrow": []
+     },
+     "settled_by": "cecad.install.driver_clearance() on the built solid, which sweeps the volume the key needs to turn \u2014 this check only compares diameters"
+    }
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "size": "M2",
+   "length_mm": 12.0,
+   "meshes": [
+    "hip_l",
+    "xl330"
+   ],
+   "head_seat": "hip_l/ambiguous",
+   "pilot": "xl330 \u00d81.6",
+   "checks": [
+    {
+     "check": "head seats",
+     "verdict": "PASS",
+     "what": "the head lands on the outer FACE (no counterbore) and stands 2.000 mm proud",
+     "measured": {
+      "seat_class": "ambiguous",
+      "head_height_mm": 2.0
+     },
+     "settled_by": "a photograph of that face on a real unit: a head that should be flush and is not means the counterbore was not detected"
+    },
+    {
+     "check": "shank clears",
+     "verdict": "PASS",
+     "what": "every clearance/ambiguous hole on the run must be wider than the shank (\u00d82.00 mm)",
+     "measured": {
+      "holes_checked": 2,
+      "too_tight": []
+     },
+     "settled_by": "a hole narrower than the screw is either a pilot the classifier mis-sized or a different screw size on this line"
+    },
+    {
+     "check": "engagement",
+     "verdict": "PASS",
+     "what": "the screw must reach 1.5 d = 3.000 mm of thread (a RULE) and must not bottom in the 6.000 mm pilot (a MEASUREMENT)",
+     "measured": {
+      "screw_length_mm": 12.0,
+      "grip_mm": 8.346,
+      "engaged_mm": 3.654,
+      "min_rule_mm": 3.0,
+      "pilot_depth_mm": 6.0,
+      "window_mm": [
+       11.346,
+       14.346
+      ]
+     },
+     "settled_by": "a sourced length inside the window, or a re-measurement of grip / pilot depth"
+    },
+    {
+     "check": "protrusion",
+     "verdict": "PASS",
+     "what": "the thread must stop inside the pilot, not emerge from the far face",
+     "measured": {
+      "engaged_mm": 3.654,
+      "pilot_depth_mm": 6.0,
+      "overshoot_mm": 0.0,
+      "chain_span_mm": [
+       -8.5,
+       28.846
+      ]
+     },
+     "settled_by": "a section view of that part, or a caliper on the boss depth"
+    },
+    {
+     "check": "driver access",
+     "verdict": "PASS",
+     "what": "a 1.5 mm across-flats hex key (ISO 4762) must reach the head; every bore above it must be at least that wide",
+     "measured": {
+      "key_af_mm": 1.5,
+      "bores_wide_enough": 2,
+      "bores_too_narrow": []
+     },
+     "settled_by": "cecad.install.driver_clearance() on the built solid, which sweeps the volume the key needs to turn \u2014 this check only compares diameters"
+    }
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "size": "M2",
+   "length_mm": 12.0,
+   "meshes": [
+    "hip_l",
+    "xl330"
+   ],
+   "head_seat": "hip_l/ambiguous",
+   "pilot": "xl330 \u00d81.6",
+   "checks": [
+    {
+     "check": "head seats",
+     "verdict": "PASS",
+     "what": "the head lands on the outer FACE (no counterbore) and stands 2.000 mm proud",
+     "measured": {
+      "seat_class": "ambiguous",
+      "head_height_mm": 2.0
+     },
+     "settled_by": "a photograph of that face on a real unit: a head that should be flush and is not means the counterbore was not detected"
+    },
+    {
+     "check": "shank clears",
+     "verdict": "PASS",
+     "what": "every clearance/ambiguous hole on the run must be wider than the shank (\u00d82.00 mm)",
+     "measured": {
+      "holes_checked": 2,
+      "too_tight": []
+     },
+     "settled_by": "a hole narrower than the screw is either a pilot the classifier mis-sized or a different screw size on this line"
+    },
+    {
+     "check": "engagement",
+     "verdict": "PASS",
+     "what": "the screw must reach 1.5 d = 3.000 mm of thread (a RULE) and must not bottom in the 6.000 mm pilot (a MEASUREMENT)",
+     "measured": {
+      "screw_length_mm": 12.0,
+      "grip_mm": 8.3185,
+      "engaged_mm": 3.6815,
+      "min_rule_mm": 3.0,
+      "pilot_depth_mm": 6.0,
+      "window_mm": [
+       11.3185,
+       14.3185
+      ]
+     },
+     "settled_by": "a sourced length inside the window, or a re-measurement of grip / pilot depth"
+    },
+    {
+     "check": "protrusion",
+     "verdict": "PASS",
+     "what": "the thread must stop inside the pilot, not emerge from the far face",
+     "measured": {
+      "engaged_mm": 3.6815,
+      "pilot_depth_mm": 6.0,
+      "overshoot_mm": 0.0,
+      "chain_span_mm": [
+       -8.5,
+       28.8185
+      ]
+     },
+     "settled_by": "a section view of that part, or a caliper on the boss depth"
+    },
+    {
+     "check": "driver access",
+     "verdict": "PASS",
+     "what": "a 1.5 mm across-flats hex key (ISO 4762) must reach the head; every bore above it must be at least that wide",
+     "measured": {
+      "key_af_mm": 1.5,
+      "bores_wide_enough": 2,
+      "bores_too_narrow": []
+     },
+     "settled_by": "cecad.install.driver_clearance() on the built solid, which sweeps the volume the key needs to turn \u2014 this check only compares diameters"
+    }
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "size": "M2",
+   "length_mm": 10.0,
+   "meshes": [
+    "hip_l",
+    "xl330"
+   ],
+   "head_seat": "hip_l/ambiguous",
+   "pilot": "xl330 \u00d81.6",
+   "checks": [
+    {
+     "check": "head seats",
+     "verdict": "PASS",
+     "what": "the head lands on the outer FACE (no counterbore) and stands 2.000 mm proud",
+     "measured": {
+      "seat_class": "ambiguous",
+      "head_height_mm": 2.0
+     },
+     "settled_by": "a photograph of that face on a real unit: a head that should be flush and is not means the counterbore was not detected"
+    },
+    {
+     "check": "shank clears",
+     "verdict": "PASS",
+     "what": "every clearance/ambiguous hole on the run must be wider than the shank (\u00d82.00 mm)",
+     "measured": {
+      "holes_checked": 2,
+      "too_tight": []
+     },
+     "settled_by": "a hole narrower than the screw is either a pilot the classifier mis-sized or a different screw size on this line"
+    },
+    {
+     "check": "engagement",
+     "verdict": "PASS",
+     "what": "the screw must reach 1.5 d = 3.000 mm of thread (a RULE) and must not bottom in the 6.000 mm pilot (a MEASUREMENT)",
+     "measured": {
+      "screw_length_mm": 10.0,
+      "grip_mm": 6.326,
+      "engaged_mm": 3.674,
+      "min_rule_mm": 3.0,
+      "pilot_depth_mm": 6.0,
+      "window_mm": [
+       9.326,
+       12.326
+      ]
+     },
+     "settled_by": "a sourced length inside the window, or a re-measurement of grip / pilot depth"
+    },
+    {
+     "check": "protrusion",
+     "verdict": "PASS",
+     "what": "the thread must stop inside the pilot, not emerge from the far face",
+     "measured": {
+      "engaged_mm": 3.674,
+      "pilot_depth_mm": 6.0,
+      "overshoot_mm": 0.0,
+      "chain_span_mm": [
+       -69.5,
+       -34.174
+      ]
+     },
+     "settled_by": "a section view of that part, or a caliper on the boss depth"
+    },
+    {
+     "check": "driver access",
+     "verdict": "PASS",
+     "what": "a 1.5 mm across-flats hex key (ISO 4762) must reach the head; every bore above it must be at least that wide",
+     "measured": {
+      "key_af_mm": 1.5,
+      "bores_wide_enough": 2,
+      "bores_too_narrow": []
+     },
+     "settled_by": "cecad.install.driver_clearance() on the built solid, which sweeps the volume the key needs to turn \u2014 this check only compares diameters"
+    }
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "size": "M2",
+   "length_mm": 10.0,
+   "meshes": [
+    "hip_l",
+    "xl330"
+   ],
+   "head_seat": "hip_l/ambiguous",
+   "pilot": "xl330 \u00d81.6",
+   "checks": [
+    {
+     "check": "head seats",
+     "verdict": "PASS",
+     "what": "the head lands on the outer FACE (no counterbore) and stands 2.000 mm proud",
+     "measured": {
+      "seat_class": "ambiguous",
+      "head_height_mm": 2.0
+     },
+     "settled_by": "a photograph of that face on a real unit: a head that should be flush and is not means the counterbore was not detected"
+    },
+    {
+     "check": "shank clears",
+     "verdict": "PASS",
+     "what": "every clearance/ambiguous hole on the run must be wider than the shank (\u00d82.00 mm)",
+     "measured": {
+      "holes_checked": 2,
+      "too_tight": []
+     },
+     "settled_by": "a hole narrower than the screw is either a pilot the classifier mis-sized or a different screw size on this line"
+    },
+    {
+     "check": "engagement",
+     "verdict": "PASS",
+     "what": "the screw must reach 1.5 d = 3.000 mm of thread (a RULE) and must not bottom in the 6.000 mm pilot (a MEASUREMENT)",
+     "measured": {
+      "screw_length_mm": 10.0,
+      "grip_mm": 6.3,
+      "engaged_mm": 3.7,
+      "min_rule_mm": 3.0,
+      "pilot_depth_mm": 6.0,
+      "window_mm": [
+       9.3,
+       12.3
+      ]
+     },
+     "settled_by": "a sourced length inside the window, or a re-measurement of grip / pilot depth"
+    },
+    {
+     "check": "protrusion",
+     "verdict": "PASS",
+     "what": "the thread must stop inside the pilot, not emerge from the far face",
+     "measured": {
+      "engaged_mm": 3.7,
+      "pilot_depth_mm": 6.0,
+      "overshoot_mm": 0.0,
+      "chain_span_mm": [
+       34.2,
+       69.5
+      ]
+     },
+     "settled_by": "a section view of that part, or a caliper on the boss depth"
+    },
+    {
+     "check": "driver access",
+     "verdict": "PASS",
+     "what": "a 1.5 mm across-flats hex key (ISO 4762) must reach the head; every bore above it must be at least that wide",
+     "measured": {
+      "key_af_mm": 1.5,
+      "bores_wide_enough": 2,
+      "bores_too_narrow": []
+     },
+     "settled_by": "cecad.install.driver_clearance() on the built solid, which sweeps the volume the key needs to turn \u2014 this check only compares diameters"
+    }
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "size": "M2",
+   "length_mm": 10.0,
+   "meshes": [
+    "hip_l",
+    "xl330"
+   ],
+   "head_seat": "hip_l/ambiguous",
+   "pilot": "xl330 \u00d81.6",
+   "checks": [
+    {
+     "check": "head seats",
+     "verdict": "PASS",
+     "what": "the head lands on the outer FACE (no counterbore) and stands 2.000 mm proud",
+     "measured": {
+      "seat_class": "ambiguous",
+      "head_height_mm": 2.0
+     },
+     "settled_by": "a photograph of that face on a real unit: a head that should be flush and is not means the counterbore was not detected"
+    },
+    {
+     "check": "shank clears",
+     "verdict": "PASS",
+     "what": "every clearance/ambiguous hole on the run must be wider than the shank (\u00d82.00 mm)",
+     "measured": {
+      "holes_checked": 2,
+      "too_tight": []
+     },
+     "settled_by": "a hole narrower than the screw is either a pilot the classifier mis-sized or a different screw size on this line"
+    },
+    {
+     "check": "engagement",
+     "verdict": "PASS",
+     "what": "the screw must reach 1.5 d = 3.000 mm of thread (a RULE) and must not bottom in the 6.000 mm pilot (a MEASUREMENT)",
+     "measured": {
+      "screw_length_mm": 10.0,
+      "grip_mm": 6.3,
+      "engaged_mm": 3.7,
+      "min_rule_mm": 3.0,
+      "pilot_depth_mm": 6.0,
+      "window_mm": [
+       9.3,
+       12.3
+      ]
+     },
+     "settled_by": "a sourced length inside the window, or a re-measurement of grip / pilot depth"
+    },
+    {
+     "check": "protrusion",
+     "verdict": "PASS",
+     "what": "the thread must stop inside the pilot, not emerge from the far face",
+     "measured": {
+      "engaged_mm": 3.7,
+      "pilot_depth_mm": 6.0,
+      "overshoot_mm": 0.0,
+      "chain_span_mm": [
+       -69.5,
+       -34.2
+      ]
+     },
+     "settled_by": "a section view of that part, or a caliper on the boss depth"
+    },
+    {
+     "check": "driver access",
+     "verdict": "PASS",
+     "what": "a 1.5 mm across-flats hex key (ISO 4762) must reach the head; every bore above it must be at least that wide",
+     "measured": {
+      "key_af_mm": 1.5,
+      "bores_wide_enough": 2,
+      "bores_too_narrow": []
+     },
+     "settled_by": "cecad.install.driver_clearance() on the built solid, which sweeps the volume the key needs to turn \u2014 this check only compares diameters"
+    }
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "size": "M2",
+   "length_mm": 10.0,
+   "meshes": [
+    "hip_l",
+    "xl330"
+   ],
+   "head_seat": "hip_l/ambiguous",
+   "pilot": "xl330 \u00d81.6",
+   "checks": [
+    {
+     "check": "head seats",
+     "verdict": "PASS",
+     "what": "the head lands on the outer FACE (no counterbore) and stands 2.000 mm proud",
+     "measured": {
+      "seat_class": "ambiguous",
+      "head_height_mm": 2.0
+     },
+     "settled_by": "a photograph of that face on a real unit: a head that should be flush and is not means the counterbore was not detected"
+    },
+    {
+     "check": "shank clears",
+     "verdict": "PASS",
+     "what": "every clearance/ambiguous hole on the run must be wider than the shank (\u00d82.00 mm)",
+     "measured": {
+      "holes_checked": 2,
+      "too_tight": []
+     },
+     "settled_by": "a hole narrower than the screw is either a pilot the classifier mis-sized or a different screw size on this line"
+    },
+    {
+     "check": "engagement",
+     "verdict": "PASS",
+     "what": "the screw must reach 1.5 d = 3.000 mm of thread (a RULE) and must not bottom in the 6.000 mm pilot (a MEASUREMENT)",
+     "measured": {
+      "screw_length_mm": 10.0,
+      "grip_mm": 6.3,
+      "engaged_mm": 3.7,
+      "min_rule_mm": 3.0,
+      "pilot_depth_mm": 6.0,
+      "window_mm": [
+       9.3,
+       12.3
+      ]
+     },
+     "settled_by": "a sourced length inside the window, or a re-measurement of grip / pilot depth"
+    },
+    {
+     "check": "protrusion",
+     "verdict": "PASS",
+     "what": "the thread must stop inside the pilot, not emerge from the far face",
+     "measured": {
+      "engaged_mm": 3.7,
+      "pilot_depth_mm": 6.0,
+      "overshoot_mm": 0.0,
+      "chain_span_mm": [
+       -69.5,
+       -34.2
+      ]
+     },
+     "settled_by": "a section view of that part, or a caliper on the boss depth"
+    },
+    {
+     "check": "driver access",
+     "verdict": "PASS",
+     "what": "a 1.5 mm across-flats hex key (ISO 4762) must reach the head; every bore above it must be at least that wide",
+     "measured": {
+      "key_af_mm": 1.5,
+      "bores_wide_enough": 2,
+      "bores_too_narrow": []
+     },
+     "settled_by": "cecad.install.driver_clearance() on the built solid, which sweeps the volume the key needs to turn \u2014 this check only compares diameters"
+    }
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "size": "M2",
+   "length_mm": 10.0,
+   "meshes": [
+    "hip_l",
+    "xl330"
+   ],
+   "head_seat": "hip_l/ambiguous",
+   "pilot": "xl330 \u00d81.6",
+   "checks": [
+    {
+     "check": "head seats",
+     "verdict": "PASS",
+     "what": "the head lands on the outer FACE (no counterbore) and stands 2.000 mm proud",
+     "measured": {
+      "seat_class": "ambiguous",
+      "head_height_mm": 2.0
+     },
+     "settled_by": "a photograph of that face on a real unit: a head that should be flush and is not means the counterbore was not detected"
+    },
+    {
+     "check": "shank clears",
+     "verdict": "PASS",
+     "what": "every clearance/ambiguous hole on the run must be wider than the shank (\u00d82.00 mm)",
+     "measured": {
+      "holes_checked": 2,
+      "too_tight": []
+     },
+     "settled_by": "a hole narrower than the screw is either a pilot the classifier mis-sized or a different screw size on this line"
+    },
+    {
+     "check": "engagement",
+     "verdict": "PASS",
+     "what": "the screw must reach 1.5 d = 3.000 mm of thread (a RULE) and must not bottom in the 6.000 mm pilot (a MEASUREMENT)",
+     "measured": {
+      "screw_length_mm": 10.0,
+      "grip_mm": 6.326,
+      "engaged_mm": 3.674,
+      "min_rule_mm": 3.0,
+      "pilot_depth_mm": 6.0,
+      "window_mm": [
+       9.326,
+       12.326
+      ]
+     },
+     "settled_by": "a sourced length inside the window, or a re-measurement of grip / pilot depth"
+    },
+    {
+     "check": "protrusion",
+     "verdict": "PASS",
+     "what": "the thread must stop inside the pilot, not emerge from the far face",
+     "measured": {
+      "engaged_mm": 3.674,
+      "pilot_depth_mm": 6.0,
+      "overshoot_mm": 0.0,
+      "chain_span_mm": [
+       34.174,
+       69.5
+      ]
+     },
+     "settled_by": "a section view of that part, or a caliper on the boss depth"
+    },
+    {
+     "check": "driver access",
+     "verdict": "PASS",
+     "what": "a 1.5 mm across-flats hex key (ISO 4762) must reach the head; every bore above it must be at least that wide",
+     "measured": {
+      "key_af_mm": 1.5,
+      "bores_wide_enough": 2,
+      "bores_too_narrow": []
+     },
+     "settled_by": "cecad.install.driver_clearance() on the built solid, which sweeps the volume the key needs to turn \u2014 this check only compares diameters"
+    }
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "size": "M2",
+   "length_mm": 5.0,
+   "meshes": [
+    "ankle_right",
+    "xl330"
+   ],
+   "head_seat": "ankle_right/counterbore",
+   "pilot": "xl330 \u00d81.6",
+   "checks": [
+    {
+     "check": "head passes and seats",
+     "verdict": "PASS",
+     "what": "the head (dk max 3.800 mm) must pass down and seat in a \u00d84.400 mm bore 1.675 mm deep",
+     "measured": {
+      "bore_d_mm": 4.4,
+      "dk_max_mm": 3.8,
+      "clearance_mm": 0.6,
+      "bore_depth_mm": 1.675,
+      "dk_min_mm": 3.62,
+      "clearance_at_dk_min_mm": 0.78,
+      "mesh_fit_residual_mm": 0.0,
+      "bore_cover_deg": 355.0,
+      "deficit_vs_residual": "no deficit"
+     },
+     "settled_by": "A caliper on the printed bore. THE REFERENCE WORKS, so a negative clearance is first a modelling error: compare it against the mesh's own fit residual \u2014 where the residual is larger than the deficit the measurement cannot tell them apart and this is CANNOT DETERMINE, not a design flaw."
+    },
+    {
+     "check": "shank clears",
+     "verdict": "PASS",
+     "what": "every clearance/ambiguous hole on the run must be wider than the shank (\u00d82.00 mm)",
+     "measured": {
+      "holes_checked": 1,
+      "too_tight": []
+     },
+     "settled_by": "a hole narrower than the screw is either a pilot the classifier mis-sized or a different screw size on this line"
+    },
+    {
+     "check": "engagement",
+     "verdict": "PASS",
+     "what": "the screw must reach 1.5 d = 3.000 mm of thread (a RULE) and must not bottom in the 6.000 mm pilot (a MEASUREMENT)",
+     "measured": {
+      "screw_length_mm": 5.0,
+      "grip_mm": 1.8005,
+      "engaged_mm": 3.1995,
+      "min_rule_mm": 3.0,
+      "pilot_depth_mm": 6.0,
+      "window_mm": [
+       4.8005,
+       7.8005
+      ]
+     },
+     "settled_by": "a sourced length inside the window, or a re-measurement of grip / pilot depth"
+    },
+    {
+     "check": "protrusion",
+     "verdict": "PASS",
+     "what": "the thread must stop inside the pilot, not emerge from the far face",
+     "measured": {
+      "engaged_mm": 3.1995,
+      "pilot_depth_mm": 6.0,
+      "overshoot_mm": 0.0,
+      "chain_span_mm": [
+       -67.9755,
+       -35.5
+      ]
+     },
+     "settled_by": "a section view of that part, or a caliper on the boss depth"
+    },
+    {
+     "check": "driver access",
+     "verdict": "PASS",
+     "what": "a 1.5 mm across-flats hex key (ISO 4762) must reach the head; every bore above it must be at least that wide",
+     "measured": {
+      "key_af_mm": 1.5,
+      "bores_wide_enough": 2,
+      "bores_too_narrow": []
+     },
+     "settled_by": "cecad.install.driver_clearance() on the built solid, which sweeps the volume the key needs to turn \u2014 this check only compares diameters"
+    }
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "size": "M2",
+   "length_mm": 5.0,
+   "meshes": [
+    "ankle_left",
+    "xl330"
+   ],
+   "head_seat": "ankle_left/counterbore",
+   "pilot": "xl330 \u00d81.6",
+   "checks": [
+    {
+     "check": "head passes and seats",
+     "verdict": "PASS",
+     "what": "the head (dk max 3.800 mm) must pass down and seat in a \u00d84.400 mm bore 1.675 mm deep",
+     "measured": {
+      "bore_d_mm": 4.4,
+      "dk_max_mm": 3.8,
+      "clearance_mm": 0.6,
+      "bore_depth_mm": 1.675,
+      "dk_min_mm": 3.62,
+      "clearance_at_dk_min_mm": 0.78,
+      "mesh_fit_residual_mm": 0.0,
+      "bore_cover_deg": 355.0,
+      "deficit_vs_residual": "no deficit"
+     },
+     "settled_by": "A caliper on the printed bore. THE REFERENCE WORKS, so a negative clearance is first a modelling error: compare it against the mesh's own fit residual \u2014 where the residual is larger than the deficit the measurement cannot tell them apart and this is CANNOT DETERMINE, not a design flaw."
+    },
+    {
+     "check": "shank clears",
+     "verdict": "PASS",
+     "what": "every clearance/ambiguous hole on the run must be wider than the shank (\u00d82.00 mm)",
+     "measured": {
+      "holes_checked": 1,
+      "too_tight": []
+     },
+     "settled_by": "a hole narrower than the screw is either a pilot the classifier mis-sized or a different screw size on this line"
+    },
+    {
+     "check": "engagement",
+     "verdict": "PASS",
+     "what": "the screw must reach 1.5 d = 3.000 mm of thread (a RULE) and must not bottom in the 6.000 mm pilot (a MEASUREMENT)",
+     "measured": {
+      "screw_length_mm": 5.0,
+      "grip_mm": 1.8005,
+      "engaged_mm": 3.1995,
+      "min_rule_mm": 3.0,
+      "pilot_depth_mm": 6.0,
+      "window_mm": [
+       4.8005,
+       7.8005
+      ]
+     },
+     "settled_by": "a sourced length inside the window, or a re-measurement of grip / pilot depth"
+    },
+    {
+     "check": "protrusion",
+     "verdict": "PASS",
+     "what": "the thread must stop inside the pilot, not emerge from the far face",
+     "measured": {
+      "engaged_mm": 3.1995,
+      "pilot_depth_mm": 6.0,
+      "overshoot_mm": 0.0,
+      "chain_span_mm": [
+       35.5,
+       67.9755
+      ]
+     },
+     "settled_by": "a section view of that part, or a caliper on the boss depth"
+    },
+    {
+     "check": "driver access",
+     "verdict": "PASS",
+     "what": "a 1.5 mm across-flats hex key (ISO 4762) must reach the head; every bore above it must be at least that wide",
+     "measured": {
+      "key_af_mm": 1.5,
+      "bores_wide_enough": 2,
+      "bores_too_narrow": []
+     },
+     "settled_by": "cecad.install.driver_clearance() on the built solid, which sweeps the volume the key needs to turn \u2014 this check only compares diameters"
+    }
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "size": "M2",
+   "length_mm": 5.0,
+   "meshes": [
+    "ankle_right",
+    "xl330"
+   ],
+   "head_seat": "ankle_right/counterbore",
+   "pilot": "xl330 \u00d81.6",
+   "checks": [
+    {
+     "check": "head passes and seats",
+     "verdict": "PASS",
+     "what": "the head (dk max 3.800 mm) must pass down and seat in a \u00d84.400 mm bore 2.426 mm deep",
+     "measured": {
+      "bore_d_mm": 4.4,
+      "dk_max_mm": 3.8,
+      "clearance_mm": 0.6,
+      "bore_depth_mm": 2.426,
+      "dk_min_mm": 3.62,
+      "clearance_at_dk_min_mm": 0.78,
+      "mesh_fit_residual_mm": 0.0,
+      "bore_cover_deg": 355.0,
+      "deficit_vs_residual": "no deficit"
+     },
+     "settled_by": "A caliper on the printed bore. THE REFERENCE WORKS, so a negative clearance is first a modelling error: compare it against the mesh's own fit residual \u2014 where the residual is larger than the deficit the measurement cannot tell them apart and this is CANNOT DETERMINE, not a design flaw."
+    },
+    {
+     "check": "shank clears",
+     "verdict": "PASS",
+     "what": "every clearance/ambiguous hole on the run must be wider than the shank (\u00d82.00 mm)",
+     "measured": {
+      "holes_checked": 1,
+      "too_tight": []
+     },
+     "settled_by": "a hole narrower than the screw is either a pilot the classifier mis-sized or a different screw size on this line"
+    },
+    {
+     "check": "engagement",
+     "verdict": "PASS",
+     "what": "the screw must reach 1.5 d = 3.000 mm of thread (a RULE) and must not bottom in the 6.000 mm pilot (a MEASUREMENT)",
+     "measured": {
+      "screw_length_mm": 5.0,
+      "grip_mm": 1.8,
+      "engaged_mm": 3.2,
+      "min_rule_mm": 3.0,
+      "pilot_depth_mm": 6.0,
+      "window_mm": [
+       4.8,
+       7.8
+      ]
+     },
+     "settled_by": "a sourced length inside the window, or a re-measurement of grip / pilot depth"
+    },
+    {
+     "check": "protrusion",
+     "verdict": "PASS",
+     "what": "the thread must stop inside the pilot, not emerge from the far face",
+     "measured": {
+      "engaged_mm": 3.2,
+      "pilot_depth_mm": 6.0,
+      "overshoot_mm": 0.0,
+      "chain_span_mm": [
+       -68.726,
+       -35.5
+      ]
+     },
+     "settled_by": "a section view of that part, or a caliper on the boss depth"
+    },
+    {
+     "check": "driver access",
+     "verdict": "PASS",
+     "what": "a 1.5 mm across-flats hex key (ISO 4762) must reach the head; every bore above it must be at least that wide",
+     "measured": {
+      "key_af_mm": 1.5,
+      "bores_wide_enough": 2,
+      "bores_too_narrow": []
+     },
+     "settled_by": "cecad.install.driver_clearance() on the built solid, which sweeps the volume the key needs to turn \u2014 this check only compares diameters"
+    }
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "size": "M2",
+   "length_mm": 5.0,
+   "meshes": [
+    "ankle_left",
+    "xl330"
+   ],
+   "head_seat": "ankle_left/counterbore",
+   "pilot": "xl330 \u00d81.6",
+   "checks": [
+    {
+     "check": "head passes and seats",
+     "verdict": "PASS",
+     "what": "the head (dk max 3.800 mm) must pass down and seat in a \u00d84.400 mm bore 2.426 mm deep",
+     "measured": {
+      "bore_d_mm": 4.4,
+      "dk_max_mm": 3.8,
+      "clearance_mm": 0.6,
+      "bore_depth_mm": 2.426,
+      "dk_min_mm": 3.62,
+      "clearance_at_dk_min_mm": 0.78,
+      "mesh_fit_residual_mm": 0.0,
+      "bore_cover_deg": 355.0,
+      "deficit_vs_residual": "no deficit"
+     },
+     "settled_by": "A caliper on the printed bore. THE REFERENCE WORKS, so a negative clearance is first a modelling error: compare it against the mesh's own fit residual \u2014 where the residual is larger than the deficit the measurement cannot tell them apart and this is CANNOT DETERMINE, not a design flaw."
+    },
+    {
+     "check": "shank clears",
+     "verdict": "PASS",
+     "what": "every clearance/ambiguous hole on the run must be wider than the shank (\u00d82.00 mm)",
+     "measured": {
+      "holes_checked": 1,
+      "too_tight": []
+     },
+     "settled_by": "a hole narrower than the screw is either a pilot the classifier mis-sized or a different screw size on this line"
+    },
+    {
+     "check": "engagement",
+     "verdict": "PASS",
+     "what": "the screw must reach 1.5 d = 3.000 mm of thread (a RULE) and must not bottom in the 6.000 mm pilot (a MEASUREMENT)",
+     "measured": {
+      "screw_length_mm": 5.0,
+      "grip_mm": 1.8,
+      "engaged_mm": 3.2,
+      "min_rule_mm": 3.0,
+      "pilot_depth_mm": 6.0,
+      "window_mm": [
+       4.8,
+       7.8
+      ]
+     },
+     "settled_by": "a sourced length inside the window, or a re-measurement of grip / pilot depth"
+    },
+    {
+     "check": "protrusion",
+     "verdict": "PASS",
+     "what": "the thread must stop inside the pilot, not emerge from the far face",
+     "measured": {
+      "engaged_mm": 3.2,
+      "pilot_depth_mm": 6.0,
+      "overshoot_mm": 0.0,
+      "chain_span_mm": [
+       35.5,
+       68.726
+      ]
+     },
+     "settled_by": "a section view of that part, or a caliper on the boss depth"
+    },
+    {
+     "check": "driver access",
+     "verdict": "PASS",
+     "what": "a 1.5 mm across-flats hex key (ISO 4762) must reach the head; every bore above it must be at least that wide",
+     "measured": {
+      "key_af_mm": 1.5,
+      "bores_wide_enough": 2,
+      "bores_too_narrow": []
+     },
+     "settled_by": "cecad.install.driver_clearance() on the built solid, which sweeps the volume the key needs to turn \u2014 this check only compares diameters"
+    }
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "size": "M2",
+   "length_mm": 5.0,
+   "meshes": [
+    "ankle_right",
+    "xl330"
+   ],
+   "head_seat": "ankle_right/counterbore",
+   "pilot": "xl330 \u00d81.6",
+   "checks": [
+    {
+     "check": "head passes and seats",
+     "verdict": "PASS",
+     "what": "the head (dk max 3.800 mm) must pass down and seat in a \u00d84.400 mm bore 3.176 mm deep",
+     "measured": {
+      "bore_d_mm": 4.4,
+      "dk_max_mm": 3.8,
+      "clearance_mm": 0.6,
+      "bore_depth_mm": 3.176,
+      "dk_min_mm": 3.62,
+      "clearance_at_dk_min_mm": 0.78,
+      "mesh_fit_residual_mm": 0.0,
+      "bore_cover_deg": 355.0,
+      "deficit_vs_residual": "no deficit"
+     },
+     "settled_by": "A caliper on the printed bore. THE REFERENCE WORKS, so a negative clearance is first a modelling error: compare it against the mesh's own fit residual \u2014 where the residual is larger than the deficit the measurement cannot tell them apart and this is CANNOT DETERMINE, not a design flaw."
+    },
+    {
+     "check": "shank clears",
+     "verdict": "PASS",
+     "what": "every clearance/ambiguous hole on the run must be wider than the shank (\u00d82.00 mm)",
+     "measured": {
+      "holes_checked": 1,
+      "too_tight": []
+     },
+     "settled_by": "a hole narrower than the screw is either a pilot the classifier mis-sized or a different screw size on this line"
+    },
+    {
+     "check": "engagement",
+     "verdict": "PASS",
+     "what": "the screw must reach 1.5 d = 3.000 mm of thread (a RULE) and must not bottom in the 6.000 mm pilot (a MEASUREMENT)",
+     "measured": {
+      "screw_length_mm": 5.0,
+      "grip_mm": 1.8,
+      "engaged_mm": 3.2,
+      "min_rule_mm": 3.0,
+      "pilot_depth_mm": 6.0,
+      "window_mm": [
+       4.8,
+       7.8
+      ]
+     },
+     "settled_by": "a sourced length inside the window, or a re-measurement of grip / pilot depth"
+    },
+    {
+     "check": "protrusion",
+     "verdict": "PASS",
+     "what": "the thread must stop inside the pilot, not emerge from the far face",
+     "measured": {
+      "engaged_mm": 3.2,
+      "pilot_depth_mm": 6.0,
+      "overshoot_mm": 0.0,
+      "chain_span_mm": [
+       -69.476,
+       -35.5
+      ]
+     },
+     "settled_by": "a section view of that part, or a caliper on the boss depth"
+    },
+    {
+     "check": "driver access",
+     "verdict": "PASS",
+     "what": "a 1.5 mm across-flats hex key (ISO 4762) must reach the head; every bore above it must be at least that wide",
+     "measured": {
+      "key_af_mm": 1.5,
+      "bores_wide_enough": 2,
+      "bores_too_narrow": []
+     },
+     "settled_by": "cecad.install.driver_clearance() on the built solid, which sweeps the volume the key needs to turn \u2014 this check only compares diameters"
+    }
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "size": "M2",
+   "length_mm": 5.0,
+   "meshes": [
+    "ankle_left",
+    "xl330"
+   ],
+   "head_seat": "ankle_left/counterbore",
+   "pilot": "xl330 \u00d81.6",
+   "checks": [
+    {
+     "check": "head passes and seats",
+     "verdict": "PASS",
+     "what": "the head (dk max 3.800 mm) must pass down and seat in a \u00d84.400 mm bore 3.176 mm deep",
+     "measured": {
+      "bore_d_mm": 4.4,
+      "dk_max_mm": 3.8,
+      "clearance_mm": 0.6,
+      "bore_depth_mm": 3.176,
+      "dk_min_mm": 3.62,
+      "clearance_at_dk_min_mm": 0.78,
+      "mesh_fit_residual_mm": 0.0,
+      "bore_cover_deg": 355.0,
+      "deficit_vs_residual": "no deficit"
+     },
+     "settled_by": "A caliper on the printed bore. THE REFERENCE WORKS, so a negative clearance is first a modelling error: compare it against the mesh's own fit residual \u2014 where the residual is larger than the deficit the measurement cannot tell them apart and this is CANNOT DETERMINE, not a design flaw."
+    },
+    {
+     "check": "shank clears",
+     "verdict": "PASS",
+     "what": "every clearance/ambiguous hole on the run must be wider than the shank (\u00d82.00 mm)",
+     "measured": {
+      "holes_checked": 1,
+      "too_tight": []
+     },
+     "settled_by": "a hole narrower than the screw is either a pilot the classifier mis-sized or a different screw size on this line"
+    },
+    {
+     "check": "engagement",
+     "verdict": "PASS",
+     "what": "the screw must reach 1.5 d = 3.000 mm of thread (a RULE) and must not bottom in the 6.000 mm pilot (a MEASUREMENT)",
+     "measured": {
+      "screw_length_mm": 5.0,
+      "grip_mm": 1.8,
+      "engaged_mm": 3.2,
+      "min_rule_mm": 3.0,
+      "pilot_depth_mm": 6.0,
+      "window_mm": [
+       4.8,
+       7.8
+      ]
+     },
+     "settled_by": "a sourced length inside the window, or a re-measurement of grip / pilot depth"
+    },
+    {
+     "check": "protrusion",
+     "verdict": "PASS",
+     "what": "the thread must stop inside the pilot, not emerge from the far face",
+     "measured": {
+      "engaged_mm": 3.2,
+      "pilot_depth_mm": 6.0,
+      "overshoot_mm": 0.0,
+      "chain_span_mm": [
+       35.5,
+       69.476
+      ]
+     },
+     "settled_by": "a section view of that part, or a caliper on the boss depth"
+    },
+    {
+     "check": "driver access",
+     "verdict": "PASS",
+     "what": "a 1.5 mm across-flats hex key (ISO 4762) must reach the head; every bore above it must be at least that wide",
+     "measured": {
+      "key_af_mm": 1.5,
+      "bores_wide_enough": 2,
+      "bores_too_narrow": []
+     },
+     "settled_by": "cecad.install.driver_clearance() on the built solid, which sweeps the volume the key needs to turn \u2014 this check only compares diameters"
+    }
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "size": "M2",
+   "length_mm": 5.0,
+   "meshes": [
+    "ankle_right",
+    "xl330"
+   ],
+   "head_seat": "ankle_right/counterbore",
+   "pilot": "xl330 \u00d81.6",
+   "checks": [
+    {
+     "check": "head passes and seats",
+     "verdict": "PASS",
+     "what": "the head (dk max 3.800 mm) must pass down and seat in a \u00d84.400 mm bore 2.426 mm deep",
+     "measured": {
+      "bore_d_mm": 4.4,
+      "dk_max_mm": 3.8,
+      "clearance_mm": 0.6,
+      "bore_depth_mm": 2.426,
+      "dk_min_mm": 3.62,
+      "clearance_at_dk_min_mm": 0.78,
+      "mesh_fit_residual_mm": 0.0,
+      "bore_cover_deg": 355.0,
+      "deficit_vs_residual": "no deficit"
+     },
+     "settled_by": "A caliper on the printed bore. THE REFERENCE WORKS, so a negative clearance is first a modelling error: compare it against the mesh's own fit residual \u2014 where the residual is larger than the deficit the measurement cannot tell them apart and this is CANNOT DETERMINE, not a design flaw."
+    },
+    {
+     "check": "shank clears",
+     "verdict": "PASS",
+     "what": "every clearance/ambiguous hole on the run must be wider than the shank (\u00d82.00 mm)",
+     "measured": {
+      "holes_checked": 1,
+      "too_tight": []
+     },
+     "settled_by": "a hole narrower than the screw is either a pilot the classifier mis-sized or a different screw size on this line"
+    },
+    {
+     "check": "engagement",
+     "verdict": "PASS",
+     "what": "the screw must reach 1.5 d = 3.000 mm of thread (a RULE) and must not bottom in the 6.000 mm pilot (a MEASUREMENT)",
+     "measured": {
+      "screw_length_mm": 5.0,
+      "grip_mm": 1.8,
+      "engaged_mm": 3.2,
+      "min_rule_mm": 3.0,
+      "pilot_depth_mm": 6.0,
+      "window_mm": [
+       4.8,
+       7.8
+      ]
+     },
+     "settled_by": "a sourced length inside the window, or a re-measurement of grip / pilot depth"
+    },
+    {
+     "check": "protrusion",
+     "verdict": "PASS",
+     "what": "the thread must stop inside the pilot, not emerge from the far face",
+     "measured": {
+      "engaged_mm": 3.2,
+      "pilot_depth_mm": 6.0,
+      "overshoot_mm": 0.0,
+      "chain_span_mm": [
+       -68.726,
+       -35.5
+      ]
+     },
+     "settled_by": "a section view of that part, or a caliper on the boss depth"
+    },
+    {
+     "check": "driver access",
+     "verdict": "PASS",
+     "what": "a 1.5 mm across-flats hex key (ISO 4762) must reach the head; every bore above it must be at least that wide",
+     "measured": {
+      "key_af_mm": 1.5,
+      "bores_wide_enough": 2,
+      "bores_too_narrow": []
+     },
+     "settled_by": "cecad.install.driver_clearance() on the built solid, which sweeps the volume the key needs to turn \u2014 this check only compares diameters"
+    }
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "size": "M2",
+   "length_mm": 5.0,
+   "meshes": [
+    "ankle_left",
+    "xl330"
+   ],
+   "head_seat": "ankle_left/counterbore",
+   "pilot": "xl330 \u00d81.6",
+   "checks": [
+    {
+     "check": "head passes and seats",
+     "verdict": "PASS",
+     "what": "the head (dk max 3.800 mm) must pass down and seat in a \u00d84.400 mm bore 2.426 mm deep",
+     "measured": {
+      "bore_d_mm": 4.4,
+      "dk_max_mm": 3.8,
+      "clearance_mm": 0.6,
+      "bore_depth_mm": 2.426,
+      "dk_min_mm": 3.62,
+      "clearance_at_dk_min_mm": 0.78,
+      "mesh_fit_residual_mm": 0.0,
+      "bore_cover_deg": 355.0,
+      "deficit_vs_residual": "no deficit"
+     },
+     "settled_by": "A caliper on the printed bore. THE REFERENCE WORKS, so a negative clearance is first a modelling error: compare it against the mesh's own fit residual \u2014 where the residual is larger than the deficit the measurement cannot tell them apart and this is CANNOT DETERMINE, not a design flaw."
+    },
+    {
+     "check": "shank clears",
+     "verdict": "PASS",
+     "what": "every clearance/ambiguous hole on the run must be wider than the shank (\u00d82.00 mm)",
+     "measured": {
+      "holes_checked": 1,
+      "too_tight": []
+     },
+     "settled_by": "a hole narrower than the screw is either a pilot the classifier mis-sized or a different screw size on this line"
+    },
+    {
+     "check": "engagement",
+     "verdict": "PASS",
+     "what": "the screw must reach 1.5 d = 3.000 mm of thread (a RULE) and must not bottom in the 6.000 mm pilot (a MEASUREMENT)",
+     "measured": {
+      "screw_length_mm": 5.0,
+      "grip_mm": 1.8,
+      "engaged_mm": 3.2,
+      "min_rule_mm": 3.0,
+      "pilot_depth_mm": 6.0,
+      "window_mm": [
+       4.8,
+       7.8
+      ]
+     },
+     "settled_by": "a sourced length inside the window, or a re-measurement of grip / pilot depth"
+    },
+    {
+     "check": "protrusion",
+     "verdict": "PASS",
+     "what": "the thread must stop inside the pilot, not emerge from the far face",
+     "measured": {
+      "engaged_mm": 3.2,
+      "pilot_depth_mm": 6.0,
+      "overshoot_mm": 0.0,
+      "chain_span_mm": [
+       35.5,
+       68.726
+      ]
+     },
+     "settled_by": "a section view of that part, or a caliper on the boss depth"
+    },
+    {
+     "check": "driver access",
+     "verdict": "PASS",
+     "what": "a 1.5 mm across-flats hex key (ISO 4762) must reach the head; every bore above it must be at least that wide",
+     "measured": {
+      "key_af_mm": 1.5,
+      "bores_wide_enough": 2,
+      "bores_too_narrow": []
+     },
+     "settled_by": "cecad.install.driver_clearance() on the built solid, which sweeps the volume the key needs to turn \u2014 this check only compares diameters"
+    }
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "size": "M2",
+   "length_mm": 5.0,
+   "meshes": [
+    "ankle_left",
+    "foot_left"
+   ],
+   "head_seat": "ankle_left/counterbore",
+   "pilot": "foot_left \u00d81.6",
+   "checks": [
+    {
+     "check": "head passes and seats",
+     "verdict": "PASS",
+     "what": "the head (dk max 3.800 mm) must pass down and seat in a \u00d84.400 mm bore 1.000 mm deep",
+     "measured": {
+      "bore_d_mm": 4.4,
+      "dk_max_mm": 3.8,
+      "clearance_mm": 0.6,
+      "bore_depth_mm": 1.0,
+      "dk_min_mm": 3.62,
+      "clearance_at_dk_min_mm": 0.78,
+      "mesh_fit_residual_mm": 0.0,
+      "bore_cover_deg": 355.0,
+      "deficit_vs_residual": "no deficit"
+     },
+     "settled_by": "A caliper on the printed bore. THE REFERENCE WORKS, so a negative clearance is first a modelling error: compare it against the mesh's own fit residual \u2014 where the residual is larger than the deficit the measurement cannot tell them apart and this is CANNOT DETERMINE, not a design flaw."
+    },
+    {
+     "check": "shank clears",
+     "verdict": "PASS",
+     "what": "every clearance/ambiguous hole on the run must be wider than the shank (\u00d82.00 mm)",
+     "measured": {
+      "holes_checked": 1,
+      "too_tight": []
+     },
+     "settled_by": "a hole narrower than the screw is either a pilot the classifier mis-sized or a different screw size on this line"
+    },
+    {
+     "check": "engagement",
+     "verdict": "PASS",
+     "what": "the screw must reach 1.5 d = 3.000 mm of thread (a RULE) and must not bottom in the 5.500 mm pilot (a MEASUREMENT)",
+     "measured": {
+      "screw_length_mm": 5.0,
+      "grip_mm": 2.0,
+      "engaged_mm": 3.0,
+      "min_rule_mm": 3.0,
+      "pilot_depth_mm": 5.5,
+      "window_mm": [
+       5.0,
+       7.5
+      ]
+     },
+     "settled_by": "a sourced length inside the window, or a re-measurement of grip / pilot depth"
+    },
+    {
+     "check": "protrusion",
+     "verdict": "PASS",
+     "what": "the thread must stop inside the pilot, not emerge from the far face",
+     "measured": {
+      "engaged_mm": 3.0,
+      "pilot_depth_mm": 5.5,
+      "overshoot_mm": 0.0,
+      "chain_span_mm": [
+       22.8809,
+       31.3809
+      ]
+     },
+     "settled_by": "a section view of that part, or a caliper on the boss depth"
+    },
+    {
+     "check": "driver access",
+     "verdict": "PASS",
+     "what": "a 1.5 mm across-flats hex key (ISO 4762) must reach the head; every bore above it must be at least that wide",
+     "measured": {
+      "key_af_mm": 1.5,
+      "bores_wide_enough": 3,
+      "bores_too_narrow": []
+     },
+     "settled_by": "cecad.install.driver_clearance() on the built solid, which sweeps the volume the key needs to turn \u2014 this check only compares diameters"
+    }
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "size": "M2",
+   "length_mm": 6.0,
+   "meshes": [
+    "neck_pitch",
+    "xl330"
+   ],
+   "head_seat": "neck_pitch/clearance",
+   "pilot": "xl330 \u00d81.6",
+   "checks": [
+    {
+     "check": "head seats",
+     "verdict": "PASS",
+     "what": "the head lands on the outer FACE (no counterbore) and stands 2.000 mm proud",
+     "measured": {
+      "seat_class": "clearance",
+      "head_height_mm": 2.0
+     },
+     "settled_by": "a photograph of that face on a real unit: a head that should be flush and is not means the counterbore was not detected"
+    },
+    {
+     "check": "shank clears",
+     "verdict": "PASS",
+     "what": "every clearance/ambiguous hole on the run must be wider than the shank (\u00d82.00 mm)",
+     "measured": {
+      "holes_checked": 2,
+      "too_tight": []
+     },
+     "settled_by": "a hole narrower than the screw is either a pilot the classifier mis-sized or a different screw size on this line"
+    },
+    {
+     "check": "engagement",
+     "verdict": "PASS",
+     "what": "the screw must reach 1.5 d = 3.000 mm of thread (a RULE) and must not bottom in the 6.000 mm pilot (a MEASUREMENT)",
+     "measured": {
+      "screw_length_mm": 6.0,
+      "grip_mm": 3.0,
+      "engaged_mm": 3.0,
+      "min_rule_mm": 3.0,
+      "pilot_depth_mm": 6.0,
+      "window_mm": [
+       6.0,
+       9.0
+      ]
+     },
+     "settled_by": "a sourced length inside the window, or a re-measurement of grip / pilot depth"
+    },
+    {
+     "check": "protrusion",
+     "verdict": "PASS",
+     "what": "the thread must stop inside the pilot, not emerge from the far face",
+     "measured": {
+      "engaged_mm": 3.0,
+      "pilot_depth_mm": 6.0,
+      "overshoot_mm": 0.0,
+      "chain_span_mm": [
+       -17.5,
+       17.5
+      ]
+     },
+     "settled_by": "a section view of that part, or a caliper on the boss depth"
+    },
+    {
+     "check": "driver access",
+     "verdict": "PASS",
+     "what": "a 1.5 mm across-flats hex key (ISO 4762) must reach the head; every bore above it must be at least that wide",
+     "measured": {
+      "key_af_mm": 1.5,
+      "bores_wide_enough": 2,
+      "bores_too_narrow": []
+     },
+     "settled_by": "cecad.install.driver_clearance() on the built solid, which sweeps the volume the key needs to turn \u2014 this check only compares diameters"
+    }
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "size": "M2",
+   "length_mm": 6.0,
+   "meshes": [
+    "neck_pitch",
+    "xl330"
+   ],
+   "head_seat": "neck_pitch/clearance",
+   "pilot": "xl330 \u00d81.6",
+   "checks": [
+    {
+     "check": "head seats",
+     "verdict": "PASS",
+     "what": "the head lands on the outer FACE (no counterbore) and stands 2.000 mm proud",
+     "measured": {
+      "seat_class": "clearance",
+      "head_height_mm": 2.0
+     },
+     "settled_by": "a photograph of that face on a real unit: a head that should be flush and is not means the counterbore was not detected"
+    },
+    {
+     "check": "shank clears",
+     "verdict": "PASS",
+     "what": "every clearance/ambiguous hole on the run must be wider than the shank (\u00d82.00 mm)",
+     "measured": {
+      "holes_checked": 2,
+      "too_tight": []
+     },
+     "settled_by": "a hole narrower than the screw is either a pilot the classifier mis-sized or a different screw size on this line"
+    },
+    {
+     "check": "engagement",
+     "verdict": "PASS",
+     "what": "the screw must reach 1.5 d = 3.000 mm of thread (a RULE) and must not bottom in the 6.000 mm pilot (a MEASUREMENT)",
+     "measured": {
+      "screw_length_mm": 6.0,
+      "grip_mm": 3.0,
+      "engaged_mm": 3.0,
+      "min_rule_mm": 3.0,
+      "pilot_depth_mm": 6.0,
+      "window_mm": [
+       6.0,
+       9.0
+      ]
+     },
+     "settled_by": "a sourced length inside the window, or a re-measurement of grip / pilot depth"
+    },
+    {
+     "check": "protrusion",
+     "verdict": "PASS",
+     "what": "the thread must stop inside the pilot, not emerge from the far face",
+     "measured": {
+      "engaged_mm": 3.0,
+      "pilot_depth_mm": 6.0,
+      "overshoot_mm": 0.0,
+      "chain_span_mm": [
+       -17.5,
+       17.5
+      ]
+     },
+     "settled_by": "a section view of that part, or a caliper on the boss depth"
+    },
+    {
+     "check": "driver access",
+     "verdict": "PASS",
+     "what": "a 1.5 mm across-flats hex key (ISO 4762) must reach the head; every bore above it must be at least that wide",
+     "measured": {
+      "key_af_mm": 1.5,
+      "bores_wide_enough": 2,
+      "bores_too_narrow": []
+     },
+     "settled_by": "cecad.install.driver_clearance() on the built solid, which sweeps the volume the key needs to turn \u2014 this check only compares diameters"
+    }
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "size": "M2",
+   "length_mm": 6.0,
+   "meshes": [
+    "neck_pitch",
+    "xl330"
+   ],
+   "head_seat": "neck_pitch/clearance",
+   "pilot": "xl330 \u00d81.6",
+   "checks": [
+    {
+     "check": "head seats",
+     "verdict": "PASS",
+     "what": "the head lands on the outer FACE (no counterbore) and stands 2.000 mm proud",
+     "measured": {
+      "seat_class": "clearance",
+      "head_height_mm": 2.0
+     },
+     "settled_by": "a photograph of that face on a real unit: a head that should be flush and is not means the counterbore was not detected"
+    },
+    {
+     "check": "shank clears",
+     "verdict": "PASS",
+     "what": "every clearance/ambiguous hole on the run must be wider than the shank (\u00d82.00 mm)",
+     "measured": {
+      "holes_checked": 2,
+      "too_tight": []
+     },
+     "settled_by": "a hole narrower than the screw is either a pilot the classifier mis-sized or a different screw size on this line"
+    },
+    {
+     "check": "engagement",
+     "verdict": "PASS",
+     "what": "the screw must reach 1.5 d = 3.000 mm of thread (a RULE) and must not bottom in the 6.000 mm pilot (a MEASUREMENT)",
+     "measured": {
+      "screw_length_mm": 6.0,
+      "grip_mm": 3.0,
+      "engaged_mm": 3.0,
+      "min_rule_mm": 3.0,
+      "pilot_depth_mm": 6.0,
+      "window_mm": [
+       6.0,
+       9.0
+      ]
+     },
+     "settled_by": "a sourced length inside the window, or a re-measurement of grip / pilot depth"
+    },
+    {
+     "check": "protrusion",
+     "verdict": "PASS",
+     "what": "the thread must stop inside the pilot, not emerge from the far face",
+     "measured": {
+      "engaged_mm": 3.0,
+      "pilot_depth_mm": 6.0,
+      "overshoot_mm": 0.0,
+      "chain_span_mm": [
+       -17.5,
+       17.5
+      ]
+     },
+     "settled_by": "a section view of that part, or a caliper on the boss depth"
+    },
+    {
+     "check": "driver access",
+     "verdict": "PASS",
+     "what": "a 1.5 mm across-flats hex key (ISO 4762) must reach the head; every bore above it must be at least that wide",
+     "measured": {
+      "key_af_mm": 1.5,
+      "bores_wide_enough": 2,
+      "bores_too_narrow": []
+     },
+     "settled_by": "cecad.install.driver_clearance() on the built solid, which sweeps the volume the key needs to turn \u2014 this check only compares diameters"
+    }
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "size": "M2",
+   "length_mm": 6.0,
+   "meshes": [
+    "neck_pitch",
+    "xl330"
+   ],
+   "head_seat": "neck_pitch/clearance",
+   "pilot": "xl330 \u00d81.6",
+   "checks": [
+    {
+     "check": "head seats",
+     "verdict": "PASS",
+     "what": "the head lands on the outer FACE (no counterbore) and stands 2.000 mm proud",
+     "measured": {
+      "seat_class": "clearance",
+      "head_height_mm": 2.0
+     },
+     "settled_by": "a photograph of that face on a real unit: a head that should be flush and is not means the counterbore was not detected"
+    },
+    {
+     "check": "shank clears",
+     "verdict": "PASS",
+     "what": "every clearance/ambiguous hole on the run must be wider than the shank (\u00d82.00 mm)",
+     "measured": {
+      "holes_checked": 2,
+      "too_tight": []
+     },
+     "settled_by": "a hole narrower than the screw is either a pilot the classifier mis-sized or a different screw size on this line"
+    },
+    {
+     "check": "engagement",
+     "verdict": "PASS",
+     "what": "the screw must reach 1.5 d = 3.000 mm of thread (a RULE) and must not bottom in the 6.000 mm pilot (a MEASUREMENT)",
+     "measured": {
+      "screw_length_mm": 6.0,
+      "grip_mm": 3.0,
+      "engaged_mm": 3.0,
+      "min_rule_mm": 3.0,
+      "pilot_depth_mm": 6.0,
+      "window_mm": [
+       6.0,
+       9.0
+      ]
+     },
+     "settled_by": "a sourced length inside the window, or a re-measurement of grip / pilot depth"
+    },
+    {
+     "check": "protrusion",
+     "verdict": "PASS",
+     "what": "the thread must stop inside the pilot, not emerge from the far face",
+     "measured": {
+      "engaged_mm": 3.0,
+      "pilot_depth_mm": 6.0,
+      "overshoot_mm": 0.0,
+      "chain_span_mm": [
+       -17.5,
+       17.5
+      ]
+     },
+     "settled_by": "a section view of that part, or a caliper on the boss depth"
+    },
+    {
+     "check": "driver access",
+     "verdict": "PASS",
+     "what": "a 1.5 mm across-flats hex key (ISO 4762) must reach the head; every bore above it must be at least that wide",
+     "measured": {
+      "key_af_mm": 1.5,
+      "bores_wide_enough": 2,
+      "bores_too_narrow": []
+     },
+     "settled_by": "cecad.install.driver_clearance() on the built solid, which sweeps the volume the key needs to turn \u2014 this check only compares diameters"
+    }
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "size": "M2",
+   "length_mm": 6.0,
+   "meshes": [
+    "neck_pitch",
+    "xl330"
+   ],
+   "head_seat": "neck_pitch/counterbore",
+   "pilot": "xl330 \u00d81.6",
+   "checks": [
+    {
+     "check": "head passes and seats",
+     "verdict": "PASS",
+     "what": "the head (dk max 3.800 mm) must pass down and seat in a \u00d84.400 mm bore 2.177 mm deep",
+     "measured": {
+      "bore_d_mm": 4.4,
+      "dk_max_mm": 3.8,
+      "clearance_mm": 0.6,
+      "bore_depth_mm": 2.177,
+      "dk_min_mm": 3.62,
+      "clearance_at_dk_min_mm": 0.78,
+      "mesh_fit_residual_mm": 0.0,
+      "bore_cover_deg": 355.0,
+      "deficit_vs_residual": "no deficit"
+     },
+     "settled_by": "A caliper on the printed bore. THE REFERENCE WORKS, so a negative clearance is first a modelling error: compare it against the mesh's own fit residual \u2014 where the residual is larger than the deficit the measurement cannot tell them apart and this is CANNOT DETERMINE, not a design flaw."
+    },
+    {
+     "check": "shank clears",
+     "verdict": "PASS",
+     "what": "every clearance/ambiguous hole on the run must be wider than the shank (\u00d82.00 mm)",
+     "measured": {
+      "holes_checked": 1,
+      "too_tight": []
+     },
+     "settled_by": "a hole narrower than the screw is either a pilot the classifier mis-sized or a different screw size on this line"
+    },
+    {
+     "check": "engagement",
+     "verdict": "PASS",
+     "what": "the screw must reach 1.5 d = 3.000 mm of thread (a RULE) and must not bottom in the 6.000 mm pilot (a MEASUREMENT)",
+     "measured": {
+      "screw_length_mm": 6.0,
+      "grip_mm": 2.8995,
+      "engaged_mm": 3.1005,
+      "min_rule_mm": 3.0,
+      "pilot_depth_mm": 6.0,
+      "window_mm": [
+       5.8995,
+       8.8995
+      ]
+     },
+     "settled_by": "a sourced length inside the window, or a re-measurement of grip / pilot depth"
+    },
+    {
+     "check": "protrusion",
+     "verdict": "PASS",
+     "what": "the thread must stop inside the pilot, not emerge from the far face",
+     "measured": {
+      "engaged_mm": 3.1005,
+      "pilot_depth_mm": 6.0,
+      "overshoot_mm": 0.0,
+      "chain_span_mm": [
+       216.0381,
+       250.1146
+      ]
+     },
+     "settled_by": "a section view of that part, or a caliper on the boss depth"
+    },
+    {
+     "check": "driver access",
+     "verdict": "PASS",
+     "what": "a 1.5 mm across-flats hex key (ISO 4762) must reach the head; every bore above it must be at least that wide",
+     "measured": {
+      "key_af_mm": 1.5,
+      "bores_wide_enough": 2,
+      "bores_too_narrow": []
+     },
+     "settled_by": "cecad.install.driver_clearance() on the built solid, which sweeps the volume the key needs to turn \u2014 this check only compares diameters"
+    }
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "size": "M2",
+   "length_mm": 6.0,
+   "meshes": [
+    "neck_pitch",
+    "xl330"
+   ],
+   "head_seat": "neck_pitch/counterbore",
+   "pilot": "xl330 \u00d81.6",
+   "checks": [
+    {
+     "check": "head passes and seats",
+     "verdict": "PASS",
+     "what": "the head (dk max 3.800 mm) must pass down and seat in a \u00d84.400 mm bore 2.177 mm deep",
+     "measured": {
+      "bore_d_mm": 4.4,
+      "dk_max_mm": 3.8,
+      "clearance_mm": 0.6,
+      "bore_depth_mm": 2.177,
+      "dk_min_mm": 3.62,
+      "clearance_at_dk_min_mm": 0.78,
+      "mesh_fit_residual_mm": 0.0,
+      "bore_cover_deg": 355.0,
+      "deficit_vs_residual": "no deficit"
+     },
+     "settled_by": "A caliper on the printed bore. THE REFERENCE WORKS, so a negative clearance is first a modelling error: compare it against the mesh's own fit residual \u2014 where the residual is larger than the deficit the measurement cannot tell them apart and this is CANNOT DETERMINE, not a design flaw."
+    },
+    {
+     "check": "shank clears",
+     "verdict": "PASS",
+     "what": "every clearance/ambiguous hole on the run must be wider than the shank (\u00d82.00 mm)",
+     "measured": {
+      "holes_checked": 1,
+      "too_tight": []
+     },
+     "settled_by": "a hole narrower than the screw is either a pilot the classifier mis-sized or a different screw size on this line"
+    },
+    {
+     "check": "engagement",
+     "verdict": "PASS",
+     "what": "the screw must reach 1.5 d = 3.000 mm of thread (a RULE) and must not bottom in the 6.000 mm pilot (a MEASUREMENT)",
+     "measured": {
+      "screw_length_mm": 6.0,
+      "grip_mm": 2.8995,
+      "engaged_mm": 3.1005,
+      "min_rule_mm": 3.0,
+      "pilot_depth_mm": 6.0,
+      "window_mm": [
+       5.8995,
+       8.8995
+      ]
+     },
+     "settled_by": "a sourced length inside the window, or a re-measurement of grip / pilot depth"
+    },
+    {
+     "check": "protrusion",
+     "verdict": "PASS",
+     "what": "the thread must stop inside the pilot, not emerge from the far face",
+     "measured": {
+      "engaged_mm": 3.1005,
+      "pilot_depth_mm": 6.0,
+      "overshoot_mm": 0.0,
+      "chain_span_mm": [
+       216.0381,
+       250.1146
+      ]
+     },
+     "settled_by": "a section view of that part, or a caliper on the boss depth"
+    },
+    {
+     "check": "driver access",
+     "verdict": "PASS",
+     "what": "a 1.5 mm across-flats hex key (ISO 4762) must reach the head; every bore above it must be at least that wide",
+     "measured": {
+      "key_af_mm": 1.5,
+      "bores_wide_enough": 2,
+      "bores_too_narrow": []
+     },
+     "settled_by": "cecad.install.driver_clearance() on the built solid, which sweeps the volume the key needs to turn \u2014 this check only compares diameters"
+    }
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "size": "M2",
+   "length_mm": 6.0,
+   "meshes": [
+    "neck_pitch",
+    "xl330"
+   ],
+   "head_seat": "neck_pitch/counterbore",
+   "pilot": "xl330 \u00d81.6",
+   "checks": [
+    {
+     "check": "head passes and seats",
+     "verdict": "PASS",
+     "what": "the head (dk max 3.800 mm) must pass down and seat in a \u00d84.400 mm bore 4.702 mm deep",
+     "measured": {
+      "bore_d_mm": 4.4,
+      "dk_max_mm": 3.8,
+      "clearance_mm": 0.6,
+      "bore_depth_mm": 4.702,
+      "dk_min_mm": 3.62,
+      "clearance_at_dk_min_mm": 0.78,
+      "mesh_fit_residual_mm": 0.0001,
+      "bore_cover_deg": 355.0,
+      "deficit_vs_residual": "no deficit"
+     },
+     "settled_by": "A caliper on the printed bore. THE REFERENCE WORKS, so a negative clearance is first a modelling error: compare it against the mesh's own fit residual \u2014 where the residual is larger than the deficit the measurement cannot tell them apart and this is CANNOT DETERMINE, not a design flaw."
+    },
+    {
+     "check": "shank clears",
+     "verdict": "PASS",
+     "what": "every clearance/ambiguous hole on the run must be wider than the shank (\u00d82.00 mm)",
+     "measured": {
+      "holes_checked": 1,
+      "too_tight": []
+     },
+     "settled_by": "a hole narrower than the screw is either a pilot the classifier mis-sized or a different screw size on this line"
+    },
+    {
+     "check": "engagement",
+     "verdict": "PASS",
+     "what": "the screw must reach 1.5 d = 3.000 mm of thread (a RULE) and must not bottom in the 6.000 mm pilot (a MEASUREMENT)",
+     "measured": {
+      "screw_length_mm": 6.0,
+      "grip_mm": 2.8968,
+      "engaged_mm": 3.1032,
+      "min_rule_mm": 3.0,
+      "pilot_depth_mm": 6.0,
+      "window_mm": [
+       5.8968,
+       8.8968
+      ]
+     },
+     "settled_by": "a sourced length inside the window, or a re-measurement of grip / pilot depth"
+    },
+    {
+     "check": "protrusion",
+     "verdict": "PASS",
+     "what": "the thread must stop inside the pilot, not emerge from the far face",
+     "measured": {
+      "engaged_mm": 3.1032,
+      "pilot_depth_mm": 6.0,
+      "overshoot_mm": 0.0,
+      "chain_span_mm": [
+       213.5158,
+       250.1146
+      ]
+     },
+     "settled_by": "a section view of that part, or a caliper on the boss depth"
+    },
+    {
+     "check": "driver access",
+     "verdict": "PASS",
+     "what": "a 1.5 mm across-flats hex key (ISO 4762) must reach the head; every bore above it must be at least that wide",
+     "measured": {
+      "key_af_mm": 1.5,
+      "bores_wide_enough": 2,
+      "bores_too_narrow": []
+     },
+     "settled_by": "cecad.install.driver_clearance() on the built solid, which sweeps the volume the key needs to turn \u2014 this check only compares diameters"
+    }
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "size": "M2",
+   "length_mm": 8.0,
+   "meshes": [
+    "xl330",
+    "yaw_roll_motion"
+   ],
+   "head_seat": "yaw_roll_motion/counterbore",
+   "pilot": "xl330 \u00d81.6",
+   "checks": [
+    {
+     "check": "head passes and seats",
+     "verdict": "PASS",
+     "what": "the head (dk max 3.800 mm) must pass down and seat in a \u00d84.400 mm bore 2.500 mm deep",
+     "measured": {
+      "bore_d_mm": 4.4,
+      "dk_max_mm": 3.8,
+      "clearance_mm": 0.6,
+      "bore_depth_mm": 2.5,
+      "dk_min_mm": 3.62,
+      "clearance_at_dk_min_mm": 0.78,
+      "mesh_fit_residual_mm": 0.0,
+      "bore_cover_deg": 355.0,
+      "deficit_vs_residual": "no deficit"
+     },
+     "settled_by": "A caliper on the printed bore. THE REFERENCE WORKS, so a negative clearance is first a modelling error: compare it against the mesh's own fit residual \u2014 where the residual is larger than the deficit the measurement cannot tell them apart and this is CANNOT DETERMINE, not a design flaw."
+    },
+    {
+     "check": "shank clears",
+     "verdict": "PASS",
+     "what": "every clearance/ambiguous hole on the run must be wider than the shank (\u00d82.00 mm)",
+     "measured": {
+      "holes_checked": 1,
+      "too_tight": []
+     },
+     "settled_by": "a hole narrower than the screw is either a pilot the classifier mis-sized or a different screw size on this line"
+    },
+    {
+     "check": "engagement",
+     "verdict": "PASS",
+     "what": "the screw must reach 1.5 d = 3.000 mm of thread (a RULE) and must not bottom in the 6.000 mm pilot (a MEASUREMENT)",
+     "measured": {
+      "screw_length_mm": 8.0,
+      "grip_mm": 3.4,
+      "engaged_mm": 4.6,
+      "min_rule_mm": 3.0,
+      "pilot_depth_mm": 6.0,
+      "window_mm": [
+       6.4,
+       9.4
+      ]
+     },
+     "settled_by": "a sourced length inside the window, or a re-measurement of grip / pilot depth"
+    },
+    {
+     "check": "protrusion",
+     "verdict": "PASS",
+     "what": "the thread must stop inside the pilot, not emerge from the far face",
+     "measured": {
+      "engaged_mm": 4.6,
+      "pilot_depth_mm": 6.0,
+      "overshoot_mm": 0.0,
+      "chain_span_mm": [
+       -20.9,
+       14.0
+      ]
+     },
+     "settled_by": "a section view of that part, or a caliper on the boss depth"
+    },
+    {
+     "check": "driver access",
+     "verdict": "PASS",
+     "what": "a 1.5 mm across-flats hex key (ISO 4762) must reach the head; every bore above it must be at least that wide",
+     "measured": {
+      "key_af_mm": 1.5,
+      "bores_wide_enough": 2,
+      "bores_too_narrow": []
+     },
+     "settled_by": "cecad.install.driver_clearance() on the built solid, which sweeps the volume the key needs to turn \u2014 this check only compares diameters"
+    }
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "size": "M2",
+   "length_mm": 8.0,
+   "meshes": [
+    "xl330",
+    "yaw_roll_motion"
+   ],
+   "head_seat": "yaw_roll_motion/counterbore",
+   "pilot": "xl330 \u00d81.6",
+   "checks": [
+    {
+     "check": "head passes and seats",
+     "verdict": "PASS",
+     "what": "the head (dk max 3.800 mm) must pass down and seat in a \u00d84.400 mm bore 2.500 mm deep",
+     "measured": {
+      "bore_d_mm": 4.4,
+      "dk_max_mm": 3.8,
+      "clearance_mm": 0.6,
+      "bore_depth_mm": 2.5,
+      "dk_min_mm": 3.62,
+      "clearance_at_dk_min_mm": 0.78,
+      "mesh_fit_residual_mm": 0.0,
+      "bore_cover_deg": 355.0,
+      "deficit_vs_residual": "no deficit"
+     },
+     "settled_by": "A caliper on the printed bore. THE REFERENCE WORKS, so a negative clearance is first a modelling error: compare it against the mesh's own fit residual \u2014 where the residual is larger than the deficit the measurement cannot tell them apart and this is CANNOT DETERMINE, not a design flaw."
+    },
+    {
+     "check": "shank clears",
+     "verdict": "PASS",
+     "what": "every clearance/ambiguous hole on the run must be wider than the shank (\u00d82.00 mm)",
+     "measured": {
+      "holes_checked": 1,
+      "too_tight": []
+     },
+     "settled_by": "a hole narrower than the screw is either a pilot the classifier mis-sized or a different screw size on this line"
+    },
+    {
+     "check": "engagement",
+     "verdict": "PASS",
+     "what": "the screw must reach 1.5 d = 3.000 mm of thread (a RULE) and must not bottom in the 6.000 mm pilot (a MEASUREMENT)",
+     "measured": {
+      "screw_length_mm": 8.0,
+      "grip_mm": 3.4,
+      "engaged_mm": 4.6,
+      "min_rule_mm": 3.0,
+      "pilot_depth_mm": 6.0,
+      "window_mm": [
+       6.4,
+       9.4
+      ]
+     },
+     "settled_by": "a sourced length inside the window, or a re-measurement of grip / pilot depth"
+    },
+    {
+     "check": "protrusion",
+     "verdict": "PASS",
+     "what": "the thread must stop inside the pilot, not emerge from the far face",
+     "measured": {
+      "engaged_mm": 4.6,
+      "pilot_depth_mm": 6.0,
+      "overshoot_mm": 0.0,
+      "chain_span_mm": [
+       -20.9,
+       14.0
+      ]
+     },
+     "settled_by": "a section view of that part, or a caliper on the boss depth"
+    },
+    {
+     "check": "driver access",
+     "verdict": "PASS",
+     "what": "a 1.5 mm across-flats hex key (ISO 4762) must reach the head; every bore above it must be at least that wide",
+     "measured": {
+      "key_af_mm": 1.5,
+      "bores_wide_enough": 2,
+      "bores_too_narrow": []
+     },
+     "settled_by": "cecad.install.driver_clearance() on the built solid, which sweeps the volume the key needs to turn \u2014 this check only compares diameters"
+    }
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "size": "M2",
+   "length_mm": 8.0,
+   "meshes": [
+    "xl330",
+    "yaw_roll_motion"
+   ],
+   "head_seat": "yaw_roll_motion/counterbore",
+   "pilot": "xl330 \u00d81.6",
+   "checks": [
+    {
+     "check": "head passes and seats",
+     "verdict": "PASS",
+     "what": "the head (dk max 3.800 mm) must pass down and seat in a \u00d84.400 mm bore 1.500 mm deep",
+     "measured": {
+      "bore_d_mm": 4.4,
+      "dk_max_mm": 3.8,
+      "clearance_mm": 0.6,
+      "bore_depth_mm": 1.5,
+      "dk_min_mm": 3.62,
+      "clearance_at_dk_min_mm": 0.78,
+      "mesh_fit_residual_mm": 0.0,
+      "bore_cover_deg": 355.0,
+      "deficit_vs_residual": "no deficit"
+     },
+     "settled_by": "A caliper on the printed bore. THE REFERENCE WORKS, so a negative clearance is first a modelling error: compare it against the mesh's own fit residual \u2014 where the residual is larger than the deficit the measurement cannot tell them apart and this is CANNOT DETERMINE, not a design flaw."
+    },
+    {
+     "check": "shank clears",
+     "verdict": "PASS",
+     "what": "every clearance/ambiguous hole on the run must be wider than the shank (\u00d82.00 mm)",
+     "measured": {
+      "holes_checked": 1,
+      "too_tight": []
+     },
+     "settled_by": "a hole narrower than the screw is either a pilot the classifier mis-sized or a different screw size on this line"
+    },
+    {
+     "check": "engagement",
+     "verdict": "PASS",
+     "what": "the screw must reach 1.5 d = 3.000 mm of thread (a RULE) and must not bottom in the 6.000 mm pilot (a MEASUREMENT)",
+     "measured": {
+      "screw_length_mm": 8.0,
+      "grip_mm": 3.4,
+      "engaged_mm": 4.6,
+      "min_rule_mm": 3.0,
+      "pilot_depth_mm": 6.0,
+      "window_mm": [
+       6.4,
+       9.4
+      ]
+     },
+     "settled_by": "a sourced length inside the window, or a re-measurement of grip / pilot depth"
+    },
+    {
+     "check": "protrusion",
+     "verdict": "PASS",
+     "what": "the thread must stop inside the pilot, not emerge from the far face",
+     "measured": {
+      "engaged_mm": 4.6,
+      "pilot_depth_mm": 6.0,
+      "overshoot_mm": 0.0,
+      "chain_span_mm": [
+       -20.9,
+       13.0
+      ]
+     },
+     "settled_by": "a section view of that part, or a caliper on the boss depth"
+    },
+    {
+     "check": "driver access",
+     "verdict": "PASS",
+     "what": "a 1.5 mm across-flats hex key (ISO 4762) must reach the head; every bore above it must be at least that wide",
+     "measured": {
+      "key_af_mm": 1.5,
+      "bores_wide_enough": 2,
+      "bores_too_narrow": []
+     },
+     "settled_by": "cecad.install.driver_clearance() on the built solid, which sweeps the volume the key needs to turn \u2014 this check only compares diameters"
+    }
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "size": "M2",
+   "length_mm": 8.0,
+   "meshes": [
+    "xl330",
+    "yaw_roll_motion"
+   ],
+   "head_seat": "yaw_roll_motion/counterbore",
+   "pilot": "xl330 \u00d81.6",
+   "checks": [
+    {
+     "check": "head passes and seats",
+     "verdict": "PASS",
+     "what": "the head (dk max 3.800 mm) must pass down and seat in a \u00d84.400 mm bore 2.500 mm deep",
+     "measured": {
+      "bore_d_mm": 4.4,
+      "dk_max_mm": 3.8,
+      "clearance_mm": 0.6,
+      "bore_depth_mm": 2.5,
+      "dk_min_mm": 3.62,
+      "clearance_at_dk_min_mm": 0.78,
+      "mesh_fit_residual_mm": 0.0,
+      "bore_cover_deg": 355.0,
+      "deficit_vs_residual": "no deficit"
+     },
+     "settled_by": "A caliper on the printed bore. THE REFERENCE WORKS, so a negative clearance is first a modelling error: compare it against the mesh's own fit residual \u2014 where the residual is larger than the deficit the measurement cannot tell them apart and this is CANNOT DETERMINE, not a design flaw."
+    },
+    {
+     "check": "shank clears",
+     "verdict": "PASS",
+     "what": "every clearance/ambiguous hole on the run must be wider than the shank (\u00d82.00 mm)",
+     "measured": {
+      "holes_checked": 1,
+      "too_tight": []
+     },
+     "settled_by": "a hole narrower than the screw is either a pilot the classifier mis-sized or a different screw size on this line"
+    },
+    {
+     "check": "engagement",
+     "verdict": "PASS",
+     "what": "the screw must reach 1.5 d = 3.000 mm of thread (a RULE) and must not bottom in the 6.000 mm pilot (a MEASUREMENT)",
+     "measured": {
+      "screw_length_mm": 8.0,
+      "grip_mm": 3.4,
+      "engaged_mm": 4.6,
+      "min_rule_mm": 3.0,
+      "pilot_depth_mm": 6.0,
+      "window_mm": [
+       6.4,
+       9.4
+      ]
+     },
+     "settled_by": "a sourced length inside the window, or a re-measurement of grip / pilot depth"
+    },
+    {
+     "check": "protrusion",
+     "verdict": "PASS",
+     "what": "the thread must stop inside the pilot, not emerge from the far face",
+     "measured": {
+      "engaged_mm": 4.6,
+      "pilot_depth_mm": 6.0,
+      "overshoot_mm": 0.0,
+      "chain_span_mm": [
+       -20.9,
+       14.0
+      ]
+     },
+     "settled_by": "a section view of that part, or a caliper on the boss depth"
+    },
+    {
+     "check": "driver access",
+     "verdict": "PASS",
+     "what": "a 1.5 mm across-flats hex key (ISO 4762) must reach the head; every bore above it must be at least that wide",
+     "measured": {
+      "key_af_mm": 1.5,
+      "bores_wide_enough": 2,
+      "bores_too_narrow": []
+     },
+     "settled_by": "cecad.install.driver_clearance() on the built solid, which sweeps the volume the key needs to turn \u2014 this check only compares diameters"
+    }
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "size": "M2.5",
+   "length_mm": 8.0,
+   "meshes": [
+    "bottom_head_shell",
+    "top_head_shell"
+   ],
+   "head_seat": "bottom_head_shell/counterbore",
+   "pilot": "top_head_shell \u00d82.1",
+   "checks": [
+    {
+     "check": "head passes and seats",
+     "verdict": "PASS",
+     "what": "the head (dk max 4.500 mm) must pass down and seat in a \u00d85.500 mm bore 2.824 mm deep",
+     "measured": {
+      "bore_d_mm": 5.5,
+      "dk_max_mm": 4.5,
+      "clearance_mm": 1.0,
+      "bore_depth_mm": 2.824,
+      "dk_min_mm": 4.32,
+      "clearance_at_dk_min_mm": 1.18,
+      "mesh_fit_residual_mm": 0.0,
+      "bore_cover_deg": 355.0,
+      "deficit_vs_residual": "no deficit"
+     },
+     "settled_by": "A caliper on the printed bore. THE REFERENCE WORKS, so a negative clearance is first a modelling error: compare it against the mesh's own fit residual \u2014 where the residual is larger than the deficit the measurement cannot tell them apart and this is CANNOT DETERMINE, not a design flaw."
+    },
+    {
+     "check": "shank clears",
+     "verdict": "PASS",
+     "what": "every clearance/ambiguous hole on the run must be wider than the shank (\u00d82.50 mm)",
+     "measured": {
+      "holes_checked": 2,
+      "too_tight": []
+     },
+     "settled_by": "a hole narrower than the screw is either a pilot the classifier mis-sized or a different screw size on this line"
+    },
+    {
+     "check": "engagement",
+     "verdict": "PASS",
+     "what": "the screw must reach 1.5 d = 3.750 mm of thread (a RULE) and must not bottom in the 11.200 mm pilot (a MEASUREMENT)",
+     "measured": {
+      "screw_length_mm": 8.0,
+      "grip_mm": 2.804,
+      "engaged_mm": 5.196,
+      "min_rule_mm": 3.75,
+      "pilot_depth_mm": 11.2,
+      "window_mm": [
+       6.554,
+       14.004
+      ]
+     },
+     "settled_by": "a sourced length inside the window, or a re-measurement of grip / pilot depth"
+    },
+    {
+     "check": "protrusion",
+     "verdict": "PASS",
+     "what": "the thread must stop inside the pilot, not emerge from the far face",
+     "measured": {
+      "engaged_mm": 5.196,
+      "pilot_depth_mm": 11.2,
+      "overshoot_mm": 0.0,
+      "chain_span_mm": [
+       229.4866,
+       246.3146
+      ]
+     },
+     "settled_by": "a section view of that part, or a caliper on the boss depth"
+    },
+    {
+     "check": "driver access",
+     "verdict": "PASS",
+     "what": "a 2.0 mm across-flats hex key (ISO 4762) must reach the head; every bore above it must be at least that wide",
+     "measured": {
+      "key_af_mm": 2.0,
+      "bores_wide_enough": 3,
+      "bores_too_narrow": []
+     },
+     "settled_by": "cecad.install.driver_clearance() on the built solid, which sweeps the volume the key needs to turn \u2014 this check only compares diameters"
+    }
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "size": "M2.5",
+   "length_mm": 8.0,
+   "meshes": [
+    "bottom_head_shell",
+    "top_head_shell"
+   ],
+   "head_seat": "bottom_head_shell/counterbore",
+   "pilot": "top_head_shell \u00d82.1",
+   "checks": [
+    {
+     "check": "head passes and seats",
+     "verdict": "PASS",
+     "what": "the head (dk max 4.500 mm) must pass down and seat in a \u00d85.500 mm bore 2.824 mm deep",
+     "measured": {
+      "bore_d_mm": 5.5,
+      "dk_max_mm": 4.5,
+      "clearance_mm": 1.0,
+      "bore_depth_mm": 2.824,
+      "dk_min_mm": 4.32,
+      "clearance_at_dk_min_mm": 1.18,
+      "mesh_fit_residual_mm": 0.0,
+      "bore_cover_deg": 355.0,
+      "deficit_vs_residual": "no deficit"
+     },
+     "settled_by": "A caliper on the printed bore. THE REFERENCE WORKS, so a negative clearance is first a modelling error: compare it against the mesh's own fit residual \u2014 where the residual is larger than the deficit the measurement cannot tell them apart and this is CANNOT DETERMINE, not a design flaw."
+    },
+    {
+     "check": "shank clears",
+     "verdict": "PASS",
+     "what": "every clearance/ambiguous hole on the run must be wider than the shank (\u00d82.50 mm)",
+     "measured": {
+      "holes_checked": 2,
+      "too_tight": []
+     },
+     "settled_by": "a hole narrower than the screw is either a pilot the classifier mis-sized or a different screw size on this line"
+    },
+    {
+     "check": "engagement",
+     "verdict": "PASS",
+     "what": "the screw must reach 1.5 d = 3.750 mm of thread (a RULE) and must not bottom in the 11.200 mm pilot (a MEASUREMENT)",
+     "measured": {
+      "screw_length_mm": 8.0,
+      "grip_mm": 2.804,
+      "engaged_mm": 5.196,
+      "min_rule_mm": 3.75,
+      "pilot_depth_mm": 11.2,
+      "window_mm": [
+       6.554,
+       14.004
+      ]
+     },
+     "settled_by": "a sourced length inside the window, or a re-measurement of grip / pilot depth"
+    },
+    {
+     "check": "protrusion",
+     "verdict": "PASS",
+     "what": "the thread must stop inside the pilot, not emerge from the far face",
+     "measured": {
+      "engaged_mm": 5.196,
+      "pilot_depth_mm": 11.2,
+      "overshoot_mm": 0.0,
+      "chain_span_mm": [
+       229.4866,
+       246.3146
+      ]
+     },
+     "settled_by": "a section view of that part, or a caliper on the boss depth"
+    },
+    {
+     "check": "driver access",
+     "verdict": "PASS",
+     "what": "a 2.0 mm across-flats hex key (ISO 4762) must reach the head; every bore above it must be at least that wide",
+     "measured": {
+      "key_af_mm": 2.0,
+      "bores_wide_enough": 3,
+      "bores_too_narrow": []
+     },
+     "settled_by": "cecad.install.driver_clearance() on the built solid, which sweeps the volume the key needs to turn \u2014 this check only compares diameters"
+    }
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "size": "M2",
+   "length_mm": 12.0,
+   "meshes": [
+    "hip_l",
+    "xl330"
+   ],
+   "head_seat": "hip_l/ambiguous",
+   "pilot": "xl330 \u00d81.6",
+   "checks": [
+    {
+     "check": "head seats",
+     "verdict": "PASS",
+     "what": "the head lands on the outer FACE (no counterbore) and stands 2.000 mm proud",
+     "measured": {
+      "seat_class": "ambiguous",
+      "head_height_mm": 2.0
+     },
+     "settled_by": "a photograph of that face on a real unit: a head that should be flush and is not means the counterbore was not detected"
+    },
+    {
+     "check": "shank clears",
+     "verdict": "PASS",
+     "what": "every clearance/ambiguous hole on the run must be wider than the shank (\u00d82.00 mm)",
+     "measured": {
+      "holes_checked": 2,
+      "too_tight": []
+     },
+     "settled_by": "a hole narrower than the screw is either a pilot the classifier mis-sized or a different screw size on this line"
+    },
+    {
+     "check": "engagement",
+     "verdict": "PASS",
+     "what": "the screw must reach 1.5 d = 3.000 mm of thread (a RULE) and must not bottom in the 6.000 mm pilot (a MEASUREMENT)",
+     "measured": {
+      "screw_length_mm": 12.0,
+      "grip_mm": 8.2845,
+      "engaged_mm": 3.7155,
+      "min_rule_mm": 3.0,
+      "pilot_depth_mm": 6.0,
+      "window_mm": [
+       11.2845,
+       14.2845
+      ]
+     },
+     "settled_by": "a sourced length inside the window, or a re-measurement of grip / pilot depth"
+    },
+    {
+     "check": "protrusion",
+     "verdict": "PASS",
+     "what": "the thread must stop inside the pilot, not emerge from the far face",
+     "measured": {
+      "engaged_mm": 3.7155,
+      "pilot_depth_mm": 6.0,
+      "overshoot_mm": 0.0,
+      "chain_span_mm": [
+       -8.5,
+       28.7845
+      ]
+     },
+     "settled_by": "a section view of that part, or a caliper on the boss depth"
+    },
+    {
+     "check": "driver access",
+     "verdict": "PASS",
+     "what": "a 1.5 mm across-flats hex key (ISO 4762) must reach the head; every bore above it must be at least that wide",
+     "measured": {
+      "key_af_mm": 1.5,
+      "bores_wide_enough": 2,
+      "bores_too_narrow": []
+     },
+     "settled_by": "cecad.install.driver_clearance() on the built solid, which sweeps the volume the key needs to turn \u2014 this check only compares diameters"
+    }
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "size": "M2",
+   "length_mm": 12.0,
+   "meshes": [
+    "hip_l",
+    "xl330"
+   ],
+   "head_seat": "hip_l/ambiguous",
+   "pilot": "xl330 \u00d81.6",
+   "checks": [
+    {
+     "check": "head seats",
+     "verdict": "PASS",
+     "what": "the head lands on the outer FACE (no counterbore) and stands 2.000 mm proud",
+     "measured": {
+      "seat_class": "ambiguous",
+      "head_height_mm": 2.0
+     },
+     "settled_by": "a photograph of that face on a real unit: a head that should be flush and is not means the counterbore was not detected"
+    },
+    {
+     "check": "shank clears",
+     "verdict": "PASS",
+     "what": "every clearance/ambiguous hole on the run must be wider than the shank (\u00d82.00 mm)",
+     "measured": {
+      "holes_checked": 2,
+      "too_tight": []
+     },
+     "settled_by": "a hole narrower than the screw is either a pilot the classifier mis-sized or a different screw size on this line"
+    },
+    {
+     "check": "engagement",
+     "verdict": "PASS",
+     "what": "the screw must reach 1.5 d = 3.000 mm of thread (a RULE) and must not bottom in the 6.000 mm pilot (a MEASUREMENT)",
+     "measured": {
+      "screw_length_mm": 12.0,
+      "grip_mm": 8.339,
+      "engaged_mm": 3.661,
+      "min_rule_mm": 3.0,
+      "pilot_depth_mm": 6.0,
+      "window_mm": [
+       11.339,
+       14.339
+      ]
+     },
+     "settled_by": "a sourced length inside the window, or a re-measurement of grip / pilot depth"
+    },
+    {
+     "check": "protrusion",
+     "verdict": "PASS",
+     "what": "the thread must stop inside the pilot, not emerge from the far face",
+     "measured": {
+      "engaged_mm": 3.661,
+      "pilot_depth_mm": 6.0,
+      "overshoot_mm": 0.0,
+      "chain_span_mm": [
+       -8.5,
+       28.839
+      ]
+     },
+     "settled_by": "a section view of that part, or a caliper on the boss depth"
+    },
+    {
+     "check": "driver access",
+     "verdict": "PASS",
+     "what": "a 1.5 mm across-flats hex key (ISO 4762) must reach the head; every bore above it must be at least that wide",
+     "measured": {
+      "key_af_mm": 1.5,
+      "bores_wide_enough": 2,
+      "bores_too_narrow": []
+     },
+     "settled_by": "cecad.install.driver_clearance() on the built solid, which sweeps the volume the key needs to turn \u2014 this check only compares diameters"
+    }
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "size": "M2",
+   "length_mm": 5.0,
+   "meshes": [
+    "ankle_right",
+    "foot_right"
+   ],
+   "head_seat": "ankle_right/counterbore",
+   "pilot": "foot_right \u00d81.6",
+   "checks": [
+    {
+     "check": "head passes and seats",
+     "verdict": "PASS",
+     "what": "the head (dk max 3.800 mm) must pass down and seat in a \u00d84.400 mm bore 1.000 mm deep",
+     "measured": {
+      "bore_d_mm": 4.4,
+      "dk_max_mm": 3.8,
+      "clearance_mm": 0.6,
+      "bore_depth_mm": 1.0,
+      "dk_min_mm": 3.62,
+      "clearance_at_dk_min_mm": 0.78,
+      "mesh_fit_residual_mm": 0.0,
+      "bore_cover_deg": 355.0,
+      "deficit_vs_residual": "no deficit"
+     },
+     "settled_by": "A caliper on the printed bore. THE REFERENCE WORKS, so a negative clearance is first a modelling error: compare it against the mesh's own fit residual \u2014 where the residual is larger than the deficit the measurement cannot tell them apart and this is CANNOT DETERMINE, not a design flaw."
+    },
+    {
+     "check": "shank clears",
+     "verdict": "PASS",
+     "what": "every clearance/ambiguous hole on the run must be wider than the shank (\u00d82.00 mm)",
+     "measured": {
+      "holes_checked": 1,
+      "too_tight": []
+     },
+     "settled_by": "a hole narrower than the screw is either a pilot the classifier mis-sized or a different screw size on this line"
+    },
+    {
+     "check": "engagement",
+     "verdict": "PASS",
+     "what": "the screw must reach 1.5 d = 3.000 mm of thread (a RULE) and must not bottom in the 5.500 mm pilot (a MEASUREMENT)",
+     "measured": {
+      "screw_length_mm": 5.0,
+      "grip_mm": 2.0,
+      "engaged_mm": 3.0,
+      "min_rule_mm": 3.0,
+      "pilot_depth_mm": 5.5,
+      "window_mm": [
+       5.0,
+       7.5
+      ]
+     },
+     "settled_by": "a sourced length inside the window, or a re-measurement of grip / pilot depth"
+    },
+    {
+     "check": "protrusion",
+     "verdict": "PASS",
+     "what": "the thread must stop inside the pilot, not emerge from the far face",
+     "measured": {
+      "engaged_mm": 3.0,
+      "pilot_depth_mm": 5.5,
+      "overshoot_mm": 0.0,
+      "chain_span_mm": [
+       22.8809,
+       31.3809
+      ]
+     },
+     "settled_by": "a section view of that part, or a caliper on the boss depth"
+    },
+    {
+     "check": "driver access",
+     "verdict": "PASS",
+     "what": "a 1.5 mm across-flats hex key (ISO 4762) must reach the head; every bore above it must be at least that wide",
+     "measured": {
+      "key_af_mm": 1.5,
+      "bores_wide_enough": 3,
+      "bores_too_narrow": []
+     },
+     "settled_by": "cecad.install.driver_clearance() on the built solid, which sweeps the volume the key needs to turn \u2014 this check only compares diameters"
+    }
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "size": "M2",
+   "length_mm": 6.0,
+   "meshes": [
+    "hip_l",
+    "xl330"
+   ],
+   "head_seat": "hip_l/clearance",
+   "pilot": "xl330 \u00d81.6",
+   "checks": [
+    {
+     "check": "head seats",
+     "verdict": "PASS",
+     "what": "the head lands on the outer FACE (no counterbore) and stands 2.000 mm proud",
+     "measured": {
+      "seat_class": "clearance",
+      "head_height_mm": 2.0
+     },
+     "settled_by": "a photograph of that face on a real unit: a head that should be flush and is not means the counterbore was not detected"
+    },
+    {
+     "check": "shank clears",
+     "verdict": "PASS",
+     "what": "every clearance/ambiguous hole on the run must be wider than the shank (\u00d82.00 mm)",
+     "measured": {
+      "holes_checked": 1,
+      "too_tight": []
+     },
+     "settled_by": "a hole narrower than the screw is either a pilot the classifier mis-sized or a different screw size on this line"
+    },
+    {
+     "check": "engagement",
+     "verdict": "PASS",
+     "what": "the screw must reach 1.5 d = 3.000 mm of thread (a RULE) and must not bottom in the 6.000 mm pilot (a MEASUREMENT)",
+     "measured": {
+      "screw_length_mm": 6.0,
+      "grip_mm": 3.0,
+      "engaged_mm": 3.0,
+      "min_rule_mm": 3.0,
+      "pilot_depth_mm": 6.0,
+      "window_mm": [
+       6.0,
+       9.0
+      ]
+     },
+     "settled_by": "a sourced length inside the window, or a re-measurement of grip / pilot depth"
+    },
+    {
+     "check": "protrusion",
+     "verdict": "PASS",
+     "what": "the thread must stop inside the pilot, not emerge from the far face",
+     "measured": {
+      "engaged_mm": 3.0,
+      "pilot_depth_mm": 6.0,
+      "overshoot_mm": 0.0,
+      "chain_span_mm": [
+       -8.5,
+       23.5
+      ]
+     },
+     "settled_by": "a section view of that part, or a caliper on the boss depth"
+    },
+    {
+     "check": "driver access",
+     "verdict": "PASS",
+     "what": "a 1.5 mm across-flats hex key (ISO 4762) must reach the head; every bore above it must be at least that wide",
+     "measured": {
+      "key_af_mm": 1.5,
+      "bores_wide_enough": 1,
+      "bores_too_narrow": []
+     },
+     "settled_by": "cecad.install.driver_clearance() on the built solid, which sweeps the volume the key needs to turn \u2014 this check only compares diameters"
+    }
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "size": "M2",
+   "length_mm": 6.0,
+   "meshes": [
+    "hip_l",
+    "xl330"
+   ],
+   "head_seat": "hip_l/clearance",
+   "pilot": "xl330 \u00d81.6",
+   "checks": [
+    {
+     "check": "head seats",
+     "verdict": "PASS",
+     "what": "the head lands on the outer FACE (no counterbore) and stands 2.000 mm proud",
+     "measured": {
+      "seat_class": "clearance",
+      "head_height_mm": 2.0
+     },
+     "settled_by": "a photograph of that face on a real unit: a head that should be flush and is not means the counterbore was not detected"
+    },
+    {
+     "check": "shank clears",
+     "verdict": "PASS",
+     "what": "every clearance/ambiguous hole on the run must be wider than the shank (\u00d82.00 mm)",
+     "measured": {
+      "holes_checked": 1,
+      "too_tight": []
+     },
+     "settled_by": "a hole narrower than the screw is either a pilot the classifier mis-sized or a different screw size on this line"
+    },
+    {
+     "check": "engagement",
+     "verdict": "PASS",
+     "what": "the screw must reach 1.5 d = 3.000 mm of thread (a RULE) and must not bottom in the 6.000 mm pilot (a MEASUREMENT)",
+     "measured": {
+      "screw_length_mm": 6.0,
+      "grip_mm": 3.0,
+      "engaged_mm": 3.0,
+      "min_rule_mm": 3.0,
+      "pilot_depth_mm": 6.0,
+      "window_mm": [
+       6.0,
+       9.0
+      ]
+     },
+     "settled_by": "a sourced length inside the window, or a re-measurement of grip / pilot depth"
+    },
+    {
+     "check": "protrusion",
+     "verdict": "PASS",
+     "what": "the thread must stop inside the pilot, not emerge from the far face",
+     "measured": {
+      "engaged_mm": 3.0,
+      "pilot_depth_mm": 6.0,
+      "overshoot_mm": 0.0,
+      "chain_span_mm": [
+       -8.5,
+       23.5
+      ]
+     },
+     "settled_by": "a section view of that part, or a caliper on the boss depth"
+    },
+    {
+     "check": "driver access",
+     "verdict": "PASS",
+     "what": "a 1.5 mm across-flats hex key (ISO 4762) must reach the head; every bore above it must be at least that wide",
+     "measured": {
+      "key_af_mm": 1.5,
+      "bores_wide_enough": 1,
+      "bores_too_narrow": []
+     },
+     "settled_by": "cecad.install.driver_clearance() on the built solid, which sweeps the volume the key needs to turn \u2014 this check only compares diameters"
+    }
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "size": "M2",
+   "length_mm": 6.0,
+   "meshes": [
+    "hip_l",
+    "xl330"
+   ],
+   "head_seat": "hip_l/clearance",
+   "pilot": "xl330 \u00d81.6",
+   "checks": [
+    {
+     "check": "head seats",
+     "verdict": "PASS",
+     "what": "the head lands on the outer FACE (no counterbore) and stands 2.000 mm proud",
+     "measured": {
+      "seat_class": "clearance",
+      "head_height_mm": 2.0
+     },
+     "settled_by": "a photograph of that face on a real unit: a head that should be flush and is not means the counterbore was not detected"
+    },
+    {
+     "check": "shank clears",
+     "verdict": "PASS",
+     "what": "every clearance/ambiguous hole on the run must be wider than the shank (\u00d82.00 mm)",
+     "measured": {
+      "holes_checked": 1,
+      "too_tight": []
+     },
+     "settled_by": "a hole narrower than the screw is either a pilot the classifier mis-sized or a different screw size on this line"
+    },
+    {
+     "check": "engagement",
+     "verdict": "PASS",
+     "what": "the screw must reach 1.5 d = 3.000 mm of thread (a RULE) and must not bottom in the 6.000 mm pilot (a MEASUREMENT)",
+     "measured": {
+      "screw_length_mm": 6.0,
+      "grip_mm": 3.0,
+      "engaged_mm": 3.0,
+      "min_rule_mm": 3.0,
+      "pilot_depth_mm": 6.0,
+      "window_mm": [
+       6.0,
+       9.0
+      ]
+     },
+     "settled_by": "a sourced length inside the window, or a re-measurement of grip / pilot depth"
+    },
+    {
+     "check": "protrusion",
+     "verdict": "PASS",
+     "what": "the thread must stop inside the pilot, not emerge from the far face",
+     "measured": {
+      "engaged_mm": 3.0,
+      "pilot_depth_mm": 6.0,
+      "overshoot_mm": 0.0,
+      "chain_span_mm": [
+       -69.5,
+       -37.5
+      ]
+     },
+     "settled_by": "a section view of that part, or a caliper on the boss depth"
+    },
+    {
+     "check": "driver access",
+     "verdict": "PASS",
+     "what": "a 1.5 mm across-flats hex key (ISO 4762) must reach the head; every bore above it must be at least that wide",
+     "measured": {
+      "key_af_mm": 1.5,
+      "bores_wide_enough": 1,
+      "bores_too_narrow": []
+     },
+     "settled_by": "cecad.install.driver_clearance() on the built solid, which sweeps the volume the key needs to turn \u2014 this check only compares diameters"
+    }
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "size": "M2",
+   "length_mm": 6.0,
+   "meshes": [
+    "neck_pitch",
+    "xl330"
+   ],
+   "head_seat": "neck_pitch/clearance",
+   "pilot": "xl330 \u00d81.6",
+   "checks": [
+    {
+     "check": "head seats",
+     "verdict": "PASS",
+     "what": "the head lands on the outer FACE (no counterbore) and stands 2.000 mm proud",
+     "measured": {
+      "seat_class": "clearance",
+      "head_height_mm": 2.0
+     },
+     "settled_by": "a photograph of that face on a real unit: a head that should be flush and is not means the counterbore was not detected"
+    },
+    {
+     "check": "shank clears",
+     "verdict": "PASS",
+     "what": "every clearance/ambiguous hole on the run must be wider than the shank (\u00d82.00 mm)",
+     "measured": {
+      "holes_checked": 1,
+      "too_tight": []
+     },
+     "settled_by": "a hole narrower than the screw is either a pilot the classifier mis-sized or a different screw size on this line"
+    },
+    {
+     "check": "engagement",
+     "verdict": "PASS",
+     "what": "the screw must reach 1.5 d = 3.000 mm of thread (a RULE) and must not bottom in the 6.000 mm pilot (a MEASUREMENT)",
+     "measured": {
+      "screw_length_mm": 6.0,
+      "grip_mm": 2.9,
+      "engaged_mm": 3.1,
+      "min_rule_mm": 3.0,
+      "pilot_depth_mm": 6.0,
+      "window_mm": [
+       5.9,
+       8.9
+      ]
+     },
+     "settled_by": "a sourced length inside the window, or a re-measurement of grip / pilot depth"
+    },
+    {
+     "check": "protrusion",
+     "verdict": "PASS",
+     "what": "the thread must stop inside the pilot, not emerge from the far face",
+     "measured": {
+      "engaged_mm": 3.1,
+      "pilot_depth_mm": 6.0,
+      "overshoot_mm": 0.0,
+      "chain_span_mm": [
+       218.2146,
+       250.1146
+      ]
+     },
+     "settled_by": "a section view of that part, or a caliper on the boss depth"
+    },
+    {
+     "check": "driver access",
+     "verdict": "PASS",
+     "what": "a 1.5 mm across-flats hex key (ISO 4762) must reach the head; every bore above it must be at least that wide",
+     "measured": {
+      "key_af_mm": 1.5,
+      "bores_wide_enough": 1,
+      "bores_too_narrow": []
+     },
+     "settled_by": "cecad.install.driver_clearance() on the built solid, which sweeps the volume the key needs to turn \u2014 this check only compares diameters"
+    }
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "size": "M2",
+   "length_mm": 8.0,
+   "meshes": [
+    "jaw",
+    "xl330"
+   ],
+   "head_seat": "jaw/clearance",
+   "pilot": "xl330 \u00d81.6",
+   "checks": [
+    {
+     "check": "head seats",
+     "verdict": "PASS",
+     "what": "the head lands on the outer FACE (no counterbore) and stands 2.000 mm proud",
+     "measured": {
+      "seat_class": "clearance",
+      "head_height_mm": 2.0
+     },
+     "settled_by": "a photograph of that face on a real unit: a head that should be flush and is not means the counterbore was not detected"
+    },
+    {
+     "check": "shank clears",
+     "verdict": "PASS",
+     "what": "every clearance/ambiguous hole on the run must be wider than the shank (\u00d82.00 mm)",
+     "measured": {
+      "holes_checked": 1,
+      "too_tight": []
+     },
+     "settled_by": "a hole narrower than the screw is either a pilot the classifier mis-sized or a different screw size on this line"
+    },
+    {
+     "check": "engagement",
+     "verdict": "PASS",
+     "what": "the screw must reach 1.5 d = 3.000 mm of thread (a RULE) and must not bottom in the 6.000 mm pilot (a MEASUREMENT)",
+     "measured": {
+      "screw_length_mm": 8.0,
+      "grip_mm": 4.2585,
+      "engaged_mm": 3.7415,
+      "min_rule_mm": 3.0,
+      "pilot_depth_mm": 6.0,
+      "window_mm": [
+       7.2585,
+       10.2585
+      ]
+     },
+     "settled_by": "a sourced length inside the window, or a re-measurement of grip / pilot depth"
+    },
+    {
+     "check": "protrusion",
+     "verdict": "PASS",
+     "what": "the thread must stop inside the pilot, not emerge from the far face",
+     "measured": {
+      "engaged_mm": 3.7415,
+      "pilot_depth_mm": 6.0,
+      "overshoot_mm": 0.0,
+      "chain_span_mm": [
+       11.0,
+       44.2585
+      ]
+     },
+     "settled_by": "a section view of that part, or a caliper on the boss depth"
+    },
+    {
+     "check": "driver access",
+     "verdict": "PASS",
+     "what": "a 1.5 mm across-flats hex key (ISO 4762) must reach the head; every bore above it must be at least that wide",
+     "measured": {
+      "key_af_mm": 1.5,
+      "bores_wide_enough": 1,
+      "bores_too_narrow": []
+     },
+     "settled_by": "cecad.install.driver_clearance() on the built solid, which sweeps the volume the key needs to turn \u2014 this check only compares diameters"
+    }
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "size": "M2",
+   "length_mm": 8.0,
+   "meshes": [
+    "jaw",
+    "xl330"
+   ],
+   "head_seat": "jaw/clearance",
+   "pilot": "xl330 \u00d81.6",
+   "checks": [
+    {
+     "check": "head seats",
+     "verdict": "PASS",
+     "what": "the head lands on the outer FACE (no counterbore) and stands 2.000 mm proud",
+     "measured": {
+      "seat_class": "clearance",
+      "head_height_mm": 2.0
+     },
+     "settled_by": "a photograph of that face on a real unit: a head that should be flush and is not means the counterbore was not detected"
+    },
+    {
+     "check": "shank clears",
+     "verdict": "PASS",
+     "what": "every clearance/ambiguous hole on the run must be wider than the shank (\u00d82.00 mm)",
+     "measured": {
+      "holes_checked": 1,
+      "too_tight": []
+     },
+     "settled_by": "a hole narrower than the screw is either a pilot the classifier mis-sized or a different screw size on this line"
+    },
+    {
+     "check": "engagement",
+     "verdict": "PASS",
+     "what": "the screw must reach 1.5 d = 3.000 mm of thread (a RULE) and must not bottom in the 6.000 mm pilot (a MEASUREMENT)",
+     "measured": {
+      "screw_length_mm": 8.0,
+      "grip_mm": 4.324,
+      "engaged_mm": 3.676,
+      "min_rule_mm": 3.0,
+      "pilot_depth_mm": 6.0,
+      "window_mm": [
+       7.324,
+       10.324
+      ]
+     },
+     "settled_by": "a sourced length inside the window, or a re-measurement of grip / pilot depth"
+    },
+    {
+     "check": "protrusion",
+     "verdict": "PASS",
+     "what": "the thread must stop inside the pilot, not emerge from the far face",
+     "measured": {
+      "engaged_mm": 3.676,
+      "pilot_depth_mm": 6.0,
+      "overshoot_mm": 0.0,
+      "chain_span_mm": [
+       11.0,
+       44.324
+      ]
+     },
+     "settled_by": "a section view of that part, or a caliper on the boss depth"
+    },
+    {
+     "check": "driver access",
+     "verdict": "PASS",
+     "what": "a 1.5 mm across-flats hex key (ISO 4762) must reach the head; every bore above it must be at least that wide",
+     "measured": {
+      "key_af_mm": 1.5,
+      "bores_wide_enough": 1,
+      "bores_too_narrow": []
+     },
+     "settled_by": "cecad.install.driver_clearance() on the built solid, which sweeps the volume the key needs to turn \u2014 this check only compares diameters"
+    }
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "size": "M2",
+   "length_mm": 8.0,
+   "meshes": [
+    "jaw",
+    "xl330"
+   ],
+   "head_seat": "jaw/clearance",
+   "pilot": "xl330 \u00d81.6",
+   "checks": [
+    {
+     "check": "head seats",
+     "verdict": "PASS",
+     "what": "the head lands on the outer FACE (no counterbore) and stands 2.000 mm proud",
+     "measured": {
+      "seat_class": "clearance",
+      "head_height_mm": 2.0
+     },
+     "settled_by": "a photograph of that face on a real unit: a head that should be flush and is not means the counterbore was not detected"
+    },
+    {
+     "check": "shank clears",
+     "verdict": "PASS",
+     "what": "every clearance/ambiguous hole on the run must be wider than the shank (\u00d82.00 mm)",
+     "measured": {
+      "holes_checked": 1,
+      "too_tight": []
+     },
+     "settled_by": "a hole narrower than the screw is either a pilot the classifier mis-sized or a different screw size on this line"
+    },
+    {
+     "check": "engagement",
+     "verdict": "PASS",
+     "what": "the screw must reach 1.5 d = 3.000 mm of thread (a RULE) and must not bottom in the 6.000 mm pilot (a MEASUREMENT)",
+     "measured": {
+      "screw_length_mm": 8.0,
+      "grip_mm": 3.76,
+      "engaged_mm": 4.24,
+      "min_rule_mm": 3.0,
+      "pilot_depth_mm": 6.0,
+      "window_mm": [
+       6.76,
+       9.76
+      ]
+     },
+     "settled_by": "a sourced length inside the window, or a re-measurement of grip / pilot depth"
+    },
+    {
+     "check": "protrusion",
+     "verdict": "PASS",
+     "what": "the thread must stop inside the pilot, not emerge from the far face",
+     "measured": {
+      "engaged_mm": 4.24,
+      "pilot_depth_mm": 6.0,
+      "overshoot_mm": 0.0,
+      "chain_span_mm": [
+       11.0,
+       43.76
+      ]
+     },
+     "settled_by": "a section view of that part, or a caliper on the boss depth"
+    },
+    {
+     "check": "driver access",
+     "verdict": "PASS",
+     "what": "a 1.5 mm across-flats hex key (ISO 4762) must reach the head; every bore above it must be at least that wide",
+     "measured": {
+      "key_af_mm": 1.5,
+      "bores_wide_enough": 1,
+      "bores_too_narrow": []
+     },
+     "settled_by": "cecad.install.driver_clearance() on the built solid, which sweeps the volume the key needs to turn \u2014 this check only compares diameters"
+    }
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "size": "M2",
+   "length_mm": 8.0,
+   "meshes": [
+    "jaw",
+    "xl330"
+   ],
+   "head_seat": "jaw/clearance",
+   "pilot": "xl330 \u00d81.6",
+   "checks": [
+    {
+     "check": "head seats",
+     "verdict": "PASS",
+     "what": "the head lands on the outer FACE (no counterbore) and stands 2.000 mm proud",
+     "measured": {
+      "seat_class": "clearance",
+      "head_height_mm": 2.0
+     },
+     "settled_by": "a photograph of that face on a real unit: a head that should be flush and is not means the counterbore was not detected"
+    },
+    {
+     "check": "shank clears",
+     "verdict": "PASS",
+     "what": "every clearance/ambiguous hole on the run must be wider than the shank (\u00d82.00 mm)",
+     "measured": {
+      "holes_checked": 1,
+      "too_tight": []
+     },
+     "settled_by": "a hole narrower than the screw is either a pilot the classifier mis-sized or a different screw size on this line"
+    },
+    {
+     "check": "engagement",
+     "verdict": "PASS",
+     "what": "the screw must reach 1.5 d = 3.000 mm of thread (a RULE) and must not bottom in the 6.000 mm pilot (a MEASUREMENT)",
+     "measured": {
+      "screw_length_mm": 8.0,
+      "grip_mm": 3.6945,
+      "engaged_mm": 4.3055,
+      "min_rule_mm": 3.0,
+      "pilot_depth_mm": 6.0,
+      "window_mm": [
+       6.6945,
+       9.6945
+      ]
+     },
+     "settled_by": "a sourced length inside the window, or a re-measurement of grip / pilot depth"
+    },
+    {
+     "check": "protrusion",
+     "verdict": "PASS",
+     "what": "the thread must stop inside the pilot, not emerge from the far face",
+     "measured": {
+      "engaged_mm": 4.3055,
+      "pilot_depth_mm": 6.0,
+      "overshoot_mm": 0.0,
+      "chain_span_mm": [
+       11.0,
+       43.6945
+      ]
+     },
+     "settled_by": "a section view of that part, or a caliper on the boss depth"
+    },
+    {
+     "check": "driver access",
+     "verdict": "PASS",
+     "what": "a 1.5 mm across-flats hex key (ISO 4762) must reach the head; every bore above it must be at least that wide",
+     "measured": {
+      "key_af_mm": 1.5,
+      "bores_wide_enough": 1,
+      "bores_too_narrow": []
+     },
+     "settled_by": "cecad.install.driver_clearance() on the built solid, which sweeps the volume the key needs to turn \u2014 this check only compares diameters"
+    }
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "size": "M2.5",
+   "length_mm": 8.0,
+   "meshes": [
+    "bottom_head_shell",
+    "top_head_shell"
+   ],
+   "head_seat": "bottom_head_shell/clearance",
+   "pilot": "top_head_shell \u00d82.1",
+   "checks": [
+    {
+     "check": "head seats",
+     "verdict": "PASS",
+     "what": "the head lands on the outer FACE (no counterbore) and stands 2.500 mm proud",
+     "measured": {
+      "seat_class": "clearance",
+      "head_height_mm": 2.5
+     },
+     "settled_by": "a photograph of that face on a real unit: a head that should be flush and is not means the counterbore was not detected"
+    },
+    {
+     "check": "shank clears",
+     "verdict": "PASS",
+     "what": "every clearance/ambiguous hole on the run must be wider than the shank (\u00d82.50 mm)",
+     "measured": {
+      "holes_checked": 2,
+      "too_tight": []
+     },
+     "settled_by": "a hole narrower than the screw is either a pilot the classifier mis-sized or a different screw size on this line"
+    },
+    {
+     "check": "engagement",
+     "verdict": "PASS",
+     "what": "the screw must reach 1.5 d = 3.750 mm of thread (a RULE) and must not bottom in the 11.200 mm pilot (a MEASUREMENT)",
+     "measured": {
+      "screw_length_mm": 8.0,
+      "grip_mm": 2.8064,
+      "engaged_mm": 5.1936,
+      "min_rule_mm": 3.75,
+      "pilot_depth_mm": 11.2,
+      "window_mm": [
+       6.5564,
+       14.0064
+      ]
+     },
+     "settled_by": "a sourced length inside the window, or a re-measurement of grip / pilot depth"
+    },
+    {
+     "check": "protrusion",
+     "verdict": "PASS",
+     "what": "the thread must stop inside the pilot, not emerge from the far face",
+     "measured": {
+      "engaged_mm": 5.1936,
+      "pilot_depth_mm": 11.2,
+      "overshoot_mm": 0.0,
+      "chain_span_mm": [
+       232.3082,
+       246.3146
+      ]
+     },
+     "settled_by": "a section view of that part, or a caliper on the boss depth"
+    },
+    {
+     "check": "driver access",
+     "verdict": "PASS",
+     "what": "a 2.0 mm across-flats hex key (ISO 4762) must reach the head; every bore above it must be at least that wide",
+     "measured": {
+      "key_af_mm": 2.0,
+      "bores_wide_enough": 2,
+      "bores_too_narrow": []
+     },
+     "settled_by": "cecad.install.driver_clearance() on the built solid, which sweeps the volume the key needs to turn \u2014 this check only compares diameters"
+    }
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "size": "M2",
+   "length_mm": 6.0,
+   "meshes": [
+    "hip_l",
+    "xl330"
+   ],
+   "head_seat": "hip_l/clearance",
+   "pilot": "xl330 \u00d81.6",
+   "checks": [
+    {
+     "check": "head seats",
+     "verdict": "PASS",
+     "what": "the head lands on the outer FACE (no counterbore) and stands 2.000 mm proud",
+     "measured": {
+      "seat_class": "clearance",
+      "head_height_mm": 2.0
+     },
+     "settled_by": "a photograph of that face on a real unit: a head that should be flush and is not means the counterbore was not detected"
+    },
+    {
+     "check": "shank clears",
+     "verdict": "PASS",
+     "what": "every clearance/ambiguous hole on the run must be wider than the shank (\u00d82.00 mm)",
+     "measured": {
+      "holes_checked": 1,
+      "too_tight": []
+     },
+     "settled_by": "a hole narrower than the screw is either a pilot the classifier mis-sized or a different screw size on this line"
+    },
+    {
+     "check": "engagement",
+     "verdict": "PASS",
+     "what": "the screw must reach 1.5 d = 3.000 mm of thread (a RULE) and must not bottom in the 6.000 mm pilot (a MEASUREMENT)",
+     "measured": {
+      "screw_length_mm": 6.0,
+      "grip_mm": 3.0,
+      "engaged_mm": 3.0,
+      "min_rule_mm": 3.0,
+      "pilot_depth_mm": 6.0,
+      "window_mm": [
+       6.0,
+       9.0
+      ]
+     },
+     "settled_by": "a sourced length inside the window, or a re-measurement of grip / pilot depth"
+    },
+    {
+     "check": "protrusion",
+     "verdict": "PASS",
+     "what": "the thread must stop inside the pilot, not emerge from the far face",
+     "measured": {
+      "engaged_mm": 3.0,
+      "pilot_depth_mm": 6.0,
+      "overshoot_mm": 0.0,
+      "chain_span_mm": [
+       -8.5,
+       23.5
+      ]
+     },
+     "settled_by": "a section view of that part, or a caliper on the boss depth"
+    },
+    {
+     "check": "driver access",
+     "verdict": "PASS",
+     "what": "a 1.5 mm across-flats hex key (ISO 4762) must reach the head; every bore above it must be at least that wide",
+     "measured": {
+      "key_af_mm": 1.5,
+      "bores_wide_enough": 1,
+      "bores_too_narrow": []
+     },
+     "settled_by": "cecad.install.driver_clearance() on the built solid, which sweeps the volume the key needs to turn \u2014 this check only compares diameters"
+    }
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "size": "M2",
+   "length_mm": 6.0,
+   "meshes": [
+    "hip_l",
+    "xl330"
+   ],
+   "head_seat": "hip_l/clearance",
+   "pilot": "xl330 \u00d81.6",
+   "checks": [
+    {
+     "check": "head seats",
+     "verdict": "PASS",
+     "what": "the head lands on the outer FACE (no counterbore) and stands 2.000 mm proud",
+     "measured": {
+      "seat_class": "clearance",
+      "head_height_mm": 2.0
+     },
+     "settled_by": "a photograph of that face on a real unit: a head that should be flush and is not means the counterbore was not detected"
+    },
+    {
+     "check": "shank clears",
+     "verdict": "PASS",
+     "what": "every clearance/ambiguous hole on the run must be wider than the shank (\u00d82.00 mm)",
+     "measured": {
+      "holes_checked": 1,
+      "too_tight": []
+     },
+     "settled_by": "a hole narrower than the screw is either a pilot the classifier mis-sized or a different screw size on this line"
+    },
+    {
+     "check": "engagement",
+     "verdict": "PASS",
+     "what": "the screw must reach 1.5 d = 3.000 mm of thread (a RULE) and must not bottom in the 6.000 mm pilot (a MEASUREMENT)",
+     "measured": {
+      "screw_length_mm": 6.0,
+      "grip_mm": 3.0,
+      "engaged_mm": 3.0,
+      "min_rule_mm": 3.0,
+      "pilot_depth_mm": 6.0,
+      "window_mm": [
+       6.0,
+       9.0
+      ]
+     },
+     "settled_by": "a sourced length inside the window, or a re-measurement of grip / pilot depth"
+    },
+    {
+     "check": "protrusion",
+     "verdict": "PASS",
+     "what": "the thread must stop inside the pilot, not emerge from the far face",
+     "measured": {
+      "engaged_mm": 3.0,
+      "pilot_depth_mm": 6.0,
+      "overshoot_mm": 0.0,
+      "chain_span_mm": [
+       -8.5,
+       23.5
+      ]
+     },
+     "settled_by": "a section view of that part, or a caliper on the boss depth"
+    },
+    {
+     "check": "driver access",
+     "verdict": "PASS",
+     "what": "a 1.5 mm across-flats hex key (ISO 4762) must reach the head; every bore above it must be at least that wide",
+     "measured": {
+      "key_af_mm": 1.5,
+      "bores_wide_enough": 1,
+      "bores_too_narrow": []
+     },
+     "settled_by": "cecad.install.driver_clearance() on the built solid, which sweeps the volume the key needs to turn \u2014 this check only compares diameters"
+    }
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "size": "M2",
+   "length_mm": 5.0,
+   "meshes": [
+    "banana_pcb_locker",
+    "power_support"
+   ],
+   "head_seat": "banana_pcb_locker/clearance",
+   "pilot": "power_support \u00d81.636",
+   "checks": [
+    {
+     "check": "head seats",
+     "verdict": "PASS",
+     "what": "the head lands on the outer FACE (no counterbore) and stands 2.000 mm proud",
+     "measured": {
+      "seat_class": "clearance",
+      "head_height_mm": 2.0
+     },
+     "settled_by": "a photograph of that face on a real unit: a head that should be flush and is not means the counterbore was not detected"
+    },
+    {
+     "check": "shank clears",
+     "verdict": "PASS",
+     "what": "every clearance/ambiguous hole on the run must be wider than the shank (\u00d82.00 mm)",
+     "measured": {
+      "holes_checked": 1,
+      "too_tight": []
+     },
+     "settled_by": "a hole narrower than the screw is either a pilot the classifier mis-sized or a different screw size on this line"
+    },
+    {
+     "check": "engagement",
+     "verdict": "PASS",
+     "what": "the screw must reach 1.5 d = 3.000 mm of thread (a RULE) and must not bottom in the 7.800 mm pilot (a MEASUREMENT)",
+     "measured": {
+      "screw_length_mm": 5.0,
+      "grip_mm": 1.5,
+      "engaged_mm": 3.5,
+      "min_rule_mm": 3.0,
+      "pilot_depth_mm": 7.8,
+      "window_mm": [
+       4.5,
+       9.3
+      ]
+     },
+     "settled_by": "a sourced length inside the window, or a re-measurement of grip / pilot depth"
+    },
+    {
+     "check": "protrusion",
+     "verdict": "PASS",
+     "what": "the thread must stop inside the pilot, not emerge from the far face",
+     "measured": {
+      "engaged_mm": 3.5,
+      "pilot_depth_mm": 7.8,
+      "overshoot_mm": 0.0,
+      "chain_span_mm": [
+       -32.3,
+       -23.0
+      ]
+     },
+     "settled_by": "a section view of that part, or a caliper on the boss depth"
+    },
+    {
+     "check": "driver access",
+     "verdict": "PASS",
+     "what": "a 1.5 mm across-flats hex key (ISO 4762) must reach the head; every bore above it must be at least that wide",
+     "measured": {
+      "key_af_mm": 1.5,
+      "bores_wide_enough": 1,
+      "bores_too_narrow": []
+     },
+     "settled_by": "cecad.install.driver_clearance() on the built solid, which sweeps the volume the key needs to turn \u2014 this check only compares diameters"
+    }
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "size": "M2",
+   "length_mm": 5.0,
+   "meshes": [
+    "banana_pcb_locker",
+    "power_support"
+   ],
+   "head_seat": "banana_pcb_locker/clearance",
+   "pilot": "power_support \u00d81.636",
+   "checks": [
+    {
+     "check": "head seats",
+     "verdict": "PASS",
+     "what": "the head lands on the outer FACE (no counterbore) and stands 2.000 mm proud",
+     "measured": {
+      "seat_class": "clearance",
+      "head_height_mm": 2.0
+     },
+     "settled_by": "a photograph of that face on a real unit: a head that should be flush and is not means the counterbore was not detected"
+    },
+    {
+     "check": "shank clears",
+     "verdict": "PASS",
+     "what": "every clearance/ambiguous hole on the run must be wider than the shank (\u00d82.00 mm)",
+     "measured": {
+      "holes_checked": 1,
+      "too_tight": []
+     },
+     "settled_by": "a hole narrower than the screw is either a pilot the classifier mis-sized or a different screw size on this line"
+    },
+    {
+     "check": "engagement",
+     "verdict": "PASS",
+     "what": "the screw must reach 1.5 d = 3.000 mm of thread (a RULE) and must not bottom in the 7.800 mm pilot (a MEASUREMENT)",
+     "measured": {
+      "screw_length_mm": 5.0,
+      "grip_mm": 1.5,
+      "engaged_mm": 3.5,
+      "min_rule_mm": 3.0,
+      "pilot_depth_mm": 7.8,
+      "window_mm": [
+       4.5,
+       9.3
+      ]
+     },
+     "settled_by": "a sourced length inside the window, or a re-measurement of grip / pilot depth"
+    },
+    {
+     "check": "protrusion",
+     "verdict": "PASS",
+     "what": "the thread must stop inside the pilot, not emerge from the far face",
+     "measured": {
+      "engaged_mm": 3.5,
+      "pilot_depth_mm": 7.8,
+      "overshoot_mm": 0.0,
+      "chain_span_mm": [
+       -32.3,
+       -23.0
+      ]
+     },
+     "settled_by": "a section view of that part, or a caliper on the boss depth"
+    },
+    {
+     "check": "driver access",
+     "verdict": "PASS",
+     "what": "a 1.5 mm across-flats hex key (ISO 4762) must reach the head; every bore above it must be at least that wide",
+     "measured": {
+      "key_af_mm": 1.5,
+      "bores_wide_enough": 1,
+      "bores_too_narrow": []
+     },
+     "settled_by": "cecad.install.driver_clearance() on the built solid, which sweeps the volume the key needs to turn \u2014 this check only compares diameters"
+    }
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "size": "M2",
+   "length_mm": 4.0,
+   "meshes": [
+    "face_part"
+   ],
+   "head_seat": "face_part/clearance",
+   "pilot": "face_part \u00d81.6",
+   "checks": [
+    {
+     "check": "head seats",
+     "verdict": "PASS",
+     "what": "the head lands on the outer FACE (no counterbore) and stands 2.000 mm proud",
+     "measured": {
+      "seat_class": "clearance",
+      "head_height_mm": 2.0
+     },
+     "settled_by": "a photograph of that face on a real unit: a head that should be flush and is not means the counterbore was not detected"
+    },
+    {
+     "check": "shank clears",
+     "verdict": "PASS",
+     "what": "every clearance/ambiguous hole on the run must be wider than the shank (\u00d82.00 mm)",
+     "measured": {
+      "holes_checked": 1,
+      "too_tight": []
+     },
+     "settled_by": "a hole narrower than the screw is either a pilot the classifier mis-sized or a different screw size on this line"
+    },
+    {
+     "check": "engagement",
+     "verdict": "PASS",
+     "what": "the screw must reach 1.5 d = 3.000 mm of thread (a RULE) and must not bottom in the 4.250 mm pilot (a MEASUREMENT)",
+     "measured": {
+      "screw_length_mm": 4.0,
+      "grip_mm": 0.75,
+      "engaged_mm": 3.25,
+      "min_rule_mm": 3.0,
+      "pilot_depth_mm": 4.25,
+      "window_mm": [
+       3.75,
+       5.0
+      ]
+     },
+     "settled_by": "a sourced length inside the window, or a re-measurement of grip / pilot depth"
+    },
+    {
+     "check": "protrusion",
+     "verdict": "PASS",
+     "what": "the thread must stop inside the pilot, not emerge from the far face",
+     "measured": {
+      "engaged_mm": 3.25,
+      "pilot_depth_mm": 4.25,
+      "overshoot_mm": 0.0,
+      "chain_span_mm": [
+       72.9,
+       77.9
+      ]
+     },
+     "settled_by": "a section view of that part, or a caliper on the boss depth"
+    },
+    {
+     "check": "driver access",
+     "verdict": "PASS",
+     "what": "a 1.5 mm across-flats hex key (ISO 4762) must reach the head; every bore above it must be at least that wide",
+     "measured": {
+      "key_af_mm": 1.5,
+      "bores_wide_enough": 1,
+      "bores_too_narrow": []
+     },
+     "settled_by": "cecad.install.driver_clearance() on the built solid, which sweeps the volume the key needs to turn \u2014 this check only compares diameters"
+    }
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "size": "M2",
+   "length_mm": 4.0,
+   "meshes": [
+    "face_part"
+   ],
+   "head_seat": "face_part/clearance",
+   "pilot": "face_part \u00d81.6",
+   "checks": [
+    {
+     "check": "head seats",
+     "verdict": "PASS",
+     "what": "the head lands on the outer FACE (no counterbore) and stands 2.000 mm proud",
+     "measured": {
+      "seat_class": "clearance",
+      "head_height_mm": 2.0
+     },
+     "settled_by": "a photograph of that face on a real unit: a head that should be flush and is not means the counterbore was not detected"
+    },
+    {
+     "check": "shank clears",
+     "verdict": "PASS",
+     "what": "every clearance/ambiguous hole on the run must be wider than the shank (\u00d82.00 mm)",
+     "measured": {
+      "holes_checked": 1,
+      "too_tight": []
+     },
+     "settled_by": "a hole narrower than the screw is either a pilot the classifier mis-sized or a different screw size on this line"
+    },
+    {
+     "check": "engagement",
+     "verdict": "PASS",
+     "what": "the screw must reach 1.5 d = 3.000 mm of thread (a RULE) and must not bottom in the 4.250 mm pilot (a MEASUREMENT)",
+     "measured": {
+      "screw_length_mm": 4.0,
+      "grip_mm": 0.75,
+      "engaged_mm": 3.25,
+      "min_rule_mm": 3.0,
+      "pilot_depth_mm": 4.25,
+      "window_mm": [
+       3.75,
+       5.0
+      ]
+     },
+     "settled_by": "a sourced length inside the window, or a re-measurement of grip / pilot depth"
+    },
+    {
+     "check": "protrusion",
+     "verdict": "PASS",
+     "what": "the thread must stop inside the pilot, not emerge from the far face",
+     "measured": {
+      "engaged_mm": 3.25,
+      "pilot_depth_mm": 4.25,
+      "overshoot_mm": 0.0,
+      "chain_span_mm": [
+       72.9,
+       77.9
+      ]
+     },
+     "settled_by": "a section view of that part, or a caliper on the boss depth"
+    },
+    {
+     "check": "driver access",
+     "verdict": "PASS",
+     "what": "a 1.5 mm across-flats hex key (ISO 4762) must reach the head; every bore above it must be at least that wide",
+     "measured": {
+      "key_af_mm": 1.5,
+      "bores_wide_enough": 1,
+      "bores_too_narrow": []
+     },
+     "settled_by": "cecad.install.driver_clearance() on the built solid, which sweeps the volume the key needs to turn \u2014 this check only compares diameters"
+    }
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "size": "M2",
+   "length_mm": 4.0,
+   "meshes": [
+    "face_part"
+   ],
+   "head_seat": "face_part/clearance",
+   "pilot": "face_part \u00d81.6",
+   "checks": [
+    {
+     "check": "head seats",
+     "verdict": "PASS",
+     "what": "the head lands on the outer FACE (no counterbore) and stands 2.000 mm proud",
+     "measured": {
+      "seat_class": "clearance",
+      "head_height_mm": 2.0
+     },
+     "settled_by": "a photograph of that face on a real unit: a head that should be flush and is not means the counterbore was not detected"
+    },
+    {
+     "check": "shank clears",
+     "verdict": "PASS",
+     "what": "every clearance/ambiguous hole on the run must be wider than the shank (\u00d82.00 mm)",
+     "measured": {
+      "holes_checked": 1,
+      "too_tight": []
+     },
+     "settled_by": "a hole narrower than the screw is either a pilot the classifier mis-sized or a different screw size on this line"
+    },
+    {
+     "check": "engagement",
+     "verdict": "PASS",
+     "what": "the screw must reach 1.5 d = 3.000 mm of thread (a RULE) and must not bottom in the 4.250 mm pilot (a MEASUREMENT)",
+     "measured": {
+      "screw_length_mm": 4.0,
+      "grip_mm": 0.75,
+      "engaged_mm": 3.25,
+      "min_rule_mm": 3.0,
+      "pilot_depth_mm": 4.25,
+      "window_mm": [
+       3.75,
+       5.0
+      ]
+     },
+     "settled_by": "a sourced length inside the window, or a re-measurement of grip / pilot depth"
+    },
+    {
+     "check": "protrusion",
+     "verdict": "PASS",
+     "what": "the thread must stop inside the pilot, not emerge from the far face",
+     "measured": {
+      "engaged_mm": 3.25,
+      "pilot_depth_mm": 4.25,
+      "overshoot_mm": 0.0,
+      "chain_span_mm": [
+       72.9,
+       77.9
+      ]
+     },
+     "settled_by": "a section view of that part, or a caliper on the boss depth"
+    },
+    {
+     "check": "driver access",
+     "verdict": "PASS",
+     "what": "a 1.5 mm across-flats hex key (ISO 4762) must reach the head; every bore above it must be at least that wide",
+     "measured": {
+      "key_af_mm": 1.5,
+      "bores_wide_enough": 1,
+      "bores_too_narrow": []
+     },
+     "settled_by": "cecad.install.driver_clearance() on the built solid, which sweeps the volume the key needs to turn \u2014 this check only compares diameters"
+    }
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "size": "M2",
+   "length_mm": 4.0,
+   "meshes": [
+    "face_part"
+   ],
+   "head_seat": "face_part/clearance",
+   "pilot": "face_part \u00d81.6",
+   "checks": [
+    {
+     "check": "head seats",
+     "verdict": "PASS",
+     "what": "the head lands on the outer FACE (no counterbore) and stands 2.000 mm proud",
+     "measured": {
+      "seat_class": "clearance",
+      "head_height_mm": 2.0
+     },
+     "settled_by": "a photograph of that face on a real unit: a head that should be flush and is not means the counterbore was not detected"
+    },
+    {
+     "check": "shank clears",
+     "verdict": "PASS",
+     "what": "every clearance/ambiguous hole on the run must be wider than the shank (\u00d82.00 mm)",
+     "measured": {
+      "holes_checked": 1,
+      "too_tight": []
+     },
+     "settled_by": "a hole narrower than the screw is either a pilot the classifier mis-sized or a different screw size on this line"
+    },
+    {
+     "check": "engagement",
+     "verdict": "PASS",
+     "what": "the screw must reach 1.5 d = 3.000 mm of thread (a RULE) and must not bottom in the 4.250 mm pilot (a MEASUREMENT)",
+     "measured": {
+      "screw_length_mm": 4.0,
+      "grip_mm": 0.75,
+      "engaged_mm": 3.25,
+      "min_rule_mm": 3.0,
+      "pilot_depth_mm": 4.25,
+      "window_mm": [
+       3.75,
+       5.0
+      ]
+     },
+     "settled_by": "a sourced length inside the window, or a re-measurement of grip / pilot depth"
+    },
+    {
+     "check": "protrusion",
+     "verdict": "PASS",
+     "what": "the thread must stop inside the pilot, not emerge from the far face",
+     "measured": {
+      "engaged_mm": 3.25,
+      "pilot_depth_mm": 4.25,
+      "overshoot_mm": 0.0,
+      "chain_span_mm": [
+       72.9,
+       77.9
+      ]
+     },
+     "settled_by": "a section view of that part, or a caliper on the boss depth"
+    },
+    {
+     "check": "driver access",
+     "verdict": "PASS",
+     "what": "a 1.5 mm across-flats hex key (ISO 4762) must reach the head; every bore above it must be at least that wide",
+     "measured": {
+      "key_af_mm": 1.5,
+      "bores_wide_enough": 1,
+      "bores_too_narrow": []
+     },
+     "settled_by": "cecad.install.driver_clearance() on the built solid, which sweeps the volume the key needs to turn \u2014 this check only compares diameters"
+    }
+   ],
+   "verdict": "PASS"
+  }
+ ]
+}

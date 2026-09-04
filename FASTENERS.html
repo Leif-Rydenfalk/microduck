@@ -34,31 +34,32 @@
 </header>
 
 <div class="statbar">
-  <div class="stat"><b>68</b><span>screws placed through a connection</span></div>
-  <div class="stat"><b>70 &rarr; 138</b><span>placements in the assembly</span></div>
-  <div class="stat"><b>68</b><span>fastener pieces on the BOM (was 0)</span></div>
+  <div class="stat"><b>64</b><span>screws placed through a connection</span></div>
+  <div class="stat"><b>70 &rarr; 134</b><span>placements in the assembly</span></div>
+  <div class="stat"><b>64</b><span>fastener pieces on the BOM (was 0)</span></div>
   <div class="stat"><b>0.000000000 mm</b><span>worst placement error</span></div>
+  <div class="stat"><b>322</b><span>physical checks, 0 FAIL</span></div>
   <div class="stat"><b>0</b><span>ball joints found</span></div>
 </div>
 
 <nav class="toc">
   <a href="#answer">1 Verdict</a><a href="#bom">2 The BOM</a><a href="#placed">3 Every screw</a>
-  <a href="#refused">4 What is not determined</a><a href="#ball">5 Ball joints</a>
-  <a href="#parts">6 The screw parts</a><a href="#method">7 Method</a>
+  <a href="#audit">4 Does it work?</a><a href="#refused">5 What is not determined</a>
+  <a href="#ball">6 Ball joints</a><a href="#parts">7 The screw parts</a><a href="#method">8 Method</a>
 </nav>
 
 <section id="answer">
   <h2><span class="n">1</span>Verdict</h2>
   <div class="verdict">
-    <b>68 screws are in the assembly and every one arrived through a connection.</b>
-    <code>placements.json</code> went from 70 rows to 138; <code>bom.json</code>
-    from 38 rows with <b>zero fasteners</b> to 46 rows carrying 68 pieces.
+    <b>64 screws are in the assembly and every one arrived through a connection.</b>
+    <code>placements.json</code> went from 70 rows to 134; <code>bom.json</code>
+    from 38 rows with <b>zero fasteners</b> to 45 rows carrying 64 pieces.
     Each placement was re-checked by pushing the screw&rsquo;s own local origin and shank axis
     back through the transform <code>mate()</code> produced: worst error
     <b>0.000000000&nbsp;mm</b> and
-    <b>0.000000000&nbsp;deg</b> over all 68. That check has been seen
+    <b>0.000000000&nbsp;deg</b> over all 64. That check has been seen
     to fail — <code>CE_PLACE_BREAK=1</code> un-flips the pilot frame and refuses all
-    68 at 180.0&nbsp;deg.
+    64 at 180.0&nbsp;deg.
   </div>
   <div class="verdict">
     <b>Two methods agree on what this robot is bolted with.</b> Ours reads coaxial chains through
@@ -94,7 +95,7 @@
 </section>
 
 <section id="bom">
-  <h2><span class="n">2</span>The fastener BOM — 8 lines, 68 pieces</h2>
+  <h2><span class="n">2</span>The fastener BOM — 7 lines, 64 pieces</h2>
   <p class="lede">Every line is a count of MEASURED screw runs at that length, not an estimate
   with a loss allowance. Quantities for a build must add a loss allowance on top of these.</p>
   <div class="tw"><table class="data">
@@ -109,7 +110,6 @@
 <tr><td><code>part:screw-m2-iso4762</code></td><td class="n">8</td><td class="n">12</td><td>12 screw run(s) MEASURED at this length. Head seats on: right_shell x4, yaw_roll_motion x4, jaw x4. Length chosen as the shortest sourced ISO 4762 length inside each run&#x27;s measured window [grip + 1.5 d, grip + measured pilot depth].</td></tr>
 <tr><td><code>part:screw-m2-iso4762</code></td><td class="n">10</td><td class="n">8</td><td>8 screw run(s) MEASURED at this length. Head seats on: hip_l x7, right_shell x1. Length chosen as the shortest sourced ISO 4762 length inside each run&#x27;s measured window [grip + 1.5 d, grip + measured pilot depth].</td></tr>
 <tr><td><code>part:screw-m2-iso4762</code></td><td class="n">12</td><td class="n">4</td><td>4 screw run(s) MEASURED at this length. Head seats on: hip_l x4. Length chosen as the shortest sourced ISO 4762 length inside each run&#x27;s measured window [grip + 1.5 d, grip + measured pilot depth].</td></tr>
-<tr><td><code>part:screw-m2.5-iso4762</code></td><td class="n">5</td><td class="n">4</td><td>4 screw run(s) MEASURED at this length. Head seats on: bearing_roll x4. Length chosen as the shortest sourced ISO 4762 length inside each run&#x27;s measured window [grip + 1.5 d, grip + measured pilot depth].</td></tr>
 <tr><td><code>part:screw-m2.5-iso4762</code></td><td class="n">8</td><td class="n">3</td><td>3 screw run(s) MEASURED at this length. Head seats on: bottom_head_shell x3. Length chosen as the shortest sourced ISO 4762 length inside each run&#x27;s measured window [grip + 1.5 d, grip + measured pilot depth].</td></tr>
     </tbody></table></div>
 </section>
@@ -123,7 +123,7 @@
   <i>measurement</i> (the point the screw bottoms and stops clamping). The length taken is the
   shortest sourced ISO 4762 length inside it.</p>
   <div class="tw"><table class="data">
-    <caption>Table 2. All 68 placed fasteners. Source:
+    <caption>Table 2. All 64 placed fasteners. Source:
       <code>out/fasteners/placed.json</code>.</caption>
     <thead><tr><th class="n">#</th><th>Screw</th><th>Connection</th><th>Head seats on</th>
       <th>Threads into</th><th class="n">Grip</th><th class="n">Engage</th>
@@ -190,51 +190,93 @@
 <tr><td class="n">57</td><td>M2&nbsp;&times;&nbsp;6</td><td><code>connection:threaded-m2</code></td><td>hip_l <span class="dim">(clearance)</span></td><td>xl330 <span class="dim">&Oslash;1.6</span></td><td class="n">3.0000</td><td class="n">6.0000</td><td class="n">[6.000, 9.000]</td><td class="n">23.5, -11.5, 102.5</td><td><span class="chip pass">PASS</span></td></tr>
 <tr><td class="n">58</td><td>M2&nbsp;&times;&nbsp;5</td><td><code>connection:self-tap-m2-pla</code></td><td>banana_pcb_locker <span class="dim">(clearance)</span></td><td>power_support <span class="dim">&Oslash;1.636</span></td><td class="n">1.5000</td><td class="n">7.8000</td><td class="n">[4.500, 9.300]</td><td class="n">-32.3, 25.0, 156.1</td><td><span class="chip pass">PASS</span></td></tr>
 <tr><td class="n">59</td><td>M2&nbsp;&times;&nbsp;5</td><td><code>connection:self-tap-m2-pla</code></td><td>banana_pcb_locker <span class="dim">(clearance)</span></td><td>power_support <span class="dim">&Oslash;1.636</span></td><td class="n">1.5000</td><td class="n">7.8000</td><td class="n">[4.500, 9.300]</td><td class="n">-32.3, -25.0, 156.1</td><td><span class="chip pass">PASS</span></td></tr>
-<tr><td class="n">60</td><td>M2.5&nbsp;&times;&nbsp;5</td><td><code>connection:self-tap-m2.5-pla</code></td><td>bearing_roll <span class="dim">(clearance)</span></td><td>yaw2roll <span class="dim">&Oslash;2.05</span></td><td class="n">1.1974</td><td class="n">4.0000</td><td class="n">[4.947, 5.197]</td><td class="n">18.5, 26.5, 115.0</td><td><span class="chip pass">PASS</span></td></tr>
-<tr><td class="n">61</td><td>M2.5&nbsp;&times;&nbsp;5</td><td><code>connection:self-tap-m2.5-pla</code></td><td>bearing_roll <span class="dim">(clearance)</span></td><td>yaw2roll <span class="dim">&Oslash;2.05</span></td><td class="n">1.2008</td><td class="n">4.0000</td><td class="n">[4.951, 5.201]</td><td class="n">18.5, 8.5, 115.0</td><td><span class="chip pass">PASS</span></td></tr>
-<tr><td class="n">62</td><td>M2&nbsp;&times;&nbsp;4</td><td><code>connection:self-tap-m2-pla</code></td><td>face_part <span class="dim">(clearance)</span></td><td>face_part <span class="dim">&Oslash;1.6</span></td><td class="n">0.7500</td><td class="n">4.2500</td><td class="n">[3.750, 5.000]</td><td class="n">72.9, -6.8, 261.6</td><td><span class="chip pass">PASS</span></td></tr>
-<tr><td class="n">63</td><td>M2&nbsp;&times;&nbsp;4</td><td><code>connection:self-tap-m2-pla</code></td><td>face_part <span class="dim">(clearance)</span></td><td>face_part <span class="dim">&Oslash;1.6</span></td><td class="n">0.7500</td><td class="n">4.2500</td><td class="n">[3.750, 5.000]</td><td class="n">72.9, 6.7, 261.6</td><td><span class="chip pass">PASS</span></td></tr>
-<tr><td class="n">64</td><td>M2&nbsp;&times;&nbsp;4</td><td><code>connection:self-tap-m2-pla</code></td><td>face_part <span class="dim">(clearance)</span></td><td>face_part <span class="dim">&Oslash;1.6</span></td><td class="n">0.7500</td><td class="n">4.2500</td><td class="n">[3.750, 5.000]</td><td class="n">72.9, 6.7, 240.6</td><td><span class="chip pass">PASS</span></td></tr>
-<tr><td class="n">65</td><td>M2&nbsp;&times;&nbsp;4</td><td><code>connection:self-tap-m2-pla</code></td><td>face_part <span class="dim">(clearance)</span></td><td>face_part <span class="dim">&Oslash;1.6</span></td><td class="n">0.7500</td><td class="n">4.2500</td><td class="n">[3.750, 5.000]</td><td class="n">72.9, -6.8, 240.6</td><td><span class="chip pass">PASS</span></td></tr>
-<tr><td class="n">66</td><td>M2.5&nbsp;&times;&nbsp;5</td><td><code>connection:self-tap-m2.5-pla</code></td><td>bearing_roll <span class="dim">(clearance)</span></td><td>yaw2roll <span class="dim">&Oslash;2.05</span></td><td class="n">1.2009</td><td class="n">4.0000</td><td class="n">[4.951, 5.201]</td><td class="n">18.5, -8.5, 115.0</td><td><span class="chip pass">PASS</span></td></tr>
-<tr><td class="n">67</td><td>M2.5&nbsp;&times;&nbsp;5</td><td><code>connection:self-tap-m2.5-pla</code></td><td>bearing_roll <span class="dim">(clearance)</span></td><td>yaw2roll <span class="dim">&Oslash;2.05</span></td><td class="n">1.1973</td><td class="n">4.0000</td><td class="n">[4.947, 5.197]</td><td class="n">18.5, -26.5, 115.0</td><td><span class="chip pass">PASS</span></td></tr>
+<tr><td class="n">60</td><td>M2&nbsp;&times;&nbsp;4</td><td><code>connection:self-tap-m2-pla</code></td><td>face_part <span class="dim">(clearance)</span></td><td>face_part <span class="dim">&Oslash;1.6</span></td><td class="n">0.7500</td><td class="n">4.2500</td><td class="n">[3.750, 5.000]</td><td class="n">72.9, -6.8, 261.6</td><td><span class="chip pass">PASS</span></td></tr>
+<tr><td class="n">61</td><td>M2&nbsp;&times;&nbsp;4</td><td><code>connection:self-tap-m2-pla</code></td><td>face_part <span class="dim">(clearance)</span></td><td>face_part <span class="dim">&Oslash;1.6</span></td><td class="n">0.7500</td><td class="n">4.2500</td><td class="n">[3.750, 5.000]</td><td class="n">72.9, 6.7, 261.6</td><td><span class="chip pass">PASS</span></td></tr>
+<tr><td class="n">62</td><td>M2&nbsp;&times;&nbsp;4</td><td><code>connection:self-tap-m2-pla</code></td><td>face_part <span class="dim">(clearance)</span></td><td>face_part <span class="dim">&Oslash;1.6</span></td><td class="n">0.7500</td><td class="n">4.2500</td><td class="n">[3.750, 5.000]</td><td class="n">72.9, 6.7, 240.6</td><td><span class="chip pass">PASS</span></td></tr>
+<tr><td class="n">63</td><td>M2&nbsp;&times;&nbsp;4</td><td><code>connection:self-tap-m2-pla</code></td><td>face_part <span class="dim">(clearance)</span></td><td>face_part <span class="dim">&Oslash;1.6</span></td><td class="n">0.7500</td><td class="n">4.2500</td><td class="n">[3.750, 5.000]</td><td class="n">72.9, -6.8, 240.6</td><td><span class="chip pass">PASS</span></td></tr>
     </tbody></table></div>
 </section>
 
+<section id="audit">
+  <h2><span class="n">4</span>Does this fastening actually work? 322 physical checks</h2>
+  <div class="verdict"><b>63 of 64
+  runs pass every check; 0 FAIL and
+  1 CANNOT DETERMINE.</b>
+  THE REAL MICRODUCK WORKS. A failing row is FIRST a place our model is wrong, not a design flaw. Every row names the measurement that separates the two, and nothing here moves the model away from the reference.</div>
+  <div class="tw"><table class="data">
+    <caption>Table 3. Eight questions, asked of every run. Source:
+      <code>out/fasteners/audit.json</code>, generated by
+      <code>tools/fastener_audit.py</code>.</caption>
+    <thead><tr><th>Check</th><th>What it asks</th><th class="n">PASS</th><th class="n">FAIL</th>
+      <th class="n">CANNOT&nbsp;DETERMINE</th></tr></thead>
+    <tbody>
+<tr><td>driver access</td><td>a 1.5 mm across-flats hex key (ISO 4762) must reach the head; every bore above it must be at least that wide</td><td class="n">64</td><td class="n">0</td><td class="n">0</td></tr>
+<tr><td>engagement</td><td>the screw must reach 1.5 d = 3.000 mm of thread (a RULE) and must not bottom in the 6.000 mm pilot (a MEASUREMENT)</td><td class="n">64</td><td class="n">0</td><td class="n">0</td></tr>
+<tr><td>head passes and seats</td><td>the head (dk max 3.800 mm) must pass down and seat in a Ø5.229 mm bore 0.213 mm deep</td><td class="n">28</td><td class="n">0</td><td class="n">1</td></tr>
+<tr><td>head seats</td><td>the head lands on the outer FACE (no counterbore) and stands 2.000 mm proud</td><td class="n">35</td><td class="n">0</td><td class="n">0</td></tr>
+<tr><td>protrusion</td><td>the thread must stop inside the pilot, not emerge from the far face</td><td class="n">64</td><td class="n">0</td><td class="n">0</td></tr>
+<tr><td>shank clears</td><td>every clearance/ambiguous hole on the run must be wider than the shank (Ø2.00 mm)</td><td class="n">64</td><td class="n">0</td><td class="n">0</td></tr>
+<tr><td>duplicate <span class="dim">(assembly-wide)</span></td><td>no two screws claim the same head point</td><td class="n">1</td><td class="n">0</td><td class="n">0</td></tr>
+<tr><td>head clash <span class="dim">(assembly-wide)</span></td><td>no two screw heads overlap; two heads clear when their centres are further apart than the mean of their head radii sum, i.e. (dk_a + dk_b)/2</td><td class="n">1</td><td class="n">0</td><td class="n">0</td></tr>
+    </tbody></table></div>
+  <div class="tw"><table class="data">
+    <caption>Table 4. Every row that is not a PASS, with the number behind it and what settles
+      it.</caption>
+    <thead><tr><th>Screw</th><th>Where</th><th>Check</th><th>Verdict</th><th>Measured</th>
+      <th>What settles it</th></tr></thead>
+    <tbody>
+<tr><td>M2&nbsp;&times;&nbsp;10</td><td><code>left_shell/right_shell</code></td><td>head passes and seats</td><td><span class="chip cd">CANNOT DETERMINE</span></td><td><code>{&quot;bore_d_mm&quot;: 3.788, &quot;dk_max_mm&quot;: 3.8, &quot;clearance_mm&quot;: -0.012, &quot;bore_depth_mm&quot;: 26.237, &quot;dk_min_mm&quot;: 3.62, &quot;clearance_at_dk_min_mm&quot;: 0.168, &quot;mesh_fit_residual_mm&quot;: 0.0316, &quot;bore_cover_deg&quot;: 355.8, &quot;deficit_vs_residual&quot;: &quot;deficit 0.0120 mm is INSIDE the patch&#x27;s own 0.0316 mm fit residual \u2014 the instrument cannot separate them&quot;}</code></td><td>A caliper on the printed bore. THE REFERENCE WORKS, so a negative clearance is first a modelling error: compare it against the mesh&#x27;s own fit residual — where the residual is larger than the deficit the measurement cannot tell them apart and this is CANNOT DETERMINE, not a design flaw.</td></tr>
+    </tbody></table></div>
+  <p class="note"><b>Two readings were caught by these checks and both changed the model.</b>
+  (1) Four runs <code>bearing_roll</code>&nbsp;&rarr;&nbsp;<code>yaw2roll</code> came out
+  M2.5&nbsp;&times;&nbsp;5 because the per-hole classifier&rsquo;s labels were settled by a
+  majority vote &mdash; one &Oslash;2.05 pilot outvoting one &Oslash;2.2 clearance &mdash; and an
+  M2.5 shank is &Oslash;2.50 and cannot pass a &Oslash;2.2 hole. The size is now DERIVED from the
+  holes: the shank must clear the tightest clearance on the chain and exceed the pilot it bites.
+  Ten chains now have <b>no screw that fits their own geometry</b> and are CANNOT DETERMINE
+  &mdash; most likely those blind features are pin seats, not pilots.
+  (2) The one remaining open row is a &Oslash;3.788&nbsp;mm bore against a head of
+  d<sub>k</sub>&nbsp;max 3.800&nbsp;mm &mdash; a 0.012&nbsp;mm interference measured on a patch
+  whose own least-squares residual is 0.0316&nbsp;mm. The instrument cannot separate the two, so
+  it is open rather than a FAIL, and a caliper closes it. At d<sub>k</sub> min (3.62&nbsp;mm) the
+  same bore clears by 0.168&nbsp;mm.</p>
+</section>
+
 <section id="refused">
-  <h2><span class="n">4</span>What is <i>not</i> determined — 196 chains</h2>
+  <h2><span class="n">5</span>What is <i>not</i> determined — 200 chains</h2>
   <p class="lede">217 coaxial lines through the assembled robot became
   264 chains once each line was cut at 20&nbsp;mm — the longest
-  sourced ISO 4762 length, so no single screw could span the gap. 68 read as screw
+  sourced ISO 4762 length, so no single screw could span the gap. 64 read as screw
   runs. The rest are listed here rather than quietly dropped, because each is a lead pointing at
   a specific missing measurement.</p>
   <div class="tw"><table class="data">
-    <caption>Table 3. Chains that produced no fastener, by reason.</caption>
+    <caption>Table 5. Chains that produced no fastener, by reason.</caption>
     <thead><tr><th>Reason</th><th class="n">Count</th><th>What the tool said</th>
       <th>What settles it</th></tr></thead>
     <tbody>
 <tr><td>no thread partner</td><td class="n">90</td><td>6 M2.5 feature(s) on this line across 3 mesh(es) ankle_right, leg, seeed_bearing__configuration_default, and NOT ONE reads as a tap pilot. A screw needs something to bite: this run is either a nut/insert position whose seat is not in the mesh, a clearance for a shaft, or the mating part&#x27;s pilot went undetected.</td><td>look for a nut pocket or an insert boss on the far side in the mesh, or measure the real part: does a screw thread into it?</td></tr>
 <tr><td>unsized</td><td class="n">74</td><td>no feature in this coaxial group read as a fastener size; it is a bore, a shaft seat or a cable pass-through, not a screw</td><td>a caliper on the printed part, or a section view naming what the bore is for</td></tr>
 <tr><td>pilot with no clearance</td><td class="n">18</td><td>the only features on this chain are tap pilots (2). A pilot with nothing to clamp is a self-tapped boss waiting for a mating part whose clearance hole was not detected.</td><td>the mating part&#x27;s clearance hole, or a photo of what screws in here</td></tr>
-<tr><td>no sourced length inside the measured window</td><td class="n">14</td><td>M3: head seats on trunk_base (clearance), thread bites a Ø2.5 pilot on power_support</td><td>a sourced offer inside [6.665, 4.052] mm, or a re-measurement of the grip / pilot depth that widens it</td></tr>
+<tr><td>no screw fits this chain</td><td class="n">10</td><td>NO standard screw satisfies this chain&#x27;s own geometry. The shank must clear the tightest clearance hole (Ø2.0 mm) and must be LARGER than the pilot it forms a thread in (Ø2.5 mm); with the pilot that wide there is nothing for a thread that also passes the clearance to bite. The per-hole classifier labelled this chain &#x27;M3&#x27; by diameter alone; that label is not a screw. Most likely the</td><td>a section view or a caliper on that blind feature: is a screw threaded into it, or is it a pin seat? THE REAL ROBOT WORKS, so this is a reading error somewhere, not a broken joint.</td></tr>
+<tr><td>no sourced length inside the measured window</td><td class="n">8</td><td>M2.5: head seats on elec_rpi_robot_hat_pcb (clearance), thread bites a Ø2.05 pilot on face_part</td><td>a sourced offer inside [14.490, 14.740] mm, or a re-measurement of the grip / pilot depth that widens it</td></tr>
     </tbody></table></div>
   <p class="note">The gap to the community census is stated, not averaged.
   <code>SPEC.md:75&ndash;76</code> reads 145 holes across the robot and the replica author counts
   roughly 146 structural clearance holes; our own part folders record
-  79 fastening features; this document places 68 screws.
+  79 fastening features; this document places 64 screws.
   Three different questions — a hole, a recorded interface, and a screw whose length can be
   derived — with three different answers, all measured.</p>
 </section>
 
 <section id="ball">
-  <h2><span class="n">5</span>Ball joints — the search, and its answer</h2>
+  <h2><span class="n">6</span>Ball joints — the search, and its answer</h2>
   <div class="verdict warn"><b>NO BALL JOINT EXISTS IN THIS GEOMETRY. 82 spherical patches were fitted on placed geometry (41 balls, 39 sockets, 2 mixed). 6 ball/socket pairs came within 0.6 mm of concentric and every one is refuted below by its own measurement. The spherical features in this robot are dome ends of printed pockets, drill points, fillet caps and the toroidal chamfers of the bearing rings — not articulating joints. Leif named ball joints; the geometry does not contain one, and that is a measurement, not a refusal to look.</b></div>
   <p class="lede">A ball joint is a ball patch and a socket patch on <i>different</i> placed
   geometry, concentric to within the clearance, radii matching, the socket the larger, and the
   socket covering enough of a sphere to <i>capture</i> rather than merely touch. Each of those is
   a measurement; the table below shows every candidate and why it fails.</p>
   <div class="tw"><table class="data">
-    <caption>Table 4. The 6 pairs that came within
+    <caption>Table 6. The 6 pairs that came within
       0.6&nbsp;mm of concentric, and the measurement that refutes
       each.</caption>
     <thead><tr><th>Ball</th><th>Socket</th><th class="n">Centre&nbsp;dist&nbsp;(mm)</th>
@@ -248,7 +290,7 @@
 <tr><td><code>seeed_bearing__configuration_default</code> r10.3819</td><td><code>seeed_bearing__configuration_default</code> r7.2037</td><td class="n">0.5035</td><td class="n">-3.1782</td><td>ball and socket are the SAME placed geometry — one printed part cannot articulate against itself; the socket is 3.1782 mm SMALLER in radius than the ball: it does not fit; radial clearance -3.1782 mm exceeds the 0.50 mm band a ball joint runs in; the socket covers only 16.7% of a full sphere; below 25% it cannot CAPTURE a ball, it can only touch it</td></tr>
     </tbody></table></div>
   <div class="tw"><table class="data">
-    <caption>Table 5. Every distinct spherical patch fitted on placed geometry (19 distinct
+    <caption>Table 7. Every distinct spherical patch fitted on placed geometry (19 distinct
       of 82 instances). Residual is the least-squares fit error;
       cover is the fraction of a full sphere the patch spans. Source:
       <code>out/fasteners/spheres-all-meshes.json</code> via
@@ -280,7 +322,7 @@
 </section>
 
 <section id="parts">
-  <h2><span class="n">6</span>The screw parts — built parametrically, measured against ISO 4762</h2>
+  <h2><span class="n">7</span>The screw parts — built parametrically, measured against ISO 4762</h2>
   <p class="lede">Both folders existed on the workshop shelf with a <code>cad/README</code> saying
   <i>&ldquo;no geometry on the shelf yet&rdquo;</i> and an empty interface list. They now build the
   whole length family from <code>cecad.screws.screw()</code>, and every member is measured off the
@@ -288,7 +330,7 @@
   the fasteners.eu table fetched 2026-08-19 — two independent transcriptions meeting on geometry.
   An unsourced length is refused rather than interpolated.</p>
   <div class="tw"><table class="data">
-    <caption>Table 6. Source: <code>out/fasteners/screw-parts-verify.json</code>, generated by
+    <caption>Table 8. Source: <code>out/fasteners/screw-parts-verify.json</code>, generated by
       <code>tools/verify_screw_parts.py</code> under <code>ce-cad/bin/cad</code>.</caption>
     <thead><tr><th>Part</th><th class="n">Sourced lengths</th><th class="n">Members PASS</th>
       <th class="n">Dimension rows</th><th class="n">Default&nbsp;(mm)</th><th>Verdict</th></tr></thead>
@@ -304,7 +346,7 @@
 </section>
 
 <section id="method">
-  <h2><span class="n">7</span>Method — the whole chain, in order</h2>
+  <h2><span class="n">8</span>Method — the whole chain, in order</h2>
   <ol class="lede">
     <li><code>cecad.meshfeatures.features()</code> on every placed mesh: 355 holes with diameter,
       class, depth, axis and axial extent, ends probed by 24 axis-parallel rays &rarr;
@@ -314,7 +356,7 @@
     <li><code>tools/fastener_runs.py</code>: 601 holes in the world frame
       (meshes are reused — <code>xl330</code> is placed 15 times), 217 coaxial
       lines, 264 chains after the 20&nbsp;mm cut,
-      68 screw runs with a grip, an engagement and a length window &rarr;
+      64 screw runs with a grip, an engagement and a length window &rarr;
       <code>out/fasteners/runs.json</code>. Arithmetic:
       <code>p_w = R&nbsp;p + t</code>, <code>a_w = R&nbsp;a</code>,
       <code>s_w = s + t&nbsp;&middot;&nbsp;a_w</code>. No approximation.</li>
