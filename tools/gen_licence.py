@@ -289,7 +289,17 @@ def render(data, census, wide, readme_checks, evidence, lic_file, now, sheets):
       '  @media(max-width:800px){.instr{grid-template-columns:1fr}}\n'
       '  .num{font-family:var(--mono);text-align:right}\n'
       '</style>\n</head>\n<body>\n<div class="wrap">')
-    A('<p class="backlink"><a href="FACTORY-PACK.html">← Factory pack</a> · <a href="RELEASE.html">Release dossier</a></p>')
+    # The backlink is STAT-ED, not typed. Measured 2026-09-04: this line pointed at
+    # FACTORY-PACK.html, which does not exist yet (its sub-lane is still writing it),
+    # so the first link a factory reader clicks was a 404. Only pages that are on disk
+    # at generation time are offered; the rest are named as not written yet.
+    _back = [("INDEX.html", "Index"), ("FACTORY-PACK.html", "Factory pack"),
+             ("WORK-BREAKDOWN.html", "Work breakdown"), ("RELEASE.html", "Release dossier")]
+    _have = [(h, t) for h, t in _back if os.path.isfile(os.path.join(REPO, h))]
+    _missing = [t for h, t in _back if not os.path.isfile(os.path.join(REPO, h))]
+    A('<p class="backlink">%s%s</p>'
+      % (" · ".join('<a href="%s">← %s</a>' % (e(h), e(t)) for h, t in _have),
+         (' <span class="zh">(not written yet: %s)</span>' % e(", ".join(_missing))) if _missing else ""))
     A('<header class="hero">')
     A('  <p class="eyebrow">Microduck · factory handoff pack · 工厂交接资料包</p>')
     A('  <h1>Licence and origin position <span class="zh">许可证与来源立场</span></h1>')
@@ -515,8 +525,14 @@ def render(data, census, wide, readme_checks, evidence, lic_file, now, sheets):
     A('<div class="tablewrap"><table class="data compact" id="ev"><colgroup><col style="width:22%%"><col style="width:34%%"><col style="width:7%%"><col style="width:22%%"><col style="width:15%%"></colgroup><thead><tr>%s%s%s%s%s</tr></thead><tbody>'
       % (th("File", "文件"), th("URL", "网址"), th("Bytes", "字节"), th("sha256 (measured now)", "sha256（当前测量）"), th("Verdict", "结论")))
     for x in evidence:
-        A('<tr><td><code>%s</code></td><td class="src"><a href="%s">%s</a></td><td class="num">%s</td><td class="src">%s</td><td class="v">%s<br><span class="src">%s</span></td></tr>'
-          % (e(x["file"]), e(x["url"]), e(x["url"]), e(x["size"]) if x["size"] is not None else "-", e(x["measured"] or "-"), chip(x["verdict"]), e(x["why"])))
+        # Some evidence rows describe HOW the bytes were obtained rather than naming a URL
+        # (a ZIP listing, our own probe log). Wrapping those in <a href> produced a link
+        # that could not resolve — found 2026-09-04 by walking every internal href in the
+        # generated page. Only an http(s) value is linkified; the rest is set as plain text.
+        u = x["url"]
+        ucell = ('<a href="%s">%s</a>' % (e(u), e(u))) if str(u).startswith(("http://", "https://")) else e(u)
+        A('<tr><td><code>%s</code></td><td class="src">%s</td><td class="num">%s</td><td class="src">%s</td><td class="v">%s<br><span class="src">%s</span></td></tr>'
+          % (e(x["file"]), ucell, e(x["size"]) if x["size"] is not None else "-", e(x["measured"] or "-"), chip(x["verdict"]), e(x["why"])))
     A('</tbody></table></div>')
     A('</section>')
 
@@ -526,7 +542,7 @@ def render(data, census, wide, readme_checks, evidence, lic_file, now, sheets):
     A('<li>Fetch: %s</li>' % e(data["fetch_method"]))
     A('<li>Quotes are verbatim from the archived bytes; line numbers are of the archived file. The README quote is re-checked at the cited line in both local mirrors every time this page is generated (section 6).</li>')
     A('<li>Verdict words: PASS / FAIL / CANNOT DETERMINE. For a fact, PASS means established. For a question, PASS means the plain reading of the licence permits it, FAIL means it does not, CANNOT DETERMINE means the licence text does not answer it and the thing that does is named.</li>')
-    A('<li>A trade mark search WAS run on 2026-09-04 against TMview (EUIPO + EU national offices + USPTO + CNIPA + WIPO) with a control query, and it is reported as F15. No registered-design or patent search was run: both DesignView endpoints refused (F15, F9). No message was sent to anyone. Nothing was bought — in particular no Microduck was purchased, and F14 is the reason that matters.</li>')
+    A('<li>A trade mark search WAS run against TMview (EUIPO + EU national offices + USPTO + CNIPA + WIPO) with a control query, TWICE on 2026-09-04 and through two different URLs — F15 at 04:2x and F18 at 09:07 — and both times &#8216;microduck&#8217; returned 0 while the control returned 47. No registered-design or patent search was run, and F18 records exactly why rather than reporting a bare failure: DesignView answers 405 to POST and serves its app shell to GET, and the ONE endpoint that does answer JSON is a proxy to the TRADEMARK backend, proven with a control, so its zero is NOT a design clearance and is not counted. No message was sent to anyone. Nothing was bought — in particular no Microduck was purchased, and F14 is the reason that matters.</li>')
     A('<li>The Creative Commons clause text is the 4.0 International legal code. Pollen names no version; both 3.0 and 4.0 carry the NonCommercial and ShareAlike elements, so the plain-reading answers do not turn on the version, but the exact clause numbering would.</li>')
     A('<li>Generated %s by tools/gen_licence.py from out/factory/licence.json.</li>' % e(now))
     A('</ul></section>')
