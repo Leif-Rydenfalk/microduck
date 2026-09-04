@@ -208,9 +208,20 @@ slice_by_slug = {p["slug"]: p for p in SL.get("parts", [])}
 bought = cls("bought")
 
 
-def best_offer(r):
+def best_offer(r, currency=None):
+    """Cheapest priced tier across this line's offers. If `currency` is given,
+    only offers in that currency are considered.
+
+    DEFECT THIS EXISTS TO PREVENT (found by reading the rendered page, 2026-09-04):
+    the first version took the cheapest tier in ANY currency and then summed the
+    lot under a 'USD' heading, so B18a at EUR 0.0434 and B18b at GBP 0.0800 were
+    added to dollars. spec/sourcing.json's own note on B18a says the opposite:
+    'there is still NO USD price for this line - it does not enter the USD
+    subtotal.' A subtotal is only a subtotal within one currency."""
     best = None
     for o in r.get("offers") or []:
+        if currency and (o.get("currency") or "").upper() != currency:
+            continue
         for t in o.get("tiers") or []:
             if len(t) >= 2 and t[1] is not None:
                 if best is None or t[1] < best[1]:
@@ -218,9 +229,19 @@ def best_offer(r):
     return best
 
 
+def _qty(v):
+    if v is None:
+        return "CANNOT DETERMINE"
+    if isinstance(v, float):
+        return ("%.4f" % v).rstrip("0").rstrip(".")
+    return str(v)
+
+
 bom_table = []
 priced_total = 0.0
 unpriced_lines = []
+non_usd_lines = []          # priced, but not in dollars — excluded from the subtotal
+usd_lines = 0
 for r in bought:
     b = best_offer(r)
     line = {"id": r["id"], "name": r["name"], "grade": r["grade"], "grade_en": r["grade_en"], "grade_zh": r["grade_zh"],
@@ -231,10 +252,17 @@ for r in bought:
         o, price, tier, cur = b
         line.update({"price": price, "price_tier": tier, "currency": cur, "vendor": o.get("vendor"),
                      "url": o.get("url"), "moq": o.get("moq"), "fetched": o.get("fetched")})
-        try:
-            priced_total += price * float(r.get("qty_per_robot") or 0)
-        except Exception:
-            pass
+        u = best_offer(r, "USD")
+        if u:
+            uo, uprice, utier, _ = u
+            line["usd_price"] = uprice
+            try:
+                priced_total += uprice * float(r.get("qty_per_robot") or 0)
+                usd_lines += 1
+            except Exception:
+                pass
+        else:
+            non_usd_lines.append("%s (%s)" % (r["id"], cur))
     else:
         unpriced_lines.append(r["id"])
     bom_table.append(line)
@@ -250,6 +278,44 @@ torque = PB.get("torque", [])
 # ------------------------------------------------------------------ 3.7 / 4 test
 test_row = cls("test")[0] if cls("test") else {}
 eol = TP.get("eol", [])
+
+
+def eol_resolved():
+    """The end-of-line gates with their @TOKEN@s filled.
+
+    DEFECT THIS EXISTS TO FIX (found by reading strip 18 of my own page,
+    2026-09-04): spec/test-plan.json writes gate text with @TOKEN@ placeholders
+    — EB-05 is 'derived servo standby >= @STANDBY_TOTAL_A@ A' — and the values
+    are computed inside tools/gen_test_plan.py from measured artifacts. Printing
+    the raw JSON shipped a literal '@STANDBY_TOTAL_A@' to the factory. Copying
+    the token table here would make a second source of truth, so instead this
+    reads the ALREADY-RESOLVED rows out of the published TEST-PLAN.html
+    (Table 13) and cross-checks them against the JSON: same count, same ids, in
+    the same order. If they disagree, the pack says so rather than guessing."""
+    path = os.path.join(ROOT, "TEST-PLAN.html")
+    if not os.path.exists(path):
+        return [(g[0], g[1], g[2]) for g in eol if isinstance(g, (list, tuple)) and len(g) >= 3], "TEST-PLAN.html absent — raw spec/test-plan.json text, @TOKEN@s NOT resolved"
+    doc = open(path, encoding="utf-8").read()
+    i = doc.find("End-of-line gates")
+    body = doc[i:i + 60000] if i >= 0 else ""
+    rowre = re.compile(r'<tr><td class="box">[^<]*</td><td class="tidcell"><a href="#([A-Z]{2}-\d+)"><code>[^<]*</code></a></td><td>(.*?)</td><td class="sk">(.*?)</td></tr>', re.S)
+    got = []
+    for m in rowre.finditer(body):
+        txt = re.sub(r"<[^>]+>", "", m.group(2))
+        inst = re.sub(r"<[^>]+>", "", m.group(3))
+        got.append((m.group(1), html.unescape(txt).strip(), html.unescape(inst).strip()))
+    want = [(g[0], g[2]) for g in eol if isinstance(g, (list, tuple)) and len(g) >= 3]
+    if len(got) != len(want) or [(a, c) for a, _b, c in got] != want:
+        return ([(g[0], g[1], g[2]) for g in eol if isinstance(g, (list, tuple)) and len(g) >= 3],
+                "CROSS-CHECK FAILED: TEST-PLAN.html Table 13 has %d gates, spec/test-plan.json has %d, or the ids/instruments differ — raw JSON text shown, @TOKEN@s may be unresolved"
+                % (len(got), len(want)))
+    left = sorted(set(re.findall(r"@[A-Z0-9_]+@", " ".join(t for _a, t, _c in got))))
+    note = ("%d gates read from TEST-PLAN.html Table 13 with every @TOKEN@ resolved; id and instrument sequence cross-checked against spec/test-plan.json: identical" % len(got)) + (
+        "; UNRESOLVED TOKENS STILL PRESENT: " + ", ".join(left) if left else "")
+    return got, note
+
+
+EOL_ROWS, EOL_NOTE = eol_resolved()
 
 # ------------------------------------------------------------------ 6 artifacts
 ARTIFACTS = [
@@ -294,14 +360,18 @@ pack = {
     "product": {"envelope": ENV, "renders": RENDERS},
     "not_ready": NOT_READY,
     "summary": S,
-    "bom": {"lines": bom_table, "priced_subtotal_usd_per_robot": round(priced_total, 4),
-            "unpriced_lines": unpriced_lines,
-            "note": "Subtotal sums qty_per_robot x the cheapest tier-1 unit price found on a live page. It EXCLUDES the %d line(s) with no priced offer, so it is a floor, not a cost." % len(unpriced_lines)},
+    "bom": {"lines": bom_table, "usd_subtotal_per_robot": round(priced_total, 4),
+            "usd_lines": usd_lines, "unpriced_lines": unpriced_lines, "priced_but_not_usd": non_usd_lines,
+            "note": ("USD subtotal = sum over the %d line(s) that have a price in DOLLARS of qty_per_robot x the cheapest USD unit price read off a live page. "
+                     "It EXCLUDES the %d line(s) with no priced offer at all (%s) and the %d line(s) priced only in another currency (%s), because adding currencies would be an invented exchange rate. "
+                     "It is therefore a FLOOR on the bought cost of one robot, not the cost.")
+                    % (usd_lines, len(unpriced_lines), ", ".join(unpriced_lines) or "none",
+                       len(non_usd_lines), ", ".join(non_usd_lines) or "none")},
     "print_totals": SL.get("grand_total", {}),
     "printer": SL.get("printer"),
     "harness": {"rows": len(cables), "total_mm": CAB.get("total_length_mm")},
     "stations": [{"id": s.get("id"), "name": s.get("name"), "steps": len(s.get("steps", []))} for s in stations],
-    "eol_gates": len(eol),
+    "eol_gates": len(EOL_ROWS), "eol_provenance": EOL_NOTE,
     "artifacts": [{"path": p, "en": en, "zh": zh, "stat": st} for p, en, zh, st in ARTIFACTS],
     "documents": [{"path": p, "en": en, "zh": zh, "stat": st} for p, en, zh, st in DOCS],
 }
@@ -342,7 +412,7 @@ A.append('<link rel="stylesheet" href="tools/doc.css">')
 A.append('<style>'
          '.zh{font-family:var(--sans);font-size:12px;color:var(--ink-2);display:block}'
          'table{border-collapse:collapse;width:100%;table-layout:fixed;font-size:12.5px;margin:8px 0 18px;overflow-wrap:anywhere}'
-         'th{white-space:normal !important;padding:5px 6px;background:var(--head);font-family:var(--sans);font-size:12px;text-align:left;vertical-align:top;border-bottom:1px solid var(--hair)}'
+         'th{white-space:normal !important;overflow-wrap:break-word;word-break:normal;padding:5px 6px;background:var(--head);font-family:var(--sans);font-size:12px;text-align:left;vertical-align:top;border-bottom:1px solid var(--hair)}'
          'td{border-bottom:1px solid var(--hair);padding:5px 6px;text-align:left;vertical-align:top}'
          'td.m{font-family:var(--mono);font-size:11.5px;word-break:break-all}'
          'td.num{text-align:right;font-variant-numeric:tabular-nums}'
@@ -389,9 +459,18 @@ if RENDERS:
     A.append('<p class="lede zh">以上为我方 CAD 的渲染图，并非实物照片。逐角度匹配的产品照片见 COMPARISON.html。</p>')
 A.append('<table>' + cols(28, 42, 12, 18) + '<tr>' + th("Quantity", "量") + th("Value", "数值")
          + th("Source class", "来源类别") + th("Where", "出处") + '</tr>')
+def _md(v):
+    """SPEC.md cells are markdown. Render `x` as code and **x** as bold instead
+    of leaking the punctuation onto the page."""
+    out = E(v)
+    out = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", out)
+    out = re.sub(r"`([^`]+)`", r"<code>\1</code>", out)
+    return out
+
+
 for e in ENV:
     A.append('<tr><td>%s</td><td>%s</td><td class="m">%s</td><td class="m">%s</td></tr>'
-             % (E(e["quantity"]), E(re.sub(r"\*\*", "", e["value"])), E(e["tag"]), E(e["src"])))
+             % (E(e["quantity"]), _md(e["value"]), E(e["tag"]), E(e["src"])))
 A.append('</table>')
 A.append('<p class="lede">Source classes: <b>[P]</b> published by Pollen Robotics · <b>[M]</b> measured by us off Pollen\'s own MJCF and meshes with a CAD kernel · <b>[C]</b> community-reported, unverified · <b>[?]</b> our inference. SPEC.md lines 1-10.</p>')
 A.append('<p class="lede zh">来源类别：<b>[P]</b> Pollen 官方公布 · <b>[M]</b> 我方用 CAD 内核测自 Pollen 的 MJCF 与网格 · <b>[C]</b> 社区提供、未经验证 · <b>[?]</b> 我方推断。见 SPEC.md 第 1-10 行。</p>')
@@ -406,7 +485,7 @@ if gt:
                       (str(len(bought)), "bought lines", "外购项"),
                       (str(len(cables)), "cables", "线缆"),
                       (str(len(stations)), "line stations", "产线工位"),
-                      (str(len(eol)), "end-of-line gates", "下线判据")]:
+                      (str(len(EOL_ROWS)), "end-of-line gates", "下线判据")]:
         A.append('<div class="stat"><b>%s</b><span>%s<br>%s</span></div>' % (E(b), E(en), E(zh)))
     A.append('</div>')
     A.append('<p class="lede">Print figures are the sum of out/print/slice.json, sliced on %s. They are per-piece prints, not plate times.</p>'
@@ -498,21 +577,21 @@ if SL.get("flags"):
 # 3.3 bom
 A.append('<h3>3.3 Bought parts · 外购件</h3>')
 A.append('<p class="lede">%s</p><p class="lede zh">%s</p>' % (E(D["sections"]["bom"]["en"]), E(D["sections"]["bom"]["zh"])))
-A.append('<table>' + cols(5, 25, 6, 10, 8, 16, 9, 21) + '<tr>' + th("Line", "编号") + th("Item", "品名")
+A.append('<table>' + cols(5, 22, 9, 11, 6, 15, 9, 23) + '<tr>' + th("Line", "编号") + th("Item", "品名")
          + th("Qty/robot", "每台数量") + th("Unit price", "单价") + th("MOQ", "起订量")
          + th("Vendor read", "已读取供应商") + th("Lead time", "交期") + th("Verdict / what is missing", "判定 / 缺什么") + '</tr>')
 for l in bom_table:
     price = ("%s %.4f @%d" % (l.get("currency"), l.get("price"), l.get("price_tier"))) if l.get("price") is not None else "no priced offer"
     A.append('<tr><td class="m">%s</td><td>%s</td><td class="num">%s</td><td class="num m">%s</td><td class="num">%s</td>'
              '<td>%s</td><td>%s</td><td>%s %s</td></tr>'
-             % (E(l["id"]), E(l["name"]), E(str(l.get("qty")) if l.get("qty") is not None else "CANNOT DETERMINE"), E(price), E(str(l.get("moq") or "—")),
+             % (E(l["id"]), E(l["name"]), E(_qty(l.get("qty"))), E(price), E(str(l.get("moq") or "—")),
                 E(str(l.get("vendor") or "—")), E(l["lead"]),
                 gchip(l["grade"], l["grade_en"], l["grade_zh"]), E(l.get("missing") or "")))
 A.append('</table>')
-A.append('<p><b>Priced subtotal, one robot: %s %.4f.</b> %s</p>'
-         % ("USD", priced_total, E(pack["bom"]["note"])))
-A.append('<p class="zh">单台已定价小计：USD %.4f。该小计按每台数量 x 在线页面上找到的最低 1 件单价求和，<b>不含</b>无报价的 %d 项，因此是下限而非实际成本。</p>'
-         % (priced_total, len(unpriced_lines)))
+A.append('<p><b>USD subtotal, one robot: %.4f USD over %d of %d lines.</b> %s</p>'
+         % (priced_total, usd_lines, len(bom_table), E(pack["bom"]["note"])))
+A.append('<p class="zh">单台美元小计：%.4f USD，覆盖 %d / %d 项。该小计仅对<b>以美元标价</b>的项按每台数量 x 最低美元单价求和；不含无报价的 %d 项，也不含仅有其他币种报价的 %d 项（换算汇率属于臆造）。因此它是单台外购成本的<b>下限</b>，不是成本。</p>'
+         % (priced_total, usd_lines, len(bom_table), len(unpriced_lines), len(non_usd_lines)))
 
 # 3.4 pcb
 def _routed(v):
@@ -607,13 +686,10 @@ sec(4, "Acceptance of a finished unit", "整机验收", D["sections"]["acceptanc
 A.append('<p class="lede">%s</p>' % E(str(TP.get("eol_note", ""))[:400]))
 A.append('<table>' + cols(10, 66, 24) + '<tr>' + th("Gate", "判据编号") + th("Passes when", "合格条件")
          + th("Instrument", "仪器") + '</tr>')
-for g in eol:
-    if isinstance(g, (list, tuple)) and len(g) >= 3:
-        A.append('<tr><td class="m">%s</td><td>%s</td><td class="m">%s</td></tr>' % (E(str(g[0])), E(str(g[1])), E(str(g[2]))))
-    elif isinstance(g, dict):
-        A.append('<tr><td class="m">%s</td><td>%s</td><td class="m">%s</td></tr>'
-                 % (E(str(g.get("id"))), E(str(g.get("passes", g.get("gate", "")))), E(str(g.get("instrument", "")))))
+for gid, gate, inst in EOL_ROWS:
+    A.append('<tr><td class="m">%s</td><td>%s</td><td class="m">%s</td></tr>' % (E(gid), E(gate), E(inst)))
 A.append('</table>')
+A.append('<p class="lede">Provenance of this table: %s.</p>' % E(EOL_NOTE))
 A.append('<p>None of these gates has ever been run. The first unit off your line is the first time any of them is exercised; log every result against the unit serial and send us the log — that is how our simulated numbers become measured ones.</p>')
 A.append('<p class="zh">上述判据从未执行过。贵厂下线的第一台机器将是首次执行；请按整机序列号记录每项结果并回传日志——这是把我方仿真数据变为实测数据的唯一途径。</p>')
 A.append('</section>')
@@ -677,4 +753,4 @@ with open(OUT_HTML, "w", encoding="utf-8") as f:
     f.write("\n".join(A))
 print("wrote %s (%d B) and %s" % (OUT_HTML, os.path.getsize(OUT_HTML), OUT_JSON))
 print("  sections: product(%d envelope rows, %d renders) not-ready(%d) drawings(%d) print(%d) bought(%d) pcb(%d) cables(%d) stations(%d) eol(%d) artifacts(%d)"
-      % (len(ENV), len(RENDERS), len(NOT_READY), len(dr), len(print_rows), len(bom_table), len(cls("pcb")), len(cables), len(stations), len(eol), len(ARTIFACTS)))
+      % (len(ENV), len(RENDERS), len(NOT_READY), len(dr), len(print_rows), len(bom_table), len(cls("pcb")), len(cables), len(stations), len(EOL_ROWS), len(ARTIFACTS)))
