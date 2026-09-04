@@ -221,6 +221,9 @@ def render(data, census, wide, readme_checks, evidence, lic_file, now):
       '  .zh{font-family:var(--sans);font-weight:400;color:var(--ink-2);font-size:.86em}\n'
       '  h2 .zh{font-size:.72em;margin-left:.5em}\n'
       '  th .zh{display:block;font-size:10.5px;letter-spacing:0;text-transform:none;color:var(--ink-2)}\n'
+      '  #cdtable{table-layout:fixed;width:99.6%}\n'
+      '  #cdtable blockquote.q{margin:6px 0 8px;padding:6px 10px;font-size:.94em}\n'
+      '  #cdtable td{vertical-align:top}\n'
       '  blockquote.q{margin:8px 0 10px;padding:8px 14px;border-left:3px solid var(--accent);background:var(--card);'
       'font-family:var(--serif);font-size:14px;line-height:1.5}\n'
       '  .fact{border-top:1px solid var(--hair);padding:14px 0 8px}\n'
@@ -397,7 +400,13 @@ def render(data, census, wide, readme_checks, evidence, lic_file, now):
 
     # 4 CD
     A(h2(4, "CANNOT DETERMINE — and exactly what settles each", "无法确定——以及各自如何确定", "cd"))
-    A('<div class="tablewrap"><table class="data"><thead><tr>%s%s%s%s</tr></thead><tbody>'
+    # MEASURED 2026-09-04 by reading strip 17 back: with no colgroup the browser gave
+    # the 'open question' column ~145 px and set the draft enquiry two words to a line
+    # over 600 px of height, beside an almost empty '#' column. Fixed widths, and the
+    # quote block inside a table cell is not indented like a page-level quote.
+    A('<div class="tablewrap"><table class="data" id="cdtable">'
+      '<colgroup><col style="width:7%%"><col style="width:40%%"><col style="width:32%%"><col style="width:20%%"></colgroup>'
+      '<thead><tr>%s%s%s%s</tr></thead><tbody>'
       % (th("#", "编号"), th("Open question", "未决问题"), th("Who settles it, how", "由谁、如何确定"), th("Blocks", "阻塞项")))
     for c in cds:
         extra = ""
