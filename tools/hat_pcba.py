@@ -421,7 +421,9 @@ def main():
                    finished_thickness_mm=T_FINISHED, vendor_substrate_thickness_mm=round(vb.ZLength, 4),
                    volume_mm3=round(bs.Volume, 4), drills=len(drills), layers=4),
         assignment=dict(method="scipy.optimize.linear_sum_assignment over xy distance + KiCad F.Fab "
-                               "body-size error, side-gated, 6.0 mm radius",
+                               "body-size error; side-gated; per-part radius = half the F.Fab "
+                               "body diagonal + 1.0 mm; only placements that declare a 3D "
+                               "model compete",
                         bodies_in_step=len(bodies), candidate_placements=len(cand),
                         pairs=len(pairs), unmatched_bodies=len(unmatched_body),
                         unmatched_placements=len(unmatched_cand),
