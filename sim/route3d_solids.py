@@ -117,13 +117,59 @@ def servo_socket_iface(mate_mm, insertion_dir, row_dir):
     forced the rung-5 lane to measure routes off placements instead of off
     connectors. Built here from the placement, written there by this lane.
     """
+    # THE HEADER'S +z LEAVES THE BOARD; the insertion direction points the other
+    # way. mate() seats the housing SEAT_MM along the header's +z, so handing it
+    # the insertion direction puts the housing 1.6000 mm INSIDE the servo case
+    # and the whole 8.1000 mm mated stack on the wrong side of the flank. Flipped
+    # here, and the placement is checked in tools/place_harness.py by pushing the
+    # housing's own origin and axis back through the 4x4.
     return {"name": "socket", "role": "eh_header", "series": "EH", "circuits": 3,
             "pitch_mm": 2.5, "mated_height_mm": 8.1, "owner_ref": "part:xl330-m288-t",
-            "frame": {"origin_mm": list(mate_mm), "z_axis": list(insertion_dir),
+            "frame": {"origin_mm": list(mate_mm),
+                      "z_axis": [-float(v) for v in insertion_dir],
                       "x_axis": list(row_dir)}}
 
 
-STL_DEVIATION_MM = 0.05
+STL_DEVIATION_MM = 0.25   # mm; a 3.1243 mm tube needs no finer, and 0.0500 mm cost 7.6 MB
+                          # and six minutes for ONE 33 mm cable (measured)
+
+
+def _sweep(poly, od):
+    """One cable as a solid: pipe shell first, Frenet then corrected, then the fallback.
+
+    cecad.route.sweep_polyline tries a FRENET-framed pipe shell and, on any
+    kernel refusal, fuses a capsule chain. The capsule chain is correct and
+    RUINOUS: ~300 fused primitives, a 7.6 MB STL and six minutes for a 33 mm
+    cable, measured. A Frenet frame is also the one that misbehaves on a curve
+    whose curvature vanishes — exactly what a relaxed route is full of — so the
+    corrected (auxiliary) frame is tried before giving up on a single shell.
+    """
+    import Part as _P
+    import FreeCAD as _App
+    V = _App.Vector
+    thin = [poly[0]]
+    for q in poly[1:]:
+        if float(np.linalg.norm(np.asarray(q) - np.asarray(thin[-1]))) > 0.05:
+            thin.append(q)
+    for frenet in (True, False):
+        try:
+            bs = _P.BSplineCurve()
+            bs.interpolate([V(*p) for p in thin])
+            wire = _P.Wire([bs.toShape()])
+            e0 = wire.Edges[0]
+            circ = _P.Wire([_P.Circle(e0.valueAt(e0.FirstParameter),
+                                      e0.tangentAt(e0.FirstParameter), od / 2.0).toShape()])
+            ps = _P.BRepOffsetAPI.MakePipeShell(wire)
+            ps.setFrenetMode(frenet)
+            ps.add(circ, False, False)
+            ps.build()
+            ps.makeSolid()
+            sh = ps.shape()
+            if sh.isValid() and sh.Volume > 0:
+                return sh, "makePipeShell/bspline/%s" % ("frenet" if frenet else "corrected")
+        except Exception:
+            pass
+    return sweep_polyline(poly, od)
 
 
 def _export_stl(shape, path):
@@ -179,7 +225,7 @@ def main():
         # oscillate) and the deviation from the routed chain is MEASURED below,
         # never assumed.
         poly_in = _resample(wp, RESAMPLE_MM)
-        shape, how = sweep_polyline(poly_in, od, name=rid)
+        shape, how = _sweep(poly_in, od)
         poly = poly_in
         L = path_length(poly)
         dev = _max_dev(wp, poly)
@@ -223,6 +269,9 @@ def main():
                                     "verdict": mt.verdict,
                                     "seat_mm": mt.provenance["seat_mm"],
                                     "origin_mm": [round(mt.transform[i][3], 4) for i in range(3)],
+                                    "transform": [[round(mt.transform[i][j], 9) for j in range(4)]
+                                                  for i in range(4)],
+                                    "at_device": e.get("device"),
                                     "adds_parts": mt.adds_parts})
         rows.append(row)
         say("%-18s swept %-14s L %8.3f mm  vol %10.2f mm3  housings %d  mass %.3f g"
