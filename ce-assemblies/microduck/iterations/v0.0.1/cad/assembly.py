@@ -31,6 +31,15 @@ import os
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 
+#: triad connection ref -> cecad.kinematics joint model. Two vocabularies, one
+#: stated map. A connection absent here is REFUSED, never defaulted.
+CONNECTION_JOINT_MODEL = {
+    "connection:threaded-m2": "screwed",
+    "connection:threaded-m2.5": "screwed",
+    "connection:self-tap-m2-pla": "screwed",
+    "connection:self-tap-m2.5-pla": "screwed",
+}
+
 
 def build(doc, params=None):
     import FreeCAD as App
@@ -81,12 +90,28 @@ def build(doc, params=None):
         rot = App.Rotation(App.Vector(0, 0, 1), 0)
         rot.Q = (x, y, z, w)
         label = "%s/%s#%d" % (r.get("body") or "fastener", ref.split(":")[1], i)
-        # A FASTENER IS NOT "CLAMPED TO THE WORLD". Its joint is the connection
-        # it was placed through, so the placement declares that connection and
-        # a.connection_report() can print what actually holds it. A bare
-        # joint="clamped" on 68 screws would report a machine held together by
-        # nothing, which is the exact failure ce-cad's docs record for add().
-        joint = r.get("via_connection") or "clamped"
+        # A FASTENER IS NOT "CLAMPED TO THE WORLD", and it is not its connection
+        # ref either. `Assembly.add(joint=)` takes a cecad.kinematics JOINT MODEL
+        # name — measured 2026-09-04: passing the triad ref raised
+        # KeyError: unknown joint 'connection:threaded-m2'. Two different
+        # vocabularies for two different questions, and the map between them is
+        # stated here rather than guessed:
+        #   "screwed" — kinematics.py:160, "Like bolted but threaded directly
+        #   into one part — no nut, and the thread engagement in the softer
+        #   material is the weak link." That is exactly what every fastener in
+        #   this robot is, cut thread or formed. It is in stitch.RETAINS_HELD,
+        #   so the stitch gate counts these screws as actually holding.
+        # The CONNECTION ref survives on the placement row itself, which is where
+        # the provenance belongs; an unmapped connection is REFUSED by name.
+        conn = r.get("via_connection")
+        if conn is None:
+            joint = "clamped"
+        else:
+            joint = CONNECTION_JOINT_MODEL.get(conn)
+            if joint is None:
+                missing.append("%s: no cecad joint model mapped for %s — refusing to place it "
+                               "under a guessed one" % (label if 'label' in dir() else ref, conn))
+                continue
         a.add(label, part, at=tuple(r["world_pos_mm"]), rot=rot, joint=joint)
     n_fast = sum(1 for r in rows if r.get("via_connection"))
     a.notes.append("placed %d of %d instances from placements.json (%d MJCF-seeded, %d fasteners "
