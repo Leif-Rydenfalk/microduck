@@ -323,6 +323,33 @@ HARV = J("out/open/cannot-determine-harvest.json")
 row("open", "cannot-determine-harvest", "Open CANNOT DETERMINE items", "NOT_YET", "%d unique items in out/open/cannot-determine-harvest.json" % len(HARV),
     "out/open/cannot-determine-harvest.json", "Each names what settles it; the resolution workflow owns the list tonight.", "agent_tonight", "WF-UNKNOWNS", {"count": len(HARV)})
 
+# ------------------------------------------------- in-flight lanes, MEASURED
+# A parcel is only IN FLIGHT if the workflow that owns it is writing files. Stat
+# every owned path so the factory reads a fact, not a promise.
+for w in D["in_flight"]:
+    st = []
+    for pth in [x.strip() for x in w["owns"].split(",")]:
+        pth = pth.split(" ")[0].rstrip("/")
+        full = os.path.join(ROOT, pth)
+        if not os.path.exists(full):  # a lane may own a path in the workshop repo, not ours
+            alt = os.path.join(os.path.dirname(os.path.dirname(ROOT)), pth)
+            if os.path.exists(alt):
+                full = alt
+        if not os.path.exists(full):
+            st.append("%s does not exist yet" % pth)
+            continue
+        if os.path.isdir(full):
+            files = [os.path.join(dp, f) for dp, _, fs in os.walk(full) for f in fs]
+            if not files:
+                st.append("%s is empty" % pth)
+                continue
+            newest = max(files, key=os.path.getmtime)
+            st.append("%s: %d files, newest %s (%s)" % (pth, len(files), datetime.datetime.fromtimestamp(os.path.getmtime(newest)).strftime("%m-%d %H:%M"), os.path.relpath(newest, full)))
+        else:
+            st.append("%s: %s" % (pth, datetime.datetime.fromtimestamp(os.path.getmtime(full)).strftime("%m-%d %H:%M")))
+    w["state"] = st
+    w["stat_at"] = NOW
+
 # ---------------------------------------------------------------- summary
 def count(cls):
     rs = [r for r in rows if r["class"] == cls]
@@ -411,9 +438,11 @@ A.append('</table></section>')
 
 # 2 in flight
 A.append('<section id="inflight"><h2><span class="n">2</span>Work an agent is doing tonight — do not hand these to the factory · 今晚代理正在做的工作（勿交给工厂）</h2>')
-A.append('<table>%s<tr>%s%s%s</tr>' % (cols(14, 50, 36), th("Workflow", "工作流"), th("What it closes", "完成内容"), th("Paths it owns", "所属路径")))
+A.append('<p class="lede">The right-hand column is measured, not reported: each owned path is stat-ed at generation time — how many files exist and when the newest one was written. A path that does not exist yet is named as such.</p>')
+A.append('<table>%s<tr>%s%s%s%s</tr>' % (cols(11, 36, 27, 26), th("Workflow", "工作流"), th("What it closes", "完成内容"), th("Paths it owns", "所属路径"), th("Measured state of those paths", "所属路径的实测状态")))
 for w in D["in_flight"]:
-    A.append('<tr><td class="m">%s</td><td>%s<span class="zh">%s</span></td><td class="m">%s</td></tr>' % (E(w["id"]), E(w["en"]), E(w["zh"]), E(w["owns"])))
+    A.append('<tr><td class="m">%s</td><td>%s<span class="zh">%s</span></td><td class="m">%s</td><td><small>%s</small></td></tr>' % (
+        E(w["id"]), E(w["en"]), E(w["zh"]), E(w["owns"]), E("; ".join(w["state"]))))
 A.append('</table></section>')
 
 # 3 drawings
