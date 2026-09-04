@@ -23,15 +23,15 @@
   "unpowered_fitted_devices": 0,
   "cable_runs_modelled": 23,
   "cable_runs_touching_the_hat": 7,
-  "checks_total": 79,
-  "checks_PASS": 61,
+  "checks_total": 81,
+  "checks_PASS": 62,
   "checks_FAIL": 7,
-  "checks_CANNOT_DETERMINE": 11,
+  "checks_CANNOT_DETERMINE": 12,
   "model_corrections": 9,
   "model_corrections_that_contradict_a_record": 5
  },
  "verdict": "FAIL",
- "verdict_why": "7 FAIL and 11 CANNOT DETERMINE of 79 checks. A CANNOT DETERMINE is not a pass.",
+ "verdict_why": "7 FAIL and 12 CANNOT DETERMINE of 81 checks. A CANNOT DETERMINE is not a pass.",
  "rows": [
   {
    "check": "E1",
@@ -417,6 +417,20 @@
    "verdict": "CANNOT DETERMINE",
    "measurement": "55 pads on +3V3, and the rail is SOURCED BY THE RADXA through header pins 1 and 17 \u2014 the HAT makes no 3.3 V. Known demand: U2 7.35 mA, U11 5.15 mA, ToF module on J5 95 mA typical / 150 mA peak = 107.50 mA typical, 162.50 mA with the ToF at its peak. NOT COUNTED because no figure was transcribed: U8, U3, MK1, the four Stemma headers J5-J8 (anything a user plugs in), and Y1 the 12 MHz oscillator. THE SUPPLY SIDE IS THE PROBLEM: no fetched Radxa document states how much current the 40-pin 3.3 V pins can deliver, and the RK817 PMIC rail behind them is not broken out per-rail in the brief. A 145 mA peak demand on an unstated supply is not a pass. WHAT SETTLES IT: the RK817 datasheet LDO rating for the rail that feeds header pins 1/17, or a meter.",
    "cite": "copper +3V3 pad list; per-device cites in DEVICE_FACTS; part:radxa-zero-3w power[4] \"Board-level current draw: NOT stated in any fetched document\""
+  },
+  {
+   "check": "E5",
+   "item": "the whole chain, pack to peak, and the ONE number that is missing",
+   "verdict": "CANNOT DETERMINE",
+   "measurement": "Pack -> +BATT: the 15 servos take a measured 2.0561 A peak / 1.2102 A mean while walking. Pack -> U9 -> +5V -> the Radxa and the amplifier: 5.000 V at up to 2.000 A = 10.0 W, and reflected to the pack at its EMPTY voltage of 6.6 V that is P/(eta x 6.6) \u2014 0.4785 A to 0.5682 A per 3 W at an efficiency of 0.95 to 0.80 (the AP63205 efficiency curve was NOT transcribed, so the band is stated, not a number). Everything on that path is measured or bounded EXCEPT ONE THING: the Radxa Zero 3W board current, which no fetched Radxa document states in any operating condition. It is the single number that closes this budget. The runtime table already sweeps it: 1.0 W gives 113 min of walking and 5.0 W gives 80 min. WHAT SETTLES IT: an ammeter in series with header pin 2 while the policy runs.",
+   "cite": "out/sim-evidence/battery-runtime.json outputs.runtime_table.walking; AP63205 DS41326 Rev 2-2 p.1; part:radxa-zero-3w unknowns[1]"
+  },
+  {
+   "check": "E5",
+   "item": "the press kit's ~1 h needs more compute power than the buck can deliver",
+   "verdict": "PASS",
+   "measurement": "Pollen publish ~1 h on an 18.7 Wh pack, i.e. 18.7 W average. This lane measures the servos at 8.9553 W while walking, which leaves 9.7447 W for everything else. THE HAT'S BUCK CANNOT DELIVER THAT: the AP63205 is a fixed-5.0 V part rated 2 A, so 10.0 W is its whole output, and 9.7447 W is 97.4 % of it with nothing left for the audio amplifier. The battery-runtime study reached the same conclusion from the RADXA'S adapter rating; this is an independent second reason, from the HAT side, and it means the press-kit hour is NOT an hour of compute-heavy walking on this hardware. The missing power is on the servo side, where the XL330's no-load current is unpublished and fifteen of them multiply it.",
+   "cite": "out/sim-evidence/battery-runtime.json outputs.pollen_claim; AP63205 DS41326 Rev 2-2 p.1 \"2A Continuous Output Current\""
   },
   {
    "check": "E5",

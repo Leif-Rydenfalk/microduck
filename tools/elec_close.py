@@ -721,6 +721,40 @@ def rows_e5_budget(comps, runtime):
                                 f'WHAT SETTLES IT: the RK817 datasheet LDO rating for the rail that feeds header pins 1/17, or a meter.',
                     cite='copper +3V3 pad list; per-device cites in DEVICE_FACTS; part:radxa-zero-3w power[4] "Board-level current draw: '
                          'NOT stated in any fetched document"'))
+    # the whole chain, end to end
+    rt = runtime['outputs']['runtime_table']['walking']
+    lim_W = RAIL_SOURCE['+5V']['limit_A'] * 5.0
+    claim = runtime['outputs']['pollen_claim']
+    eta_lo, eta_hi = 0.80, 0.95
+    ilo = round(3.0 / (eta_hi * PACK['v_min']), 4)
+    ihi = round(3.0 / (eta_lo * PACK['v_min']), 4)
+    out.append(dict(check='E5', item='the whole chain, pack to peak, and the ONE number that is missing', verdict=CD,
+                    measurement=f'Pack -> +BATT: the 15 servos take a measured {pk:.4f} A peak / {mn:.4f} A mean while walking. '
+                                f'Pack -> U9 -> +5V -> the Radxa and the amplifier: 5.000 V at up to {RAIL_SOURCE["+5V"]["limit_A"]:.3f} A '
+                                f'= {lim_W:.1f} W, and reflected to the pack at its EMPTY voltage of {PACK["v_min"]} V that is '
+                                f'P/(eta x {PACK["v_min"]}) — {ilo:.4f} A to {ihi:.4f} A per 3 W at an efficiency of {eta_hi:.2f} to '
+                                f'{eta_lo:.2f} (the AP63205 efficiency curve was NOT transcribed, so the band is stated, not a number). '
+                                f'Everything on that path is measured or bounded EXCEPT ONE THING: the Radxa Zero 3W board current, '
+                                f'which no fetched Radxa document states in any operating condition. It is the single number that '
+                                f'closes this budget. The runtime table already sweeps it: {rt["rows"][0]["compute_and_sensors_W"]:.1f} W '
+                                f'gives {rt["rows"][0]["runtime_min"]:.0f} min of walking and '
+                                f'{rt["rows"][-1]["compute_and_sensors_W"]:.1f} W gives {rt["rows"][-1]["runtime_min"]:.0f} min. '
+                                f'WHAT SETTLES IT: an ammeter in series with header pin 2 while the policy runs.',
+                    cite='out/sim-evidence/battery-runtime.json outputs.runtime_table.walking; AP63205 DS41326 Rev 2-2 p.1; '
+                         'part:radxa-zero-3w unknowns[1]'))
+    out.append(dict(check='E5', item="the press kit's ~1 h needs more compute power than the buck can deliver", verdict=PASS,
+                    measurement=f'Pollen publish ~1 h on an 18.7 Wh pack, i.e. {claim["implied_total_average_W"]:.1f} W average. '
+                                f'This lane measures the servos at {claim["measured_servo_average_W_walking"]:.4f} W while walking, '
+                                f'which leaves {claim["implied_compute_and_sensors_W"]:.4f} W for everything else. THE HAT\'S BUCK '
+                                f'CANNOT DELIVER THAT: the AP63205 is a fixed-5.0 V part rated 2 A, so {lim_W:.1f} W is its whole '
+                                f'output, and {claim["implied_compute_and_sensors_W"]:.4f} W is {100 * claim["implied_compute_and_sensors_W"] / lim_W:.1f} % '
+                                f'of it with nothing left for the audio amplifier. The battery-runtime study reached the same '
+                                f'conclusion from the RADXA\'S adapter rating; this is an independent second reason, from the HAT '
+                                f'side, and it means the press-kit hour is NOT an hour of compute-heavy walking on this hardware. '
+                                f'The missing power is on the servo side, where the XL330\'s no-load current is unpublished and '
+                                f'fifteen of them multiply it.',
+                    cite='out/sim-evidence/battery-runtime.json outputs.pollen_claim; AP63205 DS41326 Rev 2-2 p.1 "2A Continuous Output Current"'))
+
     # +1V8
     out.append(dict(check='E5', item='+1V8 — demand versus the LDO', verdict=PASS,
                     measurement=f'{len(sorted(bn["+1V8"]))} pads: U3.2 (the LDO output), U2.32 (the codec DVDD) and two capacitors. '
