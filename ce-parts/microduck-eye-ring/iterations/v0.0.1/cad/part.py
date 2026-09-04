@@ -1,33 +1,105 @@
-# WRITTEN by tools/head_eye_ring_shelve.py on 2026-09-03 — a LOADER for a published mesh (the cecad.meshshelve shape).
-"""part:microduck-eye-ring — cad/part.py, the TRIAD build contract.
+"""part:microduck-eye-ring — the eye bezel, REBUILT parametrically. Ours.
 
-    def build(doc, params=None) -> Part
+Contract (TRIAD.md): `def build(doc, params=None) -> Part`. Imports cecad +
+stdlib only.
 
-WHAT THIS BUILDS. Pollen Robotics' published mesh `noenoeil` (MJCF sim asset, CC BY-SA-NC 4.0 (pollen-robotics/microduck_rl README)): the
-EYE BEZEL — a Ø30.000 mm ring, 7.5 mm long, with a Ø14.4 bore for the M12 lens, that
-stands proud of the face panel (whose only opening on this axis is the Ø14.5 lens hole).
-GOAL.md finding 1 called the product's bezel "missing" from the simulation meshes; it is
-this mesh (HEAD-RECONSTRUCTION.html §6). Loaded through `cecad.core.Part.from_mesh` at
-scale 1000.0 (the file is in metres). Render, place, measure and print it; do not cut it.
+HOW THIS GEOMETRY WAS AUTHORED — the licence question, answered first.
+This file replaces a LOADER that shipped Pollen Robotics' published mesh
+`noenoeil.stl` (CC BY-SA-NC 4.0) as our geometry. Nothing of that mesh
+survives here: no vertex, no facet, no decimated outline. What survives is a
+LIST OF DIMENSIONS taken with calipers off the published artifact
+(`tools/own_measure_eyering.py`, a ray-cast through the mesh at 0.1 mm
+pitch; readings frozen in `out/own/measure/eye-ring.json`), which is
+ordinary reverse engineering, plus the interfaces this part must satisfy
+(the M12 lens bore, the face panel's front plane). The part below is a
+SOLID OF REVOLUTION generated from ten numbers and three locating tabs —
+a machine element whose every dimension is dictated by fit, not by
+expression. See docs/REBUILD-PROTOCOL.md and LICENCE-POSITION.html.
 
-FRAME. The mesh's own frame, unchanged: bbox x -15.000..15.000, y -63.500..-54.000, z 5.000..35.000 mm,
-ring axis y, boss centre (0, -59.25, 20). The MJCF geom pos/quat for `noenoeil` (body jaw_soft,
-spec/mesh-placements.json) place it directly.
+FRAME — Pollen's mesh frame, kept on purpose so the MJCF geom pos/quat
+place this part with no re-derivation and refcheck needs no alignment:
+ring axis is +y, the optical axis sits at (x, z) = (0, 20), the ring
+occupies y -63.5 .. -54.0.
+
+THE MEASUREMENTS, each with the probe line that produced it
+(out/own/measure/eye-ring.json; probe A = material along x at (y, z=20),
+probe C = material along y at (z=20, x=r); 0.1 mm pitch):
+
+  probe A, y -63.0 .. -55.5   outer radius 15.000 flat        -> OD 30.000
+  probe A, y -63.5            outer radius 14.500              -> 0.5 x 45 deg
+  probe A, y -63.0            outer radius 15.000                 front chamfer
+  probe A, y -61.5 .. -55.5   inner radius  7.200 flat        -> bore 14.400
+  probe A, y -63.5            inner radius  9.200 }  2.000 mm of y for
+  probe A, y -61.5            inner radius  7.200 }  2.000 mm of r -> 45 deg funnel
+  probe C, every r 9.5..14.5  material ends at y -55.500      -> rear face plane
+  probe C, r 7.2 .. 15.0      material starts at y -63.5      -> front face plane
+  section y -54.75            three arcs, r 8.500 .. 9.500,
+                              spanning -160..-140, -40..-20 and 80..100 deg
+                              about (x=0, z=20)                -> 3 tabs, 20 deg
+                              wide, 120 deg apart, wall 1.000, reaching y -54.000
+
+WHAT THE PART IS FOR. The bezel that surrounds the camera eye. Its bore is
+clearance for the M12 lens (part:microduck-m12-lens, 16.94 mm barrel, held
+behind the panel by part:microduck-m12-lens-holder) — the funnel is the
+cone the lens looks through. Its rear face butts on part:microduck-face-part's
+front plane at y -55.500, and the three tabs enter that panel and locate it
+on the optical axis. The part is printed in the accent colour.
 """
-import os
+import math
 
-HERE = os.path.dirname(os.path.abspath(__file__))
-ROOT = os.path.dirname(HERE)
-GEOMETRY = "geometry/noenoeil.stl"
-SCALE = 1000.0
+# ---- driving parameters, every one a caliper reading (mm, degrees) --------
+OD = 30.000               # probe A: outer radius 15.000 over y -63.0..-55.5
+BORE_D = 14.400           # probe A: inner radius 7.200 over y -61.5..-55.5
+Y_FRONT = -63.500         # probe C: material starts here at every radius
+Y_BACK = -55.500          # probe C: material ends here at every radius >= 9.5
+CHAMFER = 0.500           # probe A: r 15.000 at y -63.0 -> 14.500 at y -63.5
+FUNNEL = 2.000            # probe A: r 7.200 at y -61.5 -> 9.200 at y -63.5
+TAB_OD = 19.000           # section y -54.75: arcs reach r 9.500
+TAB_ID = 17.000           # section y -54.75: arcs start at r 8.500
+TAB_LEN = 1.500           # y -55.500 .. -54.000
+TAB_ARC = 20.0            # each arc spans 20 deg
+TAB_ANGLES = (90.0, 210.0, 330.0)   # centres, measured as atan2(z-20, x)
+AXIS_X, AXIS_Z = 0.0, 20.000        # optical axis in the mesh frame
 MATERIAL = "PLA"
 
 
+def _sector(r_in, r_out, a_mid, a_span, cz, cx, n=12):
+    """Annular sector as (u, v) = (z, x) points — the plane a prism along
+    the y axis takes (cecad's cyclic mapping: axis 'y' takes (z, x))."""
+    a0, a1 = math.radians(a_mid - a_span / 2), math.radians(a_mid + a_span / 2)
+    pts = []
+    for i in range(n + 1):
+        a = a0 + (a1 - a0) * i / n
+        pts.append((cz + r_out * math.sin(a), cx + r_out * math.cos(a)))
+    for i in range(n + 1):
+        a = a1 + (a0 - a1) * i / n
+        pts.append((cz + r_in * math.sin(a), cx + r_in * math.cos(a)))
+    return pts
+
+
 def build(doc, params=None):
-    if params:
-        raise ValueError("microduck-eye-ring takes no build parameters (got %s) — it loads a published mesh" % sorted(params))
     from cecad.core import Part
-    path = os.path.join(ROOT, GEOMETRY)
-    if not os.path.exists(path):
-        raise FileNotFoundError("microduck-eye-ring: %s is missing — the folder cannot build without its geometry" % path)
-    return Part.from_mesh(path, name="microduck-eye-ring", material=MATERIAL, scale=SCALE, tol=0.05)
+    if params:
+        raise ValueError("microduck-eye-ring takes no build parameters (got %s)"
+                         % sorted(params))
+    p = Part("microduck-eye-ring", material=MATERIAL)
+
+    ro, ri = OD / 2.0, BORE_D / 2.0
+    # (r, y) profile, revolved about the y axis through (x, z) = (0, 20).
+    profile = [
+        (ri + FUNNEL, Y_FRONT),                 # front bore lip, r 9.200
+        (ro - CHAMFER, Y_FRONT),                # front face out to r 14.500
+        (ro, Y_FRONT + CHAMFER),                # 45 deg chamfer up to r 15.000
+        (ro, Y_BACK),                           # outer cylinder
+        (ri, Y_BACK),                           # rear face, in to the bore
+        (ri, Y_FRONT + FUNNEL),                 # bore, r 7.200
+    ]
+    p.revolve(profile, at=(AXIS_X, 0.0, AXIS_Z), axis="y")
+
+    # three locating tabs behind the rear face
+    for a in TAB_ANGLES:
+        p.prism(_sector(TAB_ID / 2.0, TAB_OD / 2.0, a, TAB_ARC, AXIS_Z, AXIS_X),
+                TAB_LEN, at=(0.0, Y_BACK, 0.0), axis="y")
+
+    p.connector("optical_axis", at=(AXIS_X, Y_BACK, AXIS_Z), dir=(0, -1, 0))
+    return p
