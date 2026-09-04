@@ -1,0 +1,1476 @@
+{
+ "$triad": 1,
+ "kind": "wire-bend",
+ "generated_by": "sim/wire_bend.py",
+ "record": {
+  "units": "mm",
+  "method": "wire_bend \u2014 the bend radius of every routed centreline, measured at the scale\na cable can actually respond to, as a SECOND OPINION on cables3d.json.\n\n    ce-cad/bin/cad sim/wire_bend.py\n\nWHY A SECOND OPINION EXISTS. out/wiring/cables3d.json reports\nmin_bend_radius_mm from cecad.route.discrete_bend_radius with bend_window_mm\n3.0000 -- the circumscribed circle of three samples 1.5 mm apart. That is a\nPOINT measurement on a curve that came out of a 1.0000 mm voxel plan, so a\nsingle 1 mm stair step reads as a very tight radius whether or not the cable\nwould feel one. A cable of outside diameter D cannot be bent at a wavelength\nshorter than D: the jacket bridges it. So the honest instrument measures\nTURNING ANGLE OVER ARC LENGTH at a stated window and reports the window.\n\nMETHOD, and it is a bound rather than a fit:\n  a cable whose minimum bend radius is R cannot accumulate more than s/R\n  radians of turning over an arc length s. So over every window of arc length\n  s along the resampled centreline, theta(s) = the total turning angle, and\n  R(s) = min over windows of s / theta. That is an UPPER bound on the radius\n  the cable achieves at that scale -- the curve turns at least that hard\n  somewhere -- and it is immune to a stair step, because a stair step that\n  turns +90 then -90 accumulates 180 degrees of |turning| in the sum only if\n  you sum |angles|, which is what a cable feels.\n\n  TWO FLAVOURS, AND ONLY ONE OF THEM IS A PROOF:\n    NET   theta_net = the angle between the tangent entering the window and the\n          tangent leaving it. A cable that must change heading by theta over an\n          arc s MUST have bent to at least s/theta somewhere in there, whatever\n          shape it actually took. This is a NECESSARY condition and it is the\n          one GRADED.\n    TOTAL theta_total = the sum of |turn| at every interior vertex in the\n          window. This is the curvature of the DRAWN POLYLINE, and the drawn\n          polyline came out of a 1.0000 mm voxel plan, so it carries stair-step\n          zigzag a real jacket would simply bridge. Reported, never graded --\n          it describes our model, not the cable.\n\nTHE ONE ABSOLUTE FLOOR, and it needs no vendor. A cable bent to a centreline\nradius below OD/2 has its inner surface at a negative radius: the jacket would\nhave to pass through itself. R >= OD/2 = 1.5622 mm is geometry, not practice,\nand a route under it is a FAIL nobody can argue with. Above it and below the\n3 x OD target this lane routed to, the verdict stays CANNOT DETERMINE because\nROBOTIS publishes no bend radius for the X3P (route3d.py header).",
+  "counts": {
+   "runs": 16,
+   "below_absolute_floor": 0,
+   "below_one_OD": 9,
+   "below_lane_target": 11,
+   "meets_lane_target": 5,
+   "new_tighter_than_3sample": 12,
+   "new_looser_than_3sample": 2
+  },
+  "runs": [
+   {
+    "id": "dxl-hat-id34",
+    "path_from": "paths-hat.json",
+    "od_mm": 3.1243,
+    "length_mm": 31.9317,
+    "resample_mm": 0.2,
+    "R_at_OD_window_mm": 1.8728,
+    "R_total_at_OD_window_mm": 1.8724,
+    "absolute_floor_mm": 1.5621,
+    "lane_target_mm": 9.3729,
+    "R_prev_3sample_mm": 2.5813,
+    "R_prev_from": "cables3d-hat.json",
+    "prev_window_is_3_SAMPLES_not_mm": true,
+    "prev_minus_new_mm": 0.7085,
+    "windows": {
+     "0.5000": {
+      "window_mm": 0.5,
+      "R_net_mm": 0.2341,
+      "turn_net_deg": 97.9,
+      "R_total_mm": 0.2341,
+      "turn_total_deg": 97.9,
+      "at_mm": [
+       55.1216,
+       25.4939,
+       247.4765
+      ]
+     },
+     "1.0000": {
+      "window_mm": 1.0,
+      "R_net_mm": 0.5852,
+      "turn_net_deg": 97.9,
+      "R_total_mm": 0.5852,
+      "turn_total_deg": 97.9,
+      "at_mm": [
+       55.1216,
+       25.4939,
+       247.4765
+      ]
+     },
+     "2.0000": {
+      "window_mm": 2.0,
+      "R_net_mm": 1.1705,
+      "turn_net_deg": 97.901,
+      "R_total_mm": 1.1704,
+      "turn_total_deg": 97.911,
+      "at_mm": [
+       55.1706,
+       25.4822,
+       247.9675
+      ]
+     },
+     "3.1243": {
+      "window_mm": 3.1243,
+      "R_net_mm": 1.8728,
+      "turn_net_deg": 97.901,
+      "R_total_mm": 1.8724,
+      "turn_total_deg": 97.922,
+      "at_mm": [
+       54.7233,
+       25.4701,
+       247.4887
+      ]
+     },
+     "6.2486": {
+      "window_mm": 6.2486,
+      "R_net_mm": 2.2952,
+      "turn_net_deg": 154.771,
+      "R_total_mm": 2.2272,
+      "turn_total_deg": 159.496,
+      "at_mm": [
+       54.9398,
+       25.4036,
+       250.1492
+      ]
+     },
+     "9.3729": {
+      "window_mm": 9.3729,
+      "R_net_mm": 3.2726,
+      "turn_net_deg": 164.571,
+      "R_total_mm": 2.9724,
+      "turn_total_deg": 181.191,
+      "at_mm": [
+       54.8768,
+       25.3822,
+       250.7442
+      ]
+     }
+    },
+    "verdict": "CANNOT DETERMINE",
+    "verdict_why": "R 1.8728 mm is above the absolute floor OD/2 = 1.5621 mm but BELOW one outside diameter (3.1243 mm). No published minimum exists for the X3P, so this is not graded FAIL -- but no bundle of three 21 AWG wires is routinely bent tighter than its own thickness, and this is where a measurement on the real cable would settle it"
+   },
+   {
+    "id": "dxl-id10-id11",
+    "path_from": "paths.json",
+    "od_mm": 3.1243,
+    "length_mm": 52.6577,
+    "resample_mm": 0.2,
+    "R_at_OD_window_mm": 2.0453,
+    "R_total_at_OD_window_mm": 2.0452,
+    "absolute_floor_mm": 1.5621,
+    "lane_target_mm": 9.3729,
+    "R_prev_3sample_mm": 5.2741,
+    "R_prev_from": "cables3d.json",
+    "prev_window_is_3_SAMPLES_not_mm": true,
+    "prev_minus_new_mm": 3.2288,
+    "windows": {
+     "0.5000": {
+      "window_mm": 0.5,
+      "R_net_mm": 0.2558,
+      "turn_net_deg": 89.6,
+      "R_total_mm": 0.2558,
+      "turn_total_deg": 89.6,
+      "at_mm": [
+       -3.0,
+       -34.2046,
+       138.35
+      ]
+     },
+     "1.0000": {
+      "window_mm": 1.0,
+      "R_net_mm": 0.6395,
+      "turn_net_deg": 89.6,
+      "R_total_mm": 0.6395,
+      "turn_total_deg": 89.6,
+      "at_mm": [
+       -3.0,
+       -34.0044,
+       138.35
+      ]
+     },
+     "2.0000": {
+      "window_mm": 2.0,
+      "R_net_mm": 1.2789,
+      "turn_net_deg": 89.601,
+      "R_total_mm": 1.2788,
+      "turn_total_deg": 89.606,
+      "at_mm": [
+       -3.1277,
+       -34.2553,
+       137.6054
+      ]
+     },
+     "3.1243": {
+      "window_mm": 3.1243,
+      "R_net_mm": 2.0453,
+      "turn_net_deg": 89.641,
+      "R_total_mm": 2.0452,
+      "turn_total_deg": 89.646,
+      "at_mm": [
+       -3.2292,
+       -34.2595,
+       137.0134
+      ]
+     },
+     "6.2486": {
+      "window_mm": 6.2486,
+      "R_net_mm": 3.9577,
+      "turn_net_deg": 89.759,
+      "R_total_mm": 3.9574,
+      "turn_total_deg": 89.765,
+      "at_mm": [
+       -3.4661,
+       -34.2689,
+       135.6321
+      ]
+     },
+     "9.3729": {
+      "window_mm": 9.3729,
+      "R_net_mm": 5.9858,
+      "turn_net_deg": 89.976,
+      "R_total_mm": 5.9853,
+      "turn_total_deg": 89.984,
+      "at_mm": [
+       -3.703,
+       -34.2776,
+       134.2507
+      ]
+     }
+    },
+    "verdict": "CANNOT DETERMINE",
+    "verdict_why": "R 2.0453 mm is above the absolute floor OD/2 = 1.5621 mm but BELOW one outside diameter (3.1243 mm). No published minimum exists for the X3P, so this is not graded FAIL -- but no bundle of three 21 AWG wires is routinely bent tighter than its own thickness, and this is where a measurement on the real cable would settle it"
+   },
+   {
+    "id": "dxl-id11-id12",
+    "path_from": "paths.json",
+    "od_mm": 3.1243,
+    "length_mm": 32.9671,
+    "resample_mm": 0.2,
+    "R_at_OD_window_mm": 8.0547,
+    "R_total_at_OD_window_mm": 8.0547,
+    "absolute_floor_mm": 1.5621,
+    "lane_target_mm": 9.3729,
+    "R_prev_3sample_mm": 7.8948,
+    "R_prev_from": "cables3d.json",
+    "prev_window_is_3_SAMPLES_not_mm": true,
+    "prev_minus_new_mm": -0.1599,
+    "windows": {
+     "0.5000": {
+      "window_mm": 0.5,
+      "R_net_mm": 1.28,
+      "turn_net_deg": 17.905,
+      "R_total_mm": 1.28,
+      "turn_total_deg": 17.905,
+      "at_mm": [
+       -2.359,
+       -37.8337,
+       89.8179
+      ]
+     },
+     "1.0000": {
+      "window_mm": 1.0,
+      "R_net_mm": 3.1992,
+      "turn_net_deg": 17.91,
+      "R_total_mm": 3.1992,
+      "turn_total_deg": 17.91,
+      "at_mm": [
+       -2.3837,
+       -38.0301,
+       89.8014
+      ]
+     },
+     "2.0000": {
+      "window_mm": 2.0,
+      "R_net_mm": 5.0716,
+      "turn_net_deg": 22.595,
+      "R_total_mm": 5.0716,
+      "turn_total_deg": 22.595,
+      "at_mm": [
+       -2.3266,
+       -37.6486,
+       89.886
+      ]
+     },
+     "3.1243": {
+      "window_mm": 3.1243,
+      "R_net_mm": 8.0547,
+      "turn_net_deg": 22.763,
+      "R_total_mm": 8.0547,
+      "turn_total_deg": 22.763,
+      "at_mm": [
+       -2.4071,
+       -38.2283,
+       89.7935
+      ]
+     },
+     "6.2486": {
+      "window_mm": 6.2486,
+      "R_net_mm": 14.6107,
+      "turn_net_deg": 24.313,
+      "R_total_mm": 14.5955,
+      "turn_total_deg": 24.339,
+      "at_mm": [
+       -1.8543,
+       -35.1254,
+       90.9925
+      ]
+     },
+     "9.3729": {
+      "window_mm": 9.3729,
+      "R_net_mm": 21.7382,
+      "turn_net_deg": 24.776,
+      "R_total_mm": 21.7159,
+      "turn_total_deg": 24.801,
+      "at_mm": [
+       -2.0596,
+       -36.1966,
+       90.4949
+      ]
+     }
+    },
+    "verdict": "CANNOT DETERMINE",
+    "verdict_why": "R 8.0547 mm clears one OD and is under this lane's own 3 x OD target (9.3729 mm); ROBOTIS publishes no minimum, so there is nothing to grade it against"
+   },
+   {
+    "id": "dxl-id12-id13",
+    "path_from": "paths.json",
+    "od_mm": 3.1243,
+    "length_mm": 14.2859,
+    "resample_mm": 0.2,
+    "R_at_OD_window_mm": 30494.9933,
+    "R_total_at_OD_window_mm": 10163.5552,
+    "absolute_floor_mm": 1.5621,
+    "lane_target_mm": 9.3729,
+    "R_prev_3sample_mm": null,
+    "R_prev_from": "cables3d.json",
+    "prev_window_is_3_SAMPLES_not_mm": true,
+    "prev_minus_new_mm": null,
+    "windows": {
+     "0.5000": {
+      "window_mm": 0.5,
+      "R_net_mm": 3811.8742,
+      "turn_net_deg": 0.006,
+      "R_total_mm": 3811.8741,
+      "turn_total_deg": 0.006,
+      "at_mm": [
+       -5.8043,
+       -61.85,
+       89.9719
+      ]
+     },
+     "1.0000": {
+      "window_mm": 1.0,
+      "R_net_mm": 9529.6854,
+      "turn_net_deg": 0.006,
+      "R_total_mm": 7520.7786,
+      "turn_total_deg": 0.008,
+      "at_mm": [
+       -6.0054,
+       -61.85,
+       89.9648
+      ]
+     },
+     "2.0000": {
+      "window_mm": 2.0,
+      "R_net_mm": 19059.3708,
+      "turn_net_deg": 0.006,
+      "R_total_mm": 9527.6559,
+      "turn_total_deg": 0.012,
+      "at_mm": [
+       -8.2174,
+       -61.85,
+       89.8873
+      ]
+     },
+     "3.1243": {
+      "window_mm": 3.1243,
+      "R_net_mm": 30494.9933,
+      "turn_net_deg": 0.006,
+      "R_total_mm": 10163.5552,
+      "turn_total_deg": 0.018,
+      "at_mm": [
+       -7.2119,
+       -61.85,
+       89.9225
+      ]
+     },
+     "6.2486": {
+      "window_mm": 6.2486,
+      "R_net_mm": 59084.0495,
+      "turn_net_deg": 0.006,
+      "R_total_mm": 11898.2794,
+      "turn_total_deg": 0.03,
+      "at_mm": [
+       -9.625,
+       -61.85,
+       89.838
+      ]
+     },
+     "9.3729": {
+      "window_mm": 9.3729,
+      "R_net_mm": 89579.0436,
+      "turn_net_deg": 0.006,
+      "R_total_mm": 12923.9478,
+      "turn_total_deg": 0.042,
+      "at_mm": [
+       -9.8261,
+       -61.85,
+       89.831
+      ]
+     }
+    },
+    "verdict": "CANNOT DETERMINE",
+    "verdict_why": "R 30494.9933 mm meets this lane's 3 x OD target (9.3729 mm). Still CANNOT DETERMINE and not PASS: the target is this lane's rule, not a published limit"
+   },
+   {
+    "id": "dxl-id13-id14",
+    "path_from": "paths.json",
+    "od_mm": 3.1243,
+    "length_mm": 45.9822,
+    "resample_mm": 0.2,
+    "R_at_OD_window_mm": 292.7996,
+    "R_total_at_OD_window_mm": 292.7926,
+    "absolute_floor_mm": 1.5621,
+    "lane_target_mm": 9.3729,
+    "R_prev_3sample_mm": 349.1781,
+    "R_prev_from": "cables3d.json",
+    "prev_window_is_3_SAMPLES_not_mm": true,
+    "prev_minus_new_mm": 56.3785,
+    "windows": {
+     "0.5000": {
+      "window_mm": 0.5,
+      "R_net_mm": 142.0641,
+      "turn_net_deg": 0.161,
+      "R_total_mm": 142.0641,
+      "turn_total_deg": 0.161,
+      "at_mm": [
+       -19.0438,
+       -47.6415,
+       57.0938
+      ]
+     },
+     "1.0000": {
+      "window_mm": 1.0,
+      "R_net_mm": 305.7771,
+      "turn_net_deg": 0.187,
+      "R_total_mm": 305.7669,
+      "turn_total_deg": 0.187,
+      "at_mm": [
+       -19.0368,
+       -47.8909,
+       57.6392
+      ]
+     },
+     "2.0000": {
+      "window_mm": 2.0,
+      "R_net_mm": 306.3219,
+      "turn_net_deg": 0.374,
+      "R_total_mm": 306.2447,
+      "turn_total_deg": 0.374,
+      "at_mm": [
+       -19.0438,
+       -47.6415,
+       57.0938
+      ]
+     },
+     "3.1243": {
+      "window_mm": 3.1243,
+      "R_net_mm": 292.7996,
+      "turn_net_deg": 0.626,
+      "R_total_mm": 292.7926,
+      "turn_total_deg": 0.626,
+      "at_mm": [
+       -19.0285,
+       -48.2226,
+       58.3668
+      ]
+     },
+     "6.2486": {
+      "window_mm": 6.2486,
+      "R_net_mm": 327.515,
+      "turn_net_deg": 1.085,
+      "R_total_mm": 327.4436,
+      "turn_total_deg": 1.085,
+      "at_mm": [
+       -19.0324,
+       -48.057,
+       58.0029
+      ]
+     },
+     "9.3729": {
+      "window_mm": 9.3729,
+      "R_net_mm": 360.1963,
+      "turn_net_deg": 1.495,
+      "R_total_mm": 360.1167,
+      "turn_total_deg": 1.496,
+      "at_mm": [
+       -19.0266,
+       -48.3055,
+       58.5488
+      ]
+     }
+    },
+    "verdict": "CANNOT DETERMINE",
+    "verdict_why": "R 292.7996 mm meets this lane's 3 x OD target (9.3729 mm). Still CANNOT DETERMINE and not PASS: the target is this lane's rule, not a published limit"
+   },
+   {
+    "id": "dxl-id20-id21",
+    "path_from": "paths.json",
+    "od_mm": 3.1243,
+    "length_mm": 132.4574,
+    "resample_mm": 0.2,
+    "R_at_OD_window_mm": 2.6117,
+    "R_total_at_OD_window_mm": 2.6114,
+    "absolute_floor_mm": 1.5621,
+    "lane_target_mm": 9.3729,
+    "R_prev_3sample_mm": 2.9547,
+    "R_prev_from": "cables3d.json",
+    "prev_window_is_3_SAMPLES_not_mm": true,
+    "prev_minus_new_mm": 0.343,
+    "windows": {
+     "0.5000": {
+      "window_mm": 0.5,
+      "R_net_mm": 0.5565,
+      "turn_net_deg": 41.182,
+      "R_total_mm": 0.5565,
+      "turn_total_deg": 41.182,
+      "at_mm": [
+       -2.7878,
+       14.2188,
+       163.1542
+      ]
+     },
+     "1.0000": {
+      "window_mm": 1.0,
+      "R_net_mm": 1.0382,
+      "turn_net_deg": 55.186,
+      "R_total_mm": 1.0382,
+      "turn_total_deg": 55.187,
+      "at_mm": [
+       -11.4001,
+       10.1955,
+       95.3292
+      ]
+     },
+     "2.0000": {
+      "window_mm": 2.0,
+      "R_net_mm": 1.866,
+      "turn_net_deg": 61.411,
+      "R_total_mm": 1.866,
+      "turn_total_deg": 61.412,
+      "at_mm": [
+       -11.5009,
+       10.3298,
+       95.4352
+      ]
+     },
+     "3.1243": {
+      "window_mm": 3.1243,
+      "R_net_mm": 2.6117,
+      "turn_net_deg": 70.203,
+      "R_total_mm": 2.6114,
+      "turn_total_deg": 70.209,
+      "at_mm": [
+       -2.7967,
+       13.2484,
+       162.149
+      ]
+     },
+     "6.2486": {
+      "window_mm": 6.2486,
+      "R_net_mm": 5.0244,
+      "turn_net_deg": 70.701,
+      "R_total_mm": 5.0235,
+      "turn_total_deg": 70.714,
+      "at_mm": [
+       -2.7914,
+       14.5895,
+       163.2344
+      ]
+     },
+     "9.3729": {
+      "window_mm": 9.3729,
+      "R_net_mm": 7.5471,
+      "turn_net_deg": 71.363,
+      "R_total_mm": 7.5449,
+      "turn_total_deg": 71.383,
+      "at_mm": [
+       -2.8128,
+       15.9899,
+       163.2483
+      ]
+     }
+    },
+    "verdict": "CANNOT DETERMINE",
+    "verdict_why": "R 2.6117 mm is above the absolute floor OD/2 = 1.5621 mm but BELOW one outside diameter (3.1243 mm). No published minimum exists for the X3P, so this is not graded FAIL -- but no bundle of three 21 AWG wires is routinely bent tighter than its own thickness, and this is where a measurement on the real cable would settle it"
+   },
+   {
+    "id": "dxl-id21-id22",
+    "path_from": "paths.json",
+    "od_mm": 3.1243,
+    "length_mm": 74.9892,
+    "resample_mm": 0.2,
+    "R_at_OD_window_mm": 2.1259,
+    "R_total_at_OD_window_mm": 2.1232,
+    "absolute_floor_mm": 1.5621,
+    "lane_target_mm": 9.3729,
+    "R_prev_3sample_mm": 2.833,
+    "R_prev_from": "cables3d.json",
+    "prev_window_is_3_SAMPLES_not_mm": true,
+    "prev_minus_new_mm": 0.7071,
+    "windows": {
+     "0.5000": {
+      "window_mm": 0.5,
+      "R_net_mm": 0.2671,
+      "turn_net_deg": 85.818,
+      "R_total_mm": 0.2671,
+      "turn_total_deg": 85.818,
+      "at_mm": [
+       -5.0079,
+       61.6511,
+       118.0146
+      ]
+     },
+     "1.0000": {
+      "window_mm": 1.0,
+      "R_net_mm": 0.6675,
+      "turn_net_deg": 85.836,
+      "R_total_mm": 0.6675,
+      "turn_total_deg": 85.841,
+      "at_mm": [
+       -5.0236,
+       61.2526,
+       118.0437
+      ]
+     },
+     "2.0000": {
+      "window_mm": 2.0,
+      "R_net_mm": 1.333,
+      "turn_net_deg": 85.967,
+      "R_total_mm": 1.3324,
+      "turn_total_deg": 86.004,
+      "at_mm": [
+       -5.0394,
+       60.854,
+       118.0728
+      ]
+     },
+     "3.1243": {
+      "window_mm": 3.1243,
+      "R_net_mm": 2.1259,
+      "turn_net_deg": 86.245,
+      "R_total_mm": 2.1232,
+      "turn_total_deg": 86.352,
+      "at_mm": [
+       -5.0635,
+       60.2561,
+       118.116
+      ]
+     },
+     "6.2486": {
+      "window_mm": 6.2486,
+      "R_net_mm": 4.0669,
+      "turn_net_deg": 87.347,
+      "R_total_mm": 4.049,
+      "turn_total_deg": 87.733,
+      "at_mm": [
+       -5.1314,
+       58.6616,
+       118.2262
+      ]
+     },
+     "9.3729": {
+      "window_mm": 9.3729,
+      "R_net_mm": 6.0257,
+      "turn_net_deg": 89.38,
+      "R_total_mm": 5.966,
+      "turn_total_deg": 90.276,
+      "at_mm": [
+       -5.2081,
+       57.0667,
+       118.3247
+      ]
+     }
+    },
+    "verdict": "CANNOT DETERMINE",
+    "verdict_why": "R 2.1259 mm is above the absolute floor OD/2 = 1.5621 mm but BELOW one outside diameter (3.1243 mm). No published minimum exists for the X3P, so this is not graded FAIL -- but no bundle of three 21 AWG wires is routinely bent tighter than its own thickness, and this is where a measurement on the real cable would settle it"
+   },
+   {
+    "id": "dxl-id22-id23",
+    "path_from": "paths.json",
+    "od_mm": 3.1243,
+    "length_mm": 14.2859,
+    "resample_mm": 0.2,
+    "R_at_OD_window_mm": 30494.9933,
+    "R_total_at_OD_window_mm": 10163.5552,
+    "absolute_floor_mm": 1.5621,
+    "lane_target_mm": 9.3729,
+    "R_prev_3sample_mm": null,
+    "R_prev_from": "cables3d.json",
+    "prev_window_is_3_SAMPLES_not_mm": true,
+    "prev_minus_new_mm": null,
+    "windows": {
+     "0.5000": {
+      "window_mm": 0.5,
+      "R_net_mm": 3811.8742,
+      "turn_net_deg": 0.006,
+      "R_total_mm": 3811.8741,
+      "turn_total_deg": 0.006,
+      "at_mm": [
+       -5.8043,
+       61.85,
+       89.9719
+      ]
+     },
+     "1.0000": {
+      "window_mm": 1.0,
+      "R_net_mm": 9529.6854,
+      "turn_net_deg": 0.006,
+      "R_total_mm": 7520.7786,
+      "turn_total_deg": 0.008,
+      "at_mm": [
+       -6.0054,
+       61.85,
+       89.9648
+      ]
+     },
+     "2.0000": {
+      "window_mm": 2.0,
+      "R_net_mm": 19059.3708,
+      "turn_net_deg": 0.006,
+      "R_total_mm": 9527.6559,
+      "turn_total_deg": 0.012,
+      "at_mm": [
+       -8.2174,
+       61.85,
+       89.8873
+      ]
+     },
+     "3.1243": {
+      "window_mm": 3.1243,
+      "R_net_mm": 30494.9933,
+      "turn_net_deg": 0.006,
+      "R_total_mm": 10163.5552,
+      "turn_total_deg": 0.018,
+      "at_mm": [
+       -7.2119,
+       61.85,
+       89.9225
+      ]
+     },
+     "6.2486": {
+      "window_mm": 6.2486,
+      "R_net_mm": 59084.0495,
+      "turn_net_deg": 0.006,
+      "R_total_mm": 11898.2794,
+      "turn_total_deg": 0.03,
+      "at_mm": [
+       -9.625,
+       61.85,
+       89.838
+      ]
+     },
+     "9.3729": {
+      "window_mm": 9.3729,
+      "R_net_mm": 89579.0436,
+      "turn_net_deg": 0.006,
+      "R_total_mm": 12923.9478,
+      "turn_total_deg": 0.042,
+      "at_mm": [
+       -9.8261,
+       61.85,
+       89.831
+      ]
+     }
+    },
+    "verdict": "CANNOT DETERMINE",
+    "verdict_why": "R 30494.9933 mm meets this lane's 3 x OD target (9.3729 mm). Still CANNOT DETERMINE and not PASS: the target is this lane's rule, not a published limit"
+   },
+   {
+    "id": "dxl-id23-id24",
+    "path_from": "paths.json",
+    "od_mm": 3.1243,
+    "length_mm": 45.9822,
+    "resample_mm": 0.2,
+    "R_at_OD_window_mm": 292.7996,
+    "R_total_at_OD_window_mm": 292.7926,
+    "absolute_floor_mm": 1.5621,
+    "lane_target_mm": 9.3729,
+    "R_prev_3sample_mm": 349.1789,
+    "R_prev_from": "cables3d.json",
+    "prev_window_is_3_SAMPLES_not_mm": true,
+    "prev_minus_new_mm": 56.3793,
+    "windows": {
+     "0.5000": {
+      "window_mm": 0.5,
+      "R_net_mm": 142.0641,
+      "turn_net_deg": 0.161,
+      "R_total_mm": 142.0641,
+      "turn_total_deg": 0.161,
+      "at_mm": [
+       -19.0438,
+       47.6415,
+       57.0938
+      ]
+     },
+     "1.0000": {
+      "window_mm": 1.0,
+      "R_net_mm": 305.7771,
+      "turn_net_deg": 0.187,
+      "R_total_mm": 305.7669,
+      "turn_total_deg": 0.187,
+      "at_mm": [
+       -19.0368,
+       47.8909,
+       57.6392
+      ]
+     },
+     "2.0000": {
+      "window_mm": 2.0,
+      "R_net_mm": 306.3219,
+      "turn_net_deg": 0.374,
+      "R_total_mm": 306.2447,
+      "turn_total_deg": 0.374,
+      "at_mm": [
+       -19.0438,
+       47.6415,
+       57.0938
+      ]
+     },
+     "3.1243": {
+      "window_mm": 3.1243,
+      "R_net_mm": 292.7996,
+      "turn_net_deg": 0.626,
+      "R_total_mm": 292.7926,
+      "turn_total_deg": 0.626,
+      "at_mm": [
+       -19.0285,
+       48.2226,
+       58.3668
+      ]
+     },
+     "6.2486": {
+      "window_mm": 6.2486,
+      "R_net_mm": 327.515,
+      "turn_net_deg": 1.085,
+      "R_total_mm": 327.4436,
+      "turn_total_deg": 1.085,
+      "at_mm": [
+       -19.0324,
+       48.057,
+       58.0029
+      ]
+     },
+     "9.3729": {
+      "window_mm": 9.3729,
+      "R_net_mm": 360.1963,
+      "turn_net_deg": 1.495,
+      "R_total_mm": 360.1167,
+      "turn_total_deg": 1.496,
+      "at_mm": [
+       -19.0266,
+       48.3055,
+       58.5488
+      ]
+     }
+    },
+    "verdict": "CANNOT DETERMINE",
+    "verdict_why": "R 292.7996 mm meets this lane's 3 x OD target (9.3729 mm). Still CANNOT DETERMINE and not PASS: the target is this lane's rule, not a published limit"
+   },
+   {
+    "id": "dxl-id30-imu200",
+    "path_from": "paths.json",
+    "od_mm": 3.1243,
+    "length_mm": 93.7032,
+    "resample_mm": 0.2,
+    "R_at_OD_window_mm": 5.4315,
+    "R_total_at_OD_window_mm": 5.4314,
+    "absolute_floor_mm": 1.5621,
+    "lane_target_mm": 9.3729,
+    "R_prev_3sample_mm": 5.0363,
+    "R_prev_from": "cables3d.json",
+    "prev_window_is_3_SAMPLES_not_mm": true,
+    "prev_minus_new_mm": -0.3952,
+    "windows": {
+     "0.5000": {
+      "window_mm": 0.5,
+      "R_net_mm": 0.8105,
+      "turn_net_deg": 28.278,
+      "R_total_mm": 0.8105,
+      "turn_total_deg": 28.278,
+      "at_mm": [
+       38.6824,
+       -6.1798,
+       141.0706
+      ]
+     },
+     "1.0000": {
+      "window_mm": 1.0,
+      "R_net_mm": 2.0262,
+      "turn_net_deg": 28.278,
+      "R_total_mm": 2.0262,
+      "turn_total_deg": 28.278,
+      "at_mm": [
+       38.6147,
+       -6.1585,
+       140.8903
+      ]
+     },
+     "2.0000": {
+      "window_mm": 2.0,
+      "R_net_mm": 3.4135,
+      "turn_net_deg": 33.57,
+      "R_total_mm": 3.4135,
+      "turn_total_deg": 33.57,
+      "at_mm": [
+       38.6824,
+       -6.1798,
+       141.0706
+      ]
+     },
+     "3.1243": {
+      "window_mm": 3.1243,
+      "R_net_mm": 5.4315,
+      "turn_net_deg": 33.756,
+      "R_total_mm": 5.4314,
+      "turn_total_deg": 33.756,
+      "at_mm": [
+       38.5023,
+       -6.128,
+       140.7279
+      ]
+     },
+     "6.2486": {
+      "window_mm": 6.2486,
+      "R_net_mm": 10.2926,
+      "turn_net_deg": 34.513,
+      "R_total_mm": 10.2925,
+      "turn_total_deg": 34.514,
+      "at_mm": [
+       37.8276,
+       -5.9449,
+       139.7542
+      ]
+     },
+     "9.3729": {
+      "window_mm": 9.3729,
+      "R_net_mm": 15.0896,
+      "turn_net_deg": 35.692,
+      "R_total_mm": 15.0892,
+      "turn_total_deg": 35.693,
+      "at_mm": [
+       36.697,
+       -5.6386,
+       138.1357
+      ]
+     }
+    },
+    "verdict": "CANNOT DETERMINE",
+    "verdict_why": "R 5.4315 mm clears one OD and is under this lane's own 3 x OD target (9.3729 mm); ROBOTIS publishes no minimum, so there is nothing to grade it against"
+   },
+   {
+    "id": "dxl-id31-id30",
+    "path_from": "paths.json",
+    "od_mm": 3.1243,
+    "length_mm": 32.0425,
+    "resample_mm": 0.2,
+    "R_at_OD_window_mm": 101.004,
+    "R_total_at_OD_window_mm": 100.9833,
+    "absolute_floor_mm": 1.5621,
+    "lane_target_mm": 9.3729,
+    "R_prev_3sample_mm": 117.5999,
+    "R_prev_from": "cables3d.json",
+    "prev_window_is_3_SAMPLES_not_mm": true,
+    "prev_minus_new_mm": 16.5959,
+    "windows": {
+     "0.5000": {
+      "window_mm": 0.5,
+      "R_net_mm": 49.7734,
+      "turn_net_deg": 0.46,
+      "R_total_mm": 49.7734,
+      "turn_total_deg": 0.46,
+      "at_mm": [
+       39.1674,
+       -6.7144,
+       171.6108
+      ]
+     },
+     "1.0000": {
+      "window_mm": 1.0,
+      "R_net_mm": 92.2253,
+      "turn_net_deg": 0.621,
+      "R_total_mm": 92.2071,
+      "turn_total_deg": 0.621,
+      "at_mm": [
+       39.1839,
+       -6.7111,
+       172.2113
+      ]
+     },
+     "2.0000": {
+      "window_mm": 2.0,
+      "R_net_mm": 92.52,
+      "turn_net_deg": 1.239,
+      "R_total_mm": 92.5033,
+      "turn_total_deg": 1.239,
+      "at_mm": [
+       39.1674,
+       -6.7144,
+       171.6108
+      ]
+     },
+     "3.1243": {
+      "window_mm": 3.1243,
+      "R_net_mm": 101.004,
+      "turn_net_deg": 1.815,
+      "R_total_mm": 100.9833,
+      "turn_total_deg": 1.816,
+      "at_mm": [
+       39.1784,
+       -6.7122,
+       172.0111
+      ]
+     },
+     "6.2486": {
+      "window_mm": 6.2486,
+      "R_net_mm": 114.4699,
+      "turn_net_deg": 3.103,
+      "R_total_mm": 114.4498,
+      "turn_total_deg": 3.104,
+      "at_mm": [
+       39.1973,
+       -6.7083,
+       172.812
+      ]
+     },
+     "9.3729": {
+      "window_mm": 9.3729,
+      "R_net_mm": 121.0773,
+      "turn_net_deg": 4.448,
+      "R_total_mm": 121.0577,
+      "turn_total_deg": 4.449,
+      "at_mm": [
+       39.1934,
+       -6.7092,
+       172.6117
+      ]
+     }
+    },
+    "verdict": "CANNOT DETERMINE",
+    "verdict_why": "R 101.0040 mm meets this lane's 3 x OD target (9.3729 mm). Still CANNOT DETERMINE and not PASS: the target is this lane's rule, not a published limit"
+   },
+   {
+    "id": "dxl-id32-id31",
+    "path_from": "paths.json",
+    "od_mm": 3.1243,
+    "length_mm": 117.5708,
+    "resample_mm": 0.2,
+    "R_at_OD_window_mm": 2.0316,
+    "R_total_at_OD_window_mm": 2.0311,
+    "absolute_floor_mm": 1.5621,
+    "lane_target_mm": 9.3729,
+    "R_prev_3sample_mm": 3.0353,
+    "R_prev_from": "cables3d.json",
+    "prev_window_is_3_SAMPLES_not_mm": true,
+    "prev_minus_new_mm": 1.0037,
+    "windows": {
+     "0.5000": {
+      "window_mm": 0.5,
+      "R_net_mm": 0.2539,
+      "turn_net_deg": 90.247,
+      "R_total_mm": 0.2539,
+      "turn_total_deg": 90.247,
+      "at_mm": [
+       48.6975,
+       -9.0,
+       242.4646
+      ]
+     },
+     "1.0000": {
+      "window_mm": 1.0,
+      "R_net_mm": 0.6349,
+      "turn_net_deg": 90.247,
+      "R_total_mm": 0.6348,
+      "turn_total_deg": 90.251,
+      "at_mm": [
+       48.7494,
+       -8.982,
+       242.6109
+      ]
+     },
+     "2.0000": {
+      "window_mm": 2.0,
+      "R_net_mm": 1.2697,
+      "turn_net_deg": 90.247,
+      "R_total_mm": 1.2696,
+      "turn_total_deg": 90.261,
+      "at_mm": [
+       48.6975,
+       -9.0,
+       242.4646
+      ]
+     },
+     "3.1243": {
+      "window_mm": 3.1243,
+      "R_net_mm": 2.0316,
+      "turn_net_deg": 90.247,
+      "R_total_mm": 2.0311,
+      "turn_total_deg": 90.268,
+      "at_mm": [
+       48.0976,
+       -9.0,
+       242.4646
+      ]
+     },
+     "6.2486": {
+      "window_mm": 6.2486,
+      "R_net_mm": 2.7233,
+      "turn_net_deg": 130.443,
+      "R_total_mm": 2.6153,
+      "turn_total_deg": 135.828,
+      "at_mm": [
+       48.7382,
+       -8.6656,
+       245.1909
+      ]
+     },
+     "9.3729": {
+      "window_mm": 9.3729,
+      "R_net_mm": 4.1287,
+      "turn_net_deg": 130.448,
+      "R_total_mm": 3.9645,
+      "turn_total_deg": 135.85,
+      "at_mm": [
+       48.7373,
+       -8.6412,
+       245.3894
+      ]
+     }
+    },
+    "verdict": "CANNOT DETERMINE",
+    "verdict_why": "R 2.0316 mm is above the absolute floor OD/2 = 1.5621 mm but BELOW one outside diameter (3.1243 mm). No published minimum exists for the X3P, so this is not graded FAIL -- but no bundle of three 21 AWG wires is routinely bent tighter than its own thickness, and this is where a measurement on the real cable would settle it"
+   },
+   {
+    "id": "dxl-id34-id33",
+    "path_from": "paths.json",
+    "od_mm": 3.1243,
+    "length_mm": 67.404,
+    "resample_mm": 0.2,
+    "R_at_OD_window_mm": 2.18,
+    "R_total_at_OD_window_mm": 2.18,
+    "absolute_floor_mm": 1.5621,
+    "lane_target_mm": 9.3729,
+    "R_prev_3sample_mm": 5.4428,
+    "R_prev_from": "cables3d.json",
+    "prev_window_is_3_SAMPLES_not_mm": true,
+    "prev_minus_new_mm": 3.2628,
+    "windows": {
+     "0.5000": {
+      "window_mm": 0.5,
+      "R_net_mm": 0.2734,
+      "turn_net_deg": 83.842,
+      "R_total_mm": 0.2734,
+      "turn_total_deg": 83.842,
+      "at_mm": [
+       -13.1444,
+       -8.8942,
+       216.8485
+      ]
+     },
+     "1.0000": {
+      "window_mm": 1.0,
+      "R_net_mm": 0.6834,
+      "turn_net_deg": 83.842,
+      "R_total_mm": 0.6834,
+      "turn_total_deg": 83.842,
+      "at_mm": [
+       -13.0039,
+       -8.7534,
+       216.827
+      ]
+     },
+     "2.0000": {
+      "window_mm": 2.0,
+      "R_net_mm": 1.3659,
+      "turn_net_deg": 83.893,
+      "R_total_mm": 1.3659,
+      "turn_total_deg": 83.893,
+      "at_mm": [
+       -12.5825,
+       -8.3312,
+       216.7627
+      ]
+     },
+     "3.1243": {
+      "window_mm": 3.1243,
+      "R_net_mm": 2.18,
+      "turn_net_deg": 84.105,
+      "R_total_mm": 2.18,
+      "turn_total_deg": 84.105,
+      "at_mm": [
+       -12.161,
+       -7.9089,
+       216.6987
+      ]
+     },
+     "6.2486": {
+      "window_mm": 6.2486,
+      "R_net_mm": 4.1898,
+      "turn_net_deg": 84.785,
+      "R_total_mm": 4.1898,
+      "turn_total_deg": 84.786,
+      "at_mm": [
+       -11.0369,
+       -6.7827,
+       216.5306
+      ]
+     },
+     "9.3729": {
+      "window_mm": 9.3729,
+      "R_net_mm": 6.2733,
+      "turn_net_deg": 85.853,
+      "R_total_mm": 6.2732,
+      "turn_total_deg": 85.854,
+      "at_mm": [
+       -10.0529,
+       -5.7968,
+       216.389
+      ]
+     }
+    },
+    "verdict": "CANNOT DETERMINE",
+    "verdict_why": "R 2.1800 mm is above the absolute floor OD/2 = 1.5621 mm but BELOW one outside diameter (3.1243 mm). No published minimum exists for the X3P, so this is not graded FAIL -- but no bundle of three 21 AWG wires is routinely bent tighter than its own thickness, and this is where a measurement on the real cable would settle it"
+   },
+   {
+    "id": "dxl-imu200-id10",
+    "path_from": "paths.json",
+    "od_mm": 3.1243,
+    "length_mm": 128.0179,
+    "resample_mm": 0.2,
+    "R_at_OD_window_mm": 1.985,
+    "R_total_at_OD_window_mm": 1.9846,
+    "absolute_floor_mm": 1.5621,
+    "lane_target_mm": 9.3729,
+    "R_prev_3sample_mm": 3.4995,
+    "R_prev_from": "cables3d.json",
+    "prev_window_is_3_SAMPLES_not_mm": true,
+    "prev_minus_new_mm": 1.5145,
+    "windows": {
+     "0.5000": {
+      "window_mm": 0.5,
+      "R_net_mm": 0.2481,
+      "turn_net_deg": 92.364,
+      "R_total_mm": 0.2481,
+      "turn_total_deg": 92.364,
+      "at_mm": [
+       -17.8418,
+       0.49,
+       105.4699
+      ]
+     },
+     "1.0000": {
+      "window_mm": 1.0,
+      "R_net_mm": 0.6203,
+      "turn_net_deg": 92.364,
+      "R_total_mm": 0.6203,
+      "turn_total_deg": 92.364,
+      "at_mm": [
+       -18.2366,
+       0.4287,
+       105.4487
+      ]
+     },
+     "2.0000": {
+      "window_mm": 2.0,
+      "R_net_mm": 1.2407,
+      "turn_net_deg": 92.364,
+      "R_total_mm": 1.2405,
+      "turn_total_deg": 92.372,
+      "at_mm": [
+       -18.434,
+       0.3981,
+       105.4381
+      ]
+     },
+     "3.1243": {
+      "window_mm": 3.1243,
+      "R_net_mm": 1.985,
+      "turn_net_deg": 92.364,
+      "R_total_mm": 1.9846,
+      "turn_total_deg": 92.385,
+      "at_mm": [
+       -19.0262,
+       0.3062,
+       105.4062
+      ]
+     },
+     "6.2486": {
+      "window_mm": 6.2486,
+      "R_net_mm": 3.8463,
+      "turn_net_deg": 92.358,
+      "R_total_mm": 3.8437,
+      "turn_total_deg": 92.42,
+      "at_mm": [
+       -17.6294,
+       -1.124,
+       106.0647
+      ]
+     },
+     "9.3729": {
+      "window_mm": 9.3729,
+      "R_net_mm": 5.8318,
+      "turn_net_deg": 92.352,
+      "R_total_mm": 5.8235,
+      "turn_total_deg": 92.485,
+      "at_mm": [
+       -17.6294,
+       -1.124,
+       106.0647
+      ]
+     }
+    },
+    "verdict": "CANNOT DETERMINE",
+    "verdict_why": "R 1.9850 mm is above the absolute floor OD/2 = 1.5621 mm but BELOW one outside diameter (3.1243 mm). No published minimum exists for the X3P, so this is not graded FAIL -- but no bundle of three 21 AWG wires is routinely bent tighter than its own thickness, and this is where a measurement on the real cable would settle it"
+   },
+   {
+    "id": "dxl-imu200-id20",
+    "path_from": "paths.json",
+    "od_mm": 3.1243,
+    "length_mm": 124.6393,
+    "resample_mm": 0.2,
+    "R_at_OD_window_mm": 2.5422,
+    "R_total_at_OD_window_mm": 2.5412,
+    "absolute_floor_mm": 1.5621,
+    "lane_target_mm": 9.3729,
+    "R_prev_3sample_mm": 3.7823,
+    "R_prev_from": "cables3d.json",
+    "prev_window_is_3_SAMPLES_not_mm": true,
+    "prev_minus_new_mm": 1.2401,
+    "windows": {
+     "0.5000": {
+      "window_mm": 0.5,
+      "R_net_mm": 0.3178,
+      "turn_net_deg": 72.121,
+      "R_total_mm": 0.3178,
+      "turn_total_deg": 72.121,
+      "at_mm": [
+       -17.8413,
+       0.49,
+       105.4699
+      ]
+     },
+     "1.0000": {
+      "window_mm": 1.0,
+      "R_net_mm": 0.7944,
+      "turn_net_deg": 72.121,
+      "R_total_mm": 0.7944,
+      "turn_total_deg": 72.121,
+      "at_mm": [
+       -18.0387,
+       0.4594,
+       105.4593
+      ]
+     },
+     "2.0000": {
+      "window_mm": 2.0,
+      "R_net_mm": 1.5889,
+      "turn_net_deg": 72.121,
+      "R_total_mm": 1.5886,
+      "turn_total_deg": 72.133,
+      "at_mm": [
+       -18.4335,
+       0.3982,
+       105.4381
+      ]
+     },
+     "3.1243": {
+      "window_mm": 3.1243,
+      "R_net_mm": 2.5422,
+      "turn_net_deg": 72.121,
+      "R_total_mm": 2.5412,
+      "turn_total_deg": 72.151,
+      "at_mm": [
+       -19.0258,
+       0.3063,
+       105.4062
+      ]
+     },
+     "6.2486": {
+      "window_mm": 6.2486,
+      "R_net_mm": 4.926,
+      "turn_net_deg": 72.115,
+      "R_total_mm": 4.9194,
+      "turn_total_deg": 72.211,
+      "at_mm": [
+       -18.0387,
+       0.4594,
+       105.4593
+      ]
+     },
+     "9.3729": {
+      "window_mm": 9.3729,
+      "R_net_mm": 7.469,
+      "turn_net_deg": 72.109,
+      "R_total_mm": 7.4463,
+      "turn_total_deg": 72.329,
+      "at_mm": [
+       -17.5187,
+       2.0999,
+       106.0944
+      ]
+     }
+    },
+    "verdict": "CANNOT DETERMINE",
+    "verdict_why": "R 2.5422 mm is above the absolute floor OD/2 = 1.5621 mm but BELOW one outside diameter (3.1243 mm). No published minimum exists for the X3P, so this is not graded FAIL -- but no bundle of three 21 AWG wires is routinely bent tighter than its own thickness, and this is where a measurement on the real cable would settle it"
+   },
+   {
+    "id": "tof-hat",
+    "path_from": "paths-hat.json",
+    "od_mm": 2.2,
+    "length_mm": 38.5013,
+    "resample_mm": 0.2,
+    "R_at_OD_window_mm": 2.0379,
+    "R_total_at_OD_window_mm": 2.0373,
+    "absolute_floor_mm": 1.1,
+    "lane_target_mm": 6.6,
+    "R_prev_3sample_mm": 3.0493,
+    "R_prev_from": "cables3d-hat.json",
+    "prev_window_is_3_SAMPLES_not_mm": true,
+    "prev_minus_new_mm": 1.0114,
+    "windows": {
+     "0.5000": {
+      "window_mm": 0.5,
+      "R_net_mm": 0.3705,
+      "turn_net_deg": 61.853,
+      "R_total_mm": 0.3705,
+      "turn_total_deg": 61.853,
+      "at_mm": [
+       81.0882,
+       22.609,
+       249.4734
+      ]
+     },
+     "1.0000": {
+      "window_mm": 1.0,
+      "R_net_mm": 0.9263,
+      "turn_net_deg": 61.853,
+      "R_total_mm": 0.9262,
+      "turn_total_deg": 61.859,
+      "at_mm": [
+       80.778,
+       22.8599,
+       249.4734
+      ]
+     },
+     "2.0000": {
+      "window_mm": 2.0,
+      "R_net_mm": 1.8526,
+      "turn_net_deg": 61.853,
+      "R_total_mm": 1.8521,
+      "turn_total_deg": 61.872,
+      "at_mm": [
+       80.6229,
+       22.9854,
+       249.4734
+      ]
+     },
+     "2.2000": {
+      "window_mm": 2.2,
+      "R_net_mm": 2.0379,
+      "turn_net_deg": 61.853,
+      "R_total_mm": 2.0373,
+      "turn_total_deg": 61.872,
+      "at_mm": [
+       80.4678,
+       23.1109,
+       249.4734
+      ]
+     },
+     "4.4000": {
+      "window_mm": 4.4,
+      "R_net_mm": 3.6412,
+      "turn_net_deg": 69.236,
+      "R_total_mm": 3.6409,
+      "turn_total_deg": 69.242,
+      "at_mm": [
+       57.4669,
+       33.7042,
+       251.0263
+      ]
+     },
+     "6.6000": {
+      "window_mm": 6.6,
+      "R_net_mm": 5.4584,
+      "turn_net_deg": 69.278,
+      "R_total_mm": 5.458,
+      "turn_total_deg": 69.284,
+      "at_mm": [
+       58.4061,
+       34.6802,
+       250.1823
+      ]
+     }
+    },
+    "verdict": "CANNOT DETERMINE",
+    "verdict_why": "R 2.0379 mm is above the absolute floor OD/2 = 1.1000 mm but BELOW one outside diameter (2.2000 mm). No published minimum exists for the X3P, so this is not graded FAIL -- but no bundle of three 21 AWG wires is routinely bent tighter than its own thickness, and this is where a measurement on the real cable would settle it"
+   }
+  ]
+ }
+}
