@@ -1,0 +1,73 @@
+sheetcheck --self-test   (workdir /var/folders/10/grbnlfxx7zv19wrbq9d3xr2r0000gn/T/sheetcheck-selftest)
+  THE CONTROL FIRST: a sheet built to pass all 8 rules
+  control-good             line_ratio    want PASS             got PASS             ok
+  control-good             coverage      want PASS             got PASS             ok
+  control-good             empty_rect    want PASS             got PASS             ok
+  control-good             font          want PASS             got PASS             ok
+  control-good             iso           want PASS             got PASS             ok
+  control-good             renders       want PASS             got PASS             ok
+  control-good             curve_density want PASS             got PASS             ok
+  control-good             dim_coverage  want PASS             got PASS             ok
+  now the breaks — each must turn its own rule red
+  break-font-2mm           font          want FAIL             got FAIL             ok
+  break-lines-30k          line_ratio    want FAIL             got FAIL             ok
+  break-coverage-20        coverage      want FAIL             got FAIL             ok
+  break-empty-rect         empty_rect    want FAIL             got FAIL             ok
+  break-iso-one            iso           want FAIL             got FAIL             ok
+  break-iso-small          iso           want FAIL             got FAIL             ok
+  break-renders-one        renders       want FAIL             got FAIL             ok
+  break-renders-small      renders       want FAIL             got FAIL             ok
+  break-renders-lineart    renders       want FAIL             got FAIL             ok
+  break-renders-flat-colou renders       want FAIL             got FAIL             ok
+  break-renders-grey-shade renders       want FAIL             got FAIL             ok
+  break-curve-density      curve_density want FAIL             got FAIL             ok
+  break-dim-coverage       dim_coverage  want FAIL             got FAIL             ok
+  break-dim-class          dim_coverage  want FAIL             got FAIL             ok
+  and the CANNOT DETERMINEs — never a pass
+  cd-no-edges              line_ratio    want CANNOT DETERMINE got CANNOT DETERMINE ok
+  cd-no-frame              coverage      want CANNOT DETERMINE got CANNOT DETERMINE ok
+  cd-no-frame-rect         empty_rect    want CANNOT DETERMINE got CANNOT DETERMINE ok
+  cd-no-frame-density      curve_density want CANNOT DETERMINE got CANNOT DETERMINE ok
+  cd-no-features           dim_coverage  want CANNOT DETERMINE got CANNOT DETERMINE ok
+  cd-mesh-backed-would-pas dim_coverage  want CANNOT DETERMINE got CANNOT DETERMINE ok
+  cd-census-too-small      dim_coverage  want CANNOT DETERMINE got CANNOT DETERMINE ok
+  guard-control-small-box  dim_coverage  want PASS             got PASS             ok
+  mesh-census-undimensione dim_coverage  want FAIL             got FAIL             ok
+  mesh-census-all-dimensio dim_coverage  want CANNOT DETERMINE got CANNOT DETERMINE ok
+  break-a4-refusal-not-on- dim_coverage  want FAIL             got FAIL             ok
+  a4-refusal-printed-passe dim_coverage  want PASS             got PASS             ok
+  a4-wrong-refusal-does-no dim_coverage  want FAIL             got FAIL             ok
+  iso-label-iso2-counts    iso           want PASS             got PASS             ok
+  iso-label-standard-cite  iso           want FAIL             got FAIL             ok
+  and PRISMATIC POCKETS — the class the census could not see
+  pocket-control-plain-box pockets       want 0                got 0                ok
+  pocket-found-blind       pockets       want 1                got 1                ok
+  pocket-measures-w-l-d    pockets       want (2.0, 3.0, 2.0)  got (2.0, 3.0, 2.0)  ok
+  pocket-positions-from-da pockets       want (6.5, 5.0)       got (6.5, 5.0)       ok
+  pocket-through-folds-to- pockets       want (1, 2)           got (1, 2)           ok
+  pocket-round-mouth-not-a pockets       want (0, 2)           got (0, 2)           ok
+  ratio-pass-density-fail  line_ratio    want PASS             got PASS             ok
+  ratio-pass-says-dense    line_ratio    want True             got True             ok
+  ratio-note-control       line_ratio    want True             got True             ok
+  and the SWEEP — which folders --all grades at all
+  sweep-grades-the-part    sweep         want ['part-with-a-sheet'] got ['part-with-a-sheet'] ok
+  sweep-skips-_prof        sweep         want ['_prof']        got ['_prof']        ok
+  sweep-names-the-unbuilt  sweep         want ['part-folder-left-empty', 'part-that-never-built'] got ['part-folder-left-empty', 'part-that-never-built'] ok
+  sweep-carries-the-reason sweep         want True             got True             ok
+  sweep-control-no-false-a sweep         want (1, 0, 0)        got (1, 0, 0)        ok
+  sweep-nonpart-dir-skippe sweep         want ['another-lanes-plot-dir', 'another-lanes-probe-dir'] got ['another-lanes-plot-dir', 'another-lanes-probe-dir'] ok
+  sweep-nonpart-with-svg-n sweep         want []               got []               ok
+  sweep-break-nonpart-goes sweep         want True             got True             ok
+  realpred-found-a-part-to sweep         want True             got True             ok
+  realpred-knows-a-real-pa sweep         want (True, True)     got (True, True)     ok
+  realpred-refuses-a-nonpa sweep         want False            got False            ok
+  realpred-unconsultable-i sweep         want True             got True             ok
+  and the SECTION ROLL-UP — A / A2 / A3 / A4 counted apart
+  sections-control-all-pas sections      want {'A': 'PASS', 'A2': 'PASS', 'A3': 'PASS', 'A4': 'PASS'} got {'A': 'PASS', 'A2': 'PASS', 'A3': 'PASS', 'A4': 'PASS'} ok
+  sections-font-breaks-onl sections      want ('FAIL', 'PASS', 'PASS', 'PASS') got ('FAIL', 'PASS', 'PASS', 'PASS') ok
+  sections-dim-breaks-A-A2 sections      want ('FAIL', 'FAIL', 'FAIL', 'PASS') got ('FAIL', 'FAIL', 'FAIL', 'PASS') ok
+  sections-renders-break-o sections      want ('FAIL', 'PASS', 'PASS', 'PASS') got ('FAIL', 'PASS', 'PASS', 'PASS') ok
+  sections-a2-coverage-is- sections      want (60.0, 85.0)     got (60.0, 85.0)     ok
+  colour-shadow-counted-ap sections      want (6, 0, 6)        got (6, 0, 6)        ok
+
+  64/64 self-test cases behaved as required
