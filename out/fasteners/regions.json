@@ -1,0 +1,117 @@
+{
+ "doc": {
+  "id": "MD-FASTREGION-001",
+  "rev": "A",
+  "title": "The 64 placed screws IN SITU, four regions, each render read back by the instrument that refused the whole-machine one",
+  "generated_by": "tools/render_fastener_regions.py"
+ },
+ "a_misreading_recorded": "The first hip-left render was read as '20 coarse boxes, no real geometry' \u2014 i.e. as a broken render. That reading was WRONG and a two-part control settled it: the hip bracket draws as a real curved bracket with its bores, and the XL330 servo genuinely IS a rectangular box with a round output horn on one face. The boxes were correct parts. What the picture did show was a defect in THIS tool, not in the kernel: all 15 servo instances were drawn in all four regions because every region names the mesh. Hence the proximity filter above.",
+ "why": "cecad.render.verify_render REFUSED the all-64-screws render and was right to: a cloud of 4 mm objects in a 300 mm frame has no continuous mark over 10 % of the frame. The answer is not to disable the check but to frame the picture a reader needs \u2014 screws beside the parts they fasten, at a scale where both are legible.",
+ "regions": {
+  "hip-left": {
+   "parts_placed": 8,
+   "screws_placed": 24,
+   "png": "/Users/leifrydenfalk/dev/ce-workshop/ce-designs/microduck/out/fasteners/region-hip-left.png",
+   "render_verdict": "PASS",
+   "verified": {
+    "bytes": 218350,
+    "size": [
+     1240,
+     840
+    ],
+    "distinct_colors": 2587,
+    "ink_frac": 0.19411,
+    "background": [
+     255,
+     255,
+     255
+    ],
+    "max_stroke": 0.6768,
+    "thin_part": false
+   }
+  },
+  "legs": {
+   "parts_placed": 12,
+   "screws_placed": 10,
+   "png": "/Users/leifrydenfalk/dev/ce-workshop/ce-designs/microduck/out/fasteners/region-legs.png",
+   "render_verdict": "PASS",
+   "verified": {
+    "bytes": 288149,
+    "size": [
+     1240,
+     840
+    ],
+    "distinct_colors": 2993,
+    "ink_frac": 0.21591,
+    "background": [
+     255,
+     255,
+     255
+    ],
+    "max_stroke": 0.4748,
+    "thin_part": false
+   }
+  },
+  "head": {
+   "parts_placed": 18,
+   "screws_placed": 19,
+   "png": "/Users/leifrydenfalk/dev/ce-workshop/ce-designs/microduck/out/fasteners/region-head.png",
+   "render_verdict": "PASS",
+   "verified": {
+    "bytes": 250895,
+    "size": [
+     1240,
+     840
+    ],
+    "distinct_colors": 2559,
+    "ink_frac": 0.20694,
+    "background": [
+     255,
+     255,
+     255
+    ],
+    "max_stroke": 0.4194,
+    "thin_part": false
+   }
+  },
+  "trunk": {
+   "parts_placed": 9,
+   "screws_placed": 11,
+   "png": "/Users/leifrydenfalk/dev/ce-workshop/ce-designs/microduck/out/fasteners/region-trunk.png",
+   "render_verdict": "PASS",
+   "verified": {
+    "bytes": 235523,
+    "size": [
+     1240,
+     840
+    ],
+    "distinct_colors": 2629,
+    "ink_frac": 0.17007,
+    "background": [
+     255,
+     255,
+     255
+    ],
+    "max_stroke": 0.6098,
+    "thin_part": false
+   }
+  }
+ },
+ "counts": {
+  "regions": 4,
+  "renders_PASS": 4,
+  "renders_FAIL": 0,
+  "screws_shown": 64,
+  "screws_total": 64,
+  "distinct_screws_shown": 64,
+  "screws_in_no_region": 0,
+  "servos_per_region_nearest_anchor": {
+   "hip-left": 3,
+   "legs": 2,
+   "head": 9,
+   "trunk": 1
+  }
+ },
+ "seconds": 141.4,
+ "a_limitation_found_by_looking_at_the_head_render": "The head picture shows the head shell floating above a cluster of NINE servo boxes, and the head does not have nine servos. The servos are assigned to a region by nearest anchor part, and the head region's anchor list includes `neck`, which sits low on the machine \u2014 so trunk and hip servos fall closer to it than to their own region's anchors. This is a defect in the DISPLAY GROUPING only: every servo's world placement is the assembly's own, unchanged, and each appears exactly once across the four pictures (3 + 2 + 9 + 1 = 15). It is recorded rather than tuned away, because sweeping the grouping until the head shows three servos would be fitting the instrument to the expected answer. WHAT SETTLES IT: assign each servo to the region of the JOINT it actuates, read from ce-assemblies/microduck/current/joints.json, instead of by distance."
+}

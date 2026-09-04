@@ -5,7 +5,8 @@ its derived world position, and MEASURE them against each other.
     ce-cad/bin/cad tools/build_fastener_skeleton.py
         -> out/fasteners/skeleton.json
         -> out/fasteners/fastener-skeleton-{iso,front,right}.png
-        -> log at /private/tmp/int-fast/skel.log (bin/cad buffers stdout)
+        -> log at out/fasteners/skeleton-build.log (bin/cad buffers stdout;
+           override with MD_SKELETON_LOG)
 
 WHY THIS EXISTS SEPARATELY FROM THE WHOLE ASSEMBLY. The full assembly loads 70
 decimated reference meshes through the kernel and takes many minutes; the
@@ -33,7 +34,18 @@ placement row where the provenance belongs.
 import os, json, traceback, time
 ROOT="/Users/leifrydenfalk/dev/ce-workshop/ce-designs/microduck"
 os.environ.setdefault("CE_TRIAD_ROOT", ROOT+":/Users/leifrydenfalk/dev/ce-workshop")
-LOG=open("/private/tmp/int-fast/skel.log","w",buffering=1)
+# bin/cad buffers stdout, so this writes its own log and flushes every line.
+# It used to hardcode /private/tmp/int-fast/, ONE agent's scratch directory,
+# and the tool therefore died with FileNotFoundError for everyone else the
+# moment that directory was gone. A tool promoted into tools/ may not depend
+# on the scratch dir of the session that wrote it. Default is inside the repo;
+# override with MD_SKELETON_LOG.
+_LOGPATH = os.environ.get(
+    "MD_SKELETON_LOG",
+    os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                 "out/fasteners/skeleton-build.log"))
+os.makedirs(os.path.dirname(_LOGPATH), exist_ok=True)
+LOG=open(_LOGPATH,"w",buffering=1)
 def p(*a): LOG.write(" ".join(str(x) for x in a)+"\n"); LOG.flush()
 try:
     t0=time.time()
