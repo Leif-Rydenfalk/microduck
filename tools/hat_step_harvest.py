@@ -38,7 +38,10 @@ def slugify(s):
 def main():
     os.makedirs(GEO, exist_ok=True)
     comps = json.load(open(os.path.join(OUT, "components.json")))
-    fitted = [c for c in comps["components"] if c["fitted"]]
+    # candidates for matching = every footprint that has a body: the 117 fitted
+    # placements AND the 9 DNP lands (KiCad exports a 3D model for a DNP part too,
+    # so an unmatched DNP model would otherwise be mis-assigned to its neighbour).
+    fitted = [c for c in comps["components"] if c["fitted"] or c["dnp"]]
 
     t0 = time.time()
     doc = App.newDocument("hat")
@@ -105,11 +108,14 @@ def main():
                          match_dist_mm=round(bd, 4) if best else None))
     by_ref = {}
     for r in rows:
-        if r["refdes"] and (r["match_dist_mm"] or 9) < 3.5:
+        if r["refdes"] and r["match_dist_mm"] is not None and r["match_dist_mm"] < 3.5:
             by_ref.setdefault(r["refdes"], []).append(r)
     dup = {k: len(v) for k, v in by_ref.items() if len(v) > 1}
     print("designators matched", len(by_ref), "of", len(fitted), "duplicates", dup, flush=True)
     unmatched = [c["refdes"] for c in fitted if c["refdes"] not in by_ref]
+    far = [(r["label"], r["refdes"], r["match_dist_mm"]) for r in rows
+           if r["match_dist_mm"] is None or r["match_dist_mm"] > 0.6]
+    print("objects further than 0.6 mm from their designator:", far, flush=True)
     print("unmatched designators", unmatched, flush=True)
 
     json.dump(dict(_generated="tools/hat_step_harvest.py",
