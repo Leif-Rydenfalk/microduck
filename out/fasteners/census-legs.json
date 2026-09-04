@@ -1,0 +1,93 @@
+{
+ "schema": "microduck fastener census, region legs, v1",
+ "region": "legs",
+ "status": "checkpoint 1 \u2014 skeleton only, nothing measured in THIS file yet",
+ "generated": "2026-09-04T18:15:43",
+ "owned_paths": [
+  "out/fasteners/census-legs.json",
+  "out/fasteners/legs/**",
+  "tools/fastener_legs.py",
+  "FASTENERS-legs.html",
+  "ce-cad/cecad/meshpockets.py (+ docs + selftest)",
+  "fastener part/connection folders this lane creates",
+  "the legs fastener rows of ce-assemblies/microduck"
+ ],
+ "not_owned": [
+  "tools/gen_fasteners.py, FASTENERS.html, ce-cad/cecad/meshfeatures.py (hips-trunk lane)",
+  "ce-cad/cecad/meshfasteners.py (head-neck lane)",
+  "ce-cad/cecad/meshmates.py (electronics-mounts lane)",
+  "out/drawings/, out/pose/, out/harness/, out/joints/"
+ ],
+ "community_census_to_be_rechecked": {
+  "source": "SPEC.md:75-76, marked [C] community-derived",
+  "claim": {
+   "clearance_2.2000_mm": 77,
+   "counterbore_4.4000_mm": 28,
+   "tap_1.6000_mm": 20,
+   "pilot_2.7000_2.8000_mm": 20,
+   "total_holes": 145
+  },
+  "status": "NOT YET RE-MEASURED by this lane"
+ },
+ "parts": {
+  "part:microduck-shin": {
+   "mesh": "leg",
+   "status": "not yet measured"
+  },
+  "part:microduck-ankle-left": {
+   "mesh": "ankle_left",
+   "status": "not yet measured"
+  },
+  "part:microduck-ankle-right": {
+   "mesh": "ankle_right",
+   "status": "not yet measured"
+  },
+  "part:microduck-foot-left": {
+   "mesh": "foot_left",
+   "status": "not yet measured"
+  },
+  "part:microduck-foot-right": {
+   "mesh": "foot_right",
+   "status": "not yet measured"
+  },
+  "part:microduck-sole-left": {
+   "mesh": "sole_left",
+   "status": "not yet measured"
+  },
+  "part:microduck-sole-right": {
+   "mesh": "sole_right",
+   "status": "not yet measured"
+  },
+  "part:microduck-upper-leg-left": {
+   "mesh": "upper_leg_left",
+   "status": "not yet measured"
+  },
+  "part:microduck-upper-leg-right": {
+   "mesh": "upper_leg_right",
+   "status": "not yet measured"
+  },
+  "part:microduck-upper-leg-rigidity-plate": {
+   "mesh": "upper_leg_rigidity_plate",
+   "status": "not yet measured"
+  }
+ },
+ "features": [],
+ "mates": [],
+ "fasteners": [],
+ "findings": [
+  {
+   "id": "F-legs-001",
+   "severity": "defect",
+   "what": "out/fasteners/world-placements.json (written by a previous run of this lane via tools/gen_fasteners.py) is NOT world: upper_leg_left and upper_leg_right carry the identical R and t = [4.0, 0.0, 102.5], which would make the two thighs coincident. Those are BODY-LOCAL geom transforms, not world.",
+   "evidence": "out/fasteners/world-placements.json placements[] entries for upper_leg_left / upper_leg_right",
+   "action": "this lane computes its own world transforms with cecad.mjcf.bodies_world() into out/fasteners/legs/world-placements-legs.json and does not use that file",
+   "verified": false
+  }
+ ],
+ "checkpoints": [
+  {
+   "at": "2026-09-04T18:15:43",
+   "what": "skeleton written; prior-run reference features exist in out/fasteners/mesh-features-reference.json and will be RE-TAKEN, not inherited"
+  }
+ ]
+}
