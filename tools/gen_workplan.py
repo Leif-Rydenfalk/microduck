@@ -396,6 +396,103 @@ track(
           evidence="readiness.json summary.print_licence — 22 vendor meshes, 8 ours"),
     ])
 
+# --- Track 8: the three parcels nothing else in this plan covered -----------
+# Found by walking the readiness rows against the parcels: the harness has no
+# human parcel at all although its cut tolerance can only come off a built loom;
+# torque is 3/3 CANNOT DETERMINE and no parcel produced it; and nothing turned
+# the first units into an inspection record.
+track(
+    8, "The three gaps this plan had",
+    "本计划原本遗漏的三项",
+    "Every other parcel here came from a readiness row. These three came from "
+    "reading the plan against the rows and finding work that no parcel owned: "
+    "the harness cut list, the torque schedule and the first-article report.",
+    "其余工作包均对应就绪度审核的某一行。这三项来自把计划与审核逐行核对后发现的空白："
+    "线束下料表、扭矩表、首件检验报告。",
+    [
+        P("H-1", "Build one harness and turn route floors into a cut list",
+          "实做一套线束，把走线下限转为下料表",
+          "wiring/CUTLIST.md: a cut length and a tolerance for every cable, measured "
+          "on a loom that has been fitted into a built robot, not computed in CAD.",
+          "Every one of the 23 cable rows carries a cut length and a tolerance, and "
+          "the 6 rows that are CANNOT DETERMINE today carry a connector part number. "
+          "Today: 20 cuttable lengths, 0 tolerances.",
+          23, "cables", depends="A-1 (a built robot to fit the loom into)",
+          needs="a real loom, crimp tooling, a built robot",
+          unblocks="harness purchasing, and the assembly station that fits it",
+          evidence="wiring/cables.json — 23 rows, 0 with a tolerance field, lengths are route floors + slack"),
+        P("F-1", "Set the torque schedule by strip and pull-out test",
+          "通过滑牙与拔出试验确定扭矩表",
+          "A torque per joint family with the test that produced it: torque-to-strip "
+          "and pull-out force on printed bosses and on the XL330's own tapped holes.",
+          "All three CANNOT DETERMINE torque rows in the playbook are replaced by a "
+          "number with a test method and a specimen count. No chart figure is copied.",
+          3, "joint families", depends="C-2 (the production print profile), M-1 for a real servo case",
+          needs="a torque rig, printed specimens, a calibrated driver",
+          unblocks="every assembly station step that tightens a screw",
+          evidence="tools/data/playbook.json torque — 3 of 3 CANNOT DETERMINE; ROBOTIS publishes no torque"),
+        P("Q-1", "First-article inspection report on the first five units",
+          "首批五台整机的首件检验报告",
+          "One report per unit: every gate result, every dimension out of tolerance, "
+          "every place the assembly document was wrong, and the time each station took.",
+          "5 units x 42 gates logged against a serial, and the report names every "
+          "step of the assembly document that had to be corrected to build them.",
+          5, "units", depends="A-1, A-3",
+          needs="built units, the test bench, a caliper",
+          unblocks="turns our simulated numbers into measured ones — the whole point of the pilot",
+          evidence="spec/test-plan.json — 42 end-of-line gates, 0 exercised"),
+    ])
+
+# ------------------------------------------------------- effort and what it needs
+# EVERY DAY FIGURE BELOW IS AN ESTIMATE AND IS LABELLED AS ONE. This workshop has
+# never built a physical unit, so no measured time-per-item exists for any of this
+# work (that absence is itself measured: 0 units built, 0 of 44 tests exercised,
+# spec/test-plan.json). Three things keep the estimates honest rather than invented:
+#
+#   1. every parcel says WHAT the estimate is arithmetic on — a count we measured
+#      (30 print files, 145 holes, 23 cables, 42 gates) times a per-item rate;
+#   2. the per-item rate is stated in the row, so a factory that knows its own rate
+#      can divide ours out and substitute theirs;
+#   3. where the driver is a measured quantity rather than an assumed rate — print
+#      time, for instance — the row says so and the number is not an assumption.
+#
+# An estimate is not a measurement and this document never calls it one.
+EFFORT = {
+    "M-1": (2.0, "1 unit: order, receive, unbox and photograph a full teardown. Rate: 2 d per unit, ASSUMED. Elapsed time is longer than the effort — shipping is not engineer-days.", "measurement"),
+    "M-2": (4.0, "30 printed parts x 0.13 engineer-day per part (about 1 h per part: fixture, caliper 3 axes plus features, record). Part count MEASURED (out/print/slice.json), rate ASSUMED.", "measurement"),
+    "M-3": (1.0, "2 dimensions, but the work is the setup: scale reference, repeat readings, recompute the front-view ratio. Rate ASSUMED.", "measurement"),
+    "M-4": (2.0, "6 unidentified components x 0.33 d each: decap or read the marking under magnification, then search the marking to a datasheet. Component count MEASURED (readiness CANNOT DETERMINE rows), rate ASSUMED.", "measurement"),
+    "M-5": (1.0, "1 bench session: rail voltages and standby current on a live unit. Rate ASSUMED.", "machine"),
+    "M-6": (4.5, "36 shelf records x 0.125 d each to write the measurement into the folder and re-run bin/triad check. Record count MEASURED (69 refs, 36 gradeable only from a unit), rate ASSUMED.", "desk"),
+    "C-1": (1.5, "4 processes x 0.375 d: collect the capability statement and turn it into the tolerance basis on our sheets. Process count MEASURED, rate ASSUMED.", "desk"),
+    "C-2": (3.0, "6 feature families x 5 specimens = 30 coupons: 1 d printing (machine time, not engineer time), 1.5 d measuring, 0.5 d writing the capability record. Coupon count is the plan; rates ASSUMED.", "machine"),
+    "C-3": (1.0, "2 materials: obtain the datasheets, re-run the FEA material sweep on the real numbers. The re-run itself is minutes — cecad.stress is already scripted.", "material"),
+    "S-1": (2.0, "3 quantity tiers across 32 lines: issue RFQ.html, chase, tabulate. Effort is chasing, not typing. Rate ASSUMED.", "desk"),
+    "S-2": (1.0, "1 decision (which battery pack actually ships) once a label has been read on a real pack.", "measurement"),
+    "S-3": (2.5, "15 lines x 0.17 d: get a lead time stated in writing for the 11 lines that have none, and a price for the 4 that have none. Line counts MEASURED (readiness bought_gaps), rate ASSUMED.", "desk"),
+    "B-1": (6.0, "3 boards x 2 d: trace nets off the physical board under magnification and correct our schematic. The Robot HAT may collapse to 0 d if Pollen's published Apache-2.0 package is adopted instead (FACTORY-QUESTIONS Q5.4).", "measurement"),
+    "B-2": (3.0, "1 board (Robot HAT) re-routed to close 8 open nets and pass DRC against the fab's own rules. Open-net count MEASURED (electronics/pcb-package.json routing), rate ASSUMED.", "desk"),
+    "B-3": (2.0, "2 boards through fab and assembly: prepare the package, panelise, review the fab's DFM report. Excludes fab lead time.", "vendor"),
+    "D-1": (3.0, "30 parts x 0.1 d for a manufacturability opinion per part. Part count MEASURED, rate ASSUMED.", "desk"),
+    "D-2": (2.0, "8 candidate parts for tooling: draft, wall, parting line, gate and ejector review. Candidate count MEASURED (5 shells + 3), rate ASSUMED.", "desk"),
+    "A-1": (3.0, "1 unit built for the first time from the paper, recording every place the paper is wrong. 23 steps are known to assume knowledge that is not on the page (MEASURED), which is what makes this 3 d and not 1.", "machine"),
+    "A-2": (2.0, "6 fixtures already drawn: print, fit, correct. Fixture count MEASURED (out/jigs), rate ASSUMED.", "machine"),
+    "A-3": (2.5, "42 end-of-line gates x 0.06 d to run and log the first time, plus rig setup. Gate count MEASURED (TEST-PLAN.html Table 13), rate ASSUMED.", "machine"),
+    "H-1": (2.0, "23 cable rows: build one loom, measure each cut length installed, set a tolerance from the measured spread. Cable count MEASURED (wiring/cables.json), rate ASSUMED.", "measurement"),
+    "F-1": (2.0, "3 joint families x 5 specimens: torque to failure and pull-out on printed bosses, then write the schedule. Torque is 3/3 CANNOT DETERMINE today (MEASURED).", "machine"),
+    "Q-1": (2.0, "5 first-article units inspected against the drawings and the gates, one report. Unit count is the pilot plan.", "measurement"),
+    "L-1": (1.0, "1 decision. Effort is reading and writing; the elapsed time depends on counsel or on Pollen answering.", "desk"),
+    "L-2": (11.0, "22 vendor meshes x 0.5 d to rebuild parametrically and grade against the reference to the 1.0 mm p95 rule. Mesh count MEASURED (readiness print_licence), rate ASSUMED and the most uncertain number in this table — the 8 already done took an agent, not an engineer.", "desk"),
+}
+
+NEEDS_CLASS = {
+    "machine": ("a real machine", "需实机"),
+    "material": ("a real material", "需实料"),
+    "measurement": ("a real measurement on real hardware", "需对实物实测"),
+    "desk": ("a desk only", "仅需案头工作"),
+    "vendor": ("an outside vendor's time", "需外部供应商配合"),
+}
+
 # ------------------------------------------------------------------ in flight
 IN_FLIGHT_PARCELS = [
     dict(id="WF-SHEETS", en="Drawing sheets rebuilt to the A2/A3/A4 standard: "
@@ -420,6 +517,79 @@ IN_FLIGHT_PARCELS = [
          "as solids in the assembly, with cut lengths and range-of-motion slack",
          zh="线束进入 CAD", count="23 cables"),
 ]
+
+# ------------------------------------------------- ten tracks, one per engineer
+# Leif, verbatim: "We have a factory and 10 engineers to put on this." So the
+# themes above are re-cut into TEN tracks, each sized for ONE engineer, and each
+# track says what it can start on day one and what it must wait for. A parcel
+# appears in exactly one track — the assertion below fails the build if a parcel
+# is dropped or claimed twice.
+THEME_PARCELS = {p["id"]: p for t in TRACKS for p in t["parcels"]}
+for pid, (days, basis, ncls) in EFFORT.items():
+    if pid not in THEME_PARCELS:
+        raise SystemExit("gen_workplan: EFFORT names parcel %s which does not exist" % pid)
+    THEME_PARCELS[pid]["days"] = days
+    THEME_PARCELS[pid]["days_basis"] = basis
+    THEME_PARCELS[pid]["needs_class"] = ncls
+    THEME_PARCELS[pid]["needs_class_en"] = NEEDS_CLASS[ncls][0]
+    THEME_PARCELS[pid]["needs_class_zh"] = NEEDS_CLASS[ncls][1]
+missing_effort = [pid for pid in THEME_PARCELS if "days" not in THEME_PARCELS[pid]]
+if missing_effort:
+    raise SystemExit("gen_workplan: no effort estimate for %s" % missing_effort)
+
+ENGINEERS = [
+    (1, "Teardown and dimensional metrology", "拆解与尺寸测量", ["M-1", "M-2", "M-3"],
+     "day one", "nothing — this track starts first and gates six others",
+     "先行开工，无前置条件，并制约其余六条线"),
+    (2, "Components, electrical identity and the shelf", "元器件识别、电气测量与零件档案", ["M-4", "M-5", "M-6"],
+     "after E1 has the unit apart", "E1 (M-1): the unit must be open",
+     "需 E1 完成拆解"),
+    (3, "Process capability, coupons and materials", "工艺能力、试件与材料", ["C-1", "C-2", "C-3"],
+     "day one", "nothing — your own machines and materials answer this",
+     "可即刻开工，答案在贵厂自有设备与材料"),
+    (4, "Sourcing: quotes, lead times and the battery", "采购：报价、交期与电池", ["S-1", "S-2", "S-3"],
+     "day one", "nothing for the quotes; S-2 wants a label read on a real pack",
+     "报价可即刻开始；S-2 需读取实物电池标签"),
+    (5, "Board reverse-engineering and routing", "电路板逆向与布线", ["B-1", "B-2"],
+     "after E1 opens the unit; the Robot HAT half may start day one",
+     "E1 for the physical boards. If Pollen's published Apache-2.0 HAT is adopted (FACTORY-QUESTIONS Q5.4) this track loses about a third of its work",
+     "需 E1 取得实物板；若采用 Pollen 公开的 Apache-2.0 板，本线工作量减少约三分之一"),
+    (6, "Board fabrication, assembly and the test rig", "投板、贴装与测试台", ["B-3", "A-3"],
+     "after E5 closes DRC", "E5 (B-2) for the boards; a built unit for the gates",
+     "需 E5 通过 DRC；判据执行需已装配整机"),
+    (7, "DFM and the print files", "可制造性评审与打印文件", ["D-1", "D-2"],
+     "day one", "nothing — it reads our drawings and your process rules",
+     "可即刻开工，依据我方图纸与贵厂工艺规则"),
+    (8, "First build, fixtures and first-article inspection", "首台装配、工装与首件检验", ["A-1", "A-2", "Q-1"],
+     "when parts and boards exist", "printed parts, bought parts and boards; E6 for the boards",
+     "需打印件、外购件与电路板齐备；电路板来自 E6"),
+    (9, "Harness and the torque schedule", "线束与扭矩表", ["H-1", "F-1"],
+     "F-1 can start with printed coupons on day one; H-1 needs a built robot",
+     "F-1: printed specimens only. H-1: E8 (A-1), a robot to fit the loom into",
+     "F-1 只需打印试件，可即刻开始；H-1 需 E8 完成首台装配"),
+    (10, "Licence position and owned rebuilds", "许可确认与自研重建", ["L-1", "L-2"],
+     "day one", "nothing — but L-2 is worth more once E1's measurements exist",
+     "可即刻开工；但 L-2 在 E1 测量完成后价值更大"),
+]
+claimed = [pid for _n, _e, _z, ids, *_r in ENGINEERS for pid in ids]
+if sorted(claimed) != sorted(THEME_PARCELS):
+    raise SystemExit("gen_workplan: engineer tracks do not partition the parcels — claimed %d of %d; missing %s; twice %s"
+                     % (len(claimed), len(THEME_PARCELS),
+                        sorted(set(THEME_PARCELS) - set(claimed)),
+                        sorted(x for x in set(claimed) if claimed.count(x) > 1)))
+
+TRACKS = [dict(num=n, engineer="E%d" % n, title_en=en, title_zh=zh,
+               why_en="Starts %s. Blocked by: %s." % (starts, blocked),
+               why_zh="开工时点：%s。前置条件：%s。" % (starts, blocked_zh),
+               starts=starts, blocked=blocked,
+               parcels=[THEME_PARCELS[i] for i in ids],
+               days=round(sum(THEME_PARCELS[i]["days"] for i in ids), 1))
+          for n, en, zh, ids, starts, blocked, blocked_zh in ENGINEERS]
+
+# The critical path is a chain of parcels that must run one after another.
+CRITICAL = ["M-1", "B-1", "B-2", "B-3", "A-1", "Q-1"]
+CRIT_DAYS = round(sum(THEME_PARCELS[i]["days"] for i in CRITICAL), 1)
+TOTAL_DAYS = round(sum(t["days"] for t in TRACKS), 1)
 
 # ---------------------------------------------------------------------- write
 now = datetime.datetime.now().astimezone().replace(microsecond=0).isoformat()
@@ -488,13 +658,49 @@ h.append("<li><a href=\"#inflight\">In flight — do not assign · 进行中，�
 h.append("<li><a href=\"#effort\">On effort estimates · 关于工时估算</a></li>")
 h.append("</ol></nav>")
 
-h.append(f"<p class=\"lede\">{n_parcels} parcels across {len(TRACKS)} tracks. Tracks 1 and 2 "
-         "gate most of the others; tracks 3, 4, 5 and 7 can start on day one in parallel.</p>")
+h.append(f"<p class=\"lede\">{n_parcels} parcels across {len(TRACKS)} tracks, one track per engineer, "
+         f"{TOTAL_DAYS} engineer-days of estimated hands-on work in total. Tracks 1, 3, 4, 7 and 10 can "
+         f"start on day one; the rest wait on a named predecessor, given per track below.</p>")
+h.append(f"<p class=\"lede zh\">共 {n_parcels} 个工作包、{len(TRACKS)} 条工作线（每位工程师一条），"
+         f"估算动手工作量合计 {TOTAL_DAYS} 人天。第 1、3、4、7、10 线可即刻开工，其余各线的前置条件见下。</p>")
+
+# --- the critical path, in one sentence, with the days computed from the parcels
+h.append("<div class=\"front\" style=\"border-color:var(--accent)\"><h2>The critical path, in one sentence "
+         "<span class=\"zh\" style=\"display:inline;font-size:15px\">关键路径，一句话</span></h2>")
+h.append(f"<p><b>Buy one retail unit (M-1) → trace the three boards off it (B-1) → route them to pass DRC (B-2) → "
+         f"fabricate and assemble them (B-3) → build the first robot from the paper (A-1) → inspect the first five "
+         f"units (Q-1): {CRIT_DAYS} engineer-days of hands-on work in series, and nothing shortens it except "
+         f"adopting Pollen's already-published Apache-2.0 Robot HAT, which removes the largest board from B-1 and B-2.</b> "
+         f"Everything else in this plan runs beside it.</p>")
+h.append(f"<p class=\"zh\"><b>关键路径：购入一台零售整机（M-1）→ 逆向三块电路板（B-1）→ 完成布线并通过 DRC（B-2）→ "
+         f"投板与贴装（B-3）→ 按文件装配第一台整机（A-1）→ 检验前五台（Q-1）：串行动手工作量 {CRIT_DAYS} 人天。"
+         f"唯一能缩短它的办法是改用 Pollen 已公开的 Apache-2.0 Robot HAT，从而免去 B-1 与 B-2 中最大的一块板。</b>"
+         f"计划中其余工作均可与之并行。</p>")
+h.append("<p class=\"lede\">Vendor lead time is not in that figure: B-3 waits on a PCB house and M-1 waits on a "
+         "shipment. Those are elapsed days, not engineer-days, and only you can put numbers on them.</p>")
+h.append("<p class=\"lede zh\">上述数字不含供应商周期：B-3 需等待 PCB 厂，M-1 需等待到货。那是日历天而非人天，"
+         "只有贵方能给出数值。</p></div>")
+
+# --- the ten tracks as a table before the detail
+h.append("<h3>The ten tracks · 十条工作线</h3>")
+h.append("<table><colgroup><col style=\"width:7%\"><col style=\"width:27%\"><col style=\"width:8%\">"
+         "<col style=\"width:9%\"><col style=\"width:17%\"><col style=\"width:32%\"></colgroup>")
+h.append("<thead><tr><th>Eng.<span class=\"zh\">工程师</span></th><th>Track<span class=\"zh\">工作线</span></th>"
+         "<th>Parcels<span class=\"zh\">工作包</span></th><th>Est. days<span class=\"zh\">估算人天</span></th>"
+         "<th>Starts<span class=\"zh\">开工时点</span></th><th>Blocked by<span class=\"zh\">前置条件</span></th></tr></thead><tbody>")
+for t in TRACKS:
+    h.append(f"<tr><td class=\"m\">{E(t['engineer'])}</td><td><a href=\"#t{t['num']}\">{E(t['title_en'])}</a>"
+             f"<span class=\"zh\">{E(t['title_zh'])}</span></td>"
+             f"<td class=\"num\">{len(t['parcels'])}</td><td class=\"num\">{t['days']}</td>"
+             f"<td>{E(t['starts'])}</td><td>{E(t['blocked'])}</td></tr>")
+h.append("</tbody></table>")
 
 for t in TRACKS:
     h.append(f"<section class=\"trk\" id=\"t{t['num']}\">")
-    h.append(f"<h2>Track {t['num']} · {E(t['title_en'])} <span class=\"zh\" "
+    h.append(f"<h2>Track {t['num']} — one engineer · {E(t['title_en'])} <span class=\"zh\" "
              f"style=\"display:inline;font-size:15px\">{E(t['title_zh'])}</span></h2>")
+    h.append(f"<p class=\"f\">{len(t['parcels'])} parcels · {t['days']} estimated engineer-days · "
+             f"starts {E(t['starts'])}</p>")
     h.append(f"<p>{E(t['why_en'])}</p><p class=\"zh\">{E(t['why_zh'])}</p>")
     for p in t["parcels"]:
         h.append("<div class=\"parcel\">")
@@ -508,7 +714,8 @@ for t in TRACKS:
         h.append(f"<tr><th>Depends on 依赖</th><td>{E(p['depends'])}</td></tr>")
         if p["unblocks"]:
             h.append(f"<tr><th>Unblocks 解锁</th><td>{E(p['unblocks'])}</td></tr>")
-        h.append(f"<tr><th>Needs 需要</th><td>{E(p['needs'])}</td></tr>")
+        h.append(f"<tr><th>Effort 估算工作量</th><td><b>{p['days']} engineer-days (ESTIMATE)</b> — {E(p['days_basis'])}</td></tr>")
+        h.append(f"<tr><th>Needs 需要</th><td><b>{E(p['needs_class_en'])} · {E(p['needs_class_zh'])}</b> — {E(p['needs'])}</td></tr>")
         if p["evidence"]:
             h.append(f"<tr><th>Evidence 依据</th><td class=\"m\">{E(p['evidence'])}</td></tr>")
         h.append("</tbody></table></div>")
@@ -528,14 +735,38 @@ h.append("</tbody></table></section>")
 
 h.append("<section class=\"trk\" id=\"effort\"><h2>On effort estimates "
          "<span class=\"zh\" style=\"display:inline;font-size:15px\">关于工时估算</span></h2>")
-h.append("<p><b>No engineer-day estimate is given, deliberately.</b> This workshop has never "
-         "built a physical unit and has no measured time-per-item for any of this work, so any "
-         "day figure would be invented. Each parcel states its quantity and its unit of work "
-         "instead, which the factory can price against its own rates. This is a stated CANNOT "
-         "DETERMINE, not an oversight.</p>")
-h.append("<p class=\"zh\"><b>本文件有意不给出人天估算。</b>我们从未制造过实物，也没有任何一项工作的"
-         "实测单件工时，任何天数都将是臆测。每个工作包改为给出数量与工作单位，由工厂按自身工时定额报价。"
-         "这是明确标注的“无法判定”，而非疏漏。</p></section>")
+h.append("<p><b>Every day figure in this document is an ESTIMATE and is labelled as one on the parcel.</b> "
+         "This workshop has never built a physical unit, so it holds no measured time-per-item for any of "
+         "this work — and that absence is itself measured: 0 units built, 0 of the 44 gated tests ever "
+         "exercised. What keeps the estimates from being invented is that each one states the arithmetic "
+         "it rests on: a COUNT we measured (30 print files, 145 M2 holes, 23 cables, 42 end-of-line gates, "
+         "22 vendor meshes) multiplied by a per-item rate that is written into the row. Divide our rate "
+         "out and put yours in — that is what the row is for.</p>")
+h.append("<p class=\"zh\"><b>本文件中的每个天数均为估算，并已在各工作包中如实标注。</b>我方从未制造过实物，"
+         "因此没有任何一项工作的实测单件工时——这一点本身也是实测结论：已制造 0 台，44 项判据测试执行 0 项。"
+         "估算之所以不是臆测，在于每一条都写明其算式：一个我方实测的<b>数量</b>（30 个打印文件、145 个 M2 孔、"
+         "23 条线缆、42 项下线判据、22 个供方网格）乘以写在该行中的单件定额。请用贵厂定额替换我方定额。</p>")
+h.append(f"<p>The largest single estimate, and the least certain, is L-2: {E(str(THEME_PARCELS['L-2']['days']))} "
+         "engineer-days to rebuild 22 vendor meshes as parts we own. The 8 already rebuilt were done by a "
+         "software agent, not by an engineer, so that rate may be wrong by a factor either way.</p>")
+h.append("<p class=\"zh\">最大且最不确定的估算是 L-2：把 22 个供方网格重建为我方自有零件。已完成的 8 个"
+         "由软件代理而非工程师完成，因此该定额可能显著偏高或偏低。</p>")
+h.append("<h3>What each parcel physically needs · 各工作包的实物需求</h3>")
+h.append("<table><colgroup><col style=\"width:22%\"><col style=\"width:10%\"><col></colgroup>")
+h.append("<thead><tr><th>Needs<span class=\"zh\">需求类别</span></th><th>Parcels<span class=\"zh\">数量</span></th>"
+         "<th>Which<span class=\"zh\">具体工作包</span></th></tr></thead><tbody>")
+for _k, (_en, _zh) in NEEDS_CLASS.items():
+    _ids = [pid for pid in sorted(THEME_PARCELS) if THEME_PARCELS[pid]["needs_class"] == _k]
+    if _ids:
+        h.append(f"<tr><td>{E(_en)}<span class=\"zh\">{E(_zh)}</span></td><td class=\"num\">{len(_ids)}</td>"
+                 f"<td class=\"m\">{E(', '.join(_ids))}</td></tr>")
+h.append("</tbody></table>")
+h.append(f"<p class=\"lede\">{sum(1 for p in THEME_PARCELS.values() if p['needs_class'] != 'desk')} of "
+         f"{len(THEME_PARCELS)} parcels cannot be done at a desk. That is the reason this pack exists: the "
+         "remaining work is mostly work only a factory can do.</p>")
+h.append(f"<p class=\"lede zh\">{len(THEME_PARCELS)} 个工作包中有 "
+         f"{sum(1 for p in THEME_PARCELS.values() if p['needs_class'] != 'desk')} 个无法在案头完成。"
+         "这正是本交付包存在的理由：剩余工作大多只有工厂才能完成。</p></section>")
 
 h.append("<p class=\"backlink\" style=\"margin-top:40px\"><a href=\"INDEX.html\">← Document index</a> · "
          "<a href=\"out/factory/readiness.html\">Readiness audit</a> · "
@@ -549,7 +780,12 @@ os.makedirs(os.path.dirname(OUT_JSON), exist_ok=True)
 with open(OUT_JSON, "w", encoding="utf-8") as f:
     json.dump(dict(generated=now, source="out/factory/readiness.json",
                    tracks=TRACKS, in_flight=IN_FLIGHT_PARCELS,
-                   parcels=n_parcels), f, indent=1, ensure_ascii=False)
+                   parcels=n_parcels, engineer_days_total=TOTAL_DAYS,
+                   critical_path=CRITICAL, critical_path_days=CRIT_DAYS,
+                   effort_note=("Every day figure is an ESTIMATE. No measured time-per-item exists in this "
+                                "workshop: 0 units built. Each parcel states the measured COUNT and the "
+                                "assumed per-item rate its estimate is arithmetic on.")),
+              f, indent=1, ensure_ascii=False)
 
-print(f"wrote {OUT_HTML} ({os.path.getsize(OUT_HTML)} B) — {n_parcels} parcels, {len(TRACKS)} tracks")
+print(f"wrote {OUT_HTML} ({os.path.getsize(OUT_HTML)} B) — {n_parcels} parcels, {len(TRACKS)} tracks, {TOTAL_DAYS} est. engineer-days, critical path {CRIT_DAYS} d")
 print(f"wrote {OUT_JSON}")

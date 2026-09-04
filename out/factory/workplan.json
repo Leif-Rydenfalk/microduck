@@ -1,13 +1,16 @@
 {
- "generated": "2026-09-04T17:11:59+08:00",
+ "generated": "2026-09-04T18:18:48+08:00",
  "source": "out/factory/readiness.json",
  "tracks": [
   {
    "num": 1,
-   "title_en": "Metrology on a physical Microduck",
-   "title_zh": "对实物 Microduck 进行测量",
-   "why_en": "36 shelf records cannot be graded from published data alone — they need a real unit on a bench. This is the single largest block of human work and it unblocks the most other parcels, so it should start first.",
-   "why_zh": "36 项零件记录无法仅凭公开资料判定，必须在工作台上测量实物。这是人工工作量最大的一块，解锁的后续工作也最多，应最先开始。",
+   "engineer": "E1",
+   "title_en": "Teardown and dimensional metrology",
+   "title_zh": "拆解与尺寸测量",
+   "why_en": "Starts day one. Blocked by: nothing — this track starts first and gates six others.",
+   "why_zh": "开工时点：day one。前置条件：先行开工，无前置条件，并制约其余六条线。",
+   "starts": "day one",
+   "blocked": "nothing — this track starts first and gates six others",
    "parcels": [
     {
      "id": "M-1",
@@ -21,7 +24,12 @@
      "unblocks": "every other parcel in this track, plus T2-1 and T5-1",
      "needs": "a purchased retail unit (SPENDING — Leif approves)",
      "evidence": "SPEC.md:24 — Pollen's mechanical CAD, BOM and PCBs are not published",
-     "state": "OPEN"
+     "state": "OPEN",
+     "days": 2.0,
+     "days_basis": "1 unit: order, receive, unbox and photograph a full teardown. Rate: 2 d per unit, ASSUMED. Elapsed time is longer than the effort — shipping is not engineer-days.",
+     "needs_class": "measurement",
+     "needs_class_en": "a real measurement on real hardware",
+     "needs_class_zh": "需对实物实测"
     },
     {
      "id": "M-2",
@@ -35,7 +43,12 @@
      "unblocks": "closes the head-geometry CANNOT DETERMINE and the 1.5 mm rebuild rule",
      "needs": "calipers, a real unit",
      "evidence": "HEAD-RECONSTRUCTION.html — photo scale uncertainty ≈4 % ≈5 mm on a 122 mm head",
-     "state": "OPEN"
+     "state": "OPEN",
+     "days": 4.0,
+     "days_basis": "30 printed parts x 0.13 engineer-day per part (about 1 h per part: fixture, caliper 3 axes plus features, record). Part count MEASURED (out/print/slice.json), rate ASSUMED.",
+     "needs_class": "measurement",
+     "needs_class_en": "a real measurement on real hardware",
+     "needs_class_zh": "需对实物实测"
     },
     {
      "id": "M-3",
@@ -49,8 +62,26 @@
      "unblocks": "head tooling; the biggest open geometric question",
      "needs": "calipers, a real unit",
      "evidence": "HEAD-RECONSTRUCTION.html §1 — front-view ring/width ratio +9.1 %",
-     "state": "OPEN"
-    },
+     "state": "OPEN",
+     "days": 1.0,
+     "days_basis": "2 dimensions, but the work is the setup: scale reference, repeat readings, recompute the front-view ratio. Rate ASSUMED.",
+     "needs_class": "measurement",
+     "needs_class_en": "a real measurement on real hardware",
+     "needs_class_zh": "需对实物实测"
+    }
+   ],
+   "days": 7.0
+  },
+  {
+   "num": 2,
+   "engineer": "E2",
+   "title_en": "Components, electrical identity and the shelf",
+   "title_zh": "元器件识别、电气测量与零件档案",
+   "why_en": "Starts after E1 has the unit apart. Blocked by: E1 (M-1): the unit must be open.",
+   "why_zh": "开工时点：after E1 has the unit apart。前置条件：需 E1 完成拆解。",
+   "starts": "after E1 has the unit apart",
+   "blocked": "E1 (M-1): the unit must be open",
+   "parcels": [
     {
      "id": "M-4",
      "title_en": "Identify every unidentified component from the teardown",
@@ -63,7 +94,12 @@
      "unblocks": "T3 sourcing lines and the electronics BOM",
      "needs": "a real unit, magnification",
      "evidence": "readiness.json — 10 of 32 bought lines are CANNOT DETERMINE",
-     "state": "OPEN"
+     "state": "OPEN",
+     "days": 2.0,
+     "days_basis": "6 unidentified components x 0.33 d each: decap or read the marking under magnification, then search the marking to a datasheet. Component count MEASURED (readiness CANNOT DETERMINE rows), rate ASSUMED.",
+     "needs_class": "measurement",
+     "needs_class_en": "a real measurement on real hardware",
+     "needs_class_zh": "需对实物实测"
     },
     {
      "id": "M-5",
@@ -77,7 +113,12 @@
      "unblocks": "the entire power-path design; the most consequential electrical unknown",
      "needs": "a multimeter, a running unit",
      "evidence": "workflows/RUNNING.md finding 1 — the most important electrical finding in the project",
-     "state": "OPEN"
+     "state": "OPEN",
+     "days": 1.0,
+     "days_basis": "1 bench session: rail voltages and standby current on a live unit. Rate ASSUMED.",
+     "needs_class": "machine",
+     "needs_class_en": "a real machine",
+     "needs_class_zh": "需实机"
     },
     {
      "id": "M-6",
@@ -91,16 +132,25 @@
      "unblocks": "the shelf reaching a defensible verdict",
      "needs": "the measurements from M-2 and M-4",
      "evidence": "readiness.json summary.triad_refs — 69 checked, 17 pass, 47 CANNOT DETERMINE",
-     "state": "OPEN"
+     "state": "OPEN",
+     "days": 4.5,
+     "days_basis": "36 shelf records x 0.125 d each to write the measurement into the folder and re-run bin/triad check. Record count MEASURED (69 refs, 36 gradeable only from a unit), rate ASSUMED.",
+     "needs_class": "desk",
+     "needs_class_en": "a desk only",
+     "needs_class_zh": "仅需案头工作"
     }
-   ]
+   ],
+   "days": 7.5
   },
   {
-   "num": 2,
-   "title_en": "Process capability and the tolerance basis",
-   "title_zh": "工艺能力与公差基准",
-   "why_en": "Every structural safety factor and every fit in this design rests on an assumed filament strength and an assumed printed dimensional band. Neither has been measured. Until the factory states its own numbers, the whole tolerance stack is provisional.",
-   "why_zh": "本设计的所有结构安全系数与配合公差，都建立在假设的材料强度与打印尺寸带上，二者均未实测。在工厂给出自有数据前，整个公差链条都只是暂定值。",
+   "num": 3,
+   "engineer": "E3",
+   "title_en": "Process capability, coupons and materials",
+   "title_zh": "工艺能力、试件与材料",
+   "why_en": "Starts day one. Blocked by: nothing — your own machines and materials answer this.",
+   "why_zh": "开工时点：day one。前置条件：可即刻开工，答案在贵厂自有设备与材料。",
+   "starts": "day one",
+   "blocked": "nothing — your own machines and materials answer this",
    "parcels": [
     {
      "id": "C-1",
@@ -114,7 +164,12 @@
      "unblocks": "every drawing's tolerance block; the joint tolerance stack",
      "needs": "factory process data",
      "evidence": "docs/MANUFACTURING-REQUIREMENTS.md A4 — every dimension carries a tolerance from a stated basis",
-     "state": "OPEN"
+     "state": "OPEN",
+     "days": 1.5,
+     "days_basis": "4 processes x 0.375 d: collect the capability statement and turn it into the tolerance basis on our sheets. Process count MEASURED, rate ASSUMED.",
+     "needs_class": "desk",
+     "needs_class_en": "a desk only",
+     "needs_class_zh": "仅需案头工作"
     },
     {
      "id": "C-2",
@@ -128,7 +183,12 @@
      "unblocks": "every press fit and every bearing seat verdict",
      "needs": "a printer, calipers, material",
      "evidence": "out/open — 'This workshop's own printed dimensional band (the whole tolerance stack rests on it)'",
-     "state": "OPEN"
+     "state": "OPEN",
+     "days": 3.0,
+     "days_basis": "6 feature families x 5 specimens = 30 coupons: 1 d printing (machine time, not engineer time), 1.5 d measuring, 0.5 d writing the capability record. Coupon count is the plan; rates ASSUMED.",
+     "needs_class": "machine",
+     "needs_class_en": "a real machine",
+     "needs_class_zh": "需实机"
     },
     {
      "id": "C-3",
@@ -142,16 +202,25 @@
      "unblocks": "every safety factor in STRUCTURAL.html",
      "needs": "factory material stock data",
      "evidence": "STRUCTURAL.html — 'Strength of the fitted filament in the printed orientation (every SF rests on it)'",
-     "state": "OPEN"
+     "state": "OPEN",
+     "days": 1.0,
+     "days_basis": "2 materials: obtain the datasheets, re-run the FEA material sweep on the real numbers. The re-run itself is minutes — cecad.stress is already scripted.",
+     "needs_class": "material",
+     "needs_class_en": "a real material",
+     "needs_class_zh": "需实料"
     }
-   ]
+   ],
+   "days": 5.5
   },
   {
-   "num": 3,
-   "title_en": "Sourcing the unbuyable lines",
-   "title_zh": "解决无法采购的物料",
-   "why_en": "19 of 32 bought lines are ready. The rest are not a paperwork problem: the compute board's stated SKU does not exist in the vendor catalogue, and the dominant cost line has no published volume price at any quantity.",
-   "why_zh": "32 项外购物料中 19 项已就绪。其余并非文书问题：主控板所述型号在厂商目录中并不存在，而成本占比最大的物料在任何数量下都没有公开的批量价格。",
+   "num": 4,
+   "engineer": "E4",
+   "title_en": "Sourcing: quotes, lead times and the battery",
+   "title_zh": "采购：报价、交期与电池",
+   "why_en": "Starts day one. Blocked by: nothing for the quotes; S-2 wants a label read on a real pack.",
+   "why_zh": "开工时点：day one。前置条件：报价可即刻开始；S-2 需读取实物电池标签。",
+   "starts": "day one",
+   "blocked": "nothing for the quotes; S-2 wants a label read on a real pack",
    "parcels": [
     {
      "id": "S-1",
@@ -165,7 +234,12 @@
      "unblocks": "the entire unit-cost model at volume",
      "needs": "a supplier relationship (CONTACT — factory does this)",
      "evidence": "readiness.json — servos are 77 % of electronics cost at $358.50 of $465.64",
-     "state": "OPEN"
+     "state": "OPEN",
+     "days": 2.0,
+     "days_basis": "3 quantity tiers across 32 lines: issue RFQ.html, chase, tabulate. Effort is chasing, not typing. Rate ASSUMED.",
+     "needs_class": "desk",
+     "needs_class_en": "a desk only",
+     "needs_class_zh": "仅需案头工作"
     },
     {
      "id": "S-2",
@@ -179,7 +253,12 @@
      "unblocks": "the compute mount, the HAT connector layout, the power budget",
      "needs": "distributor contact, and the teardown",
      "evidence": "spec/sourcing.json line B3 — 5 offers, 0 with a stated lead time",
-     "state": "OPEN"
+     "state": "OPEN",
+     "days": 1.0,
+     "days_basis": "1 decision (which battery pack actually ships) once a label has been read on a real pack.",
+     "needs_class": "measurement",
+     "needs_class_en": "a real measurement on real hardware",
+     "needs_class_zh": "需对实物实测"
     },
     {
      "id": "S-3",
@@ -193,16 +272,25 @@
      "unblocks": "a defensible unit cost and a build schedule",
      "needs": "distributor contact",
      "evidence": "readiness.json summary.bought_gaps",
-     "state": "OPEN"
+     "state": "OPEN",
+     "days": 2.5,
+     "days_basis": "15 lines x 0.17 d: get a lead time stated in writing for the 11 lines that have none, and a price for the 4 that have none. Line counts MEASURED (readiness bought_gaps), rate ASSUMED.",
+     "needs_class": "desk",
+     "needs_class_en": "a desk only",
+     "needs_class_zh": "仅需案头工作"
     }
-   ]
+   ],
+   "days": 5.5
   },
   {
-   "num": 4,
-   "title_en": "The three custom circuit boards",
-   "title_zh": "三块自制电路板",
-   "why_en": "Pollen publishes no design files for the Robot HAT, the IMU-to-Dynamixel board or the battery contact board. Our reconstruction of the HAT fails its own DRC and is a footprint-accurate stand-in, not a manufacturable copy.",
-   "why_zh": "Pollen 未公开 Robot HAT、IMU 转 Dynamixel 板与电池触点板的设计文件。我们复原的 HAT 未通过自身 DRC，只是尺寸相符的替代件，并非可制造的复制品。",
+   "num": 5,
+   "engineer": "E5",
+   "title_en": "Board reverse-engineering and routing",
+   "title_zh": "电路板逆向与布线",
+   "why_en": "Starts after E1 opens the unit; the Robot HAT half may start day one. Blocked by: E1 for the physical boards. If Pollen's published Apache-2.0 HAT is adopted (FACTORY-QUESTIONS Q5.4) this track loses about a third of its work.",
+   "why_zh": "开工时点：after E1 opens the unit; the Robot HAT half may start day one。前置条件：需 E1 取得实物板；若采用 Pollen 公开的 Apache-2.0 板，本线工作量减少约三分之一。",
+   "starts": "after E1 opens the unit; the Robot HAT half may start day one",
+   "blocked": "E1 for the physical boards. If Pollen's published Apache-2.0 HAT is adopted (FACTORY-QUESTIONS Q5.4) this track loses about a third of its work",
    "parcels": [
     {
      "id": "B-1",
@@ -216,7 +304,12 @@
      "unblocks": "all fabrication; nothing ships without these",
      "needs": "the physical boards, magnification, a meter",
      "evidence": "PCB-PACKAGE.html — Robot HAT reconstruction fails its own DRC",
-     "state": "OPEN"
+     "state": "OPEN",
+     "days": 6.0,
+     "days_basis": "3 boards x 2 d: trace nets off the physical board under magnification and correct our schematic. The Robot HAT may collapse to 0 d if Pollen's published Apache-2.0 package is adopted instead (FACTORY-QUESTIONS Q5.4).",
+     "needs_class": "measurement",
+     "needs_class_en": "a real measurement on real hardware",
+     "needs_class_zh": "需对实物实测"
     },
     {
      "id": "B-2",
@@ -230,8 +323,26 @@
      "unblocks": "the power path; a buildable prototype",
      "needs": "PCB fab",
      "evidence": "workflows/RUNNING.md — 'the banana contact board is passive and is ~1 day of work after one measurement session'",
-     "state": "OPEN"
-    },
+     "state": "OPEN",
+     "days": 3.0,
+     "days_basis": "1 board (Robot HAT) re-routed to close 8 open nets and pass DRC against the fab's own rules. Open-net count MEASURED (electronics/pcb-package.json routing), rate ASSUMED.",
+     "needs_class": "desk",
+     "needs_class_en": "a desk only",
+     "needs_class_zh": "仅需案头工作"
+    }
+   ],
+   "days": 9.0
+  },
+  {
+   "num": 6,
+   "engineer": "E6",
+   "title_en": "Board fabrication, assembly and the test rig",
+   "title_zh": "投板、贴装与测试台",
+   "why_en": "Starts after E5 closes DRC. Blocked by: E5 (B-2) for the boards; a built unit for the gates.",
+   "why_zh": "开工时点：after E5 closes DRC。前置条件：需 E5 通过 DRC；判据执行需已装配整机。",
+   "starts": "after E5 closes DRC",
+   "blocked": "E5 (B-2) for the boards; a built unit for the gates",
+   "parcels": [
     {
      "id": "B-3",
      "title_en": "Lay out and fabricate the Robot HAT and the IMU board",
@@ -244,81 +355,12 @@
      "unblocks": "a working prototype",
      "needs": "PCB fab and assembly",
      "evidence": "PCB-PACKAGE.html — 10 DRC fails; DVDD dead-ends on TP1",
-     "state": "OPEN"
-    }
-   ]
-  },
-  {
-   "num": 5,
-   "title_en": "DFM review and the print files",
-   "title_zh": "可制造性审查与打印文件",
-   "why_en": "18 of 30 print files are ready. The rest are vendor simulation meshes that carry no manufacturable dimensions, and 22 of the 30 are under a non-commercial licence that forbids selling what is printed from them.",
-   "why_zh": "30 个打印文件中 18 个已就绪。其余为供应商仿真网格，不含可制造尺寸；且其中 22 个受非商业许可限制，不得用于销售。",
-   "parcels": [
-    {
-     "id": "D-1",
-     "title_en": "DFM review every part against your processes",
-     "title_zh": "按贵厂工艺对每个零件做可制造性审查",
-     "deliverable": "Per part: what you would change to make it manufacturable, with the reason and the cost or cycle-time impact.",
-     "acceptance": "A written finding per part, or an explicit 'no change needed'. Silence on a part is not an answer.",
-     "qty": 30,
-     "unit": "parts",
-     "depends": "C-1",
-     "unblocks": "the production geometry; possibly a re-model",
-     "needs": "factory process knowledge",
-     "evidence": "MANUFACTURING-PLAYBOOK.html",
-     "state": "OPEN"
-    },
-    {
-     "id": "D-2",
-     "title_en": "Quote injection moulding against the printed baseline",
-     "title_zh": "报价注塑方案并与打印方案比较",
-     "deliverable": "Tooling cost, tooling lead time, per-part price and MOQ for the shells, against our printed cost, so the break-even quantity is a real number.",
-     "acceptance": "A quote per shell part. Our current break-even analysis uses published list prices, not your rates, so it is indicative only.",
-     "qty": 8,
-     "unit": "candidate parts",
-     "depends": "none — can start on day one",
-     "unblocks": "the volume decision",
-     "needs": "factory tooling quotes",
-     "evidence": "docs/PRODUCTION.md — cost at 1/10/100/1000",
-     "state": "OPEN"
-    }
-   ]
-  },
-  {
-   "num": 6,
-   "title_en": "Assembly, fixtures and end-of-line test",
-   "title_zh": "装配、工装与下线测试",
-   "why_en": "The assembly sequence and the test plan are written but have never been executed by a person. The first build is the test of the paperwork.",
-   "why_zh": "装配顺序与测试方案已编写，但从未有人实际执行。首台装机就是对全部文件的检验。",
-   "parcels": [
-    {
-     "id": "A-1",
-     "title_en": "Build one unit from the paper alone",
-     "title_zh": "仅依据文件装配一台整机",
-     "deliverable": "A build log recording every step where the document was wrong, ambiguous, or assumed knowledge not on the page.",
-     "acceptance": "A working unit, or a log of exactly where it stopped. Every defect found becomes a correction to MANUAL.md. This is the single best test of whether this pack is real.",
-     "qty": 1,
-     "unit": "unit",
-     "depends": "B-2, B-3, the printed parts",
-     "unblocks": "everything; it validates or refutes the whole pack",
-     "needs": "all parts, a bench",
-     "evidence": "ce-assemblies/microduck/current/manual/MANUAL.md",
-     "state": "OPEN"
-    },
-    {
-     "id": "A-2",
-     "title_en": "Specify and build the assembly fixtures",
-     "title_zh": "设计并制作装配工装",
-     "deliverable": "The jigs the line needs: bearing press, servo-horn alignment, harness form board.",
-     "acceptance": "Each fixture drawn and made, with the step it serves named. Our jig drawings exist but have never been made or used.",
-     "qty": 6,
-     "unit": "fixtures",
-     "depends": "A-1",
-     "unblocks": "repeatable assembly",
-     "needs": "a workshop",
-     "evidence": "MANUFACTURING-PLAYBOOK.html — six assembly jigs with verified A3 drawings",
-     "state": "OPEN"
+     "state": "OPEN",
+     "days": 2.0,
+     "days_basis": "2 boards through fab and assembly: prepare the package, panelise, review the fab's DFM report. Excludes fab lead time.",
+     "needs_class": "vendor",
+     "needs_class_en": "an outside vendor's time",
+     "needs_class_zh": "需外部供应商配合"
     },
     {
      "id": "A-3",
@@ -332,16 +374,197 @@
      "unblocks": "the acceptance criteria becoming real",
      "needs": "a built unit, a test bench",
      "evidence": "TEST-PLAN.html — the only artifact class currently graded READY",
-     "state": "OPEN"
+     "state": "OPEN",
+     "days": 2.5,
+     "days_basis": "42 end-of-line gates x 0.06 d to run and log the first time, plus rig setup. Gate count MEASURED (TEST-PLAN.html Table 13), rate ASSUMED.",
+     "needs_class": "machine",
+     "needs_class_en": "a real machine",
+     "needs_class_zh": "需实机"
     }
-   ]
+   ],
+   "days": 4.5
   },
   {
    "num": 7,
-   "title_en": "The licence position",
-   "title_zh": "许可与授权",
-   "why_en": "This design is reverse-engineered from Pollen Robotics' published assets. 22 of the 30 print files are their meshes under a non-commercial licence. This must be settled before anyone cuts tooling.",
-   "why_zh": "本设计逆向自 Pollen Robotics 公开资料。30 个打印文件中 22 个是其网格，且受非商业许可限制。开模之前必须先解决此问题。",
+   "engineer": "E7",
+   "title_en": "DFM and the print files",
+   "title_zh": "可制造性评审与打印文件",
+   "why_en": "Starts day one. Blocked by: nothing — it reads our drawings and your process rules.",
+   "why_zh": "开工时点：day one。前置条件：可即刻开工，依据我方图纸与贵厂工艺规则。",
+   "starts": "day one",
+   "blocked": "nothing — it reads our drawings and your process rules",
+   "parcels": [
+    {
+     "id": "D-1",
+     "title_en": "DFM review every part against your processes",
+     "title_zh": "按贵厂工艺对每个零件做可制造性审查",
+     "deliverable": "Per part: what you would change to make it manufacturable, with the reason and the cost or cycle-time impact.",
+     "acceptance": "A written finding per part, or an explicit 'no change needed'. Silence on a part is not an answer.",
+     "qty": 30,
+     "unit": "parts",
+     "depends": "C-1",
+     "unblocks": "the production geometry; possibly a re-model",
+     "needs": "factory process knowledge",
+     "evidence": "MANUFACTURING-PLAYBOOK.html",
+     "state": "OPEN",
+     "days": 3.0,
+     "days_basis": "30 parts x 0.1 d for a manufacturability opinion per part. Part count MEASURED, rate ASSUMED.",
+     "needs_class": "desk",
+     "needs_class_en": "a desk only",
+     "needs_class_zh": "仅需案头工作"
+    },
+    {
+     "id": "D-2",
+     "title_en": "Quote injection moulding against the printed baseline",
+     "title_zh": "报价注塑方案并与打印方案比较",
+     "deliverable": "Tooling cost, tooling lead time, per-part price and MOQ for the shells, against our printed cost, so the break-even quantity is a real number.",
+     "acceptance": "A quote per shell part. Our current break-even analysis uses published list prices, not your rates, so it is indicative only.",
+     "qty": 8,
+     "unit": "candidate parts",
+     "depends": "none — can start on day one",
+     "unblocks": "the volume decision",
+     "needs": "factory tooling quotes",
+     "evidence": "docs/PRODUCTION.md — cost at 1/10/100/1000",
+     "state": "OPEN",
+     "days": 2.0,
+     "days_basis": "8 candidate parts for tooling: draft, wall, parting line, gate and ejector review. Candidate count MEASURED (5 shells + 3), rate ASSUMED.",
+     "needs_class": "desk",
+     "needs_class_en": "a desk only",
+     "needs_class_zh": "仅需案头工作"
+    }
+   ],
+   "days": 5.0
+  },
+  {
+   "num": 8,
+   "engineer": "E8",
+   "title_en": "First build, fixtures and first-article inspection",
+   "title_zh": "首台装配、工装与首件检验",
+   "why_en": "Starts when parts and boards exist. Blocked by: printed parts, bought parts and boards; E6 for the boards.",
+   "why_zh": "开工时点：when parts and boards exist。前置条件：需打印件、外购件与电路板齐备；电路板来自 E6。",
+   "starts": "when parts and boards exist",
+   "blocked": "printed parts, bought parts and boards; E6 for the boards",
+   "parcels": [
+    {
+     "id": "A-1",
+     "title_en": "Build one unit from the paper alone",
+     "title_zh": "仅依据文件装配一台整机",
+     "deliverable": "A build log recording every step where the document was wrong, ambiguous, or assumed knowledge not on the page.",
+     "acceptance": "A working unit, or a log of exactly where it stopped. Every defect found becomes a correction to MANUAL.md. This is the single best test of whether this pack is real.",
+     "qty": 1,
+     "unit": "unit",
+     "depends": "B-2, B-3, the printed parts",
+     "unblocks": "everything; it validates or refutes the whole pack",
+     "needs": "all parts, a bench",
+     "evidence": "ce-assemblies/microduck/current/manual/MANUAL.md",
+     "state": "OPEN",
+     "days": 3.0,
+     "days_basis": "1 unit built for the first time from the paper, recording every place the paper is wrong. 23 steps are known to assume knowledge that is not on the page (MEASURED), which is what makes this 3 d and not 1.",
+     "needs_class": "machine",
+     "needs_class_en": "a real machine",
+     "needs_class_zh": "需实机"
+    },
+    {
+     "id": "A-2",
+     "title_en": "Specify and build the assembly fixtures",
+     "title_zh": "设计并制作装配工装",
+     "deliverable": "The jigs the line needs: bearing press, servo-horn alignment, harness form board.",
+     "acceptance": "Each fixture drawn and made, with the step it serves named. Our jig drawings exist but have never been made or used.",
+     "qty": 6,
+     "unit": "fixtures",
+     "depends": "A-1",
+     "unblocks": "repeatable assembly",
+     "needs": "a workshop",
+     "evidence": "MANUFACTURING-PLAYBOOK.html — six assembly jigs with verified A3 drawings",
+     "state": "OPEN",
+     "days": 2.0,
+     "days_basis": "6 fixtures already drawn: print, fit, correct. Fixture count MEASURED (out/jigs), rate ASSUMED.",
+     "needs_class": "machine",
+     "needs_class_en": "a real machine",
+     "needs_class_zh": "需实机"
+    },
+    {
+     "id": "Q-1",
+     "title_en": "First-article inspection report on the first five units",
+     "title_zh": "首批五台整机的首件检验报告",
+     "deliverable": "One report per unit: every gate result, every dimension out of tolerance, every place the assembly document was wrong, and the time each station took.",
+     "acceptance": "5 units x 42 gates logged against a serial, and the report names every step of the assembly document that had to be corrected to build them.",
+     "qty": 5,
+     "unit": "units",
+     "depends": "A-1, A-3",
+     "unblocks": "turns our simulated numbers into measured ones — the whole point of the pilot",
+     "needs": "built units, the test bench, a caliper",
+     "evidence": "spec/test-plan.json — 42 end-of-line gates, 0 exercised",
+     "state": "OPEN",
+     "days": 2.0,
+     "days_basis": "5 first-article units inspected against the drawings and the gates, one report. Unit count is the pilot plan.",
+     "needs_class": "measurement",
+     "needs_class_en": "a real measurement on real hardware",
+     "needs_class_zh": "需对实物实测"
+    }
+   ],
+   "days": 7.0
+  },
+  {
+   "num": 9,
+   "engineer": "E9",
+   "title_en": "Harness and the torque schedule",
+   "title_zh": "线束与扭矩表",
+   "why_en": "Starts F-1 can start with printed coupons on day one; H-1 needs a built robot. Blocked by: F-1: printed specimens only. H-1: E8 (A-1), a robot to fit the loom into.",
+   "why_zh": "开工时点：F-1 can start with printed coupons on day one; H-1 needs a built robot。前置条件：F-1 只需打印试件，可即刻开始；H-1 需 E8 完成首台装配。",
+   "starts": "F-1 can start with printed coupons on day one; H-1 needs a built robot",
+   "blocked": "F-1: printed specimens only. H-1: E8 (A-1), a robot to fit the loom into",
+   "parcels": [
+    {
+     "id": "H-1",
+     "title_en": "Build one harness and turn route floors into a cut list",
+     "title_zh": "实做一套线束，把走线下限转为下料表",
+     "deliverable": "wiring/CUTLIST.md: a cut length and a tolerance for every cable, measured on a loom that has been fitted into a built robot, not computed in CAD.",
+     "acceptance": "Every one of the 23 cable rows carries a cut length and a tolerance, and the 6 rows that are CANNOT DETERMINE today carry a connector part number. Today: 20 cuttable lengths, 0 tolerances.",
+     "qty": 23,
+     "unit": "cables",
+     "depends": "A-1 (a built robot to fit the loom into)",
+     "unblocks": "harness purchasing, and the assembly station that fits it",
+     "needs": "a real loom, crimp tooling, a built robot",
+     "evidence": "wiring/cables.json — 23 rows, 0 with a tolerance field, lengths are route floors + slack",
+     "state": "OPEN",
+     "days": 2.0,
+     "days_basis": "23 cable rows: build one loom, measure each cut length installed, set a tolerance from the measured spread. Cable count MEASURED (wiring/cables.json), rate ASSUMED.",
+     "needs_class": "measurement",
+     "needs_class_en": "a real measurement on real hardware",
+     "needs_class_zh": "需对实物实测"
+    },
+    {
+     "id": "F-1",
+     "title_en": "Set the torque schedule by strip and pull-out test",
+     "title_zh": "通过滑牙与拔出试验确定扭矩表",
+     "deliverable": "A torque per joint family with the test that produced it: torque-to-strip and pull-out force on printed bosses and on the XL330's own tapped holes.",
+     "acceptance": "All three CANNOT DETERMINE torque rows in the playbook are replaced by a number with a test method and a specimen count. No chart figure is copied.",
+     "qty": 3,
+     "unit": "joint families",
+     "depends": "C-2 (the production print profile), M-1 for a real servo case",
+     "unblocks": "every assembly station step that tightens a screw",
+     "needs": "a torque rig, printed specimens, a calibrated driver",
+     "evidence": "tools/data/playbook.json torque — 3 of 3 CANNOT DETERMINE; ROBOTIS publishes no torque",
+     "state": "OPEN",
+     "days": 2.0,
+     "days_basis": "3 joint families x 5 specimens: torque to failure and pull-out on printed bosses, then write the schedule. Torque is 3/3 CANNOT DETERMINE today (MEASURED).",
+     "needs_class": "machine",
+     "needs_class_en": "a real machine",
+     "needs_class_zh": "需实机"
+    }
+   ],
+   "days": 4.0
+  },
+  {
+   "num": 10,
+   "engineer": "E10",
+   "title_en": "Licence position and owned rebuilds",
+   "title_zh": "许可确认与自研重建",
+   "why_en": "Starts day one. Blocked by: nothing — but L-2 is worth more once E1's measurements exist.",
+   "why_zh": "开工时点：day one。前置条件：可即刻开工；但 L-2 在 E1 测量完成后价值更大。",
+   "starts": "day one",
+   "blocked": "nothing — but L-2 is worth more once E1's measurements exist",
    "parcels": [
     {
      "id": "L-1",
@@ -355,7 +578,12 @@
      "unblocks": "tooling, and any commercial plan",
      "needs": "counsel, or a licence enquiry to Pollen (Leif sends)",
      "evidence": "LICENCE-POSITION.html; microduck_rl README §License",
-     "state": "OPEN"
+     "state": "OPEN",
+     "days": 1.0,
+     "days_basis": "1 decision. Effort is reading and writing; the elapsed time depends on counsel or on Pollen answering.",
+     "needs_class": "desk",
+     "needs_class_en": "a desk only",
+     "needs_class_zh": "仅需案头工作"
     },
     {
      "id": "L-2",
@@ -369,9 +597,15 @@
      "unblocks": "a commercially clean product",
      "needs": "CAD work — an agent can do this, given the measurements",
      "evidence": "readiness.json summary.print_licence — 22 vendor meshes, 8 ours",
-     "state": "OPEN"
+     "state": "OPEN",
+     "days": 11.0,
+     "days_basis": "22 vendor meshes x 0.5 d to rebuild parametrically and grade against the reference to the 1.0 mm p95 rule. Mesh count MEASURED (readiness print_licence), rate ASSUMED and the most uncertain number in this table — the 8 already done took an agent, not an engineer.",
+     "needs_class": "desk",
+     "needs_class_en": "a desk only",
+     "needs_class_zh": "仅需案头工作"
     }
-   ]
+   ],
+   "days": 12.0
   }
  ],
  "in_flight": [
@@ -406,5 +640,16 @@
    "count": "23 cables"
   }
  ],
- "parcels": 22
+ "parcels": 25,
+ "engineer_days_total": 67.0,
+ "critical_path": [
+  "M-1",
+  "B-1",
+  "B-2",
+  "B-3",
+  "A-1",
+  "Q-1"
+ ],
+ "critical_path_days": 18.0,
+ "effort_note": "Every day figure is an ESTIMATE. No measured time-per-item exists in this workshop: 0 units built. Each parcel states the measured COUNT and the assumed per-item rate its estimate is arithmetic on."
 }
