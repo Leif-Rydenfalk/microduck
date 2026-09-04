@@ -3,16 +3,110 @@
   "kind": "connection",
   "record": {
     "slug": "jst-eh-3pin",
-    "title": "jst-eh-3pin",
-    "verdict": "CANNOT DETERMINE",
-    "why": "created by `bin/triad new connection` — nothing measured yet",
+    "title": "JST EH 3-circuit wire-to-board joint, 2.5 mm pitch \u2014 the DYNAMIXEL TTL socket, and every cable end on the Microduck's servo bus",
     "joins": {
-      "a": null,
-      "b": null
+      "a": "an EH cable housing (interface name `mate`, role `eh_housing`) \u2014 part:jst-ehr-03, i.e. either end of part:cable-dxl-x3p, carrying three part:jst-seh-001t-p0.6 crimps",
+      "b": "an EH top-entry Type A board header (interface name `mate`, role `eh_header`) \u2014 part:jst-b3b-eh-a, or the socket cut into part:xl330-m288-t's own case (interfaces `socket_pos_y` / `socket_neg_y`)"
     },
-    "dof_left": null,
-    "detachable": null,
+    "dof_left": [],
+    "dof_left_why": "A seated EH is a friction-and-lock joint: the three phosphor-bronze contacts grip the posts and the housing's 0.6 mm lock rib (eEH.pdf p.3) takes the axial load, so all six degrees of freedom between housing and header are closed. UNSEATED there is one free axis \u2014 translation along the header's +z, the insertion direction \u2014 and mate() reports that when params['state'] == 'unmated'. There is no rotational freedom in either state: the wafer is polarised (one orientation only, eEH.pdf p.4 Type A side view), which is why mate() fixes x as well as z.",
+    "detachable": true,
+    "detachable_why": "eEH.pdf p.1 'Insertion force: 15 N max. / Withdrawal force: 1 N min.' \u2014 a hand-separable connector, no tool, and the cable is meant to be unplugged for servo replacement (ROBOTIS e-Manual XL330-M288-T section 4.4).",
     "standard": null,
-    "adds_parts": []
+    "standard_why": "NO published standard fixes an EH. It is JST's own series (eEH.pdf, 'EH CONNECTOR, 2.5 mm pitch/Wire-to-Board connectors'), which is why `standard` is null and this connection is NOT T4-eligible: the trust it can earn is bounded by evidence, not by a standards body. The pitch 2.5 mm, the 8.1 mm mated height and the 3 A/250 V ratings are all vendor figures from that one document.",
+    "adds_parts": [
+      "part:jst-ehr-03",
+      "part:jst-seh-001t-p0.6",
+      "part:jst-b3b-eh-a"
+    ],
+    "adds_parts_why": "A made joint is three folders, not one: the housing (1 per end), the crimp (3 per end \u2014 the contacts are 'Sold Separately' on eEH.pdf p.2), and the header on the board side. mate() returns them as a BOM with those quantities. When side b is a servo the header is INSIDE the bought servo and is NOT added \u2014 part:xl330-m288-t already carries it, and adding it again would double-count; mate() drops it by name when b's interface belongs to part:xl330-m288-t.",
+    "seating": {
+      "$about": "The transform, in one sentence and three numbers, all from eEH.pdf.",
+      "rule": "the housing's `mate` frame is placed on the header's `mate` frame with z ANTI-PARALLEL (the two insertion directions oppose), x PARALLEL (circuit No.1 to No.1 \u2014 the wafer is polarised), and the housing's mating face standing 1.6000 mm above the header's board plane along the header's +z.",
+      "seat_offset_mm": 1.6,
+      "seat_offset_derivation": "8.1000 (mated assembly height, eEH.pdf p.2 '(8.1)') minus 6.5000 (EHR-3 housing height, eEH.pdf p.3) = 1.6000. Independently the same figure is printed on p.4's Type A side view as '(1.6)', the row height above the wafer floor \u2014 two places in the vendor's own drawing agreeing to 0.0000 mm.",
+      "contacts_mm": [
+        -2.5,
+        0.0,
+        2.5
+      ],
+      "contacts_source": "A = 5.0 = 2 x 2.5 pitch, eEH.pdf p.3 (housing) and p.4 (header)"
+    },
+    "ratings": {
+      "current_A": {
+        "value": 3.0,
+        "cite": "eEH.pdf p.1 'Current rating: 3 A AC/DC (AWG #22)'"
+      },
+      "voltage_V": {
+        "value": 250.0,
+        "cite": "eEH.pdf p.1 'Voltage rating: 250 V AC/DC'"
+      },
+      "temperature_C": {
+        "value": "-25 to +85",
+        "cite": "eEH.pdf p.1, 'including temperature rise in applying electrical current'"
+      },
+      "contact_resistance_mohm": {
+        "value": null,
+        "cite": null,
+        "why_null": "not transcribed here \u2014 eEH.pdf p.1 states one but it was not read in this session; CANNOT DETERMINE, not zero"
+      },
+      "insertion_force_N": {
+        "value": 15.0,
+        "cite": "eEH.pdf p.1 'Insertion force: 15 N max.'"
+      },
+      "withdrawal_force_N": {
+        "value": 1.0,
+        "cite": "eEH.pdf p.1 'Withdrawal force: 1 N min.'"
+      }
+    },
+    "verdict": "PASS",
+    "why": "THE GEOMETRY OF THE PAIR IS PASS AND IT IS DERIVED, NOT RECALLED: the 1.6000 mm seat falls out of 8.1000 - 6.5000 and is independently printed as '(1.6)' on the header's own side view; the contact rows coincide at x = -2.5000 / 0.0000 / +2.5000 on both sides; the housing's 3.8000 mm thickness equals the header's 3.8000 mm, so the pair is the 3.8 x 8.1 envelope eEH.pdf p.1 states in words. THE ELECTRICAL SIDE OF THIS JOINT IS WHERE THE MICRODUCK HAS A PROBLEM, and it is recorded here rather than softened \u2014 see `findings`.",
+    "findings": [
+      {
+        "id": "EH-CURRENT-1",
+        "what": "The whole servo bus is daisy-chained through 3 A connectors, and the first hop carries every servo's current.",
+        "numbers": "JST's rating for the EH series is 3.0000 A AC/DC (eEH.pdf p.1). wiring/cables.json's chain has ONE cable, dxl-hat-id34, between the HAT and the first servo, and CABLES.md's drop table gives it servos_downstream = 15. At the lane's stated basis of 1 A per moving servo that hop carries 15.0000 A = 500.00 % of the connector's rating. At the vendor's published stall current 1.4700 A per servo (part:xl330-m288-t) it would be 22.0500 A = 735.00 %. At the vendor's published standby 17.0000 mA it is 0.2550 A = 8.50 %. The break-even is 0.2000 A per servo: above that, the first hop is over the connector's published rating.",
+        "verdict": "CANNOT DETERMINE",
+        "why_not_fail": "ROBOTIS publishes no RUNNING current for the XL330-M288-T \u2014 only standby 17 mA and stall 1.47 A at 5 V \u2014 so which side of the 0.2000 A break-even the real robot sits on is not established by any document in this repo. What it is NOT is silent: the architecture makes the first hop a single 3 A contact pair for fifteen actuators, and that is a design fact independent of the current.",
+        "what_settles_it": "A clamp meter on the first X3P lead of a running Microduck during a walk cycle, or ROBOTIS publishing a running current. Either closes it in one measurement.",
+        "opened_by": "this lane, 2026-09-04, reading eEH.pdf p.1 \u2014 wiring/README.md section 6 had listed it as 'not read'."
+      },
+      {
+        "id": "EH-WIRE-1",
+        "what": "ROBOTIS' stated wire gauge is bigger than the crimp JST publishes for it.",
+        "numbers": "ROBOTIS e-Manual XL330-M288-T section 4.4 states 'Crimp Terminal JST SEH-001T-P0.6' and 'Wire Gauge for DYNAMIXEL 21 AWG' in the SAME table. 21 AWG = 0.4105 mm2 (ASTM B258 area from d = 0.7230 mm). eEH.pdf p.2's contact table gives SEH-001T-P0.6 a conductor range of 0.05 to 0.33 mm2 (#30 to #22). 0.4105 / 0.3300 = 124.39 % \u2014 the wire is 24.39 % over the contact's published maximum.",
+        "verdict": "CANNOT DETERMINE",
+        "why_not_fail": "Two vendor documents disagree and no third settles it. Either ROBOTIS crimps a different contact than the one it names, or its 21 AWG is a nominal for a thin-wall wire whose conductor is smaller than ASTM B258's, or JST's range is conservative. Nothing here can choose.",
+        "what_settles_it": "A stripped X3P lead under a micrometer: the conductor area, and the marking on the crimp.",
+        "opened_by": "the dead wiring-3d lane, 2026-09-04, in part:jst-seh-001t-p0.6's ledger; restated here because it is a property of the JOINT, not of one part."
+      }
+    ],
+    "joint": {
+      "$joint": 1,
+      "default_state": "mated. params['state'] == 'unmated' is the other case and mate() reports it.",
+      "axes": {
+        "tx": "locked",
+        "ty": "locked",
+        "tz": "locked",
+        "rx": "locked",
+        "ry": "locked",
+        "rz": "locked"
+      },
+      "axes_cannot_determine": {},
+      "limits": {},
+      "one_way": "",
+      "intermittent": false,
+      "engagement": {
+        "seat_mm": 1.6,
+        "seat_cite": "eEH.pdf p.2 (8.1) minus p.3 6.5; p.4 '(1.6)'"
+      },
+      "couples": [],
+      "holds_by": "contact friction plus the housing's 0.6 mm lock rib",
+      "removable": true,
+      "removal_force_N": {
+        "value": 1.0,
+        "cite": "eEH.pdf p.1 'Withdrawal force: 1 N min.'"
+      }
+    }
   }
 }

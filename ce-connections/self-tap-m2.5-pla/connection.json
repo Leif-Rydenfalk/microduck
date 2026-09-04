@@ -1,0 +1,88 @@
+{
+  "$triad": 1,
+  "kind": "connection",
+  "record": {
+    "slug": "self-tap-m2.5-pla",
+    "title": "M2.5 screw thread-formed into an FDM-printed pilot hole — a self-tapped joint in PLA, not a cut thread",
+    "joins": {
+      "a": "external ISO metric M2.5 thread (interface name: thread_ext) — a cap screw, part:screw-m2.5-iso4762",
+      "b": "a PRINTED PILOT HOLE (interface name: pilot) — an FDM-printed cylindrical hole of nominal Ø2.05 mm into which the screw FORMS its own thread on first insertion. There is no tap, no die and no cut thread anywhere in this joint."
+    },
+    "dof_left": [],
+    "dof_left_why": "Tightened, this is a friction clamp exactly as connection:threaded-m2.5 is: preload closes all six DOF between the joined faces. WHAT IS DIFFERENT IS EVERYTHING ABOUT HOW IT LETS GO. A cut thread in metal fails by bolt yield at a preload the property class fixes; a thread FORMED in printed PLA fails by stripping the polymer, at a load nobody here has measured, and it loses holding on every re-insertion because the formed flank is re-cut rather than re-engaged. Modelling this as connection:threaded-m2.5 would inherit that folder's ISO fit language and quietly imply a thread class this joint does not have. Same geometry, different physics, different folder.",
+    "detachable": true,
+    "detachable_why": "Removable, and that is not the same as reusable. Each re-insertion re-forms the flank in material that has already yielded once. HOW MANY CYCLES this survives is CANNOT DETERMINE — see record.open_questions.",
+    "standard": "NONE GOVERNS THIS JOINT, and that is the first thing to say about it",
+    "standard_why": "ISO 4762 governs the screw and ISO 261 its M2.5 x 0.45 thread — both cited on part:screw-m2.5-iso4762. NOTHING published governs the pilot hole in a printed part: the ISO 261 tap-drill figure Ø2.05 mm is a figure for CUTTING a thread in stock, and cecad/fasteners.py carries it in its M2.5 row as exactly that. A thread-FORMING screw in a thermoplastic wants a pilot sized to the pitch diameter, not to the tap drill, and the plastics-industry figures for that (0.8-0.85 d for glass-free thermoplastics) are a RULE OF THUMB, not a standard — none is asserted here as if it were one. What is MEASURED is what Pollen drew: see record.measured.",
+    "measured": {
+      "$what": "Every pilot hole of this size on the reference meshes, measured by cecad.meshfeatures.features() (dihedral patch -> least-squares cylinder, ends by 24 axis-parallel probe rays), 2026-09-04.",
+      "artifact": "ce-designs/microduck/out/fasteners/features-by-mesh.json",
+      "pilots_of_this_size": 11,
+      "pilots_exactly_at_the_tap_drill_figure": 8,
+      "measured_diameters_mm": [
+        2.05,
+        2.1
+      ],
+      "where": "face_part x6, top_head_shell x3, yaw2roll x2",
+      "reading": "8 of the 11 read Ø2.05 mm to 0.000 mm — the ISO tap-drill figure for M2.5, which is what a CAD model of a self-tapped boss is normally drawn at. The rest sit at Ø2.10 mm, 0.05 mm over the tap drill. The design intent is unambiguous: M2.5 screws forming their own thread in printed plastic."
+    },
+    "not_in_this_folder": "No pilot of this size falls in a bought-in part; all 11 are in printed geometry.",
+    "adds_parts": [
+      "part:screw-m2.5-iso4762"
+    ],
+    "adds_parts_why": "The joint adds ONE part: the screw. The internal thread is formed in part B itself and adds nothing to buy — which is the whole economic point of a self-tap over a heat-set insert. part:screw-m2.5-iso4762 now builds real parametric geometry over its sourced length family (ce-workshop 083bc13c), so this ref resolves to a solid rather than to a folder; before 2026-09-04 it did not, and TRIAD.md makes a dangling ref a FAIL.",
+    "verdict": "CANNOT DETERMINE",
+    "why": "The GEOMETRY is PASS and is measured on both sides: 11 pilots of Ø2.05 mm on the reference meshes (artifact above) against a M2.5 screw whose shank is Ø2.50 mm at nominal, measured off the built solid (out/fasteners/screw-parts-verify.json, 120 rows 0 FAIL). mate() places the screw and chooses its length from a MEASURED grip and a MEASURED pilot depth. The HOLDING is CANNOT DETERMINE and this folder refuses to grade it: nobody in this workshop has pulled a M2.5 screw out of a printed Ø2.05 pilot and written down the load. That is one afternoon with a test coupon and a force gauge, and until it happens the verdict stays here rather than being borrowed from a plastics handbook whose resin, layer height and infill are not ours.",
+    "open_questions": [
+      {
+        "q": "strip / pull-out load of a M2.5 screw thread-formed in FDM PLA at Ø2.05 pilot",
+        "settled_by": "a printed coupon, screw driven to a recorded torque, pulled to failure, n >= 5"
+      },
+      {
+        "q": "how many re-insertions before the formed thread stops holding",
+        "settled_by": "the same coupon, re-driven and re-pulled cycle by cycle"
+      },
+      {
+        "q": "thread-forming torque for the assembly instructions",
+        "settled_by": "a torque screwdriver on the same coupon"
+      }
+    ],
+    "why_not_a_heat_set_insert": "The replica author RECOMMENDS heat-set inserts for these positions — reference/makerworld-3250889/upstream-github-fanhao375-microduck-replica/docs/fastener-reconstruction.en.md:90, 'M2 heat-set inserts | 60 | recommended over tapping printed plastic directly'. That is his ADVICE, and it is good advice. It is not a measurement of the product. MEASURED on the reference meshes 2026-09-04: exactly 3 of 355 holes read as an insert seat by diameter, and all 3 are refuted by their own depth — left_shell idx6 Ø4.088 is 29.265 mm deep (a boss channel, not a 4-6 mm insert seat) and yaw_roll_motion idx12/13 Ø4.6 are 0.500 mm deep (a lead-in chamfer). NO INSERT SEAT EXISTS IN THIS GEOMETRY, so no insert part is placed and none was created. What settles it: a teardown photograph of a boss on a real unit, or a caliper on one. If inserts turn out to be there, this folder is superseded by connection:heatset-insert-m2p5 and the geometry is wrong, not the reading.",
+    "joint": {
+      "$joint": 1,
+      "default_state": "tight; params['state'] == 'loose' leaves the helical DOF, as in connection:threaded-m2.5",
+      "axes": {
+        "tx": "locked",
+        "ty": "locked",
+        "tz": "locked",
+        "rx": "locked",
+        "ry": "locked",
+        "rz": "locked"
+      },
+      "axes_cannot_determine": {},
+      "limits": {},
+      "one_way": "",
+      "intermittent": false,
+      "engagement": {
+        "pilot_d_mm": 2.05,
+        "engagement_is_measured_per_instance": "the pilot's own depth, from out/fasteners/runs.json"
+      },
+      "couples": [],
+      "holds_by": "preload",
+      "removable": true,
+      "transmits": [
+        "axial",
+        "shear",
+        "moment"
+      ],
+      "driven": false,
+      "rating": {
+        "preload_N": null,
+        "tightening_torque_Nm": null,
+        "pla_strip_N": null,
+        "reinsertions": null
+      },
+      "why": "holds_by preload, same mechanism as a cut thread. All four rating numbers are MISSING and refused; record.open_questions names the bench test that produces each. The loose state couples rz to tz at 0.45 mm per turn (ISO 261 coarse pitch for nominal diameter 2.5 mm)."
+    }
+  }
+}
