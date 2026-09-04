@@ -597,7 +597,7 @@ n_parcels = sum(len(t["parcels"]) for t in TRACKS)
 
 CSS = """.zh{font-family:var(--sans);font-size:12px;color:var(--ink-2);display:block}
 table{border-collapse:collapse;width:100%;table-layout:fixed;font-size:12.5px;margin:8px 0 18px;overflow-wrap:anywhere}
-th{white-space:normal !important;padding:5px 6px;background:var(--head);font-family:var(--sans);font-size:12px}
+th{white-space:normal !important;overflow-wrap:break-word;word-break:normal;padding:5px 6px;background:var(--head);font-family:var(--sans);font-size:12px}
 th,td{border-bottom:1px solid var(--hair);padding:5px 6px;text-align:left;vertical-align:top}
 td.m{font-family:var(--mono);font-size:11.5px;word-break:break-all}
 .g{font-family:var(--sans);font-weight:600;font-size:11px}

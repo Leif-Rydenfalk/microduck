@@ -12,7 +12,7 @@
 <header class="hero"><p class="eyebrow">Microduck · factory pack · 工厂交付包</p>
 <h1>Microduck factory pack <span class="zh" style="font-size:22px;display:inline">Microduck 工厂交付包</span></h1>
 <p class="sub">One document a factory can build from: what the product is, what is NOT ready, what to build, how a finished unit is accepted, what may and may not be sold, and where every underlying file sits in the repository.</p><p class="sub zh">供工厂直接使用的单一文件：产品是什么、哪些尚未就绪、要制造什么、成品如何验收、什么可售什么不可售，以及每个源文件在仓库中的位置。</p>
-<div class="rev"><span>MD-FACT-PACK-001 · Rev A</span><span>generated 2026-09-04T18:10:16+08:00</span><span>commit 000454b</span><span>tools/gen_factory_pack.py</span></div></header>
+<div class="rev"><span>MD-FACT-PACK-001 · Rev A</span><span>generated 2026-09-04T18:33:16+08:00</span><span>commit f3118ce</span><span>tools/gen_factory_pack.py</span></div></header>
 <div class="front"><h2>Read this first · 请先阅读</h2>
 <p><b>NO PHYSICAL UNIT HAS EVER BEEN BUILT OR MEASURED. Not one Microduck has been assembled from these files, and no number in this pack was taken off a real robot. Everything dynamic here — walking, loads, safety factors, thermal, battery runtime — is SIMULATION: rigid-body simulation in MuJoCo and linear-elastic finite element in CalculiX, run on our own CAD. Everything static — millimetres, grams, seconds, prices — is measured, but measured off files: off the geometry with a CAD kernel, off the STL with a slicer, off a live distributor page. Treat every simulated result as a hypothesis your first five units will test, not as a property of the product.</b></p>
 <p class="zh" style="font-size:13px">从未制造或测量过任何实物样机。没有一台 Microduck 按本文件装配过，本交付包中的任何数字都不是从实物机器人上取得的。所有动态结果——行走、受力、安全系数、温升、续航——均为仿真：MuJoCo 刚体仿真与 CalculiX 线弹性有限元，基于我方 CAD 运行。所有静态数据——毫米、克、秒、价格——是实测，但测自文件：用 CAD 内核测几何、用切片软件测 STL、从供应商在线页面读取价格。请把每一项仿真结果视为待验证的假设，由你们的前五台样机来检验，而非产品的既有属性。</p>
@@ -69,8 +69,8 @@
 <tr><td>open CANNOT DETERMINE items across the repository<br><span class="zh">全仓库未定项</span></td><td class="num"><b class="no">139</b></td><td>Every one names what would settle it. They are not unknowns we are ignoring; they are unknowns we have refused to guess.<br><span class="zh">每一项都写明了如何才能定案。它们不是被忽略的未知，而是我方拒绝臆测的未知。</span><br><span class="mono" style="font-size:10.5px">out/open/cannot-determine-harvest.json</span></td><td>agent, tonight (WF-UNKNOWNS) for the desk-answerable ones<br><span class="zh">可查证部分由软件代理今晚完成（WF-UNKNOWNS）</span></td></tr>
 <tr><td>physical units ever built or measured<br><span class="zh">已制造或测量过的实物样机</span></td><td class="num"><b class="no">0</b></td><td>The test plan is complete and has been exercised zero times. Every dynamic figure in this repository is simulation.<br><span class="zh">测试计划完整但执行次数为零。本仓库中所有动态数据均为仿真结果。</span><br><span class="mono" style="font-size:10.5px">spec/test-plan.json (0 tests exercised), readiness.json test row</span></td><td>the factory — this is the whole point of the pack<br><span class="zh">由工厂完成——这正是本交付包的目的</span></td></tr>
 </table>
-<p>Every one of these is cut into parcels of one engineer each in <a href="WORK-BREAKDOWN.html">WORK-BREAKDOWN.html</a> (22 parcels). Work an agent is closing tonight is marked IN FLIGHT there so you do not duplicate it.</p>
-<p class="zh">上述每一项均已在 <a href="WORK-BREAKDOWN.html">WORK-BREAKDOWN.html</a> 中切分为每人一份的工作包（共 22 个）。今晚由软件代理完成的工作在其中标记为 IN FLIGHT，请勿重复。</p>
+<p>Every one of these is cut into parcels of one engineer each in <a href="WORK-BREAKDOWN.html">WORK-BREAKDOWN.html</a> (25 parcels). Work an agent is closing tonight is marked IN FLIGHT there so you do not duplicate it.</p>
+<p class="zh">上述每一项均已在 <a href="WORK-BREAKDOWN.html">WORK-BREAKDOWN.html</a> 中切分为每人一份的工作包（共 25 个）。今晚由软件代理完成的工作在其中标记为 IN FLIGHT，请勿重复。</p>
 <h3>Work an agent is closing tonight — do not start these · 今晚由软件代理完成的工作，请勿开工</h3>
 <table><colgroup><col style="width:14%"><col style="width:46%"><col style="width:40%"></colgroup><tr><th>Workflow<br><span class="zh">工作流</span></th><th>What it is closing<br><span class="zh">工作内容</span></th><th>Paths it owns (do not write these)<br><span class="zh">其占用路径（请勿写入）</span></th></tr>
 <tr><td class="m">WF-SHEETS</td><td>Drawing-sheet rebuild to the A2/A3/A4 standard; every sheet regenerated<br><span class="zh">按 A2/A3/A4 标准重建全部图纸</span></td><td class="m">ce-cad/cecad/autosheet.py, ce-cad/cecad/sheets.py, out/drawings/</td></tr>
@@ -233,19 +233,21 @@
 </table>
 <h3>3.6 Assembly sequence · 装配顺序</h3>
 <p class="lede">Two documents describe the build: MANUAL.md, the order the parts go together, and the playbook&#x27;s line stations, which is the same build laid out as a production line. Both are readable; neither is yet followable by a stranger without asking us questions. The unanswered questions are listed, each with what closes it.</p><p class="lede zh">有两份文件描述装配：MANUAL.md 给出零件装配顺序，制造手册的工位表将同一装配拆解为产线工位。两者均可读，但陌生工程师尚无法在不询问我方的情况下照做。下表列出未解答的问题及其解决途径。</p>
-<table><colgroup><col style="width:10%"><col style="width:40%"><col style="width:12%"><col style="width:38%"></colgroup><tr><th>Station<br><span class="zh">工位</span></th><th>Name<br><span class="zh">名称</span></th><th>Steps<br><span class="zh">步骤数</span></th><th>Note<br><span class="zh">说明</span></th></tr>
-<tr><td class="m">S0</td><td>Incoming inspection</td><td class="num">4</td><td></td></tr>
-<tr><td class="m">S1</td><td>Print and post-process</td><td class="num">5</td><td></td></tr>
-<tr><td class="m">S2</td><td>Bearing seating</td><td class="num">4</td><td></td></tr>
-<tr><td class="m">S3</td><td>Servo ID, EEPROM and horn index</td><td class="num">5</td><td></td></tr>
-<tr><td class="m">S4</td><td>Trunk</td><td class="num">5</td><td></td></tr>
-<tr><td class="m">S5</td><td>Hips and legs, left then right</td><td class="num">5</td><td></td></tr>
-<tr><td class="m">S6</td><td>Neck</td><td class="num">3</td><td></td></tr>
-<tr><td class="m">S7</td><td>Head and electronics</td><td class="num">5</td><td></td></tr>
-<tr><td class="m">S8</td><td>Harness and closing</td><td class="num">5</td><td></td></tr>
-<tr><td class="m">S9</td><td>Power-up and functional test</td><td class="num">4</td><td></td></tr>
-<tr><td class="m">S10</td><td>Pack-out</td><td class="num">4</td><td></td></tr>
+<table><colgroup><col style="width:10%"><col style="width:19%"><col style="width:7%"><col style="width:7%"><col style="width:29%"><col style="width:28%"></colgroup><tr><th>Station<br><span class="zh">工位</span></th><th>Name<br><span class="zh">名称</span></th><th>Steps<br><span class="zh">步骤数</span></th><th>Gates<br><span class="zh">判据数</span></th><th>What arrives here<br><span class="zh">投入物</span></th><th>Takt basis<br><span class="zh">节拍依据</span></th></tr>
+<tr><td class="m">S0</td><td>Incoming inspection</td><td class="num">4</td><td class="num">4</td><td>XL330 ×15, bearings 22×16×4 ×11 and 15×10×3 ×3, NP-F550, Radxa Zero 3W, the three custom PCBs, camera, ToF, speaker, fasteners</td><td>batch, not per unit</td></tr>
+<tr><td class="m">S1</td><td>Print and post-process</td><td class="num">5</td><td class="num">4</td><td>two plates: PLA 32 pieces, TPU 4 pieces (§4)</td><td>plate-batched, off the unit clock</td></tr>
+<tr><td class="m">S2</td><td>Bearing seating</td><td class="num">4</td><td class="num">3</td><td>11 × 22×16×4, 3 × 15×10×3, the four pushers and the anvil from §5.1</td><td>14 bearings per robot</td></tr>
+<tr><td class="m">S3</td><td>Servo ID, EEPROM and horn index</td><td class="num">5</td><td class="num">3</td><td>15 × XL330, one servo at a time on a bench bus, the horn-index gauge from §5.1</td><td>15 servos per robot, 5-11 min (S43/our estimate)</td></tr>
+<tr><td class="m">S4</td><td>Trunk</td><td class="num">5</td><td class="num">2</td><td>trunk-base, power-support, banana-pcb-locker, banana contact PCB, 2 × XL330 (ID 20, 10), 2 × bearing 22×16×4</td><td>MANUAL step 1</td></tr>
+<tr><td class="m">S5</td><td>Hips and legs, left then right</td><td class="num">5</td><td class="num">2</td><td>per side: yaw2roll, bearing-roll, hip-bracket, upper-leg, rigidity-plate, shin, ankle, foot, TPU sole, 5 × XL330, 4 × bearing 22×16×4, 1 × bearing 15×10×3</td><td>MANUAL steps 2-3, the longest station</td></tr>
+<tr><td class="m">S6</td><td>Neck</td><td class="num">3</td><td class="num">1</td><td>2 × neck-plate, neck-pitch-bracket, 2 × XL330 (ID 30, 31), 1 × bearing 22×16×4</td><td>MANUAL step 4</td></tr>
+<tr><td class="m">S7</td><td>Head and electronics</td><td class="num">5</td><td class="num">2</td><td>yaw-roll-motion, motor-support, face-part, eye-ring, M12 lens + holder, IMX219, ToF, Radxa Zero 3W, Robot HAT, speaker, top and bottom head shells, jaw, TPU lips, 3 × XL330 (ID 32, 33, 34), 2 × bearing 22×16×4, 1 × beari</td><td>MANUAL step 5, the densest station</td></tr>
+<tr><td class="m">S8</td><td>Harness and closing</td><td class="num">5</td><td class="num">2</td><td>the cut set from wiring/CABLES.md</td><td>22 cables, 1615 mm (CABLES)</td></tr>
+<tr><td class="m">S9</td><td>Power-up and functional test</td><td class="num">4</td><td class="num">3</td><td>the closed robot, a charged NP-F550</td><td>see TEST-PLAN.html for the full procedure</td></tr>
+<tr><td class="m">S10</td><td>Pack-out</td><td class="num">4</td><td class="num">3</td><td>robot, box, insert, battery, USB-C cable, controller, manual</td><td>2-5 min (our estimate)</td></tr>
 </table>
+<p class="lede">11 stations, 49 steps, 29 in-station gates. No station has a measured takt time: no unit has been built, so the takt column is the basis a time would be measured against, not a time.</p>
+<p class="lede zh">共 11 个工位、49 个步骤、29 项工位内判据。没有任何工位有实测节拍时间：因为尚未装配过整机；“节拍依据”列给出的是将来测量节拍时的依据，而不是时间。</p>
 <h4>Torque · 拧紧扭矩</h4>
 <table><colgroup><col style="width:34%"><col style="width:12%"><col style="width:54%"></colgroup><tr><th>Joint<br><span class="zh">连接</span></th><th>Value<br><span class="zh">数值</span></th><th>Why it is CANNOT DETERMINE<br><span class="zh">为何无法判定</span></th></tr>
 <tr><td>M2 screw into the XL330&#x27;s own Ø1.6 x 6.0 tapped holes (horn face and case), 4 per horn / 8 per case face</td><td class="m">CANNOT DETERMINE</td><td>ROBOTIS publishes no tightening torque for this part. Four searches over robotis.us, docs.robotis.com, emanual.robotis.com, the XL-series TDS PDF and forum.robotis.com returned specification and dimension pages only; none states a torque. The case material is not stated either (part:xl330-m288-t cad/part.py: MATERIAL = &quot;PA&quot; with the note that the vendor&#x27;s case material is not on the fetched page), so it cannot even be derived.</td></tr>
@@ -380,9 +382,9 @@
 <p class="lede zh">本交付包中的每一项主张都指向本仓库中的一个文件。下表给出路径、大小与最后修改时间，便于读者确认所打开的文件即为本包生成时所用的文件。</p>
 <h3>Documents · 文件</h3>
 <table><colgroup><col style="width:26%"><col style="width:44%"><col style="width:14%"><col style="width:16%"></colgroup><tr><th>Document<br><span class="zh">文件</span></th><th>What it is<br><span class="zh">内容</span></th><th>Size<br><span class="zh">大小</span></th><th>Last changed<br><span class="zh">最后修改</span></th></tr>
-<tr><td class="m"><a href="FACTORY-PACK.html">FACTORY-PACK.html</a></td><td>This document<br><span class="zh">本文件</span></td><td class="num">117.0 kB</td><td class="m">2026-09-04 17:58</td></tr>
-<tr><td class="m"><a href="WORK-BREAKDOWN.html">WORK-BREAKDOWN.html</a></td><td>The open work cut into parcels of one engineer each<br><span class="zh">待办工作，按每人一份切分</span></td><td class="num">35.9 kB</td><td class="m">2026-09-04 17:11</td></tr>
-<tr><td class="m"><a href="FACTORY-QUESTIONS.html">FACTORY-QUESTIONS.html</a></td><td>What only a factory with real machines can answer<br><span class="zh">只有拥有实机的工厂才能回答的问题</span></td><td class="num">81.2 kB</td><td class="m">2026-09-04 18:10</td></tr>
+<tr><td class="m"><a href="FACTORY-PACK.html">FACTORY-PACK.html</a></td><td>This document<br><span class="zh">本文件</span></td><td class="num">120.1 kB</td><td class="m">2026-09-04 18:29</td></tr>
+<tr><td class="m"><a href="WORK-BREAKDOWN.html">WORK-BREAKDOWN.html</a></td><td>The open work cut into parcels of one engineer each<br><span class="zh">待办工作，按每人一份切分</span></td><td class="num">56.5 kB</td><td class="m">2026-09-04 18:25</td></tr>
+<tr><td class="m"><a href="FACTORY-QUESTIONS.html">FACTORY-QUESTIONS.html</a></td><td>What only a factory with real machines can answer<br><span class="zh">只有拥有实机的工厂才能回答的问题</span></td><td class="num">81.2 kB</td><td class="m">2026-09-04 18:12</td></tr>
 <tr><td class="m"><a href="LICENCE-POSITION.html">LICENCE-POSITION.html</a></td><td>Origin of every byte and what may be sold<br><span class="zh">各项数据来源与可售范围</span></td><td class="num">144.6 kB</td><td class="m">2026-09-04 17:37</td></tr>
 <tr><td class="m"><a href="out/factory/readiness.html">out/factory/readiness.html</a></td><td>The readiness audit, artifact by artifact<br><span class="zh">逐项就绪度审核</span></td><td class="num">164.1 kB</td><td class="m">2026-09-04 17:45</td></tr>
 <tr><td class="m"><a href="MANUFACTURING-PLAYBOOK.html">MANUFACTURING-PLAYBOOK.html</a></td><td>Process selection, DFM, line stations, costing<br><span class="zh">工艺选择、DFM、产线工位、成本</span></td><td class="num">158.0 kB</td><td class="m">2026-09-03 17:29</td></tr>
@@ -391,11 +393,11 @@
 <tr><td class="m"><a href="PCB-PACKAGE.html">PCB-PACKAGE.html</a></td><td>The three custom boards<br><span class="zh">三块定制电路板</span></td><td class="num">134.1 kB</td><td class="m">2026-09-03 17:38</td></tr>
 <tr><td class="m"><a href="TEST-PLAN.html">TEST-PLAN.html</a></td><td>The bench procedure<br><span class="zh">台架测试程序</span></td><td class="num">249.9 kB</td><td class="m">2026-09-03 06:00</td></tr>
 <tr><td class="m"><a href="out/drawings/INDEX.html">out/drawings/INDEX.html</a></td><td>Drawing sheet index<br><span class="zh">图纸索引</span></td><td class="num">123.7 kB</td><td class="m">2026-09-03 17:48</td></tr>
-<tr><td class="m"><a href="INDEX.html">INDEX.html</a></td><td>Everything else in the repository<br><span class="zh">仓库其余全部文件</span></td><td class="num">38.8 kB</td><td class="m">2026-09-04 17:30</td></tr>
+<tr><td class="m"><a href="INDEX.html">INDEX.html</a></td><td>Everything else in the repository<br><span class="zh">仓库其余全部文件</span></td><td class="num">42.7 kB</td><td class="m">2026-09-04 18:24</td></tr>
 </table>
 <h3>Data and source artifacts · 数据与源文件</h3>
 <table><colgroup><col style="width:26%"><col style="width:44%"><col style="width:14%"><col style="width:16%"></colgroup><tr><th>Path<br><span class="zh">路径</span></th><th>What it is<br><span class="zh">内容</span></th><th>Size<br><span class="zh">大小</span></th><th>Last changed<br><span class="zh">最后修改</span></th></tr>
-<tr><td class="m">out/drawings/</td><td>One folder per part: SVG sheet, PDF, and the JSON of measured facts it was drawn from<br><span class="zh">每个零件一个文件夹：SVG 图纸、PDF 及绘图依据的 JSON</span></td><td class="num">360 files</td><td class="m">2026-09-04 07:05</td></tr>
+<tr><td class="m">out/drawings/</td><td>One folder per part: SVG sheet, PDF, and the JSON of measured facts it was drawn from<br><span class="zh">每个零件一个文件夹：SVG 图纸、PDF 及绘图依据的 JSON</span></td><td class="num">393 files</td><td class="m">2026-09-04 18:25</td></tr>
 <tr><td class="m">out/print/stl/</td><td>The STL files to print, by material<br><span class="zh">按材料分类的待打印 STL 文件</span></td><td class="num">30 files</td><td class="m">2026-09-02 02:40</td></tr>
 <tr><td class="m">out/print/slice.json</td><td>Real slicer grams and seconds per part<br><span class="zh">各零件的真实切片克数与秒数</span></td><td class="num">26.0 kB</td><td class="m">2026-09-02 02:44</td></tr>
 <tr><td class="m">spec/sourcing.json</td><td>Every bought line with its offers, read off live pages<br><span class="zh">全部外购项及其在线读取的报价</span></td><td class="num">163.8 kB</td><td class="m">2026-09-03 17:22</td></tr>
@@ -411,8 +413,8 @@
 <tr><td class="m">docs/MANUFACTURING-REQUIREMENTS.md</td><td>The drawing standard our own sheets are graded against<br><span class="zh">我方图纸所依据的评级标准</span></td><td class="num">13.7 kB</td><td class="m">2026-09-03 18:19</td></tr>
 <tr><td class="m">SPEC.md</td><td>What we are rebuilding, every number tagged published / measured / community / inferred<br><span class="zh">重建目标规格，每个数字标注来源类别</span></td><td class="num">11.0 kB</td><td class="m">2026-09-01 23:38</td></tr>
 </table>
-<p class="lede">Repository: this pack was generated at commit 000454b. Re-take every measurement in it with <code>python3 tools/measure_readiness.py</code>, then <code>python3 tools/gen_readiness.py</code>, then <code>python3 tools/gen_factory_pack.py</code>. If your numbers differ from ours, your repository moved — tell us which row.</p>
-<p class="lede zh">本包生成于提交 000454b。可依次运行上述三条命令重新采集全部测量并重建本文件。若数字与我方不符，说明仓库已变动，请告知具体行。</p>
+<p class="lede">Repository: this pack was generated at commit f3118ce. Re-take every measurement in it with <code>python3 tools/measure_readiness.py</code>, then <code>python3 tools/gen_readiness.py</code>, then <code>python3 tools/gen_factory_pack.py</code>. If your numbers differ from ours, your repository moved — tell us which row.</p>
+<p class="lede zh">本包生成于提交 f3118ce。可依次运行上述三条命令重新采集全部测量并重建本文件。若数字与我方不符，说明仓库已变动，请告知具体行。</p>
 </section>
 <footer class="foot"><p>Generated by <code>tools/gen_factory_pack.py</code> from out/factory/readiness.json, out/print/slice.json, spec/sourcing.json, spec/test-plan.json, wiring/cables.json, tools/data/playbook.json, out/factory/licence.json and SPEC.md. Readiness measured 2026-09-04T17:45:34+08:00. No figure on this page was typed by hand.</p><p class="zh">本页由 tools/gen_factory_pack.py 从上述数据文件生成；就绪度实测时间 2026-09-04T17:45:34+08:00。页面上没有任何数字是手工填写的。</p></footer>
 </div></body></html>

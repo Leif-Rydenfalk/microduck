@@ -648,13 +648,21 @@ A.append('</table>')
 # 3.6 assembly
 A.append('<h3>3.6 Assembly sequence · 装配顺序</h3>')
 A.append('<p class="lede">%s</p><p class="lede zh">%s</p>' % (E(D["sections"]["assembly"]["en"]), E(D["sections"]["assembly"]["zh"])))
-A.append('<table>' + cols(10, 40, 12, 38) + '<tr>' + th("Station", "工位") + th("Name", "名称")
-         + th("Steps", "步骤数") + th("Note", "说明") + '</tr>')
+# The station rows carry takt_note, inputs and gates — the first version printed a
+# "Note" column that was empty on all 11 rows because no station has a `why` or
+# `note` key. An empty column in a factory table is worse than no column.
+A.append('<table>' + cols(10, 19, 7, 7, 29, 28) + '<tr>' + th("Station", "工位") + th("Name", "名称")
+         + th("Steps", "步骤数") + th("Gates", "判据数") + th("What arrives here", "投入物")
+         + th("Takt basis", "节拍依据") + '</tr>')
 for s in stations:
-    A.append('<tr><td class="m">%s</td><td>%s</td><td class="num">%s</td><td>%s</td></tr>'
-             % (E(str(s.get("id"))), E(str(s.get("name"))), len(s.get("steps", [])),
-                E(str(s.get("why", s.get("note", "")) or "")[:200])))
+    A.append('<tr><td class="m">%s</td><td>%s</td><td class="num">%s</td><td class="num">%s</td><td>%s</td><td>%s</td></tr>'
+             % (E(str(s.get("id"))), E(str(s.get("name"))), len(s.get("steps", [])), len(s.get("gates", [])),
+                E(str(s.get("inputs") or "—")[:220]), E(str(s.get("takt_note") or "—")[:160])))
 A.append('</table>')
+A.append('<p class="lede">%d stations, %d steps, %d in-station gates. No station has a measured takt time: no unit has been built, so the takt column is the basis a time would be measured against, not a time.</p>'
+         % (len(stations), sum(len(s.get("steps", [])) for s in stations), sum(len(s.get("gates", [])) for s in stations)))
+A.append('<p class="lede zh">共 %d 个工位、%d 个步骤、%d 项工位内判据。没有任何工位有实测节拍时间：因为尚未装配过整机；“节拍依据”列给出的是将来测量节拍时的依据，而不是时间。</p>'
+         % (len(stations), sum(len(s.get("steps", [])) for s in stations), sum(len(s.get("gates", [])) for s in stations)))
 if torque:
     A.append('<h4>Torque · 拧紧扭矩</h4>')
     A.append('<table>' + cols(34, 12, 54) + '<tr>' + th("Joint", "连接") + th("Value", "数值")
