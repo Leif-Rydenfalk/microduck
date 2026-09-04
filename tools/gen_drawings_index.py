@@ -205,10 +205,36 @@ def sheet_card(r):
     ref = up(r.get("reference_render"))
     kind = r.get("kind") or r.get("state")
     parts = ['<article class="sheet" id="%s">' % E(slug)]
-    parts.append('<div class="sheethead"><h3>%s</h3><div>%s '
+    # THE VERDICT BESIDE A SHEET IS THE SHEET'S VERDICT.
+    #
+    # Until 2026-09-04 this line printed result.json's bare `verdict`, which
+    # grades whether the PART BUILT — and 25 of 27 rows read PASS while
+    # ce-cad/bin/sheetcheck read 27 FAIL on the same sheets against A2+A3+A4.
+    # A reader scrolling this page took the green chip for "a machinist can
+    # cut this". So the big chip is the SHEET verdict, the build verdict sits
+    # behind the word "build", and the row says which rules failed.
+    sv = r.get("sheet_verdict") or "CANNOT DETERMINE"
+    bv = r.get("build_verdict") or "CANNOT DETERMINE"
+    parts.append('<div class="sheethead"><h3>%s</h3><div>'
+                 '<span class="vlab">sheet A2+A3+A4</span> %s '
+                 '<span class="vlab">build</span> %s '
                  '<span class="kindtag">%s</span></div></div>'
-                 % (E(slug), chip(r.get("verdict", "CANNOT DETERMINE")),
-                    E(str(kind))))
+                 % (E(slug), chip(sv), chip(bv), E(str(kind))))
+    parts.append('<p class="paircap"><b>SHEET %s</b> — %s. '
+                 '<b>BUILD %s</b> — the part built and every number on the '
+                 'sheet re-measured off the solid. Source: %s.</p>'
+                 % (E(sv), E(str(r.get("sheet_verdict_why")
+                                 or "no rule detail recorded")[:300]),
+                    E(bv), E(str(r.get("sheet_verdict_source") or "—"))))
+    if r.get("sheet_rules"):
+        parts.append('<p class="paircap">' + " · ".join(
+            "%s %s" % (E(k), chip(v))
+            for k, v in sorted(r["sheet_rules"].items())) + "</p>")
+    if r.get("sheet_sections"):
+        parts.append('<p class="paircap">by section — ' + " · ".join(
+            "%s %s" % (E(k), chip(r["sheet_sections"][k]))
+            for k in ("A", "A2", "A3", "A4")
+            if k in r["sheet_sections"]) + "</p>")
     if r.get("title"):
         parts.append('<p class="paircap">%s</p>' % E(str(r["title"])[:240]))
     if thumb:
@@ -379,13 +405,18 @@ def open_items(rows):
     """
     out = []
     for r in rows:
-        if r.get("verdict") == "PASS":
+        # OPEN AGAINST THE SHEET, not against the build. A part that built
+        # perfectly and whose sheet no shop can cut from is open.
+        if r.get("sheet_verdict") == "PASS":
             continue
         st = r.get("state") or r.get("kind") or "unknown"
         out.append({"slug": r["slug"], "state": st,
-                    "verdict": r.get("verdict") or "CANNOT DETERMINE",
-                    "why": r.get("why") or _first_failed(r) or "no reason "
-                           "recorded — that is itself a defect of this row",
+                    "verdict": r.get("sheet_verdict") or "CANNOT DETERMINE",
+                    "build_verdict": r.get("build_verdict")
+                    or "CANNOT DETERMINE",
+                    "why": (r.get("sheet_verdict_why") or r.get("why")
+                            or _first_failed(r) or "no reason recorded — "
+                            "that is itself a defect of this row"),
                     "settles": _SETTLES.get(st, "Not classified — read the "
                                             "reason and the sheet.")})
     out.sort(key=lambda d: (d["verdict"] != "FAIL", d["state"], d["slug"]))
@@ -406,15 +437,17 @@ def _first_failed(r):
 def open_table(rows):
     items = open_items(rows)
     if not items:
-        return ('<p class="note">Every row on this shelf is PASS. Nothing is '
-                'open.</p>')
+        return ('<p class="note">Every row on this shelf is PASS against '
+                'A2+A3+A4. Nothing is open.</p>')
     h = ['<div class="tablewrap"><table class="data">',
-         "<thead><tr><th>part</th><th>verdict</th><th>state</th>"
+         "<thead><tr><th>part</th><th>sheet verdict</th><th>build verdict"
+         "</th><th>state</th>"
          "<th>why</th><th>what settles it</th></tr></thead><tbody>"]
     for d in items:
         h.append("<tr><th scope=\"row\">%s</th><td>%s</td><td>%s</td>"
-                 "<td>%s</td><td>%s</td></tr>"
-                 % (E(d["slug"]), chip(d["verdict"]), E(d["state"]),
+                 "<td>%s</td><td>%s</td><td>%s</td></tr>"
+                 % (E(d["slug"]), chip(d["verdict"]),
+                    chip(d.get("build_verdict")), E(d["state"]),
                     E(str(d["why"])[:700]), E(d["settles"])))
     h.append("</tbody></table></div>")
     return "\n".join(h)
@@ -490,14 +523,22 @@ def main():
     # 53 against a headline of 54 parts on the shelf, because one row carried
     # `verdict: null` and was counted by nothing. An arithmetic identity
     # printed on the page cannot go quietly wrong.
-    acc = t["pass"] + t["fail"] + t["cannot_determine"]
-    recon = ("%d PASS + %d FAIL + %d CANNOT DETERMINE = %d, against %d parts "
-             "on the shelf — %s"
-             % (t["pass"], t["fail"], t["cannot_determine"], acc, t["shelf"],
+    acc = (t["build_pass"] + t["build_fail"] + t["build_cannot_determine"])
+    recon = ("TWO VERDICTS, TWO SUBJECTS, AND ONLY ONE OF THEM ANSWERS 'CAN A "
+             "MACHINIST CUT THIS'. SHEET (docs/MANUFACTURING-REQUIREMENTS.md "
+             "A2+A3+A4, measured by ce-cad/bin/sheetcheck %s): %d PASS, %d "
+             "FAIL, %d CANNOT DETERMINE. BUILD (the part built and its sheet "
+             "read back off the solid): %d PASS + %d FAIL + %d CANNOT "
+             "DETERMINE = %d, against %d parts on the shelf — %s"
+             % (t.get("sheet_verdict_measured") or "NOT MEASURED",
+                t.get("sheet_pass", 0), t.get("sheet_fail", 0),
+                t.get("sheet_cannot_determine", 0),
+                t["build_pass"], t["build_fail"], t["build_cannot_determine"],
+                acc, t["shelf"],
                 "every part is accounted for."
                 if acc == t["shelf"] else
-                "THEY DO NOT AGREE: %d row(s) carry a verdict this page "
-                "cannot count, which is a defect in "
+                "THEY DO NOT AGREE: %d row(s) carry a build verdict this "
+                "page cannot count, which is a defect in "
                 "tools/collect_drawings.py, not a rounding."
                 % abs(t["shelf"] - acc)))
     if not doc.get("features_generated"):
@@ -553,6 +594,7 @@ def main():
   .paircap{{font-family:var(--sans);font-size:12.5px;color:var(--ink-2);margin:6px 0 0}}
   .note{{font-size:13.5px;color:var(--ink-2);max-width:46em}}
   td.dash,.dash{{color:#b3aea4}}
+  .vlab{{font-family:var(--sans);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);margin-right:3px}}
   .statbar{{display:flex;flex-wrap:wrap;gap:0;border-bottom:1px solid var(--hair);margin:8px 0 2px}}
   .stat{{padding:12px 26px 12px 0;margin-right:22px}}
   .stat b{{display:block;font-weight:700;font-size:22px;font-variant-numeric:tabular-nums}}
@@ -586,9 +628,12 @@ def main():
   <div class="stat"><b>{t['drawings']}</b><span>dimensioned drawings</span></div>
   <div class="stat"><b>{t.get('reference_drawings', 0)}</b><span>bought-part references</span></div>
   <div class="stat"><b>{t['print_sheets']}</b><span>print sheets</span></div>
-  <div class="stat"><b>{t['pass']}</b><span>verify PASS</span></div>
-  <div class="stat"><b>{t['fail']}</b><span>verify FAIL</span></div>
-  <div class="stat"><b>{t['cannot_determine']}</b><span>cannot determine</span></div>
+  <div class="stat"><b>{t.get('sheet_pass', 0)}</b><span>SHEET PASS &mdash; A2+A3+A4</span></div>
+  <div class="stat"><b>{t.get('sheet_fail', 0)}</b><span>SHEET FAIL</span></div>
+  <div class="stat"><b>{t.get('sheet_cannot_determine', 0)}</b><span>sheet cannot determine</span></div>
+  <div class="stat"><b>{t.get('build_pass', 0)}</b><span>build PASS &mdash; the part built</span></div>
+  <div class="stat"><b>{t.get('build_fail', 0)}</b><span>build FAIL</span></div>
+  <div class="stat"><b>{t.get('build_cannot_determine', 0)}</b><span>build cannot determine</span></div>
   <div class="stat"><b>{t.get('stale', 0)}</b><span>stale rows</span></div>
   <div class="stat"><b>{t.get('rechecked', 0)}</b><span>independently rechecked</span></div>
 </div>

@@ -192,6 +192,10 @@ def verdict_class(v):
     if not isinstance(v, str):
         return None
     u = v.strip().upper()
+    # "SHEET FAIL · BUILD PASS" — the SHEET half is the one a reader must be
+    # shown, so the colour follows it.
+    if u.startswith("SHEET "):
+        u = u[len("SHEET "):]
     if u.startswith("PASS"):
         return "pass"
     if u.startswith("FAIL"):
@@ -203,6 +207,8 @@ def verdict_class(v):
 
 def verdict_text(v):
     u = v.strip().upper()
+    if u.startswith("SHEET "):
+        u = u[len("SHEET "):]
     if u.startswith("CANNOT"):
         return "C/D"
     return u.split()[0] if u else ""
@@ -218,7 +224,12 @@ def record_of(d):
             if not isinstance(j, dict):
                 continue
             rec = j.get("record") if isinstance(j.get("record"), dict) else j
-            v = rec.get("verdict") or j.get("verdict")
+            if rec.get("sheet_verdict") or rec.get("build_verdict"):
+                v = ("SHEET %s · BUILD %s"
+                     % (rec.get("sheet_verdict") or "CANNOT DETERMINE",
+                        rec.get("build_verdict") or "CANNOT DETERMINE"))
+            else:
+                v = rec.get("verdict") or j.get("verdict")
             t = rec.get("title") or j.get("title")
             if v or t:
                 tier = None
@@ -616,7 +627,17 @@ def render_record(d, rel):
         if not isinstance(j, dict):
             continue
         rec = j.get("record") if isinstance(j.get("record"), dict) else j
-        v = rec.get("verdict") or j.get("verdict")
+        # A DRAWING FOLDER HAS TWO VERDICTS AND THE SHEET ONE IS THE ANSWER.
+        # out/drawings/<slug>/result.json publishes build_verdict (the part
+        # built) and sheet_verdict (a machinist can cut from this sheet,
+        # A2+A3+A4). Showing the build one beside a sheet is what made 25
+        # green rows read as 25 machinable drawings on 2026-09-03.
+        if rec.get("sheet_verdict") or rec.get("build_verdict"):
+            v = ("SHEET %s · BUILD %s"
+                 % (rec.get("sheet_verdict") or "CANNOT DETERMINE",
+                    rec.get("build_verdict") or "CANNOT DETERMINE"))
+        else:
+            v = rec.get("verdict") or j.get("verdict")
         tier = rec.get("tier")
         head = ""
         if v:
@@ -628,7 +649,8 @@ def render_record(d, rel):
         src = '<span class="src">from <a href="%s">%s</a></span>' % (bhref(relof(fp)), esc(relof(fp)))
         rows, lists, why = [], [], ""
         for k, val in rec.items():
-            if k in ("verdict", "title", "$triad", "$schema", "$generated", "kind_why"):
+            if k in ("verdict", "sheet_verdict", "build_verdict", "title",
+                     "$triad", "$schema", "$generated", "kind_why"):
                 continue
             if isinstance(val, bool):
                 rows.append((k, esc(str(val)), False))

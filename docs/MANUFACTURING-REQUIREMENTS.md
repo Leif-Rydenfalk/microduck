@@ -232,3 +232,120 @@ tolerance block plus per-feature tolerances where the fit requires it, with the
 fit class named for anything that mates). "As printed" is not a tolerance; the
 printed dimensional band is a measured number or a CANNOT DETERMINE with the
 coupon that settles it.
+
+## A5 · WHAT THE INSTRUMENT MEASURES — Leif, 2026-09-04, verbatim
+
+> lots of tegh blueprints still arent perfect and all of them needs the
+> revisions ive talked about. the renders can have cilor and shadows and more
+> detail for machinist and it might actually make it more clear to machinists.
+> mmore detail. every signel detail must have dimensions and meassurements. it
+> must put workflows on iterating on these blueprints
+
+This section ADDS NO NEW DEMAND and LOOSENS NOTHING. A2, A3 and A4 stand
+exactly as written. What it does is settle three ambiguities found by reading
+`ce-cad/cecad/sheetcheck.py` rule by rule against the sections above on
+2026-09-04 — because a checker that measures the wrong quantity while
+returning a verdict is worse than no checker at all.
+
+### A5.1 · WHICH QUANTITY A3 rule 4's 85 % IS
+
+A3 rule 4: *"≥ 85 % of the drawing frame carries content — a view, a render, a
+table, a dimension, a note or the title block"*. Three different numbers could
+be read into that sentence, and the before-run reported two of them 25–30
+points apart on every sheet (`bbox occupancy 54.39 %` against `5 mm-cell ink
+coverage 23.51 %`, *"more than 25 points apart"*). The gate is the FIRST one:
+
+| name | definition | role |
+|---|---|---|
+| **`occupancy_pct`** | union of the bounding boxes of the sheet's content clusters ÷ frame area, off the SVG on a 1 mm grid. The white paper *inside* a view, between two of its strokes, counts as carried — it is part of the view. | **THE RULE. A3 r4's 85 % is this number.** |
+| `cell_pct` | share of 5 mm cells of the rendered PNG holding any ink | reported second opinion |
+| `ink_pct` | share of PIXELS that are ink | reported second opinion |
+
+The reason the gate cannot be ink: a fully packed ISO drawing inks a few per
+cent of its paper, so an 85 % ink threshold could not be met by any drawing
+ever made. The subject of A3 r4's sentence is **area that carries content**,
+not area covered in ink. Every report now names the quantity on the row, and a
+wide gap between the two is printed as its own finding — *the views are sparse
+inside their own bounding boxes* — because that is a real thing a re-layout
+must answer, and it is not a dispute about the verdict.
+
+### A5.2 · WHAT "MATERIAL-COLOURED, LIT" IS MEASURED AS — colour **and** shadow
+
+A3 rule 1 already asks for renders that are *"material-coloured, lit,
+anti-aliased"*, and Leif's line tonight says why it matters: a shaded colour
+render with real shadows is how a doubly-curved surface, a draft, a fillet
+run-out and a pocket floor reach a machinist at all. The instrument used to
+score an image as a render if it was colourful **or** continuous-tone, and
+that OR counts a **flat matte blob** — one solid colour, zero shading — as a
+render. A machinist reads no form off one. So each `<image>` is now measured
+twice and must clear **both**:
+
+- **coloured** — at least `RENDER_COLOUR_PCT` = 5 % of its non-white pixels
+  carry chroma ≥ `RENDER_CHROMA` = 0.10 of full scale.
+- **shadowed** — at least `RENDER_TONE_LEVELS` = 32 distinct luminances **and**
+  the 5th-percentile ink luminance ≤ `SHADOW_DARK_RATIO` = 0.70 × the median
+  ink luminance, i.e. the image carries a real dark end. Terminator shading and
+  a cast shadow both produce that; a flat fill produces none.
+
+Shadow direction is to be consistent sheet to sheet, so parts read comparably.
+The counts `renders_coloured_but_flat` and `renders_shadowed_but_grey` are
+printed so a generator is told which half it is missing. This is a
+TIGHTENING: an image that used to count and is flat no longer does.
+
+### A5.3 · A4's SECOND HALF IS PART OF THE GATE
+
+A4 already says it, and it was not being graded: *"A feature whose dimension
+genuinely cannot be measured is printed as a CANNOT DETERMINE row on the
+sheet, naming what would settle it — never as a blank, and never as a
+plausible number."* Two consequences, both now measured:
+
+1. **The census names the classes it cannot see.** A4 requires a dimension on
+   every chamfer (size and angle), every draft, every step and shoulder, every
+   rib (thickness, height, pitch), and every mating surface with its mating
+   part named by triad ref. `cecad.inspect` has **no classifier for any of
+   those five** — it exposes holes, slots, grooves, shafts, arc radii, fillets
+   and walls. Before 2026-09-04 the enumeration simply had no rows for them,
+   which made the A4 **denominator short by five whole feature classes** and
+   every coverage percentage optimistic in the one direction a gate must never
+   be wrong in. They are now standing CANNOT DETERMINE rows, each naming what
+   would settle it.
+2. **The sheet has to print them.** 100 % coverage over a census with a hidden
+   refusal is a **FAIL**, because a sheet silent about a whole class of feature
+   reads as complete and is not. Measured, not interpreted: a refusal counts as
+   disclosed when text on the sheet carries the phrase `CANNOT DETERMINE` and a
+   keyword for that feature kind.
+
+### A5.4 · TWO VERDICTS, NEVER ONE
+
+`out/drawings/<slug>/result.json` published a bare `verdict` that graded
+whether the PART BUILT, and readers took it for sheet quality: 25 PASS there
+against 27 FAIL from `sheetcheck` on the same sheets. The key is gone. Every
+result and every index now carries **`build_verdict`** (the part built, a sheet
+emitted, every number on it re-measured off the solid) and **`sheet_verdict`**
+(A2+A3+A4, from `ce-cad/bin/sheetcheck`), and **only `sheet_verdict` answers
+"can a machinist cut this part from this sheet"**. See
+`out/drawings/VERDICT-RECONCILIATION.md`.
+
+### A5.5 · THE SECTIONS ARE GRADED APART
+
+"How many sheets meet A2?" is a question with an answer now. Each rule is
+mapped to the section it serves and each section rolls up on its own rules:
+
+| section | rules |
+|---|---|
+| **A** | `line_ratio` (A r1–3, no facet texture), `iso` (A r4), `dim_coverage` (A r5–6) |
+| **A2** | `line_ratio` (r1), `iso` (r2), `coverage_a2` (r3, at **A2's own 60 %**), `font` (r4), `dim_coverage` (r5) |
+| **A3** | `renders` (r1), `iso` (r2), `curve_density` (r3), `coverage` ≥ 85 % + `empty_rect` (r4) |
+| **A4** | `dim_coverage`, and nothing else — it is the completeness gate |
+
+A3 r4 superseded A2 r3's 60 %, and **the sheet verdict always uses 85 %**;
+`coverage_a2` exists only so the A2 column can be reported and never enters a
+sheet's verdict.
+
+### Acceptance for this section
+`ce-cad/bin/sheetcheck --self-test` breaks every one of these on purpose and
+requires each to go red — six flat colour blobs must fail `renders`, six
+greyscale ramps must fail `renders`, a refusal not printed on the sheet must
+fail A4, the same refusal PRINTED must pass, a CANNOT DETERMINE line about
+something else must not buy it, and one broken section must not drag the other
+three down. 63 cases, and a check never seen to fail is not a check.

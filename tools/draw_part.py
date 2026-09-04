@@ -15,8 +15,24 @@ Two documents, and WHICH ONE a part gets is measured, not chosen:
     §A.3 of the standard forbids a drawing off a decimated triangulation, and
     the part still has to be made.
 
-Writes out/drawings/<slug>/result.json: the verdict, every measurement, and
+Writes out/drawings/<slug>/result.json: TWO verdicts, every measurement, and
 what the sheet had to give up to read back clean.
+
+TWO VERDICTS, NEVER ONE. This file used to publish a bare `verdict`, and that
+key was read as "a machinist can cut this" when what it graded was "the part
+built and its sheet read back against the solid". Measured 2026-09-04: the 27
+shipped sheets read 25 PASS by that key and 27 FAIL by `ce-cad/bin/sheetcheck`,
+which grades the SHEET against MANUFACTURING-REQUIREMENTS A2+A3+A4. The two
+numbers never contradicted; they graded different subjects, and one label was
+carrying both. So:
+
+  build_verdict   did `cad/part.py` build a solid, did a sheet emit, and does
+                  every number on it read back off that solid (`verify_sheet`)?
+  sheet_verdict   is the SHEET usable in a shop — the eight rules of A2+A3+A4,
+                  copied here from `cecad.sheetcheck.grade_sheet`, measured on
+                  the file this run just wrote.
+
+`verdict` is NOT written. A reader who wants one number must say which.
 """
 import json
 import os
@@ -38,6 +54,66 @@ from cecad.printsheet import (print_sheet, verify_print_sheet,  # noqa: E402
 from drawing_facts import (TOLERANCE_DFM, VENDOR_DFM, classify,  # noqa: E402
                            part_record, is_bought, GENERAL_TOLERANCE,
                            mesh_geometry_of, design_radii)
+
+
+#: printed into every result.json so a reader who opens one file, with no
+#: context, cannot mistake one subject for the other.
+VERDICT_NOTE = (
+    "build_verdict grades THE PART AND ITS READ-BACK (cad/part.py built a "
+    "solid, a sheet emitted, and every number on the sheet re-measured off "
+    "that solid). sheet_verdict grades THE SHEET against "
+    "docs/MANUFACTURING-REQUIREMENTS.md A2+A3+A4 via ce-cad/bin/sheetcheck "
+    "(line_ratio, coverage, empty_rect, font, iso, renders, curve_density, "
+    "dim_coverage). ONLY sheet_verdict answers 'can a machinist cut this "
+    "part from this sheet'. There is deliberately no bare 'verdict' key.")
+
+
+def grade_the_sheet(svg, slug, outdir):
+    """The SHEET verdict, from the instrument that grades sheets.
+
+    Not a second opinion written here: `cecad.sheetcheck.grade_sheet` is the
+    same code `ce-cad/bin/sheetcheck` runs, called on the file this run just
+    wrote, so result.json and the sweep table cannot drift apart. A failure
+    inside the grader is a CANNOT DETERMINE naming the failure — never an
+    absent key that a reader fills in with the build verdict.
+    """
+    try:
+        from cecad import sheetcheck                          # noqa: PLC0415
+        png = os.path.join(outdir, slug + "-sheet.png")
+        g = sheetcheck.grade_sheet(svg, png_path=png if os.path.exists(png)
+                                   else None, slug=slug, use_kernel=True)
+        return {
+            "sheet_verdict": g["verdict"],
+            "sheet_verdict_why": g["checks"].get("dim_coverage", {}).get(
+                "why", "")[:200],
+            "sheet_rules": g.get("rules"),
+            "sheet_sections": g.get("sections"),
+            "sheet_measurements": {
+                "line_ratio": g.get("line_ratio"),
+                "occupancy_pct": g.get("occupancy_pct"),
+                "largest_empty_rect_pct": (g.get("largest_empty_rect") or {})
+                    .get("pct_of_frame"),
+                "font_min_mm": g.get("font_min_mm"),
+                "iso_count": g.get("iso_count"),
+                "shaded_render_count": g.get("shaded_render_count"),
+                "colour_and_shadow_render_count": g.get(
+                    "colour_and_shadow_render_count"),
+                "density_cells_over": (g.get("line_density") or {})
+                    .get("over_cells"),
+                "features_enumerated": g.get("features_enumerated"),
+                "features_dimensioned": g.get("features_dimensioned"),
+                "dim_coverage_pct": g.get("dim_coverage_pct"),
+            },
+            "sheet_failing_rules": [k for k, v in (g.get("rules") or {}).items()
+                                    if v != "PASS"],
+        }
+    except Exception as e:                                    # noqa: BLE001
+        return {"sheet_verdict": "CANNOT DETERMINE",
+                "sheet_verdict_why":
+                    "cecad.sheetcheck.grade_sheet raised %s: %s; what settles "
+                    "it: ce-cad/bin/sheetcheck %s"
+                    % (type(e).__name__, e, outdir),
+                "sheet_rules": None}
 
 
 def export_stl(part, outdir, slug):
@@ -138,7 +214,11 @@ def draw(slug):
     stem = os.path.join(outdir, slug)
     os.makedirs(outdir, exist_ok=True)
     t0 = time.time()
-    out = {"slug": slug, "kind": None, "verdict": "CANNOT DETERMINE",
+    out = {"slug": slug, "kind": None,
+           "build_verdict": "CANNOT DETERMINE",
+           "sheet_verdict": "CANNOT DETERMINE",
+           "sheet_verdict_why": "no sheet has been graded yet",
+           "verdict_note": VERDICT_NOTE,
            "generated": time.strftime("%Y-%m-%d %H:%M:%S")}
 
     rec = part_record(slug)
@@ -152,7 +232,10 @@ def draw(slug):
     try:
         part = triad.load(doc, "part:" + slug)
     except Exception as e:                                    # noqa: BLE001
-        out.update(verdict="CANNOT DETERMINE",
+        out.update(build_verdict="CANNOT DETERMINE",
+                   sheet_verdict="CANNOT DETERMINE",
+                   sheet_verdict_why="no sheet was written, so there is "
+                                     "nothing for sheetcheck to grade",
                    why="part:%s does not build: %s: %s"
                        % (slug, type(e).__name__, e),
                    traceback=traceback.format_exc()[-1200:])
@@ -276,13 +359,13 @@ def draw(slug):
         # the mesh". Any OTHER failing check still fails the sheet.
         bad = [n for n, o, _ in checks if not o]
         if bad and bad == [_NO_FILE]:
-            out["verdict"] = "CANNOT DETERMINE"
+            out["build_verdict"] = "CANNOT DETERMINE"
             out["why"] = ("the print sheet reads back clean but names no file "
                           "to print; what settles it is the GEOMETRY path in "
                           "ce-parts/%s/current/cad/part.py or an STL exported "
                           "from the loaded shape" % slug)
         else:
-            out["verdict"] = "PASS" if ok else "FAIL"
+            out["build_verdict"] = "PASS" if ok else "FAIL"
     else:
         png, pfacts = render_reference(part, slug, outdir)
         out["reference_render"] = png
@@ -338,7 +421,16 @@ def draw(slug):
         out["thinnest_wall_where"] = tw.get("where")
         out["thinnest_wall_step_mm"] = tw.get("step_mm")
         out["thumbnail"], out["thumbnail_facts"] = _shoot(r["svg"], stem)
-        out["verdict"] = "PASS" if (r["verified"] and ok2) else "FAIL"
+        out["build_verdict"] = "PASS" if (r["verified"] and ok2) else "FAIL"
+
+    # THE SHEET VERDICT, on the file just written, from sheetcheck itself.
+    svg_written = out.get("svg")
+    if svg_written and os.path.exists(svg_written):
+        out.update(grade_the_sheet(svg_written, slug, outdir))
+    else:
+        out["sheet_verdict"] = "CANNOT DETERMINE"
+        out["sheet_verdict_why"] = (
+            "no SVG on disk for this part, so no sheet could be graded")
 
     out["seconds"] = round(time.time() - t0, 1)
     json.dump(out, open(os.path.join(outdir, "result.json"), "w"), indent=1)
@@ -368,9 +460,11 @@ def main():
                 FreeCAD.closeDocument(d)
             except Exception:                                 # noqa: BLE001
                 pass
-    n = sum(1 for d in done if d and d.get("verdict") == "PASS")
-    print("DRAW-SUMMARY %d/%d PASS over %d requested"
-          % (n, len(done), len(slugs)), flush=True)
+    nb = sum(1 for d in done if d and d.get("build_verdict") == "PASS")
+    ns = sum(1 for d in done if d and d.get("sheet_verdict") == "PASS")
+    print("DRAW-SUMMARY build %d/%d PASS · SHEET %d/%d PASS (sheetcheck, "
+          "A2+A3+A4) over %d requested"
+          % (nb, len(done), ns, len(done), len(slugs)), flush=True)
 
 
 main()
