@@ -47,7 +47,7 @@
 
 <nav class="toc">
   <a href="#verdict">1 Verdict</a><a href="#runs">2 Every run</a><a href="#pictures">3 The pictures</a>
-  <a href="#hat">4 The HAT connectors</a><a href="#method">5 How it was built</a>
+  <a href="#hat">4 The HAT connectors</a><a href="#notcable">4b Not cables</a><a href="#leads">4c The leads</a><a href="#method">5 How it was built</a>
   <a href="#open">6 What is not determined</a>
 </nav>
 
@@ -111,7 +111,11 @@
 
 <section id="pictures">
   <h2><span class="n">3</span>The pictures</h2>
-  <p>Cables in red, connector housings in amber, the bodies they plug into in grey.</p>
+  <p>Drawn flat with hidden-line edges, which is the mode that shows where a cable GOES: the
+  cables are the swept tubes, the small blocks on the servo flanks are the EH housings, and the
+  grey boxes are a <b>proxy</b> &mdash; each one is the measured world bounding box of a placed
+  body, not its outline. The mode was picked by rendering both: under PBR every body shades from
+  its material and cables, housings and boxes come out the same grey.</p>
 <figure class="shot"><img src="out/wiring/harness-front.png" alt="harness front"><figcaption>front &mdash; 61873 bytes</figcaption></figure>
 <figure class="shot"><img src="out/wiring/harness-iso.png" alt="harness iso"><figcaption>iso &mdash; 90164 bytes</figcaption></figure>
 <figure class="shot"><img src="out/wiring/harness-right.png" alt="harness right"><figcaption>right &mdash; 70900 bytes</figcaption></figure>
@@ -147,6 +151,48 @@
 <tr><td><code>J9</code></td><td>Wago 2059-302</td><td>spring terminal</td><td class='mono'>[59.04, -23.5064, 240.9015]</td><td class='mono'>&mdash;</td><td class='n'>&mdash;</td><td>1:GND, 2:Net-(J9-Pin_2)</td></tr>
     </tbody>
   </table>
+</section>
+
+<section id="notcable">
+  <h2><span class="n">4b</span>Three rows in the connection list are not cables</h2>
+  <p>They were carried as runs and could never route. Each is settled by a document, not by a
+  routing failure:</p>
+  <ul>
+    <li><code>mic-hat</code> &mdash; <b>there is no microphone cable.</b> The microphone is
+    <code>MK1 = LMA2718</code>, an <i>on-board</i> MEMS part: footprint
+    <code>MIC-SMD_4P-L2.8-W1.9-P1.84-TL</code> on sheet <code>/Schematic/Audio/</code> of Pollen&rsquo;s
+    own board (<code>out/pcb/hat/components.json</code>), and
+    <code>hardware-teardown.en.md:201</code> reads it &ldquo;<i>MK1 = LMA2718 &mdash; On-board MEMS
+    microphone</i>&rdquo;. <code>wiring/cables.json</code> already had this device as &ldquo;no mesh,
+    no site: CANNOT DETERMINE&rdquo;. A <i>second, external</i> microphone on a Wago terminal is
+    offered by the board (<code>teardown:205</code>) and is not fitted in the reference robot.</li>
+    <li><code>hat-radxa-40pin</code> &mdash; a board-to-board stack, not a lead: <code>J4</code> is a
+    2&times;20 P2.54 header and <code>cables.json</code> already records
+    <code>cable_mm&nbsp;=&nbsp;0</code>. The HAT sits ON the Radxa.</li>
+    <li><code>hat-dxl-port</code> &mdash; no endpoint on either side in
+    <code>cables.json</code> (<code>cable_mm&nbsp;=&nbsp;null</code>); it names the port, not a run.</li>
+  </ul>
+</section>
+
+<section id="leads">
+  <h2><span class="n">4c</span>The two runs that still FAIL, as leads</h2>
+  <p>The real Microduck has both of these cables, so a run with no corridor is a statement about
+  <b>our model</b>, not about the design. Each row says where to look.</p>
+  <ul>
+    <li><b><code>bat-hat</code> &mdash; the battery feed, and the whole robot is powered through
+    it.</b> With the HAT end now on a real connector (<code>J14</code>, +BATT on pin 2) there is
+    still <b>no corridor at any clearance floor down to 0.0000&nbsp;mm</b> between the pack in the
+    trunk and the head, on either the 4.0&nbsp;mm or the 1.0&nbsp;mm grid. The cable has to cross
+    the neck, which carries 720&nbsp;degrees of joint travel. <i>The lead</i>: our neck and trunk
+    models have no wire passage. <i>Settled by</i>: measuring the passage on the reference meshes,
+    or a photograph of the interior.</li>
+    <li><b><code>spk-hat</code> &mdash; the speaker lead.</b> Its HAT end is now located
+    (<code>J1</code>, Wago-2, audio sheet) and its SPEAKER end is still the mesh centroid, which is
+    <i>inside</i> the transducer: 3 pierce samples and &minus;1.2500&nbsp;mm clearance are what a
+    route out of the middle of a solid body looks like. <i>The lead</i>: the speaker&rsquo;s
+    terminal face is not modelled. <i>Settled by</i>: the terminal side of the speaker, from a
+    photograph or the part drawing.</li>
+  </ul>
 </section>
 
 <section id="method">
