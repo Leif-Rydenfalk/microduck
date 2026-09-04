@@ -228,5 +228,17 @@ work breakdown is worse than none.
 **LEIF LOOKS AT RESULTS IN THE BROWSER** — `tools/docs_server.py` on
 http://localhost:8842. Anything you produce must be reachable and readable there.
 
+**EVERY AGENT RUNS ON OPUS 5 — SUPERSEDES THE EARLIER FABLE NOTE.** Leif,
+2026-09-04, verbatim: *"all workflows and eveyrhing must use opus 5 this is
+highest priority change because fable 5.1 consumes like a monster"* and *"Do
+this first. first thing you do is this change to change verything to use opus
+5"*. Subagents DO NOT inherit the parent's model — an `agent()` or Agent call
+with no `model` falls back to the harness default, which is Fable. So every
+`agent()` call in every workflow script and every Agent tool call passes
+`{model: 'opus'}` explicitly. Measured 2026-09-04 across 50 live agent
+transcripts: 797 turns on Fable vs 472 on Opus, despite both orchestrator
+sessions running Opus. Any earlier note in this file about running lanes on
+Fable is void.
+
 **BE TOKEN EFFICIENT.** Do not re-read what is already known, do not re-derive a
 settled fact, keep prompts tight. Depth of measurement, not depth of prose.
