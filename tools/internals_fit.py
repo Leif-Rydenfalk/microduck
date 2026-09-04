@@ -40,6 +40,7 @@ os.makedirs(OUT, exist_ok=True)
 LOG = open(os.path.join(OUT, "hat-fit.log"), "w")
 MESH_TOL = 0.10          # mm, Part.makeShapeFromMesh sewing tolerance
 NEAR_MM = 5.0            # only bodies whose bbox comes within this are examined
+HIDE = ("top_head_shell", "bottom_head_shell", "face_part", "jaw", "jaw_soft")
 
 
 def P(*a):
@@ -232,6 +233,12 @@ def main():
         for r in rows:
             if r is hat_row or not r.get("mesh_file") or not os.path.exists(r["mesh_file"]):
                 continue
+            # The head SHELLS are what the board sits inside, so drawing them draws an
+            # opaque box with the subject hidden in it -- measured: the first version of
+            # this render was a picture of a closed head and nothing else. They are named
+            # here and left out, and the caption says they are left out.
+            if r["mesh"] in HIDE:
+                continue
             m = placed_mesh(r)
             if bbgap(keepbb, m.BoundBox) > 30.0:
                 continue
@@ -241,10 +248,29 @@ def main():
                 items.append((shp, (0.72, 0.74, 0.76)))
             except Exception:
                 pass
-        for view in ("iso",):
+        # and the interference itself, in red, so the finding is IN the picture
+        for r in rows:
+            if r.get("mesh") not in ("top_head_shell", "motor_support") or not r.get("mesh_file"):
+                continue
+            solid, _err = sewn(r)
+            if solid is None:
+                continue
+            for label, sh in keep:
+                if bbgap(sh.BoundBox, solid.BoundBox) > 0:
+                    continue
+                try:
+                    cm = sh.common(solid)
+                except Exception:
+                    continue
+                if cm.Volume > 1e-6:
+                    items.append((cm, (0.86, 0.13, 0.13)))
+                    P("render: interference solid", r["mesh"], "x", label,
+                      round(cm.Volume, 4), "mm3 drawn in red")
+        for view in ("iso", "front"):
             png = os.path.join(OUT, "hat-in-head-%s.png" % view)
             render(items, png, view=view, mode="pbr", W=1600, H=1100,
-                   title="the POPULATED Robot HAT where our CAD puts the bare plate")
+                   title="the POPULATED Robot HAT (112 bodies) where our CAD kept a 0.84 mm "
+                         "plate - head shells hidden, interference in RED")
             P("rendered", png, os.path.getsize(png), "bytes")
     except Exception:
         import traceback
