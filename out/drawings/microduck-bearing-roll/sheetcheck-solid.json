@@ -276,6 +276,36 @@
  ],
  "feature_cannot_determine": [
   {
+   "id": "chamfers",
+   "kind": "chamfer",
+   "why": "A4 requires size and angle on every chamfer; cecad.inspect has no chamfer classifier \u2014 a chamfer is a planar face bridging two faces at an angle and nothing here identifies one",
+   "settled_by": "a chamfer classifier in cecad.inspect (planar face whose two neighbours meet it at equal angles), or the builder declaring its chamfers in the part record"
+  },
+  {
+   "id": "ribs",
+   "kind": "rib",
+   "why": "A4 requires thickness, height and pitch on every rib; nothing here groups faces into a rib",
+   "settled_by": "a rib classifier (parallel thin prisms standing off a wall), or the builder declaring its rib pitch"
+  },
+  {
+   "id": "drafts",
+   "kind": "draft",
+   "why": "A4 requires every draft angle; no face here is tested for draft against a pull direction",
+   "settled_by": "a pull direction on the part record, then the angle of every planar face to it"
+  },
+  {
+   "id": "steps",
+   "kind": "step",
+   "why": "A4 requires every step and shoulder; nothing here classifies a shoulder between two coaxial diameters or two parallel faces",
+   "settled_by": "a step classifier, or the section views declaring their stations"
+  },
+  {
+   "id": "mating_faces",
+   "kind": "mate",
+   "why": "A4 requires every surface that mates with another part, with the mating part named by its triad ref; the mates live in ce-assemblies/*/joints.json and are not read here",
+   "settled_by": "reading this part's joints out of the assemblies that use it and matching each mate to a face"
+  },
+  {
    "id": "wall.stations",
    "kind": "wall",
    "why": "A4 wants a wall thickness at every distinct station; only the thinnest wall is measurable off the solid without a station list",
@@ -328,5 +358,5 @@
  "error": null,
  "walls_measured": true,
  "surface_area_mm2": 1460.889,
- "measured": "2026-09-04 07:01:26"
+ "measured": "2026-09-04 22:22:51"
 }

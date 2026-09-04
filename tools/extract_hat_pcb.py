@@ -341,6 +341,48 @@ def main():
     )
     os.makedirs(OUT, exist_ok=True)
     json.dump(out, open(os.path.join(OUT, "components.json"), "w"), indent=1)
+
+    # ---- drilled holes, in board coordinates ---------------------------------
+    # KiCad's page frame is y-DOWN and a footprint rotation is a rotation in that
+    # frame, so a pad at local (px,py) on a footprint at (fx,fy,rot) lands at
+    #   gx = fx + px cos a + py sin a ,  gy = fy - px sin a + py cos a
+    # and the board frame is x = gx - ox, y = -(gy - oy). Checked against the four
+    # 2.700 mounting holes, which come out at (0,0) (58,0) (0,-23) (58,-23) to
+    # 0.005 mm — the same four the simulation mesh gives.
+    holes = []
+    for fp in fps:
+        at = vals(kids(fp, "at")[0])
+        fx, fy = num(at[0]), num(at[1])
+        fr = num(at[2]) if len(at) > 2 else 0.0
+        ref = None
+        for p in kids(fp, "property"):
+            v = vals(p)
+            if len(v) >= 2 and v[0] == "Reference":
+                ref = v[1]
+        for pad in kids(fp, "pad"):
+            dr = kids(pad, "drill")
+            if not dr:
+                continue
+            dv = vals(dr[0])
+            if not dv or dv[0] == "oval":
+                continue
+            d = num(dv[0])
+            pa = vals(kids(pad, "at")[0])
+            px, py = num(pa[0]), num(pa[1])
+            a = math.radians(fr)
+            gx = fx + px * math.cos(a) + py * math.sin(a)
+            gy = fy - px * math.sin(a) + py * math.cos(a)
+            kind = vals(pad)[1] if len(vals(pad)) > 1 else "?"
+            holes.append(dict(d=round(d, 4), x=round(gx - ox, 4), y=round(-(gy - oy), 4),
+                              refdes=ref, kind=kind))
+    json.dump(dict(_generated="tools/extract_hat_pcb.py", n=len(holes),
+                   by_diameter={str(k): sum(1 for h in holes if abs(h["d"] - k) < 1e-6)
+                                for k in sorted({h["d"] for h in holes})},
+                   holes=holes),
+              open(os.path.join(OUT, "drills.json"), "w"), indent=1)
+    print("drills", len(holes), {str(k): sum(1 for h in holes if abs(h["d"] - k) < 1e-6)
+                                 for k in sorted({h["d"] for h in holes})})
+
     print(json.dumps(out["counts"], indent=1))
     print("board", json.dumps(out["board"]["outline_bbox_mm"]))
     print("origin residual mm", out["board"]["origin_offset_residual_mm"])

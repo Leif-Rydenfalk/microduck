@@ -48,7 +48,7 @@ R = "/Users/leifrydenfalk/dev/ce-workshop/ce-designs/microduck"
 sys.path.insert(0, "/Users/leifrydenfalk/dev/ce-workshop/ce-cad")
 from cecad.route import (Occupancy, astar, shortcut, fillet_corners, polyline_of,
                          path_length, discrete_bend_radius, measure_path, verdict_for,
-                         PASS, FAIL, CANNOT)
+                         corridor_mask, relax, PASS, FAIL, CANNOT)
 
 OCC_NPZ = "/private/tmp/int-wire3d/occ.npz"
 PROGRESS = "/private/tmp/int-wire3d/route-progress.log"
@@ -72,7 +72,12 @@ BUNDLE3 = INS_OD_NOM * (1.0 + 2.0 / math.sqrt(3.0))        # 3.1243, CHOSEN
 
 CLEAR_MIN = 1.0            # CHOSEN routing rule, mm, surface to surface
 PREFER_EXTRA = 1.5         # cost preference for a roomier lane, mm
-PLAN_FACTORS = (4, 2, 1)   # planning cell = factor x 1.0 mm; coarsest first
+PLAN_FACTORS = (4, 1)      # coarse plan, then a fine plan inside its corridor
+CORRIDOR_MM = 14.0         # half-width of the fine search corridor around the coarse answer
+FINE_MAX_NODES = 3_000_000
+RELAX_ITERS = 300          # constrained Laplacian passes; stops early when nothing moves
+BEND_WINDOW = 3            # samples either side for the circumscribed-circle radius
+CLEAR_LADDER = (1.0, 0.5, 0.25, 0.0)   # the stated floor, then how far it has to fall
 COARSE = {}
 
 # per group: (bundle OD mm, od_basis, conductors)
@@ -280,55 +285,108 @@ def main():
             say("%-18s FAIL (endpoint buried)" % rid)
             continue
 
-        # PLAN COARSE, MEASURE FINE. The coarse grid's distance is the MINIMUM over
-        # each block, so a coarse cell that clears means every fine cell in it
-        # clears: the plan is admissible, never optimistic. If the finished curve
-        # then fails to clear on the FINE grid, the run is re-planned one step
-        # finer and the escalation is recorded — the check is never loosened.
+        # PLAN COARSE, REFINE IN A CORRIDOR, RELAX, MEASURE FINE.
+        #   1. A* on the 4.0 mm grid (its distance is the MINIMUM over each block,
+        #      so a coarse cell that clears means every fine cell in it clears —
+        #      the coarse plan is admissible, never optimistic).
+        #   2. dilate that answer into a corridor and re-run A* on the 1.0 mm grid
+        #      restricted to it: a RESTRICTION, so the fine plan can only be worse
+        #      than an unrestricted one, never illegally better.
+        #   3. string-pull, then relax (constrained Laplacian): the shortest path
+        #      is a chain of hard corners and a hard corner has bend radius zero.
+        #   4. re-measure on the finished curve. The check never moves.
+        #
+        # THE CLEARANCE LADDER. When nothing clears the stated 1.0000 mm floor,
+        # the run is re-planned at 0.5000, 0.2500 and 0.0000 mm and the LOWEST
+        # floor that admits a path is reported. That converts "no route" into a
+        # number — how much room our model is short of — which is the lead the
+        # brief asks for, since the real robot's cable exists.
         t1 = time.time()
         pulled = None
-        used_factor = None
-        for f in PLAN_FACTORS:
-            g = COARSE.get(f) or occ
-            ga = g.nearest_free(launches[0], r_req, search_mm=30.0)
-            gb = g.nearest_free(launches[1], r_req, search_mm=30.0)
+        ladder = []
+        floor_used = None
+        for floor in CLEAR_LADDER:
+            rr = r_cable + floor
+            g = COARSE[4]
+            ga = g.nearest_free(launches[0], rr, search_mm=30.0)
+            gb = g.nearest_free(launches[1], rr, search_mm=30.0)
             if ga is None or gb is None:
+                ladder.append({"floor_mm": floor, "result": "an endpoint has no clear cell on "
+                                                            "the 4.0 mm planning grid"})
                 continue
-            gp = astar(g, ga[0], gb[0], r_req, prefer_clearance_mm=PREFER_EXTRA)
-            if gp is None:
+            gp = astar(g, ga[0], gb[0], rr, prefer_clearance_mm=PREFER_EXTRA)
+            coarse_world = [g.world_of(i) for i in gp] if gp is not None else None
+            fa = occ.nearest_free(launches[0], rr, search_mm=30.0)
+            fb = occ.nearest_free(launches[1], rr, search_mm=30.0)
+            fine = None
+            how_grid = None
+            if fa is not None and fb is not None:
+                if coarse_world is not None:
+                    allow = corridor_mask(occ, coarse_world, CORRIDOR_MM)
+                    fp = astar(occ, fa[0], fb[0], rr, prefer_clearance_mm=PREFER_EXTRA,
+                               allow=allow)
+                    how_grid = "1.0 mm inside a %.1f mm corridor round the 4.0 mm plan" % CORRIDOR_MM
+                else:
+                    # THE COARSE GRID CAN SAY NO WHERE THE FINE GRID SAYS YES: a
+                    # 4.0 mm cell clears only when all 64 of its 1.0 mm cells do,
+                    # which in a packed head refuses gaps a cable really fits. So
+                    # a coarse refusal falls through to an UNRESTRICTED fine
+                    # search rather than being reported as no route.
+                    fp = astar(occ, fa[0], fb[0], rr, prefer_clearance_mm=PREFER_EXTRA,
+                               max_nodes=FINE_MAX_NODES)
+                    how_grid = "1.0 mm unrestricted (the 4.0 mm grid found nothing)"
+                if fp is not None:
+                    fine = [occ.world_of(i) for i in fp]
+            if fine is None and coarse_world is None:
+                ladder.append({"floor_mm": floor,
+                               "result": "no corridor on the 4.0 mm grid and none on the "
+                                         "1.0 mm grid either"})
                 continue
-            raw = [g.world_of(i) for i in gp]
+            raw = fine if fine is not None else coarse_world
             raw[0] = launches[0]
             raw[-1] = launches[1]
-            cand = shortcut(occ, raw, r_req, rounds=5)
-            chk = measure_path(occ, polyline_of(fillet_corners(_dedup(cand), 3.0 * od,
-                                                               occ=occ, r_clear_mm=r_req)[0],
-                                                arc_steps=16), r_cable)
-            used_factor = f
-            pulled = cand
-            if chk["min_clearance_mm"] >= CLEAR_MIN and chk["pierce_samples"] == 0:
+            cand = shortcut(occ, raw, rr, rounds=5)
+            cand, moved = relax(occ, cand, rr, iters=RELAX_ITERS, alpha=0.35)
+            chk = measure_path(occ, cand, r_cable)
+            ladder.append({"floor_mm": floor,
+                           "result": "routed on %s" % (how_grid if fine is not None
+                                                       else "the 4.0 mm grid alone"),
+                           "measured_clearance_mm": round(chk["min_clearance_mm"], 4),
+                           "pierce_samples": chk["pierce_samples"],
+                           "relax_moves": moved})
+            if chk["min_clearance_mm"] >= floor - 1e-6 and chk["pierce_samples"] == 0:
+                pulled = cand
+                floor_used = floor
+                rec["plan_grid_mm"] = 1.0 if fine is not None else 4.0
                 break
-            say("  %s: plan at %.1f mm cells measured %.4f mm clearance — refining"
-                % (rid, g.cell, chk["min_clearance_mm"]))
+            if pulled is None and chk["pierce_samples"] == 0:
+                pulled = cand            # keep the best so far, and say so
+                floor_used = floor
+                rec["plan_grid_mm"] = 1.0 if fine is not None else 4.0
+        rec["clearance_ladder"] = ladder
+        rec["clearance_floor_achieved_mm"] = floor_used
         if pulled is None:
             rec.update(status="FAIL", verdict=FAIL, routed=False,
-                       why="no path clears %.4f mm (cable radius %.4f + clearance floor %.4f) "
-                           "between the two connectors at zero pose" % (r_req, r_cable, CLEAR_MIN),
+                       why="NO ROUTE AT ANY CLEARANCE DOWN TO 0.0000 mm: at zero pose there is "
+                           "no corridor at all between these two connectors wide enough for a "
+                           "%.4f mm cable. Since the real robot has this cable, the model is "
+                           "what is wrong — the ladder rows say at which floor each attempt "
+                           "died." % od,
                        ends=_clean(ends))
             results.append(rec)
-            say("%-18s FAIL no path (r_req %.3f)" % (rid, r_req))
+            say("%-18s FAIL no route at any clearance" % rid)
             continue
-        rec["plan_grid_mm"] = round((COARSE.get(used_factor) or occ).cell, 4)
+        if floor_used is not None and floor_used < CLEAR_MIN:
+            say("  %s: routed only at a %.4f mm floor, not the stated %.4f mm"
+                % (rid, floor_used, CLEAR_MIN))
         # the connector stubs, in front of and behind the routed part
-        full = [np.asarray(ends[0]["start_mm"], float)] + pulled + [np.asarray(ends[1]["start_mm"], float)]
-        full = _dedup(full)
-        segs, r_intended = fillet_corners(full, 3.0 * od, occ=occ, r_clear_mm=r_req)
-        poly = polyline_of(segs, arc_steps=16)
+        full = _dedup([np.asarray(ends[0]["start_mm"], float)] + list(pulled)
+                      + [np.asarray(ends[1]["start_mm"], float)])
+        poly = full
         L = path_length(poly)
-        rb = discrete_bend_radius(poly, window=2)
-        # measure only the ROUTED part (launch -> launch): the stubs are the connector
-        routed_poly = polyline_of(fillet_corners(_dedup(pulled), 3.0 * od, occ=occ, r_clear_mm=r_req)[0],
-                                  arc_steps=16)
+        routed_poly = _dedup(list(pulled))
+        rb = discrete_bend_radius(routed_poly, window=BEND_WINDOW)
+        r_intended = None
         m_all = measure_path(occ, poly, r_cable)
         m_routed = measure_path(occ, routed_poly, r_cable)
         rec.update(
@@ -340,7 +398,7 @@ def main():
             stub_from_mm=round(float(np.linalg.norm(np.asarray(ends[0]["start_mm"], float) - pulled[0])), 4),
             stub_to_mm=round(float(np.linalg.norm(np.asarray(ends[1]["start_mm"], float) - pulled[-1])), 4),
             min_bend_radius_mm=(round(rb, 4) if rb else None),
-            fillet_radius_used_mm=(round(r_intended, 4) if r_intended else None),
+            bend_window_mm=BEND_WINDOW * 1.0,
             min_clearance_mm=round(m_routed["min_clearance_mm"], 4),
             min_clearance_at_mm=[round(v, 4) for v in m_routed["worst_point_mm"]],
             pierce_samples=m_routed["pierce_samples"],
@@ -350,8 +408,34 @@ def main():
             whole_path_pierce_samples=m_all["pierce_samples"],
             ends=_clean(ends),
         )
-        v, why = verdict_for(rec, CLEAR_MIN, None)
-        rec["verdict"], rec["verdict_why"] = v, why
+        # THREE QUESTIONS, THREE VERDICTS — a run that clears and pierces nothing
+        # is not made CANNOT DETERMINE by the one question no document answers.
+        vp = PASS if m_routed["pierce_samples"] == 0 else FAIL
+        vc = PASS if m_routed["min_clearance_mm"] >= CLEAR_MIN - 1e-9 else FAIL
+        vb = CANNOT      # no vendor bend limit exists for any cable on this robot
+        rec["verdict_pierce"] = vp
+        rec["verdict_pierce_why"] = ("no sample of the centreline lands in material"
+                                     if vp == PASS else
+                                     "%d sample(s) of the centreline land in material"
+                                     % m_routed["pierce_samples"])
+        rec["verdict_clearance"] = vc
+        rec["verdict_clearance_why"] = ("min clearance %.4f mm >= the stated floor %.4f mm"
+                                        % (m_routed["min_clearance_mm"], CLEAR_MIN)
+                                        if vc == PASS else
+                                        "min clearance %.4f mm < the stated floor %.4f mm; the "
+                                        "lowest floor that admitted a route was %s mm"
+                                        % (m_routed["min_clearance_mm"], CLEAR_MIN,
+                                           rec.get("clearance_floor_achieved_mm")))
+        rec["verdict_bend"] = vb
+        rec["verdict_bend_why"] = ("achieved %s mm; NO published minimum exists for this cable "
+                                   "(ROBOTIS states a gauge and no bend radius; the 3 x OD "
+                                   "target this lane routed to is its own rule), so there is "
+                                   "nothing to compare it with"
+                                   % (("%.4f" % rb) if rb else "n/a"))
+        v = FAIL if FAIL in (vp, vc) else CANNOT
+        rec["verdict"] = v
+        rec["verdict_why"] = ("pierce %s; clearance %s; bend radius %s"
+                              % (vp, vc, vb))
         rec["delta_vs_cable_mm"] = round(L - c["cable_mm"], 4)
         rec["delta_vs_floor_mm"] = round(L - c["floor_mm"], 4)
         paths[rid] = {"polyline_mm": [[round(float(x), 4) for x in p] for p in poly],
@@ -370,6 +454,8 @@ def main():
 
     routed = [r for r in results if r.get("routed")]
     npass = sum(1 for r in routed if r["verdict"] == PASS)
+    n_geom_ok = sum(1 for r in routed
+                    if r.get("verdict_pierce") == PASS and r.get("verdict_clearance") == PASS)
     nfail = sum(1 for r in results if r["verdict"] == FAIL)
     ncan = sum(1 for r in results if r["verdict"] == CANNOT)
     doc = {"$triad": 1, "kind": "cables3d",
@@ -381,7 +467,12 @@ def main():
                         "trunk_base origin (0,0,120) — the same frame as wiring/cables.json",
                "counts": {"runs_in_cables_json": len(cab["cables"]),
                           "routed": len(routed), "PASS": npass, "FAIL": nfail,
-                          "CANNOT DETERMINE": ncan},
+                          "CANNOT DETERMINE": ncan,
+                          "geometry_clean": n_geom_ok,
+                          "geometry_clean_means": "pierces nothing AND clears the stated "
+                                                  "1.0000 mm floor; the overall verdict of such "
+                                                  "a run is still CANNOT DETERMINE because no "
+                                                  "published bend limit exists to judge it by"},
                "grid": {"cell_mm": occ.cell, "shape": list(occ.shape),
                         "occupied_cells": int(occ.grid.sum()),
                         "source": "every triangle of the 70 rows of "
@@ -419,8 +510,9 @@ def main():
     json.dump({"$triad": 1, "kind": "cable-paths", "generated_by": "sim/route3d.py",
                "record": {"units": "mm", "paths": paths}},
               open(PATHS_JSON, "w"), indent=1)
-    say("\n%d runs in cables.json; %d routed; PASS %d FAIL %d CANNOT DETERMINE %d; %.1f s"
-          % (len(cab["cables"]), len(routed), npass, nfail, ncan, time.time() - t0))
+    say("\n%d runs in cables.json; %d routed; geometry clean %d; PASS %d FAIL %d "
+        "CANNOT DETERMINE %d; %.1f s"
+        % (len(cab["cables"]), len(routed), n_geom_ok, npass, nfail, ncan, time.time() - t0))
     say("wrote %s and %s" % (OUT_JSON, PATHS_JSON))
 
 

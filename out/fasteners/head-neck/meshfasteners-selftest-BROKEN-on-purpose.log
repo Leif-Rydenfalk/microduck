@@ -1,0 +1,42 @@
+[live capture NOT installed: RuntimeError: cecad.livehook needs FreeCAD's geometry kernel, which this interpreter does not have (No module named 'FreeCAD').
+    Run designs through bin/cad — FreeCAD's interpreter ignores PYTHONPATH and `FreeCAD -c` hangs on stdin.
+    cecad.electrical and cecad.vision are kernel-free and work here.]
+meshfasteners self-test
+  PASS  through hole found 1 rows at (-12,0)
+  PASS  through hole d 2.2000 d 2.2000
+  PASS  through hole kind through_hole through_hole
+  PASS  through hole depth 4.0000 4.0000
+  PASS  blind hole found 
+  PASS  blind hole kind blind_hole blind_hole
+  PASS  blind hole depth 2.5000 2.5000
+  PASS  blind hole has exactly one floor [True, False]
+  PASS  counterbored hole found as ONE row 1 rows at (4,0)
+  PASS  counterbore kind counterbored_hole
+  PASS  counterbore d 4.4000 4.4
+  PASS  counterbore depth 2.0000 2.0
+  PASS  counterbore reading M2 counterbore M2 counterbore for ISO 4762 head
+  PASS  pilot boss found 1 rows at (12,0)
+  PASS  pilot boss kind pilot_boss
+  PASS  pilot boss d 1.6000 1.6000
+  PASS  pilot boss OD 4.5000 4.5
+  PASS  pilot boss blind (one floor) 
+  PASS  pilot reading M2 tap drill M2 tap drill
+  PASS  ball socket found as ball_joint_candidate 1 candidates
+  PASS  socket r 3.0000 3.0000
+  PASS  socket kind socket (concave) socket
+  PASS  socket cap 60 deg 60.0
+  PASS  fillet r 0.8 / 20 deg is NOT a ball_joint_candidate (near-planar: skipped or rejected) candidates at r 0.8: 0
+  FAIL  a 40 deg convex cap r 0.8 is read (stud) but is NOT a ball_joint_candidate []
+ break on purpose:
+  FAIL  cbore 1.0 mm of air away does NOT pair (two rows, neither counterbored) 1 rows kinds ['counterbored_hole']
+  PASS  the blind hole with its floor DELETED flips to through_hole ['through_hole']
+  PASS  fit_sphere REFUSES cylinder points (3 rings) sphere residual 17.2% of r
+  PASS  classify_diameter(2.21) -> M2 close clearance M2 close clearance (ISO 273 fine)
+  PASS  classify_diameter(1.61) -> M2 tap drill M2 tap drill
+  PASS  classify_diameter(4.15) reads M5 tap drill at delta -0.050 (the OLD check's expectation was wrong) M5 tap drill delta -0.050
+  PASS  classify_diameter(6.1) REFUSES (largest gap 5.8..6.4 in the fastener range) M5 loose clearance (ISO 273) delta 0.300
+  PASS  classify_diameter(4.35) is AMBIGUOUS between 4.30 and 4.40 [4.3, 4.4]
+  PASS  classify_diameter(2.21) is NOT ambiguous (one row within tol) [2.2]
+  PASS  reading table density stated: largest gap in 1.25..6.6 is 0.60 mm 0.600 mm over 34 rows
+31 checks, 2 FAIL
+FAILED: ['a 40 deg convex cap r 0.8 is read (stud) but is NOT a ball_joint_candidate', 'cbore 1.0 mm of air away does NOT pair (two rows, neither counterbored)']

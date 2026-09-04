@@ -24,10 +24,10 @@ def file_rows():
     out = []
     for f in F:
         c = f["census"]; p = f.get("vs_pollen_sim_body") or {}; o = f.get("vs_our_rebuild_body") or {}
-        out.append("<tr><td class='n'>%02d</td><td><code>%s</code><br><span class='small'>%s · %s</span></td>"
-                   "<td class='n'>%s</td><td class='n'>%s</td><td class='n'>%s</td><td class='n'>%s</td>"
+        out.append("<tr><td class='n'>%02d</td><td class='nm'>%s<br><span class='small'>%s</span></td>"
+                   "<td class='n'>%s</td><td class='n'>%s</td>"
                    "<td class='n'>%s</td><td class='n'>%s / %s</td><td class='n'>%s / %s</td><td>%s</td></tr>" % (
-            f["n"], E(f["file"]), E(f["name_zh"]), E(f["name_en"]), n3l(c["size_mm"]), "{:,}".format(c["tris"]), c["unique_vertices"], c["edges_boundary"],
+            f["n"], E(f["name_en"]), E(f["name_zh"]), n3l(c["size_mm"]), "{:,}".format(c["tris"]),
             ("%.1e" % f["identity"]["max_abs_vertex_delta_mm"]) if f["identity"]["max_abs_vertex_delta_mm"] is not None else "—",
             n4(p.get("ref_to_cand", {}).get("p95_mm")), n4(p.get("cand_to_ref", {}).get("p95_mm")),
             n4(o.get("ref_to_cand", {}).get("p95_mm")), n4(o.get("cand_to_ref", {}).get("p95_mm")), chip(f["verdict_vs_our_rebuild"])))
@@ -90,6 +90,10 @@ page = f"""<!DOCTYPE html>
   table.data th{{font-family:var(--sans);font-size:11.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2);background:var(--head)}}
   td.n,th.n{{text-align:right;font-variant-numeric:tabular-nums;font-family:var(--mono);font-size:12px}}
   .small{{font-family:var(--sans);font-size:11.5px;color:var(--ink-2)}}
+  #files table.data{{font-size:12px}} #files table.data th,#files table.data td{{padding:4px 4px}} #files td.n{{font-size:11px;white-space:nowrap}}
+  #files td.nm{{white-space:nowrap}}
+  #contents table.data,#parts table.data{{font-size:12px}} #contents table.data td,#parts table.data td{{padding:4px 4px}}
+  #parts td code,#contents td code{{font-size:11px}}
   .chip{{font-family:var(--sans);font-size:11px;font-weight:600;letter-spacing:.04em;padding:1px 6px;border:1px solid;border-radius:2px;white-space:nowrap}}
   .chip.pass{{color:var(--pass-ink);border-color:var(--pass-ink)}} .chip.fail{{color:var(--no);border-color:var(--no)}}
   .chip.cd{{color:var(--cd-ink);border-color:var(--cd-ink)}} .chip.ref{{color:var(--ink-2);border-color:var(--hair)}}
@@ -114,7 +118,7 @@ page = f"""<!DOCTYPE html>
   <div class="stat"><b>{worst_id:.1e} mm</b><span>worst vertex delta vs Pollen rl 5946fd9</span></div>
   <div class="stat"><b>{T["identity_pass"]}/{T["files"]}</b><span>identical to upstream</span></div>
   <div class="stat"><b>{T["printable_as_shipped_pass"]}/{T["files"]}</b><span>printable as shipped</span></div>
-  <div class="stat"><b>{T["vs_ours_pass"]}/{T["files"]}</b><span>PASS vs our rebuild ({T["vs_ours_cd"]} not yet run)</span></div>
+  <div class="stat"><b>{T["vs_ours_pass"]}/{T["files"]}</b><span>PASS vs our rebuild{(" (%d not yet run)" % T["vs_ours_cd"]) if T["vs_ours_cd"] else ""}</span></div>
   <div class="stat"><b>0</b><span>print parameters stated</span></div>
 </div>
 <nav class="toc">
@@ -178,9 +182,9 @@ page = f"""<!DOCTYPE html>
 
 <section id="files">
   <h2><span class="n">4</span>The 15 files, measured</h2>
-  <p class="lede">Bounding box in the file's own frame (trunk body at origin, mm), triangle and unique-vertex counts, boundary edges (0 = every shell closed), the order-matched max vertex delta against Pollen's rl <code>5946fd9</code> assets placed by <code>cecad.mjcf</code>, and <code>cecad.meshcompare</code> p95 surface distance (15 000 samples each way, bbox-centre aligned, tol 1.0 mm / 1.5 mm) against Pollen's decimated simulator body and against OUR rebuild assembled per body.</p>
+  <p class="lede">Bounding box in the file's own frame (trunk body at origin, mm), triangle count (unique vertices and boundary-edge counts are in the JSON: every file has 0 open edges), the order-matched max vertex delta against Pollen's rl <code>5946fd9</code> assets placed by <code>cecad.mjcf</code>, and <code>cecad.meshcompare</code> p95 surface distance (15 000 samples each way, bbox-centre aligned, tol 1.0 mm / 1.5 mm) against Pollen's decimated simulator body and against OUR rebuild assembled per body.</p>
   <div class="tw"><table class="data">
-    <thead><tr><th>#</th><th>File</th><th class="n">Size x × y × z (mm)</th><th class="n">Tris</th><th class="n">Verts</th><th class="n">Open edges</th><th class="n">Δ vs rl 5946fd9 (mm)</th><th class="n">p95 vs Pollen sim body (mm)</th><th class="n">p95 vs our rebuild (mm)</th><th>Verdict vs ours</th></tr></thead>
+    <thead><tr><th>#</th><th>Part (file NN_名.stl)</th><th class="n">Size x × y × z (mm)</th><th class="n">Tris</th><th class="n">Δ vs rl 5946fd9 (mm)</th><th class="n">p95 vs Pollen sim body →/← (mm)</th><th class="n">p95 vs our rebuild →/← (mm)</th><th>vs ours</th></tr></thead>
     <tbody>{file_rows()}</tbody>
   </table></div>
   <p class="small">Worst p95 against our rebuild so far: {n4(worst_ours)} / {n4(worst_ours2)} mm (MW→ours / ours→MW). The Pollen simulator bodies are 4.2× coarser (decimated) than the rl assets, which is why they show 0.02–0.16 mm; the rl-asset comparison is exact and is the one that matters.</p>

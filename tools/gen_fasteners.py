@@ -191,6 +191,43 @@ def cmd_spheres():
     print("total spherical patches across %d meshes: %d" % (len(names), tot))
 
 
+# ----------------------------------------------------------------- neighbours (every mesh, cached)
+
+def features_by_mesh_path():
+    return os.path.join(OUT, "features-by-mesh.json")
+
+
+def cmd_neighbours(only=None):
+    """features() for EVERY mesh the assembly places (rl copy), cached by mesh
+    name so the mate step can look across the whole robot. Incremental: a
+    mesh already in the cache is skipped unless --redo."""
+    p = features_by_mesh_path()
+    cache = json.load(open(p, encoding="utf-8")) if os.path.exists(p) else {
+        "$what": "cecad.meshfeatures.features() of every mesh the assembly places, in the mesh's own frame (mm) — the lookup table the mate step searches for coaxial partners",
+        "$generated_by": "tools/gen_fasteners.py neighbours", "meshes": {}}
+    rows = json.load(open(PLACEMENTS, encoding="utf-8"))["record"]["rows"]
+    names = sorted(set(r["mesh"] for r in rows))
+    if only:
+        names = [n for n in names if n in only]
+    for m in names:
+        if m in cache["meshes"] and "--redo" not in sys.argv:
+            continue
+        paths = dict(mesh_paths(m))
+        path = paths.get("rl") or paths.get("sim")
+        if not path:
+            cache["meshes"][m] = {"error": "no STL found"}
+            continue
+        print("neighbours: measuring %s ..." % m, flush=True)
+        r = measure_mesh(path)
+        r["stl"] = os.path.relpath(path, REPO)
+        cache["meshes"][m] = r
+        print("   %d features in %.1fs" % (len(r["features"]), r["seconds"]), flush=True)
+        with open(p + ".tmp", "w", encoding="utf-8") as fh:
+            json.dump(cache, fh, indent=1)
+        os.replace(p + ".tmp", p)
+    print("neighbours: %d meshes cached" % len(cache["meshes"]))
+
+
 def main(argv):
     if len(argv) < 2:
         print(__doc__)
@@ -203,6 +240,8 @@ def main(argv):
         cmd_measure(region)
     elif cmd == "spheres":
         cmd_spheres()
+    elif cmd == "neighbours":
+        cmd_neighbours()
     else:
         from gen_fasteners_steps import run_step   # later steps live beside this file
         return run_step(cmd, region, argv)

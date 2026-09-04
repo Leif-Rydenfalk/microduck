@@ -110,10 +110,89 @@ def cmd_measure(names):
                     checkpoint="measured %s: %d holes %d bosses %d spheres" % (tag, len(r["holes"]), len(r["bosses"]), len(r["spheres"])))
 
 
+REBUILD_SLUG = {p: p.split(":", 1)[1] for p in PARTS}
+
+
+def cmd_rebuild(names):
+    """Build each part's OWN parametric solid and measure its internal
+    cylinders and external bosses with cecad.inspect — the B side of the
+    reconciliation. A feature in the mesh and not in the rebuild (or the
+    other way round) is a FINDING, not a rounding error."""
+    import FreeCAD
+    from cecad import triad, inspect as insp
+    todo = [(p, m) for p, (m, _s) in PARTS.items() if not names or m in names or p in names
+            or p.split(":", 1)[1] in names]
+    for part_ref, mesh in todo:
+        slug = part_ref.split(":", 1)[1]
+        out = os.path.join(RAW, slug + ".rebuild-holes.json")
+        t0 = time.time()
+        rec = {"$what": "cecad.inspect.holes/shafts on the PARAMETRIC rebuild %s"
+                        " (ce-parts/%s/current/cad/part.py), for reconciliation against"
+                        " Pollen's mesh %s" % (part_ref, slug, mesh),
+               "$part": part_ref, "$mesh": mesh,
+               "$builder": "ce-parts/%s/current/cad/part.py" % slug,
+               "$measured_at": time.strftime("%Y-%m-%dT%H:%M:%S")}
+        try:
+            doc = FreeCAD.newDocument("fx_" + slug.replace("-", "_"))
+            obj = triad.load(doc, part_ref)
+            shape = getattr(obj, "shape", None) or getattr(obj, "Shape", None)
+            bb = shape.BoundBox
+            rec["bbox_mm"] = {"min": [round(bb.XMin, 4), round(bb.YMin, 4), round(bb.ZMin, 4)],
+                              "max": [round(bb.XMax, 4), round(bb.YMax, 4), round(bb.ZMax, 4)],
+                              "size": [round(bb.XLength, 4), round(bb.YLength, 4), round(bb.ZLength, 4)]}
+            rec["volume_mm3"] = round(shape.Volume, 4)
+            rec["faces"] = len(shape.Faces)
+            rec["valid"] = bool(shape.isValid())
+            hs = []
+            for h in insp.holes(obj, min_d=0.8, max_d=60.0, round_to=4):
+                hs.append({"d_mm": round(h.d, 4), "axis": [round(x, 6) for x in h.axis],
+                           "center_mm": [round(x, 4) for x in h.center],
+                           "depth_mm": round(h.depth, 4), "through_envelope": bool(h.through),
+                           "kind": h.kind, "ends": list(h.ends),
+                           "blind": h.blind, "coverage_deg": round(h.coverage_deg, 2),
+                           "span_mm": (round(h.span, 4) if h.span else None),
+                           "of_group": h.of_group,
+                           "csk": ([round(h.csk[0], 4), round(h.csk[1], 2)] if h.csk else None),
+                           "text": str(h)})
+            rec["holes"] = hs
+            ss = []
+            for sh in insp.shafts(obj, min_d=0.8, max_d=60.0, round_to=4):
+                ss.append({"d_mm": round(sh.d, 4), "axis": [round(x, 6) for x in sh.axis],
+                           "center_mm": [round(x, 4) for x in sh.center],
+                           "length_mm": round(sh.length, 4),
+                           "coverage_deg": round(sh.coverage_deg, 2), "text": str(sh)})
+            rec["shafts"] = ss
+            rec["method"] = ("cecad.inspect.holes(min_d=0.8) — every internal cylindrical FACE of"
+                             " the B-rep, coaxial runs split at air, ends classified open/closed/"
+                             "obstructed by solid probes; cecad.inspect.shafts for external cylinders")
+            rec["ok"] = True
+            FreeCAD.closeDocument(doc.Name)
+        except Exception as exc:  # a failed rebuild is itself the finding
+            import traceback
+            rec["ok"] = False
+            rec["error"] = "%s: %s" % (type(exc).__name__, exc)
+            rec["traceback"] = traceback.format_exc()[-2000:]
+        rec["$seconds"] = round(time.time() - t0, 1)
+        with open(out, "w") as f:
+            json.dump(rec, f, indent=1)
+        print("%s -> %s (%s, %d holes, %d shafts, %.1fs)" % (
+            slug, os.path.relpath(out, ROOT), "OK" if rec["ok"] else rec.get("error", "FAIL"),
+            len(rec.get("holes", [])), len(rec.get("shafts", [])), rec["$seconds"]), flush=True)
+        c = load_census()
+        pc = c["parts"].setdefault(part_ref, {})
+        pc.setdefault("raw", {})["rebuild"] = os.path.relpath(out, ROOT)
+        pc["rebuild_ok"] = rec["ok"]
+        save_census(c, checkpoint="rebuild measured %s: %s" % (
+            slug, ("%d holes %d shafts" % (len(rec.get("holes", [])), len(rec.get("shafts", []))))
+            if rec["ok"] else rec.get("error")))
+
+
 if __name__ == "__main__":
     cmd = sys.argv[1] if len(sys.argv) > 1 else "measure"
     if cmd == "measure":
         cmd_measure(sys.argv[2:])
+    elif cmd == "rebuild":
+        cmd_rebuild(sys.argv[2:])
     else:
         print("unknown command", cmd)
         sys.exit(2)

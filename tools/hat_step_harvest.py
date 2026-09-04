@@ -23,6 +23,7 @@ Run:  ce-cad/bin/cad tools/hat_step_harvest.py   (writes a log; read the log)
 import json, math, os, re, time
 import FreeCAD as App
 import Import
+import Part
 
 REPO = "/Users/leifrydenfalk/dev/ce-workshop/ce-designs/microduck"
 STEP = "/private/tmp/int-pcbchips/step/ASE01187-C1_elec_RPI_Robot_HAT_STEP.step"
@@ -147,24 +148,38 @@ def main():
             continue
         o = doc.getObject(objs[0]["name"])
         sh = o.Shape.copy()
-        # localise: undo the placement rotation about the placement point, then
-        # move the body centre to (0,0) and the board face to z = 0.
+        # LOCALISE, with ONE matrix and no Shape.rotate(). The placement that puts a
+        # component on the board is P = T(px,py,zref) . Rz(rot) (the z shift commutes
+        # with a z rotation), so the local body is P^-1 . X = Rz(-rot) . (X - p - z).
+        # Mixing transformShape() with Shape.rotate() writes a file whose geometry is
+        # NOT in the local frame — measured, and the reason this block is spelled out.
         rot = c["pos_rot_deg"] or 0.0
         px, py = c["pos_mm"]
-        m = App.Matrix()
-        m.move(App.Vector(-px, -py, 0))
-        sh.transformShape(m, True)
-        if abs(rot) > 1e-9:
-            sh.rotate(App.Vector(0, 0, 0), App.Vector(0, 0, 1), -rot)
-        b2 = sh.BoundBox
         zref = 0.84 if c["pos_side"] == "top" else 0.0
-        m2 = App.Matrix()
-        m2.move(App.Vector(0, 0, -zref))
-        sh.transformShape(m2, True)
+        mt = App.Matrix(); mt.move(App.Vector(-px, -py, -zref))
+        mr = App.Matrix(); mr.rotateZ(math.radians(-rot))
+        sh.transformShape(mr.multiply(mt), True)
         b3 = sh.BoundBox
         obj = doc.addObject("Part::Feature", "exp_" + key.replace("-", "_")[:40])
         obj.Shape = sh
-        Import.export([obj], os.path.join(GEO, key + ".step"))
+        obj.Placement = App.Placement()
+        path = os.path.join(GEO, key + ".step")
+        Import.export([obj], path)
+        # READ IT BACK. A file that exists is not a file that is correct.
+        chk = Part.Shape(); chk.read(path)
+        cb2 = chk.BoundBox
+        dev = max(abs(cb2.XMin - b3.XMin), abs(cb2.YMin - b3.YMin), abs(cb2.ZMin - b3.ZMin),
+                  abs(cb2.XMax - b3.XMax), abs(cb2.YMax - b3.YMax), abs(cb2.ZMax - b3.ZMax))
+        # and put it back where it came from: it must land on the manufacturer's bbox
+        back = chk.copy()
+        mr2 = App.Matrix(); mr2.rotateZ(math.radians(rot))
+        mt2 = App.Matrix(); mt2.move(App.Vector(px, py, zref))
+        back.transformShape(mt2.multiply(mr2), True)
+        rb = back.BoundBox
+        ob = objs[0]
+        rt = max(abs(rb.XMin - ob["bbox_min"][0]), abs(rb.YMin - ob["bbox_min"][1]),
+                 abs(rb.ZMin - ob["bbox_min"][2]), abs(rb.XMax - ob["bbox_max"][0]),
+                 abs(rb.YMax - ob["bbox_max"][1]), abs(rb.ZMax - ob["bbox_max"][2]))
         exported[key] = dict(refdes=c["refdes"], exported=True,
                              instances=[x["refdes"] for x in cs],
                              qty=len(cs), side=c["pos_side"], rot_deg=rot,
@@ -174,13 +189,23 @@ def main():
                                                                b3.XMax, b3.YMax, b3.ZMax)],
                              size_mm=[round(b3.XLength, 4), round(b3.YLength, 4), round(b3.ZLength, 4)],
                              volume_mm3=round(sh.Volume, 4) if sh.Solids else None,
-                             solids=len(sh.Solids))
-        print("exported", key, exported[key]["size_mm"], "qty", len(cs), flush=True)
+                             solids=len(sh.Solids),
+                             file_readback_dev_mm=round(dev, 6),
+                             round_trip_dev_mm=round(rt, 6))
+        print("exported", key, exported[key]["size_mm"], "qty", len(cs),
+              "readback", exported[key]["file_readback_dev_mm"],
+              "roundtrip", exported[key]["round_trip_dev_mm"], flush=True)
 
     json.dump(dict(_generated="tools/hat_step_harvest.py", parts=exported),
               open(os.path.join(OUT, "geometry_index.json"), "w"), indent=1)
+    worst_rt = max((v.get("round_trip_dev_mm", 0) for v in exported.values() if v["exported"]), default=None)
     print("DONE parts exported", sum(1 for v in exported.values() if v["exported"]),
-          "of", len(exported), flush=True)
+          "of", len(exported), "worst round trip mm", worst_rt, flush=True)
+    open(os.path.join(OUT, "harvest.log"), "w").write(
+        "exported %d of %d; worst file-readback dev %.6f mm; worst round-trip dev %.6f mm\n"
+        % (sum(1 for v in exported.values() if v["exported"]), len(exported),
+           max((v.get("file_readback_dev_mm", 0) for v in exported.values() if v["exported"]), default=-1),
+           worst_rt if worst_rt is not None else -1))
 
 
 main()
