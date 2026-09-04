@@ -134,6 +134,7 @@ for s in print_slugs:
 STL = {r["file"]: r for r in J(os.path.join(MEAS, "stlcheck.json"))}
 MAN = J("out/print/stl_manifest.json")
 PB = J("tools/data/playbook.json")
+SJ = J(os.path.join(MEAS, "slice-journal.json"))  # tools/slice_journal.py — every ce-slice run of every microduck STL
 stale_named = re.findall(r"The twelve are (.*?):", PB["open"][0]["settles"])
 stale_list = [("microduck-" + s.strip().rstrip(".")) for s in re.split(r",| and ", stale_named[0])] if stale_named else []
 stale_list = [s for s in stale_list if s.strip("microduck-")]
@@ -179,15 +180,34 @@ for p in slice_["parts"]:
     if grade == "NOT_YET":
         closer = "agent_later"
         by = "re-export from out/dfm/stl-rebuilt/ and re-slice on ce-slice (minutes); the mesh repair for yaw-roll-motion is a rebuild export" if (stale or not st.get("watertight")) else ""
+    sj = SJ["parts"].get(slug, {})
+    trace = ("traced to a ce-slice journal run and the STL's sha256 %s… is UNCHANGED since"
+             % (sj.get("published_run_sha256") or "")[:8]) if sj.get("sha256_still_matches") else "NOT traceable to a journal run"
+    if not sj.get("sha256_still_matches"):
+        problems.append("the published gram/second figure is %s: re-slice before quoting it" % trace)
+        grade = "NOT_YET"
+    reb = sj.get("rebuilt_alternative")
+    spread = sj.get("orientation_spread")
+    extra_meas = "; number %s" % trace
+    if reb:
+        extra_meas += "; the SAME part sliced from our parametric rebuild %s gives %.4f g / %.0f s (%+.2f %% filament, %+.2f %% time)" % (
+            reb["rebuilt_stl"], reb["rebuilt_grams"], reb["rebuilt_seconds"], reb["d_grams_pct"], reb["d_seconds_pct"])
+    if spread:
+        extra_meas += "; the same file at the same %s mm layer sliced %.4f g / %.0f s auto-oriented and %.4f g / %.0f s as modelled (%+.2f %% time) — the orientation is part of the number" % (
+            spread["layer_mm"], spread["grams"][0], spread["seconds"][0], spread["grams"][1], spread["seconds"][1], spread["seconds_pct"])
     row("print", slug, slug, grade,
-        "%s x%d %s; bbox %s mm; %d triangles; watertight %s; oriented %s; %.4f g / %.0f s per piece from ce-slice (BambuStudio %s, %s)" % (
+        "%s x%d %s; bbox %s mm; %d triangles; watertight %s; oriented %s; %.4f g / %.0f s per piece from ce-slice (BambuStudio %s, %s)%s" % (
             p["material"], p["qty"], os.path.basename(p["stl"]), "x".join("%.3f" % b for b in p["bbox_mm"]), st.get("triangles", 0), st.get("watertight"), p["orientation_rule"],
-            p["grams_per_piece"], p["seconds_per_piece"], "02.08.02.61", p["process_preset"]),
-        "out/print/slice.json[%s]; out/factory/measure/stlcheck.json[%s]; ce-slice journal (slice_recent) 2026-09-02" % (slug, p["stl"]),
+            p["grams_per_piece"], p["seconds_per_piece"], "02.08.02.61", p["process_preset"], extra_meas),
+        "out/print/slice.json[%s]; out/factory/measure/stlcheck.json[%s]; out/factory/measure/slice-journal.json[%s] (ce-slice journal ~/dev/ce-slice/state/slices.jsonl, read %s)" % (slug, p["stl"], slug, SJ["read_at"][:16]),
         ("; ".join(problems) + "." if problems else note), closer, by,
         {"stl": p["stl"], "stl_source": src, "vendor_mesh": vendor, "licence": ("CC BY-SA-NC (Pollen sim mesh)" if vendor else "ours"), "stale": stale,
          "watertight": st.get("watertight"), "open_edges": st.get("open_edges"), "grams_per_piece": p["grams_per_piece"], "seconds_per_piece": p["seconds_per_piece"],
-         "slicer_warning": p.get("slicer_warning"), "qty": p["qty"], "stl_mtime": stl_mtime, "part_last_commit": part_commit, "rebuilt_delta": rebuilt_delta})
+         "slicer_warning": p.get("slicer_warning"), "qty": p["qty"], "stl_mtime": stl_mtime, "part_last_commit": part_commit, "rebuilt_delta": rebuilt_delta,
+         "slice_journal": {"runs": sj.get("runs"), "traced": sj.get("published_run_found_in_journal"), "sha256_still_matches": sj.get("sha256_still_matches"),
+                           "stl_sha256": sj.get("published", {}).get("stl_sha256_now") if sj.get("published") else None,
+                           "auto_orient": sj.get("published_run_auto_orient"), "failures": sj.get("failures"),
+                           "rebuilt_alternative": reb, "orientation_spread": spread}})
 
 # ---------------------------------------------------------------- 3 bought lines
 SRC = J(os.path.join(MEAS, "sourcing-rows.json"))
