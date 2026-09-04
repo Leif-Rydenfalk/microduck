@@ -1,0 +1,779 @@
+{
+ "$triad": 1,
+ "kind": "wire-gap",
+ "generated_by": "sim/wire_gap.py",
+ "record": {
+  "units": "mm",
+  "method": "wire_gap \u2014 THE BATTERY FEED CANNOT BE ROUTED AT ALL. WHERE IS THE WALL?\n\n    ce-cad/bin/cad sim/wire_gap.py\n\nout/wiring/cables3d-hat.json records bat-hat as FAIL with the same line at every\nrung of the clearance ladder, 1.0000 mm down to 0.0000 mm: \"no corridor on the\n4.0 mm grid and none on the 1.0 mm grid either\". At a ZERO clearance floor. That\nis not a tight fit the router lost; it is a claim that no path of free cells\nexists between the pack's contact end and the HAT's battery connector.\n\nThe real Microduck runs off that pack, so the correct first conclusion is that\nOUR MODEL is wrong, and the useful output is not a verdict but a LOCATION: which\nbody's material severs the free space, how thick it is there, and what a\npass-through would cost. This pass answers exactly that.\n\n  1. label every connected component of the FREE cells of the 1.0000 mm\n     occupancy (26-connectivity, so a diagonal counts -- the most generous\n     reading, which makes a severed answer stronger).\n  2. say which component every cable endpoint in wiring/cables.json sits in,\n     WITH THAT COMPONENT'S SIZE, because \"component 84\" means nothing until you\n     know whether it is a room or a 20-cell blister. An endpoint that is inside\n     material, or closer to a surface than the cable is thick, is not in any\n     component at all: it is SNAPPED to the nearest cell of the space and the\n     snap distance is reported, because a connector sitting on a board is\n     supposed to be against a surface and calling that \"severed\" would be an\n     artefact of the question rather than a fact about the robot.\n     Two endpoints of one run in two components is a run nothing can route.\n  3. for each severed run, measure the THINNEST material between its two\n     components: the Euclidean distance from every cell of the far component to\n     the near one, minimised over the near component. That distance is the\n     length of the shortest pass-through that would join them, its endpoints\n     are where to drill, and the owner field names the part it goes through.\n  4. repeat the whole thing on the space a CABLE can occupy -- cells at least\n     (OD/2 + floor) from any surface -- because a hole a point can pass through\n     is not a hole a 3.1243 mm bundle can.\n\nNothing here proposes a change to any part. It measures what our model says and\nnames the wall, so the next lane can compare that wall against a photograph.",
+  "counts": {
+   "cables": 23,
+   "point_space_components": 239,
+   "point_space_severed_runs": 2,
+   "cable_space_components": 47,
+   "cable_space_severed_runs": 4,
+   "grid_cell_mm": 1.0
+  },
+  "spaces": [
+   {
+    "tag": "point",
+    "note": "every non-solid cell: the most generous free space there is, a cable of zero thickness with zero clearance",
+    "components": 239,
+    "largest_component_cells": 9919715,
+    "free_cells": 10031587,
+    "largest_share_pct": 98.885,
+    "endpoints": {
+     "dxl-hat-id34/hat": {
+      "component": 1,
+      "snapped_mm": 0.0,
+      "component_cells": 9919715,
+      "component_mm3": 9919715.0,
+      "is_the_largest_component": true
+     },
+     "dxl-hat-id34/id34": {
+      "component": 1,
+      "snapped_mm": 0.0,
+      "component_cells": 9919715,
+      "component_mm3": 9919715.0,
+      "is_the_largest_component": true
+     },
+     "dxl-id34-id33/id34": {
+      "component": 1,
+      "snapped_mm": 0.0,
+      "component_cells": 9919715,
+      "component_mm3": 9919715.0,
+      "is_the_largest_component": true
+     },
+     "dxl-id34-id33/id33": {
+      "component": 1,
+      "snapped_mm": 0.0,
+      "component_cells": 9919715,
+      "component_mm3": 9919715.0,
+      "is_the_largest_component": true
+     },
+     "dxl-id33-id32/id33": {
+      "component": 84,
+      "snapped_mm": 0.0,
+      "component_cells": 4392,
+      "component_mm3": 4392.0,
+      "is_the_largest_component": false
+     },
+     "dxl-id33-id32/id32": {
+      "component": 77,
+      "snapped_mm": 0.0,
+      "component_cells": 12787,
+      "component_mm3": 12787.0,
+      "is_the_largest_component": false
+     },
+     "dxl-id32-id31/id32": {
+      "component": 1,
+      "snapped_mm": 0.0,
+      "component_cells": 9919715,
+      "component_mm3": 9919715.0,
+      "is_the_largest_component": true
+     },
+     "dxl-id32-id31/id31": {
+      "component": 1,
+      "snapped_mm": 0.0,
+      "component_cells": 9919715,
+      "component_mm3": 9919715.0,
+      "is_the_largest_component": true
+     },
+     "dxl-id31-id30/id31": {
+      "component": 1,
+      "snapped_mm": 0.0,
+      "component_cells": 9919715,
+      "component_mm3": 9919715.0,
+      "is_the_largest_component": true
+     },
+     "dxl-id31-id30/id30": {
+      "component": 1,
+      "snapped_mm": 0.0,
+      "component_cells": 9919715,
+      "component_mm3": 9919715.0,
+      "is_the_largest_component": true
+     },
+     "dxl-id30-imu200/id30": {
+      "component": 1,
+      "snapped_mm": 0.0,
+      "component_cells": 9919715,
+      "component_mm3": 9919715.0,
+      "is_the_largest_component": true
+     },
+     "dxl-id30-imu200/imu200": {
+      "component": 1,
+      "snapped_mm": 0.0,
+      "component_cells": 9919715,
+      "component_mm3": 9919715.0,
+      "is_the_largest_component": true
+     },
+     "dxl-imu200-id20/imu200": {
+      "component": 1,
+      "snapped_mm": 0.0,
+      "component_cells": 9919715,
+      "component_mm3": 9919715.0,
+      "is_the_largest_component": true
+     },
+     "dxl-imu200-id20/id20": {
+      "component": 1,
+      "snapped_mm": 0.0,
+      "component_cells": 9919715,
+      "component_mm3": 9919715.0,
+      "is_the_largest_component": true
+     },
+     "dxl-id20-id21/id20": {
+      "component": 1,
+      "snapped_mm": 0.0,
+      "component_cells": 9919715,
+      "component_mm3": 9919715.0,
+      "is_the_largest_component": true
+     },
+     "dxl-id20-id21/id21": {
+      "component": 1,
+      "snapped_mm": 0.0,
+      "component_cells": 9919715,
+      "component_mm3": 9919715.0,
+      "is_the_largest_component": true
+     },
+     "dxl-id21-id22/id21": {
+      "component": 1,
+      "snapped_mm": 0.0,
+      "component_cells": 9919715,
+      "component_mm3": 9919715.0,
+      "is_the_largest_component": true
+     },
+     "dxl-id21-id22/id22": {
+      "component": 1,
+      "snapped_mm": 0.0,
+      "component_cells": 9919715,
+      "component_mm3": 9919715.0,
+      "is_the_largest_component": true
+     },
+     "dxl-id22-id23/id22": {
+      "component": 1,
+      "snapped_mm": 0.0,
+      "component_cells": 9919715,
+      "component_mm3": 9919715.0,
+      "is_the_largest_component": true
+     },
+     "dxl-id22-id23/id23": {
+      "component": 1,
+      "snapped_mm": 0.0,
+      "component_cells": 9919715,
+      "component_mm3": 9919715.0,
+      "is_the_largest_component": true
+     },
+     "dxl-id23-id24/id23": {
+      "component": 1,
+      "snapped_mm": 0.0,
+      "component_cells": 9919715,
+      "component_mm3": 9919715.0,
+      "is_the_largest_component": true
+     },
+     "dxl-id23-id24/id24": {
+      "component": 1,
+      "snapped_mm": 0.0,
+      "component_cells": 9919715,
+      "component_mm3": 9919715.0,
+      "is_the_largest_component": true
+     },
+     "dxl-imu200-id10/imu200": {
+      "component": 1,
+      "snapped_mm": 0.0,
+      "component_cells": 9919715,
+      "component_mm3": 9919715.0,
+      "is_the_largest_component": true
+     },
+     "dxl-imu200-id10/id10": {
+      "component": 1,
+      "snapped_mm": 0.0,
+      "component_cells": 9919715,
+      "component_mm3": 9919715.0,
+      "is_the_largest_component": true
+     },
+     "dxl-id10-id11/id10": {
+      "component": 1,
+      "snapped_mm": 0.0,
+      "component_cells": 9919715,
+      "component_mm3": 9919715.0,
+      "is_the_largest_component": true
+     },
+     "dxl-id10-id11/id11": {
+      "component": 1,
+      "snapped_mm": 0.0,
+      "component_cells": 9919715,
+      "component_mm3": 9919715.0,
+      "is_the_largest_component": true
+     },
+     "dxl-id11-id12/id11": {
+      "component": 1,
+      "snapped_mm": 0.0,
+      "component_cells": 9919715,
+      "component_mm3": 9919715.0,
+      "is_the_largest_component": true
+     },
+     "dxl-id11-id12/id12": {
+      "component": 1,
+      "snapped_mm": 0.0,
+      "component_cells": 9919715,
+      "component_mm3": 9919715.0,
+      "is_the_largest_component": true
+     },
+     "dxl-id12-id13/id12": {
+      "component": 1,
+      "snapped_mm": 0.0,
+      "component_cells": 9919715,
+      "component_mm3": 9919715.0,
+      "is_the_largest_component": true
+     },
+     "dxl-id12-id13/id13": {
+      "component": 1,
+      "snapped_mm": 0.0,
+      "component_cells": 9919715,
+      "component_mm3": 9919715.0,
+      "is_the_largest_component": true
+     },
+     "dxl-id13-id14/id13": {
+      "component": 1,
+      "snapped_mm": 0.0,
+      "component_cells": 9919715,
+      "component_mm3": 9919715.0,
+      "is_the_largest_component": true
+     },
+     "dxl-id13-id14/id14": {
+      "component": 1,
+      "snapped_mm": 0.0,
+      "component_cells": 9919715,
+      "component_mm3": 9919715.0,
+      "is_the_largest_component": true
+     },
+     "tof-hat/hat": {
+      "component": 1,
+      "snapped_mm": 0.0,
+      "component_cells": 9919715,
+      "component_mm3": 9919715.0,
+      "is_the_largest_component": true
+     },
+     "tof-hat/tof": {
+      "component": 1,
+      "snapped_mm": 0.0,
+      "component_cells": 9919715,
+      "component_mm3": 9919715.0,
+      "is_the_largest_component": true
+     },
+     "spk-hat/hat": {
+      "component": 1,
+      "snapped_mm": 0.0,
+      "component_cells": 9919715,
+      "component_mm3": 9919715.0,
+      "is_the_largest_component": true
+     },
+     "spk-hat/speaker": {
+      "component": 84,
+      "snapped_mm": 0.0,
+      "component_cells": 4392,
+      "component_mm3": 4392.0,
+      "is_the_largest_component": false
+     },
+     "csi-radxa-camera/radxa": {
+      "component": 1,
+      "snapped_mm": 0.0,
+      "component_cells": 9919715,
+      "component_mm3": 9919715.0,
+      "is_the_largest_component": true
+     },
+     "csi-radxa-camera/camera": {
+      "component": 1,
+      "snapped_mm": 0.0,
+      "component_cells": 9919715,
+      "component_mm3": 9919715.0,
+      "is_the_largest_component": true
+     },
+     "bat-hat/battery": {
+      "component": 1,
+      "snapped_mm": 0.0,
+      "component_cells": 9919715,
+      "component_mm3": 9919715.0,
+      "is_the_largest_component": true
+     },
+     "bat-hat/hat": {
+      "component": 1,
+      "snapped_mm": 0.0,
+      "component_cells": 9919715,
+      "component_mm3": 9919715.0,
+      "is_the_largest_component": true
+     }
+    },
+    "largest_component_id": 1,
+    "severed_runs": [
+     {
+      "id": "dxl-id33-id32",
+      "from": "id33",
+      "to": "id32",
+      "component_from": 84,
+      "component_to": 77,
+      "component_from_cells": 4392,
+      "component_to_cells": 12787,
+      "snapped_from_mm": 0.0,
+      "snapped_to_mm": 0.0,
+      "thinnest_wall_mm": 2.0,
+      "drill_from_mm": [
+       -16.2771,
+       -15.0,
+       246.9734
+      ],
+      "drill_to_mm": [
+       -16.2771,
+       -15.0,
+       244.9734
+      ],
+      "wall_parts": [
+       "part:microduck-speaker"
+      ],
+      "wall_meshes": [
+       "speaker"
+      ],
+      "what_would_join_them": "a through-hole 2.0000 mm long from [-16.277, -15.0, 246.973] to [-16.277, -15.0, 244.973], through part:microduck-speaker"
+     },
+     {
+      "id": "spk-hat",
+      "from": "hat",
+      "to": "speaker",
+      "component_from": 1,
+      "component_to": 84,
+      "component_from_cells": 9919715,
+      "component_to_cells": 4392,
+      "snapped_from_mm": 0.0,
+      "snapped_to_mm": 0.0,
+      "thinnest_wall_mm": 2.0,
+      "drill_from_mm": [
+       -18.2771,
+       -15.0,
+       246.9734
+      ],
+      "drill_to_mm": [
+       -16.2771,
+       -15.0,
+       246.9734
+      ],
+      "wall_parts": [
+       "part:microduck-speaker"
+      ],
+      "wall_meshes": [
+       "speaker"
+      ],
+      "what_would_join_them": "a through-hole 2.0000 mm long from [-18.277, -15.0, 246.973] to [-16.277, -15.0, 246.973], through part:microduck-speaker"
+     }
+    ],
+    "severed_count": 2
+   },
+   {
+    "tag": "cable",
+    "note": "cells at least 2.5621 mm from any surface (bundle radius 1.5621 + the lane's 1.0000 mm floor): the space a real bundle can occupy",
+    "components": 47,
+    "largest_component_cells": 9247051,
+    "free_cells": 9375797,
+    "largest_share_pct": 98.627,
+    "endpoints": {
+     "dxl-hat-id34/hat": {
+      "component": 1,
+      "snapped_mm": 1.0,
+      "component_cells": 9247051,
+      "component_mm3": 9247051.0,
+      "is_the_largest_component": true
+     },
+     "dxl-hat-id34/id34": {
+      "component": 1,
+      "snapped_mm": 1.0,
+      "component_cells": 9247051,
+      "component_mm3": 9247051.0,
+      "is_the_largest_component": true
+     },
+     "dxl-id34-id33/id34": {
+      "component": 1,
+      "snapped_mm": 0.0,
+      "component_cells": 9247051,
+      "component_mm3": 9247051.0,
+      "is_the_largest_component": true
+     },
+     "dxl-id34-id33/id33": {
+      "component": 1,
+      "snapped_mm": 0.0,
+      "component_cells": 9247051,
+      "component_mm3": 9247051.0,
+      "is_the_largest_component": true
+     },
+     "dxl-id33-id32/id33": {
+      "component": 22,
+      "snapped_mm": 1.0,
+      "component_cells": 733,
+      "component_mm3": 733.0,
+      "is_the_largest_component": false
+     },
+     "dxl-id33-id32/id32": {
+      "component": 18,
+      "snapped_mm": 0.0,
+      "component_cells": 5738,
+      "component_mm3": 5738.0,
+      "is_the_largest_component": false
+     },
+     "dxl-id32-id31/id32": {
+      "component": 1,
+      "snapped_mm": 1.0,
+      "component_cells": 9247051,
+      "component_mm3": 9247051.0,
+      "is_the_largest_component": true
+     },
+     "dxl-id32-id31/id31": {
+      "component": 1,
+      "snapped_mm": 0.0,
+      "component_cells": 9247051,
+      "component_mm3": 9247051.0,
+      "is_the_largest_component": true
+     },
+     "dxl-id31-id30/id31": {
+      "component": 1,
+      "snapped_mm": 0.0,
+      "component_cells": 9247051,
+      "component_mm3": 9247051.0,
+      "is_the_largest_component": true
+     },
+     "dxl-id31-id30/id30": {
+      "component": 1,
+      "snapped_mm": 0.0,
+      "component_cells": 9247051,
+      "component_mm3": 9247051.0,
+      "is_the_largest_component": true
+     },
+     "dxl-id30-imu200/id30": {
+      "component": 1,
+      "snapped_mm": 0.0,
+      "component_cells": 9247051,
+      "component_mm3": 9247051.0,
+      "is_the_largest_component": true
+     },
+     "dxl-id30-imu200/imu200": {
+      "component": 1,
+      "snapped_mm": 1.0,
+      "component_cells": 9247051,
+      "component_mm3": 9247051.0,
+      "is_the_largest_component": true
+     },
+     "dxl-imu200-id20/imu200": {
+      "component": 1,
+      "snapped_mm": 1.0,
+      "component_cells": 9247051,
+      "component_mm3": 9247051.0,
+      "is_the_largest_component": true
+     },
+     "dxl-imu200-id20/id20": {
+      "component": 1,
+      "snapped_mm": 0.0,
+      "component_cells": 9247051,
+      "component_mm3": 9247051.0,
+      "is_the_largest_component": true
+     },
+     "dxl-id20-id21/id20": {
+      "component": 1,
+      "snapped_mm": 0.0,
+      "component_cells": 9247051,
+      "component_mm3": 9247051.0,
+      "is_the_largest_component": true
+     },
+     "dxl-id20-id21/id21": {
+      "component": 1,
+      "snapped_mm": 0.0,
+      "component_cells": 9247051,
+      "component_mm3": 9247051.0,
+      "is_the_largest_component": true
+     },
+     "dxl-id21-id22/id21": {
+      "component": 1,
+      "snapped_mm": 0.0,
+      "component_cells": 9247051,
+      "component_mm3": 9247051.0,
+      "is_the_largest_component": true
+     },
+     "dxl-id21-id22/id22": {
+      "component": 1,
+      "snapped_mm": 1.0,
+      "component_cells": 9247051,
+      "component_mm3": 9247051.0,
+      "is_the_largest_component": true
+     },
+     "dxl-id22-id23/id22": {
+      "component": 1,
+      "snapped_mm": 0.0,
+      "component_cells": 9247051,
+      "component_mm3": 9247051.0,
+      "is_the_largest_component": true
+     },
+     "dxl-id22-id23/id23": {
+      "component": 1,
+      "snapped_mm": 0.0,
+      "component_cells": 9247051,
+      "component_mm3": 9247051.0,
+      "is_the_largest_component": true
+     },
+     "dxl-id23-id24/id23": {
+      "component": 1,
+      "snapped_mm": 0.0,
+      "component_cells": 9247051,
+      "component_mm3": 9247051.0,
+      "is_the_largest_component": true
+     },
+     "dxl-id23-id24/id24": {
+      "component": 1,
+      "snapped_mm": 0.0,
+      "component_cells": 9247051,
+      "component_mm3": 9247051.0,
+      "is_the_largest_component": true
+     },
+     "dxl-imu200-id10/imu200": {
+      "component": 1,
+      "snapped_mm": 1.0,
+      "component_cells": 9247051,
+      "component_mm3": 9247051.0,
+      "is_the_largest_component": true
+     },
+     "dxl-imu200-id10/id10": {
+      "component": 1,
+      "snapped_mm": 0.0,
+      "component_cells": 9247051,
+      "component_mm3": 9247051.0,
+      "is_the_largest_component": true
+     },
+     "dxl-id10-id11/id10": {
+      "component": 1,
+      "snapped_mm": 0.0,
+      "component_cells": 9247051,
+      "component_mm3": 9247051.0,
+      "is_the_largest_component": true
+     },
+     "dxl-id10-id11/id11": {
+      "component": 1,
+      "snapped_mm": 0.0,
+      "component_cells": 9247051,
+      "component_mm3": 9247051.0,
+      "is_the_largest_component": true
+     },
+     "dxl-id11-id12/id11": {
+      "component": 1,
+      "snapped_mm": 0.0,
+      "component_cells": 9247051,
+      "component_mm3": 9247051.0,
+      "is_the_largest_component": true
+     },
+     "dxl-id11-id12/id12": {
+      "component": 1,
+      "snapped_mm": 0.0,
+      "component_cells": 9247051,
+      "component_mm3": 9247051.0,
+      "is_the_largest_component": true
+     },
+     "dxl-id12-id13/id12": {
+      "component": 1,
+      "snapped_mm": 0.0,
+      "component_cells": 9247051,
+      "component_mm3": 9247051.0,
+      "is_the_largest_component": true
+     },
+     "dxl-id12-id13/id13": {
+      "component": 1,
+      "snapped_mm": 0.0,
+      "component_cells": 9247051,
+      "component_mm3": 9247051.0,
+      "is_the_largest_component": true
+     },
+     "dxl-id13-id14/id13": {
+      "component": 1,
+      "snapped_mm": 0.0,
+      "component_cells": 9247051,
+      "component_mm3": 9247051.0,
+      "is_the_largest_component": true
+     },
+     "dxl-id13-id14/id14": {
+      "component": 1,
+      "snapped_mm": 0.0,
+      "component_cells": 9247051,
+      "component_mm3": 9247051.0,
+      "is_the_largest_component": true
+     },
+     "tof-hat/hat": {
+      "component": 1,
+      "snapped_mm": 0.0,
+      "component_cells": 9247051,
+      "component_mm3": 9247051.0,
+      "is_the_largest_component": true
+     },
+     "tof-hat/tof": {
+      "component": 1,
+      "snapped_mm": 0.0,
+      "component_cells": 9247051,
+      "component_mm3": 9247051.0,
+      "is_the_largest_component": true
+     },
+     "spk-hat/hat": {
+      "component": 1,
+      "snapped_mm": 0.0,
+      "component_cells": 9247051,
+      "component_mm3": 9247051.0,
+      "is_the_largest_component": true
+     },
+     "spk-hat/speaker": {
+      "component": 22,
+      "snapped_mm": 0.0,
+      "component_cells": 733,
+      "component_mm3": 733.0,
+      "is_the_largest_component": false
+     },
+     "csi-radxa-camera/radxa": {
+      "component": 39,
+      "snapped_mm": 0.0,
+      "component_cells": 180,
+      "component_mm3": 180.0,
+      "is_the_largest_component": false
+     },
+     "csi-radxa-camera/camera": {
+      "component": 40,
+      "snapped_mm": 0.0,
+      "component_cells": 532,
+      "component_mm3": 532.0,
+      "is_the_largest_component": false
+     },
+     "bat-hat/battery": {
+      "component": 2,
+      "snapped_mm": 0.0,
+      "component_cells": 29319,
+      "component_mm3": 29319.0,
+      "is_the_largest_component": false
+     },
+     "bat-hat/hat": {
+      "component": 1,
+      "snapped_mm": 1.0,
+      "component_cells": 9247051,
+      "component_mm3": 9247051.0,
+      "is_the_largest_component": true
+     }
+    },
+    "largest_component_id": 1,
+    "severed_runs": [
+     {
+      "id": "dxl-id33-id32",
+      "from": "id33",
+      "to": "id32",
+      "component_from": 22,
+      "component_to": 18,
+      "component_from_cells": 733,
+      "component_to_cells": 5738,
+      "snapped_from_mm": 1.0,
+      "snapped_to_mm": 0.0,
+      "thinnest_wall_mm": 6.0,
+      "drill_from_mm": [
+       -14.2771,
+       4.0,
+       248.9734
+      ],
+      "drill_to_mm": [
+       -14.2771,
+       4.0,
+       242.9734
+      ],
+      "wall_parts": [
+       "part:microduck-speaker"
+      ],
+      "wall_meshes": [
+       "speaker"
+      ],
+      "what_would_join_them": "a through-hole 6.0000 mm long from [-14.277, 4.0, 248.973] to [-14.277, 4.0, 242.973], through part:microduck-speaker"
+     },
+     {
+      "id": "spk-hat",
+      "from": "hat",
+      "to": "speaker",
+      "component_from": 1,
+      "component_to": 22,
+      "component_from_cells": 9247051,
+      "component_to_cells": 733,
+      "snapped_from_mm": 0.0,
+      "snapped_to_mm": 0.0,
+      "thinnest_wall_mm": 6.0,
+      "drill_from_mm": [
+       -20.2771,
+       7.0,
+       248.9734
+      ],
+      "drill_to_mm": [
+       -14.2771,
+       7.0,
+       248.9734
+      ],
+      "wall_parts": [
+       "part:microduck-speaker"
+      ],
+      "wall_meshes": [
+       "speaker"
+      ],
+      "what_would_join_them": "a through-hole 6.0000 mm long from [-20.277, 7.0, 248.973] to [-14.277, 7.0, 248.973], through part:microduck-speaker"
+     },
+     {
+      "id": "csi-radxa-camera",
+      "from": "radxa",
+      "to": "camera",
+      "component_from": 39,
+      "component_to": 40,
+      "component_from_cells": 180,
+      "component_to_cells": 532,
+      "snapped_from_mm": 0.0,
+      "snapped_to_mm": 0.0,
+      "thinnest_wall_mm": 10.0,
+      "drill_from_mm": [
+       64.7229,
+       -2.0,
+       250.9734
+      ],
+      "drill_to_mm": [
+       74.7229,
+       -2.0,
+       250.9734
+      ],
+      "wall_parts": [
+       "part:radxa-zero-3w",
+       "part:microduck-m12-lens"
+      ],
+      "wall_meshes": [
+       "pcb__raspberry_pi_zero_2_w",
+       "lens"
+      ],
+      "what_would_join_them": "a through-hole 10.0000 mm long from [64.723, -2.0, 250.973] to [74.723, -2.0, 250.973], through part:radxa-zero-3w, part:microduck-m12-lens"
+     },
+     {
+      "id": "bat-hat",
+      "from": "battery",
+      "to": "hat",
+      "component_from": 2,
+      "component_to": 1,
+      "component_from_cells": 29319,
+      "component_to_cells": 9247051,
+      "snapped_from_mm": 0.0,
+      "snapped_to_mm": 1.0,
+      "thinnest_wall_mm": 5.3852,
+      "drill_from_mm": [
+       -43.2771,
+       -9.0,
+       111.9734
+      ],
+      "drill_to_mm": [
+       -48.2771,
+       -9.0,
+       113.9734
+      ],
+      "wall_parts": [],
+      "wall_meshes": [],
+      "what_would_join_them": "a through-hole 5.3852 mm long from [-43.277, -9.0, 111.973] to [-48.277, -9.0, 113.973], through nothing marked"
+     }
+    ],
+    "severed_count": 4
+   }
+  ]
+ }
+}
