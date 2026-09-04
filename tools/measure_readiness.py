@@ -14,6 +14,7 @@ measurement and get the same table, or a different one if the repo moved.
   out/factory/measure/sourcing-rows.json spec/sourcing.json (copied, so the audit
                                          and the page quote one frozen read)
   out/factory/measure/slice-health.json  ce-slice health --deep + a CONTROL slice of a real part
+  out/factory/measure/delta.json         this measurement vs the last committed one that differed
 
 TWO MEASURED DEFECTS IN THE INSTRUMENTS, handled here and recorded in the file
 rather than silently patched:
@@ -183,10 +184,100 @@ def measure_slice_health():
     return rec
 
 
+
+def git_blob(rev, path):
+    try:
+        return subprocess.check_output(["git", "show", "%s:%s" % (rev, path)], cwd=ROOT,
+                                       text=True, stderr=subprocess.DEVNULL)
+    except subprocess.CalledProcessError:
+        return None
+
+
+def measure_delta(vs=None):
+    """HAS ANYTHING MOVED? Diff this measurement against an earlier committed one.
+
+    A factory pack that reprints the same numbers every few hours is telling the
+    reader something: the parcels are not closing. So the delta is measured and
+    published, not left for the reader to notice.
+
+    `vs` defaults to the most recent commit whose out/factory/measure/sheetcheck.json
+    differs from the file on disk — i.e. the last time this measurement CHANGED.
+    """
+    path = "out/factory/measure/sheetcheck.json"
+    cur = open(os.path.join(ROOT, path), encoding="utf-8").read()
+    if vs is None:
+        revs = subprocess.check_output(["git", "log", "--format=%H", "--", path],
+                                       cwd=ROOT, text=True).split()
+        for r in revs:
+            b = git_blob(r, path)
+            if b is not None and b != cur:
+                vs = r
+                break
+    rec = {"vs_rev": vs, "vs_rev_date": None, "this_measurement": None,
+           "prior_measurement": None, "sheet_check_differences": [],
+           "triad_ref_differences": [], "stl_differences": []}
+    if vs is None:
+        rec["why"] = "no earlier committed measurement to compare against"
+        with open(os.path.join(MEAS, "delta.json"), "w", encoding="utf-8") as f:
+            json.dump(rec, f, indent=1)
+        return rec
+    rec["vs_rev_date"] = subprocess.check_output(
+        ["git", "log", "-1", "--format=%ci", vs], cwd=ROOT, text=True).strip()
+    new = json.loads(cur)
+    old = json.loads(git_blob(vs, path))
+    rec["this_measurement"] = new["generated"]
+    rec["prior_measurement"] = old["generated"]
+    for slug, s2 in new["sheets"].items():
+        o = old["sheets"].get(slug)
+        if o is None:
+            rec["sheet_check_differences"].append({"sheet": slug, "rule": "(sheet is new)"})
+            continue
+        for rule, c in s2["checks"].items():
+            oc = o["checks"].get(rule, {})
+            if (c.get("verdict"), c.get("measured")) != (oc.get("verdict"), oc.get("measured")):
+                rec["sheet_check_differences"].append(
+                    {"sheet": slug, "rule": rule, "was": [oc.get("verdict"), oc.get("measured")],
+                     "now": [c.get("verdict"), c.get("measured")]})
+    for slug in set(old["sheets"]) - set(new["sheets"]):
+        rec["sheet_check_differences"].append({"sheet": slug, "rule": "(sheet is gone)"})
+    tp = "out/factory/measure/triad.json"
+    tb = git_blob(vs, tp)
+    if tb:
+        om = {r["ref"]: r["verdict"] for r in json.loads(tb)["results"]}
+        nm = {r["ref"]: r["verdict"] for r in json.load(open(os.path.join(ROOT, tp), encoding="utf-8"))["results"]}
+        for k in sorted(set(om) | set(nm)):
+            if om.get(k) != nm.get(k):
+                rec["triad_ref_differences"].append({"ref": k, "was": om.get(k), "now": nm.get(k)})
+    sp = "out/factory/measure/stlcheck.json"
+    sb = git_blob(vs, sp)
+    if sb:
+        om = {r["file"]: (r.get("triangles"), r.get("watertight"), r.get("signed_volume_mm3")) for r in json.loads(sb)}
+        nm = {r["file"]: (r.get("triangles"), r.get("watertight"), r.get("signed_volume_mm3")) for r in json.load(open(os.path.join(ROOT, sp), encoding="utf-8"))}
+        for k in sorted(set(om) | set(nm)):
+            if om.get(k) != nm.get(k):
+                rec["stl_differences"].append({"stl": k, "was": om.get(k), "now": nm.get(k)})
+    n = (len(rec["sheet_check_differences"]) + len(rec["triad_ref_differences"])
+         + len(rec["stl_differences"]))
+    rec["differences"] = n
+    checks = sum(len(s2["checks"]) for s2 in new["sheets"].values())
+    refs = len(json.load(open(os.path.join(ROOT, tp), encoding="utf-8"))["results"])
+    stls = len(json.load(open(os.path.join(ROOT, sp), encoding="utf-8")))
+    rec["compared"] = {"sheet_checks": checks, "triad_refs": refs, "stls": stls}
+    rec["verdict"] = "UNCHANGED" if n == 0 else "MOVED"
+    rec["why"] = ("%d sheet checks + %d shelf refs + %d STL records re-measured %s against %s "
+                  "(commit %s): %d difference(s)"
+                  % (checks, refs, stls, new["generated"], old["generated"], vs[:7], n))
+    with open(os.path.join(MEAS, "delta.json"), "w", encoding="utf-8") as f:
+        json.dump(rec, f, indent=1)
+    print("delta vs %s (%s): %s — %s" % (vs[:7], old["generated"], rec["verdict"], rec["why"]), flush=True)
+    return rec
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--skip-sheets", action="store_true")
     ap.add_argument("--skip-triad", action="store_true")
+    ap.add_argument("--vs", default=None, help="git rev of the earlier measurement to diff against")
     a = ap.parse_args()
     os.makedirs(MEAS, exist_ok=True)
     started = datetime.datetime.now().astimezone().isoformat(timespec="seconds")
@@ -198,6 +289,7 @@ def main():
     run([sys.executable, "tools/slice_journal.py"])
     measure_slice_health()
     measure_sourcing()
+    measure_delta(a.vs)
     with open(os.path.join(MEAS, "run.json"), "w", encoding="utf-8") as f:
         json.dump({"started": started,
                    "finished": datetime.datetime.now().astimezone().isoformat(timespec="seconds"),
