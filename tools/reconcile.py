@@ -409,6 +409,58 @@ def eol_gates():
     }
 
 
+
+# ====================================================================== 5 glossary
+# THE DEFECT THIS FIXES (factory reviewer, 2026-09-04): the bilingual layer dropped
+# exactly the terms that carry the geometry. 沉孔 (counterbore) appeared ZERO times
+# across FACTORY-PACK, WORK-BREAKDOWN and FACTORY-QUESTIONS; the shop abbreviation
+# "c'bore" was left in English inside four Chinese sentences, including the hole
+# census itself; 间隙 (clearance), "tap" and "THRU" were untranslated in the one
+# table that has to survive the language barrier. One glossary, here, so all three
+# documents render the same terms and none of them can drift.
+GLOSSARY = [
+    ["c'bore", "counterbore", "沉孔",
+     "A flat-bottomed enlargement at the mouth of a hole so a cap-screw head sits below the surface. "
+     "On this robot: Ø4.4 over a Ø2.2 clearance hole, for an M2 socket head.",
+     "孔口处的平底扩孔，使内六角螺钉头沉入表面以下。本机为 Ø2.2 过孔上方的 Ø4.4 沉孔，配 M2 内六角圆柱头螺钉。"],
+    ["CSK", "countersink", "锪孔 / 埋头孔",
+     "A conical enlargement for a flat-head screw. Not used on this robot; listed so it is not confused with a counterbore.",
+     "供沉头螺钉使用的锥形扩孔。本机未使用，列出以免与沉孔混淆。"],
+    ["clearance", "clearance hole", "间隙孔 / 过孔",
+     "A hole the screw passes THROUGH without engaging thread. Ø2.2 for M2 here (ISO medium fit).",
+     "螺钉<b>穿过</b>而不与之啮合的孔。本机 M2 用 Ø2.2（ISO 中等配合）。"],
+    ["tap", "tapped hole / tap drill", "攻丝孔 / 攻丝底孔",
+     "A hole the screw threads INTO. Ø1.6 is the TAP-DRILL size for an M2 thread; a finished M2 tapped hole is not Ø1.6.",
+     "螺钉<b>旋入</b>的孔。Ø1.6 是 M2 螺纹的<b>底孔</b>直径；攻好丝的 M2 螺孔并非 Ø1.6。"],
+    ["THRU", "through", "通孔",
+     "The hole passes entirely through the part. The opposite is a blind hole.",
+     "孔贯穿整个零件。与之相对的是盲孔。"],
+    ["heat-set insert", "heat-set threaded insert", "热熔螺母 / 热压螺母",
+     "A knurled brass nut pressed into printed plastic with a heated tool, giving a metal thread in a plastic part.",
+     "用加热工具压入打印塑料件的滚花黄铜螺母，使塑料件获得金属螺纹。"],
+    ["press fit", "interference fit", "过盈配合",
+     "The shaft is larger than the bore and is pressed in. Used for the bearing seats.",
+     "轴径大于孔径，需压入装配。本机用于轴承座。"],
+    ["SF", "safety factor", "安全系数",
+     "Material yield strength divided by the peak simulated stress. Every SF in this project is SIMULATED, never measured.",
+     "材料屈服强度除以仿真峰值应力。本项目所有安全系数均为<b>仿真值</b>，非实测。"],
+    ["DFM", "design for manufacture", "可制造性设计",
+     "Review of a part against the process that will actually make it.",
+     "针对实际制造工艺对零件进行的评审。"],
+    ["DRC", "design rule check", "设计规则检查",
+     "The PCB layout checked against the fabricator's own minimum track, space and drill rules.",
+     "按 PCB 厂自有的最小线宽、间距与钻孔规则对布线进行检查。"],
+    ["MOQ", "minimum order quantity", "最小起订量",
+     "The smallest quantity a supplier will sell.", "供应商可接受的最小销售数量。"],
+    ["FAI", "first-article inspection", "首件检验",
+     "Full dimensional and functional inspection of the first units off a new process.",
+     "对新工艺下线的首批整机进行的全尺寸与功能检验。"],
+    ["ray minimum", "ray-cast minimum thickness", "射线最小厚度",
+     "The shortest distance between two surfaces found by casting rays through the solid. At an edge "
+     "or a fillet run-out this goes to nearly zero and IS NOT a printable wall.",
+     "对实体投射射线所测得的两面之间最短距离。在棱边或圆角收尾处该值趋近于零，<b>不是可打印壁厚</b>。"],
+]
+
 # ====================================================================== write
 rec = {
     "$doc": ("out/factory/reconcile.json — the cross-document reconciliations behind FACTORY-PACK.html "
@@ -419,6 +471,8 @@ rec = {
     "fasteners": fasteners(),
     "unknowns": unknowns(),
     "eol_gates": eol_gates(),
+    "glossary": [{"on_drawing": g[0], "term_en": g[1], "term_zh": g[2],
+                  "what_en": g[3], "what_zh": g[4]} for g in GLOSSARY],
 }
 os.makedirs(os.path.dirname(OUT), exist_ok=True)
 with open(OUT, "w", encoding="utf-8") as f:
@@ -432,6 +486,7 @@ print("  fasteners: %s" % ", ".join("%s = %s" % (c["what_en"].split(" in ")[0], 
 print("  unknowns: harvest %d vs census %s distinct / %s occurrences"
       % (rec["unknowns"]["curated_harvest"]["n"], rec["unknowns"]["repository_census"]["distinct_subjects"],
          rec["unknowns"]["repository_census"]["occurrences"]))
+print("  glossary: %d shop terms, both languages" % len(GLOSSARY))
 print("  eol gates: %s — %s" % (rec["eol_gates"]["verdict"], rec["eol_gates"]["arithmetic"]))
 if rec["eol_gates"]["verdict"] != "PASS":
     raise SystemExit("reconcile: the end-of-line gate list is NOT complete: %s unaccounted for"

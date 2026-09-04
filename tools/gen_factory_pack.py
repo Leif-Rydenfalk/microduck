@@ -144,10 +144,26 @@ NOT_READY = [
      "who": "agent, tonight (WF-SHEETS) for layout; a parametric rebuild for the mesh-backed parts",
      "who_zh": "版面由软件代理今晚完成（WF-SHEETS）；网格来源零件需参数化重建",
      "src": "out/factory/measure/sheetcheck.json (bin/sheetcheck %s)" % sheets["generated"]},
-    {"k": "printed parts with no drawing sheet at all", "k_zh": "完全没有图纸的打印件",
+    {"k": "parts with no drawing sheet at all", "k_zh": "完全没有图纸的零件",
      "n": str(len(sheets["parts_without_a_sheet"])),
-     "why": "No out/drawings/<slug>/ folder exists for " + ", ".join(sheets["parts_without_a_sheet"]) + ".",
-     "why_zh": "以下零件没有 out/drawings/<slug>/ 目录：" + "、".join(sheets["parts_without_a_sheet"]) + "。",
+     "why": ("No sheet exists for " + ", ".join(sheets["parts_without_a_sheet"]) + ". This list is the "
+             "UNION of two walks, because either alone is wrong by a part and this row was wrong by one "
+             "until 2026-09-04: %s ha%s no out/drawings folder at all, so bin/sheetcheck cannot see %s "
+             "(it only walks folders that exist); %s ha%s a folder with no sheet SVG but %s not a "
+             "printed part, so a walk of the print list cannot see %s."
+             % (", ".join(sheets["parts_without_a_sheet_how"]["from_print_walk_only"]) or "no part",
+                "ve" if len(sheets["parts_without_a_sheet_how"]["from_print_walk_only"]) != 1 else "s",
+                "them" if len(sheets["parts_without_a_sheet_how"]["from_print_walk_only"]) != 1 else "it",
+                ", ".join(sheets["parts_without_a_sheet_how"]["from_sheetcheck_only"]) or "no part",
+                "ve" if len(sheets["parts_without_a_sheet_how"]["from_sheetcheck_only"]) != 1 else "s",
+                "they are" if len(sheets["parts_without_a_sheet_how"]["from_sheetcheck_only"]) != 1 else "is",
+                "them" if len(sheets["parts_without_a_sheet_how"]["from_sheetcheck_only"]) != 1 else "it")),
+     "why_zh": ("以下零件没有图纸：" + "、".join(sheets["parts_without_a_sheet"]) +
+                "。本清单是<b>两种遍历的并集</b>，因为单用其中任何一种都会漏掉零件——直到 2026-09-04 本行仍漏了一个："
+                "%s 根本没有 out/drawings 目录，bin/sheetcheck 只遍历已存在的目录，因而看不到它；"
+                "%s 有目录但没有图纸 SVG，且不属于打印件，因而遍历打印清单也看不到它。"
+                % ("、".join(sheets["parts_without_a_sheet_how"]["from_print_walk_only"]) or "（无）",
+                   "、".join(sheets["parts_without_a_sheet_how"]["from_sheetcheck_only"]) or "（无）")),
      "who": "agent, tonight (WF-SHEETS)", "who_zh": "软件代理，今晚（WF-SHEETS）",
      "src": "out/print/slice.json against out/drawings/"},
     {"k": "custom PCBs that pass their own DRC", "k_zh": "通过自身 DRC 的定制 PCB",
@@ -548,12 +564,39 @@ if isinstance(wp_parcels, int) and wp_parcels:
     A.append('<p class="zh">上述每一项均已在 <a href="WORK-BREAKDOWN.html">WORK-BREAKDOWN.html</a> 中切分为每人一份的工作包（共 %d 个）。今晚由软件代理完成的工作在其中标记为 IN FLIGHT，请勿重复。</p>' % wp_parcels)
 inflight = RD.get("in_flight", [])
 if inflight:
-    A.append('<h3>Work an agent is closing tonight — do not start these · 今晚由软件代理完成的工作，请勿开工</h3>')
-    A.append('<table>' + cols(14, 46, 40) + '<tr>' + th("Workflow", "工作流") + th("What it is closing", "工作内容")
+    # LIVENESS IS MEASURED, NOT ASSERTED. A factory reviewer found on 2026-09-04 that
+    # three of the six lanes this table told engineers not to touch had no artifact on
+    # disk at all, or none written for fifteen hours. "In flight" is a claim about a
+    # process nobody can see; the checkable version is the age of the newest byte under
+    # a path the lane owns, which tools/gen_readiness.py now stats for every one.
+    _live = [w for w in inflight if w.get("liveness") == "LIVE"]
+    _dead = [w for w in inflight if w.get("liveness") != "LIVE"]
+    A.append('<h3>Work an agent may already be closing · 软件代理可能已在处理的工作</h3>')
+    A.append('<p class="lede">Listed so you do not duplicate it — but <b>“in flight” is measured here, '
+             'not asserted</b>: every path each lane owns is stat\'d and the age of its newest byte is '
+             'printed. A lane whose newest artifact is older than 90 minutes, or which has written '
+             'nothing at all, does NOT reserve work from you. Measured %s: <b>%d of %d lanes are '
+             'LIVE</b>%s.</p>'
+             % (E(RD.get("measured_at", "")), len(_live), len(inflight),
+                ("; " + ", ".join(E(w["id"]) for w in _dead) + " " +
+                 ("are" if len(_dead) != 1 else "is") + " not, and that work is assignable") if _dead else ""))
+    A.append('<p class="lede zh">列出以避免重复劳动——但<b>此处的“进行中”是实测结果而非断言</b>：'
+             '对每条工作流占用的全部路径读取文件属性，并给出最新字节的写入时间。'
+             '若最新产出已超过 90 分钟，或根本没有产出，则该工作流<b>不能</b>为自己保留工作。'
+             '本次实测：%d / %d 条工作流处于活跃状态。</p>' % (len(_live), len(inflight)))
+    A.append('<table>' + cols(11, 13, 34, 42) + '<tr>' + th("Workflow", "工作流")
+             + th("Liveness", "活跃状态") + th("What it is closing", "工作内容")
              + th("Paths it owns (do not write these)", "其占用路径（请勿写入）") + '</tr>')
     for w in inflight:
-        A.append('<tr><td class="m">%s</td><td>%s<br><span class="zh">%s</span></td><td class="m">%s</td></tr>'
-                 % (E(w["id"]), E(w["en"]), E(w["zh"]), E(w.get("owns", ""))))
+        _c = {"LIVE": "cd"}.get(w.get("liveness"), "no")
+        _age = ("newest byte %s min ago" % w["newest_artifact_age_min"]) if w.get("newest_artifact_age_min") is not None else "nothing on disk"
+        A.append('<tr><td class="m">%s</td>'
+                 '<td><b class="%s">%s</b><br><span class="mono" style="font-size:10.5px">%s</span><br>%s</td>'
+                 '<td>%s<br><span class="zh">%s</span></td>'
+                 '<td class="m">%s<br><span style="font-family:var(--sans);font-size:11px">%s</span></td></tr>'
+                 % (E(w["id"]), _c, E(w.get("liveness", "CANNOT DETERMINE")), E(_age),
+                    E("DO NOT ASSIGN" if w.get("liveness") == "LIVE" else "ASSIGNABLE — ask first"),
+                    E(w["en"]), E(w["zh"]), E(w.get("owns", "")), E(w.get("liveness_why", ""))))
     A.append('</table>')
 A.append('</section>')
 
@@ -884,6 +927,21 @@ for p, en, zh, st in DOCS:
     A.append('<tr><td class="m">%s</td><td>%s<br><span class="zh">%s</span></td><td class="num">@@SIZE:%s@@</td><td class="m">@@MTIME:%s@@</td></tr>'
              % (link, E(en), E(zh), p, p))
 A.append('</table>')
+A.append('<h3>Glossary of shop terms · 车间术语对照</h3>')
+A.append('<p class="lede">The abbreviations on our drawings and in the hole census, in both languages. '
+         'An English abbreviation inside a Chinese sentence is exactly the place a drawing stops '
+         'crossing the language barrier; these are the terms that were being dropped.</p>')
+A.append('<p class="lede zh">我方图纸与孔位统计中出现的缩写，双语对照。中文句子里夹一个英文缩写，'
+         '正是图纸失去跨语言能力的地方；下列正是此前被漏译的术语。</p>')
+A.append('<table>' + cols(13, 15, 17, 55) + '<tr>' + th("On the drawing", "图纸标注")
+         + th("Full term", "全称") + th("中文", "Chinese") + th("What it is", "含义") + '</tr>')
+for _g in RC["glossary"]:
+    A.append('<tr><td class="m">%s</td><td>%s</td><td><b>%s</b></td><td>%s<br><span class="zh">%s</span></td></tr>'
+             % (E(_g["on_drawing"]), E(_g["term_en"]), E(_g["term_zh"]),
+                E(_g["what_en"]).replace("&lt;b&gt;", "<b>").replace("&lt;/b&gt;", "</b>"),
+                E(_g["what_zh"]).replace("&lt;b&gt;", "<b>").replace("&lt;/b&gt;", "</b>")))
+A.append('</table>')
+
 A.append('<h3>Data and source artifacts · 数据与源文件</h3>')
 A.append('<table>' + cols(26, 44, 14, 16) + '<tr>' + th("Path", "路径") + th("What it is", "内容")
          + th("Size", "大小") + th("Last changed", "最后修改") + '</tr>')

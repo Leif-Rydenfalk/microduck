@@ -1,559 +1,1127 @@
 {
-  "$comment": "Prose for tools/gen_questions.py -> FACTORY-QUESTIONS.html. Numbers are NOT typed here: any {token} is filled by the generator from a measurement file and an unfilled token is a hard error. EN + 简体中文.",
-  "doc": {
-    "id": "MD-FACT-Q-001", "rev": "A",
-    "title": "Questions for the factory",
-    "title_zh": "致工厂的问题清单",
-    "sub": "The things only a factory with real machines, real materials and real measurement can answer. Each question says why we ask and what we will do with each possible answer — a question whose answer changes nothing is not on this list.",
-    "sub_zh": "只有拥有实机、实料与实测能力的工厂才能回答的问题。每个问题都说明为何提问，以及对每种可能的答复我方将如何处理——答复不会改变任何事情的问题，不在此列。"
+ "$comment": "Prose for tools/gen_questions.py -> FACTORY-QUESTIONS.html. Numbers are NOT typed here: any {token} is filled by the generator from a measurement file and an unfilled token is a hard error. EN + 简体中文.",
+ "doc": {
+  "id": "MD-FACT-Q-001",
+  "rev": "A",
+  "title": "Questions for the factory",
+  "title_zh": "致工厂的问题清单",
+  "sub": "The things only a factory with real machines, real materials and real measurement can answer. Each question says why we ask and what we will do with each possible answer — a question whose answer changes nothing is not on this list.",
+  "sub_zh": "只有拥有实机、实料与实测能力的工厂才能回答的问题。每个问题都说明为何提问，以及对每种可能的答复我方将如何处理——答复不会改变任何事情的问题，不在此列。"
+ },
+ "how_to_answer": {
+  "en": "Answer in the right-hand column of this table, or in any form you like as long as each answer carries our question id (Q1.1 …). Where the answer is a number, we want the number and where it came from: a datasheet page, a coupon you printed and measured, a quotation. 'Typical' is not an answer we can compute with. If a question does not apply to your plant, write 'not applicable' and why — that is a useful answer and we will strike the question.",
+  "zh": "请在本表右栏作答，或采用任何形式作答，只需注明我方问题编号（Q1.1 …）。若答复是数字，请同时给出出处：数据表页码、贵厂打印并实测的试件、或正式报价。“典型值”无法用于计算。若某问题不适用于贵厂，请写“不适用”并说明原因——这同样是有用的答复，我方会据此删除该问题。"
+ },
+ "priority": {
+  "blocking": {
+   "en": "BLOCKING — we cannot finish a document until this is answered",
+   "zh": "阻塞项——未答复前我方无法完成相应文件"
   },
-  "how_to_answer": {
-    "en": "Answer in the right-hand column of this table, or in any form you like as long as each answer carries our question id (Q1.1 …). Where the answer is a number, we want the number and where it came from: a datasheet page, a coupon you printed and measured, a quotation. 'Typical' is not an answer we can compute with. If a question does not apply to your plant, write 'not applicable' and why — that is a useful answer and we will strike the question.",
-    "zh": "请在本表右栏作答，或采用任何形式作答，只需注明我方问题编号（Q1.1 …）。若答复是数字，请同时给出出处：数据表页码、贵厂打印并实测的试件、或正式报价。“典型值”无法用于计算。若某问题不适用于贵厂，请写“不适用”并说明原因——这同样是有用的答复，我方会据此删除该问题。"
+  "high": {
+   "en": "HIGH — changes a number we have published",
+   "zh": "高——将改变我方已发布的数字"
   },
-  "priority": {
-    "blocking": {"en": "BLOCKING — we cannot finish a document until this is answered", "zh": "阻塞项——未答复前我方无法完成相应文件"},
-    "high": {"en": "HIGH — changes a number we have published", "zh": "高——将改变我方已发布的数字"},
-    "normal": {"en": "NORMAL — improves the plan", "zh": "一般——有助于完善方案"}
+  "normal": {
+   "en": "NORMAL — improves the plan",
+   "zh": "一般——有助于完善方案"
+  }
+ },
+ "need": {
+  "coupon": {
+   "en": "needs a coupon printed and measured",
+   "zh": "需打印并实测试件"
   },
-  "need": {
-    "coupon": {"en": "needs a coupon printed and measured", "zh": "需打印并实测试件"},
-    "datasheet": {"en": "needs a datasheet value", "zh": "需数据表数值"},
-    "quote": {"en": "needs a quotation", "zh": "需报价"},
-    "capability": {"en": "needs a capability statement", "zh": "需能力声明"},
-    "decision": {"en": "needs your engineering judgement", "zh": "需贵方工程判断"}
+  "datasheet": {
+   "en": "needs a datasheet value",
+   "zh": "需数据表数值"
   },
-  "sections": [
+  "quote": {
+   "en": "needs a quotation",
+   "zh": "需报价"
+  },
+  "capability": {
+   "en": "needs a capability statement",
+   "zh": "需能力声明"
+  },
+  "decision": {
+   "en": "needs your engineering judgement",
+   "zh": "需贵方工程判断"
+  }
+ },
+ "sections": [
+  {
+   "n": "1",
+   "id": "process",
+   "title_en": "Process capability — what tolerance can you actually hold",
+   "title_zh": "工艺能力——贵厂实际能保证的公差",
+   "lede_en": "Our drawings carry NO in-house tolerance basis. Measured 2026-09-02 and unchanged since: every printer on our farm records tolerance_mm: null with the reason 'no coupon printed and measured on this machine', and Bambu Lab's own spec sheet has no dimensional-accuracy line. Our sheets therefore say DIMENSIONS ARE NOMINAL AS MODELLED and quote an outsourced figure ({tol_outsourced}) as the only cited number in the repository. Your process capability replaces that note.",
+   "lede_zh": "我方图纸没有自有公差依据。2026-09-02 实测且至今未变：我方所有打印机的 tolerance_mm 均为 null，理由是“本机未打印并测量过试件”；Bambu Lab 官方规格书也无尺寸精度条目。因此我方图纸标注“尺寸为建模名义值”，并引用外协数据（{tol_outsourced}）作为仓库中唯一有出处的数字。贵厂的工艺能力将取代该说明。",
+   "questions": [
     {
-      "n": "1", "id": "process",
-      "title_en": "Process capability — what tolerance can you actually hold",
-      "title_zh": "工艺能力——贵厂实际能保证的公差",
-      "lede_en": "Our drawings carry NO in-house tolerance basis. Measured 2026-09-02 and unchanged since: every printer on our farm records tolerance_mm: null with the reason 'no coupon printed and measured on this machine', and Bambu Lab's own spec sheet has no dimensional-accuracy line. Our sheets therefore say DIMENSIONS ARE NOMINAL AS MODELLED and quote an outsourced figure ({tol_outsourced}) as the only cited number in the repository. Your process capability replaces that note.",
-      "lede_zh": "我方图纸没有自有公差依据。2026-09-02 实测且至今未变：我方所有打印机的 tolerance_mm 均为 null，理由是“本机未打印并测量过试件”；Bambu Lab 官方规格书也无尺寸精度条目。因此我方图纸标注“尺寸为建模名义值”，并引用外协数据（{tol_outsourced}）作为仓库中唯一有出处的数字。贵厂的工艺能力将取代该说明。",
-      "questions": [
-        {
-          "id": "Q1.1", "priority": "blocking", "need": "coupon",
-          "ask_en": "For FDM in the material you would use, what dimensional tolerance do you hold on (a) an external dimension of 20-100 mm, (b) a hole diameter of 2-22 mm, (c) a wall of 0.8-3 mm? Please answer from a coupon you print and measure, not from a brochure.",
-          "ask_zh": "对贵厂拟用材料的 FDM 工艺，(a) 20-100 mm 外形尺寸、(b) Ø2-22 mm 孔径、(c) 0.8-3 mm 壁厚，各能保证多少尺寸公差？请以贵厂实际打印并测量的试件为依据，而非样本手册。",
-          "ours_en": "In-house: CANNOT DETERMINE. Outsourced, cited: {tol_outsourced}. A planning constant of ±0.2 mm exists in our code and is deliberately NOT used on any sheet because it has no vendor citation.",
-          "ours_zh": "自有产线：无法判定。外协并有出处的数据：{tol_outsourced}。我方代码中有 ±0.2 mm 的规划常数，因无供应商出处，图纸上一律不使用。",
-          "source": "out/drawings/microduck-shin/result.json — the sheet's own TOLERANCE BASIS notes",
-          "branches_en": [
-            ["you hold ±0.2 mm or better on all three", "we put your figure on every sheet as the tolerance basis, and the 22×16×4 and 15×10×3 bearing seats can be printed to size without reaming"],
-            ["you hold ±0.3 to ±0.5 mm", "we add a reaming or post-machining operation to every bearing and press-fit bore and put it in the routing, and we re-check every clearance in the tolerance stack against your figure"],
-            ["you cannot state a figure without a paid coupon run", "we pay for the coupon run — tell us the cost; a measured number is worth more to us than any other single answer on this page"]
-          ],
-          "branches_zh": [
-            ["三项均可保证 ±0.2 mm 或更优", "我方将贵厂数据作为公差依据标注于每张图纸；22×16×4 与 15×10×3 轴承座可直接打印到位，无需铰孔"],
-            ["可保证 ±0.3 至 ±0.5 mm", "我方为所有轴承孔与压配孔增加铰孔或后加工工序并写入工艺路线，并按贵厂数据重算全部配合尺寸链"],
-            ["未做付费试件则无法给出数值", "该试件费用由我方承担，请报价；一个实测数字对我方的价值高于本页任何其他答复"]
-          ]
-        },
-        {
-          "id": "Q1.2", "priority": "blocking", "need": "decision",
-          "ask_en": "How do you prepare a printed bearing seat: print to size, ream, or press with a heated tool? What interference do you hold for a Ø22 h7-class ball bearing into a printed bore, and what pull-out force does it give you?",
-          "ask_zh": "打印件轴承座如何处理：直接打印到位、铰孔、还是加热压装？Ø22 级滚珠轴承压入打印孔时贵厂控制多少过盈量，可获得多大拔出力？",
-          "ours_en": "NO interference is specified anywhere in our repository. The seats are modelled at nominal (Ø16.000 boss, Ø22.000 bore) and no ISO 286 fit class is declared on any bore, because FDM cannot be sized to one (H7/p6 at Ø22 is a 0.021 mm band). There are {bearings_22} bearings of 22×16×4 and {bearings_15} of 15×10×3 in the robot.",
-          "ours_zh": "我方仓库中未规定任何过盈量。轴承座按名义尺寸建模（Ø16.000 轴肩、Ø22.000 孔），且任何孔位均未标注 ISO 286 配合等级，因为 FDM 无法达到该精度（Ø22 的 H7/p6 公差带仅 0.021 mm）。整机有 22×16×4 轴承 {bearings_22} 个、15×10×3 轴承 {bearings_15} 个。",
-          "source": "tools/data/playbook.json open['Interference at every printed bearing seat'] = CANNOT DETERMINE; SPEC.md:77-78",
-          "branches_en": [
-            ["you press into a printed bore with a stated interference", "we model the bore at your nominal minus that interference and put the press force on the station sheet"],
-            ["you ream every seat", "we add the reamed size and the ream allowance to the drawing and to the routing, and the seat becomes a controlled dimension"],
-            ["you would rather we design in a heat-set steel sleeve", "we will — tell us the sleeve you stock and we re-model the seat around it"]
-          ],
-          "branches_zh": [
-            ["按规定过盈量直接压入打印孔", "我方按贵厂名义尺寸减去该过盈量建模，并将压装力写入工位卡"],
-            ["每个座孔均铰孔", "我方在图纸与工艺路线中标注铰后尺寸与铰削余量，该孔成为受控尺寸"],
-            ["建议改用热压钢衬套", "可以，请告知贵厂常备衬套规格，我方据此重做座孔"]
-          ]
-        },
-        {
-          "id": "Q1.3", "priority": "high", "need": "capability",
-          "ask_en": "What is your minimum printable wall, minimum hole, and minimum unsupported bridge on the process you would use for these parts? Our thinnest modelled wall per part is on every drawing sheet.",
-          "ask_zh": "针对本项目零件，贵厂工艺的最小可打印壁厚、最小孔径与最大无支撑跨桥各为多少？我方各零件的最小建模壁厚已标注于每张图纸。",
-          "ours_en": "Our print profile is {profile_walls} at a 0.4 mm nozzle, which is the {wall_floor} mm wall floor every DFM verdict in the playbook is measured against. {support_count} of {print_slugs} parts carry a slicer support warning at that profile.",
-          "ours_zh": "我方打印配置为 {profile_walls}，0.4 mm 喷嘴，对应 {wall_floor} mm 壁厚下限，制造手册中所有 DFM 判定均以此为准。该配置下 {print_slugs} 个零件中有 {support_count} 个存在切片支撑警告。",
-          "source": "tools/data/playbook.json profile (BambuStudio 0.20mm Standard @BBL H2S, inherit chain resolved); out/print/slice.json slicer_warning",
-          "branches_en": [
-            ["your floors are at or below ours", "nothing changes; we keep the geometry"],
-            ["your floors are above ours", "name the parts that violate them and we thicken those features and re-run the FEA at the new section"],
-            ["you would use a different nozzle or layer height", "send the profile; we re-slice every part on it so the grams and hours in the pack are yours, not ours"]
-          ],
-          "branches_zh": [
-            ["贵厂下限不高于我方", "几何保持不变"],
-            ["贵厂下限高于我方", "请指出违反的零件，我方加厚相应特征并按新截面重跑有限元"],
-            ["贵厂拟用不同喷嘴或层高", "请提供配置文件，我方按其重新切片全部零件，使交付包中的克数与工时来自贵厂而非我方"]
-          ]
-        },
-        {
-          "id": "Q1.4", "priority": "normal", "need": "capability",
-          "ask_en": "For the visible shells, what surface finish do you achieve as printed, and what post-process (sanding, vapour, coating, paint) do you recommend at what added cost and cycle time per unit?",
-          "ask_zh": "对外观外壳，贵厂打印后可达到何种表面质量？建议何种后处理（打磨、熏蒸、涂层、喷漆）？每台增加的成本与工时各为多少？",
-          "ours_en": "We have written NO cosmetic acceptance standard — it is an open item in our own playbook. The visible parts are the two trunk shells, the top and bottom head shells and the face part, {shell_grams} g and {shell_hours} h of printing per robot between them.",
-          "ours_zh": "我方尚未制定外观验收标准——这是我方制造手册中的未决项。外观件为两片躯干壳、上下头壳与面板，每台合计打印 {shell_grams} 克、{shell_hours} 小时。",
-          "source": "tools/data/playbook.json open['Cosmetic acceptance standard for a printed shell'] = CANNOT DETERMINE; out/print/slice.json",
-          "branches_en": [
-            ["as-printed is acceptable at your line rate", "we write your as-printed finish into the cosmetic standard and photograph a golden sample"],
-            ["you recommend a post-process", "we cost it per unit against the moulding break-even in section 3 and decide with you"],
-            ["you consider these parts unsuitable for FDM cosmetically", "that is the strongest argument for tooling them and it goes straight into section 3"]
-          ],
-          "branches_zh": [
-            ["按贵厂节拍，打印原态即可接受", "我方将贵厂原态表面写入外观标准，并拍摄标准样件"],
-            ["贵厂建议做后处理", "我方按单台成本与第 3 节的开模盈亏平衡点对比，与贵方共同决策"],
-            ["贵方认为这些外观件不适合 FDM", "这将是开模最有力的理由，直接进入第 3 节"]
-          ]
-        },
-        {
-          "id": "Q1.5", "priority": "high", "need": "capability",
-          "ask_en": "Do you install M2 brass heat-set inserts in printed parts, with what tool, at what temperature and insertion depth, and what pull-out and torque-to-fail do you get in the material you would use?",
-          "ask_zh": "贵厂是否在打印件中安装 M2 黄铜热熔螺母？使用何种工具、温度与压入深度？在拟用材料中可获得多大拔出力与破坏扭矩？",
-          "ours_en": "The robot is an M2 system: {holes_total} holes ({hole_breakdown}), and we already buy {insert_qty} heat-set inserts and {screw_qty} screws and nuts per robot. We have NO torque figure for any of them — ROBOTIS publishes no tightening torque for the XL330's own tapped holes and we refuse to copy a steel-into-steel chart figure into a plastic joint.",
-          "ours_zh": "整机为 M2 体系：共 {holes_total} 个孔（{hole_breakdown}），每台已采购热熔螺母 {insert_qty} 个、螺钉与螺母 {screw_qty} 件。但我方没有任何扭矩数据——ROBOTIS 未公布 XL330 自带螺纹孔的拧紧扭矩，我方拒绝把钢对钢的表格数值套用于塑料连接。",
-          "source": "SPEC.md:75-76 hole census; spec/sourcing.json B18a/B18b/B18c; tools/data/playbook.json torque = 3/3 CANNOT DETERMINE",
-          "branches_en": [
-            ["you can run a strip test and a pull-out test on our parts", "you set the torque schedule and we publish it with your test as the source — this closes the single largest hole in the assembly document"],
-            ["you have house values for M2 into PLA/PETG", "send them with the test method and we adopt them provisionally, marked as your figures"],
-            ["you do not use inserts", "tell us what you use instead (self-tapping into a boss, nut trap) and we re-model every boss for it"]
-          ],
-          "branches_zh": [
-            ["贵厂可对我方零件做滑牙与拔出试验", "由贵厂确定扭矩表，我方以贵厂试验为出处发布——这将补上装配文件中最大的缺口"],
-            ["贵厂有 M2 在 PLA/PETG 中的内部数据", "请连同试验方法提供，我方暂按贵厂数据采用并注明来源"],
-            ["贵厂不使用热熔螺母", "请告知替代方案（自攻入柱、嵌入螺母槽），我方据此重做所有螺柱"]
-          ]
-        }
+     "id": "Q1.1",
+     "priority": "blocking",
+     "need": "coupon",
+     "ask_en": "For FDM in the material you would use, what dimensional tolerance do you hold on (a) an external dimension of 20-100 mm, (b) a hole diameter of 2-22 mm, (c) a wall of 0.8-3 mm? Please answer from a coupon you print and measure, not from a brochure.",
+     "ask_zh": "对贵厂拟用材料的 FDM 工艺，(a) 20-100 mm 外形尺寸、(b) Ø2-22 mm 孔径、(c) 0.8-3 mm 壁厚，各能保证多少尺寸公差？请以贵厂实际打印并测量的试件为依据，而非样本手册。",
+     "ours_en": "In-house: CANNOT DETERMINE. Outsourced, cited: {tol_outsourced}. A planning constant of ±0.2 mm exists in our code and is deliberately NOT used on any sheet because it has no vendor citation.",
+     "ours_zh": "自有产线：无法判定。外协并有出处的数据：{tol_outsourced}。我方代码中有 ±0.2 mm 的规划常数，因无供应商出处，图纸上一律不使用。",
+     "source": "out/drawings/microduck-shin/result.json — the sheet's own TOLERANCE BASIS notes",
+     "branches_en": [
+      [
+       "you hold ±0.2 mm or better on all three",
+       "we put your figure on every sheet as the tolerance basis, and the 22×16×4 and 15×10×3 bearing seats can be printed to size without reaming"
+      ],
+      [
+       "you hold ±0.3 to ±0.5 mm",
+       "we add a reaming or post-machining operation to every bearing and press-fit bore and put it in the routing, and we re-check every clearance in the tolerance stack against your figure"
+      ],
+      [
+       "you cannot state a figure without a paid coupon run",
+       "we pay for the coupon run — tell us the cost; a measured number is worth more to us than any other single answer on this page"
       ]
+     ],
+     "branches_zh": [
+      [
+       "三项均可保证 ±0.2 mm 或更优",
+       "我方将贵厂数据作为公差依据标注于每张图纸；22×16×4 与 15×10×3 轴承座可直接打印到位，无需铰孔"
+      ],
+      [
+       "可保证 ±0.3 至 ±0.5 mm",
+       "我方为所有轴承孔与压配孔增加铰孔或后加工工序并写入工艺路线，并按贵厂数据重算全部配合尺寸链"
+      ],
+      [
+       "未做付费试件则无法给出数值",
+       "该试件费用由我方承担，请报价；一个实测数字对我方的价值高于本页任何其他答复"
+      ]
+     ]
     },
     {
-      "n": "2", "id": "materials",
-      "title_en": "Materials — our entire structural safety-factor set rests on one assumed number",
-      "title_zh": "材料——我方全部结构安全系数都建立在一个假设数值上",
-      "lede_en": "Every finite-element verdict we publish uses a yield of {pla_yield} MPa for PLA, with density {pla_density} g/cm³ and modulus {pla_E} GPa, taken from a table in our own CAD library at {pla_src}. That table row has NO source: our materials module says in its own comments that density and Young's modulus 'exist only in fits.py' and 'have NO SOURCE AT ALL'. It is also isotropic, and FDM is not. So the honest state is that our safety factors are arithmetic on an assumption. Your filament's datasheet replaces it.",
-      "lede_zh": "我方发布的每一项有限元判定，PLA 均按屈服 {pla_yield} MPa、密度 {pla_density} g/cm³、模量 {pla_E} GPa 计算，取自我方 CAD 库中的一张表（{pla_src}）。该表行<b>没有任何出处</b>：我方材料模块的注释明确写道，密度与杨氏模量“只存在于 fits.py 中”“完全没有来源”。且该模型为各向同性，而 FDM 并非如此。因此实情是：我方安全系数只是基于假设的算术。贵厂材料数据表将取代它。",
-      "questions": [
-        {
-          "id": "Q2.1", "priority": "blocking", "need": "datasheet",
-          "ask_en": "For each filament you would use, send the datasheet: tensile strength IN-PLANE (XY) and ACROSS LAYERS (Z), Young's modulus, elongation at break, density, and the print settings those coupons were made at. If you have your own coupon data rather than the maker's, we prefer yours.",
-          "ask_zh": "请提供贵厂拟用每种耗材的数据表：面内（XY）与层间（Z）拉伸强度、杨氏模量、断裂伸长率、密度，以及试件的打印参数。若贵厂有自测数据而非厂家数据，我方更希望采用贵厂数据。",
-          "ours_en": "PLA {pla_yield} MPa / {pla_density} g/cm³ / {pla_E} GPa, isotropic, unsourced ({pla_src}). Every safety factor in STRUCTURAL.html and SIMULATION.html is computed against that one number.",
-          "ours_zh": "PLA：{pla_yield} MPa / {pla_density} g/cm³ / {pla_E} GPa，各向同性，无出处（{pla_src}）。STRUCTURAL.html 与 SIMULATION.html 中每一个安全系数都基于这一个数字。",
-          "source": "ce-cad/cecad/fits.py:302 and cecad/materials.py comment block on ungrounded properties",
-          "branches_en": [
-            ["your XY strength is at or above ours", "we re-run every FEA case with your number and republish the safety-factor table with your datasheet as the citation"],
-            ["your Z strength is materially lower (the usual case)", "we re-run each part in the orientation you would print it, treating the load across layers, and any part that then fails is re-oriented or re-designed before tooling — this is the correct way to do it and we cannot do it without your Z number"],
-            ["you would use a different polymer entirely", "send its datasheet; the material sweep is already automated, so a new material is a re-run, not a redesign"]
-          ],
-          "branches_zh": [
-            ["贵厂 XY 强度不低于我方假设", "我方按贵厂数据重跑全部有限元工况，并以贵厂数据表为出处重新发布安全系数表"],
-            ["贵厂 Z 向强度明显更低（常见情形）", "我方按贵厂实际打印方向重跑每个零件，按层间受载计算；届时不合格的零件在开模前重新定向或重新设计——这才是正确做法，而没有贵厂 Z 向数据就无法进行"],
-            ["贵厂拟用完全不同的聚合物", "请提供其数据表；材料扫掠已自动化，换材料只是重跑，不是重新设计"]
-          ]
-        },
-        {
-          "id": "Q2.2", "priority": "blocking", "need": "decision",
-          "ask_en": "Our simulated landing case FAILS on the ankle in every material we tried: safety factor {ankle_sf_pla} in PLA at a 60 N single-leg landing, best of the sweep {ankle_best_material} at {ankle_best_sf}, all below 1. Would you (a) print the ankle in a stronger material, (b) re-orient it, (c) tell us the load case is unrealistic, or (d) something else?",
-          "ask_zh": "我方仿真的落地工况下，踝关节在所有试算材料中均不合格：60 N 单腿落地时 PLA 安全系数 {ankle_sf_pla}，扫掠中最好的 {ankle_best_material} 也仅 {ankle_best_sf}，均小于 1。贵方倾向于：(a) 用更强材料打印踝件、(b) 改变打印方向、(c) 认为该工况不合理、还是 (d) 其他方案？",
-          "ours_en": "The load case is our own construction: {load_basis}. It is simulation, it is linear-elastic and isotropic, and no physical ankle has ever been loaded. The standing case passes at {ankle_sf_standing}.",
-          "ours_zh": "该工况由我方设定：{load_basis}。这是仿真结果，采用线弹性各向同性模型，且从未对实物踝件加载过。站立工况通过，安全系数 {ankle_sf_standing}。",
-          "source": "out/stress/matrix.json — governing case and material_sweep",
-          "branches_en": [
-            ["a stronger material fixes it", "we adopt it for that part only and re-cost the BOM"],
-            ["orientation fixes it", "we fix the orientation on the drawing and in the slicer profile so it cannot be lost"],
-            ["you think the case is unrealistic", "say what you would use instead and we re-run — this is exactly the kind of judgement we do not have without a factory"],
-            ["it needs a redesign", "we redesign the ankle; it is one of the {ours_parts} parts that are ours outright, so there is no licence obstacle"]
-          ],
-          "branches_zh": [
-            ["更强材料即可解决", "我方仅对该零件采用该材料并重算 BOM 成本"],
-            ["改变打印方向即可解决", "我方将该方向固化到图纸与切片配置中，防止丢失"],
-            ["贵方认为该工况不合理", "请给出贵方建议的工况，我方重跑——这正是没有工厂就无法获得的判断"],
-            ["需要重新设计", "我方重新设计踝件；它属于我方完全自有的 {ours_parts} 个零件之一，无许可障碍"]
-          ]
-        },
-        {
-          "id": "Q2.3", "priority": "high", "need": "datasheet",
-          "ask_en": "For the four soft parts (two soles, jaw_soft, soft_mouth_top) what TPU do you stock and at what Shore hardness? Send the datasheet.",
-          "ask_zh": "四个软性零件（两只脚底、jaw_soft、soft_mouth_top）贵厂常备何种 TPU？邵氏硬度多少？请提供数据表。",
-          "ours_en": "The durometer is INFERRED, not known: Pollen say nothing, the community says 90-95A, and our slicer preset resolves to Bambu TPU 85A. We print {tpu_pieces} TPU pieces per robot, {tpu_grams} g.",
-          "ours_zh": "硬度为推断值而非已知值：Pollen 未说明，社区称 90-95A，我方切片预设对应 Bambu TPU 85A。每台打印 TPU 件 {tpu_pieces} 个，共 {tpu_grams} 克。",
-          "source": "out/print/slice.json flags; out/print/slice.json totals_per_material.TPU",
-          "branches_en": [
-            ["you stock 90-95A", "we adopt it and re-slice the four parts on your material for real grams and times"],
-            ["you stock only 85A or softer", "we take it, and we add a grip test to the walk acceptance because sole hardness changes the friction the gait was tuned in"],
-            ["you would injection-mould or die-cut the soles instead", "send the process and MOQ; the soles are the most mould-friendly parts on the robot"]
-          ],
-          "branches_zh": [
-            ["贵厂常备 90-95A", "我方采用，并按贵厂材料重新切片四个零件以取得真实克数与时间"],
-            ["贵厂仅有 85A 或更软", "我方接受，并在行走验收中增加抓地测试，因为鞋底硬度会改变步态调参所依据的摩擦条件"],
-            ["贵方倾向注塑或模切鞋底", "请提供工艺与起订量；鞋底是整机最适合开模的零件"]
-          ]
-        },
-        {
-          "id": "Q2.4", "priority": "normal", "need": "capability",
-          "ask_en": "Can you supply the four published colourways in filament (cream, graphite, lavender, sky) with colour consistency between lots, and do you colour-match to a standard (Pantone / RAL) or to a physical sample?",
-          "ask_zh": "贵厂能否提供四种已公布配色的耗材（奶油、石墨、薰衣草、天蓝），并保证批次间色差稳定？色号按标准（Pantone / RAL）还是按实物样板对色？",
-          "ours_en": "The four colourways and their hex values are published by Pollen and recorded in SPEC.md; no lot-tolerance and no colour standard exists anywhere in our documents.",
-          "ours_zh": "四种配色及其色值由 Pollen 公布并记录于 SPEC.md；我方文件中没有任何批次色差公差或对色标准。",
-          "source": "SPEC.md:37 colourways",
-          "branches_en": [
-            ["you colour-match to a standard", "we convert the published hex values to that standard and put them on the drawings"],
-            ["you match to a physical sample", "we will send a printed sample once you tell us which part to send"],
-            ["colour is a stock constraint for you", "we will pick from your stock and republish the colourway table"]
-          ],
-          "branches_zh": [
-            ["贵厂按标准色卡对色", "我方将公布的色值换算为该标准并标注于图纸"],
-            ["贵厂按实物样板对色", "请告知需寄送哪个零件，我方寄出打印样件"],
-            ["颜色受贵厂库存限制", "我方从贵厂库存中选定并重新发布配色表"]
-          ]
-        }
+     "id": "Q1.2",
+     "priority": "blocking",
+     "need": "decision",
+     "ask_en": "How do you prepare a printed bearing seat: print to size, ream, or press with a heated tool? What interference do you hold for a Ø22 h7-class ball bearing into a printed bore, and what pull-out force does it give you?",
+     "ask_zh": "打印件轴承座如何处理：直接打印到位、铰孔、还是加热压装？Ø22 级滚珠轴承压入打印孔时贵厂控制多少过盈量，可获得多大拔出力？",
+     "ours_en": "NO interference is specified anywhere in our repository. The seats are modelled at nominal (Ø16.000 boss, Ø22.000 bore) and no ISO 286 fit class is declared on any bore, because FDM cannot be sized to one (H7/p6 at Ø22 is a 0.021 mm band). There are {bearings_22} bearings of 22×16×4 and {bearings_15} of 15×10×3 in the robot.",
+     "ours_zh": "我方仓库中未规定任何过盈量。轴承座按名义尺寸建模（Ø16.000 轴肩、Ø22.000 孔），且任何孔位均未标注 ISO 286 配合等级，因为 FDM 无法达到该精度（Ø22 的 H7/p6 公差带仅 0.021 mm）。整机有 22×16×4 轴承 {bearings_22} 个、15×10×3 轴承 {bearings_15} 个。",
+     "source": "tools/data/playbook.json open['Interference at every printed bearing seat'] = CANNOT DETERMINE; SPEC.md:77-78",
+     "branches_en": [
+      [
+       "you press into a printed bore with a stated interference",
+       "we model the bore at your nominal minus that interference and put the press force on the station sheet"
+      ],
+      [
+       "you ream every seat",
+       "we add the reamed size and the ream allowance to the drawing and to the routing, and the seat becomes a controlled dimension"
+      ],
+      [
+       "you would rather we design in a heat-set steel sleeve",
+       "we will — tell us the sleeve you stock and we re-model the seat around it"
       ]
+     ],
+     "branches_zh": [
+      [
+       "按规定过盈量直接压入打印孔",
+       "我方按贵厂名义尺寸减去该过盈量建模，并将压装力写入工位卡"
+      ],
+      [
+       "每个座孔均铰孔",
+       "我方在图纸与工艺路线中标注铰后尺寸与铰削余量，该孔成为受控尺寸"
+      ],
+      [
+       "建议改用热压钢衬套",
+       "可以，请告知贵厂常备衬套规格，我方据此重做座孔"
+      ]
+     ]
     },
     {
-      "n": "3", "id": "tooling",
-      "title_en": "Moulding versus printing — MOQ, tooling cost and lead time",
-      "title_zh": "注塑与打印之比较——起订量、模具费与周期",
-      "lede_en": "Our printed baseline is measured, not estimated: {print_pieces} pieces, {print_grams} g and {print_hours} h of machine time per robot, from real slicer runs. The moulding side is NOT measured — we carry published planning figures only (tooling from {tool_floor} USD, aluminium tools {tool_alu}, moulded piece {mould_piece} USD) and no quotation from anyone. Your numbers replace ours entirely.",
-      "lede_zh": "我方打印基线为实测值而非估算：每台 {print_pieces} 件、{print_grams} 克、{print_hours} 小时机时，来自真实切片运行。注塑侧<b>没有</b>实测数据——我方仅有公开的规划数值（模具费自 {tool_floor} 美元起，铝模 {tool_alu}，注塑单件 {mould_piece} 美元），且无任何正式报价。贵厂数据将完全取代我方数值。",
-      "questions": [
-        {
-          "id": "Q3.1", "priority": "high", "need": "quote",
-          "ask_en": "For the five shell parts, quote: tooling cost per cavity, tooling lead time, MOQ, and piece price at 1 000 / 5 000 / 20 000 units. Single cavity is fine; say if you would family-tool them.",
-          "ask_zh": "针对五个外壳零件，请报：单腔模具费、模具周期、起订量，以及 1 000 / 5 000 / 20 000 台的单件价格。单腔即可；若建议一模多腔请说明。",
-          "ours_en": "The five are the two trunk shells, the two head shells and the face part: {shell_grams} g and {shell_hours} h of printing per robot, which is {shell_share_pct} % of the robot's print time.",
-          "ours_zh": "五件为两片躯干壳、两片头壳与面板：每台打印 {shell_grams} 克、{shell_hours} 小时，占整机打印时间的 {shell_share_pct} %。",
-          "source": "out/print/slice.json per-part grams and seconds",
-          "branches_en": [
-            ["tooling pays back under 5 000 units", "we do the DFM-for-moulding pass now: draft, uniform wall, gate and ejector positions, parting line, and we re-issue those five parts"],
-            ["it pays back over 20 000 units", "we stay printed and spend the effort on print-farm throughput instead"],
-            ["you would tool only some of them", "name which, and we split the five into two process families in the playbook"]
-          ],
-          "branches_zh": [
-            ["5 000 台以内可收回模具费", "我方立即进行注塑 DFM：拔模、均匀壁厚、浇口与顶针位置、分型线，并重新发布这五个零件"],
-            ["需 20 000 台以上才回本", "我方维持打印方案，把精力投入打印产能"],
-            ["贵方建议只对其中部分开模", "请指明具体零件，我方在制造手册中将五件拆为两个工艺族"]
-          ]
-        },
-        {
-          "id": "Q3.2", "priority": "high", "need": "decision",
-          "ask_en": "Given our current geometry, what would you change per part to make these shells mouldable — draft angles, wall thickness, undercuts, boss design, parting line? We would rather receive a marked-up drawing than a rule.",
-          "ask_zh": "以现有几何为基础，为使外壳可注塑，贵方对每个零件会做哪些修改——拔模角、壁厚、倒扣、螺柱结构、分型线？我方更希望收到标注修改的图纸，而不是通则。",
-          "ours_en": "These parts were modelled for FDM and have never been reviewed for moulding by anyone. Our own DFM pass covers printing only.",
-          "ours_zh": "这些零件按 FDM 建模，从未有人做过注塑评审。我方自有 DFM 评审仅覆盖打印工艺。",
-          "source": "MANUFACTURING-PLAYBOOK.html DFM section — process is FDM throughout",
-          "branches_en": [
-            ["you mark up our drawings", "we take the mark-ups into the CAD and re-issue; that is the fastest path to a mouldable part"],
-            ["you would remodel them yourselves", "agree the datum scheme with us first so the assembly still closes — every joint position in the robot is measured from one frame"],
-            ["you judge them unmouldable as shaped", "then the shells stay printed and we say so in the pack with your reason"]
-          ],
-          "branches_zh": [
-            ["贵方在我方图纸上标注修改", "我方将修改落实到 CAD 并重新发布；这是获得可注塑零件的最快路径"],
-            ["贵方自行重建模型", "请先与我方确认基准体系，以保证装配闭合——整机每个关节位置均以同一坐标系测得"],
-            ["贵方判断现有形状不可注塑", "则外壳维持打印方案，我方在交付包中注明并附贵方理由"]
-          ]
-        },
-        {
-          "id": "Q3.3", "priority": "normal", "need": "quote",
-          "ask_en": "What is your MOQ and lead time for a first pilot batch built entirely by printing, say 10 and 50 units, including the printed jigs?",
-          "ask_zh": "若首批试产完全采用打印（例如 10 台与 50 台，含打印夹具），贵厂的起订量与周期各是多少？",
-          "ours_en": "We have {jig_count} printed jigs designed (bearing presses in two sizes with anvil, and a servo horn-zero gauge) but none has been printed or used.",
-          "ours_zh": "我方已设计 {jig_count} 套打印夹具（两种规格的轴承压装工装含压砧、以及舵机零位对刀规），但均未打印或使用过。",
-          "source": "out/jigs/jigs.json",
-          "branches_en": [
-            ["you can build 10 in weeks", "we send the first article package immediately and the first units become our measurement baseline"],
-            ["you need a larger first batch to be economic", "tell us the number and we plan the pilot around it"],
-            ["you want us to print the jigs here first", "we will, and we ship them with the files"]
-          ],
-          "branches_zh": [
-            ["数周内可完成 10 台", "我方立即寄出首件包，首批样机即成为我方的测量基线"],
-            ["经济批量需更大", "请给出数量，我方据此规划试产"],
-            ["希望我方先打印夹具", "可以，我方连同文件一并寄出"]
-          ]
-        }
+     "id": "Q1.3",
+     "priority": "high",
+     "need": "capability",
+     "ask_en": "What is your minimum printable wall, minimum hole, and minimum unsupported bridge on the process you would use for these parts? We are asking you rather than telling you, because OUR OWN SHEETS CANNOT ANSWER THIS and we would rather say so than hand you a number that does not mean what it looks like.",
+     "ask_zh": "针对本项目零件，贵厂工艺的最小可打印壁厚、最小孔径与最大无支撑跨桥各为多少？此处是向贵方提问而非告知，因为<b>我方图纸本身回答不了这个问题</b>；与其给贵方一个看似有意义、实则并非如此的数字，不如如实说明。",
+     "ours_en": "Our print profile is {profile_walls} at a 0.4 mm nozzle, which is the {wall_floor} mm wall floor every DFM verdict in the playbook is measured against. {support_count} of {print_slugs} parts carry a slicer support warning at that profile. <b>What our sheets DO NOT give you is a comparable wall.</b> On out/drawings/microduck-shin the thinnest-wall figure is {sheet_wall_min} mm and the sheet prints it as “{sheet_wall_note}” — our own note pairs it with the floor because they are not the same quantity. That figure is a RAY MINIMUM over the solid, taken at a fillet run-out; it is not a wall any process can make or fail to make, so comparing it to your floor would be meaningless. The comparable number on the same sheet is the thinnest measured STEP, {sheet_wall_step} mm, which is above our own floor. Producing a real minimum PRINTABLE wall per part is parcel C-4 in WORK-BREAKDOWN.html and it needs your process data.",
+     "ours_zh": "我方打印配置为 {profile_walls}，0.4 mm 喷嘴，对应 {wall_floor} mm 壁厚下限，制造手册中所有 DFM 判定均以此为准。该配置下 {print_slugs} 个零件中有 {support_count} 个存在切片支撑警告。<b>但我方图纸给不出可与之比较的壁厚。</b>在 out/drawings/microduck-shin 上，最小壁厚值为 {sheet_wall_min} mm，图纸原文为“{sheet_wall_note}”——我方注释之所以把它与下限并列，正因为二者不是同一个量。该数值是对实体做射线扫描得到的<b>最小值</b>，取自圆角收尾处，并不是任何工艺能做出或做不出的“壁”，因此拿它与贵厂下限比较毫无意义。同一张图纸上可比的数值是最小实测<b>台阶厚度</b> {sheet_wall_step} mm，该值高于我方自身下限。为每个零件给出真正的最小<b>可打印</b>壁厚，是 WORK-BREAKDOWN.html 中的工作包 C-4，且需要贵厂工艺数据。",
+     "source": "tools/data/playbook.json profile (BambuStudio 0.20mm Standard @BBL H2S, inherit chain resolved); out/print/slice.json slicer_warning; out/drawings/microduck-shin/result.json thinnest_wall_mm / thinnest_wall_step_mm / dfm",
+     "branches_en": [
+      [
+       "your floors are at or below ours",
+       "nothing changes; we keep the geometry, and C-4 records your floor as the basis on every sheet"
+      ],
+      [
+       "your floors are above ours",
+       "run C-4: give us a minimum printable wall per part on YOUR process, name the parts our geometry goes below it, and we thicken those features and re-run the FEA at the new section. Do not use our sheet's ray minimum to pick the parts — it will name the wrong ones."
+      ],
+      [
+       "you would use a different nozzle or layer height",
+       "send the profile; we re-slice every part on it so the grams and hours in the pack are yours, not ours"
+      ],
+      [
+       "you want us to state a printable wall ourselves first",
+       "we cannot honestly, and that is the whole point of this question: our measurement is a ray minimum and we will not present it as a printable wall"
       ]
+     ],
+     "branches_zh": [
+      [
+       "贵厂下限不高于我方",
+       "几何保持不变；C-4 将把贵厂下限作为依据写入每张图纸"
+      ],
+      [
+       "贵厂下限高于我方",
+       "执行 C-4：按<b>贵厂工艺</b>给出每个零件的最小可打印壁厚，指出我方几何低于该值的零件，我方据此加厚相应特征并按新截面重跑有限元。请勿用我方图纸上的射线最小值来挑选零件——那会挑错。"
+      ],
+      [
+       "贵厂拟用不同喷嘴或层高",
+       "请提供配置文件，我方按其重新切片全部零件，使交付包中的克数与工时来自贵厂而非我方"
+      ],
+      [
+       "希望我方先自行给出可打印壁厚",
+       "我方无法诚实地给出，这正是本问题存在的原因：我方的测量值是射线最小值，我方不会把它当作可打印壁厚呈报"
+      ]
+     ]
     },
     {
-      "n": "4", "id": "dfm",
-      "title_en": "Design for manufacture — what you would change, per part",
-      "title_zh": "可制造性——逐零件的修改建议",
-      "lede_en": "We publish {print_slugs} printed part numbers and {sheet_count} drawing sheets, and we already know none of the sheets passes our own layout standard. What we want from you is not a review of the sheets — it is a review of the PARTS.",
-      "lede_zh": "我方共发布 {print_slugs} 个打印件品种与 {sheet_count} 张图纸，并且已知没有一张图纸通过我方自有的版面标准。我方需要贵方评审的不是图纸，而是<b>零件本身</b>。",
-      "questions": [
-        {
-          "id": "Q4.1", "priority": "high", "need": "decision",
-          "ask_en": "Which of our {print_slugs} printed parts would you refuse to produce as drawn, and why? One line per part is enough.",
-          "ask_zh": "在我方 {print_slugs} 个打印件中，哪些贵厂不接受按现图生产？原因是什么？每个零件一行即可。",
-          "ours_en": "Our own DFM pass flags {support_count} parts with slicer support warnings and lists a thinnest wall per part on each sheet. It has never been checked by anyone who has to make them.",
-          "ours_zh": "我方自有 DFM 评审标记了 {support_count} 个存在切片支撑警告的零件，并在每张图纸上标注了该零件的最小壁厚。但从未经过实际制造方核查。",
-          "source": "out/print/slice.json slicer_warning; out/drawings/<slug>/result.json thinnest_wall_mm",
-          "branches_en": [
-            ["you name parts", "each becomes a work parcel with your reason as its acceptance test"],
-            ["you would accept all of them", "we lock the geometry and move the effort to the drawing sheets"],
-            ["you need STEP to judge", "see Q7.2 — we can export STEP for the {ours_parts} parts that are parametric solids; the rest are meshes and we will say so"]
-          ],
-          "branches_zh": [
-            ["贵方指出具体零件", "每个零件形成一个工作包，以贵方给出的理由作为验收标准"],
-            ["贵方全部接受", "我方冻结几何，将精力转向图纸完善"],
-            ["需 STEP 文件才能判断", "见 Q7.2——参数化实体的 {ours_parts} 个零件可导出 STEP，其余为网格模型，我方会如实说明"]
-          ]
-        },
-        {
-          "id": "Q4.2", "priority": "normal", "need": "capability",
-          "ask_en": "Do you plate parts your own way, or would you use our plate layout? Our costing assumes a plate holds {plate_pla} PLA pieces and {plate_tpu} TPU pieces, and that a plate is one print job.",
-          "ask_zh": "贵厂自行排版还是采用我方排版？我方成本核算假定每盘 PLA 排 {plate_pla} 件、TPU 排 {plate_tpu} 件，且一盘即一次打印作业。",
-          "ours_en": "Our published grams and seconds are PER-PIECE prints, not plate times, so a plate layout changes the hours but not the grams.",
-          "ours_zh": "我方公布的克数与秒数为<b>单件</b>打印值，非整盘时间；因此排版会改变工时但不改变克数。",
-          "source": "out/print/slice.json $comment; tools/data/playbook.json rates.plate_pieces",
-          "branches_en": [
-            ["you plate your own way", "send one plate's real time and we replace our per-piece sum with your plate times"],
-            ["you use ours", "we ship the plate files as they are"],
-            ["you run a farm with mixed machines", "tell us the machine mix and we re-slice on the slowest one so the plan is not optimistic"]
-          ],
-          "branches_zh": [
-            ["贵厂自行排版", "请提供一盘的实际时间，我方用贵厂整盘时间替换单件求和值"],
-            ["采用我方排版", "我方按现状提供排版文件"],
-            ["贵厂为多机型产线", "请告知机型构成，我方按最慢机型重新切片，避免计划过于乐观"]
-          ]
-        },
-        {
-          "id": "Q4.3", "priority": "high", "need": "decision",
-          "ask_en": "The head geometry is our largest open design question: our shell is {head_bbox} mm and the product photographs suggest a more compact dome. If you can obtain a retail unit, will you caliper the head and the eye ring for us?",
-          "ask_zh": "头部几何是我方最大的未决设计问题：我方头壳为 {head_bbox} mm，而产品照片显示实物更为紧凑。若贵厂能取得零售整机，可否代为用卡尺测量头壳与眼圈？",
-          "ours_en": "The deviation is CANNOT DETERMINE, not confirmed: photographic scaling carries about 4 % uncertainty, which is about 5 mm on a 122 mm head, and the reference photo has the beak open and the head tilted.",
-          "ours_zh": "该偏差为“无法判定”，而非已确认：照片标定不确定度约 4 %，对 122 mm 的头部约合 5 mm，且参考照片中鸟喙张开、头部倾斜。",
-          "source": "HEAD-RECONSTRUCTION.html; out/verify/head_analysis.json",
-          "branches_en": [
-            ["you can measure a retail head", "that single measurement closes our largest geometric unknown and we re-model to it"],
-            ["you cannot get a unit", "we keep the head as CANNOT DETERMINE and tool nothing from it"],
-            ["you would prefer we design our own head", "say so — it is the cleanest licence position, since the vendor head mesh is not ours to sell"]
-          ],
-          "branches_zh": [
-            ["贵方可测量零售整机头部", "这一项测量即可解决我方最大的几何未知，我方据此重建模型"],
-            ["贵方无法取得整机", "头部维持“无法判定”，不据此开任何模具"],
-            ["贵方建议我方自行设计头部", "请明示——这是最干净的许可方案，因为供方头部网格不属于我方可销售资产"]
-          ]
-        }
+     "id": "Q1.4",
+     "priority": "normal",
+     "need": "capability",
+     "ask_en": "For the visible shells, what surface finish do you achieve as printed, and what post-process (sanding, vapour, coating, paint) do you recommend at what added cost and cycle time per unit?",
+     "ask_zh": "对外观外壳，贵厂打印后可达到何种表面质量？建议何种后处理（打磨、熏蒸、涂层、喷漆）？每台增加的成本与工时各为多少？",
+     "ours_en": "We have written NO cosmetic acceptance standard — it is an open item in our own playbook. The visible parts are the two trunk shells, the top and bottom head shells and the face part, {shell_grams} g and {shell_hours} h of printing per robot between them.",
+     "ours_zh": "我方尚未制定外观验收标准——这是我方制造手册中的未决项。外观件为两片躯干壳、上下头壳与面板，每台合计打印 {shell_grams} 克、{shell_hours} 小时。",
+     "source": "tools/data/playbook.json open['Cosmetic acceptance standard for a printed shell'] = CANNOT DETERMINE; out/print/slice.json",
+     "branches_en": [
+      [
+       "as-printed is acceptable at your line rate",
+       "we write your as-printed finish into the cosmetic standard and photograph a golden sample"
+      ],
+      [
+       "you recommend a post-process",
+       "we cost it per unit against the moulding break-even in section 3 and decide with you"
+      ],
+      [
+       "you consider these parts unsuitable for FDM cosmetically",
+       "that is the strongest argument for tooling them and it goes straight into section 3"
       ]
+     ],
+     "branches_zh": [
+      [
+       "按贵厂节拍，打印原态即可接受",
+       "我方将贵厂原态表面写入外观标准，并拍摄标准样件"
+      ],
+      [
+       "贵厂建议做后处理",
+       "我方按单台成本与第 3 节的开模盈亏平衡点对比，与贵方共同决策"
+      ],
+      [
+       "贵方认为这些外观件不适合 FDM",
+       "这将是开模最有力的理由，直接进入第 3 节"
+      ]
+     ]
     },
     {
-      "n": "5", "id": "pcb",
-      "title_en": "PCB fabrication and assembly",
-      "title_zh": "PCB 制造与贴装",
-      "lede_en": "Three custom boards, none of which passes its own design-rule check yet. Their outlines are {board_list}. We are NOT asking you to fabricate them today; we are asking what your process accepts, so we finish the layouts against your rules rather than a generic house's.",
-      "lede_zh": "三块定制板，均尚未通过自身设计规则检查。外形尺寸为 {board_list}。我方<b>不</b>要求现在投板；我方希望了解贵厂工艺可接受的规则，以便按贵厂规则而非通用厂规则完成布线。",
-      "questions": [
-        {
-          "id": "Q5.1", "priority": "blocking", "need": "capability",
-          "ask_en": "Send your PCB capability sheet: minimum track and space at 1 oz, minimum drill, minimum annular ring, edge clearance, available finishes and thicknesses, and your panelisation requirement.",
-          "ask_zh": "请提供贵厂 PCB 工艺能力表：1 oz 铜厚下的最小线宽/线距、最小钻孔、最小环宽、边缘间距、可用表面处理与板厚，以及拼板要求。",
-          "ours_en": "We have laid out against published capability from one vendor only ({pcb_capability}) and we have contacted no fab, uploaded no file and created no account.",
-          "ours_zh": "我方仅依据一家供应商公布的能力参数布线（{pcb_capability}），且未联系任何厂家、未上传任何文件、未注册任何账户。",
-          "source": "electronics/pcb-package.json fab_quotes",
-          "branches_en": [
-            ["your rules are looser than the ones we used", "no change; we re-run DRC against your rules to confirm"],
-            ["your rules are tighter", "we re-route to them before anything is ordered"],
-            ["you subcontract PCB fab", "tell us to whom and we ask them directly, with your approval"]
-          ],
-          "branches_zh": [
-            ["贵厂规则比我方所用更宽松", "无需修改；我方按贵厂规则重跑 DRC 确认"],
-            ["贵厂规则更严格", "我方在投板前按贵厂规则重新布线"],
-            ["贵厂 PCB 外协", "请告知外协厂家，经贵方同意后我方直接对接"]
-          ]
-        },
-        {
-          "id": "Q5.2", "priority": "high", "need": "capability",
-          "ask_en": "The battery-contact board is a strip {banana_size} mm — 4.6 mm across its short axis. One US fab refuses it on a measured rule. Do you accept it, and do you need a rail or tab-routed panel to handle it?",
-          "ask_zh": "电池接触板为 {banana_size} mm 的窄条，短边仅 4.6 mm。某美国厂家依据其明文规则拒绝加工。贵厂能否接受？是否需要加工艺边或邮票孔拼板？",
-          "ours_en": "It needs ENIG rather than HASL because a sliding spring contact on a HASL pad cold-flows and oxidises — and ENIG is an ORDER-FORM field, it is not carried in the Gerbers.",
-          "ours_zh": "该板需 ENIG 而非 HASL，因为滑动弹片接触 HASL 焊盘会冷流并氧化——而 ENIG 是<b>下单选项</b>，Gerber 文件中不携带该信息。",
-          "source": "electronics/pcb-package.json boards[banana-contact].finish",
-          "branches_en": [
-            ["you accept the strip as-is with ENIG", "we finish the layout and it is the cheapest of the three boards"],
-            ["you need a panel", "we draw the panel with your rail width and tab spacing"],
-            ["you would replace it with a stamped contact or an FPC", "quote it — the board exists only to carry two spring contacts"]
-          ],
-          "branches_zh": [
-            ["可按现状加工并做 ENIG", "我方完成布线；该板是三块中最便宜的"],
-            ["需要拼板", "我方按贵厂工艺边宽度与连接位间距绘制拼板"],
-            ["贵方建议改为冲压触片或 FPC", "请报价——该板存在的唯一目的就是承载两个弹性触点"]
-          ]
-        },
-        {
-          "id": "Q5.3", "priority": "high", "need": "capability",
-          "ask_en": "Can you do the SMT assembly as well, and what is your MOQ, stencil cost and per-board placement cost at 10 / 100 / 1 000 boards? Do you source the parts or do we consign them?",
-          "ask_zh": "贵厂能否同时承接 SMT 贴装？10 / 100 / 1 000 片时的起订量、钢网费与单板贴装费各是多少？物料由贵厂采购还是我方来料？",
-          "ours_en": "Our BOM has {bom_lines} bought lines of which {usd_lines} carry a live USD price; the board-level parts (audio codec, IMUs, USB-C controller) are LCSC and DigiKey lines with prices at 1 000.",
-          "ours_zh": "我方 BOM 共 {bom_lines} 项外购件，其中 {usd_lines} 项有实时美元报价；板级物料（音频编解码、IMU、USB-C 控制器）为 LCSC 与 DigiKey 项，均有 1 000 件价格。",
-          "source": "spec/sourcing.json; out/factory/pack.json bom",
-          "branches_en": [
-            ["you assemble and source", "we hand you the BOM and the placement files and you own the whole board line"],
-            ["you assemble, we consign", "we buy from the lines in section 3.3 of the pack and ship them to you"],
-            ["you do not do SMT", "name a house you work with, and the board lane becomes a separate parcel"]
-          ],
-          "branches_zh": [
-            ["贵厂贴装并自行采购", "我方交付 BOM 与贴装文件，整条板线由贵厂负责"],
-            ["贵厂贴装，我方来料", "我方按交付包 3.3 节的采购项购买并寄送"],
-            ["贵厂不做 SMT", "请推荐合作厂家，板线将作为独立工作包"]
-          ]
-        },
-        {
-          "id": "Q5.4", "priority": "blocking", "need": "decision",
-          "ask_en": "The Robot HAT has a published upstream alternative: Pollen's own Apache-2.0 board, {pollen_hat} mm, which our current motor support does not accept, against our {our_hat} mm reconstruction that still has open nets. Which would you rather manufacture?",
-          "ask_zh": "Robot HAT 存在上游公开替代方案：Pollen 自己的 Apache-2.0 板（{pollen_hat} mm），但我方现有电机支架无法容纳；我方重构版为 {our_hat} mm，但仍有未连通网络。贵方倾向生产哪一版？",
-          "ours_en": "Apache-2.0 permits manufacture, modification and SALE, and Pollen's package includes Gerbers, BOM, POS and a STEP model. Adopting it means re-modelling the motor support to a 65.0 × 48.5 mm board; keeping ours means routing 8 open nets.",
-          "ours_zh": "Apache-2.0 允许制造、修改与<b>销售</b>，且 Pollen 的资料包含 Gerber、BOM、坐标文件与 STEP 模型。采用它需要按 65.0 × 48.5 mm 重做电机支架；沿用我方版本则需完成 8 条未连通网络的布线。",
-          "source": "out/factory/licence.json fact F11; PCB-PACKAGE.html §3.4",
-          "branches_en": [
-            ["fabricate Pollen's published board", "we re-model the motor support around it — a mechanical change we can make this week, and the licence position is clean"],
-            ["keep our reconstruction", "we route the open nets and re-run DRC against your rules"],
-            ["you would redesign the board", "then tell us the constraints and we hand over the netlist"]
-          ],
-          "branches_zh": [
-            ["生产 Pollen 公开的板", "我方按其重做电机支架——一周内可完成的机械改动，且许可关系清晰"],
-            ["沿用我方重构版", "我方完成未连通网络布线，并按贵厂规则重跑 DRC"],
-            ["贵方愿意重新设计该板", "请给出约束条件，我方移交网表"]
-          ]
-        }
+     "id": "Q1.5",
+     "priority": "high",
+     "need": "capability",
+     "ask_en": "Do you install M2 brass heat-set inserts in printed parts, with what tool, at what temperature and insertion depth, and what pull-out and torque-to-fail do you get in the material you would use?",
+     "ask_zh": "贵厂是否在打印件中安装 M2 黄铜热熔螺母？使用何种工具、温度与压入深度？在拟用材料中可获得多大拔出力与破坏扭矩？",
+     "ours_en": "The robot is an M2 system. FOUR DIFFERENT FASTENER COUNTS exist in our files and they count different things, so read FACTORY-PACK.html section 3.3a before ordering: {holes_total} HOLE FEATURES in the community census ({hole_breakdown} — a counterbored clearance hole appears TWICE there, so it is an upper bound on holes and not a screw count); {fastener_placed} screws actually placed in our assembly through a connection; and {fastener_pieces_buylist} PIECES on the buy list per robot, which is the one to order against because it includes nuts, five screw lengths and {insert_qty} heat-set inserts — as an upper bound with spares, since its basis is our own hole-fitting on Pollen's meshes and it has never been checked against hardware. We have NO torque figure for any of them — ROBOTIS publishes no tightening torque for the XL330's own tapped holes and we refuse to copy a steel-into-steel chart figure into a plastic joint.",
+     "ours_zh": "整机为 M2 体系。我方文件中存在<b>四个互不相同的紧固件计数</b>，统计对象各异，下单前请先阅读 FACTORY-PACK.html 3.3a 节：社区统计的孔特征共 {holes_total} 个（{hole_breakdown_zh}——带沉孔的过孔在该表中出现<b>两次</b>，因此它是孔数的上限，不是螺钉数）；我方装配体中经连接件实际装入的螺钉 {fastener_placed} 颗；采购清单上每台 {fastener_pieces_buylist} 件，<b>下单应以此为准</b>，因为它包含螺母、五种螺钉长度与 {insert_qty} 个热熔螺母——且应视为<b>含余量的上限</b>，因其依据是我方在 Pollen 网格上的孔位拟合，从未与实物核对。但我方没有任何扭矩数据——ROBOTIS 未公布 XL330 自带螺纹孔的拧紧扭矩，我方拒绝把钢对钢的表格数值套用于塑料连接。",
+     "source": "SPEC.md:75-76 hole census; spec/sourcing.json B18a/B18b/B18c; out/fasteners/placed.json; out/factory/reconcile.json fasteners; tools/data/playbook.json torque = 3/3 CANNOT DETERMINE",
+     "branches_en": [
+      [
+       "you can run a strip test and a pull-out test on our parts",
+       "you set the torque schedule and we publish it with your test as the source — this closes the single largest hole in the assembly document"
+      ],
+      [
+       "you have house values for M2 into PLA/PETG",
+       "send them with the test method and we adopt them provisionally, marked as your figures"
+      ],
+      [
+       "you do not use inserts",
+       "tell us what you use instead (self-tapping into a boss, nut trap) and we re-model every boss for it"
       ]
-    },
-    {
-      "n": "6", "id": "line",
-      "title_en": "Assembly line — labour, fixtures and takt",
-      "title_zh": "装配线——人工、工装与节拍",
-      "lede_en": "Our playbook lays the build out as {stations} stations and {station_steps} steps, and it has never been run by anybody. It costs labour at {labour_rate} USD/h, which is a planning figure from a hobby source, not your rate.",
-      "lede_zh": "我方制造手册将装配拆为 {stations} 个工位、{station_steps} 个步骤，但从未实际执行过。人工成本按 {labour_rate} 美元/小时计，这是来自业余来源的规划值，并非贵厂费率。",
-      "questions": [
-        {
-          "id": "Q6.1", "priority": "high", "need": "quote",
-          "ask_en": "What is your assembly labour rate, and how many minutes would you allow for one Microduck at each of our {stations} stations? A takt time per station is more useful to us than a total.",
-          "ask_zh": "贵厂装配人工费率是多少？我方 {stations} 个工位各分配多少分钟组装一台 Microduck？按工位给出的节拍时间比总时间对我方更有用。",
-          "ours_en": "We have no measured assembly time at all — no unit has been assembled.",
-          "ours_zh": "我方完全没有实测装配时间——从未装配过整机。",
-          "source": "tools/data/playbook.json stations; readiness assembly row",
-          "branches_en": [
-            ["you give per-station minutes", "we re-cost the unit with your rate and rebalance the stations against your takt"],
-            ["you would restructure the stations", "do — the station split is ours and it has no empirical basis"],
-            ["you need a pilot build before quoting", "that is Q3.3, and it is the answer we expect"]
-          ],
-          "branches_zh": [
-            ["贵方给出各工位分钟数", "我方按贵厂费率重算单台成本，并按贵厂节拍重新平衡工位"],
-            ["贵方希望重排工位", "请重排——工位划分是我方设定的，没有实证依据"],
-            ["需先试产才能报价", "即 Q3.3，这也是我方预期的答复"]
-          ]
-        },
-        {
-          "id": "Q6.2", "priority": "high", "need": "decision",
-          "ask_en": "What fixtures would you want that we have not designed? We have drawn {jig_count} printed jigs: bearing presses in two sizes with a common anvil, and a servo horn-zero gauge.",
-          "ask_zh": "还需要哪些我方尚未设计的工装？我方已绘制 {jig_count} 套打印夹具：两种规格的轴承压装工装（共用压砧）与舵机零位对刀规。",
-          "ours_en": "None of the jigs has been printed or used. The horn-zero gauge fixes an INDEX, not an absolute angle, because whether the mesh horn pose corresponds to Goal Position 2048 is CANNOT DETERMINE.",
-          "ours_zh": "所有夹具均未打印或使用过。零位对刀规固定的是<b>相对索引</b>而非绝对角度，因为网格中的舵机臂姿态是否对应 Goal Position 2048 尚无法判定。",
-          "source": "out/jigs/jigs.json; tools/data/playbook.json open['Whether the mesh horn pose is Goal Position 2048']",
-          "branches_en": [
-            ["you name fixtures", "we design and send them as printable files with the drawings"],
-            ["you would build your own", "send us the interfaces they need and we will hold those datums fixed in the CAD"],
-            ["you can settle the horn index on a real servo", "that closes an open item that no amount of reading will close"]
-          ],
-          "branches_zh": [
-            ["贵方指明所需工装", "我方设计并连同图纸提供可打印文件"],
-            ["贵方自行制作", "请告知所需接口，我方在 CAD 中固定相应基准"],
-            ["贵方可用实物舵机确定臂位索引", "这将解决一个纯靠查资料无法解决的未决项"]
-          ]
-        },
-        {
-          "id": "Q6.3", "priority": "high", "need": "capability",
-          "ask_en": "Do you have calibrated torque drivers in the 0.05-0.5 N·m range, and can you run a strip test and a pull-out test on our printed bosses to set the torque schedule?",
-          "ask_zh": "贵厂是否有 0.05-0.5 N·m 量程的校准扭力螺丝刀？能否在我方打印螺柱上做滑牙与拔出试验以确定扭矩表？",
-          "ours_en": "Torque is 3 of 3 CANNOT DETERMINE in our playbook. We will not publish a torque we have not measured, and we will not copy a steel chart figure into a plastic joint.",
-          "ours_zh": "我方制造手册中三项扭矩全部“无法判定”。我方不会发布未经实测的扭矩，也不会把钢制连接的表格数值套用于塑料连接。",
-          "source": "tools/data/playbook.json torque",
-          "branches_en": [
-            ["you can run the tests", "you become the source for the torque schedule and we publish it with your method"],
-            ["you have drivers but not the test", "we specify the test and you run it — it is three coupons and an afternoon"],
-            ["neither", "we buy the equipment and run it here, but that delays the assembly document"]
-          ],
-          "branches_zh": [
-            ["贵方可做试验", "贵方即为扭矩表的出处，我方连同贵方方法一并发布"],
-            ["有扭力工具但不做试验", "我方给出试验方法，由贵方执行——三个试件、半天即可"],
-            ["两者均无", "我方自行采购设备并在本地进行，但会延后装配文件的发布"]
-          ]
-        }
+     ],
+     "branches_zh": [
+      [
+       "贵厂可对我方零件做滑牙与拔出试验",
+       "由贵厂确定扭矩表，我方以贵厂试验为出处发布——这将补上装配文件中最大的缺口"
+      ],
+      [
+       "贵厂有 M2 在 PLA/PETG 中的内部数据",
+       "请连同试验方法提供，我方暂按贵厂数据采用并注明来源"
+      ],
+      [
+       "贵厂不使用热熔螺母",
+       "请告知替代方案（自攻入柱、嵌入螺母槽），我方据此重做所有螺柱"
       ]
-    },
-    {
-      "n": "7", "id": "from_us",
-      "title_en": "What you need from us that we have not sent",
-      "title_zh": "我方尚未提供而贵方需要的资料",
-      "lede_en": "This section is the one we cannot answer ourselves. Everything we know we owe you is already in the pack or in the work breakdown; what is missing is what a factory knows it needs and we do not.",
-      "lede_zh": "本节是我方无法自行回答的部分。凡我方自知应提供的，均已在交付包或工作分解表中；缺的是工厂知道而我方不知道的那部分。",
-      "questions": [
-        {
-          "id": "Q7.1", "priority": "blocking", "need": "decision",
-          "ask_en": "Read section 2 of FACTORY-PACK.html (what is NOT ready). What else, that is not on that list, would stop you starting?",
-          "ask_zh": "请阅读 FACTORY-PACK.html 第 2 节（哪些尚未就绪）。除该清单所列之外，还有什么会阻碍贵方开工？",
-          "ours_en": "Our own list has {not_ready_rows} entries and is measured, not guessed — but it is measured against OUR standard, and we have never had to start a line from a document.",
-          "ours_zh": "我方清单共 {not_ready_rows} 条，均为实测而非推测——但它是按<b>我方</b>标准衡量的，而我方从未按文件启动过一条产线。",
-          "source": "out/factory/readiness.json",
-          "branches_en": [
-            ["you name gaps", "each becomes a parcel in WORK-BREAKDOWN.html with your sentence as its acceptance test"],
-            ["nothing else", "we start on the parcels already listed and the pack becomes the contract"]
-          ],
-          "branches_zh": [
-            ["贵方指出缺口", "每一项在 WORK-BREAKDOWN.html 中形成工作包，以贵方原话作为验收标准"],
-            ["无其他缺口", "我方按既有工作包推进，本交付包即为工作依据"]
-          ]
-        },
-        {
-          "id": "Q7.2", "priority": "high", "need": "decision",
-          "ask_en": "What file formats do you want? We hold SVG and PDF sheets, {dxf_count} DXF files, {print_slugs} STLs, and we can export STEP for the parts that are parametric solids. The rest are meshes and cannot be given a true STEP.",
-          "ask_zh": "贵方需要哪些文件格式？我方现有 SVG 与 PDF 图纸、{dxf_count} 个 DXF、{print_slugs} 个 STL；参数化实体零件可导出 STEP，其余为网格模型，无法提供真正的 STEP。",
-          "ours_en": "{ours_parts} printed parts are parametric solids of ours; {vendor_parts} are vendor simulation meshes. A mesh converted to STEP is still a mesh, and we will not label one as a solid.",
-          "ours_zh": "打印件中 {ours_parts} 个为我方参数化实体，{vendor_parts} 个为供方仿真网格。网格转成 STEP 仍是网格，我方不会将其标注为实体。",
-          "source": "out/factory/readiness.json print rows; out/drawings/*.dxf",
-          "branches_en": [
-            ["STEP for everything", "we send STEP for the parametric parts and a written refusal, with the reason, for the meshes"],
-            ["STL and PDF are enough", "the pack already contains them"],
-            ["you want native CAD", "our parts are Python scripts on an OCCT kernel; we can send the scripts and the exports, and they rebuild deterministically"]
-          ],
-          "branches_zh": [
-            ["全部要 STEP", "我方提供参数化零件的 STEP，并对网格零件出具书面说明与理由"],
-            ["STL 与 PDF 即可", "交付包中已包含"],
-            ["需要原生 CAD 文件", "我方零件为基于 OCCT 内核的 Python 脚本，可提供脚本与导出件，可确定性重建"]
-          ]
-        },
-        {
-          "id": "Q7.3", "priority": "normal", "need": "capability",
-          "ask_en": "What incoming inspection do you run on bought parts, and what would you want us to specify for the {bom_lines} bought lines — AQL, sampling plan, certificates?",
-          "ask_zh": "贵厂对外购件如何来料检验？针对我方 {bom_lines} 项外购件，希望我方规定什么——AQL、抽样方案、还是合格证明？",
-          "ours_en": "Our test plan has {eol_gates} end-of-line gates on the finished unit and an incoming-inspection station, but no sampling plan and no AQL anywhere.",
-          "ours_zh": "我方测试计划对整机设有 {eol_gates} 项下线判据，并有来料检验工位，但没有任何抽样方案与 AQL。",
-          "source": "spec/test-plan.json eol; tools/data/playbook.json stations[S0]",
-          "branches_en": [
-            ["you have a house standard", "we adopt it and reference it from the test plan"],
-            ["you want us to specify", "we will write it once the first units tell us which parts actually vary"],
-            ["you want certificates on specific parts", "name them and we add the requirement to the sourcing lines"]
-          ],
-          "branches_zh": [
-            ["贵厂有内部标准", "我方采用并在测试计划中引用"],
-            ["希望我方规定", "待首批样机显示哪些零件真正存在波动后，我方再行编写"],
-            ["需要特定零件的合格证明", "请指明零件，我方在采购项中增加该要求"]
-          ]
-        },
-        {
-          "id": "Q7.4", "priority": "high", "need": "decision",
-          "ask_en": "Do you need a safety or compliance package (CE / FCC / UN 38.3 for the battery, EN 71 if this is sold as a toy), and would you run those tests or expect us to?",
-          "ask_zh": "贵方是否需要安全与合规资料包（CE / FCC、电池 UN 38.3、若按玩具销售则需 EN 71）？相关测试由贵方执行还是由我方承担？",
-          "ours_en": "We hold NO compliance work at all. The battery is an NP-F550-class pack whose exact cell is CANNOT DETERMINE — nobody has read a label on a shipped pack.",
-          "ours_zh": "我方完全没有做过任何合规工作。电池为 NP-F550 级别电池组，具体电芯<b>无法判定</b>——无人读取过实物电池的标签。",
-          "source": "tools/data/playbook.json open['Which NP-F550-shape battery pack actually ships']",
-          "branches_en": [
-            ["you run compliance", "we send whatever the lab needs and it becomes a track in the work breakdown"],
-            ["we run it", "tell us your target markets so we test to the right standards"],
-            ["it is out of scope for this build", "we record that decision in the pack so nobody assumes otherwise"]
-          ],
-          "branches_zh": [
-            ["由贵方负责合规", "我方提供实验室所需全部资料，并在工作分解表中单列一条工作线"],
-            ["由我方负责", "请告知目标市场，以便按正确标准送测"],
-            ["本次不涉及", "我方在交付包中记录该决定，避免他人误解"]
-          ]
-        }
-      ]
+     ]
     }
-  ]
+   ]
+  },
+  {
+   "n": "2",
+   "id": "materials",
+   "title_en": "Materials — our entire structural safety-factor set rests on one assumed number",
+   "title_zh": "材料——我方全部结构安全系数都建立在一个假设数值上",
+   "lede_en": "Every finite-element verdict we publish uses a yield of {pla_yield} MPa for PLA, with density {pla_density} g/cm³ and modulus {pla_E} GPa, taken from a table in our own CAD library at {pla_src}. That table row has NO source: our materials module says in its own comments that density and Young's modulus 'exist only in fits.py' and 'have NO SOURCE AT ALL'. It is also isotropic, and FDM is not. So the honest state is that our safety factors are arithmetic on an assumption. Your filament's datasheet replaces it.",
+   "lede_zh": "我方发布的每一项有限元判定，PLA 均按屈服 {pla_yield} MPa、密度 {pla_density} g/cm³、模量 {pla_E} GPa 计算，取自我方 CAD 库中的一张表（{pla_src}）。该表行<b>没有任何出处</b>：我方材料模块的注释明确写道，密度与杨氏模量“只存在于 fits.py 中”“完全没有来源”。且该模型为各向同性，而 FDM 并非如此。因此实情是：我方安全系数只是基于假设的算术。贵厂材料数据表将取代它。",
+   "questions": [
+    {
+     "id": "Q2.1",
+     "priority": "blocking",
+     "need": "datasheet",
+     "ask_en": "For each filament you would use, send the datasheet: tensile strength IN-PLANE (XY) and ACROSS LAYERS (Z), Young's modulus, elongation at break, density, and the print settings those coupons were made at. If you have your own coupon data rather than the maker's, we prefer yours.",
+     "ask_zh": "请提供贵厂拟用每种耗材的数据表：面内（XY）与层间（Z）拉伸强度、杨氏模量、断裂伸长率、密度，以及试件的打印参数。若贵厂有自测数据而非厂家数据，我方更希望采用贵厂数据。",
+     "ours_en": "PLA {pla_yield} MPa / {pla_density} g/cm³ / {pla_E} GPa, isotropic, unsourced ({pla_src}). Every safety factor in STRUCTURAL.html and SIMULATION.html is computed against that one number.",
+     "ours_zh": "PLA：{pla_yield} MPa / {pla_density} g/cm³ / {pla_E} GPa，各向同性，无出处（{pla_src}）。STRUCTURAL.html 与 SIMULATION.html 中每一个安全系数都基于这一个数字。",
+     "source": "ce-cad/cecad/fits.py:302 and cecad/materials.py comment block on ungrounded properties",
+     "branches_en": [
+      [
+       "your XY strength is at or above ours",
+       "we re-run every FEA case with your number and republish the safety-factor table with your datasheet as the citation"
+      ],
+      [
+       "your Z strength is materially lower (the usual case)",
+       "we re-run each part in the orientation you would print it, treating the load across layers, and any part that then fails is re-oriented or re-designed before tooling — this is the correct way to do it and we cannot do it without your Z number"
+      ],
+      [
+       "you would use a different polymer entirely",
+       "send its datasheet; the material sweep is already automated, so a new material is a re-run, not a redesign"
+      ]
+     ],
+     "branches_zh": [
+      [
+       "贵厂 XY 强度不低于我方假设",
+       "我方按贵厂数据重跑全部有限元工况，并以贵厂数据表为出处重新发布安全系数表"
+      ],
+      [
+       "贵厂 Z 向强度明显更低（常见情形）",
+       "我方按贵厂实际打印方向重跑每个零件，按层间受载计算；届时不合格的零件在开模前重新定向或重新设计——这才是正确做法，而没有贵厂 Z 向数据就无法进行"
+      ],
+      [
+       "贵厂拟用完全不同的聚合物",
+       "请提供其数据表；材料扫掠已自动化，换材料只是重跑，不是重新设计"
+      ]
+     ]
+    },
+    {
+     "id": "Q2.2",
+     "priority": "blocking",
+     "need": "decision",
+     "ask_en": "Our simulated landing case FAILS on the ankle in every material we tried: safety factor {ankle_sf_pla} in PLA at a 60 N single-leg landing, best of the sweep {ankle_best_material} at {ankle_best_sf}, all below 1. Would you (a) print the ankle in a stronger material, (b) re-orient it, (c) tell us the load case is unrealistic, or (d) something else?",
+     "ask_zh": "我方仿真的落地工况下，踝关节在所有试算材料中均不合格：60 N 单腿落地时 PLA 安全系数 {ankle_sf_pla}，扫掠中最好的 {ankle_best_material} 也仅 {ankle_best_sf}，均小于 1。贵方倾向于：(a) 用更强材料打印踝件、(b) 改变打印方向、(c) 认为该工况不合理、还是 (d) 其他方案？",
+     "ours_en": "The load case is our own construction: {load_basis}. It is simulation, it is linear-elastic and isotropic, and no physical ankle has ever been loaded. The standing case passes at {ankle_sf_standing}.",
+     "ours_zh": "该工况由我方设定：{load_basis}。这是仿真结果，采用线弹性各向同性模型，且从未对实物踝件加载过。站立工况通过，安全系数 {ankle_sf_standing}。",
+     "source": "out/stress/matrix.json — governing case and material_sweep",
+     "branches_en": [
+      [
+       "a stronger material fixes it",
+       "we adopt it for that part only and re-cost the BOM"
+      ],
+      [
+       "orientation fixes it",
+       "we fix the orientation on the drawing and in the slicer profile so it cannot be lost"
+      ],
+      [
+       "you think the case is unrealistic",
+       "say what you would use instead and we re-run — this is exactly the kind of judgement we do not have without a factory"
+      ],
+      [
+       "it needs a redesign",
+       "we redesign the ankle; it is one of the {ours_parts} parts that are ours outright, so there is no licence obstacle"
+      ]
+     ],
+     "branches_zh": [
+      [
+       "更强材料即可解决",
+       "我方仅对该零件采用该材料并重算 BOM 成本"
+      ],
+      [
+       "改变打印方向即可解决",
+       "我方将该方向固化到图纸与切片配置中，防止丢失"
+      ],
+      [
+       "贵方认为该工况不合理",
+       "请给出贵方建议的工况，我方重跑——这正是没有工厂就无法获得的判断"
+      ],
+      [
+       "需要重新设计",
+       "我方重新设计踝件；它属于我方完全自有的 {ours_parts} 个零件之一，无许可障碍"
+      ]
+     ]
+    },
+    {
+     "id": "Q2.3",
+     "priority": "high",
+     "need": "datasheet",
+     "ask_en": "For the four soft parts (two soles, jaw_soft, soft_mouth_top) what TPU do you stock and at what Shore hardness? Send the datasheet.",
+     "ask_zh": "四个软性零件（两只脚底、jaw_soft、soft_mouth_top）贵厂常备何种 TPU？邵氏硬度多少？请提供数据表。",
+     "ours_en": "The durometer is INFERRED, not known: Pollen say nothing, the community says 90-95A, and our slicer preset resolves to Bambu TPU 85A. We print {tpu_pieces} TPU pieces per robot, {tpu_grams} g.",
+     "ours_zh": "硬度为推断值而非已知值：Pollen 未说明，社区称 90-95A，我方切片预设对应 Bambu TPU 85A。每台打印 TPU 件 {tpu_pieces} 个，共 {tpu_grams} 克。",
+     "source": "out/print/slice.json flags; out/print/slice.json totals_per_material.TPU",
+     "branches_en": [
+      [
+       "you stock 90-95A",
+       "we adopt it and re-slice the four parts on your material for real grams and times"
+      ],
+      [
+       "you stock only 85A or softer",
+       "we take it, and we add a grip test to the walk acceptance because sole hardness changes the friction the gait was tuned in"
+      ],
+      [
+       "you would injection-mould or die-cut the soles instead",
+       "send the process and MOQ; the soles are the most mould-friendly parts on the robot"
+      ]
+     ],
+     "branches_zh": [
+      [
+       "贵厂常备 90-95A",
+       "我方采用，并按贵厂材料重新切片四个零件以取得真实克数与时间"
+      ],
+      [
+       "贵厂仅有 85A 或更软",
+       "我方接受，并在行走验收中增加抓地测试，因为鞋底硬度会改变步态调参所依据的摩擦条件"
+      ],
+      [
+       "贵方倾向注塑或模切鞋底",
+       "请提供工艺与起订量；鞋底是整机最适合开模的零件"
+      ]
+     ]
+    },
+    {
+     "id": "Q2.4",
+     "priority": "normal",
+     "need": "capability",
+     "ask_en": "Can you supply the four published colourways in filament (cream, graphite, lavender, sky) with colour consistency between lots, and do you colour-match to a standard (Pantone / RAL) or to a physical sample?",
+     "ask_zh": "贵厂能否提供四种已公布配色的耗材（奶油、石墨、薰衣草、天蓝），并保证批次间色差稳定？色号按标准（Pantone / RAL）还是按实物样板对色？",
+     "ours_en": "The four colourways and their hex values are published by Pollen and recorded in SPEC.md; no lot-tolerance and no colour standard exists anywhere in our documents.",
+     "ours_zh": "四种配色及其色值由 Pollen 公布并记录于 SPEC.md；我方文件中没有任何批次色差公差或对色标准。",
+     "source": "SPEC.md:37 colourways",
+     "branches_en": [
+      [
+       "you colour-match to a standard",
+       "we convert the published hex values to that standard and put them on the drawings"
+      ],
+      [
+       "you match to a physical sample",
+       "we will send a printed sample once you tell us which part to send"
+      ],
+      [
+       "colour is a stock constraint for you",
+       "we will pick from your stock and republish the colourway table"
+      ]
+     ],
+     "branches_zh": [
+      [
+       "贵厂按标准色卡对色",
+       "我方将公布的色值换算为该标准并标注于图纸"
+      ],
+      [
+       "贵厂按实物样板对色",
+       "请告知需寄送哪个零件，我方寄出打印样件"
+      ],
+      [
+       "颜色受贵厂库存限制",
+       "我方从贵厂库存中选定并重新发布配色表"
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "n": "3",
+   "id": "tooling",
+   "title_en": "Moulding versus printing — MOQ, tooling cost and lead time",
+   "title_zh": "注塑与打印之比较——起订量、模具费与周期",
+   "lede_en": "Our printed baseline is measured, not estimated: {print_pieces} pieces, {print_grams} g and {print_hours} h of machine time per robot, from real slicer runs. The moulding side is NOT measured — we carry published planning figures only (tooling from {tool_floor} USD, aluminium tools {tool_alu}, moulded piece {mould_piece} USD) and no quotation from anyone. Your numbers replace ours entirely.",
+   "lede_zh": "我方打印基线为实测值而非估算：每台 {print_pieces} 件、{print_grams} 克、{print_hours} 小时机时，来自真实切片运行。注塑侧<b>没有</b>实测数据——我方仅有公开的规划数值（模具费自 {tool_floor} 美元起，铝模 {tool_alu}，注塑单件 {mould_piece} 美元），且无任何正式报价。贵厂数据将完全取代我方数值。",
+   "questions": [
+    {
+     "id": "Q3.1",
+     "priority": "high",
+     "need": "quote",
+     "ask_en": "For the five shell parts, quote: tooling cost per cavity, tooling lead time, MOQ, and piece price at 1 000 / 5 000 / 20 000 units. Single cavity is fine; say if you would family-tool them.",
+     "ask_zh": "针对五个外壳零件，请报：单腔模具费、模具周期、起订量，以及 1 000 / 5 000 / 20 000 台的单件价格。单腔即可；若建议一模多腔请说明。",
+     "ours_en": "The five are the two trunk shells, the two head shells and the face part: {shell_grams} g and {shell_hours} h of printing per robot, which is {shell_share_pct} % of the robot's print time.",
+     "ours_zh": "五件为两片躯干壳、两片头壳与面板：每台打印 {shell_grams} 克、{shell_hours} 小时，占整机打印时间的 {shell_share_pct} %。",
+     "source": "out/print/slice.json per-part grams and seconds",
+     "branches_en": [
+      [
+       "tooling pays back under 5 000 units",
+       "we do the DFM-for-moulding pass now: draft, uniform wall, gate and ejector positions, parting line, and we re-issue those five parts"
+      ],
+      [
+       "it pays back over 20 000 units",
+       "we stay printed and spend the effort on print-farm throughput instead"
+      ],
+      [
+       "you would tool only some of them",
+       "name which, and we split the five into two process families in the playbook"
+      ]
+     ],
+     "branches_zh": [
+      [
+       "5 000 台以内可收回模具费",
+       "我方立即进行注塑 DFM：拔模、均匀壁厚、浇口与顶针位置、分型线，并重新发布这五个零件"
+      ],
+      [
+       "需 20 000 台以上才回本",
+       "我方维持打印方案，把精力投入打印产能"
+      ],
+      [
+       "贵方建议只对其中部分开模",
+       "请指明具体零件，我方在制造手册中将五件拆为两个工艺族"
+      ]
+     ]
+    },
+    {
+     "id": "Q3.2",
+     "priority": "high",
+     "need": "decision",
+     "ask_en": "Given our current geometry, what would you change per part to make these shells mouldable — draft angles, wall thickness, undercuts, boss design, parting line? We would rather receive a marked-up drawing than a rule.",
+     "ask_zh": "以现有几何为基础，为使外壳可注塑，贵方对每个零件会做哪些修改——拔模角、壁厚、倒扣、螺柱结构、分型线？我方更希望收到标注修改的图纸，而不是通则。",
+     "ours_en": "These parts were modelled for FDM and have never been reviewed for moulding by anyone. Our own DFM pass covers printing only.",
+     "ours_zh": "这些零件按 FDM 建模，从未有人做过注塑评审。我方自有 DFM 评审仅覆盖打印工艺。",
+     "source": "MANUFACTURING-PLAYBOOK.html DFM section — process is FDM throughout",
+     "branches_en": [
+      [
+       "you mark up our drawings",
+       "we take the mark-ups into the CAD and re-issue; that is the fastest path to a mouldable part"
+      ],
+      [
+       "you would remodel them yourselves",
+       "agree the datum scheme with us first so the assembly still closes — every joint position in the robot is measured from one frame"
+      ],
+      [
+       "you judge them unmouldable as shaped",
+       "then the shells stay printed and we say so in the pack with your reason"
+      ]
+     ],
+     "branches_zh": [
+      [
+       "贵方在我方图纸上标注修改",
+       "我方将修改落实到 CAD 并重新发布；这是获得可注塑零件的最快路径"
+      ],
+      [
+       "贵方自行重建模型",
+       "请先与我方确认基准体系，以保证装配闭合——整机每个关节位置均以同一坐标系测得"
+      ],
+      [
+       "贵方判断现有形状不可注塑",
+       "则外壳维持打印方案，我方在交付包中注明并附贵方理由"
+      ]
+     ]
+    },
+    {
+     "id": "Q3.3",
+     "priority": "normal",
+     "need": "quote",
+     "ask_en": "What is your MOQ and lead time for a first pilot batch built entirely by printing, say 10 and 50 units, including the printed jigs?",
+     "ask_zh": "若首批试产完全采用打印（例如 10 台与 50 台，含打印夹具），贵厂的起订量与周期各是多少？",
+     "ours_en": "We have {jig_count} printed jigs designed (bearing presses in two sizes with anvil, and a servo horn-zero gauge) but none has been printed or used.",
+     "ours_zh": "我方已设计 {jig_count} 套打印夹具（两种规格的轴承压装工装含压砧、以及舵机零位对刀规），但均未打印或使用过。",
+     "source": "out/jigs/jigs.json",
+     "branches_en": [
+      [
+       "you can build 10 in weeks",
+       "we send the first article package immediately and the first units become our measurement baseline"
+      ],
+      [
+       "you need a larger first batch to be economic",
+       "tell us the number and we plan the pilot around it"
+      ],
+      [
+       "you want us to print the jigs here first",
+       "we will, and we ship them with the files"
+      ]
+     ],
+     "branches_zh": [
+      [
+       "数周内可完成 10 台",
+       "我方立即寄出首件包，首批样机即成为我方的测量基线"
+      ],
+      [
+       "经济批量需更大",
+       "请给出数量，我方据此规划试产"
+      ],
+      [
+       "希望我方先打印夹具",
+       "可以，我方连同文件一并寄出"
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "n": "4",
+   "id": "dfm",
+   "title_en": "Design for manufacture — what you would change, per part",
+   "title_zh": "可制造性——逐零件的修改建议",
+   "lede_en": "We publish {print_slugs} printed part numbers and {sheet_count} drawing sheets, and we already know none of the sheets passes our own layout standard. What we want from you is not a review of the sheets — it is a review of the PARTS.",
+   "lede_zh": "我方共发布 {print_slugs} 个打印件品种与 {sheet_count} 张图纸，并且已知没有一张图纸通过我方自有的版面标准。我方需要贵方评审的不是图纸，而是<b>零件本身</b>。",
+   "questions": [
+    {
+     "id": "Q4.1",
+     "priority": "high",
+     "need": "decision",
+     "ask_en": "Which of our {print_slugs} printed parts would you refuse to produce as drawn, and why? One line per part is enough.",
+     "ask_zh": "在我方 {print_slugs} 个打印件中，哪些贵厂不接受按现图生产？原因是什么？每个零件一行即可。",
+     "ours_en": "Our own DFM pass flags {support_count} parts with slicer support warnings and lists a thinnest wall per part on each sheet. It has never been checked by anyone who has to make them.",
+     "ours_zh": "我方自有 DFM 评审标记了 {support_count} 个存在切片支撑警告的零件，并在每张图纸上标注了该零件的最小壁厚。但从未经过实际制造方核查。",
+     "source": "out/print/slice.json slicer_warning; out/drawings/<slug>/result.json thinnest_wall_mm",
+     "branches_en": [
+      [
+       "you name parts",
+       "each becomes a work parcel with your reason as its acceptance test"
+      ],
+      [
+       "you would accept all of them",
+       "we lock the geometry and move the effort to the drawing sheets"
+      ],
+      [
+       "you need STEP to judge",
+       "see Q7.2 — we can export STEP for the {ours_parts} parts that are parametric solids; the rest are meshes and we will say so"
+      ]
+     ],
+     "branches_zh": [
+      [
+       "贵方指出具体零件",
+       "每个零件形成一个工作包，以贵方给出的理由作为验收标准"
+      ],
+      [
+       "贵方全部接受",
+       "我方冻结几何，将精力转向图纸完善"
+      ],
+      [
+       "需 STEP 文件才能判断",
+       "见 Q7.2——参数化实体的 {ours_parts} 个零件可导出 STEP，其余为网格模型，我方会如实说明"
+      ]
+     ]
+    },
+    {
+     "id": "Q4.2",
+     "priority": "normal",
+     "need": "capability",
+     "ask_en": "Do you plate parts your own way, or would you use our plate layout? Our costing assumes a plate holds {plate_pla} PLA pieces and {plate_tpu} TPU pieces, and that a plate is one print job.",
+     "ask_zh": "贵厂自行排版还是采用我方排版？我方成本核算假定每盘 PLA 排 {plate_pla} 件、TPU 排 {plate_tpu} 件，且一盘即一次打印作业。",
+     "ours_en": "Our published grams and seconds are PER-PIECE prints, not plate times, so a plate layout changes the hours but not the grams.",
+     "ours_zh": "我方公布的克数与秒数为<b>单件</b>打印值，非整盘时间；因此排版会改变工时但不改变克数。",
+     "source": "out/print/slice.json $comment; tools/data/playbook.json rates.plate_pieces",
+     "branches_en": [
+      [
+       "you plate your own way",
+       "send one plate's real time and we replace our per-piece sum with your plate times"
+      ],
+      [
+       "you use ours",
+       "we ship the plate files as they are"
+      ],
+      [
+       "you run a farm with mixed machines",
+       "tell us the machine mix and we re-slice on the slowest one so the plan is not optimistic"
+      ]
+     ],
+     "branches_zh": [
+      [
+       "贵厂自行排版",
+       "请提供一盘的实际时间，我方用贵厂整盘时间替换单件求和值"
+      ],
+      [
+       "采用我方排版",
+       "我方按现状提供排版文件"
+      ],
+      [
+       "贵厂为多机型产线",
+       "请告知机型构成，我方按最慢机型重新切片，避免计划过于乐观"
+      ]
+     ]
+    },
+    {
+     "id": "Q4.3",
+     "priority": "high",
+     "need": "decision",
+     "ask_en": "The head geometry is our largest open design question: our shell is {head_bbox} mm and the product photographs suggest a more compact dome. If you can obtain a retail unit, will you caliper the head and the eye ring for us?",
+     "ask_zh": "头部几何是我方最大的未决设计问题：我方头壳为 {head_bbox} mm，而产品照片显示实物更为紧凑。若贵厂能取得零售整机，可否代为用卡尺测量头壳与眼圈？",
+     "ours_en": "The deviation is CANNOT DETERMINE, not confirmed: photographic scaling carries about 4 % uncertainty, which is about 5 mm on a 122 mm head, and the reference photo has the beak open and the head tilted.",
+     "ours_zh": "该偏差为“无法判定”，而非已确认：照片标定不确定度约 4 %，对 122 mm 的头部约合 5 mm，且参考照片中鸟喙张开、头部倾斜。",
+     "source": "HEAD-RECONSTRUCTION.html; out/verify/head_analysis.json",
+     "branches_en": [
+      [
+       "you can measure a retail head",
+       "that single measurement closes our largest geometric unknown and we re-model to it"
+      ],
+      [
+       "you cannot get a unit",
+       "we keep the head as CANNOT DETERMINE and tool nothing from it"
+      ],
+      [
+       "you would prefer we design our own head",
+       "say so — it is the cleanest licence position, since the vendor head mesh is not ours to sell"
+      ]
+     ],
+     "branches_zh": [
+      [
+       "贵方可测量零售整机头部",
+       "这一项测量即可解决我方最大的几何未知，我方据此重建模型"
+      ],
+      [
+       "贵方无法取得整机",
+       "头部维持“无法判定”，不据此开任何模具"
+      ],
+      [
+       "贵方建议我方自行设计头部",
+       "请明示——这是最干净的许可方案，因为供方头部网格不属于我方可销售资产"
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "n": "5",
+   "id": "pcb",
+   "title_en": "PCB fabrication and assembly",
+   "title_zh": "PCB 制造与贴装",
+   "lede_en": "Three custom boards, none of which passes its own design-rule check yet. Their outlines are {board_list}. We are NOT asking you to fabricate them today; we are asking what your process accepts, so we finish the layouts against your rules rather than a generic house's.",
+   "lede_zh": "三块定制板，均尚未通过自身设计规则检查。外形尺寸为 {board_list}。我方<b>不</b>要求现在投板；我方希望了解贵厂工艺可接受的规则，以便按贵厂规则而非通用厂规则完成布线。",
+   "questions": [
+    {
+     "id": "Q5.1",
+     "priority": "blocking",
+     "need": "capability",
+     "ask_en": "Send your PCB capability sheet: minimum track and space at 1 oz, minimum drill, minimum annular ring, edge clearance, available finishes and thicknesses, and your panelisation requirement.",
+     "ask_zh": "请提供贵厂 PCB 工艺能力表：1 oz 铜厚下的最小线宽/线距、最小钻孔、最小环宽、边缘间距、可用表面处理与板厚，以及拼板要求。",
+     "ours_en": "We have laid out against published capability from one vendor only ({pcb_capability}) and we have contacted no fab, uploaded no file and created no account.",
+     "ours_zh": "我方仅依据一家供应商公布的能力参数布线（{pcb_capability}），且未联系任何厂家、未上传任何文件、未注册任何账户。",
+     "source": "electronics/pcb-package.json fab_quotes",
+     "branches_en": [
+      [
+       "your rules are looser than the ones we used",
+       "no change; we re-run DRC against your rules to confirm"
+      ],
+      [
+       "your rules are tighter",
+       "we re-route to them before anything is ordered"
+      ],
+      [
+       "you subcontract PCB fab",
+       "tell us to whom and we ask them directly, with your approval"
+      ]
+     ],
+     "branches_zh": [
+      [
+       "贵厂规则比我方所用更宽松",
+       "无需修改；我方按贵厂规则重跑 DRC 确认"
+      ],
+      [
+       "贵厂规则更严格",
+       "我方在投板前按贵厂规则重新布线"
+      ],
+      [
+       "贵厂 PCB 外协",
+       "请告知外协厂家，经贵方同意后我方直接对接"
+      ]
+     ]
+    },
+    {
+     "id": "Q5.2",
+     "priority": "high",
+     "need": "capability",
+     "ask_en": "The battery-contact board is a strip {banana_size} mm — 4.6 mm across its short axis. One US fab refuses it on a measured rule. Do you accept it, and do you need a rail or tab-routed panel to handle it?",
+     "ask_zh": "电池接触板为 {banana_size} mm 的窄条，短边仅 4.6 mm。某美国厂家依据其明文规则拒绝加工。贵厂能否接受？是否需要加工艺边或邮票孔拼板？",
+     "ours_en": "It needs ENIG rather than HASL because a sliding spring contact on a HASL pad cold-flows and oxidises — and ENIG is an ORDER-FORM field, it is not carried in the Gerbers.",
+     "ours_zh": "该板需 ENIG 而非 HASL，因为滑动弹片接触 HASL 焊盘会冷流并氧化——而 ENIG 是<b>下单选项</b>，Gerber 文件中不携带该信息。",
+     "source": "electronics/pcb-package.json boards[banana-contact].finish",
+     "branches_en": [
+      [
+       "you accept the strip as-is with ENIG",
+       "we finish the layout and it is the cheapest of the three boards"
+      ],
+      [
+       "you need a panel",
+       "we draw the panel with your rail width and tab spacing"
+      ],
+      [
+       "you would replace it with a stamped contact or an FPC",
+       "quote it — the board exists only to carry two spring contacts"
+      ]
+     ],
+     "branches_zh": [
+      [
+       "可按现状加工并做 ENIG",
+       "我方完成布线；该板是三块中最便宜的"
+      ],
+      [
+       "需要拼板",
+       "我方按贵厂工艺边宽度与连接位间距绘制拼板"
+      ],
+      [
+       "贵方建议改为冲压触片或 FPC",
+       "请报价——该板存在的唯一目的就是承载两个弹性触点"
+      ]
+     ]
+    },
+    {
+     "id": "Q5.3",
+     "priority": "high",
+     "need": "capability",
+     "ask_en": "Can you do the SMT assembly as well, and what is your MOQ, stencil cost and per-board placement cost at 10 / 100 / 1 000 boards? Do you source the parts or do we consign them?",
+     "ask_zh": "贵厂能否同时承接 SMT 贴装？10 / 100 / 1 000 片时的起订量、钢网费与单板贴装费各是多少？物料由贵厂采购还是我方来料？",
+     "ours_en": "Our BOM has {bom_lines} bought lines of which {usd_lines} carry a live USD price; the board-level parts (audio codec, IMUs, USB-C controller) are LCSC and DigiKey lines with prices at 1 000.",
+     "ours_zh": "我方 BOM 共 {bom_lines} 项外购件，其中 {usd_lines} 项有实时美元报价；板级物料（音频编解码、IMU、USB-C 控制器）为 LCSC 与 DigiKey 项，均有 1 000 件价格。",
+     "source": "spec/sourcing.json; out/factory/pack.json bom",
+     "branches_en": [
+      [
+       "you assemble and source",
+       "we hand you the BOM and the placement files and you own the whole board line"
+      ],
+      [
+       "you assemble, we consign",
+       "we buy from the lines in section 3.3 of the pack and ship them to you"
+      ],
+      [
+       "you do not do SMT",
+       "name a house you work with, and the board lane becomes a separate parcel"
+      ]
+     ],
+     "branches_zh": [
+      [
+       "贵厂贴装并自行采购",
+       "我方交付 BOM 与贴装文件，整条板线由贵厂负责"
+      ],
+      [
+       "贵厂贴装，我方来料",
+       "我方按交付包 3.3 节的采购项购买并寄送"
+      ],
+      [
+       "贵厂不做 SMT",
+       "请推荐合作厂家，板线将作为独立工作包"
+      ]
+     ]
+    },
+    {
+     "id": "Q5.4",
+     "priority": "blocking",
+     "need": "decision",
+     "ask_en": "The Robot HAT has a published upstream alternative: Pollen's own Apache-2.0 board, MEASURED at {pollen_hat} mm, against our {our_hat} mm reconstruction, which still has open nets and fails DRC. The two differ by {hat_delta} mm on one axis. Which would you rather manufacture?",
+     "ask_zh": "Robot HAT 存在上游公开替代方案：Pollen 自己的 Apache-2.0 板，<b>实测</b>为 {pollen_hat} mm；我方重构版为 {our_hat} mm，仍有未连通网络且未通过 DRC。两者仅在一个轴上相差 {hat_delta} mm。贵方倾向生产哪一版？",
+     "ours_en": "<b>CORRECTION, and it changes this question.</b> Until 2026-09-04 this pack said Pollen's board is 65.0 x 48.5 mm and that adopting it means re-modelling the motor support. That figure was wrong. Measured tonight off the Edge.Cuts layer of Pollen's own kicad_pcb (commit 23eab119), the board is {pollen_hat} mm. The 48.5 was the bounding box of the file's Dwgs.User ANNOTATION layer, whose dimension witness lines hang 17.7 mm below the copper. So the real difference from our own {our_hat} mm reconstruction is {hat_delta} mm on one axis, and from the simulation mesh the Microduck actually carries ({hat_mesh} mm) it is 0.8751 mm. Apache-2.0 permits manufacture, modification and SALE, and Pollen's package includes Gerbers, BOM, POS and a STEP model. Adopting it is therefore a CLEARANCE CHECK, not a re-model — and it is the single move that both shortens our critical path and cleans the licence position. ONE THING IS STILL OPEN: nobody has measured the HAT pocket in our motor-support part against a {pollen_hat} mm board. That is parcel B-3a, half an engineer-day of desk work, and it is running.",
+     "ours_zh": "<b>更正，且这会改变本问题。</b>直至 2026-09-04，本交付包一直称 Pollen 的板为 65.0 x 48.5 mm，并称采用它需重做电机支架。该数据是错的。今夜从 Pollen 自己的 kicad_pcb（提交 23eab119）的 Edge.Cuts 层实测，该板为 {pollen_hat} mm。48.5 是该文件 Dwgs.User <b>标注层</b>的包络框，其尺寸引出线延伸到铜层下方 17.7 mm。因此与我方 {our_hat} mm 重构版的真实差异只有一个轴上的 {hat_delta} mm；与 Microduck 实际所载的仿真网格（{hat_mesh} mm）相差 0.8751 mm。Apache-2.0 允许制造、修改与<b>销售</b>，且 Pollen 的资料包含 Gerber、BOM、坐标文件与 STEP 模型。因此采用它是一次<b>间隙核对</b>，不是重做——而且这是唯一一步既能缩短我方关键路径、又能理顺许可关系的动作。<b>仍有一项未定</b>：无人测量过我方电机支架上的 HAT 板槽能否容纳 {pollen_hat} mm 的板。那是工作包 B-3a，半个人天的案头工作，目前正在进行。",
+     "source": "out/factory/reconcile.json robot_hat_outline (measured off reference/pollen-elec-rpi-robot-hat/elec_RPI_Robot_HAT.kicad_pcb Edge.Cuts, 4 gr_line + 4 gr_arc, 20 points); out/pcb/hat/components.json board.outline_bbox_mm; out/factory/licence.json fact F11; PCB-PACKAGE.html §3.4. NOTE: out/open/identity-sourcing.json:52-53 still carries the 48.5 figure; that file belongs to another lane and the contradiction is recorded rather than edited.",
+     "branches_en": [
+      [
+       "fabricate Pollen's published board",
+       "we finish B-3a to confirm the {hat_delta} mm fits the pocket, add a relief if it does not, and drop the HAT from B-1 and B-3 — the largest single reduction available to this plan, and the licence position becomes clean"
+      ],
+      [
+       "keep our reconstruction",
+       "we route the 8 open nets and re-run DRC against your rules; the HAT stays under our own reconstruction and its licence question stays open"
+      ],
+      [
+       "you would redesign the board",
+       "then tell us the constraints and we hand over the netlist"
+      ],
+      [
+       "you want the pocket measured before you answer",
+       "that is B-3a and it is half an engineer-day — tell us and we put the number in front of you before you decide"
+      ]
+     ],
+     "branches_zh": [
+      [
+       "生产 Pollen 公开的板",
+       "我方完成 B-3a 确认 {hat_delta} mm 能否装入板槽，若不能则加让位，并从 B-1 与 B-3 中去掉该板——这是本计划可获得的最大一次工作量削减，同时许可关系变得清晰"
+      ],
+      [
+       "沿用我方重构版",
+       "我方完成 8 条未连通网络的布线并按贵厂规则重跑 DRC；该板仍属我方重构版，其许可问题仍然悬而未决"
+      ],
+      [
+       "贵方愿意重新设计该板",
+       "请给出约束条件，我方移交网表"
+      ],
+      [
+       "希望先测得板槽尺寸再作答复",
+       "那就是 B-3a，半个人天——请告知，我方会在贵方决策前把数字放在贵方面前"
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "n": "6",
+   "id": "line",
+   "title_en": "Assembly line — labour, fixtures and takt",
+   "title_zh": "装配线——人工、工装与节拍",
+   "lede_en": "Our playbook lays the build out as {stations} stations and {station_steps} steps, and it has never been run by anybody. It costs labour at {labour_rate} USD/h, which is a planning figure from a hobby source, not your rate.",
+   "lede_zh": "我方制造手册将装配拆为 {stations} 个工位、{station_steps} 个步骤，但从未实际执行过。人工成本按 {labour_rate} 美元/小时计，这是来自业余来源的规划值，并非贵厂费率。",
+   "questions": [
+    {
+     "id": "Q6.1",
+     "priority": "high",
+     "need": "quote",
+     "ask_en": "What is your assembly labour rate, and how many minutes would you allow for one Microduck at each of our {stations} stations? A takt time per station is more useful to us than a total.",
+     "ask_zh": "贵厂装配人工费率是多少？我方 {stations} 个工位各分配多少分钟组装一台 Microduck？按工位给出的节拍时间比总时间对我方更有用。",
+     "ours_en": "We have no measured assembly time at all — no unit has been assembled.",
+     "ours_zh": "我方完全没有实测装配时间——从未装配过整机。",
+     "source": "tools/data/playbook.json stations; readiness assembly row",
+     "branches_en": [
+      [
+       "you give per-station minutes",
+       "we re-cost the unit with your rate and rebalance the stations against your takt"
+      ],
+      [
+       "you would restructure the stations",
+       "do — the station split is ours and it has no empirical basis"
+      ],
+      [
+       "you need a pilot build before quoting",
+       "that is Q3.3, and it is the answer we expect"
+      ]
+     ],
+     "branches_zh": [
+      [
+       "贵方给出各工位分钟数",
+       "我方按贵厂费率重算单台成本，并按贵厂节拍重新平衡工位"
+      ],
+      [
+       "贵方希望重排工位",
+       "请重排——工位划分是我方设定的，没有实证依据"
+      ],
+      [
+       "需先试产才能报价",
+       "即 Q3.3，这也是我方预期的答复"
+      ]
+     ]
+    },
+    {
+     "id": "Q6.2",
+     "priority": "high",
+     "need": "decision",
+     "ask_en": "What fixtures would you want that we have not designed? We have drawn {jig_count} printed jigs: bearing presses in two sizes with a common anvil, and a servo horn-zero gauge.",
+     "ask_zh": "还需要哪些我方尚未设计的工装？我方已绘制 {jig_count} 套打印夹具：两种规格的轴承压装工装（共用压砧）与舵机零位对刀规。",
+     "ours_en": "None of the jigs has been printed or used. The horn-zero gauge fixes an INDEX, not an absolute angle, because whether the mesh horn pose corresponds to Goal Position 2048 is CANNOT DETERMINE.",
+     "ours_zh": "所有夹具均未打印或使用过。零位对刀规固定的是<b>相对索引</b>而非绝对角度，因为网格中的舵机臂姿态是否对应 Goal Position 2048 尚无法判定。",
+     "source": "out/jigs/jigs.json; tools/data/playbook.json open['Whether the mesh horn pose is Goal Position 2048']",
+     "branches_en": [
+      [
+       "you name fixtures",
+       "we design and send them as printable files with the drawings"
+      ],
+      [
+       "you would build your own",
+       "send us the interfaces they need and we will hold those datums fixed in the CAD"
+      ],
+      [
+       "you can settle the horn index on a real servo",
+       "that closes an open item that no amount of reading will close"
+      ]
+     ],
+     "branches_zh": [
+      [
+       "贵方指明所需工装",
+       "我方设计并连同图纸提供可打印文件"
+      ],
+      [
+       "贵方自行制作",
+       "请告知所需接口，我方在 CAD 中固定相应基准"
+      ],
+      [
+       "贵方可用实物舵机确定臂位索引",
+       "这将解决一个纯靠查资料无法解决的未决项"
+      ]
+     ]
+    },
+    {
+     "id": "Q6.3",
+     "priority": "high",
+     "need": "capability",
+     "ask_en": "Do you have calibrated torque drivers in the 0.05-0.5 N·m range, and can you run a strip test and a pull-out test on our printed bosses to set the torque schedule?",
+     "ask_zh": "贵厂是否有 0.05-0.5 N·m 量程的校准扭力螺丝刀？能否在我方打印螺柱上做滑牙与拔出试验以确定扭矩表？",
+     "ours_en": "Torque is 3 of 3 CANNOT DETERMINE in our playbook. We will not publish a torque we have not measured, and we will not copy a steel chart figure into a plastic joint.",
+     "ours_zh": "我方制造手册中三项扭矩全部“无法判定”。我方不会发布未经实测的扭矩，也不会把钢制连接的表格数值套用于塑料连接。",
+     "source": "tools/data/playbook.json torque",
+     "branches_en": [
+      [
+       "you can run the tests",
+       "you become the source for the torque schedule and we publish it with your method"
+      ],
+      [
+       "you have drivers but not the test",
+       "we specify the test and you run it — it is three coupons and an afternoon"
+      ],
+      [
+       "neither",
+       "we buy the equipment and run it here, but that delays the assembly document"
+      ]
+     ],
+     "branches_zh": [
+      [
+       "贵方可做试验",
+       "贵方即为扭矩表的出处，我方连同贵方方法一并发布"
+      ],
+      [
+       "有扭力工具但不做试验",
+       "我方给出试验方法，由贵方执行——三个试件、半天即可"
+      ],
+      [
+       "两者均无",
+       "我方自行采购设备并在本地进行，但会延后装配文件的发布"
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "n": "7",
+   "id": "from_us",
+   "title_en": "What you need from us that we have not sent",
+   "title_zh": "我方尚未提供而贵方需要的资料",
+   "lede_en": "This section is the one we cannot answer ourselves. Everything we know we owe you is already in the pack or in the work breakdown; what is missing is what a factory knows it needs and we do not.",
+   "lede_zh": "本节是我方无法自行回答的部分。凡我方自知应提供的，均已在交付包或工作分解表中；缺的是工厂知道而我方不知道的那部分。",
+   "questions": [
+    {
+     "id": "Q7.1",
+     "priority": "blocking",
+     "need": "decision",
+     "ask_en": "Read section 2 of FACTORY-PACK.html (what is NOT ready). What else, that is not on that list, would stop you starting?",
+     "ask_zh": "请阅读 FACTORY-PACK.html 第 2 节（哪些尚未就绪）。除该清单所列之外，还有什么会阻碍贵方开工？",
+     "ours_en": "Our own list has {not_ready_rows} entries and is measured, not guessed — but it is measured against OUR standard, and we have never had to start a line from a document.",
+     "ours_zh": "我方清单共 {not_ready_rows} 条，均为实测而非推测——但它是按<b>我方</b>标准衡量的，而我方从未按文件启动过一条产线。",
+     "source": "out/factory/readiness.json",
+     "branches_en": [
+      [
+       "you name gaps",
+       "each becomes a parcel in WORK-BREAKDOWN.html with your sentence as its acceptance test"
+      ],
+      [
+       "nothing else",
+       "we start on the parcels already listed and the pack becomes the contract"
+      ]
+     ],
+     "branches_zh": [
+      [
+       "贵方指出缺口",
+       "每一项在 WORK-BREAKDOWN.html 中形成工作包，以贵方原话作为验收标准"
+      ],
+      [
+       "无其他缺口",
+       "我方按既有工作包推进，本交付包即为工作依据"
+      ]
+     ]
+    },
+    {
+     "id": "Q7.2",
+     "priority": "high",
+     "need": "decision",
+     "ask_en": "What file formats do you want? We hold SVG and PDF sheets, {dxf_count} DXF files, {print_slugs} STLs, and we can export STEP for the parts that are parametric solids. The rest are meshes and cannot be given a true STEP.",
+     "ask_zh": "贵方需要哪些文件格式？我方现有 SVG 与 PDF 图纸、{dxf_count} 个 DXF、{print_slugs} 个 STL；参数化实体零件可导出 STEP，其余为网格模型，无法提供真正的 STEP。",
+     "ours_en": "{ours_parts} printed parts are parametric solids of ours; {vendor_parts} are vendor simulation meshes. A mesh converted to STEP is still a mesh, and we will not label one as a solid.",
+     "ours_zh": "打印件中 {ours_parts} 个为我方参数化实体，{vendor_parts} 个为供方仿真网格。网格转成 STEP 仍是网格，我方不会将其标注为实体。",
+     "source": "out/factory/readiness.json print rows; out/drawings/*.dxf",
+     "branches_en": [
+      [
+       "STEP for everything",
+       "we send STEP for the parametric parts and a written refusal, with the reason, for the meshes"
+      ],
+      [
+       "STL and PDF are enough",
+       "the pack already contains them"
+      ],
+      [
+       "you want native CAD",
+       "our parts are Python scripts on an OCCT kernel; we can send the scripts and the exports, and they rebuild deterministically"
+      ]
+     ],
+     "branches_zh": [
+      [
+       "全部要 STEP",
+       "我方提供参数化零件的 STEP，并对网格零件出具书面说明与理由"
+      ],
+      [
+       "STL 与 PDF 即可",
+       "交付包中已包含"
+      ],
+      [
+       "需要原生 CAD 文件",
+       "我方零件为基于 OCCT 内核的 Python 脚本，可提供脚本与导出件，可确定性重建"
+      ]
+     ]
+    },
+    {
+     "id": "Q7.3",
+     "priority": "normal",
+     "need": "capability",
+     "ask_en": "What incoming inspection do you run on bought parts, and what would you want us to specify for the {bom_lines} bought lines — AQL, sampling plan, certificates?",
+     "ask_zh": "贵厂对外购件如何来料检验？针对我方 {bom_lines} 项外购件，希望我方规定什么——AQL、抽样方案、还是合格证明？",
+     "ours_en": "Our test plan has {eol_gates} end-of-line gates on the finished unit and an incoming-inspection station, but no sampling plan and no AQL anywhere.",
+     "ours_zh": "我方测试计划对整机设有 {eol_gates} 项下线判据，并有来料检验工位，但没有任何抽样方案与 AQL。",
+     "source": "spec/test-plan.json eol; tools/data/playbook.json stations[S0]",
+     "branches_en": [
+      [
+       "you have a house standard",
+       "we adopt it and reference it from the test plan"
+      ],
+      [
+       "you want us to specify",
+       "we will write it once the first units tell us which parts actually vary"
+      ],
+      [
+       "you want certificates on specific parts",
+       "name them and we add the requirement to the sourcing lines"
+      ]
+     ],
+     "branches_zh": [
+      [
+       "贵厂有内部标准",
+       "我方采用并在测试计划中引用"
+      ],
+      [
+       "希望我方规定",
+       "待首批样机显示哪些零件真正存在波动后，我方再行编写"
+      ],
+      [
+       "需要特定零件的合格证明",
+       "请指明零件，我方在采购项中增加该要求"
+      ]
+     ]
+    },
+    {
+     "id": "Q7.4",
+     "priority": "high",
+     "need": "decision",
+     "ask_en": "Do you need a safety or compliance package (CE / FCC / UN 38.3 for the battery, EN 71 if this is sold as a toy), and would you run those tests or expect us to?",
+     "ask_zh": "贵方是否需要安全与合规资料包（CE / FCC、电池 UN 38.3、若按玩具销售则需 EN 71）？相关测试由贵方执行还是由我方承担？",
+     "ours_en": "We hold NO compliance work at all. The battery is an NP-F550-class pack whose exact cell is CANNOT DETERMINE — nobody has read a label on a shipped pack.",
+     "ours_zh": "我方完全没有做过任何合规工作。电池为 NP-F550 级别电池组，具体电芯<b>无法判定</b>——无人读取过实物电池的标签。",
+     "source": "tools/data/playbook.json open['Which NP-F550-shape battery pack actually ships']",
+     "branches_en": [
+      [
+       "you run compliance",
+       "we send whatever the lab needs and it becomes a track in the work breakdown"
+      ],
+      [
+       "we run it",
+       "tell us your target markets so we test to the right standards"
+      ],
+      [
+       "it is out of scope for this build",
+       "we record that decision in the pack so nobody assumes otherwise"
+      ]
+     ],
+     "branches_zh": [
+      [
+       "由贵方负责合规",
+       "我方提供实验室所需全部资料，并在工作分解表中单列一条工作线"
+      ],
+      [
+       "由我方负责",
+       "请告知目标市场，以便按正确标准送测"
+      ],
+      [
+       "本次不涉及",
+       "我方在交付包中记录该决定，避免他人误解"
+      ]
+     ]
+    }
+   ]
+  }
+ ]
 }

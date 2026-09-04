@@ -108,27 +108,42 @@ for slug, sh in sorted(SC["sheets"].items()):
             {"kind": kind, "checks": {k: {"measured": meas[k], "verdict": verd[k], "limit": c.get(k, {}).get("limit")} for k in RULES}, "fails": fails, "cannot_determine": cds})
     sheet_table.append(r)
 
-# printed parts that have NO sheet at all
+# parts that have NO sheet at all — THE UNION OF TWO LISTS, because either alone
+# is wrong. A factory reviewer found on 2026-09-04 that this list named 5 parts and
+# bin/sheetcheck named a different 5, differing by two entries in each direction:
+#   (a) printed parts with no graded sheet     catches microduck-trunk-shell-right,
+#       (this audit's own walk of slice.json)  which has no out/drawings/ FOLDER at
+#                                              all, so sheetcheck never sees it
+#   (b) sheetcheck's part_dirs_with_no_sheet   catches microduck-m12-lens, which HAS
+#                                              a folder but no SVG and is not a
+#                                              printed part, so (a) never sees it
+# A factory planning drawing work from either list alone misses a part. The union is
+# 6, and each row says which list found it and why the other did not.
 slice_ = J("out/print/slice.json")
 print_slugs = [p["slug"] for p in slice_["parts"]]
 sheeted = set(SC["sheets"])
-no_sheet = []
-for s in print_slugs:
-    if s in sheeted:
-        continue
+from_print = [s for s in print_slugs if s not in sheeted]
+from_sheetcheck = [r["slug"] for r in SC.get("part_dirs_with_no_sheet", []) if r.get("slug") not in sheeted]
+no_sheet = sorted(set(from_print) | set(from_sheetcheck))
+for s in no_sheet:
     d = os.path.join(ROOT, "out", "drawings", s)
-    why = "no out/drawings/%s/ directory at all" % s
-    if os.path.isdir(d):
+    found_by = []
+    if s in from_print:
+        found_by.append("this audit's walk of out/print/slice.json (it is a printed part with no graded sheet)")
+    if s in from_sheetcheck:
+        found_by.append("bin/sheetcheck part_dirs_with_no_sheet (its out/drawings folder carries no sheet SVG)")
+    if not os.path.isdir(d):
+        why = "no out/drawings/%s/ directory at all — bin/sheetcheck cannot see it, because it only walks folders that exist" % s
+    else:
         rj = os.path.join(d, "result.json")
-        if os.path.exists(rj):
-            why = (J(rj).get("why") or "result.json without a why")
-        else:
-            why = "directory exists, no SVG, no result.json"
-    no_sheet.append(s)
-    row("drawing", s, s, "NOT_YET", "no drawing sheet exists; " + why, "out/drawings/%s/ (ls, %s)" % (s, NOW[:16]),
+        why = ((J(rj).get("why") or "result.json without a why") if os.path.exists(rj)
+               else "directory exists, no SVG, no result.json")
+    row("drawing", s, s, "NOT_YET",
+        "no drawing sheet exists; " + why + ". Found by: " + " AND ".join(found_by) + ".",
+        "out/drawings/%s/ (ls, %s); out/factory/measure/sheetcheck.json part_dirs_with_no_sheet" % (s, NOW[:16]),
         "No sheet can be drawn: the part has no parametric geometry (a vendor mesh only).", "agent_later",
         "a parametric rebuild (cad-refcheck loop, p95 <= 1 mm) — not among tonight's six workflows; the factory can print the mesh meanwhile",
-        {"kind": "NONE"})
+        {"kind": "NONE", "found_by": found_by, "printed_part": s in print_slugs})
 
 # ---------------------------------------------------------------- 2 print files
 STL = {r["file"]: r for r in J(os.path.join(MEAS, "stlcheck.json"))}
@@ -443,7 +458,15 @@ def count(cls):
 
 
 summary = {c: count(c) for c in ["drawing", "print", "bought", "pcb", "harness", "assembly", "test", "triad", "open"]}
-summary["sheets_graded"] = {"sheets": len(SC["sheets"]), "pass": sum(1 for s in SC["sheets"].values() if s["verdict"] == "PASS"), "fail": sum(1 for s in SC["sheets"].values() if s["verdict"] == "FAIL"), "generated": SC["generated"], "parts_without_a_sheet": no_sheet}
+summary["sheets_graded"] = {"sheets": len(SC["sheets"]), "pass": sum(1 for s in SC["sheets"].values() if s["verdict"] == "PASS"), "fail": sum(1 for s in SC["sheets"].values() if s["verdict"] == "FAIL"), "generated": SC["generated"], "parts_without_a_sheet": no_sheet,
+                            "parts_without_a_sheet_how": {
+                                "union_of": ["printed parts in out/print/slice.json with no graded sheet",
+                                             "bin/sheetcheck part_dirs_with_no_sheet"],
+                                "from_print_walk_only": sorted(set(from_print) - set(from_sheetcheck)),
+                                "from_sheetcheck_only": sorted(set(from_sheetcheck) - set(from_print)),
+                                "why": ("Either list alone is wrong by at least one part: a part with no "
+                                        "out/drawings folder is invisible to sheetcheck, and a part that is "
+                                        "not printed is invisible to the slice.json walk.")}}
 summary["triad_refs"] = {"checked": TR["checked"], "pass": sum(1 for r in TR["results"] if r["verdict"] == "PASS"), "fail": sum(1 for r in TR["results"] if r["verdict"] == "FAIL"), "cannot_determine": sum(1 for r in TR["results"] if r["verdict"] == "CANNOT DETERMINE")}
 summary["bom_fasteners"] = {"bom_rows": len(BOM["rows"]), "fastener_rows": len(fast_rows), "hole_census": sum(holes)}
 summary["unknowns"] = len(HARV)

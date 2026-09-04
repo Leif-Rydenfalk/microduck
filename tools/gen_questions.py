@@ -50,6 +50,14 @@ def J(rel, default=None):
         return json.load(f)
 
 
+def B(txt):
+    """Escape for HTML but keep the <b> emphasis the prose carries. The question data
+    marks the load-bearing clause in bold in BOTH languages; without this the Chinese
+    reader sees a literal <b> and the English reader sees emphasis, which is exactly
+    the sort of asymmetry this document exists to avoid."""
+    return html.escape(str(txt)).replace("&lt;b&gt;", "<b>").replace("&lt;/b&gt;", "</b>")
+
+
 def T(rel):
     p = rel if os.path.isabs(rel) else os.path.join(ROOT, rel)
     return open(p, encoding="utf-8").read() if os.path.exists(p) else ""
@@ -65,6 +73,9 @@ RD = J("out/factory/readiness.json", {})
 PK = J("out/factory/pack.json", {})
 JG = J("out/jigs/jigs.json", {})
 SHEET = J("out/drawings/microduck-shin/result.json", {})
+RC = J("out/factory/reconcile.json")
+if RC is None:
+    raise SystemExit("out/factory/reconcile.json missing — run tools/reconcile.py first")
 SPEC = T("SPEC.md")
 FITS = T(os.path.join(WORKSHOP, "ce-cad", "cecad", "fits.py"))
 
@@ -139,6 +150,27 @@ det = json.dumps(SHEET, ensure_ascii=False)
 m = re.search(r"TOLERANCE BASIS, OUTSOURCED: (.*?)Apply the route", det)
 fact("tol_outsourced", (m.group(1).strip().rstrip(".") if m else "CANNOT DETERMINE"),
      "out/drawings/microduck-shin/result.json — the sheet's own note")
+# THE DEFECT THIS FIXES (factory reviewer, 2026-09-04): question Q1.3 said "our
+# thinnest modelled wall per part is on every drawing sheet" and its answer branches
+# turned on the factory naming "the parts that violate" their floor. But the number
+# on the sheet is a RAY MINIMUM, which at an edge or a fillet run-out is not a wall
+# any process can make or fail to make — the sheet's own DFM note pairs it with the
+# 0.80 mm floor precisely because they are not the same quantity. So the question as
+# written could not be answered from the sheets. The numbers are read here, the
+# incomparability is stated in the question rather than hidden, and the real work —
+# getting a minimum PRINTABLE wall per part — is parcel C-4 in the work breakdown.
+_sheet_slug = "microduck-shin"
+_tw = SHEET.get("thinnest_wall_mm")
+_tws = SHEET.get("thinnest_wall_step_mm")
+_dfm_wall = next((x for x in (SHEET.get("dfm") or []) if x.startswith("THINNEST WALL")), None)
+fact("sheet_wall_min", ("%.4f" % _tw) if _tw is not None else "CANNOT DETERMINE",
+     "out/drawings/%s/result.json thinnest_wall_mm — a RAY MINIMUM over the solid, at "
+     "%s in part coordinates" % (_sheet_slug, SHEET.get("thinnest_wall_where")))
+fact("sheet_wall_step", ("%.4f" % _tws) if _tws is not None else "CANNOT DETERMINE",
+     "out/drawings/%s/result.json thinnest_wall_step_mm — the thinnest measured STEP, "
+     "which unlike the ray minimum is a wall a process can be asked about" % _sheet_slug)
+fact("sheet_wall_note", _dfm_wall or "CANNOT DETERMINE — that sheet no longer carries a THINNEST WALL note",
+     "out/drawings/%s/result.json dfm — the sheet's own note, quoted verbatim" % _sheet_slug)
 
 # ---- profile ----------------------------------------------------------------
 pv = {k: (v, why) for k, v, why in (PB.get("profile") or {}).get("values", [])}
@@ -164,6 +196,18 @@ if not mm:
 counts = [int(x) for x in mm.groups()]
 fact("holes_total", sum(counts), "SPEC.md hole census (%s)" % mm.group(0))
 fact("hole_breakdown", mm.group(0), "SPEC.md hole census")
+# THE BILINGUAL DEFECT THIS FIXES (factory reviewer, 2026-09-04): the Chinese hole
+# census read 共 145 个孔（Ø2.2 clearance ×77, Ø4.4 c'bore ×28, Ø1.6 tap ×20 …）,
+# leaving the three shop terms that CARRY THE GEOMETRY in English inside a Chinese
+# sentence. 沉孔 appeared zero times in all three pack documents and so did 间隙.
+# The Chinese census is now a real translation, taken from the reconciliation file
+# so it cannot drift from the English one.
+_hb = [c for c in RC["fasteners"]["counts"] if c["what_en"].startswith("HOLE")][0]
+fact("hole_breakdown_zh", _hb["breakdown_zh"], "out/factory/reconcile.json fasteners.counts[hole features].breakdown_zh")
+fact("fastener_pieces_buylist", [c["n"] for c in RC["fasteners"]["counts"] if c["what_en"].startswith("PIECES")][0],
+     "out/factory/reconcile.json fasteners — spec/sourcing.json B18a+B18b+B18c")
+fact("fastener_placed", [c["n"] for c in RC["fasteners"]["counts"] if c["what_en"].startswith("SCREWS")][0],
+     "out/factory/reconcile.json fasteners — out/fasteners/placed.json counts.placed")
 mb = re.search(r"bearings (\d+)×(\d+)×(\d+) \(×(\d+)\) and (\d+)×(\d+)×(\d+) \(×(\d+)\)", SPEC)
 fact("bearings_22", mb.group(4) if mb else "CANNOT DETERMINE", "SPEC.md bearing census")
 fact("bearings_15", mb.group(8) if mb else "CANNOT DETERMINE", "SPEC.md bearing census")
@@ -182,10 +226,23 @@ fact("banana_size", " × ".join(str(x) for x in (ban[0].get("outline_mm") or [])
 hat = [b for b in boards if "robot-hat" in (b.get("dir") or "")]
 fact("our_hat", " × ".join(str(x) for x in (hat[0].get("outline_mm") or [])) if hat else "CANNOT DETERMINE",
      "electronics/pcb-package.json boards[robot-hat].outline_mm")
-hatrow = [r for r in RD.get("rows", []) if r.get("class") == "pcb" and r.get("id") == "robot-hat"]
-ph = re.search(r"published outline is ([\d.]+ x [\d.]+ x [\d.]+)", hatrow[0].get("missing", "")) if hatrow else None
-fact("pollen_hat", ph.group(1).replace(" x ", " × ") if ph else "CANNOT DETERMINE",
-     "out/factory/readiness.json robot-hat row (measured from Pollen's published Apache-2.0 package)")
+# MEASURED, NOT SCRAPED. This token used to be a regex over a prose sentence in
+# tools/data/readiness.json, and that sentence said 65.0 x 48.5 — which is the bbox
+# of the kicad_pcb's Dwgs.User ANNOTATION layer, not the board. A blocking question
+# was resting on a dimension the repository's own measurement contradicted by
+# 17.6 mm. It now reads the number tools/reconcile.py measures off the Edge.Cuts
+# layer every time this pack is built.
+_hat = RC["robot_hat_outline"]
+_hm = _hat["measurement_mm"]
+if _hm.get("height") is None:
+    raise SystemExit("gen_questions: the Robot HAT outline could not be measured — refusing to quote a figure")
+fact("pollen_hat", "%.4f × %.4f" % (_hm["width"], _hm["height"]),
+     "out/factory/reconcile.json robot_hat_outline — measured off the Edge.Cuts layer of "
+     "reference/pollen-elec-rpi-robot-hat/elec_RPI_Robot_HAT.kicad_pcb")
+_d = _hat["comparison"]["delta_published_vs_ours_mm"] or [0, 0]
+fact("hat_delta", "%.4f" % _d[1], "out/factory/reconcile.json robot_hat_outline.comparison")
+fact("hat_mesh", " × ".join("%.3f" % v for v in (_hat["comparison"]["pollen_simulation_mesh"] or [])[:2]) or "CANNOT DETERMINE",
+     "ce-parts/microduck-robot-hat-pcb/component.json board_outline (Pollen's simulation mesh)")
 ven = (PCB.get("fab_quotes") or {}).get("vendors") or []
 fact("pcb_capability", ("%s, %s" % (ven[0].get("vendor"), (ven[0].get("spec") or "")[:120])) if ven else "CANNOT DETERMINE",
      "electronics/pcb-package.json fab_quotes.vendors[0]")
@@ -291,45 +348,80 @@ for s in sections:
     for q in s["questions"]:
         prio[q["priority"]] = prio.get(q["priority"], 0) + 1
         need[q["need"]] = need.get(q["need"], 0) + 1
-for b, en, zh in [(str(n_q), "questions", "问题总数"),
-                  (str(len(sections)), "sections", "章节"),
-                  (str(prio.get("blocking", 0)), "blocking us today", "当前阻塞项"),
-                  (str(need.get("coupon", 0) + need.get("datasheet", 0)), "need a measurement or a datasheet", "需实测或数据表"),
-                  (str(need.get("quote", 0)), "need a quotation", "需报价"),
-                  (str(need.get("decision", 0)), "need your judgement", "需贵方判断")]:
+# THE COUNTS MUST ADD UP. Until 2026-09-04 this bar showed four "need" buckets —
+# measurement-or-datasheet, quote, judgement — which summed to 13 of 26 questions,
+# because the 10 questions whose need is "capability" appeared in no bucket at all.
+# A stat bar whose parts do not sum to its own total teaches a reader to distrust
+# every other number on the page. Every bucket is shown, and the sum is asserted.
+_buckets = [(need.get("coupon", 0) + need.get("datasheet", 0), "need a measurement or a datasheet", "需实测或数据表"),
+            (need.get("capability", 0), "need your process capability", "需贵厂工艺能力数据"),
+            (need.get("quote", 0), "need a quotation", "需报价"),
+            (need.get("decision", 0), "need your judgement", "需贵方判断")]
+if sum(b for b, _e, _z in _buckets) != n_q:
+    raise SystemExit("gen_questions: the need buckets sum to %d, not the %d questions on the page — "
+                     "a stat bar that does not add up is a defect, not a rounding"
+                     % (sum(b for b, _e, _z in _buckets), n_q))
+for b, en, zh in ([(str(n_q), "questions", "问题总数"),
+                   (str(len(sections)), "sections", "章节"),
+                   (str(prio.get("blocking", 0)), "blocking us today", "当前阻塞项")]
+                  + [(str(x), e, z) for x, e, z in _buckets]):
     A.append('<div class="stat"><b>%s</b><span>%s<br>%s</span></div>' % (E(b), E(en), E(zh)))
-A.append('</div></div>')
+A.append('</div>')
+A.append('<p class="lede">The four “need” figures sum to all %d questions: every question is in exactly '
+         'one bucket. %d are BLOCKING — we cannot proceed on them without you — and they cut across the '
+         'buckets rather than forming a fifth.</p>' % (n_q, prio.get("blocking", 0)))
+A.append('<p class="lede zh">上述四项“需求”合计恰为全部 %d 个问题，每个问题只归入一类。其中 %d 个为<b>阻塞项</b>'
+         '——没有贵方答复我方无法推进——阻塞项分散在四类之中，并非第五类。</p>'
+         % (n_q, prio.get("blocking", 0)))
+A.append('</div>')
 
 A.append('<nav class="toc">')
 for s in sections:
     A.append('<a href="#s%s">%s %s</a>' % (s["n"], s["n"], E(s["title_en"].split("—")[0].strip())))
+A.append('<a href="#glossary">%d Glossary 车间术语</a>' % (len(sections) + 1))
+A.append('<a href="#facts">%d Where every number came from 数字出处</a>' % (len(sections) + 2))
 A.append('</nav>')
 
 for s in sections:
     A.append('<section id="s%s"><h2><span class="n">%s</span>%s</h2>' % (s["n"], s["n"], E(s["title_en"])))
     A.append('<p class="zh" style="font-size:14px;margin:-6px 0 8px">%s</p>' % E(s["title_zh"]))
-    A.append('<p class="lede">%s</p>' % re.sub(r"&lt;b&gt;(.*?)&lt;/b&gt;", r"<b>\1</b>", E(s["lede_en"])))
-    A.append('<p class="lede zh">%s</p>' % re.sub(r"&lt;b&gt;(.*?)&lt;/b&gt;", r"<b>\1</b>", E(s["lede_zh"])))
+    A.append('<p class="lede">%s</p>' % B(s["lede_en"]))
+    A.append('<p class="lede zh">%s</p>' % B(s["lede_zh"]))
     for q in s["questions"]:
         A.append('<div class="q">')
-        A.append('<h4><span class="qid">%s</span>%s</h4>' % (E(q["id"]), E(q["ask_en"])))
-        A.append('<p class="zh" style="font-size:13px;margin:2px 0 6px">%s</p>' % E(q["ask_zh"]))
+        A.append('<h4><span class="qid">%s</span>%s</h4>' % (E(q["id"]), B(q["ask_en"])))
+        A.append('<p class="zh" style="font-size:13px;margin:2px 0 6px">%s</p>' % B(q["ask_zh"]))
         A.append('<p><span class="tag %s">%s</span><span class="tag">%s</span></p>'
                  % (q["priority"], E(D["priority"][q["priority"]]["en"]), E(D["need"][q["need"]]["en"])))
         A.append('<div class="ours"><b>Where we stand · 我方现状.</b> %s<br><span class="zh">%s</span>'
                  '<br><span class="mono" style="font-size:10.5px">source: %s</span></div>'
-                 % (re.sub(r"&lt;b&gt;(.*?)&lt;/b&gt;", r"<b>\1</b>", E(q["ours_en"])),
-                    re.sub(r"&lt;b&gt;(.*?)&lt;/b&gt;", r"<b>\1</b>", E(q["ours_zh"])), E(q["source"])))
+                 % (B(q["ours_en"]), B(q["ours_zh"]), E(q["source"])))
         A.append('<table class="ans">' + cols(34, 66) + '<tr>' + th("If your answer is", "若贵方答复为")
                  + th("then we do this", "则我方将") + '</tr>')
         for i, (iff, then) in enumerate(q["branches_en"]):
             zh = q["branches_zh"][i] if i < len(q["branches_zh"]) else ["", ""]
             A.append('<tr><td>%s<br><span class="zh">%s</span></td><td>%s<br><span class="zh">%s</span></td></tr>'
-                     % (E(iff), E(zh[0]), E(then), E(zh[1])))
+                     % (B(iff), B(zh[0]), B(then), B(zh[1])))
         A.append('</table></div>')
     A.append('</section>')
 
-A.append('<section id="facts"><h2><span class="n">%d</span>Where every number in this document came from <span class="zh" style="display:inline;font-size:15px">本文件中每个数字的出处</span></h2>' % (len(sections) + 1))
+# the shared glossary — same rows in all three pack documents, from reconcile.json
+A.append('<section id="glossary"><h2><span class="n">%d</span>Glossary of shop terms '
+         '<span class="zh" style="display:inline;font-size:15px">车间术语对照</span></h2>' % (len(sections) + 1))
+A.append('<p class="lede">The abbreviations that appear on our drawings and in the hole census. They '
+         'are listed because an English abbreviation inside a Chinese sentence is exactly the place a '
+         'drawing stops crossing the language barrier — and a dimensioned drawing crosses it where a '
+         'paragraph does not.</p>')
+A.append('<p class="lede zh">下列为我方图纸与孔位统计中出现的缩写。之所以专门列出，是因为中文句子里夹一个英文缩写，'
+         '正是图纸失去跨语言能力的地方——而带尺寸的图纸本可以跨越语言，段落则不能。</p>')
+A.append('<table>' + cols(14, 16, 18, 52) + '<tr>' + th("On the drawing", "图纸标注")
+         + th("Full term", "全称") + th("中文", "Chinese") + th("What it is", "含义") + '</tr>')
+for _g in RC["glossary"]:
+    A.append('<tr><td class="m">%s</td><td>%s</td><td><b>%s</b></td><td>%s<br><span class="zh">%s</span></td></tr>'
+             % (E(_g["on_drawing"]), E(_g["term_en"]), E(_g["term_zh"]), B(_g["what_en"]), B(_g["what_zh"])))
+A.append('</table></section>')
+
+A.append('<section id="facts"><h2><span class="n">%d</span>Where every number in this document came from <span class="zh" style="display:inline;font-size:15px">本文件中每个数字的出处</span></h2>' % (len(sections) + 2))
 A.append('<p class="lede">The prose of this document is written by hand; the numbers in it are not. Each token below was read out of the file named beside it at generation time, so a reader can check any figure we quote about ourselves.</p>')
 A.append('<p class="lede zh">本文件的文字由人撰写，数字则不是。下列每个变量均在生成时从右侧文件中读取，读者可核对我方引用的任何自有数据。</p>')
 A.append('<table>' + cols(18, 40, 42) + '<tr>' + th("Token", "变量") + th("Value used", "所用数值") + th("Read from", "读取自") + '</tr>')

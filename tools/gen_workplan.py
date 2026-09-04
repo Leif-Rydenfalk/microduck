@@ -974,39 +974,13 @@ FASTENER_BUYLIST = [c["n"] for c in RC["fasteners"]["counts"]
 HOLE_EN = [c for c in RC["fasteners"]["counts"] if c["what_en"].startswith("HOLE")][0]["breakdown_en"]
 HOLE_ZH = [c for c in RC["fasteners"]["counts"] if c["what_en"].startswith("HOLE")][0]["breakdown_zh"]
 
-# THE DEFECT THIS FIXES (factory reviewer, 2026-09-04): the bilingual layer dropped
-# exactly the terms that carry the geometry. 沉孔 (counterbore) appeared ZERO times
-# in all three pack documents; the shop abbreviation "c'bore" was left in English
-# inside four Chinese sentences, including the hole census itself; 间隙 (clearance),
-# "tap" and "THRU" were left untranslated in the one table that must survive the
-# language barrier. A dimensioned drawing crosses that barrier and a paragraph does
-# not — but only if the words on the drawing are in both languages.
-GLOSSARY = [
-    ("c'bore", "counterbore", "沉孔",
-     "A flat-bottomed enlargement at the mouth of a hole so a cap-screw head sits below the surface. "
-     "On this robot: Ø4.4 over a Ø2.2 clearance hole, for an M2 socket head."),
-    ("CSK", "countersink", "锪孔 / 埋头孔",
-     "A conical enlargement for a flat-head screw. Not used on this robot; listed so it is not confused with 沉孔."),
-    ("clearance", "clearance hole", "间隙孔 / 过孔",
-     "A hole the screw passes THROUGH without engaging thread. Ø2.2 for M2 here (ISO medium fit)."),
-    ("tap", "tapped hole / tap drill", "攻丝孔 / 攻丝底孔",
-     "A hole the screw threads INTO. Ø1.6 is the tap-drill size for an M2 thread; a finished M2 tapped hole is not Ø1.6."),
-    ("THRU", "through", "通孔",
-     "The hole passes entirely through the part. The opposite is a blind hole, 盲孔."),
-    ("heat-set insert", "heat-set threaded insert", "热熔螺母 / 热压螺母",
-     "A knurled brass nut pressed into printed plastic with a heated tool, giving a metal thread in a plastic part."),
-    ("press fit", "interference fit", "过盈配合",
-     "The shaft is larger than the bore and is pressed in. Used for the bearing seats."),
-    ("SF", "safety factor", "安全系数",
-     "Material yield strength divided by the peak simulated stress. Every SF in this project is simulated, never measured."),
-    ("DFM", "design for manufacture", "可制造性设计",
-     "Review of a part against the process that will actually make it."),
-    ("DRC", "design rule check", "设计规则检查",
-     "The PCB layout checked against the fabricator's own minimum track, space and drill rules."),
-    ("MOQ", "minimum order quantity", "最小起订量", "The smallest quantity a supplier will sell."),
-    ("FAI", "first-article inspection", "首件检验",
-     "Full dimensional and functional inspection of the first units off a new process."),
-]
+# THE BILINGUAL DEFECT (factory reviewer, 2026-09-04): 沉孔 (counterbore) appeared
+# ZERO times across all three pack documents, "c'bore" was left in English inside
+# four Chinese sentences including the hole census, and 间隙 / tap / THRU were
+# untranslated in the one table that must survive the language barrier. The glossary
+# lives in out/factory/reconcile.json so all three documents render the SAME terms.
+GLOSSARY = [(g["on_drawing"], g["term_en"], g["term_zh"], g["what_en"], g["what_zh"])
+            for g in RC["glossary"]]
 
 
 def _b(txt):
@@ -1340,8 +1314,9 @@ h.append("<table><colgroup><col style=\"width:18%\"><col style=\"width:16%\"><co
 h.append("<thead><tr><th>On the drawing<span class=\"zh\">图纸标注</span></th>"
          "<th>Full term<span class=\"zh\">全称</span></th><th>中文<span class=\"zh\">Chinese</span></th>"
          "<th>What it is<span class=\"zh\">含义</span></th></tr></thead><tbody>")
-for a, b, c, d_ in GLOSSARY:
-    h.append(f"<tr><td class=\"m\">{E(a)}</td><td>{E(b)}</td><td><b>{E(c)}</b></td><td>{E(d_)}</td></tr>")
+for a, b, c, d_, e_ in GLOSSARY:
+    h.append(f"<tr><td class=\"m\">{E(a)}</td><td>{E(b)}</td><td><b>{E(c)}</b></td>"
+             f"<td>{E(d_)}<span class=\"zh\">{_b(e_)}</span></td></tr>")
 h.append("</tbody></table>")
 h.append(f"<p class=\"lede\">The hole census, written in both languages with no abbreviation left in "
          f"English: <b>{E(HOLE_EN)}</b></p>")
