@@ -242,8 +242,18 @@ def render(data, census, wide, readme_checks, evidence, lic_file, now):
       '  table.data td.v .chip.long{white-space:normal;display:inline-block;max-width:150px;line-height:1.35}\n'
       '  table#q4 td.v{white-space:normal;min-width:120px}\n'
       '  table#q4{table-layout:fixed}\n'
-      '  table#ev{table-layout:fixed;width:100%%;min-width:0} table#ev td,table#ev th{overflow-wrap:anywhere;word-break:break-all;white-space:normal}\n'
-      '  table#repo{table-layout:fixed;width:100%%;min-width:0} table#repo td{overflow-wrap:anywhere;white-space:normal}\n'
+      '  table#ev{table-layout:fixed;width:100%;min-width:0} table#ev td,table#ev th{overflow-wrap:anywhere;word-break:break-all;white-space:normal}\n'
+      '  table#repo{table-layout:fixed;width:100%;min-width:0} table#repo td{overflow-wrap:anywhere;white-space:normal}\n'
+      '  /* fact ITEM tables carry raw URLs, API bodies and hashes: without a fixed layout one\n'
+      '     long unbreakable token pushes the table past its column and a print/PDF loses a column.\n'
+      '     MEASURED 2026-09-04: F18 rendered 867 px inside an 840 px column before this rule. */\n'
+      '  table.items{table-layout:fixed;width:100%}\n'
+      '  table.items td,table.items th{overflow-wrap:anywhere;word-break:break-word}\n'
+      '  /* only the URL may break mid-token. The .src cell also carries a prose note, and\n'
+      '     break-all chopped it per character ("Publishin g board designs openly is Pollen\'s\n'
+      '     standing p ractice") — READ BACK off strip 17, 2026-09-04, and fixed here. */\n'
+      '  table.items td.src{word-break:normal;overflow-wrap:anywhere}\n'
+      '  table.items td.src a{word-break:break-all}\n'
       '  .instr{display:grid;grid-template-columns:1fr 1fr;gap:18px}\n'
       '  .instr ol{margin:0 0 0 20px;font-size:13.5px}\n'
       '  .instr ol li{margin:5px 0}\n'
@@ -350,7 +360,9 @@ def render(data, census, wide, readme_checks, evidence, lic_file, now):
             A('<p class="src">Creative Commons FAQ: <a href="%s">%s</a></p>' % (e(f["cc_faq_source"].split(" ,")[0]), e(f["cc_faq_source"])))
             A(quote_block(f["cc_faq_quote"]))
         if f.get("items"):
-            A('<div class="tablewrap"><table class="data"><thead><tr>%s%s%s%s</tr></thead><tbody>'
+            A('<div class="tablewrap"><table class="data items">'
+              '<colgroup><col style="width:20%%"><col style="width:15%%"><col style="width:41%%"><col style="width:24%%"></colgroup>'
+              '<thead><tr>%s%s%s%s</tr></thead><tbody>'
               % (th("What", "对象"), th("Licence / statement", "许可证 / 声明"), th("Quote", "原文"), th("Source · fetched", "来源 · 抓取时间")))
             for it in f["items"]:
                 src = it.get("source_url") or it.get("source") or ""
