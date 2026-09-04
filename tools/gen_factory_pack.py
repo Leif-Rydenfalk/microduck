@@ -2,9 +2,16 @@
 """gen_factory_pack.py — FACTORY-PACK.html, the single document a partner
 factory builds from.
 
+RUN IT LAST. Section 6 stats every document AFTER writing this one, so any generator
+that runs afterwards leaves a row in that table stale. The order is:
+
     python3 tools/measure_readiness.py      # re-take every measurement
     python3 tools/gen_readiness.py          # grade it
-    python3 tools/gen_factory_pack.py       # this file
+    python3 tools/reconcile.py              # the cross-document reconciliations
+    python3 tools/gen_workplan.py           # WORK-BREAKDOWN.html
+    python3 tools/gen_questions.py          # FACTORY-QUESTIONS.html (reads pack.json)
+    python3 tools/gen_index.py              # INDEX.html
+    python3 tools/gen_factory_pack.py       # this file — LAST
 
 Reads, never invents:
     out/factory/readiness.json      every artifact graded, with its measurement
@@ -40,6 +47,14 @@ OUT_HTML = os.path.join(ROOT, "FACTORY-PACK.html")
 OUT_JSON = os.path.join(ROOT, "out", "factory", "pack.json")
 NOW = datetime.datetime.now().astimezone().isoformat(timespec="seconds")
 E = html.escape
+
+
+def B(txt):
+    """Escape for HTML but keep the <b> emphasis the prose carries. Some of the
+    bilingual strings mark the load-bearing clause in bold; without this the reader
+    sees a literal <b> in the middle of a Chinese sentence (measured on strip 4 of
+    this page, 2026-09-05) while the English half gets real emphasis."""
+    return html.escape(str(txt if txt is not None else "")).replace("&lt;b&gt;", "<b>").replace("&lt;/b&gt;", "</b>")
 
 
 def J(rel, default=None):
@@ -555,7 +570,7 @@ for r in NOT_READY:
     A.append('<tr><td>%s<br><span class="zh">%s</span></td><td class="num"><b class="no">%s</b></td>'
              '<td>%s<br><span class="zh">%s</span><br><span class="mono" style="font-size:10.5px">%s</span></td>'
              '<td>%s<br><span class="zh">%s</span></td></tr>'
-             % (E(r["k"]), E(r["k_zh"]), E(r["n"]), E(r["why"]), E(r["why_zh"]), E(r["src"]), E(r["who"]), E(r["who_zh"])))
+             % (E(r["k"]), E(r["k_zh"]), E(r["n"]), B(r["why"]), B(r["why_zh"]), E(r["src"]), E(r["who"]), E(r["who_zh"])))
 A.append('</table>')
 
 wp_parcels = WP.get("parcels")
@@ -772,11 +787,15 @@ A.append('<p><b>Correction, and it changes the answer to question Q5.4.</b> %s</
 A.append('<p class="zh">更正说明，且这会改变 Q5.4 的答案：Pollen 公开板与我方重构版仅在一个轴上相差 %s mm，'
          '而非此前所述的 18.5 mm。采用公开板是一次间隙核对，不是重做电机支架。</p>'
          % E(str((_cmp.get("delta_published_vs_ours_mm") or [None, None])[1])))
-A.append('<p class="lede">Two files in this repository still carry the wrong figure or did until this build: %s</p>'
-         % E("; ".join("%s (%s) — %s" % (c["file"], c.get("line", ""), c["verdict"]) for c in HAT["contradicted"])))
+A.append('<p class="lede">Two files in this repository carried the wrong figure, and one still does: %s.</p>'
+         % E("; ".join("%s%s — %s" % (c["file"], (" line " + c["line"]) if c.get("line") else "",
+                                       c["verdict"].rstrip(".")) for c in HAT["contradicted"])))
+A.append('<p class="lede zh">本仓库中曾有两份文件载有错误数值，其中一份至今仍未更正——'
+         'out/open/ 目录属于另一条工作流，本工作流只记录该矛盾，不代为修改。</p>')
 _so = HAT["still_open"]
-A.append('<p class="lede"><b>Still open — %s.</b> %s Why: %s. What settles it: %s</p>'
-         % (E(_so["verdict"]), E(_so["question"]), E(_so["why"]), E(_so["what_settles_it"])))
+A.append('<p class="lede"><b>Still open — %s.</b> %s Why: %s What settles it: %s.</p>'
+         % (E(_so["verdict"]), E(_so["question"]), E(_so["why"].rstrip(".") + "."),
+            E(_so["what_settles_it"].rstrip("."))))
 A.append('<p class="lede zh">仍未定（CANNOT DETERMINE）：%s 我方从未测量过该板槽尺寸；解决办法见工作分解中的相应工作包。</p>'
          % E(_so["question"]))
 
@@ -938,8 +957,7 @@ A.append('<table>' + cols(13, 15, 17, 55) + '<tr>' + th("On the drawing", "图�
 for _g in RC["glossary"]:
     A.append('<tr><td class="m">%s</td><td>%s</td><td><b>%s</b></td><td>%s<br><span class="zh">%s</span></td></tr>'
              % (E(_g["on_drawing"]), E(_g["term_en"]), E(_g["term_zh"]),
-                E(_g["what_en"]).replace("&lt;b&gt;", "<b>").replace("&lt;/b&gt;", "</b>"),
-                E(_g["what_zh"]).replace("&lt;b&gt;", "<b>").replace("&lt;/b&gt;", "</b>")))
+                B(_g["what_en"]), B(_g["what_zh"])))
 A.append('</table>')
 
 A.append('<h3>Data and source artifacts · 数据与源文件</h3>')

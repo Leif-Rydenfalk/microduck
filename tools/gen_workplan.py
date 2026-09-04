@@ -1068,8 +1068,14 @@ h.append("</div>")
 # honest state
 h.append("<div class=\"front\"><h2>Read this before assigning anyone · 分配任务前请先读这里</h2>")
 h.append("<div class=\"statbar\">")
-h.append(f"<div class=\"stat\"><b class=\"no\">{summary['drawing']['not_yet']} / {summary['drawing']['total']}</b>"
-         "<span>drawing sheets NOT YET<br>图纸尚未就绪</span></div>")
+# 33 / 33 read as "there are 33 sheets and all fail". There are not: the drawing
+# class holds one row per GRADED SHEET plus one per part that has no sheet at all,
+# and a factory planning drawing work needs those two numbers apart.
+_sg = summary["sheets_graded"]
+_nosheet = len(_sg["parts_without_a_sheet"])
+h.append(f"<div class=\"stat\"><b class=\"no\">{_sg['fail']} / {_sg['sheets']}</b>"
+         f"<span>drawing sheets FAIL our own A2+A3+A4 check, plus {_nosheet} parts with no sheet at all"
+         f"<br>图纸未通过我方 A2+A3+A4 检查，另有 {_nosheet} 个零件完全没有图纸</span></div>")
 h.append(f"<div class=\"stat\"><b class=\"no\">{summary['bom_fasteners']['fastener_rows']}</b>"
          f"<span>fastener ROWS in the assembly BOM ({FASTENER_PLACED} screws placed)<br>"
          f"装配 BOM 中的紧固件行数（已装入 {FASTENER_PLACED} 颗螺钉）</span></div>")
@@ -1187,8 +1193,8 @@ for t in TRACKS:
     h.append(f"<p>{E(t['why_en'])}</p><p class=\"zh\">{E(t['why_zh'])}</p>")
     for p in t["parcels"]:
         h.append(f"<div class=\"parcel\" id=\"{E(p['id'])}\">")
-        h.append(f"<h4><span class=\"pid\">{E(p['id'])}</span>{E(p['title_en'])} "
-                 f"<span class=\"zh\" style=\"display:inline\">{E(p['title_zh'])}</span></h4>")
+        h.append(f"<h4><span class=\"pid\">{E(p['id'])}</span>{_b(p['title_en'])} "
+                 f"<span class=\"zh\" style=\"display:inline\">{_b(p['title_zh'])}</span></h4>")
         if p.get("gate"):
             h.append(f"<p><b class=\"no\">⛔ LEGAL GATE — {E(p['gate'])} must be answered in writing "
                      f"before this parcel starts.</b> Pollen's terms of sale forbid the buyer of a "
