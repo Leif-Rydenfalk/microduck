@@ -353,6 +353,111 @@
    "svg": "/var/folders/10/grbnlfxx7zv19wrbq9d3xr2r0000gn/T/sheetcheck-selftest/iso-label-standard-cite.svg"
   },
   {
+   "case": "pocket-control-plain-box",
+   "rule": "pockets",
+   "want": 0,
+   "got": 0,
+   "ok": true,
+   "measured": 0,
+   "why": "a 6-face box has no pocket; a pass that fires here is noise",
+   "sheet_verdict": "-",
+   "svg": ""
+  },
+  {
+   "case": "pocket-found-blind",
+   "rule": "pockets",
+   "want": 1,
+   "got": 1,
+   "ok": true,
+   "measured": 1,
+   "why": "one blind rectangular pocket is one row",
+   "sheet_verdict": "-",
+   "svg": ""
+  },
+  {
+   "case": "pocket-measures-w-l-d",
+   "rule": "pockets",
+   "want": [
+    2.0,
+    3.0,
+    2.0
+   ],
+   "got": [
+    2.0,
+    3.0,
+    2.0
+   ],
+   "ok": true,
+   "measured": [
+    2.0,
+    3.0,
+    2.0
+   ],
+   "why": "width, length and depth read off the mouth and its side faces",
+   "sheet_verdict": "-",
+   "svg": ""
+  },
+  {
+   "case": "pocket-positions-from-datums",
+   "rule": "pockets",
+   "want": [
+    6.5,
+    5.0
+   ],
+   "got": [
+    6.5,
+    5.0
+   ],
+   "ok": true,
+   "measured": [
+    6.5,
+    5.0
+   ],
+   "why": "centre - BoundBox min, the same convention the hole rows use",
+   "sheet_verdict": "-",
+   "svg": ""
+  },
+  {
+   "case": "pocket-through-folds-to-one",
+   "rule": "pockets",
+   "want": [
+    1,
+    2
+   ],
+   "got": [
+    1,
+    2
+   ],
+   "ok": true,
+   "measured": [
+    1,
+    2
+   ],
+   "why": "two mouths, one pocket",
+   "sheet_verdict": "-",
+   "svg": ""
+  },
+  {
+   "case": "pocket-round-mouth-not-a-pocket",
+   "rule": "pockets",
+   "want": [
+    0,
+    2
+   ],
+   "got": [
+    0,
+    2
+   ],
+   "ok": true,
+   "measured": [
+    0,
+    2
+   ],
+   "why": "a circular mouth is a hole, counted and not re-emitted",
+   "sheet_verdict": "-",
+   "svg": ""
+  },
+  {
    "case": "ratio-pass-density-fail",
    "rule": "line_ratio",
    "want": "PASS",
@@ -415,7 +520,7 @@
    "measured": [
     "_prof"
    ],
-   "why": "_prof holds trunk.svg and is drawer scratch: skipped, and the skip is printed rather than silent",
+   "why": "_prof holds trunk.svg and is drawer scratch: skipped by NAME, and the skip is printed rather than silent",
    "sheet_verdict": "-",
    "svg": "/var/folders/10/grbnlfxx7zv19wrbq9d3xr2r0000gn/T/sheetcheck-selftest/sweep"
   },
@@ -470,6 +575,87 @@
     0
    ],
    "why": "one good part folder: one graded, nothing missing, nothing skipped",
+   "sheet_verdict": "-",
+   "svg": "/var/folders/10/grbnlfxx7zv19wrbq9d3xr2r0000gn/T/sheetcheck-selftest/sweep"
+  },
+  {
+   "case": "sweep-nonpart-dir-skipped",
+   "rule": "sweep",
+   "want": [
+    "another-lanes-probe-dir"
+   ],
+   "got": [
+    "another-lanes-probe-dir"
+   ],
+   "ok": true,
+   "measured": [
+    "another-lanes-probe-dir"
+   ],
+   "why": "a directory the triad has no part for is SKIPPED and named, not printed as a part whose drawing never built",
+   "sheet_verdict": "-",
+   "svg": "/var/folders/10/grbnlfxx7zv19wrbq9d3xr2r0000gn/T/sheetcheck-selftest/sweep"
+  },
+  {
+   "case": "sweep-break-nonpart-goes-red",
+   "rule": "sweep",
+   "want": true,
+   "got": true,
+   "ok": true,
+   "measured": true,
+   "why": "CECAD_SHEETCHECK_BREAK=nonpart calls every directory a part: the probe dir returns to the missing bucket, which is the defect this guard removes",
+   "sheet_verdict": "-",
+   "svg": "/var/folders/10/grbnlfxx7zv19wrbq9d3xr2r0000gn/T/sheetcheck-selftest/sweep"
+  },
+  {
+   "case": "realpred-found-a-part-to-test",
+   "rule": "sweep",
+   "want": true,
+   "got": true,
+   "ok": true,
+   "measured": true,
+   "why": "the predicate is measured against a part that exists: /Users/leifrydenfalk/dev/ce-workshop/ce-designs/microduck/ce-parts/bearing-15x10x3",
+   "sheet_verdict": "-",
+   "svg": "/var/folders/10/grbnlfxx7zv19wrbq9d3xr2r0000gn/T/sheetcheck-selftest/sweep"
+  },
+  {
+   "case": "realpred-knows-a-real-part",
+   "rule": "sweep",
+   "want": [
+    true,
+    true
+   ],
+   "got": [
+    true,
+    true
+   ],
+   "ok": true,
+   "measured": [
+    true,
+    true
+   ],
+   "why": "part:bearing-15x10x3 resolves, so a folder of that name with no SVG stays a FAIL",
+   "sheet_verdict": "-",
+   "svg": "/var/folders/10/grbnlfxx7zv19wrbq9d3xr2r0000gn/T/sheetcheck-selftest/sweep"
+  },
+  {
+   "case": "realpred-refuses-a-nonpart",
+   "rule": "sweep",
+   "want": false,
+   "got": false,
+   "ok": true,
+   "measured": false,
+   "why": "a name no triad root holds is not a part folder",
+   "sheet_verdict": "-",
+   "svg": "/var/folders/10/grbnlfxx7zv19wrbq9d3xr2r0000gn/T/sheetcheck-selftest/sweep"
+  },
+  {
+   "case": "realpred-unconsultable-is-not-skipped",
+   "rule": "sweep",
+   "want": true,
+   "got": true,
+   "ok": true,
+   "measured": true,
+   "why": "when the triad cannot be consulted the folder stays in the FAIL bucket carrying the reason \u2014 skipping it would be a silent pass",
    "sheet_verdict": "-",
    "svg": "/var/folders/10/grbnlfxx7zv19wrbq9d3xr2r0000gn/T/sheetcheck-selftest/sweep"
   }
