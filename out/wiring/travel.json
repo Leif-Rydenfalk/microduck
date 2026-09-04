@@ -1,0 +1,865 @@
+{
+ "$triad": 1,
+ "kind": "wire-travel",
+ "generated_by": "sim/wire_travel.py",
+ "record": {
+  "units": "mm and degrees",
+  "model": "sim/microduck_ours.xml",
+  "method": "wire_travel \u2014 DOES EACH CABLE STILL REACH WHEN THE JOINT MOVES?\n\n    ce-cad/bin/cad sim/wire_travel.py\n\nNothing in this repo had ever asked that. wiring/cables.json orders a length\nfrom a POSE-INVARIANT floor (a polyline bent through each hinge ORIGIN, which\nby construction is the same length in every pose) plus a slack term. out/wiring/\ncables3d.json routes a 3D path AT ONE POSE (all joints zero) and grades pierce,\nclearance and bend. Neither one moves anything. A cable that clears everything\nat zero and is torn out of its socket at full knee flexion passes both.\n\nWHAT IS MEASURED HERE\n  1. THE KINEMATIC CHAIN, read off the model and not off the cable record.\n     For each run, the hinge joints on the tree path between the body carrying\n     end A and the body carrying end B, from sim/microduck_ours.xml through\n     MuJoCo. Where that disagrees with cables.json's own `crosses` list, the\n     disagreement is REPORTED, not reconciled.\n  2. REACH. Both connector points are fixed in their own body's frame (their\n     world positions in wiring/cables.json are the zero pose, so the local\n     point is inv(T_body(0)) applied to it). Sweep every crossed joint across\n     its FULL published range and measure the straight-line separation. A\n     cable shorter than max-over-poses of that separation cannot exist: no\n     routing, no service loop and no cleverness makes a straight line longer.\n     That is a NECESSARY condition and the only one a straight line can give.\n  3. THE ROUTE, CARRIED. Each vertex of the routed centreline is attributed to\n     the body whose surface is nearest it at zero pose (from the occupancy's\n     owner field), the attribution is forced MONOTONE along the kinematic chain\n     from A to B (a cable cannot hop back and forth between two bodies), and\n     then the whole polyline is carried by its bodies through the same sweep.\n     Its length at each pose is a much better estimate of what the cable must\n     be than the straight line -- and unlike the straight line it is an\n     ESTIMATE, because the carried polyline may drive into a body. Reported as\n     an estimate and labelled one; the pinch pass is what checks it.\n\nVERDICT RULE\n  needed_mm = max(  max-over-poses straight separation ,\n                    the routed length at zero pose )\n  Both terms are lower bounds on the length a real cable must have -- it has to\n  span the worst pose, and it has to follow a path that does not pass through\n  material at rest. FAIL if the ordered cable_mm is under needed_mm. PASS is\n  reach only, and says so: no published service-loop rule exists in this repo,\n  so a margin is reported as a number and never converted into a pass.",
+  "attribution": "nearest-solid owner from the 1.0000 mm occupancy (/private/tmp/int-wire3d/occ.npz, route3d_grid.py), with a second field that excludes the 7608 cells owned by the 64 fastener rows so a vertex never attributes to \"fastener\"",
+  "counts": {
+   "cables_in_cables_json": 23,
+   "with_both_ends_on_a_body": 22,
+   "crossing_at_least_one_hinge": 10,
+   "chain_disagreements_with_cables_json": 0,
+   "FAIL_reach": 5,
+   "PASS_reach_only": 15,
+   "CANNOT_DETERMINE": 3,
+   "carried_polyline_measured": 8,
+   "carried_FAIL_estimate": 3,
+   "PASS_on_a_straight_line_only": 4,
+   "poses_evaluated": 74952
+  },
+  "runs": [
+   {
+    "id": "dxl-hat-id34",
+    "group": "dynamixel-chain",
+    "from": "hat",
+    "to": "id34",
+    "cable_mm_ordered": 35,
+    "floor_mm_cables_json": 30.9,
+    "slack_mm_cables_json": 0.0,
+    "body_a": "jaw_soft",
+    "body_b": "jaw_soft",
+    "joints_crossed_measured": [],
+    "joints_crossed_stated": [],
+    "straight_zero_mm": 30.8722,
+    "straight_max_mm": 30.8722,
+    "straight_min_mm": 30.8722,
+    "straight_max_pose_deg": {},
+    "poses_swept": 1,
+    "sweep_note": "no hinge lies between these two bodies: the separation is the same in every pose, by construction",
+    "routed": true,
+    "routed_length_zero_mm": 31.9318,
+    "needed_mm_lower_bound": 31.9318,
+    "needed_from": "routed_length_zero_mm",
+    "margin_mm": 3.0682,
+    "margin_pct_of_needed": 9.61,
+    "verdict": "PASS (reach only)",
+    "verdict_why": "ordered 35.0 mm exceeds the 31.9318 mm lower bound by 3.0682 mm. This is REACH, not fit: no published service-loop rule exists in this repo, and pinch is graded by sim/wire_pinch.py."
+   },
+   {
+    "id": "dxl-id34-id33",
+    "group": "dynamixel-chain",
+    "from": "id34",
+    "to": "id33",
+    "cable_mm_ordered": 60,
+    "floor_mm_cables_json": 55.8,
+    "slack_mm_cables_json": 0.0,
+    "body_a": "jaw_soft",
+    "body_b": "jaw_soft",
+    "joints_crossed_measured": [],
+    "joints_crossed_stated": [],
+    "straight_zero_mm": 55.7785,
+    "straight_max_mm": 55.7785,
+    "straight_min_mm": 55.7785,
+    "straight_max_pose_deg": {},
+    "poses_swept": 1,
+    "sweep_note": "no hinge lies between these two bodies: the separation is the same in every pose, by construction",
+    "routed": true,
+    "routed_length_zero_mm": 67.404,
+    "needed_mm_lower_bound": 67.404,
+    "needed_from": "routed_length_zero_mm",
+    "margin_mm": -7.404,
+    "margin_pct_of_needed": -10.98,
+    "verdict": "FAIL",
+    "verdict_why": "ordered 60.0 mm is SHORTER than the 67.4040 mm this run provably needs (routed_length_zero_mm). A cable cannot span a distance longer than itself."
+   },
+   {
+    "id": "dxl-id33-id32",
+    "group": "dynamixel-chain",
+    "from": "id33",
+    "to": "id32",
+    "cable_mm_ordered": 50,
+    "floor_mm_cables_json": 39.0,
+    "slack_mm_cables_json": 8.7,
+    "body_a": "jaw_soft",
+    "body_b": "yaw_roll_motion",
+    "joints_crossed_measured": [
+     "head_roll"
+    ],
+    "joints_crossed_stated": [
+     "head_roll"
+    ],
+    "straight_zero_mm": 29.4191,
+    "straight_max_mm": 30.2894,
+    "straight_min_mm": 29.3284,
+    "straight_max_pose_deg": {
+     "head_roll": 25.0
+    },
+    "poses_swept": 181,
+    "sweep_note": "full factorial over the published range of every crossed hinge, 181 levels per joint",
+    "routed": false,
+    "needed_mm_lower_bound": 30.2894,
+    "needed_from": "straight_max_mm",
+    "margin_mm": 19.7106,
+    "margin_pct_of_needed": 65.07,
+    "verdict": "PASS (reach only)",
+    "verdict_why": "ordered 50.0 mm exceeds the 30.2894 mm lower bound by 19.7106 mm. This is REACH, not fit: no published service-loop rule exists in this repo, and pinch is graded by sim/wire_pinch.py.",
+    "needed_basis_is_weak": true,
+    "needed_basis_why": "this run has NO 3D route, so the only lower bound is the straight line between the two connectors. A real cable goes round the bodies, so the true need is higher by an unknown amount and this PASS is the weakest kind there is."
+   },
+   {
+    "id": "dxl-id32-id31",
+    "group": "dynamixel-chain",
+    "from": "id32",
+    "to": "id31",
+    "cable_mm_ordered": 165,
+    "floor_mm_cables_json": 74.1,
+    "slack_mm_cables_json": 90.8,
+    "body_a": "yaw_roll_motion",
+    "body_b": "neck",
+    "joints_crossed_measured": [
+     "head_yaw",
+     "head_pitch"
+    ],
+    "joints_crossed_stated": [
+     "head_yaw",
+     "head_pitch"
+    ],
+    "straight_zero_mm": 53.0051,
+    "straight_max_mm": 57.2161,
+    "straight_min_mm": 30.116,
+    "straight_max_pose_deg": {
+     "head_yaw": 130.33,
+     "head_pitch": 48.0
+    },
+    "poses_swept": 3721,
+    "sweep_note": "full factorial over the published range of every crossed hinge, 61 levels per joint",
+    "routed": true,
+    "routed_length_zero_mm": 117.5708,
+    "carried": {
+     "carried_length_zero_mm": 117.5708,
+     "carried_length_max_mm": 169.1856,
+     "carried_max_pose_deg": {
+      "head_yaw": -170.0,
+      "head_pitch": 90.0
+     },
+     "poses_swept": 3721,
+     "owners_raw": {
+      "yaw_roll_motion": 52,
+      "jaw_soft": 36,
+      "neck_pitch": 3,
+      "neck": 27
+     },
+     "owners_monotone": {
+      "yaw_roll_motion": 88,
+      "neck_pitch": 3,
+      "neck": 27
+     },
+     "is_an_estimate": true,
+     "why_estimate": "the carried polyline may drive into a body; its length is what the cable would be if it stayed glued to those bodies. The pinch pass is what checks whether it can.",
+     "margin_mm": -4.1856,
+     "verdict": "FAIL (estimate)",
+     "verdict_why": "carried through its own joints' full range the routed centreline grows to 169.1856 mm, 4.1856 mm longer than the 165.0 mm ordered. This is an ESTIMATE and is reported beside the hard verdict, never merged into it."
+    },
+    "needed_mm_lower_bound": 117.5708,
+    "needed_from": "routed_length_zero_mm",
+    "margin_mm": 47.4292,
+    "margin_pct_of_needed": 40.34,
+    "verdict": "PASS (reach only)",
+    "verdict_why": "ordered 165.0 mm exceeds the 117.5708 mm lower bound by 47.4292 mm. This is REACH, not fit: no published service-loop rule exists in this repo, and pinch is graded by sim/wire_pinch.py."
+   },
+   {
+    "id": "dxl-id31-id30",
+    "group": "dynamixel-chain",
+    "from": "id31",
+    "to": "id30",
+    "cable_mm_ordered": 35,
+    "floor_mm_cables_json": 32.0,
+    "slack_mm_cables_json": 0.0,
+    "body_a": "neck",
+    "body_b": "neck",
+    "joints_crossed_measured": [],
+    "joints_crossed_stated": [],
+    "straight_zero_mm": 32.0,
+    "straight_max_mm": 32.0,
+    "straight_min_mm": 32.0,
+    "straight_max_pose_deg": {},
+    "poses_swept": 1,
+    "sweep_note": "no hinge lies between these two bodies: the separation is the same in every pose, by construction",
+    "routed": true,
+    "routed_length_zero_mm": 32.0425,
+    "needed_mm_lower_bound": 32.0425,
+    "needed_from": "routed_length_zero_mm",
+    "margin_mm": 2.9575,
+    "margin_pct_of_needed": 9.23,
+    "verdict": "PASS (reach only)",
+    "verdict_why": "ordered 35.0 mm exceeds the 32.0425 mm lower bound by 2.9575 mm. This is REACH, not fit: no published service-loop rule exists in this repo, and pinch is graded by sim/wire_pinch.py."
+   },
+   {
+    "id": "dxl-id30-imu200",
+    "group": "dynamixel-chain",
+    "from": "id30",
+    "to": "imu200",
+    "cable_mm_ordered": 120,
+    "floor_mm_cables_json": 93.4,
+    "slack_mm_cables_json": 26.2,
+    "body_a": "neck",
+    "body_b": "trunk_base",
+    "joints_crossed_measured": [
+     "neck_pitch"
+    ],
+    "joints_crossed_stated": [
+     "neck_pitch"
+    ],
+    "straight_zero_mm": 80.2831,
+    "straight_max_mm": 80.2992,
+    "straight_min_mm": 67.5334,
+    "straight_max_pose_deg": {
+     "neck_pitch": 3.33
+    },
+    "poses_swept": 181,
+    "sweep_note": "full factorial over the published range of every crossed hinge, 181 levels per joint",
+    "routed": true,
+    "routed_length_zero_mm": 93.7032,
+    "carried": {
+     "carried_length_zero_mm": 93.7032,
+     "carried_length_max_mm": 121.29,
+     "carried_max_pose_deg": {
+      "neck_pitch": -90.0
+     },
+     "poses_swept": 181,
+     "owners_raw": {
+      "neck": 33,
+      "trunk_base": 31,
+      "bearing_roll": 33
+     },
+     "owners_monotone": {
+      "neck": 33,
+      "trunk_base": 64
+     },
+     "is_an_estimate": true,
+     "why_estimate": "the carried polyline may drive into a body; its length is what the cable would be if it stayed glued to those bodies. The pinch pass is what checks whether it can.",
+     "margin_mm": -1.29,
+     "verdict": "FAIL (estimate)",
+     "verdict_why": "carried through its own joints' full range the routed centreline grows to 121.2900 mm, 1.2900 mm longer than the 120.0 mm ordered. This is an ESTIMATE and is reported beside the hard verdict, never merged into it."
+    },
+    "needed_mm_lower_bound": 93.7032,
+    "needed_from": "routed_length_zero_mm",
+    "margin_mm": 26.2968,
+    "margin_pct_of_needed": 28.06,
+    "verdict": "PASS (reach only)",
+    "verdict_why": "ordered 120.0 mm exceeds the 93.7032 mm lower bound by 26.2968 mm. This is REACH, not fit: no published service-loop rule exists in this repo, and pinch is graded by sim/wire_pinch.py."
+   },
+   {
+    "id": "dxl-imu200-id20",
+    "group": "dynamixel-chain",
+    "from": "imu200",
+    "to": "id20",
+    "cable_mm_ordered": 40,
+    "floor_mm_cables_json": 38.4,
+    "slack_mm_cables_json": 0.0,
+    "body_a": "trunk_base",
+    "body_b": "trunk_base",
+    "joints_crossed_measured": [],
+    "joints_crossed_stated": [],
+    "straight_zero_mm": 38.3739,
+    "straight_max_mm": 38.3739,
+    "straight_min_mm": 38.3739,
+    "straight_max_pose_deg": {},
+    "poses_swept": 1,
+    "sweep_note": "no hinge lies between these two bodies: the separation is the same in every pose, by construction",
+    "routed": true,
+    "routed_length_zero_mm": 124.6393,
+    "needed_mm_lower_bound": 124.6393,
+    "needed_from": "routed_length_zero_mm",
+    "margin_mm": -84.6393,
+    "margin_pct_of_needed": -67.91,
+    "verdict": "FAIL",
+    "verdict_why": "ordered 40.0 mm is SHORTER than the 124.6393 mm this run provably needs (routed_length_zero_mm). A cable cannot span a distance longer than itself."
+   },
+   {
+    "id": "dxl-id20-id21",
+    "group": "dynamixel-chain",
+    "from": "id20",
+    "to": "id21",
+    "cable_mm_ordered": 65,
+    "floor_mm_cables_json": 51.6,
+    "slack_mm_cables_json": 9.6,
+    "body_a": "trunk_base",
+    "body_b": "yaw2roll",
+    "joints_crossed_measured": [
+     "left_hip_yaw"
+    ],
+    "joints_crossed_stated": [
+     "left_hip_yaw"
+    ],
+    "straight_zero_mm": 44.9015,
+    "straight_max_mm": 45.438,
+    "straight_min_mm": 44.8698,
+    "straight_max_pose_deg": {
+     "left_hip_yaw": -25.0
+    },
+    "poses_swept": 181,
+    "sweep_note": "full factorial over the published range of every crossed hinge, 181 levels per joint",
+    "routed": true,
+    "routed_length_zero_mm": 132.4574,
+    "carried": {
+     "carried_length_zero_mm": 132.4574,
+     "carried_length_max_mm": 141.876,
+     "carried_max_pose_deg": {
+      "left_hip_yaw": 30.0
+     },
+     "poses_swept": 181,
+     "owners_raw": {
+      "trunk_base": 100,
+      "yaw2roll": 44
+     },
+     "owners_monotone": {
+      "trunk_base": 100,
+      "yaw2roll": 44
+     },
+     "is_an_estimate": true,
+     "why_estimate": "the carried polyline may drive into a body; its length is what the cable would be if it stayed glued to those bodies. The pinch pass is what checks whether it can.",
+     "margin_mm": -76.876,
+     "verdict": "FAIL (estimate)",
+     "verdict_why": "carried through its own joints' full range the routed centreline grows to 141.8760 mm, 76.8760 mm longer than the 65.0 mm ordered. This is an ESTIMATE and is reported beside the hard verdict, never merged into it."
+    },
+    "needed_mm_lower_bound": 132.4574,
+    "needed_from": "routed_length_zero_mm",
+    "margin_mm": -67.4574,
+    "margin_pct_of_needed": -50.93,
+    "verdict": "FAIL",
+    "verdict_why": "ordered 65.0 mm is SHORTER than the 132.4574 mm this run provably needs (routed_length_zero_mm). A cable cannot span a distance longer than itself."
+   },
+   {
+    "id": "dxl-id21-id22",
+    "group": "dynamixel-chain",
+    "from": "id21",
+    "to": "id22",
+    "cable_mm_ordered": 125,
+    "floor_mm_cables_json": 81.6,
+    "slack_mm_cables_json": 39.1,
+    "body_a": "yaw2roll",
+    "body_b": "upper_leg_left",
+    "joints_crossed_measured": [
+     "left_hip_pitch",
+     "left_hip_roll"
+    ],
+    "joints_crossed_stated": [
+     "left_hip_roll",
+     "left_hip_pitch"
+    ],
+    "straight_zero_mm": 57.7247,
+    "straight_max_mm": 60.4457,
+    "straight_min_mm": 50.6081,
+    "straight_max_pose_deg": {
+     "left_hip_pitch": 90.0,
+     "left_hip_roll": 22.0
+    },
+    "poses_swept": 3721,
+    "sweep_note": "full factorial over the published range of every crossed hinge, 61 levels per joint",
+    "routed": true,
+    "routed_length_zero_mm": 74.9892,
+    "carried": {
+     "carried_length_zero_mm": 74.9892,
+     "carried_length_max_mm": 105.441,
+     "carried_max_pose_deg": {
+      "left_hip_pitch": -90.0,
+      "left_hip_roll": -22.0
+     },
+     "poses_swept": 3721,
+     "owners_raw": {
+      "yaw2roll": 48,
+      "upper_leg_left": 31
+     },
+     "owners_monotone": {
+      "yaw2roll": 48,
+      "upper_leg_left": 31
+     },
+     "is_an_estimate": true,
+     "why_estimate": "the carried polyline may drive into a body; its length is what the cable would be if it stayed glued to those bodies. The pinch pass is what checks whether it can.",
+     "margin_mm": 19.559,
+     "verdict": "PASS (estimate)",
+     "verdict_why": "carried to 105.4410 mm at worst, 19.5590 mm inside the 125.0 mm ordered"
+    },
+    "needed_mm_lower_bound": 74.9892,
+    "needed_from": "routed_length_zero_mm",
+    "margin_mm": 50.0108,
+    "margin_pct_of_needed": 66.69,
+    "verdict": "PASS (reach only)",
+    "verdict_why": "ordered 125.0 mm exceeds the 74.9892 mm lower bound by 50.0108 mm. This is REACH, not fit: no published service-loop rule exists in this repo, and pinch is graded by sim/wire_pinch.py."
+   },
+   {
+    "id": "dxl-id22-id23",
+    "group": "dynamixel-chain",
+    "from": "id22",
+    "to": "id23",
+    "cable_mm_ordered": 20,
+    "floor_mm_cables_json": 17.0,
+    "slack_mm_cables_json": 0.0,
+    "body_a": "upper_leg_left",
+    "body_b": "upper_leg_left",
+    "joints_crossed_measured": [],
+    "joints_crossed_stated": [],
+    "straight_zero_mm": 17.0461,
+    "straight_max_mm": 17.0461,
+    "straight_min_mm": 17.0461,
+    "straight_max_pose_deg": {},
+    "poses_swept": 1,
+    "sweep_note": "no hinge lies between these two bodies: the separation is the same in every pose, by construction",
+    "routed": true,
+    "routed_length_zero_mm": 14.2859,
+    "needed_mm_lower_bound": 17.0461,
+    "needed_from": "straight_max_mm",
+    "margin_mm": 2.9539,
+    "margin_pct_of_needed": 17.33,
+    "verdict": "PASS (reach only)",
+    "verdict_why": "ordered 20.0 mm exceeds the 17.0461 mm lower bound by 2.9539 mm. This is REACH, not fit: no published service-loop rule exists in this repo, and pinch is graded by sim/wire_pinch.py."
+   },
+   {
+    "id": "dxl-id23-id24",
+    "group": "dynamixel-chain",
+    "from": "id23",
+    "to": "id24",
+    "cable_mm_ordered": 95,
+    "floor_mm_cables_json": 61.7,
+    "slack_mm_cables_json": 31.4,
+    "body_a": "upper_leg_left",
+    "body_b": "leg",
+    "joints_crossed_measured": [
+     "left_knee"
+    ],
+    "joints_crossed_stated": [
+     "left_knee"
+    ],
+    "straight_zero_mm": 45.9749,
+    "straight_max_mm": 51.4511,
+    "straight_min_mm": 29.6617,
+    "straight_max_pose_deg": {
+     "left_knee": -65.0
+    },
+    "poses_swept": 181,
+    "sweep_note": "full factorial over the published range of every crossed hinge, 181 levels per joint",
+    "routed": true,
+    "routed_length_zero_mm": 45.9822,
+    "carried": {
+     "carried_length_zero_mm": 45.9822,
+     "carried_length_max_mm": 70.5594,
+     "carried_max_pose_deg": {
+      "left_knee": -90.0
+     },
+     "poses_swept": 181,
+     "owners_raw": {
+      "upper_leg_left": 24,
+      "leg": 24
+     },
+     "owners_monotone": {
+      "upper_leg_left": 24,
+      "leg": 24
+     },
+     "is_an_estimate": true,
+     "why_estimate": "the carried polyline may drive into a body; its length is what the cable would be if it stayed glued to those bodies. The pinch pass is what checks whether it can.",
+     "margin_mm": 24.4406,
+     "verdict": "PASS (estimate)",
+     "verdict_why": "carried to 70.5594 mm at worst, 24.4406 mm inside the 95.0 mm ordered"
+    },
+    "needed_mm_lower_bound": 51.4511,
+    "needed_from": "straight_max_mm",
+    "margin_mm": 43.5489,
+    "margin_pct_of_needed": 84.64,
+    "verdict": "PASS (reach only)",
+    "verdict_why": "ordered 95.0 mm exceeds the 51.4511 mm lower bound by 43.5489 mm. This is REACH, not fit: no published service-loop rule exists in this repo, and pinch is graded by sim/wire_pinch.py."
+   },
+   {
+    "id": "dxl-imu200-id10",
+    "group": "dynamixel-chain",
+    "from": "imu200",
+    "to": "id10",
+    "cable_mm_ordered": 40,
+    "floor_mm_cables_json": 38.4,
+    "slack_mm_cables_json": 0.0,
+    "body_a": "trunk_base",
+    "body_b": "trunk_base",
+    "joints_crossed_measured": [],
+    "joints_crossed_stated": [],
+    "straight_zero_mm": 38.3739,
+    "straight_max_mm": 38.3739,
+    "straight_min_mm": 38.3739,
+    "straight_max_pose_deg": {},
+    "poses_swept": 1,
+    "sweep_note": "no hinge lies between these two bodies: the separation is the same in every pose, by construction",
+    "routed": true,
+    "routed_length_zero_mm": 128.0179,
+    "needed_mm_lower_bound": 128.0179,
+    "needed_from": "routed_length_zero_mm",
+    "margin_mm": -88.0179,
+    "margin_pct_of_needed": -68.75,
+    "verdict": "FAIL",
+    "verdict_why": "ordered 40.0 mm is SHORTER than the 128.0179 mm this run provably needs (routed_length_zero_mm). A cable cannot span a distance longer than itself."
+   },
+   {
+    "id": "dxl-id10-id11",
+    "group": "dynamixel-chain",
+    "from": "id10",
+    "to": "id11",
+    "cable_mm_ordered": 65,
+    "floor_mm_cables_json": 51.6,
+    "slack_mm_cables_json": 9.6,
+    "body_a": "trunk_base",
+    "body_b": "bearing_roll",
+    "joints_crossed_measured": [
+     "right_hip_yaw"
+    ],
+    "joints_crossed_stated": [
+     "right_hip_yaw"
+    ],
+    "straight_zero_mm": 44.9015,
+    "straight_max_mm": 45.6175,
+    "straight_min_mm": 44.8698,
+    "straight_max_pose_deg": {
+     "right_hip_yaw": -30.0
+    },
+    "poses_swept": 181,
+    "sweep_note": "full factorial over the published range of every crossed hinge, 181 levels per joint",
+    "routed": true,
+    "routed_length_zero_mm": 52.6577,
+    "carried": {
+     "carried_length_zero_mm": 52.6577,
+     "carried_length_max_mm": 62.3617,
+     "carried_max_pose_deg": {
+      "right_hip_yaw": -30.0
+     },
+     "poses_swept": 181,
+     "owners_raw": {
+      "trunk_base": 23,
+      "bearing_roll": 5,
+      "hip_l_2": 26
+     },
+     "owners_monotone": {
+      "trunk_base": 23,
+      "bearing_roll": 31
+     },
+     "is_an_estimate": true,
+     "why_estimate": "the carried polyline may drive into a body; its length is what the cable would be if it stayed glued to those bodies. The pinch pass is what checks whether it can.",
+     "margin_mm": 2.6383,
+     "verdict": "PASS (estimate)",
+     "verdict_why": "carried to 62.3617 mm at worst, 2.6383 mm inside the 65.0 mm ordered"
+    },
+    "needed_mm_lower_bound": 52.6577,
+    "needed_from": "routed_length_zero_mm",
+    "margin_mm": 12.3423,
+    "margin_pct_of_needed": 23.44,
+    "verdict": "PASS (reach only)",
+    "verdict_why": "ordered 65.0 mm exceeds the 52.6577 mm lower bound by 12.3423 mm. This is REACH, not fit: no published service-loop rule exists in this repo, and pinch is graded by sim/wire_pinch.py."
+   },
+   {
+    "id": "dxl-id11-id12",
+    "group": "dynamixel-chain",
+    "from": "id11",
+    "to": "id12",
+    "cable_mm_ordered": 125,
+    "floor_mm_cables_json": 81.6,
+    "slack_mm_cables_json": 39.1,
+    "body_a": "bearing_roll",
+    "body_b": "upper_leg_right",
+    "joints_crossed_measured": [
+     "right_hip_pitch",
+     "right_hip_roll"
+    ],
+    "joints_crossed_stated": [
+     "right_hip_roll",
+     "right_hip_pitch"
+    ],
+    "straight_zero_mm": 34.6142,
+    "straight_max_mm": 44.1556,
+    "straight_min_mm": 32.4223,
+    "straight_max_pose_deg": {
+     "right_hip_pitch": -90.0,
+     "right_hip_roll": -22.0
+    },
+    "poses_swept": 3721,
+    "sweep_note": "full factorial over the published range of every crossed hinge, 61 levels per joint",
+    "routed": true,
+    "routed_length_zero_mm": 32.9671,
+    "carried": {
+     "carried_length_zero_mm": 32.9671,
+     "carried_length_max_mm": 52.4662,
+     "carried_max_pose_deg": {
+      "right_hip_pitch": -90.0,
+      "right_hip_roll": -4.4
+     },
+     "poses_swept": 3721,
+     "owners_raw": {
+      "hip_l_2": 12,
+      "upper_leg_right": 23
+     },
+     "owners_monotone": {
+      "hip_l_2": 12,
+      "upper_leg_right": 23
+     },
+     "is_an_estimate": true,
+     "why_estimate": "the carried polyline may drive into a body; its length is what the cable would be if it stayed glued to those bodies. The pinch pass is what checks whether it can.",
+     "margin_mm": 72.5338,
+     "verdict": "PASS (estimate)",
+     "verdict_why": "carried to 52.4662 mm at worst, 72.5338 mm inside the 125.0 mm ordered"
+    },
+    "needed_mm_lower_bound": 44.1556,
+    "needed_from": "straight_max_mm",
+    "margin_mm": 80.8444,
+    "margin_pct_of_needed": 183.09,
+    "verdict": "PASS (reach only)",
+    "verdict_why": "ordered 125.0 mm exceeds the 44.1556 mm lower bound by 80.8444 mm. This is REACH, not fit: no published service-loop rule exists in this repo, and pinch is graded by sim/wire_pinch.py."
+   },
+   {
+    "id": "dxl-id12-id13",
+    "group": "dynamixel-chain",
+    "from": "id12",
+    "to": "id13",
+    "cable_mm_ordered": 20,
+    "floor_mm_cables_json": 17.0,
+    "slack_mm_cables_json": 0.0,
+    "body_a": "upper_leg_right",
+    "body_b": "upper_leg_right",
+    "joints_crossed_measured": [],
+    "joints_crossed_stated": [],
+    "straight_zero_mm": 17.0461,
+    "straight_max_mm": 17.0461,
+    "straight_min_mm": 17.0461,
+    "straight_max_pose_deg": {},
+    "poses_swept": 1,
+    "sweep_note": "no hinge lies between these two bodies: the separation is the same in every pose, by construction",
+    "routed": true,
+    "routed_length_zero_mm": 14.2859,
+    "needed_mm_lower_bound": 17.0461,
+    "needed_from": "straight_max_mm",
+    "margin_mm": 2.9539,
+    "margin_pct_of_needed": 17.33,
+    "verdict": "PASS (reach only)",
+    "verdict_why": "ordered 20.0 mm exceeds the 17.0461 mm lower bound by 2.9539 mm. This is REACH, not fit: no published service-loop rule exists in this repo, and pinch is graded by sim/wire_pinch.py."
+   },
+   {
+    "id": "dxl-id13-id14",
+    "group": "dynamixel-chain",
+    "from": "id13",
+    "to": "id14",
+    "cable_mm_ordered": 95,
+    "floor_mm_cables_json": 61.7,
+    "slack_mm_cables_json": 31.4,
+    "body_a": "upper_leg_right",
+    "body_b": "leg_2",
+    "joints_crossed_measured": [
+     "right_knee"
+    ],
+    "joints_crossed_stated": [
+     "right_knee"
+    ],
+    "straight_zero_mm": 45.9749,
+    "straight_max_mm": 51.4511,
+    "straight_min_mm": 29.6617,
+    "straight_max_pose_deg": {
+     "right_knee": 65.0
+    },
+    "poses_swept": 181,
+    "sweep_note": "full factorial over the published range of every crossed hinge, 181 levels per joint",
+    "routed": true,
+    "routed_length_zero_mm": 45.9822,
+    "carried": {
+     "carried_length_zero_mm": 45.9822,
+     "carried_length_max_mm": 70.5594,
+     "carried_max_pose_deg": {
+      "right_knee": 90.0
+     },
+     "poses_swept": 181,
+     "owners_raw": {
+      "upper_leg_right": 24,
+      "leg_2": 24
+     },
+     "owners_monotone": {
+      "upper_leg_right": 24,
+      "leg_2": 24
+     },
+     "is_an_estimate": true,
+     "why_estimate": "the carried polyline may drive into a body; its length is what the cable would be if it stayed glued to those bodies. The pinch pass is what checks whether it can.",
+     "margin_mm": 24.4406,
+     "verdict": "PASS (estimate)",
+     "verdict_why": "carried to 70.5594 mm at worst, 24.4406 mm inside the 95.0 mm ordered"
+    },
+    "needed_mm_lower_bound": 51.4511,
+    "needed_from": "straight_max_mm",
+    "margin_mm": 43.5489,
+    "margin_pct_of_needed": 84.64,
+    "verdict": "PASS (reach only)",
+    "verdict_why": "ordered 95.0 mm exceeds the 51.4511 mm lower bound by 43.5489 mm. This is REACH, not fit: no published service-loop rule exists in this repo, and pinch is graded by sim/wire_pinch.py."
+   },
+   {
+    "id": "tof-hat",
+    "group": "hat-harness",
+    "from": "hat",
+    "to": "tof",
+    "cable_mm_ordered": 35,
+    "floor_mm_cables_json": 31.3,
+    "slack_mm_cables_json": 0.0,
+    "body_a": "jaw_soft",
+    "body_b": "jaw_soft",
+    "joints_crossed_measured": [],
+    "joints_crossed_stated": [],
+    "straight_zero_mm": 31.3323,
+    "straight_max_mm": 31.3323,
+    "straight_min_mm": 31.3323,
+    "straight_max_pose_deg": {},
+    "poses_swept": 1,
+    "sweep_note": "no hinge lies between these two bodies: the separation is the same in every pose, by construction",
+    "routed": true,
+    "routed_length_zero_mm": 38.5013,
+    "needed_mm_lower_bound": 38.5013,
+    "needed_from": "routed_length_zero_mm",
+    "margin_mm": -3.5013,
+    "margin_pct_of_needed": -9.09,
+    "verdict": "FAIL",
+    "verdict_why": "ordered 35.0 mm is SHORTER than the 38.5013 mm this run provably needs (routed_length_zero_mm). A cable cannot span a distance longer than itself."
+   },
+   {
+    "id": "spk-hat",
+    "group": "hat-harness",
+    "from": "hat",
+    "to": "speaker",
+    "cable_mm_ordered": 70,
+    "floor_mm_cables_json": 65.0,
+    "slack_mm_cables_json": 0.0,
+    "body_a": "jaw_soft",
+    "body_b": "jaw_soft",
+    "joints_crossed_measured": [],
+    "joints_crossed_stated": [],
+    "straight_zero_mm": 65.0331,
+    "straight_max_mm": 65.0331,
+    "straight_min_mm": 65.0331,
+    "straight_max_pose_deg": {},
+    "poses_swept": 1,
+    "sweep_note": "no hinge lies between these two bodies: the separation is the same in every pose, by construction",
+    "routed": false,
+    "needed_mm_lower_bound": 65.0331,
+    "needed_from": "straight_max_mm",
+    "margin_mm": 4.9669,
+    "margin_pct_of_needed": 7.64,
+    "verdict": "PASS (reach only)",
+    "verdict_why": "ordered 70.0 mm exceeds the 65.0331 mm lower bound by 4.9669 mm. This is REACH, not fit: no published service-loop rule exists in this repo, and pinch is graded by sim/wire_pinch.py.",
+    "needed_basis_is_weak": true,
+    "needed_basis_why": "this run has NO 3D route, so the only lower bound is the straight line between the two connectors. A real cable goes round the bodies, so the true need is higher by an unknown amount and this PASS is the weakest kind there is."
+   },
+   {
+    "id": "mic-hat",
+    "group": "hat-harness",
+    "from": "hat",
+    "to": "mic",
+    "cable_mm_ordered": null,
+    "floor_mm_cables_json": null,
+    "slack_mm_cables_json": null,
+    "verdict": "CANNOT DETERMINE",
+    "verdict_why": "an end has no body in wiring/cables.json (jaw_soft / None), so there is nothing to carry it with"
+   },
+   {
+    "id": "csi-radxa-camera",
+    "group": "hat-harness",
+    "from": "radxa",
+    "to": "camera",
+    "cable_mm_ordered": 15,
+    "floor_mm_cables_json": 13.3,
+    "slack_mm_cables_json": 0.0,
+    "body_a": "jaw_soft",
+    "body_b": "jaw_soft",
+    "joints_crossed_measured": [],
+    "joints_crossed_stated": [],
+    "straight_zero_mm": 13.2901,
+    "straight_max_mm": 13.2901,
+    "straight_min_mm": 13.2901,
+    "straight_max_pose_deg": {},
+    "poses_swept": 1,
+    "sweep_note": "no hinge lies between these two bodies: the separation is the same in every pose, by construction",
+    "routed": false,
+    "needed_mm_lower_bound": 13.2901,
+    "needed_from": "straight_max_mm",
+    "margin_mm": 1.7099,
+    "margin_pct_of_needed": 12.87,
+    "verdict": "PASS (reach only)",
+    "verdict_why": "ordered 15.0 mm exceeds the 13.2901 mm lower bound by 1.7099 mm. This is REACH, not fit: no published service-loop rule exists in this repo, and pinch is graded by sim/wire_pinch.py.",
+    "needed_basis_is_weak": true,
+    "needed_basis_why": "this run has NO 3D route, so the only lower bound is the straight line between the two connectors. A real cable goes round the bodies, so the true need is higher by an unknown amount and this PASS is the weakest kind there is."
+   },
+   {
+    "id": "bat-hat",
+    "group": "power",
+    "from": "battery",
+    "to": "hat",
+    "cable_mm_ordered": 340,
+    "floor_mm_cables_json": 213.5,
+    "slack_mm_cables_json": 125.7,
+    "body_a": "trunk_base",
+    "body_b": "jaw_soft",
+    "joints_crossed_measured": [
+     "head_roll",
+     "head_yaw",
+     "head_pitch",
+     "neck_pitch"
+    ],
+    "joints_crossed_stated": [
+     "neck_pitch",
+     "head_pitch",
+     "head_yaw",
+     "head_roll"
+    ],
+    "straight_zero_mm": 137.5352,
+    "straight_max_mm": 170.3859,
+    "straight_min_mm": 0.8998,
+    "straight_max_pose_deg": {
+     "head_roll": -0.0,
+     "head_yaw": -0.0,
+     "head_pitch": -38.57,
+     "neck_pitch": -90.0
+    },
+    "poses_swept": 50625,
+    "sweep_note": "full factorial over the published range of every crossed hinge, 15 levels per joint",
+    "routed": false,
+    "needed_mm_lower_bound": 170.3859,
+    "needed_from": "straight_max_mm",
+    "margin_mm": 169.6141,
+    "margin_pct_of_needed": 99.55,
+    "verdict": "PASS (reach only)",
+    "verdict_why": "ordered 340.0 mm exceeds the 170.3859 mm lower bound by 169.6141 mm. This is REACH, not fit: no published service-loop rule exists in this repo, and pinch is graded by sim/wire_pinch.py.",
+    "needed_basis_is_weak": true,
+    "needed_basis_why": "this run has NO 3D route, so the only lower bound is the straight line between the two connectors. A real cable goes round the bodies, so the true need is higher by an unknown amount and this PASS is the weakest kind there is."
+   },
+   {
+    "id": "hat-radxa-40pin",
+    "group": "power",
+    "from": "hat",
+    "to": "radxa",
+    "cable_mm_ordered": 0,
+    "floor_mm_cables_json": 0.0,
+    "slack_mm_cables_json": 0.0,
+    "body_a": "jaw_soft",
+    "body_b": "jaw_soft",
+    "joints_crossed_measured": [],
+    "joints_crossed_stated": [],
+    "verdict": "CANNOT DETERMINE",
+    "verdict_why": "an end has no world point in wiring/cables.json"
+   },
+   {
+    "id": "hat-dxl-port",
+    "group": "power",
+    "from": "hat",
+    "to": "id34",
+    "cable_mm_ordered": null,
+    "floor_mm_cables_json": null,
+    "slack_mm_cables_json": null,
+    "body_a": "jaw_soft",
+    "body_b": "jaw_soft",
+    "joints_crossed_measured": [],
+    "joints_crossed_stated": [],
+    "verdict": "CANNOT DETERMINE",
+    "verdict_why": "an end has no world point in wiring/cables.json"
+   }
+  ]
+ }
+}
