@@ -523,6 +523,12 @@ A.append('</table></section>')
 
 # 4 print
 A.append('<section id="print"><h2><span class="n">4</span>Print files — ce-slice numbers, never derived from volume · 打印文件</h2>')
+_rp = [r for r in rows if r["class"] == "print"]
+_rdy_vendor = [r["id"] for r in _rp if r["grade"] == "READY" and r.get("vendor_mesh")]
+_rdy_ours = [r["id"] for r in _rp if r["grade"] == "READY" and not r.get("vendor_mesh")]
+A.append('<p class="lede"><b>What READY means in this table, exactly.</b> READY TO BUILD FROM = the file will print: an STL exists, it is watertight, an orientation is stated and ce-slice returned real grams and seconds for it. It does NOT mean you may sell what it prints. %d of the %d READY rows are Pollen simulation meshes under CC BY-SA-<b>NC</b> (%s) — printable for prototypes, not saleable. Only %d printed parts are ours outright and free of that condition: %s. The licence column on every row says which is which. · 本表中“可直接制造”的确切含义：文件可打印（STL 存在、网格封闭、已给出摆放方向、ce-slice 返回真实克数与秒数），但<b>不等于可以销售</b>。%d/%d 项为 Pollen 仿真网格，许可为 CC BY-SA-NC（非商业），仅可打印样机；仅 %d 个打印件完全归我方所有、不受此限。</p>'
+         % (len(_rdy_vendor), len(_rdy_vendor) + len(_rdy_ours), E(", ".join(_rdy_vendor)), len(_rdy_ours), E(", ".join(_rdy_ours)),
+            len(_rdy_vendor), len(_rdy_vendor) + len(_rdy_ours), len(_rdy_ours)))
 A.append('<p class="lede">Every gram and second below is what BambuStudio %s itself reported through ce-slice, at the 0.20 mm Standard @BBL H2S process unless the row says otherwise. Checked against ce-slice\'s own append-only journal on %s: <b>%d of %d</b> published figures are traceable to a recorded run, and on <b>%d</b> of them the STL\'s sha256 is still the file on disk today. %d parts were ALSO sliced from our parametric rebuild — where those two disagree the row says by how much. · 下列克数与秒数均为 BambuStudio 经 ce-slice 实测输出，绝非由体积换算。%d/%d 项可追溯至切片日志记录，其中 %d 项 STL 的 sha256 与当前磁盘文件一致。</p>' % (
     "02.08.02.61", E(SJ["read_at"][:16]), SJ["summary"]["published_number_traced_to_a_journal_run"], len(slice_["parts"]),
     SJ["summary"]["stl_unchanged_since_that_run"], SJ["summary"]["with_a_rebuilt_alternative"],
