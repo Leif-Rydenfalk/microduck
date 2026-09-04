@@ -1,15 +1,45 @@
 {
+  "$parts_folder": 2,
   "$triad": 1,
-  "kind": "part",
+  "kind": "component",
   "record": {
     "slug": "jst-b3b-eh-a",
-    "title": "jst-b3b-eh-a",
-    "verdict": "CANNOT DETERMINE",
-    "why": "created by `bin/triad new part` — nothing measured yet",
-    "sector": null,
-    "subsector": null,
+    "title": "JST B3B-EH-A — 3-circuit EH 2.5 mm pitch top-entry Type A board header (the DYNAMIXEL X-series TTL socket, ROBOTIS e-Manual 'PCB Header JST B3B-EH-A')",
+    "origin": "vendor",
+    "origin_why": "Every dimension was read off JST's own EH CONNECTOR datasheet eEH.pdf p.4 'Header/ Type A' (fetched jst-mfg.com 2026-09-04, sha256 9e35874b…, vendored at iterations/v0.0.1/docs/fetched/eEH.pdf) and every electrical figure off its p.1 Specifications block; the part number itself comes from ROBOTIS' e-Manual XL330-M288-T §Connector Information ('PCB Header JST B3B-EH-A'). `standard` would be wrong: no published standard fixes an EH. `measured` would be wrong: no instrument has touched one here — the KiCad STEP corroboration is a measurement of a model, not of a part.",
+    "vendor": "J.S.T. Mfg. Co., Ltd. (JST)",
+    "mpn": "B3B-EH-A",
+    "sector": "connector",
+    "subsector": "wire_to_board",
     "lifecycle": "unknown",
-    "origin": null,
-    "origin_why": null
+    "lifecycle_why": "eEH.pdf carries no lifecycle statement and no distributor page was fetched for this member (the workshop family folder part:conn-jst-eh-2.5mm holds an offer for the 4-circuit member only).",
+    "verdict": "CANNOT DETERMINE",
+    "why": "ENVELOPE, PIN ROW AND MATED HEIGHT ARE VENDOR-DRAWN AND BUILD: cad/part.py constructs 10.0000 x 3.8000 x 6.0000 above the board with three □0.64 posts at x -2.5000 / 0.0000 / +2.5000 from 3.2 below to 4.2 above the board, and the built solid's bbox reproduces the KiCad B3B-EH-A body's 10.0 x 3.8 x 9.2 exactly (measured 2026-09-04). What keeps this CANNOT DETERMINE rather than PASS: (1) the wafer's internal detail — latch relief, polarising rib, back wall — is simplified to a 9.5 x 3.8 x 5.1 cavity, so the built volume is NOT the vendor body's (the KiCad model reads 97.0168 mm3; ours is whatever the ledger's build row says) and a clearance check against a housing would be against an envelope; (2) mass is CANNOT DETERMINE — eEH.pdf states none and cecad's NYLON density (1.14 g/cm3) applied to a simplified volume is not a vendor mass; (3) no offer has been fetched for THIS member. What settles it: a vendor STEP with the internal detail (or calipers on the part), a mass on a scale, and a distributor page.",
+    "iteration": "v0.0.1",
+    "spec": {
+      "$about": "Series figures from eEH.pdf p.1 Specifications, valid for every circuit count; member figures from p.4. mm, A, V.",
+      "pitch_mm": {"value": 2.5, "cite": "eEH.pdf p.1 title '2.5 mm pitch/Wire-to-Board connectors'; p.4 drawing '2.5'"},
+      "circuits": {"value": 3, "cite": "eEH.pdf p.4 table row 3: B3B-EH-A"},
+      "dimension_A_mm": {"value": 5.0, "cite": "eEH.pdf p.4 table, B3B-EH-A, A"},
+      "dimension_B_mm": {"value": 10.0, "cite": "eEH.pdf p.4 table, B3B-EH-A, B"},
+      "thickness_mm": {"value": 3.8, "cite": "eEH.pdf p.4 side view '3.8'; p.1 'The top entry type is 3.8 mm in thickness'"},
+      "height_above_board_mm": {"value": 6.0, "cite": "eEH.pdf p.4 front view '6'"},
+      "post_length_above_floor_mm": {"value": 3.3, "cite": "eEH.pdf p.4 Note 2 'The EH Type A header has a post length of 3.3 mm'"},
+      "post_below_board_mm": {"value": 3.2, "cite": "eEH.pdf p.4 front view '3.2'"},
+      "post_section_mm": {"value": 0.64, "cite": "eEH.pdf p.4 '□0.64'"},
+      "row_from_open_face_mm": {"value": 1.6, "cite": "eEH.pdf p.4 side view '(1.6)'"},
+      "mated_assembly_height_mm": {"value": 8.1, "cite": "eEH.pdf p.2 'PC board layout and Assembly layout', top entry type '(8.1)'"},
+      "pcb_hole_mm": {"value": "0.9 +0.1/0", "cite": "eEH.pdf p.2 'φ0.9 +0.1/0'; Note 2 'Tolerance for the PCB hole pitch shall be ± 0.05 and shall not accumulate'"},
+      "current_rating_A": {"value": 3.0, "cite": "eEH.pdf p.1 'Current rating: 3 A AC/DC (AWG #22)'"},
+      "voltage_rating_V": {"value": 250.0, "cite": "eEH.pdf p.1 'Voltage rating: 250 V AC/DC'"},
+      "temperature_range_C": {"value": "-25 to +85", "cite": "eEH.pdf p.1 'Temperature range: -25℃ to +85℃ (including temperature rise in applying electrical current)'"},
+      "material": {"value": "Post: Brass, copper-undercoated, tin-plated. Wafer: PA 66, natural (white)", "cite": "eEH.pdf p.4 'Material and Surface finish, etc.'"},
+      "mass_g": {"value": null, "cite": null, "why_null": "eEH.pdf states no mass; CANNOT DETERMINE"}
+    },
+    "where_on_the_microduck": {
+      "xl330_m288_t": "one socket on each side face of every XL330 — 15 servos x 2 = 30 headers inside the actuators, bought inside the servo, not separately (ROBOTIS e-Manual §Connector Information). part:xl330-m288-t/cad/interfaces.json 'dxl_socket_pos_y'/'dxl_socket_neg_y' carry the measured pocket frames.",
+      "robot_hat": "the HAT's bus port(s): part:microduck-robot-hat-pcb interface 'peripheral_connectors' block B is 2 columns x 3 holes on a 2.5000 mm pitch, phi 0.9500 — the EH drill (phi0.9 +0.1/0, p.2) at the EH pitch — so two B3B-EH-A fit that pattern. WHICH of the two is the DYNAMIXEL port is CANNOT DETERMINE from a mesh with no silkscreen (that folder says so); electronics/robot-hat/board.py is the design that decides it.",
+      "imu_to_dxl": "2 or 3 headers depending on option A/B/C in part:microduck-imu-to-dxl record.connector_count — CANNOT DETERMINE."
+    }
   }
 }

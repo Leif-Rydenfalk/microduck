@@ -3,6 +3,32 @@
   "kind": "interfaces",
   "record": {
     "slug": "jst-ehr-03",
-    "interfaces": []
+    "frame": "origin at the centre of the contact row on the housing's MATING face; +z the insertion direction (into the header, away from the wires), +x along the row circuit No. 1 -> No. 3, +y toward the closed back (lock side is -y). The body spans z -6.5..0; wires exit the z = -6.5 face. Units mm.",
+    "units": "mm",
+    "interfaces": [
+      {
+        "name": "mate",
+        "role": "eh_housing",
+        "series": "EH",
+        "circuits": 3,
+        "pitch_mm": 2.5,
+        "nominal_mm": 2.5,
+        "height_mm": 6.5,
+        "frame": {"origin_mm": [0.0, 0.0, 0.0], "z_axis": [0, 0, 1], "x_axis": [1, 0, 0]},
+        "accepts": ["connection:jst-eh-3pin"],
+        "what": "the face that seats onto a B3B-EH-A header (part:jst-b3b-eh-a, or the socket frames on part:xl330-m288-t). Contacts at x = -2.5000, 0.0000, +2.5000. When mated this face sits 1.6000 above the header's board plane ((8.1) mated height, p.2, minus 6.5 housing height, p.3) with z anti-parallel to the header's z and x parallel (the housing is polarised — one orientation).",
+        "source": "eEH.pdf p.3 'Housing' table row EHR-3 (A 5.0, B 9.5) and drawing (3.8, 6.5, 0.6, (2.25), 2.5); p.1 'The top entry type is 3.8 mm in thickness and 8.1 mm in height'; p.2 '(8.1)'. Fetched 2026-09-04, sha256 9e35874b…, docs/fetched/eEH.pdf."
+      },
+      {
+        "name": "wire_face",
+        "role": "wire_exit",
+        "circuits": 3,
+        "pitch_mm": 2.5,
+        "frame": {"origin_mm": [0.0, 0.0, -6.5], "z_axis": [0, 0, -1], "x_axis": [1, 0, 0]},
+        "accepts": [],
+        "what": "the face the three crimped wires leave through, on 2.5 mm centres, each through a phi 1.9 (max insulation O.D. of SEH-001T-P0.6, p.2) hole. `accepts` empty: the wire-to-contact join is the crimp (part:jst-seh-001t-p0.6), which this shelf records as a part and not yet as a connection folder — naming one would dangle.",
+        "source": "eEH.pdf p.3 drawing height 6.5; p.2 contact table 'SEH-001T-P0.6 … Insulation O.D. 1.0 to 1.9'."
+      }
+    ]
   }
 }

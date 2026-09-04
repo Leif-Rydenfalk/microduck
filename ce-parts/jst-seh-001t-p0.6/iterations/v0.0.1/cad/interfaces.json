@@ -3,6 +3,29 @@
   "kind": "interfaces",
   "record": {
     "slug": "jst-seh-001t-p0.6",
-    "interfaces": []
+    "frame": "origin at the contact-box tip (post entry end); +z along the contact toward the wire; +x across the width. Units mm.",
+    "units": "mm",
+    "interfaces": [
+      {
+        "name": "post",
+        "role": "crimp_contact",
+        "series": "EH",
+        "frame": {"origin_mm": [0.0, 0.0, 0.0], "z_axis": [0, 0, -1], "x_axis": [1, 0, 0]},
+        "accepts": [],
+        "what": "the receptacle end that takes a B3B-EH-A □0.64 post. Empty `accepts` on purpose: the post-to-contact engagement is inside connection:jst-eh-3pin's housing-to-header mate and is not a separately walkable joint on this shelf.",
+        "source": "eEH.pdf p.2 'Contact' drawing and table row SEH-001T-P0.6 (docs/fetched/eEH.pdf, sha256 9e35874b…)"
+      },
+      {
+        "name": "wire",
+        "role": "crimp_barrel",
+        "conductor_awg_range": [30, 22],
+        "conductor_mm2_range": [0.05, 0.33],
+        "insulation_od_mm_range": [1.0, 1.9],
+        "frame": {"origin_mm": [0.0, 0.0, 5.7], "z_axis": [0, 0, 1], "x_axis": [1, 0, 0]},
+        "accepts": [],
+        "what": "the crimp barrel. THE MEASURED CONTRADICTION THIS SHELF CARRIES: ROBOTIS' e-Manual states 'Wire Gauge for DYNAMIXEL 21 AWG' beside 'Crimp Terminal JST SEH-001T-P0.6', and JST's table for that contact ends at AWG #22 (0.33 mm2). 21 AWG is 0.4105 mm2 by the AWG series (d = 0.127 x 92^((36-21)/39) = 0.7229 mm) — 24 % over the contact's published maximum. Either the X3P lead is not 21 AWG, or it is crimped outside JST's window. CANNOT DETERMINE which without a cable on the bench (strip one, mic the strands). Recorded in evidence/ledger.jsonl.",
+        "source": "eEH.pdf p.2 contact table; ROBOTIS e-Manual XL330-M288-T §Connector Information (part:cable-dxl-x3p docs/fetched/robotis-emanual-xl330-m288.html, sha256 a336b9e3…)"
+      }
+    ]
   }
 }

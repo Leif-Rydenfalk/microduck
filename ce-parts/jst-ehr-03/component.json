@@ -1,15 +1,37 @@
 {
+  "$parts_folder": 2,
   "$triad": 1,
-  "kind": "part",
+  "kind": "component",
   "record": {
     "slug": "jst-ehr-03",
-    "title": "jst-ehr-03",
-    "verdict": "CANNOT DETERMINE",
-    "why": "created by `bin/triad new part` — nothing measured yet",
-    "sector": null,
-    "subsector": null,
+    "title": "JST EHR-3 ('EHR-03' in ROBOTIS' manual) — 3-circuit EH 2.5 mm pitch cable housing, the plug on both ends of every DYNAMIXEL X3P lead",
+    "origin": "vendor",
+    "origin_why": "Every dimension is read off JST's EH CONNECTOR datasheet eEH.pdf p.3 'Housing' (fetched jst-mfg.com 2026-09-04, sha256 9e35874b…, vendored at iterations/v0.0.1/docs/fetched/eEH.pdf); the part number comes from ROBOTIS e-Manual XL330-M288-T §Connector Information 'Housing JST EHR-03'. Not `standard` (no standard fixes an EH), not `measured` (no instrument has touched one here).",
+    "vendor": "J.S.T. Mfg. Co., Ltd. (JST)",
+    "mpn": "EHR-3",
+    "mpn_note": "JST's table prints EHR-3; ROBOTIS prints EHR-03. Same part — JST's p.6 'Model number allocation' shows EH R - <circuits> with no zero padding.",
+    "sector": "connector",
+    "subsector": "wire_to_board",
     "lifecycle": "unknown",
-    "origin": null,
-    "origin_why": null
+    "lifecycle_why": "eEH.pdf carries no lifecycle statement; no distributor page fetched for this member.",
+    "verdict": "CANNOT DETERMINE",
+    "why": "ENVELOPE AND CONTACT ROW ARE VENDOR-DRAWN AND BUILD: 9.5000 x 3.8000 x 6.5000 with contacts at x -2.5000 / 0.0000 / +2.5000 and a 0.6 lock rib, every figure from eEH.pdf p.3. CANNOT DETERMINE rather than PASS because: (1) the latch window, polarising key and the contact cavity shape are simplified (cavities modelled 1.8 square as a stated modelling clearance, not a drawing figure); (2) no vendor STEP exists for the EHR housing on the workshop shelf to corroborate against (part:conn-jst-eh-2.5mm carries headers only), so the envelope is corroborated by nothing but the drawing itself; (3) mass is CANNOT DETERMINE — no vendor figure; (4) no offer fetched for this member. What settles it: a housing STEP or calipers, a scale, a distributor page. 'Contacts Sold Separately': three part:jst-seh-001t-p0.6 per housing.",
+    "iteration": "v0.0.1",
+    "spec": {
+      "pitch_mm": {"value": 2.5, "cite": "eEH.pdf p.3 drawing '2.5'; p.1 title"},
+      "circuits": {"value": 3, "cite": "eEH.pdf p.3 table row 3: EHR-3"},
+      "dimension_A_mm": {"value": 5.0, "cite": "eEH.pdf p.3 table, EHR-3, A"},
+      "dimension_B_mm": {"value": 9.5, "cite": "eEH.pdf p.3 table, EHR-3, B"},
+      "thickness_mm": {"value": 3.8, "cite": "eEH.pdf p.3 drawing '3.8'"},
+      "height_mm": {"value": 6.5, "cite": "eEH.pdf p.3 drawing '6.5'"},
+      "lock_rib_mm": {"value": 0.6, "cite": "eEH.pdf p.3 drawing '0.6'"},
+      "end_margin_mm": {"value": 2.25, "cite": "eEH.pdf p.3 drawing '(2.25)'"},
+      "mated_assembly_height_mm": {"value": 8.1, "cite": "eEH.pdf p.1 '8.1 mm in height'; p.2 '(8.1)'"},
+      "applicable_wire": {"value": "AWG #32 to AWG #22, insulation O.D. 0.5 to 1.9 (series); with SEH-001T-P0.6: AWG #30 to #22 (0.05 to 0.33 mm2), insulation O.D. 1.0 to 1.9", "cite": "eEH.pdf p.1 'Applicable wire range'; p.2 contact table"},
+      "current_rating_A": {"value": 3.0, "cite": "eEH.pdf p.1 'Current rating: 3 A AC/DC (AWG #22)'"},
+      "material": {"value": "PA 66, natural (white)", "cite": "eEH.pdf p.3 'Material and Surface finish, etc.'"},
+      "mass_g": {"value": null, "cite": null, "why_null": "no vendor figure; CANNOT DETERMINE"}
+    },
+    "where_on_the_microduck": "two per X3P lead: 16 leads in wiring/cables.json group dynamixel-chain (cables 1-16) = 32 housings, 96 SEH-001T-P0.6 contacts."
   }
 }
