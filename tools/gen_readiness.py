@@ -386,6 +386,55 @@ for w in D["in_flight"]:
             st.append("%s: %s" % (pth, datetime.datetime.fromtimestamp(os.path.getmtime(full)).strftime("%m-%d %H:%M")))
     w["state"] = st
     w["stat_at"] = NOW
+    # LIVENESS, MEASURED — not asserted. A factory reviewer found on 2026-09-04 that
+    # three of the six lanes the work breakdown told ten engineers NOT to touch had
+    # no artifact on disk at all, or none written for fifteen hours. "In flight" is a
+    # claim about a process nobody can see; the checkable version is "when was the
+    # newest byte written under a path this lane owns". So each lane gets an age in
+    # minutes and one of three verdicts, and the documents render the verdict.
+    #   LIVE          something under an owned path was written within LIVE_MIN
+    #   QUIET         artifacts exist but nothing has moved for longer than that
+    #   NO ARTIFACT   not one owned path exists on disk
+    LIVE_MIN = 90
+    ages = []
+    for pth in [x.strip() for x in w["owns"].split(",")]:
+        pth = pth.split(" ")[0].rstrip("/")
+        for base in (ROOT, os.path.dirname(os.path.dirname(ROOT))):
+            full = os.path.join(base, pth)
+            if os.path.exists(full):
+                break
+        else:
+            continue
+        if os.path.isdir(full):
+            fs = [os.path.join(dp, f) for dp, _, fz in os.walk(full) for f in fz]
+            if fs:
+                ages.append(max(os.path.getmtime(f) for f in fs))
+        else:
+            ages.append(os.path.getmtime(full))
+    now_ts = datetime.datetime.now().timestamp()
+    if not ages:
+        w["liveness"] = "NO ARTIFACT"
+        w["newest_artifact_age_min"] = None
+        w["liveness_why"] = ("not one path this lane owns exists on disk, so nothing measurable says "
+                             "this work is under way. Do NOT hold work back for it: treat its parcels "
+                             "as OPEN and assign them.")
+        w["liveness_why_zh"] = ("该工作流所占用的路径在磁盘上一个都不存在，没有任何可测量的证据表明工作正在进行。"
+                                "请勿为它保留工作：其工作包按“未开工”处理，可以分配。")
+    else:
+        age = (now_ts - max(ages)) / 60.0
+        w["newest_artifact_age_min"] = round(age, 1)
+        if age <= LIVE_MIN:
+            w["liveness"] = "LIVE"
+            w["liveness_why"] = "an owned path was written %.0f minutes ago; do not duplicate this work" % age
+            w["liveness_why_zh"] = "其占用路径在 %.0f 分钟前刚被写入，请勿重复此项工作。" % age
+        else:
+            w["liveness"] = "QUIET"
+            w["liveness_why"] = ("artifacts exist but the newest is %.1f hours old, longer than the %d-minute "
+                                 "liveness window. Ask before assuming it is still running; if it is not, its "
+                                 "parcels are OPEN." % (age / 60.0, LIVE_MIN))
+            w["liveness_why_zh"] = ("已有产出文件，但最新一份距今 %.1f 小时，超过 %d 分钟的活跃判定窗口。"
+                                    "分配前请先确认它是否仍在运行；若已停止，其工作包即为未开工。"
+                                    % (age / 60.0, LIVE_MIN))
 
 # ---------------------------------------------------------------- summary
 def count(cls):
