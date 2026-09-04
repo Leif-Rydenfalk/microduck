@@ -11,20 +11,24 @@
    "runs_in_cables_json": 23,
    "cables_with_geometry": 16,
    "cables_routed": 16,
-   "housings_placed": 28,
-   "housing_checks_PASS": 28,
+   "housings_placed": 30,
+   "housing_checks_PASS": 30,
    "housing_checks_FAIL": 0,
    "worst_origin_error_mm": 0.0,
    "worst_axis_error_deg": 0.0
   },
   "bom_added": [
    {
+    "ref": "part:jst-b3b-eh-a",
+    "qty": 2
+   },
+   {
     "ref": "part:jst-ehr-03",
-    "qty": 28
+    "qty": 30
    },
    {
     "ref": "part:jst-seh-001t-p0.6",
-    "qty": 84
+    "qty": 90
    }
   ],
   "bom_note": "these are the pieces connection:jst-eh-3pin says a mated EH joint costs (housing + 3 crimps, and the board header EXCEPT where it is already inside a bought servo). They are not yet merged into bom.json, which another lane owns.",
@@ -38,24 +42,24 @@
     "conductors": 3,
     "routed": true,
     "verdict": "CANNOT DETERMINE",
-    "routed_length_mm": 33.3455,
+    "routed_length_mm": 31.9318,
     "cable_mm_from_cables_json": 35,
-    "delta_vs_cable_mm": -1.6545,
+    "delta_vs_cable_mm": -3.0682,
     "min_clearance_mm": 1.2663,
     "pierce_samples": 0,
     "geometry": "out/wiring/cad/dxl-hat-id34.stl",
     "geometry_exists": true,
-    "mass_total_g": 0.5382,
+    "mass_total_g": 0.5109,
     "mass_is_nominal": true,
     "derived_from": "the two connector frames on its ends; a cable is not placed by a transform, its shape IS the placement",
     "ends": [
      {
       "device": "hat",
-      "located": false,
-      "kind": "board",
-      "refdes": null,
-      "housing_part": null,
-      "why_unlocated": "HAT mesh centroid (bbox centre through the placement) \u2014 connector positions unpublished"
+      "located": true,
+      "kind": "HAT EH 3-pin connector J14",
+      "refdes": "J14",
+      "housing_part": "part:jst-ehr-03",
+      "why_unlocated": null
      },
      {
       "device": "id34",
@@ -645,25 +649,25 @@
     "od_is_nominal": true,
     "conductors": 4,
     "routed": true,
-    "verdict": "FAIL",
-    "routed_length_mm": 60.4586,
+    "verdict": "CANNOT DETERMINE",
+    "routed_length_mm": 38.5013,
     "cable_mm_from_cables_json": 35,
-    "delta_vs_cable_mm": 25.4586,
-    "min_clearance_mm": 0.9,
+    "delta_vs_cable_mm": 3.5013,
+    "min_clearance_mm": 1.1361,
     "pierce_samples": 0,
     "geometry": "out/wiring/cad/tof-hat.stl",
     "geometry_exists": true,
-    "mass_total_g": 0.6456,
+    "mass_total_g": 0.4127,
     "mass_is_nominal": true,
     "derived_from": "the two connector frames on its ends; a cable is not placed by a transform, its shape IS the placement",
     "ends": [
      {
       "device": "hat",
-      "located": false,
-      "kind": "board",
-      "refdes": null,
+      "located": true,
+      "kind": "HAT SH 4-pin connector J5",
+      "refdes": "J5",
       "housing_part": null,
-      "why_unlocated": "HAT mesh centroid (bbox centre through the placement) \u2014 connector positions unpublished"
+      "why_unlocated": null
      },
      {
       "device": "tof",
@@ -697,11 +701,11 @@
     "ends": [
      {
       "device": "hat",
-      "located": false,
-      "kind": "board",
-      "refdes": null,
+      "located": true,
+      "kind": "HAT Wago 2059-302 connector J1",
+      "refdes": "J1",
       "housing_part": null,
-      "why_unlocated": "HAT mesh centroid (bbox centre through the placement) \u2014 connector positions unpublished"
+      "why_unlocated": null
      },
      {
       "device": "speaker",
@@ -802,11 +806,11 @@
      },
      {
       "device": "hat",
-      "located": false,
-      "kind": "board",
-      "refdes": null,
-      "housing_part": null,
-      "why_unlocated": "HAT mesh centroid (bbox centre through the placement) \u2014 connector positions unpublished"
+      "located": true,
+      "kind": "HAT EH 3-pin connector J14",
+      "refdes": "J14",
+      "housing_part": "part:jst-ehr-03",
+      "why_unlocated": null
      }
     ]
    },
@@ -854,6 +858,50 @@
    }
   ],
   "connectors": [
+   {
+    "cable": "dxl-hat-id34",
+    "at_device": "hat",
+    "refdes": "J14",
+    "part": "part:jst-ehr-03",
+    "via_connection": "connection:jst-eh-3pin",
+    "world_pos_mm": [
+     57.44,
+     25.2436,
+     247.6046
+    ],
+    "world_quat_wxyz": [
+     0.0,
+     0.707106781,
+     0.0,
+     0.707106781
+    ],
+    "header_owner": "part:microduck-robot-hat-pcb",
+    "mate_verdict": "PASS",
+    "seat_mm": 1.5999999999999996,
+    "adds_parts": [
+     {
+      "ref": "part:jst-ehr-03",
+      "qty": 1,
+      "why": "the cable housing at this end (eEH.pdf p.3)"
+     },
+     {
+      "ref": "part:jst-seh-001t-p0.6",
+      "qty": 3,
+      "why": "three crimp contacts per housing \u2014 eEH.pdf p.2 prints them 'Sold Separately', so a housing alone is not a made joint"
+     },
+     {
+      "ref": "part:jst-b3b-eh-a",
+      "qty": 1,
+      "why": "the board header this housing seats onto (eEH.pdf p.4, Type A)"
+     }
+    ],
+    "placed_by": "connection:jst-eh-3pin cad/mate.py called on the housing's own `mate` interface and a header frame MEASURED off part:microduck-robot-hat-pcb",
+    "verify": {
+     "origin_error_mm": 0.0,
+     "axis_error_deg": 0.0,
+     "verdict": "PASS"
+    }
+   },
    {
     "cable": "dxl-hat-id34",
     "at_device": "id34",
@@ -1940,6 +1988,50 @@
      }
     ],
     "placed_by": "connection:jst-eh-3pin cad/mate.py called on the housing's own `mate` interface and a header frame MEASURED off part:xl330-m288-t",
+    "verify": {
+     "origin_error_mm": 0.0,
+     "axis_error_deg": 0.0,
+     "verdict": "PASS"
+    }
+   },
+   {
+    "cable": "bat-hat",
+    "at_device": "hat",
+    "refdes": "J14",
+    "part": "part:jst-ehr-03",
+    "via_connection": "connection:jst-eh-3pin",
+    "world_pos_mm": [
+     57.44,
+     25.2436,
+     247.6046
+    ],
+    "world_quat_wxyz": [
+     0.0,
+     0.707106781,
+     0.0,
+     0.707106781
+    ],
+    "header_owner": "part:microduck-robot-hat-pcb",
+    "mate_verdict": "PASS",
+    "seat_mm": 1.5999999999999996,
+    "adds_parts": [
+     {
+      "ref": "part:jst-ehr-03",
+      "qty": 1,
+      "why": "the cable housing at this end (eEH.pdf p.3)"
+     },
+     {
+      "ref": "part:jst-seh-001t-p0.6",
+      "qty": 3,
+      "why": "three crimp contacts per housing \u2014 eEH.pdf p.2 prints them 'Sold Separately', so a housing alone is not a made joint"
+     },
+     {
+      "ref": "part:jst-b3b-eh-a",
+      "qty": 1,
+      "why": "the board header this housing seats onto (eEH.pdf p.4, Type A)"
+     }
+    ],
+    "placed_by": "connection:jst-eh-3pin cad/mate.py called on the housing's own `mate` interface and a header frame MEASURED off part:microduck-robot-hat-pcb",
     "verify": {
      "origin_error_mm": 0.0,
      "axis_error_deg": 0.0,

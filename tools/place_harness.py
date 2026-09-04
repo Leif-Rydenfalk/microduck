@@ -77,6 +77,9 @@ def main():
     hat_rows = {c["id"]: c for c in hatr["record"]["cables"]} if hatr else {}
     solids = load("out/wiring/solids.json")
     srows = {r["id"]: r for r in solids["record"]["cables"]} if solids else {}
+    sol_hat = load("out/wiring/solids-hat.json")
+    if sol_hat:                       # the re-swept HAT runs replace their rows
+        srows.update({r["id"]: r for r in sol_hat["record"]["cables"]})
     hous_if = load("ce-parts/jst-ehr-03/current/cad/interfaces.json")["record"]["interfaces"]
     hmate = dict([i for i in hous_if if i["name"] == "mate"][0])
     hmate["role"] = "eh_housing"

@@ -1,0 +1,607 @@
+{
+ "$triad": 1,
+ "kind": "cables3d",
+ "generated_by": "sim/route3d.py (grid by sim/route3d_grid.py)",
+ "record": {
+  "ref": "assembly:microduck",
+  "units": "mm",
+  "frame": "MJCF world at the zero pose: +x forward (beak), +y left, +z up, trunk_base origin (0,0,120) \u2014 the same frame as wiring/cables.json",
+  "counts": {
+   "runs_in_cables_json": 23,
+   "routed": 2,
+   "PASS": 0,
+   "FAIL": 2,
+   "CANNOT DETERMINE": 2,
+   "geometry_clean": 2,
+   "geometry_clean_means": "pierces nothing AND clears the stated 1.0000 mm floor; the overall verdict of such a run is still CANNOT DETERMINE because no published bend limit exists to judge it by"
+  },
+  "grid": {
+   "cell_mm": 1.0,
+   "shape": [
+    186,
+    183,
+    305
+   ],
+   "occupied_cells": 350003,
+   "source": "every triangle of the 70 rows of ce-assemblies/microduck/current/placements.json, x1000 from metres, sampled at 0.5000 mm",
+   "accuracy": "distances resolve to the nearest marked CELL CENTRE, so a clearance carries +/- 0.8660 mm (half the cell diagonal) of grid error before the exact refinement in sim/route3d_exact.py"
+  },
+  "rules": {
+   "clearance_floor_mm": 1.0,
+   "clearance_basis": "CHOSEN BY THIS LANE \u2014 no source in this repo states a cable-to-body clearance for the Microduck",
+   "bend_target": "3 x the bundle OD, reduced at any corner the geometry or the clearance will not allow; ROBOTIS publishes no bend radius for the X3P so the real limit is CANNOT DETERMINE and only the ACHIEVED radius is reported",
+   "pose": "ZERO POSE ONLY. The routed length is the length at one pose; wiring/cables.json's cable_mm is a floor plus a slack allowance over each crossed joint's whole range. Both are reported and neither overwrites the other."
+  },
+  "wire": {
+   "awg": 21,
+   "awg_source": "ROBOTIS e-Manual XL330-M288-T 4.4 'Wire Gauge for DYNAMIXEL | 21 AWG'",
+   "bare_conductor_mm": 0.7229,
+   "bare_basis": "ASTM B258 d = 0.127 x 92^((36-awg)/39)",
+   "insulation_od_window_mm": [
+    1.0,
+    1.9
+   ],
+   "insulation_window_source": "JST eEH.pdf p.2, contact SEH-001T-P0.6, 'Insulation O.D. 1.0 to 1.9' (part:jst-seh-001t-p0.6 spec)",
+   "insulation_od_nominal_mm": 1.45,
+   "nominal_is_chosen": true
+  },
+  "cables": [
+   {
+    "id": "dxl-hat-id34",
+    "group": "dynamixel-chain",
+    "od_mm": 3.1243,
+    "od_basis": "NOMINAL \u2014 3 x 21 AWG at the 1.4500 mm midpoint of JST eEH.pdf p.2's 1.0-1.9 insulation window, triangular bundle D = d(1+2/sqrt3); no vendor jacket OD exists",
+    "od_is_nominal": true,
+    "conductors": 3,
+    "cable_mm_from_cables_json": 35,
+    "floor_mm_from_cables_json": 30.9,
+    "slack_mm_from_cables_json": 0.0,
+    "crosses": [],
+    "clearance_floor_mm": 1.0,
+    "bend_target_mm": 9.3729,
+    "plan_grid_mm": 1.0,
+    "clearance_ladder": [
+     {
+      "floor_mm": 1.0,
+      "result": "routed on 1.0 mm inside a 14.0 mm corridor round the 4.0 mm plan",
+      "measured_clearance_mm": 1.2663,
+      "pierce_samples": 0,
+      "relax_moves": 5105
+     }
+    ],
+    "clearance_floor_achieved_mm": 1.0,
+    "routed": true,
+    "waypoints": 29,
+    "corners": 29,
+    "plan_seconds": 0.71,
+    "routed_length_mm": 31.9318,
+    "routed_length_routed_part_mm": 25.6392,
+    "stub_from_mm": 4.2926,
+    "stub_to_mm": 2.0,
+    "min_bend_radius_mm": 2.5813,
+    "bend_window_mm": 3.0,
+    "min_clearance_mm": 1.2663,
+    "min_clearance_at_mm": [
+     54.5,
+     25.2539,
+     252.1701
+    ],
+    "pierce_samples": 0,
+    "pierce_points_mm": [],
+    "samples": 57,
+    "sample_step_mm": 0.5,
+    "whole_path_min_clearance_mm": -1.5622,
+    "whole_path_pierce_samples": 2,
+    "ends": [
+     {
+      "device": "hat",
+      "point": "centroid",
+      "connector_xyz_mm": [
+       59.58,
+       0.0,
+       251.06
+      ],
+      "located": true,
+      "kind": "HAT EH 3-pin connector J14",
+      "refdes": "J14",
+      "hat_revision": "as_built",
+      "why_this_connector": "the XL330 bus is 3-wire half-duplex TTL and the HAT's only 3-pin Dynamixel connectors are J13 and J14 (Connector_JST:JST_EH_B3B-EH-A_1x03, sheet /Schematic/Dynamixel/, pin 1 GND / pin 2 +BATT read off elec_RPI_Robot_HAT.kicad_pcb). Which of the two is the chain and which is the battery is decided per run BY MEASUREMENT below and the alternative is reported.",
+      "chosen_by": "shortest straight-line distance to the other end: J14 17.1870 mm, J13 19.5379 mm",
+      "nets_by_pin": {
+       "1": "GND",
+       "2": "+BATT",
+       "3": "Net-(J13-Pin_3)"
+      },
+      "mate_mm": [
+       59.04,
+       25.2436,
+       247.6046
+      ],
+      "wire_face_mm": [
+       50.94,
+       25.2436,
+       247.6046
+      ],
+      "mated_lift_mm": 8.1,
+      "mated_lift_basis": "JST eEH.pdf p.2 mated height 8.1000 mm",
+      "insertion_dir": [
+       1.0,
+       -0.0,
+       -0.0
+      ],
+      "row_dir": [
+       0.0,
+       0.0,
+       1.0
+      ],
+      "housing_part": "part:jst-ehr-03",
+      "revision_note": "our CAD carries the PRE-RELEASE board (out/pcb/hat/mesh-revision.json). This endpoint is the RELEASED (C1) position; on the board actually in our mesh the same connector sits at [59.04, -24.5064, 247.6046], 49.7500 mm away.",
+      "launch_mm": [
+       55.2229,
+       25.5,
+       247.4734
+      ],
+      "launch_offset_mm": 4.2926,
+      "launch_how": "nearest clear cell in any direction (endpoint unlocated)",
+      "start_mm": [
+       50.94,
+       25.2436,
+       247.6046
+      ]
+     },
+     {
+      "device": "id34",
+      "point": "+y",
+      "connector_xyz_mm": [
+       35.1,
+       18.65,
+       248.61
+      ],
+      "located": true,
+      "kind": "xl330 EH socket",
+      "mate_mm": [
+       35.1,
+       18.65,
+       244.6146
+      ],
+      "wire_face_mm": [
+       35.1,
+       18.65,
+       251.1146
+      ],
+      "insertion_dir": [
+       -0.0,
+       -0.0,
+       -1.0
+      ],
+      "row_dir": [
+       0.0,
+       -1.0,
+       0.0
+      ],
+      "housing_proud_of_flank_mm": 2.5,
+      "housing_part": "part:jst-ehr-03",
+      "launch_mm": [
+       35.1,
+       18.65,
+       253.1146
+      ],
+      "launch_offset_mm": 2.0,
+      "launch_how": "along the connector normal",
+      "start_mm": [
+       35.1,
+       18.65,
+       251.1146
+      ]
+     }
+    ],
+    "verdict_pierce": "PASS",
+    "verdict_pierce_why": "no sample of the centreline lands in material",
+    "verdict_clearance": "PASS",
+    "verdict_clearance_why": "min clearance 1.2663 mm >= the stated floor 1.0000 mm",
+    "verdict_bend": "CANNOT DETERMINE",
+    "verdict_bend_why": "achieved 2.5813 mm; NO published minimum exists for this cable (ROBOTIS states a gauge and no bend radius; the 3 x OD target this lane routed to is its own rule), so there is nothing to compare it with",
+    "verdict": "CANNOT DETERMINE",
+    "verdict_why": "pierce PASS; clearance PASS; bend radius CANNOT DETERMINE",
+    "delta_vs_cable_mm": -3.0682,
+    "delta_vs_floor_mm": 1.0318
+   },
+   {
+    "id": "tof-hat",
+    "group": "hat-harness",
+    "od_mm": 2.2,
+    "od_basis": "NOMINAL \u2014 JST SH 1.0 mm 4-way lead; no OD published for the ToF board's cable. 4 x ~0.9 mm flat ribbon read as a 2.2 mm round envelope",
+    "od_is_nominal": true,
+    "conductors": 4,
+    "cable_mm_from_cables_json": 35,
+    "floor_mm_from_cables_json": 31.3,
+    "slack_mm_from_cables_json": 0.0,
+    "crosses": [],
+    "clearance_floor_mm": 1.0,
+    "bend_target_mm": 6.6,
+    "plan_grid_mm": 1.0,
+    "clearance_ladder": [
+     {
+      "floor_mm": 1.0,
+      "result": "routed on 1.0 mm unrestricted (the 4.0 mm grid found nothing)",
+      "measured_clearance_mm": 1.1361,
+      "pierce_samples": 0,
+      "relax_moves": 5387
+     }
+    ],
+    "clearance_floor_achieved_mm": 1.0,
+    "routed": true,
+    "waypoints": 43,
+    "corners": 42,
+    "plan_seconds": 0.76,
+    "routed_length_mm": 38.5013,
+    "routed_length_routed_part_mm": 38.0761,
+    "stub_from_mm": 0.0,
+    "stub_to_mm": 0.4252,
+    "min_bend_radius_mm": 3.0493,
+    "bend_window_mm": 3.0,
+    "min_clearance_mm": 1.1361,
+    "min_clearance_at_mm": [
+     56.796,
+     33.007,
+     251.6292
+    ],
+    "pierce_samples": 0,
+    "pierce_points_mm": [],
+    "samples": 85,
+    "sample_step_mm": 0.5,
+    "whole_path_min_clearance_mm": 1.1361,
+    "whole_path_pierce_samples": 0,
+    "ends": [
+     {
+      "device": "hat",
+      "point": "centroid",
+      "connector_xyz_mm": [
+       59.58,
+       0.0,
+       251.06
+      ],
+      "located": true,
+      "kind": "HAT SH 4-pin connector J5",
+      "refdes": "J5",
+      "hat_revision": "as_built",
+      "why_this_connector": "hardware-teardown.en.md line 193 quotes Pollen's own wording 'Stemma J5 connector' against J5-J8 = JST SH 1 mm 4P; J5 is on sheet /Schematic/Sensors/.",
+      "chosen_by": "shortest straight-line distance to the other end: J5 28.1099 mm",
+      "nets_by_pin": {
+       "1": "GND",
+       "2": "+3V3",
+       "3": "/Schematic/Audio/IO_02",
+       "4": "/Schematic/Audio/IO_03",
+       "MP": "GND"
+      },
+      "mate_mm": [
+       59.04,
+       28.2362,
+       255.7546
+      ],
+      "wire_face_mm": [
+       54.72,
+       28.2362,
+       255.7546
+      ],
+      "mated_lift_mm": 4.32,
+      "mated_lift_basis": "the header's OWN top face, 4.3200 mm above its seating surface (measured off the official STEP in out/pcb/hat/components.json). No mated height is published for this series here, so the housing's own stack is NOT added and the start point is a floor.",
+      "insertion_dir": [
+       1.0,
+       -0.0,
+       -0.0
+      ],
+      "row_dir": [
+       0.0,
+       0.749473,
+       -0.662035
+      ],
+      "housing_part": null,
+      "launch_mm": [
+       54.72,
+       28.2362,
+       255.7546
+      ],
+      "launch_offset_mm": 0.0,
+      "launch_how": "along the connector normal",
+      "start_mm": [
+       54.72,
+       28.2362,
+       255.7546
+      ]
+     },
+     {
+      "device": "tof",
+      "point": "site",
+      "connector_xyz_mm": [
+       81.4,
+       22.4,
+       249.1
+      ],
+      "located": false,
+      "kind": "sensor",
+      "why_unlocated": "MJCF tof site, world (docs \u00a76)",
+      "housing_part": null,
+      "launch_mm": [
+       81.2229,
+       22.5,
+       249.4734
+      ],
+      "launch_offset_mm": 0.4252,
+      "launch_how": "nearest clear cell in any direction (endpoint unlocated)",
+      "start_mm": [
+       81.4,
+       22.4,
+       249.1
+      ]
+     }
+    ],
+    "verdict_pierce": "PASS",
+    "verdict_pierce_why": "no sample of the centreline lands in material",
+    "verdict_clearance": "PASS",
+    "verdict_clearance_why": "min clearance 1.1361 mm >= the stated floor 1.0000 mm",
+    "verdict_bend": "CANNOT DETERMINE",
+    "verdict_bend_why": "achieved 3.0493 mm; NO published minimum exists for this cable (ROBOTIS states a gauge and no bend radius; the 3 x OD target this lane routed to is its own rule), so there is nothing to compare it with",
+    "verdict": "CANNOT DETERMINE",
+    "verdict_why": "pierce PASS; clearance PASS; bend radius CANNOT DETERMINE",
+    "delta_vs_cable_mm": 3.5013,
+    "delta_vs_floor_mm": 7.2013
+   },
+   {
+    "id": "spk-hat",
+    "group": "hat-harness",
+    "od_mm": 2.5,
+    "od_basis": "NOMINAL \u2014 JST GH 1.25 mm 2-way speaker lead; no OD published. 2 x ~1.2 mm twisted pair read as a 2.5 mm round envelope",
+    "od_is_nominal": true,
+    "conductors": 2,
+    "cable_mm_from_cables_json": 70,
+    "floor_mm_from_cables_json": 65.0,
+    "slack_mm_from_cables_json": 0.0,
+    "crosses": [],
+    "clearance_floor_mm": 1.0,
+    "bend_target_mm": 7.5,
+    "clearance_ladder": [
+     {
+      "floor_mm": 1.0,
+      "result": "routed on the 4.0 mm grid alone",
+      "measured_clearance_mm": -1.25,
+      "pierce_samples": 3,
+      "relax_moves": 18642
+     },
+     {
+      "floor_mm": 0.5,
+      "result": "routed on the 4.0 mm grid alone",
+      "measured_clearance_mm": -1.25,
+      "pierce_samples": 3,
+      "relax_moves": 18239
+     },
+     {
+      "floor_mm": 0.25,
+      "result": "routed on the 4.0 mm grid alone",
+      "measured_clearance_mm": -1.25,
+      "pierce_samples": 3,
+      "relax_moves": 18062
+     },
+     {
+      "floor_mm": 0.0,
+      "result": "routed on the 4.0 mm grid alone",
+      "measured_clearance_mm": -1.25,
+      "pierce_samples": 3,
+      "relax_moves": 18213
+     }
+    ],
+    "clearance_floor_achieved_mm": null,
+    "status": "FAIL",
+    "verdict": "FAIL",
+    "routed": false,
+    "why": "NO ROUTE AT ANY CLEARANCE DOWN TO 0.0000 mm: at zero pose there is no corridor at all between these two connectors wide enough for a 2.5000 mm cable. Since the real robot has this cable, the model is what is wrong \u2014 the ladder rows say at which floor each attempt died.",
+    "ends": [
+     {
+      "device": "hat",
+      "point": "centroid",
+      "connector_xyz_mm": [
+       59.58,
+       0.0,
+       251.06
+      ],
+      "located": true,
+      "kind": "HAT Wago 2059-302 connector J1",
+      "refdes": "J1",
+      "hat_revision": "as_built",
+      "why_this_connector": "J1, J2 and J9 are Wago-2 screwless terminals on sheet /Schematic/Audio/ (out/pcb/hat/components.json), and hardware-teardown.en.md line 205 reads them 'Screwless terminals: external speaker and second microphone'.",
+      "chosen_by": "shortest straight-line distance to the other end: J1 62.8510 mm, J2 64.7696 mm, J9 66.8140 mm",
+      "nets_by_pin": {
+       "1": "Net-(J1-Pin_1)",
+       "2": "Net-(J1-Pin_2)"
+      },
+      "mate_mm": [
+       59.04,
+       -7.7638,
+       240.8546
+      ],
+      "wire_face_mm": [
+       56.3076,
+       -7.7638,
+       240.8546
+      ],
+      "mated_lift_mm": 2.7324,
+      "mated_lift_basis": "the header's OWN top face, 2.7324 mm above its seating surface (measured off the official STEP in out/pcb/hat/components.json). No mated height is published for this series here, so the housing's own stack is NOT added and the start point is a floor.",
+      "insertion_dir": [
+       1.0,
+       -0.0,
+       -0.0
+      ],
+      "row_dir": [
+       0.0,
+       -0.40835,
+       -0.912825
+      ],
+      "housing_part": null,
+      "launch_mm": [
+       56.3076,
+       -7.7638,
+       240.8546
+      ],
+      "launch_offset_mm": 0.0,
+      "launch_how": "along the connector normal",
+      "start_mm": [
+       56.3076,
+       -7.7638,
+       240.8546
+      ]
+     },
+     {
+      "device": "speaker",
+      "point": "centroid",
+      "connector_xyz_mm": [
+       -5.42,
+       0.71,
+       249.11
+      ],
+      "located": false,
+      "kind": "transducer",
+      "why_unlocated": "speaker mesh centroid \u2014 terminal side unknown",
+      "housing_part": null,
+      "launch_mm": [
+       -5.7771,
+       0.5,
+       249.4734
+      ],
+      "launch_offset_mm": 0.5511,
+      "launch_how": "nearest clear cell in any direction (endpoint unlocated)",
+      "start_mm": [
+       -5.42,
+       0.71,
+       249.11
+      ]
+     }
+    ]
+   },
+   {
+    "id": "bat-hat",
+    "group": "power",
+    "od_mm": 3.0,
+    "od_basis": "NOMINAL \u2014 two conductors from the pack to the HAT; neither the gauge nor the jacket is published (cables.json bat-hat connector = CANNOT DETERMINE)",
+    "od_is_nominal": true,
+    "conductors": 2,
+    "cable_mm_from_cables_json": 340,
+    "floor_mm_from_cables_json": 213.5,
+    "slack_mm_from_cables_json": 125.7,
+    "crosses": [
+     "neck_pitch",
+     "head_pitch",
+     "head_yaw",
+     "head_roll"
+    ],
+    "clearance_floor_mm": 1.0,
+    "bend_target_mm": 9.0,
+    "clearance_ladder": [
+     {
+      "floor_mm": 1.0,
+      "result": "no corridor on the 4.0 mm grid and none on the 1.0 mm grid either"
+     },
+     {
+      "floor_mm": 0.5,
+      "result": "no corridor on the 4.0 mm grid and none on the 1.0 mm grid either"
+     },
+     {
+      "floor_mm": 0.25,
+      "result": "no corridor on the 4.0 mm grid and none on the 1.0 mm grid either"
+     },
+     {
+      "floor_mm": 0.0,
+      "result": "no corridor on the 4.0 mm grid and none on the 1.0 mm grid either"
+     }
+    ],
+    "clearance_floor_achieved_mm": null,
+    "status": "FAIL",
+    "verdict": "FAIL",
+    "routed": false,
+    "why": "NO ROUTE AT ANY CLEARANCE DOWN TO 0.0000 mm: at zero pose there is no corridor at all between these two connectors wide enough for a 3.0000 mm cable. Since the real robot has this cable, the model is what is wrong \u2014 the ladder rows say at which floor each attempt died.",
+    "ends": [
+     {
+      "device": "battery",
+      "point": "contact_end",
+      "connector_xyz_mm": [
+       -35.35,
+       0.0,
+       151.54
+      ],
+      "located": false,
+      "kind": "pack",
+      "why_unlocated": "the pack's end face nearer the banana_pcb_locker centroid (-30.4, -0.0, 154.8); the NP-F contact layout has no vendor drawing (part:np-f550 pinout)",
+      "housing_part": null,
+      "launch_mm": [
+       -35.7771,
+       0.5,
+       148.4734
+      ],
+      "launch_offset_mm": 3.1363,
+      "launch_how": "nearest clear cell in any direction (endpoint unlocated)",
+      "start_mm": [
+       -35.35,
+       0.0,
+       151.54
+      ]
+     },
+     {
+      "device": "hat",
+      "point": "centroid",
+      "connector_xyz_mm": [
+       59.58,
+       0.0,
+       251.06
+      ],
+      "located": true,
+      "kind": "HAT EH 3-pin connector J14",
+      "refdes": "J14",
+      "hat_revision": "as_built",
+      "why_this_connector": "the pack feeds the robot THROUGH the motor connector \u2014 hardware-teardown.en.md line 210 'Input range 5-28 V, designed to be powered through the motor connector' \u2014 and the +BATT net is on pin 2 of J13/J14/J3/J11 in the kicad_pcb. So the battery lead lands on an EH connector, not on a barrel or a Wago.",
+      "chosen_by": "shortest straight-line distance to the other end: J14 131.5736 mm, J13 132.5782 mm",
+      "nets_by_pin": {
+       "1": "GND",
+       "2": "+BATT",
+       "3": "Net-(J13-Pin_3)"
+      },
+      "mate_mm": [
+       59.04,
+       25.2436,
+       247.6046
+      ],
+      "wire_face_mm": [
+       50.94,
+       25.2436,
+       247.6046
+      ],
+      "mated_lift_mm": 8.1,
+      "mated_lift_basis": "JST eEH.pdf p.2 mated height 8.1000 mm",
+      "insertion_dir": [
+       1.0,
+       -0.0,
+       -0.0
+      ],
+      "row_dir": [
+       0.0,
+       0.0,
+       1.0
+      ],
+      "housing_part": "part:jst-ehr-03",
+      "revision_note": "our CAD carries the PRE-RELEASE board (out/pcb/hat/mesh-revision.json). This endpoint is the RELEASED (C1) position; on the board actually in our mesh the same connector sits at [59.04, -24.5064, 247.6046], 49.7500 mm away.",
+      "launch_mm": [
+       55.2229,
+       25.5,
+       247.4734
+      ],
+      "launch_offset_mm": 4.2926,
+      "launch_how": "nearest clear cell in any direction (endpoint unlocated)",
+      "start_mm": [
+       50.94,
+       25.2436,
+       247.6046
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}
