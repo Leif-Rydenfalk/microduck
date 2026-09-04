@@ -1,0 +1,69 @@
+{
+  "$comment": "Prose inputs for tools/gen_factory_pack.py -> FACTORY-PACK.html. EVERY NUMBER on the page is computed by the generator from a measurement file; this file carries only sentences, in English and Simplified Chinese, and the source pointers that are prose rather than data.",
+  "doc": {
+    "id": "MD-FACT-PACK-001",
+    "rev": "A",
+    "title": "Microduck factory pack",
+    "title_zh": "Microduck 工厂交付包",
+    "sub": "One document a factory can build from: what the product is, what is NOT ready, what to build, how a finished unit is accepted, what may and may not be sold, and where every underlying file sits in the repository.",
+    "sub_zh": "供工厂直接使用的单一文件：产品是什么、哪些尚未就绪、要制造什么、成品如何验收、什么可售什么不可售，以及每个源文件在仓库中的位置。"
+  },
+  "honesty": {
+    "en": "NO PHYSICAL UNIT HAS EVER BEEN BUILT OR MEASURED. Not one Microduck has been assembled from these files, and no number in this pack was taken off a real robot. Everything dynamic here — walking, loads, safety factors, thermal, battery runtime — is SIMULATION: rigid-body simulation in MuJoCo and linear-elastic finite element in CalculiX, run on our own CAD. Everything static — millimetres, grams, seconds, prices — is measured, but measured off files: off the geometry with a CAD kernel, off the STL with a slicer, off a live distributor page. Treat every simulated result as a hypothesis your first five units will test, not as a property of the product.",
+    "zh": "从未制造或测量过任何实物样机。没有一台 Microduck 按本文件装配过，本交付包中的任何数字都不是从实物机器人上取得的。所有动态结果——行走、受力、安全系数、温升、续航——均为仿真：MuJoCo 刚体仿真与 CalculiX 线弹性有限元，基于我方 CAD 运行。所有静态数据——毫米、克、秒、价格——是实测，但测自文件：用 CAD 内核测几何、用切片软件测 STL、从供应商在线页面读取价格。请把每一项仿真结果视为待验证的假设，由你们的前五台样机来检验，而非产品的既有属性。"
+  },
+  "what_is_it": {
+    "en": "Microduck is a 15-servo bipedal desk robot, about 25 cm tall standing, printed shells over a Dynamixel XL330 skeleton, with a Radxa-class compute board, a camera, a ToF sensor, a speaker and a microphone in the head, and an NP-F class camera battery in the trunk. This repository is a clean-room reconstruction: Pollen Robotics publish the simulation assets (meshes + MJCF) and the firmware, but NOT the mechanical CAD, the BOM or the boards. Section 6 states exactly which bytes came from where and what may be sold.",
+    "zh": "Microduck 是一台 15 舵机双足桌面机器人，站立高度约 25 cm，打印外壳包覆 Dynamixel XL330 骨架；头部装有 Radxa 级计算板、摄像头、ToF 传感器、扬声器与麦克风，躯干内为 NP-F 级相机电池。本仓库为洁净室重建：Pollen Robotics 公开了仿真资产（网格 + MJCF）与固件，但未公开机械 CAD、BOM 与电路板。第 6 节逐项说明每份数据的来源与可售范围。"
+  },
+  "sections": {
+    "not_ready": {
+      "en": "Read this before you plan anything. A working PROTOTYPE is buildable from this pack today. A FACTORY RELEASE is not. Each row below is a measurement taken by a command you can re-run, not an opinion.",
+      "zh": "在做任何计划前请先读本节。今天可以按本交付包制作一台可工作的样机，但尚不能量产。下表每一行都是可复现命令的实测结果，不是判断。"
+    },
+    "drawings": {
+      "en": "One folder per part in out/drawings/. Each folder holds an SVG sheet, a PDF and the JSON of facts it was drawn from. The verdict column is our own bin/sheetcheck against docs/MANUFACTURING-REQUIREMENTS.md A2/A3/A4 — a standard we wrote to be strict, not the ISO minimum. A FAIL here does not mean the geometry is wrong; it means the SHEET does not yet carry enough dimensions, views or text size for a stranger to machine from without asking us.",
+      "zh": "out/drawings/ 下每个零件一个文件夹，内含 SVG 图纸、PDF 与绘图依据的 JSON。判定列为我方 bin/sheetcheck 按 docs/MANUFACTURING-REQUIREMENTS.md A2/A3/A4 标准的检查结果——该标准由我方自定，严于 ISO 最低要求。此处 FAIL 不代表几何错误，而是图纸尚未标注足够的尺寸、视图或字号，陌生工程师无法在不询问我方的情况下加工。"
+    },
+    "print": {
+      "en": "Every gram and every second below came out of BambuStudio through ce-slice, on the printer named in the header, at the layer height and profile named in the row. None was derived from volume. Orientation is part of the number: the same file in a different orientation slices to a different time.",
+      "zh": "下表每一个克数与秒数均由 BambuStudio 经 ce-slice 实际切片得出，机型见表头，层高与配置见各行，绝非由体积换算。摆放方向是数字的一部分：同一文件换个方向，时间就不同。"
+    },
+    "bom": {
+      "en": "32 bought lines. Every price was read off a live distributor page on the date in the row — no catalogue averages, no estimates. Where no vendor states a lead time, the cell says so; that is a real hole in the plan and one of the questions in FACTORY-QUESTIONS.html.",
+      "zh": "共 32 项外购件。每个价格均于表中日期从供应商在线页面读取——无目录均价、无估算。若无供应商给出交期，单元格如实标注；这是计划中的真实缺口，也是 FACTORY-QUESTIONS.html 中的提问之一。"
+    },
+    "pcb": {
+      "en": "Three boards are custom. All three have real Gerber layer sets on disk — they are not placeholders — and none passes its own design-rule check yet. Do not order these bare boards from this pack. What we want from you first is the capability answer in FACTORY-QUESTIONS.html section 5.",
+      "zh": "三块板为定制板。三块板在磁盘上均有真实 Gerber 层文件（不是占位），但均未通过自身的设计规则检查。请勿据此交付包投板。我们首先需要的是 FACTORY-QUESTIONS.html 第 5 节中关于贵厂能力的答复。"
+    },
+    "harness": {
+      "en": "The lengths below are ROUTE FLOORS plus slack, rounded up to 5 mm: the shortest path a wire can take through the assembly over the joint's full range, measured in CAD. They are not cut lengths and they carry no tolerance. The first built loom is what turns them into cut lengths.",
+      "zh": "下表长度为 CAD 中测得的走线下限加余量并向上取整至 5 mm：即导线在关节全行程范围内穿过装配体的最短路径。它们不是下料长度，也没有公差。需由第一套实做线束将其转化为下料长度。"
+    },
+    "assembly": {
+      "en": "Two documents describe the build: MANUAL.md, the order the parts go together, and the playbook's line stations, which is the same build laid out as a production line. Both are readable; neither is yet followable by a stranger without asking us questions. The unanswered questions are listed, each with what closes it.",
+      "zh": "有两份文件描述装配：MANUAL.md 给出零件装配顺序，制造手册的工位表将同一装配拆解为产线工位。两者均可读，但陌生工程师尚无法在不询问我方的情况下照做。下表列出未解答的问题及其解决途径。"
+    },
+    "test": {
+      "en": "The test plan is a bench procedure that is ready to run and has never been run, because no unit exists. Every gate has an instrument, a limit and a pass condition.",
+      "zh": "测试计划是一份可直接执行的台架程序，但从未执行过，因为尚无实物样机。每个判据均有仪器、限值与合格条件。"
+    },
+    "acceptance": {
+      "en": "A unit is accepted when every end-of-line gate below passes with its result logged against the unit serial. The list is complete by construction: the generator emits one line per gate from spec/test-plan.json.",
+      "zh": "一台整机在下列全部下线判据通过、且结果按整机序列号记录后方可放行。该清单由生成器从 spec/test-plan.json 逐条生成，结构上完整无遗漏。"
+    },
+    "licence": {
+      "en": "What may be sold is not the same question as what may be printed. Read this section before quoting a production run.",
+      "zh": "“可售”与“可打印”是两个不同的问题。在报量产价前请先阅读本节。"
+    },
+    "artifacts": {
+      "en": "Every claim in this pack points at a file in this repository. The table gives the path, its size and the date it last changed, so a reader can check that the file they opened is the file this pack was generated from.",
+      "zh": "本交付包中的每一项主张都指向本仓库中的一个文件。下表给出路径、大小与最后修改时间，便于读者确认所打开的文件即为本包生成时所用的文件。"
+    }
+  },
+  "how_to_use": {
+    "en": "Order of reading for a factory: section 2 (what is not ready) first, so nothing is planned around an artifact that is not there; then WORK-BREAKDOWN.html, which cuts the open work into parcels of one engineer each; then FACTORY-QUESTIONS.html, which is the list of things only you can answer and which we ask you to answer before any tooling money is spent.",
+    "zh": "工厂建议阅读顺序：先看第 2 节（哪些尚未就绪），避免围绕不存在的文件做计划；再看 WORK-BREAKDOWN.html，其中把待办工作切分为每人一份的工作包；最后看 FACTORY-QUESTIONS.html，那是只有贵方能回答的问题清单，我们请求在投入任何模具费用前先行答复。"
+  }
+}
