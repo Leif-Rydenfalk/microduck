@@ -90,6 +90,30 @@ def census_component_json():
     }
 
 
+def census_repo_wide_version_claims():
+    """Every file anywhere under ce-parts/ that asserts a CC VERSION Pollen never wrote.
+
+    census_component_json() only reads component.json. The claim also propagates into
+    the part scripts and the per-part READMEs, so the true extent of the over-statement
+    is larger than the folder count. Measured live, listed by file.
+    """
+    pat = re.compile(r"BY-SA-NC\s*4\.0|BY-NC-SA\s*4\.0")
+    hits = []
+    root = os.path.join(REPO, "ce-parts")
+    for dirpath, _dirs, files in os.walk(root):
+        for fn in files:
+            if not fn.endswith((".json", ".py", ".md", ".txt", ".html")):
+                continue
+            fp = os.path.join(dirpath, fn)
+            try:
+                txt = open(fp, encoding="utf-8", errors="replace").read()
+            except Exception:
+                continue
+            if pat.search(txt):
+                hits.append(os.path.relpath(fp, REPO))
+    return {"n": len(hits), "files": sorted(hits)}
+
+
 def check_readme_lines():
     """The quote in F1 must still be at the cited line of both local mirrors."""
     targets = [
@@ -175,7 +199,7 @@ def quote_block(q):
     return '<blockquote class="q">%s</blockquote>' % e(q).replace("\n", "<br>")
 
 
-def render(data, census, readme_checks, evidence, lic_file, now):
+def render(data, census, wide, readme_checks, evidence, lic_file, now):
     o = []
     A = o.append
     facts = data["facts"]
@@ -241,7 +265,8 @@ def render(data, census, readme_checks, evidence, lic_file, now):
     A('  <div class="stat"><b>%d</b><span>facts · 事实</span></div>' % len(facts))
     A('  <div class="stat"><b>%d / %d / %d</b><span>PASS / FAIL / CD</span></div>' % (n_fact_pass, n_fact_fail, n_fact_cd))
     A('  <div class="stat"><b>%d</b><span>questions answered · 已答问题</span></div>' % len(qs))
-    A('  <div class="stat"><b>%d</b><span>CANNOT DETERMINE · 无法确定</span></div>' % len(cds))
+    n_cd_open = sum(1 for c in cds if not c.get("status"))
+    A('  <div class="stat"><b>%d / %d</b><span>open / closed CANNOT DETERMINE · 未决 / 已结</span></div>' % (n_cd_open, len(cds) - n_cd_open))
     A('  <div class="stat"><b>%d / %d</b><span>evidence hashes PASS · 证据哈希</span></div>' % (n_ev_pass, len(evidence)))
     A('  <div class="stat"><b>%d / %d</b><span>README line checks PASS</span></div>' % (n_readme_pass, len(readme_checks)))
     A('  <div class="stat"><b>%d</b><span>our folders asserting a CC version Pollen never wrote</span></div>' % len(census["assert_4_0"]))
@@ -378,11 +403,15 @@ def render(data, census, readme_checks, evidence, lic_file, now):
         extra = ""
         if c.get("question_for_counsel"):
             extra = '<br><br><b>Question for counsel:</b> %s' % e(c["question_for_counsel"])
+        if c.get("position_today"):
+            extra += '<br><br><b>Our position today · 我方现状:</b> %s' % e(c["position_today"])
         if c.get("draft_enquiry_en"):
             extra = ('<br><br><b>Draft enquiry (Leif sends; nobody else):</b>%s<p class="zh">%s</p>'
                      % (quote_block(c["draft_enquiry_en"]), e(c["draft_enquiry_zh"])))
-        A('<tr><td class="v"><code>%s</code></td><td>%s%s</td><td>%s</td><td>%s</td></tr>'
-          % (e(c["id"]), e(c["what"]), extra, e(c["who"]), e(", ".join(c["blocks"]))))
+        A('<tr><td class="v"><code>%s</code>%s</td><td>%s%s</td><td>%s</td><td>%s</td></tr>'
+          % (e(c["id"]),
+             ('<br>' + chip("PASS") + '<br><span class="src">%s</span>' % e(c["status"])) if c.get("status") else "",
+             e(c["what"]), extra, e(c["who"]), e(", ".join(c["blocks"]))))
     A('</tbody></table></div>')
     A('</section>')
 
@@ -402,11 +431,14 @@ def render(data, census, readme_checks, evidence, lic_file, now):
     A('  <div class="stat"><b>%d</b><span>assert "CC … 4.0"</span></div>' % len(census["assert_4_0"]))
     A('  <div class="stat"><b>%d</b><span>say "version not stated"</span></div>' % len(census["no_version"]))
     A('  <div class="stat"><b>%d / %d</b><span>our rebuilds with a licence field</span></div>' % (len(census["generated_with_licence"]), census["generated_total"]))
+    A('  <div class="stat"><b>%d</b><span>files anywhere in ce-parts asserting "4.0"</span></div>' % wide["n"])
     A('  <div class="stat"><b>%s</b><span>repo LICENSE file</span></div>' % ("present" if lic_file["present"] else "ABSENT"))
     A('</div>')
     A('<div class="tablewrap"><table class="data" id="repo"><colgroup><col style="width:40%%"><col style="width:10%%"><col style="width:50%%"></colgroup><thead><tr>%s%s%s</tr></thead><tbody>' % (th("Check", "检查项"), th("Verdict", "结论"), th("Measured", "测量结果")))
     A('<tr><td>Folders asserting a CC version (4.0) that Pollen\'s README does not name</td><td class="v">%s</td><td>%s</td></tr>'
       % (chip("FAIL" if census["assert_4_0"] else "PASS"), e(", ".join(census["assert_4_0"]) or "none")))
+    A('<tr><td>EVERY file under <code>ce-parts/</code> asserting a CC version (4.0): component.json, part.py and docs/README.md alike</td><td class="v">%s</td><td>%d file(s): %s</td></tr>'
+      % (chip("FAIL" if wide["n"] else "PASS"), wide["n"], e(", ".join(wide["files"]) or "none")))
     A('<tr><td>Folders that say "version not stated" (correct)</td><td class="v">%s</td><td>%s</td></tr>'
       % (chip("PASS" if census["no_version"] else "CANNOT DETERMINE"), e(", ".join(census["no_version"]) or "none")))
     A('<tr><td>Our parametric rebuilds (origin=generated) that carry NO licence field although they are rebuilt from CC-licensed meshes</td><td class="v">%s</td><td>%d of %d: %s</td></tr>'
@@ -441,7 +473,7 @@ def render(data, census, readme_checks, evidence, lic_file, now):
     A('<li>Fetch: %s</li>' % e(data["fetch_method"]))
     A('<li>Quotes are verbatim from the archived bytes; line numbers are of the archived file. The README quote is re-checked at the cited line in both local mirrors every time this page is generated (section 6).</li>')
     A('<li>Verdict words: PASS / FAIL / CANNOT DETERMINE. For a fact, PASS means established. For a question, PASS means the plain reading of the licence permits it, FAIL means it does not, CANNOT DETERMINE means the licence text does not answer it and the thing that does is named.</li>')
-    A('<li>No search was run for trade marks, registered designs or patents (F9). No message was sent to anyone. Nothing was bought.</li>')
+    A('<li>A trade mark search WAS run on 2026-09-04 against TMview (EUIPO + EU national offices + USPTO + CNIPA + WIPO) with a control query, and it is reported as F15. No registered-design or patent search was run: both DesignView endpoints refused (F15, F9). No message was sent to anyone. Nothing was bought — in particular no Microduck was purchased, and F14 is the reason that matters.</li>')
     A('<li>The Creative Commons clause text is the 4.0 International legal code. Pollen names no version; both 3.0 and 4.0 carry the NonCommercial and ShareAlike elements, so the plain-reading answers do not turn on the version, but the exact clause numbering would.</li>')
     A('<li>Generated %s by tools/gen_licence.py from out/factory/licence.json.</li>' % e(now))
     A('</ul></section>')
@@ -452,11 +484,12 @@ def render(data, census, readme_checks, evidence, lic_file, now):
 def main():
     data = json.load(open(DATA, encoding="utf-8"))
     census = census_component_json()
+    wide = census_repo_wide_version_claims()
     readme_checks = check_readme_lines()
     evidence = verify_evidence(data)
     lic_file = repo_licence_file()
     now = _dt.datetime.now(_dt.timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
-    page = render(data, census, readme_checks, evidence, lic_file, now)
+    page = render(data, census, wide, readme_checks, evidence, lic_file, now)
     with open(OUT, "w", encoding="utf-8") as f:
         f.write(page)
     summary = {
