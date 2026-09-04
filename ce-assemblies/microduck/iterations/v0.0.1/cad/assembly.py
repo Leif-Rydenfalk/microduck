@@ -3,15 +3,23 @@
 
     def build(doc, params=None) -> Assembly
 
-PLACEMENT IS LITERAL HERE, BY DESIGN, AND SAYS SO. TRIAD.md wants joined
-parts placed by walking joints.json through each connection's mate(). This
-assembly is a PORT of a machine that already exists: every transform in
-placements.json was MEASURED off Pollen Robotics' own MJCF (body frames
-composed with geom frames at zero pose), which is the datum this port is a
-port of. That is a source, not a guess. When every connection kind this
-machine uses has a mate() on the shelf, the next iteration replaces this
-loader with the walk and keeps placements.json as the check the walk must
-reproduce.
+TWO KINDS OF ROW LIVE IN placements.json AND THEY HAVE DIFFERENT PROVENANCE.
+
+1. THE MJCF-SEEDED ROWS (70). Placement is LITERAL for these, by design and it
+   says so: every transform was MEASURED off Pollen Robotics' own MJCF (body
+   frames composed with geom frames at zero pose), which is the datum this port
+   is a port of. A source, not a guess.
+
+2. THE FASTENER ROWS (68, owned_by tools/place_fasteners.py). Placement came
+   from a CONNECTION'S mate(), exactly as TRIAD.md requires: the screw folder's
+   own thread_ext frame and a pilot frame built from measured geometry went into
+   mate(), and its transform was inverted to give the world placement, then
+   checked back against the measurement (worst 0.000000000 mm / 0.000000000 deg).
+   These rows carry `via_connection`, `params` and `verify`; they are not
+   literal and must never be edited by hand.
+
+The next iteration replaces case 1 with the same walk, keeping placements.json
+as the check the walk must reproduce.
 
 Parts are resolved through cecad.triad.load — never by path. A part that
 does not resolve is REPORTED as a missing bom row, not silently skipped:
@@ -38,13 +46,18 @@ def build(doc, params=None):
         if not ref:
             missing.append("%s/%s: unmapped mesh" % (r["body"], r["mesh"]))
             continue
-        if ref not in cache:
+        # A FAMILY PART IS NOT ONE PART. screw-m2-iso4762 is a family on
+        # length_mm: the cache key must carry the params or every M2 screw in
+        # the robot comes out the length of whichever one loaded first.
+        prm = r.get("params") or None
+        key = (ref, tuple(sorted(prm.items()))) if prm else ref
+        if key not in cache:
             try:
-                cache[ref] = triad.load(doc, ref)
+                cache[key] = triad.load(doc, ref, prm)
             except Exception as e:  # noqa: BLE001 - reported, never hidden
-                cache[ref] = None
-                missing.append("%s: %s" % (ref, e))
-        part = cache[ref]
+                cache[key] = None
+                missing.append("%s%s: %s" % (ref, prm or "", e))
+        part = cache[key]
         if part is None:
             # FALLBACK, and it is said so: the vendor's published mesh for this
             # placement, loaded directly (Leif, 2026-09-01: "why not use the
@@ -67,8 +80,19 @@ def build(doc, params=None):
         w, x, y, z = r["world_quat_wxyz"]
         rot = App.Rotation(App.Vector(0, 0, 1), 0)
         rot.Q = (x, y, z, w)
-        label = "%s/%s#%d" % (r["body"], ref.split(":")[1], i)
-        a.add(label, part, at=tuple(r["world_pos_mm"]), rot=rot, joint="clamped")
-    a.notes.append("placed %d of %d instances from placements.json; %d from the VENDOR MESH fallback (%s); missing %d: %s"
-                   % (len(rows) - len(missing), len(rows), len(fallback), "; ".join(fallback)[:1500], len(missing), "; ".join(missing)[:1500]))
+        label = "%s/%s#%d" % (r.get("body") or "fastener", ref.split(":")[1], i)
+        # A FASTENER IS NOT "CLAMPED TO THE WORLD". Its joint is the connection
+        # it was placed through, so the placement declares that connection and
+        # a.connection_report() can print what actually holds it. A bare
+        # joint="clamped" on 68 screws would report a machine held together by
+        # nothing, which is the exact failure ce-cad's docs record for add().
+        joint = r.get("via_connection") or "clamped"
+        a.add(label, part, at=tuple(r["world_pos_mm"]), rot=rot, joint=joint)
+    n_fast = sum(1 for r in rows if r.get("via_connection"))
+    a.notes.append("placed %d of %d instances from placements.json (%d MJCF-seeded, %d fasteners "
+                   "placed through a connection's mate()); %d from the VENDOR MESH fallback (%s); "
+                   "missing %d: %s"
+                   % (len(rows) - len(missing), len(rows), len(rows) - n_fast, n_fast,
+                      len(fallback), "; ".join(fallback)[:1200], len(missing),
+                      "; ".join(missing)[:1200]))
     return a
