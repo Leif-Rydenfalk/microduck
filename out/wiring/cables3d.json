@@ -1,58 +1,2491 @@
 {
  "$triad": 1,
  "kind": "cables3d",
- "status": "PARTIAL — checkpoint 1: inputs measured, no routes yet",
- "generated_by": "sim/cables3d.py (to be written); this checkpoint by hand from measurements taken 2026-09-04",
+ "generated_by": "sim/route3d.py (grid by sim/route3d_grid.py)",
  "record": {
   "ref": "assembly:microduck",
   "units": "mm",
-  "frame": "MJCF world at the INIT keyframe: +x forward (beak), +y left, +z up, trunk_base origin (0,0,120); same frame as wiring/cables.json",
-  "wire_sources": {
-   "dynamixel-chain": {
-    "gauge": "21 AWG",
-    "quote": "Connector Information | Item TTL | Pinout 1 GND 2 VDD 3 DATA | Housing JST EHR-03 | PCB Header JST B3B-EH-A | Crimp Terminal JST SEH-001T-P0.6 | Wire Gauge for DYNAMIXEL 21 AWG",
-    "source": "https://emanual.robotis.com/docs/en/dxl/x/xl330-m288/ §4.4 Connector Information, fetched 2026-09-04 02:06 CST (curl, 359049 bytes, text extracted by regex); same quote already in ce-parts/xl330-m288-t/electrical.chip.json:102",
-    "bare_conductor_mm": "ASTM B258 d = 0.127 * 92^((36-21)/39) (cecad.harness.awg_diameter_mm) — computed by the tool",
-    "insulated_od": "CANNOT DETERMINE — ROBOTIS publishes no jacket OD (E1 §4.4 has gauge only; robotis.us Robot Cable-X3P page has length and compatibility only, fetched 2026-09-04)"
-   },
-   "hat-harness/tof": {
-    "gauge": "CANNOT DETERMINE (JST-SH 1.0 mm Qwiic-class lead; ToF-board end unknown, wiring/cables.json)",
-    "insulated_od": "CANNOT DETERMINE"
-   },
-   "hat-harness/speaker": {
-    "gauge": "CANNOT DETERMINE (JST GH 1.25 mm 2-pin on the representative speaker, part:microduck-speaker)",
-    "insulated_od": "CANNOT DETERMINE"
-   },
-   "hat-harness/csi": {
-    "kind": "22-pin 0.5 mm FFC (Radxa wiki, wiring/cables.json csi-radxa-camera)",
-    "insulated_od": "flat ribbon; width 0.5*21+~2 mm = CANNOT DETERMINE exact"
-   },
-   "power/bat-hat": {
-    "gauge": "CANNOT DETERMINE (banana contact PCB -> HAT battery input, connector unknown)",
-    "insulated_od": "CANNOT DETERMINE"
-   }
+  "frame": "MJCF world at the zero pose: +x forward (beak), +y left, +z up, trunk_base origin (0,0,120) \u2014 the same frame as wiring/cables.json",
+  "counts": {
+   "runs_in_cables_json": 23,
+   "routed": 17,
+   "PASS": 0,
+   "FAIL": 6,
+   "CANNOT DETERMINE": 17
   },
-  "photo_observations": [
+  "grid": {
+   "cell_mm": 1.0,
+   "shape": [
+    186,
+    183,
+    305
+   ],
+   "occupied_cells": 347464,
+   "source": "every triangle of the 70 rows of ce-assemblies/microduck/current/placements.json, x1000 from metres, sampled at 0.5000 mm",
+   "accuracy": "distances resolve to the nearest marked CELL CENTRE, so a clearance carries +/- 0.8660 mm (half the cell diagonal) of grid error before the exact refinement in sim/route3d_exact.py"
+  },
+  "rules": {
+   "clearance_floor_mm": 1.0,
+   "clearance_basis": "CHOSEN BY THIS LANE \u2014 no source in this repo states a cable-to-body clearance for the Microduck",
+   "bend_target": "3 x the bundle OD, reduced at any corner the geometry or the clearance will not allow; ROBOTIS publishes no bend radius for the X3P so the real limit is CANNOT DETERMINE and only the ACHIEVED radius is reported",
+   "pose": "ZERO POSE ONLY. The routed length is the length at one pose; wiring/cables.json's cable_mm is a floor plus a slack allowance over each crossed joint's whole range. Both are reported and neither overwrites the other."
+  },
+  "wire": {
+   "awg": 21,
+   "awg_source": "ROBOTIS e-Manual XL330-M288-T 4.4 'Wire Gauge for DYNAMIXEL | 21 AWG'",
+   "bare_conductor_mm": 0.7229,
+   "bare_basis": "ASTM B258 d = 0.127 x 92^((36-awg)/39)",
+   "insulation_od_window_mm": [
+    1.0,
+    1.9
+   ],
+   "insulation_window_source": "JST eEH.pdf p.2, contact SEH-001T-P0.6, 'Insulation O.D. 1.0 to 1.9' (part:jst-seh-001t-p0.6 spec)",
+   "insulation_od_nominal_mm": 1.45,
+   "nominal_is_chosen": true
+  },
+  "cables": [
    {
-    "photo": "images/press/press_closeup.jpg (crop 0.30-0.75 x 0.35-0.65)",
-    "seen": "white JST EH housings plugged into the FRONT (+x, camera-facing) sockets of both neck servos; black leads loop around the servo flank toward the rear"
+    "id": "dxl-hat-id34",
+    "group": "dynamixel-chain",
+    "od_mm": 3.1243,
+    "od_basis": "NOMINAL \u2014 3 x 21 AWG at the 1.4500 mm midpoint of JST eEH.pdf p.2's 1.0-1.9 insulation window, triangular bundle D = d(1+2/sqrt3); no vendor jacket OD exists",
+    "od_is_nominal": true,
+    "conductors": 3,
+    "cable_mm_from_cables_json": 35,
+    "floor_mm_from_cables_json": 30.9,
+    "slack_mm_from_cables_json": 0.0,
+    "crosses": [],
+    "clearance_floor_mm": 1.0,
+    "bend_target_mm": 9.3729,
+    "plan_grid_mm": 4.0,
+    "routed": true,
+    "waypoints": 3,
+    "corners": 3,
+    "plan_seconds": 0.09,
+    "routed_length_mm": 35.9253,
+    "routed_length_routed_part_mm": 30.5438,
+    "stub_from_mm": 3.4192,
+    "stub_to_mm": 2.0,
+    "min_bend_radius_mm": 0.1864,
+    "fillet_radius_used_mm": 0.1864,
+    "min_clearance_mm": 1.4378,
+    "min_clearance_at_mm": [
+     56.2229,
+     0.5,
+     251.4734
+    ],
+    "pierce_samples": 0,
+    "pierce_points_mm": [],
+    "samples": 72,
+    "sample_step_mm": 0.5,
+    "whole_path_min_clearance_mm": -1.5622,
+    "whole_path_pierce_samples": 3,
+    "ends": [
+     {
+      "device": "hat",
+      "point": "centroid",
+      "connector_xyz_mm": [
+       59.58,
+       0.0,
+       251.06
+      ],
+      "located": false,
+      "kind": "board",
+      "why_unlocated": "HAT mesh centroid (bbox centre through the placement) \u2014 connector positions unpublished",
+      "housing_part": null,
+      "launch_mm": [
+       56.2229,
+       0.5,
+       251.4734
+      ],
+      "launch_offset_mm": 3.4192,
+      "launch_how": "nearest clear cell in any direction (endpoint unlocated)",
+      "start_mm": [
+       59.58,
+       0.0,
+       251.06
+      ]
+     },
+     {
+      "device": "id34",
+      "point": "+y",
+      "connector_xyz_mm": [
+       35.1,
+       18.65,
+       248.61
+      ],
+      "located": true,
+      "kind": "xl330 EH socket",
+      "mate_mm": [
+       35.1,
+       18.65,
+       244.6146
+      ],
+      "wire_face_mm": [
+       35.1,
+       18.65,
+       251.1146
+      ],
+      "insertion_dir": [
+       -0.0,
+       -0.0,
+       -1.0
+      ],
+      "row_dir": [
+       0.0,
+       -1.0,
+       0.0
+      ],
+      "housing_proud_of_flank_mm": 2.5,
+      "housing_part": "part:jst-ehr-03",
+      "launch_mm": [
+       35.1,
+       18.65,
+       253.1146
+      ],
+      "launch_offset_mm": 2.0,
+      "launch_how": "along the connector normal",
+      "start_mm": [
+       35.1,
+       18.65,
+       251.1146
+      ]
+     }
+    ],
+    "verdict": "CANNOT DETERMINE",
+    "verdict_why": "no bend-radius floor stated",
+    "delta_vs_cable_mm": 0.9253,
+    "delta_vs_floor_mm": 5.0253
    },
    {
-    "photo": "images/store/store_microduck-graphite-standing-back-three-quarter-right-02.jpg (crop 0.42-0.72 x 0.18-0.42)",
-    "seen": "a white housing in the lower neck servo's rear-facing socket; a bundle of 3-4 black leads rises on the rear/right side of the neck stack into the head's underside, and drops into the trunk top opening"
+    "id": "dxl-id34-id33",
+    "group": "dynamixel-chain",
+    "od_mm": 3.1243,
+    "od_basis": "NOMINAL \u2014 3 x 21 AWG at the 1.4500 mm midpoint of JST eEH.pdf p.2's 1.0-1.9 insulation window, triangular bundle D = d(1+2/sqrt3); no vendor jacket OD exists",
+    "od_is_nominal": true,
+    "conductors": 3,
+    "cable_mm_from_cables_json": 60,
+    "floor_mm_from_cables_json": 55.8,
+    "slack_mm_from_cables_json": 0.0,
+    "crosses": [],
+    "clearance_floor_mm": 1.0,
+    "bend_target_mm": 9.3729,
+    "plan_grid_mm": 4.0,
+    "routed": true,
+    "waypoints": 3,
+    "corners": 2,
+    "plan_seconds": 0.2,
+    "routed_length_mm": 73.1997,
+    "routed_length_routed_part_mm": 66.9809,
+    "stub_from_mm": 0.0,
+    "stub_to_mm": 6.25,
+    "min_bend_radius_mm": 0.1016,
+    "fillet_radius_used_mm": 0.1016,
+    "min_clearance_mm": 1.4378,
+    "min_clearance_at_mm": [
+     -9.4247,
+     -4.4618,
+     216.0291
+    ],
+    "pierce_samples": 0,
+    "pierce_points_mm": [],
+    "samples": 144,
+    "sample_step_mm": 0.5,
+    "whole_path_min_clearance_mm": -1.5622,
+    "whole_path_pierce_samples": 9,
+    "ends": [
+     {
+      "device": "id34",
+      "point": "-y",
+      "connector_xyz_mm": [
+       35.1,
+       18.65,
+       228.61
+      ],
+      "located": true,
+      "kind": "xl330 EH socket",
+      "mate_mm": [
+       35.1,
+       18.65,
+       232.6146
+      ],
+      "wire_face_mm": [
+       35.1,
+       18.65,
+       226.1146
+      ],
+      "insertion_dir": [
+       -0.0,
+       -0.0,
+       1.0
+      ],
+      "row_dir": [
+       0.0,
+       -1.0,
+       0.0
+      ],
+      "housing_proud_of_flank_mm": 2.5,
+      "housing_part": "part:jst-ehr-03",
+      "launch_mm": [
+       35.1,
+       18.65,
+       226.1146
+      ],
+      "launch_offset_mm": 0.0,
+      "launch_how": "along the connector normal",
+      "start_mm": [
+       35.1,
+       18.65,
+       226.1146
+      ]
+     },
+     {
+      "device": "id33",
+      "point": "-y",
+      "connector_xyz_mm": [
+       -13.25,
+       -9.0,
+       225.61
+      ],
+      "located": true,
+      "kind": "xl330 EH socket",
+      "mate_mm": [
+       -13.25,
+       -9.0,
+       229.6146
+      ],
+      "wire_face_mm": [
+       -13.25,
+       -9.0,
+       223.1146
+      ],
+      "insertion_dir": [
+       -0.0,
+       0.0,
+       1.0
+      ],
+      "row_dir": [
+       -1.0,
+       0.0,
+       0.0
+      ],
+      "housing_proud_of_flank_mm": 2.5,
+      "housing_part": "part:jst-ehr-03",
+      "launch_mm": [
+       -13.25,
+       -9.0,
+       216.8646
+      ],
+      "launch_offset_mm": 6.25,
+      "launch_how": "along the connector normal",
+      "start_mm": [
+       -13.25,
+       -9.0,
+       223.1146
+      ]
+     }
+    ],
+    "verdict": "CANNOT DETERMINE",
+    "verdict_why": "no bend-radius floor stated",
+    "delta_vs_cable_mm": 13.1997,
+    "delta_vs_floor_mm": 17.3997
    },
    {
-    "photo": "same, crop 0.20-0.60 x 0.52-0.86",
-    "seen": "leg leads run down the INBOARD face of each thigh behind the triangular plate, cross the knee on the inboard side of the shin, and enter the ankle servo's socket that faces forward-inboard at the shin's lower end; white housings visible at both ankle servos"
+    "id": "dxl-id33-id32",
+    "group": "dynamixel-chain",
+    "od_mm": 3.1243,
+    "od_basis": "NOMINAL \u2014 3 x 21 AWG at the 1.4500 mm midpoint of JST eEH.pdf p.2's 1.0-1.9 insulation window, triangular bundle D = d(1+2/sqrt3); no vendor jacket OD exists",
+    "od_is_nominal": true,
+    "conductors": 3,
+    "cable_mm_from_cables_json": 50,
+    "floor_mm_from_cables_json": 39.0,
+    "slack_mm_from_cables_json": 8.7,
+    "crosses": [
+     "head_roll"
+    ],
+    "clearance_floor_mm": 1.0,
+    "bend_target_mm": 9.3729,
+    "status": "FAIL",
+    "verdict": "FAIL",
+    "routed": false,
+    "why": "no path clears 2.5622 mm (cable radius 1.5622 + clearance floor 1.0000) between the two connectors at zero pose",
+    "ends": [
+     {
+      "device": "id33",
+      "point": "+y",
+      "connector_xyz_mm": [
+       -13.25,
+       -9.0,
+       245.61
+      ],
+      "located": true,
+      "kind": "xl330 EH socket",
+      "mate_mm": [
+       -13.25,
+       -9.0,
+       241.6146
+      ],
+      "wire_face_mm": [
+       -13.25,
+       -9.0,
+       248.1146
+      ],
+      "insertion_dir": [
+       -0.0,
+       -0.0,
+       -1.0
+      ],
+      "row_dir": [
+       -1.0,
+       0.0,
+       0.0
+      ],
+      "housing_proud_of_flank_mm": 2.5,
+      "housing_part": "part:jst-ehr-03",
+      "launch_mm": [
+       -13.25,
+       -9.0,
+       248.1146
+      ],
+      "launch_offset_mm": 0.0,
+      "launch_how": "along the connector normal",
+      "start_mm": [
+       -13.25,
+       -9.0,
+       248.1146
+      ]
+     },
+     {
+      "device": "id32",
+      "point": "-y",
+      "connector_xyz_mm": [
+       16.0,
+       -9.0,
+       242.46
+      ],
+      "located": true,
+      "kind": "xl330 EH socket",
+      "mate_mm": [
+       20.0,
+       -9.0,
+       242.4646
+      ],
+      "wire_face_mm": [
+       13.5,
+       -9.0,
+       242.4646
+      ],
+      "insertion_dir": [
+       1.0,
+       -0.0,
+       -0.0
+      ],
+      "row_dir": [
+       0.0,
+       0.0,
+       1.0
+      ],
+      "housing_proud_of_flank_mm": 2.5,
+      "housing_part": "part:jst-ehr-03",
+      "launch_mm": [
+       2.5,
+       -9.0,
+       242.4646
+      ],
+      "launch_offset_mm": 11.0,
+      "launch_how": "along the connector normal",
+      "start_mm": [
+       13.5,
+       -9.0,
+       242.4646
+      ]
+     }
+    ]
    },
    {
-    "photo": "images/store/store_microduck-cream-standing-office.png (crop 0.3-0.8 x 0.3-0.9)",
-    "seen": "ankle servo socket on the front face near the foot; hip servo sockets face inboard under the trunk"
+    "id": "dxl-id32-id31",
+    "group": "dynamixel-chain",
+    "od_mm": 3.1243,
+    "od_basis": "NOMINAL \u2014 3 x 21 AWG at the 1.4500 mm midpoint of JST eEH.pdf p.2's 1.0-1.9 insulation window, triangular bundle D = d(1+2/sqrt3); no vendor jacket OD exists",
+    "od_is_nominal": true,
+    "conductors": 3,
+    "cable_mm_from_cables_json": 165,
+    "floor_mm_from_cables_json": 74.1,
+    "slack_mm_from_cables_json": 90.8,
+    "crosses": [
+     "head_yaw",
+     "head_pitch"
+    ],
+    "clearance_floor_mm": 1.0,
+    "bend_target_mm": 9.3729,
+    "plan_grid_mm": 1.0,
+    "routed": true,
+    "waypoints": 7,
+    "corners": 6,
+    "plan_seconds": 28.26,
+    "routed_length_mm": 123.2548,
+    "routed_length_routed_part_mm": 113.0142,
+    "stub_from_mm": 10.25,
+    "stub_to_mm": 0.0,
+    "min_bend_radius_mm": 0.0255,
+    "fillet_radius_used_mm": 0.0255,
+    "min_clearance_mm": 0.8873,
+    "min_clearance_at_mm": [
+     14.7844,
+     12.2207,
+     249.9412
+    ],
+    "pierce_samples": 0,
+    "pierce_points_mm": [],
+    "samples": 257,
+    "sample_step_mm": 0.5,
+    "whole_path_min_clearance_mm": -1.5622,
+    "whole_path_pierce_samples": 16,
+    "ends": [
+     {
+      "device": "id32",
+      "point": "+y",
+      "connector_xyz_mm": [
+       36.0,
+       -9.0,
+       242.46
+      ],
+      "located": true,
+      "kind": "xl330 EH socket",
+      "mate_mm": [
+       32.0,
+       -9.0,
+       242.4646
+      ],
+      "wire_face_mm": [
+       38.5,
+       -9.0,
+       242.4646
+      ],
+      "insertion_dir": [
+       -1.0,
+       -0.0,
+       -0.0
+      ],
+      "row_dir": [
+       0.0,
+       0.0,
+       1.0
+      ],
+      "housing_proud_of_flank_mm": 2.5,
+      "housing_part": "part:jst-ehr-03",
+      "launch_mm": [
+       48.75,
+       -9.0,
+       242.4646
+      ],
+      "launch_offset_mm": 10.25,
+      "launch_how": "along the connector normal",
+      "start_mm": [
+       38.5,
+       -9.0,
+       242.4646
+      ]
+     },
+     {
+      "device": "id31",
+      "point": "-y",
+      "connector_xyz_mm": [
+       16.0,
+       -6.85,
+       193.42
+      ],
+      "located": true,
+      "kind": "xl330 EH socket",
+      "mate_mm": [
+       20.0,
+       -6.85,
+       193.4215
+      ],
+      "wire_face_mm": [
+       13.5,
+       -6.85,
+       193.4215
+      ],
+      "insertion_dir": [
+       1.0,
+       0.0,
+       -0.0
+      ],
+      "row_dir": [
+       0.0,
+       -1.0,
+       0.0
+      ],
+      "housing_proud_of_flank_mm": 2.5,
+      "housing_part": "part:jst-ehr-03",
+      "launch_mm": [
+       13.5,
+       -6.85,
+       193.4215
+      ],
+      "launch_offset_mm": 0.0,
+      "launch_how": "along the connector normal",
+      "start_mm": [
+       13.5,
+       -6.85,
+       193.4215
+      ]
+     }
+    ],
+    "verdict": "FAIL",
+    "verdict_why": "min clearance 0.8873 mm < the stated floor 1.0000 mm",
+    "delta_vs_cable_mm": -41.7452,
+    "delta_vs_floor_mm": 49.1548
+   },
+   {
+    "id": "dxl-id31-id30",
+    "group": "dynamixel-chain",
+    "od_mm": 3.1243,
+    "od_basis": "NOMINAL \u2014 3 x 21 AWG at the 1.4500 mm midpoint of JST eEH.pdf p.2's 1.0-1.9 insulation window, triangular bundle D = d(1+2/sqrt3); no vendor jacket OD exists",
+    "od_is_nominal": true,
+    "conductors": 3,
+    "cable_mm_from_cables_json": 35,
+    "floor_mm_from_cables_json": 32.0,
+    "slack_mm_from_cables_json": 0.0,
+    "crosses": [],
+    "clearance_floor_mm": 1.0,
+    "bend_target_mm": 9.3729,
+    "plan_grid_mm": 4.0,
+    "routed": true,
+    "waypoints": 3,
+    "corners": 1,
+    "plan_seconds": 0.01,
+    "routed_length_mm": 33.0893,
+    "routed_length_routed_part_mm": 33.0893,
+    "stub_from_mm": 0.0,
+    "stub_to_mm": 0.0,
+    "min_bend_radius_mm": 8.7489,
+    "fillet_radius_used_mm": 8.7489,
+    "min_clearance_mm": 1.4378,
+    "min_clearance_at_mm": [
+     39.1,
+     -6.5056,
+     188.498
+    ],
+    "pierce_samples": 0,
+    "pierce_points_mm": [],
+    "samples": 71,
+    "sample_step_mm": 0.5,
+    "whole_path_min_clearance_mm": 1.4378,
+    "whole_path_pierce_samples": 0,
+    "ends": [
+     {
+      "device": "id31",
+      "point": "+y",
+      "connector_xyz_mm": [
+       36.0,
+       -6.85,
+       193.42
+      ],
+      "located": true,
+      "kind": "xl330 EH socket",
+      "mate_mm": [
+       32.0,
+       -6.85,
+       193.4215
+      ],
+      "wire_face_mm": [
+       38.5,
+       -6.85,
+       193.4215
+      ],
+      "insertion_dir": [
+       -1.0,
+       -0.0,
+       -0.0
+      ],
+      "row_dir": [
+       0.0,
+       -1.0,
+       0.0
+      ],
+      "housing_proud_of_flank_mm": 2.5,
+      "housing_part": "part:jst-ehr-03",
+      "launch_mm": [
+       38.5,
+       -6.85,
+       193.4215
+      ],
+      "launch_offset_mm": 0.0,
+      "launch_how": "along the connector normal",
+      "start_mm": [
+       38.5,
+       -6.85,
+       193.4215
+      ]
+     },
+     {
+      "device": "id30",
+      "point": "-y",
+      "connector_xyz_mm": [
+       36.0,
+       -6.85,
+       161.42
+      ],
+      "located": true,
+      "kind": "xl330 EH socket",
+      "mate_mm": [
+       32.0,
+       -6.85,
+       161.4215
+      ],
+      "wire_face_mm": [
+       38.5,
+       -6.85,
+       161.4215
+      ],
+      "insertion_dir": [
+       -1.0,
+       0.0,
+       -0.0
+      ],
+      "row_dir": [
+       0.0,
+       -1.0,
+       0.0
+      ],
+      "housing_proud_of_flank_mm": 2.5,
+      "housing_part": "part:jst-ehr-03",
+      "launch_mm": [
+       38.5,
+       -6.85,
+       161.4215
+      ],
+      "launch_offset_mm": 0.0,
+      "launch_how": "along the connector normal",
+      "start_mm": [
+       38.5,
+       -6.85,
+       161.4215
+      ]
+     }
+    ],
+    "verdict": "CANNOT DETERMINE",
+    "verdict_why": "no bend-radius floor stated",
+    "delta_vs_cable_mm": -1.9107,
+    "delta_vs_floor_mm": 1.0893
+   },
+   {
+    "id": "dxl-id30-imu200",
+    "group": "dynamixel-chain",
+    "od_mm": 3.1243,
+    "od_basis": "NOMINAL \u2014 3 x 21 AWG at the 1.4500 mm midpoint of JST eEH.pdf p.2's 1.0-1.9 insulation window, triangular bundle D = d(1+2/sqrt3); no vendor jacket OD exists",
+    "od_is_nominal": true,
+    "conductors": 3,
+    "cable_mm_from_cables_json": 120,
+    "floor_mm_from_cables_json": 93.4,
+    "slack_mm_from_cables_json": 26.2,
+    "crosses": [
+     "neck_pitch"
+    ],
+    "clearance_floor_mm": 1.0,
+    "bend_target_mm": 9.3729,
+    "plan_grid_mm": 4.0,
+    "routed": true,
+    "waypoints": 4,
+    "corners": 3,
+    "plan_seconds": 0.48,
+    "routed_length_mm": 101.4496,
+    "routed_length_routed_part_mm": 98.1961,
+    "stub_from_mm": 0.0,
+    "stub_to_mm": 3.2661,
+    "min_bend_radius_mm": 1.7634,
+    "fillet_radius_used_mm": 1.7634,
+    "min_clearance_mm": 1.4378,
+    "min_clearance_at_mm": [
+     39.1921,
+     -6.4527,
+     156.6007
+    ],
+    "pierce_samples": 0,
+    "pierce_points_mm": [],
+    "samples": 225,
+    "sample_step_mm": 0.5,
+    "whole_path_min_clearance_mm": -1.5622,
+    "whole_path_pierce_samples": 2,
+    "ends": [
+     {
+      "device": "id30",
+      "point": "-y",
+      "connector_xyz_mm": [
+       36.0,
+       -6.85,
+       161.42
+      ],
+      "located": true,
+      "kind": "xl330 EH socket",
+      "mate_mm": [
+       32.0,
+       -6.85,
+       161.4215
+      ],
+      "wire_face_mm": [
+       38.5,
+       -6.85,
+       161.4215
+      ],
+      "insertion_dir": [
+       -1.0,
+       0.0,
+       -0.0
+      ],
+      "row_dir": [
+       0.0,
+       -1.0,
+       0.0
+      ],
+      "housing_proud_of_flank_mm": 2.5,
+      "housing_part": "part:jst-ehr-03",
+      "launch_mm": [
+       38.5,
+       -6.85,
+       161.4215
+      ],
+      "launch_offset_mm": 0.0,
+      "launch_how": "along the connector normal",
+      "start_mm": [
+       38.5,
+       -6.85,
+       161.4215
+      ]
+     },
+     {
+      "device": "imu200",
+      "point": "site",
+      "connector_xyz_mm": [
+       -21.0,
+       0.0,
+       105.3
+      ],
+      "located": false,
+      "kind": "board",
+      "why_unlocated": "MJCF imu site, world (docs/ELECTRONICS-AND-SOFTWARE.md \u00a74.1) \u2014 the board's connector is not located",
+      "housing_part": null,
+      "launch_mm": [
+       -17.7771,
+       0.5,
+       105.4734
+      ],
+      "launch_offset_mm": 3.2661,
+      "launch_how": "nearest clear cell in any direction (endpoint unlocated)",
+      "start_mm": [
+       -21.0,
+       0.0,
+       105.3
+      ]
+     }
+    ],
+    "verdict": "CANNOT DETERMINE",
+    "verdict_why": "no bend-radius floor stated",
+    "delta_vs_cable_mm": -18.5504,
+    "delta_vs_floor_mm": 8.0496
+   },
+   {
+    "id": "dxl-imu200-id20",
+    "group": "dynamixel-chain",
+    "od_mm": 3.1243,
+    "od_basis": "NOMINAL \u2014 3 x 21 AWG at the 1.4500 mm midpoint of JST eEH.pdf p.2's 1.0-1.9 insulation window, triangular bundle D = d(1+2/sqrt3); no vendor jacket OD exists",
+    "od_is_nominal": true,
+    "conductors": 3,
+    "cable_mm_from_cables_json": 40,
+    "floor_mm_from_cables_json": 38.4,
+    "slack_mm_from_cables_json": 0.0,
+    "crosses": [],
+    "clearance_floor_mm": 1.0,
+    "bend_target_mm": 9.3729,
+    "plan_grid_mm": 4.0,
+    "routed": true,
+    "waypoints": 5,
+    "corners": 4,
+    "plan_seconds": 3.45,
+    "routed_length_mm": 133.4057,
+    "routed_length_routed_part_mm": 130.2554,
+    "stub_from_mm": 3.2661,
+    "stub_to_mm": 0.0,
+    "min_bend_radius_mm": 0.51,
+    "fillet_radius_used_mm": 0.51,
+    "min_clearance_mm": 1.4378,
+    "min_clearance_at_mm": [
+     -17.7771,
+     0.5,
+     105.4734
+    ],
+    "pierce_samples": 0,
+    "pierce_points_mm": [],
+    "samples": 280,
+    "sample_step_mm": 0.5,
+    "whole_path_min_clearance_mm": -1.5622,
+    "whole_path_pierce_samples": 2,
+    "ends": [
+     {
+      "device": "imu200",
+      "point": "site",
+      "connector_xyz_mm": [
+       -21.0,
+       0.0,
+       105.3
+      ],
+      "located": false,
+      "kind": "board",
+      "why_unlocated": "MJCF imu site, world (docs/ELECTRONICS-AND-SOFTWARE.md \u00a74.1) \u2014 the board's connector is not located",
+      "housing_part": null,
+      "launch_mm": [
+       -17.7771,
+       0.5,
+       105.4734
+      ],
+      "launch_offset_mm": 3.2661,
+      "launch_how": "nearest clear cell in any direction (endpoint unlocated)",
+      "start_mm": [
+       -21.0,
+       0.0,
+       105.3
+      ]
+     },
+     {
+      "device": "id20",
+      "point": "+y",
+      "connector_xyz_mm": [
+       -3.0,
+       7.5,
+       138.35
+      ],
+      "located": true,
+      "kind": "xl330 EH socket",
+      "mate_mm": [
+       -3.0,
+       11.5,
+       138.35
+      ],
+      "wire_face_mm": [
+       -3.0,
+       5.0,
+       138.35
+      ],
+      "insertion_dir": [
+       -0.0,
+       1.0,
+       -0.0
+      ],
+      "row_dir": [
+       0.0,
+       0.0,
+       1.0
+      ],
+      "housing_proud_of_flank_mm": 2.5,
+      "housing_part": "part:jst-ehr-03",
+      "launch_mm": [
+       -3.0,
+       5.0,
+       138.35
+      ],
+      "launch_offset_mm": 0.0,
+      "launch_how": "along the connector normal",
+      "start_mm": [
+       -3.0,
+       5.0,
+       138.35
+      ]
+     }
+    ],
+    "verdict": "CANNOT DETERMINE",
+    "verdict_why": "no bend-radius floor stated",
+    "delta_vs_cable_mm": 93.4057,
+    "delta_vs_floor_mm": 95.0057
+   },
+   {
+    "id": "dxl-id20-id21",
+    "group": "dynamixel-chain",
+    "od_mm": 3.1243,
+    "od_basis": "NOMINAL \u2014 3 x 21 AWG at the 1.4500 mm midpoint of JST eEH.pdf p.2's 1.0-1.9 insulation window, triangular bundle D = d(1+2/sqrt3); no vendor jacket OD exists",
+    "od_is_nominal": true,
+    "conductors": 3,
+    "cable_mm_from_cables_json": 65,
+    "floor_mm_from_cables_json": 51.6,
+    "slack_mm_from_cables_json": 9.6,
+    "crosses": [
+     "left_hip_yaw"
+    ],
+    "clearance_floor_mm": 1.0,
+    "bend_target_mm": 9.3729,
+    "plan_grid_mm": 4.0,
+    "routed": true,
+    "waypoints": 6,
+    "corners": 4,
+    "plan_seconds": 1.61,
+    "routed_length_mm": 140.2871,
+    "routed_length_routed_part_mm": 140.2871,
+    "stub_from_mm": 0.0,
+    "stub_to_mm": 0.0,
+    "min_bend_radius_mm": 9.3729,
+    "fillet_radius_used_mm": 9.3729,
+    "min_clearance_mm": 1.4378,
+    "min_clearance_at_mm": [
+     -7.269,
+     34.8616,
+     156.9066
+    ],
+    "pierce_samples": 0,
+    "pierce_points_mm": [],
+    "samples": 313,
+    "sample_step_mm": 0.5,
+    "whole_path_min_clearance_mm": 1.4378,
+    "whole_path_pierce_samples": 0,
+    "ends": [
+     {
+      "device": "id20",
+      "point": "+y",
+      "connector_xyz_mm": [
+       -3.0,
+       7.5,
+       138.35
+      ],
+      "located": true,
+      "kind": "xl330 EH socket",
+      "mate_mm": [
+       -3.0,
+       11.5,
+       138.35
+      ],
+      "wire_face_mm": [
+       -3.0,
+       5.0,
+       138.35
+      ],
+      "insertion_dir": [
+       -0.0,
+       1.0,
+       -0.0
+      ],
+      "row_dir": [
+       0.0,
+       0.0,
+       1.0
+      ],
+      "housing_proud_of_flank_mm": 2.5,
+      "housing_part": "part:jst-ehr-03",
+      "launch_mm": [
+       -3.0,
+       5.0,
+       138.35
+      ],
+      "launch_offset_mm": 0.0,
+      "launch_how": "along the connector normal",
+      "start_mm": [
+       -3.0,
+       5.0,
+       138.35
+      ]
+     },
+     {
+      "device": "id21",
+      "point": "+y",
+      "connector_xyz_mm": [
+       -0.85,
+       7.5,
+       93.5
+      ],
+      "located": true,
+      "kind": "xl330 EH socket",
+      "mate_mm": [
+       -0.85,
+       11.5,
+       93.5
+      ],
+      "wire_face_mm": [
+       -0.85,
+       5.0,
+       93.5
+      ],
+      "insertion_dir": [
+       -0.0,
+       1.0,
+       -0.0
+      ],
+      "row_dir": [
+       -1.0,
+       0.0,
+       0.0
+      ],
+      "housing_proud_of_flank_mm": 2.5,
+      "housing_part": "part:jst-ehr-03",
+      "launch_mm": [
+       -0.85,
+       5.0,
+       93.5
+      ],
+      "launch_offset_mm": 0.0,
+      "launch_how": "along the connector normal",
+      "start_mm": [
+       -0.85,
+       5.0,
+       93.5
+      ]
+     }
+    ],
+    "verdict": "CANNOT DETERMINE",
+    "verdict_why": "no bend-radius floor stated",
+    "delta_vs_cable_mm": 75.2871,
+    "delta_vs_floor_mm": 88.6871
+   },
+   {
+    "id": "dxl-id21-id22",
+    "group": "dynamixel-chain",
+    "od_mm": 3.1243,
+    "od_basis": "NOMINAL \u2014 3 x 21 AWG at the 1.4500 mm midpoint of JST eEH.pdf p.2's 1.0-1.9 insulation window, triangular bundle D = d(1+2/sqrt3); no vendor jacket OD exists",
+    "od_is_nominal": true,
+    "conductors": 3,
+    "cable_mm_from_cables_json": 125,
+    "floor_mm_from_cables_json": 81.6,
+    "slack_mm_from_cables_json": 39.1,
+    "crosses": [
+     "left_hip_roll",
+     "left_hip_pitch"
+    ],
+    "clearance_floor_mm": 1.0,
+    "bend_target_mm": 9.3729,
+    "plan_grid_mm": 4.0,
+    "routed": true,
+    "waypoints": 4,
+    "corners": 3,
+    "plan_seconds": 0.09,
+    "routed_length_mm": 78.15,
+    "routed_length_routed_part_mm": 75.1557,
+    "stub_from_mm": 0.0,
+    "stub_to_mm": 3.0,
+    "min_bend_radius_mm": 0.0283,
+    "fillet_radius_used_mm": 0.0283,
+    "min_clearance_mm": 1.4378,
+    "min_clearance_at_mm": [
+     -7.116,
+     5.9333,
+     96.0542
+    ],
+    "pierce_samples": 0,
+    "pierce_points_mm": [],
+    "samples": 176,
+    "sample_step_mm": 0.5,
+    "whole_path_min_clearance_mm": -1.5622,
+    "whole_path_pierce_samples": 2,
+    "ends": [
+     {
+      "device": "id21",
+      "point": "+y",
+      "connector_xyz_mm": [
+       -0.85,
+       7.5,
+       93.5
+      ],
+      "located": true,
+      "kind": "xl330 EH socket",
+      "mate_mm": [
+       -0.85,
+       11.5,
+       93.5
+      ],
+      "wire_face_mm": [
+       -0.85,
+       5.0,
+       93.5
+      ],
+      "insertion_dir": [
+       -0.0,
+       1.0,
+       -0.0
+      ],
+      "row_dir": [
+       -1.0,
+       0.0,
+       0.0
+      ],
+      "housing_proud_of_flank_mm": 2.5,
+      "housing_part": "part:jst-ehr-03",
+      "launch_mm": [
+       -0.85,
+       5.0,
+       93.5
+      ],
+      "launch_offset_mm": 0.0,
+      "launch_how": "along the connector normal",
+      "start_mm": [
+       -0.85,
+       5.0,
+       93.5
+      ]
+     },
+     {
+      "device": "id22",
+      "point": "+y",
+      "connector_xyz_mm": [
+       -5.0,
+       61.85,
+       112.5
+      ],
+      "located": true,
+      "kind": "xl330 EH socket",
+      "mate_mm": [
+       -5.0,
+       61.85,
+       108.5
+      ],
+      "wire_face_mm": [
+       -5.0,
+       61.85,
+       115.0
+      ],
+      "insertion_dir": [
+       -0.0,
+       -0.0,
+       -1.0
+      ],
+      "row_dir": [
+       0.0,
+       1.0,
+       0.0
+      ],
+      "housing_proud_of_flank_mm": 2.5,
+      "housing_part": "part:jst-ehr-03",
+      "launch_mm": [
+       -5.0,
+       61.85,
+       118.0
+      ],
+      "launch_offset_mm": 3.0,
+      "launch_how": "along the connector normal",
+      "start_mm": [
+       -5.0,
+       61.85,
+       115.0
+      ]
+     }
+    ],
+    "verdict": "CANNOT DETERMINE",
+    "verdict_why": "no bend-radius floor stated",
+    "delta_vs_cable_mm": -46.85,
+    "delta_vs_floor_mm": -3.45
+   },
+   {
+    "id": "dxl-id22-id23",
+    "group": "dynamixel-chain",
+    "od_mm": 3.1243,
+    "od_basis": "NOMINAL \u2014 3 x 21 AWG at the 1.4500 mm midpoint of JST eEH.pdf p.2's 1.0-1.9 insulation window, triangular bundle D = d(1+2/sqrt3); no vendor jacket OD exists",
+    "od_is_nominal": true,
+    "conductors": 3,
+    "cable_mm_from_cables_json": 20,
+    "floor_mm_from_cables_json": 17.0,
+    "slack_mm_from_cables_json": 0.0,
+    "crosses": [],
+    "clearance_floor_mm": 1.0,
+    "bend_target_mm": 9.3729,
+    "plan_grid_mm": 4.0,
+    "routed": true,
+    "waypoints": 2,
+    "corners": 0,
+    "plan_seconds": 0.0,
+    "routed_length_mm": 14.2859,
+    "routed_length_routed_part_mm": 14.2859,
+    "stub_from_mm": 0.0,
+    "stub_to_mm": 0.0,
+    "min_bend_radius_mm": null,
+    "fillet_radius_used_mm": null,
+    "min_clearance_mm": 1.4378,
+    "min_clearance_at_mm": [
+     -9.4308,
+     61.85,
+     89.8448
+    ],
+    "pierce_samples": 0,
+    "pierce_points_mm": [],
+    "samples": 30,
+    "sample_step_mm": 0.5,
+    "whole_path_min_clearance_mm": 1.4378,
+    "whole_path_pierce_samples": 0,
+    "ends": [
+     {
+      "device": "id22",
+      "point": "-y",
+      "connector_xyz_mm": [
+       -5.0,
+       61.85,
+       92.5
+      ],
+      "located": true,
+      "kind": "xl330 EH socket",
+      "mate_mm": [
+       -5.0,
+       61.85,
+       96.5
+      ],
+      "wire_face_mm": [
+       -5.0,
+       61.85,
+       90.0
+      ],
+      "insertion_dir": [
+       -0.0,
+       -0.0,
+       1.0
+      ],
+      "row_dir": [
+       0.0,
+       1.0,
+       0.0
+      ],
+      "housing_proud_of_flank_mm": 2.5,
+      "housing_part": "part:jst-ehr-03",
+      "launch_mm": [
+       -5.0,
+       61.85,
+       90.0
+      ],
+      "launch_offset_mm": 0.0,
+      "launch_how": "along the connector normal",
+      "start_mm": [
+       -5.0,
+       61.85,
+       90.0
+      ]
+     },
+     {
+      "device": "id23",
+      "point": "+y",
+      "connector_xyz_mm": [
+       -21.78,
+       61.85,
+       89.5
+      ],
+      "located": true,
+      "kind": "xl330 EH socket",
+      "mate_mm": [
+       -25.7771,
+       61.85,
+       89.5
+      ],
+      "wire_face_mm": [
+       -19.2771,
+       61.85,
+       89.5
+      ],
+      "insertion_dir": [
+       -1.0,
+       -0.0,
+       -0.0
+      ],
+      "row_dir": [
+       0.0,
+       1.0,
+       0.0
+      ],
+      "housing_proud_of_flank_mm": 2.5,
+      "housing_part": "part:jst-ehr-03",
+      "launch_mm": [
+       -19.2771,
+       61.85,
+       89.5
+      ],
+      "launch_offset_mm": 0.0,
+      "launch_how": "along the connector normal",
+      "start_mm": [
+       -19.2771,
+       61.85,
+       89.5
+      ]
+     }
+    ],
+    "verdict": "CANNOT DETERMINE",
+    "verdict_why": "no bend-radius floor stated",
+    "delta_vs_cable_mm": -5.7141,
+    "delta_vs_floor_mm": -2.7141
+   },
+   {
+    "id": "dxl-id23-id24",
+    "group": "dynamixel-chain",
+    "od_mm": 3.1243,
+    "od_basis": "NOMINAL \u2014 3 x 21 AWG at the 1.4500 mm midpoint of JST eEH.pdf p.2's 1.0-1.9 insulation window, triangular bundle D = d(1+2/sqrt3); no vendor jacket OD exists",
+    "od_is_nominal": true,
+    "conductors": 3,
+    "cable_mm_from_cables_json": 95,
+    "floor_mm_from_cables_json": 61.7,
+    "slack_mm_from_cables_json": 31.4,
+    "crosses": [
+     "left_knee"
+    ],
+    "clearance_floor_mm": 1.0,
+    "bend_target_mm": 9.3729,
+    "plan_grid_mm": 4.0,
+    "routed": true,
+    "waypoints": 3,
+    "corners": 1,
+    "plan_seconds": 0.01,
+    "routed_length_mm": 48.5763,
+    "routed_length_routed_part_mm": 48.5763,
+    "stub_from_mm": 0.0,
+    "stub_to_mm": 0.0,
+    "min_bend_radius_mm": 4.6682,
+    "fillet_radius_used_mm": 4.6682,
+    "min_clearance_mm": 1.4378,
+    "min_clearance_at_mm": [
+     -19.2771,
+     61.85,
+     89.5
+    ],
+    "pierce_samples": 0,
+    "pierce_points_mm": [],
+    "samples": 105,
+    "sample_step_mm": 0.5,
+    "whole_path_min_clearance_mm": 1.4378,
+    "whole_path_pierce_samples": 0,
+    "ends": [
+     {
+      "device": "id23",
+      "point": "+y",
+      "connector_xyz_mm": [
+       -21.78,
+       61.85,
+       89.5
+      ],
+      "located": true,
+      "kind": "xl330 EH socket",
+      "mate_mm": [
+       -25.7771,
+       61.85,
+       89.5
+      ],
+      "wire_face_mm": [
+       -19.2771,
+       61.85,
+       89.5
+      ],
+      "insertion_dir": [
+       -1.0,
+       -0.0,
+       -0.0
+      ],
+      "row_dir": [
+       0.0,
+       1.0,
+       0.0
+      ],
+      "housing_proud_of_flank_mm": 2.5,
+      "housing_part": "part:jst-ehr-03",
+      "launch_mm": [
+       -19.2771,
+       61.85,
+       89.5
+      ],
+      "launch_offset_mm": 0.0,
+      "launch_how": "along the connector normal",
+      "start_mm": [
+       -19.2771,
+       61.85,
+       89.5
+      ]
+     },
+     {
+      "device": "id24",
+      "point": "-y",
+      "connector_xyz_mm": [
+       -21.78,
+       43.15,
+       47.5
+      ],
+      "located": true,
+      "kind": "xl330 EH socket",
+      "mate_mm": [
+       -25.7771,
+       43.15,
+       47.5
+      ],
+      "wire_face_mm": [
+       -19.2771,
+       43.15,
+       47.5
+      ],
+      "insertion_dir": [
+       -1.0,
+       0.0,
+       -0.0
+      ],
+      "row_dir": [
+       0.0,
+       -1.0,
+       0.0
+      ],
+      "housing_proud_of_flank_mm": 2.5,
+      "housing_part": "part:jst-ehr-03",
+      "launch_mm": [
+       -19.2771,
+       43.15,
+       47.5
+      ],
+      "launch_offset_mm": 0.0,
+      "launch_how": "along the connector normal",
+      "start_mm": [
+       -19.2771,
+       43.15,
+       47.5
+      ]
+     }
+    ],
+    "verdict": "CANNOT DETERMINE",
+    "verdict_why": "no bend-radius floor stated",
+    "delta_vs_cable_mm": -46.4237,
+    "delta_vs_floor_mm": -13.1237
+   },
+   {
+    "id": "dxl-imu200-id10",
+    "group": "dynamixel-chain",
+    "od_mm": 3.1243,
+    "od_basis": "NOMINAL \u2014 3 x 21 AWG at the 1.4500 mm midpoint of JST eEH.pdf p.2's 1.0-1.9 insulation window, triangular bundle D = d(1+2/sqrt3); no vendor jacket OD exists",
+    "od_is_nominal": true,
+    "conductors": 3,
+    "cable_mm_from_cables_json": 40,
+    "floor_mm_from_cables_json": 38.4,
+    "slack_mm_from_cables_json": 0.0,
+    "crosses": [],
+    "clearance_floor_mm": 1.0,
+    "bend_target_mm": 9.3729,
+    "plan_grid_mm": 4.0,
+    "routed": true,
+    "waypoints": 5,
+    "corners": 4,
+    "plan_seconds": 2.44,
+    "routed_length_mm": 134.8449,
+    "routed_length_routed_part_mm": 131.7563,
+    "stub_from_mm": 3.2661,
+    "stub_to_mm": 0.0,
+    "min_bend_radius_mm": 0.377,
+    "fillet_radius_used_mm": 0.377,
+    "min_clearance_mm": 1.4378,
+    "min_clearance_at_mm": [
+     -17.7771,
+     0.5,
+     105.4734
+    ],
+    "pierce_samples": 0,
+    "pierce_points_mm": [],
+    "samples": 285,
+    "sample_step_mm": 0.5,
+    "whole_path_min_clearance_mm": -1.5622,
+    "whole_path_pierce_samples": 2,
+    "ends": [
+     {
+      "device": "imu200",
+      "point": "site",
+      "connector_xyz_mm": [
+       -21.0,
+       0.0,
+       105.3
+      ],
+      "located": false,
+      "kind": "board",
+      "why_unlocated": "MJCF imu site, world (docs/ELECTRONICS-AND-SOFTWARE.md \u00a74.1) \u2014 the board's connector is not located",
+      "housing_part": null,
+      "launch_mm": [
+       -17.7771,
+       0.5,
+       105.4734
+      ],
+      "launch_offset_mm": 3.2661,
+      "launch_how": "nearest clear cell in any direction (endpoint unlocated)",
+      "start_mm": [
+       -21.0,
+       0.0,
+       105.3
+      ]
+     },
+     {
+      "device": "id10",
+      "point": "-y",
+      "connector_xyz_mm": [
+       -3.0,
+       -7.5,
+       138.35
+      ],
+      "located": true,
+      "kind": "xl330 EH socket",
+      "mate_mm": [
+       -3.0,
+       -11.5,
+       138.35
+      ],
+      "wire_face_mm": [
+       -3.0,
+       -5.0,
+       138.35
+      ],
+      "insertion_dir": [
+       -0.0,
+       -1.0,
+       -0.0
+      ],
+      "row_dir": [
+       0.0,
+       0.0,
+       1.0
+      ],
+      "housing_proud_of_flank_mm": 2.5,
+      "housing_part": "part:jst-ehr-03",
+      "launch_mm": [
+       -3.0,
+       -5.0,
+       138.35
+      ],
+      "launch_offset_mm": 0.0,
+      "launch_how": "along the connector normal",
+      "start_mm": [
+       -3.0,
+       -5.0,
+       138.35
+      ]
+     }
+    ],
+    "verdict": "CANNOT DETERMINE",
+    "verdict_why": "no bend-radius floor stated",
+    "delta_vs_cable_mm": 94.8449,
+    "delta_vs_floor_mm": 96.4449
+   },
+   {
+    "id": "dxl-id10-id11",
+    "group": "dynamixel-chain",
+    "od_mm": 3.1243,
+    "od_basis": "NOMINAL \u2014 3 x 21 AWG at the 1.4500 mm midpoint of JST eEH.pdf p.2's 1.0-1.9 insulation window, triangular bundle D = d(1+2/sqrt3); no vendor jacket OD exists",
+    "od_is_nominal": true,
+    "conductors": 3,
+    "cable_mm_from_cables_json": 65,
+    "floor_mm_from_cables_json": 51.6,
+    "slack_mm_from_cables_json": 9.6,
+    "crosses": [
+     "right_hip_yaw"
+    ],
+    "clearance_floor_mm": 1.0,
+    "bend_target_mm": 9.3729,
+    "plan_grid_mm": 4.0,
+    "routed": true,
+    "waypoints": 4,
+    "corners": 3,
+    "plan_seconds": 0.15,
+    "routed_length_mm": 57.6896,
+    "routed_length_routed_part_mm": 53.5023,
+    "stub_from_mm": 4.25,
+    "stub_to_mm": 0.0,
+    "min_bend_radius_mm": 0.1998,
+    "fillet_radius_used_mm": 0.1998,
+    "min_clearance_mm": 1.4378,
+    "min_clearance_at_mm": [
+     -3.0,
+     -34.25,
+     138.35
+    ],
+    "pierce_samples": 0,
+    "pierce_points_mm": [],
+    "samples": 133,
+    "sample_step_mm": 0.5,
+    "whole_path_min_clearance_mm": -1.5622,
+    "whole_path_pierce_samples": 3,
+    "ends": [
+     {
+      "device": "id10",
+      "point": "+y",
+      "connector_xyz_mm": [
+       -3.0,
+       -27.5,
+       138.35
+      ],
+      "located": true,
+      "kind": "xl330 EH socket",
+      "mate_mm": [
+       -3.0,
+       -23.5,
+       138.35
+      ],
+      "wire_face_mm": [
+       -3.0,
+       -30.0,
+       138.35
+      ],
+      "insertion_dir": [
+       -0.0,
+       1.0,
+       -0.0
+      ],
+      "row_dir": [
+       0.0,
+       0.0,
+       1.0
+      ],
+      "housing_proud_of_flank_mm": 2.5,
+      "housing_part": "part:jst-ehr-03",
+      "launch_mm": [
+       -3.0,
+       -34.25,
+       138.35
+      ],
+      "launch_offset_mm": 4.25,
+      "launch_how": "along the connector normal",
+      "start_mm": [
+       -3.0,
+       -30.0,
+       138.35
+      ]
+     },
+     {
+      "device": "id11",
+      "point": "+y",
+      "connector_xyz_mm": [
+       -0.85,
+       -27.5,
+       93.5
+      ],
+      "located": true,
+      "kind": "xl330 EH socket",
+      "mate_mm": [
+       -0.85,
+       -23.5,
+       93.5
+      ],
+      "wire_face_mm": [
+       -0.85,
+       -30.0,
+       93.5
+      ],
+      "insertion_dir": [
+       -0.0,
+       1.0,
+       -0.0
+      ],
+      "row_dir": [
+       -1.0,
+       0.0,
+       0.0
+      ],
+      "housing_proud_of_flank_mm": 2.5,
+      "housing_part": "part:jst-ehr-03",
+      "launch_mm": [
+       -0.85,
+       -30.0,
+       93.5
+      ],
+      "launch_offset_mm": 0.0,
+      "launch_how": "along the connector normal",
+      "start_mm": [
+       -0.85,
+       -30.0,
+       93.5
+      ]
+     }
+    ],
+    "verdict": "CANNOT DETERMINE",
+    "verdict_why": "no bend-radius floor stated",
+    "delta_vs_cable_mm": -7.3104,
+    "delta_vs_floor_mm": 6.0896
+   },
+   {
+    "id": "dxl-id11-id12",
+    "group": "dynamixel-chain",
+    "od_mm": 3.1243,
+    "od_basis": "NOMINAL \u2014 3 x 21 AWG at the 1.4500 mm midpoint of JST eEH.pdf p.2's 1.0-1.9 insulation window, triangular bundle D = d(1+2/sqrt3); no vendor jacket OD exists",
+    "od_is_nominal": true,
+    "conductors": 3,
+    "cable_mm_from_cables_json": 125,
+    "floor_mm_from_cables_json": 81.6,
+    "slack_mm_from_cables_json": 39.1,
+    "crosses": [
+     "right_hip_roll",
+     "right_hip_pitch"
+    ],
+    "clearance_floor_mm": 1.0,
+    "bend_target_mm": 9.3729,
+    "plan_grid_mm": 4.0,
+    "routed": true,
+    "waypoints": 3,
+    "corners": 1,
+    "plan_seconds": 0.01,
+    "routed_length_mm": 34.5601,
+    "routed_length_routed_part_mm": 34.5601,
+    "stub_from_mm": 0.0,
+    "stub_to_mm": 0.0,
+    "min_bend_radius_mm": 9.3729,
+    "fillet_radius_used_mm": 9.3729,
+    "min_clearance_mm": 1.2663,
+    "min_clearance_at_mm": [
+     -2.0087,
+     -32.3485,
+     92.1066
+    ],
+    "pierce_samples": 0,
+    "pierce_points_mm": [],
+    "samples": 72,
+    "sample_step_mm": 0.5,
+    "whole_path_min_clearance_mm": 1.2663,
+    "whole_path_pierce_samples": 0,
+    "ends": [
+     {
+      "device": "id11",
+      "point": "+y",
+      "connector_xyz_mm": [
+       -0.85,
+       -27.5,
+       93.5
+      ],
+      "located": true,
+      "kind": "xl330 EH socket",
+      "mate_mm": [
+       -0.85,
+       -23.5,
+       93.5
+      ],
+      "wire_face_mm": [
+       -0.85,
+       -30.0,
+       93.5
+      ],
+      "insertion_dir": [
+       -0.0,
+       1.0,
+       -0.0
+      ],
+      "row_dir": [
+       -1.0,
+       0.0,
+       0.0
+      ],
+      "housing_proud_of_flank_mm": 2.5,
+      "housing_part": "part:jst-ehr-03",
+      "launch_mm": [
+       -0.85,
+       -30.0,
+       93.5
+      ],
+      "launch_offset_mm": 0.0,
+      "launch_how": "along the connector normal",
+      "start_mm": [
+       -0.85,
+       -30.0,
+       93.5
+      ]
+     },
+     {
+      "device": "id12",
+      "point": "+y",
+      "connector_xyz_mm": [
+       -5.0,
+       -61.85,
+       92.5
+      ],
+      "located": true,
+      "kind": "xl330 EH socket",
+      "mate_mm": [
+       -5.0,
+       -61.85,
+       96.5
+      ],
+      "wire_face_mm": [
+       -5.0,
+       -61.85,
+       90.0
+      ],
+      "insertion_dir": [
+       -0.0,
+       -0.0,
+       1.0
+      ],
+      "row_dir": [
+       0.0,
+       -1.0,
+       0.0
+      ],
+      "housing_proud_of_flank_mm": 2.5,
+      "housing_part": "part:jst-ehr-03",
+      "launch_mm": [
+       -5.0,
+       -61.85,
+       90.0
+      ],
+      "launch_offset_mm": 0.0,
+      "launch_how": "along the connector normal",
+      "start_mm": [
+       -5.0,
+       -61.85,
+       90.0
+      ]
+     }
+    ],
+    "verdict": "CANNOT DETERMINE",
+    "verdict_why": "no bend-radius floor stated",
+    "delta_vs_cable_mm": -90.4399,
+    "delta_vs_floor_mm": -47.0399
+   },
+   {
+    "id": "dxl-id12-id13",
+    "group": "dynamixel-chain",
+    "od_mm": 3.1243,
+    "od_basis": "NOMINAL \u2014 3 x 21 AWG at the 1.4500 mm midpoint of JST eEH.pdf p.2's 1.0-1.9 insulation window, triangular bundle D = d(1+2/sqrt3); no vendor jacket OD exists",
+    "od_is_nominal": true,
+    "conductors": 3,
+    "cable_mm_from_cables_json": 20,
+    "floor_mm_from_cables_json": 17.0,
+    "slack_mm_from_cables_json": 0.0,
+    "crosses": [],
+    "clearance_floor_mm": 1.0,
+    "bend_target_mm": 9.3729,
+    "plan_grid_mm": 4.0,
+    "routed": true,
+    "waypoints": 2,
+    "corners": 0,
+    "plan_seconds": 0.0,
+    "routed_length_mm": 14.2859,
+    "routed_length_routed_part_mm": 14.2859,
+    "stub_from_mm": 0.0,
+    "stub_to_mm": 0.0,
+    "min_bend_radius_mm": null,
+    "fillet_radius_used_mm": null,
+    "min_clearance_mm": 1.4378,
+    "min_clearance_at_mm": [
+     -9.4308,
+     -61.85,
+     89.8448
+    ],
+    "pierce_samples": 0,
+    "pierce_points_mm": [],
+    "samples": 30,
+    "sample_step_mm": 0.5,
+    "whole_path_min_clearance_mm": 1.4378,
+    "whole_path_pierce_samples": 0,
+    "ends": [
+     {
+      "device": "id12",
+      "point": "+y",
+      "connector_xyz_mm": [
+       -5.0,
+       -61.85,
+       92.5
+      ],
+      "located": true,
+      "kind": "xl330 EH socket",
+      "mate_mm": [
+       -5.0,
+       -61.85,
+       96.5
+      ],
+      "wire_face_mm": [
+       -5.0,
+       -61.85,
+       90.0
+      ],
+      "insertion_dir": [
+       -0.0,
+       -0.0,
+       1.0
+      ],
+      "row_dir": [
+       0.0,
+       -1.0,
+       0.0
+      ],
+      "housing_proud_of_flank_mm": 2.5,
+      "housing_part": "part:jst-ehr-03",
+      "launch_mm": [
+       -5.0,
+       -61.85,
+       90.0
+      ],
+      "launch_offset_mm": 0.0,
+      "launch_how": "along the connector normal",
+      "start_mm": [
+       -5.0,
+       -61.85,
+       90.0
+      ]
+     },
+     {
+      "device": "id13",
+      "point": "-y",
+      "connector_xyz_mm": [
+       -21.78,
+       -61.85,
+       89.5
+      ],
+      "located": true,
+      "kind": "xl330 EH socket",
+      "mate_mm": [
+       -25.7771,
+       -61.85,
+       89.5
+      ],
+      "wire_face_mm": [
+       -19.2771,
+       -61.85,
+       89.5
+      ],
+      "insertion_dir": [
+       -1.0,
+       0.0,
+       -0.0
+      ],
+      "row_dir": [
+       0.0,
+       -1.0,
+       0.0
+      ],
+      "housing_proud_of_flank_mm": 2.5,
+      "housing_part": "part:jst-ehr-03",
+      "launch_mm": [
+       -19.2771,
+       -61.85,
+       89.5
+      ],
+      "launch_offset_mm": 0.0,
+      "launch_how": "along the connector normal",
+      "start_mm": [
+       -19.2771,
+       -61.85,
+       89.5
+      ]
+     }
+    ],
+    "verdict": "CANNOT DETERMINE",
+    "verdict_why": "no bend-radius floor stated",
+    "delta_vs_cable_mm": -5.7141,
+    "delta_vs_floor_mm": -2.7141
+   },
+   {
+    "id": "dxl-id13-id14",
+    "group": "dynamixel-chain",
+    "od_mm": 3.1243,
+    "od_basis": "NOMINAL \u2014 3 x 21 AWG at the 1.4500 mm midpoint of JST eEH.pdf p.2's 1.0-1.9 insulation window, triangular bundle D = d(1+2/sqrt3); no vendor jacket OD exists",
+    "od_is_nominal": true,
+    "conductors": 3,
+    "cable_mm_from_cables_json": 95,
+    "floor_mm_from_cables_json": 61.7,
+    "slack_mm_from_cables_json": 31.4,
+    "crosses": [
+     "right_knee"
+    ],
+    "clearance_floor_mm": 1.0,
+    "bend_target_mm": 9.3729,
+    "plan_grid_mm": 4.0,
+    "routed": true,
+    "waypoints": 3,
+    "corners": 1,
+    "plan_seconds": 0.05,
+    "routed_length_mm": 49.5434,
+    "routed_length_routed_part_mm": 49.5434,
+    "stub_from_mm": 0.0,
+    "stub_to_mm": 0.0,
+    "min_bend_radius_mm": 4.0578,
+    "fillet_radius_used_mm": 4.0578,
+    "min_clearance_mm": 1.4378,
+    "min_clearance_at_mm": [
+     -19.2771,
+     -61.85,
+     89.5
+    ],
+    "pierce_samples": 0,
+    "pierce_points_mm": [],
+    "samples": 106,
+    "sample_step_mm": 0.5,
+    "whole_path_min_clearance_mm": 1.4378,
+    "whole_path_pierce_samples": 0,
+    "ends": [
+     {
+      "device": "id13",
+      "point": "-y",
+      "connector_xyz_mm": [
+       -21.78,
+       -61.85,
+       89.5
+      ],
+      "located": true,
+      "kind": "xl330 EH socket",
+      "mate_mm": [
+       -25.7771,
+       -61.85,
+       89.5
+      ],
+      "wire_face_mm": [
+       -19.2771,
+       -61.85,
+       89.5
+      ],
+      "insertion_dir": [
+       -1.0,
+       0.0,
+       -0.0
+      ],
+      "row_dir": [
+       0.0,
+       -1.0,
+       0.0
+      ],
+      "housing_proud_of_flank_mm": 2.5,
+      "housing_part": "part:jst-ehr-03",
+      "launch_mm": [
+       -19.2771,
+       -61.85,
+       89.5
+      ],
+      "launch_offset_mm": 0.0,
+      "launch_how": "along the connector normal",
+      "start_mm": [
+       -19.2771,
+       -61.85,
+       89.5
+      ]
+     },
+     {
+      "device": "id14",
+      "point": "+y",
+      "connector_xyz_mm": [
+       -21.78,
+       -43.15,
+       47.5
+      ],
+      "located": true,
+      "kind": "xl330 EH socket",
+      "mate_mm": [
+       -25.7771,
+       -43.15,
+       47.5
+      ],
+      "wire_face_mm": [
+       -19.2771,
+       -43.15,
+       47.5
+      ],
+      "insertion_dir": [
+       -1.0,
+       -0.0,
+       -0.0
+      ],
+      "row_dir": [
+       0.0,
+       1.0,
+       0.0
+      ],
+      "housing_proud_of_flank_mm": 2.5,
+      "housing_part": "part:jst-ehr-03",
+      "launch_mm": [
+       -19.2771,
+       -43.15,
+       47.5
+      ],
+      "launch_offset_mm": 0.0,
+      "launch_how": "along the connector normal",
+      "start_mm": [
+       -19.2771,
+       -43.15,
+       47.5
+      ]
+     }
+    ],
+    "verdict": "CANNOT DETERMINE",
+    "verdict_why": "no bend-radius floor stated",
+    "delta_vs_cable_mm": -45.4566,
+    "delta_vs_floor_mm": -12.1566
+   },
+   {
+    "id": "tof-hat",
+    "group": "hat-harness",
+    "od_mm": 2.2,
+    "od_basis": "NOMINAL \u2014 JST SH 1.0 mm 4-way lead; no OD published for the ToF board's cable. 4 x ~0.9 mm flat ribbon read as a 2.2 mm round envelope",
+    "od_is_nominal": true,
+    "conductors": 4,
+    "cable_mm_from_cables_json": 35,
+    "floor_mm_from_cables_json": 31.3,
+    "slack_mm_from_cables_json": 0.0,
+    "crosses": [],
+    "clearance_floor_mm": 1.0,
+    "bend_target_mm": 6.6,
+    "plan_grid_mm": 1.0,
+    "routed": true,
+    "waypoints": 7,
+    "corners": 7,
+    "plan_seconds": 6.7,
+    "routed_length_mm": 64.7438,
+    "routed_length_routed_part_mm": 61.0909,
+    "stub_from_mm": 3.4192,
+    "stub_to_mm": 0.4252,
+    "min_bend_radius_mm": 0.3312,
+    "fillet_radius_used_mm": 0.3312,
+    "min_clearance_mm": 0.9,
+    "min_clearance_at_mm": [
+     58.9709,
+     3.7498,
+     268.973
+    ],
+    "pierce_samples": 0,
+    "pierce_points_mm": [],
+    "samples": 165,
+    "sample_step_mm": 0.5,
+    "whole_path_min_clearance_mm": -1.1,
+    "whole_path_pierce_samples": 3,
+    "ends": [
+     {
+      "device": "hat",
+      "point": "centroid",
+      "connector_xyz_mm": [
+       59.58,
+       0.0,
+       251.06
+      ],
+      "located": false,
+      "kind": "board",
+      "why_unlocated": "HAT mesh centroid (bbox centre through the placement) \u2014 connector positions unpublished",
+      "housing_part": null,
+      "launch_mm": [
+       56.2229,
+       0.5,
+       251.4734
+      ],
+      "launch_offset_mm": 3.4192,
+      "launch_how": "nearest clear cell in any direction (endpoint unlocated)",
+      "start_mm": [
+       59.58,
+       0.0,
+       251.06
+      ]
+     },
+     {
+      "device": "tof",
+      "point": "site",
+      "connector_xyz_mm": [
+       81.4,
+       22.4,
+       249.1
+      ],
+      "located": false,
+      "kind": "sensor",
+      "why_unlocated": "MJCF tof site, world (docs \u00a76)",
+      "housing_part": null,
+      "launch_mm": [
+       81.2229,
+       22.5,
+       249.4734
+      ],
+      "launch_offset_mm": 0.4252,
+      "launch_how": "nearest clear cell in any direction (endpoint unlocated)",
+      "start_mm": [
+       81.4,
+       22.4,
+       249.1
+      ]
+     }
+    ],
+    "verdict": "FAIL",
+    "verdict_why": "min clearance 0.9000 mm < the stated floor 1.0000 mm",
+    "delta_vs_cable_mm": 29.7438,
+    "delta_vs_floor_mm": 33.4438
+   },
+   {
+    "id": "spk-hat",
+    "group": "hat-harness",
+    "od_mm": 2.5,
+    "od_basis": "NOMINAL \u2014 JST GH 1.25 mm 2-way speaker lead; no OD published. 2 x ~1.2 mm twisted pair read as a 2.5 mm round envelope",
+    "od_is_nominal": true,
+    "conductors": 2,
+    "cable_mm_from_cables_json": 70,
+    "floor_mm_from_cables_json": 65.0,
+    "slack_mm_from_cables_json": 0.0,
+    "crosses": [],
+    "clearance_floor_mm": 1.0,
+    "bend_target_mm": 7.5,
+    "plan_grid_mm": 2.0,
+    "routed": true,
+    "waypoints": 4,
+    "corners": 4,
+    "plan_seconds": 972.91,
+    "routed_length_mm": 72.1012,
+    "routed_length_routed_part_mm": 68.1874,
+    "stub_from_mm": 3.4192,
+    "stub_to_mm": 0.5511,
+    "min_bend_radius_mm": 0.4592,
+    "fillet_radius_used_mm": 0.4592,
+    "min_clearance_mm": -1.25,
+    "min_clearance_at_mm": [
+     -4.8088,
+     0.3063,
+     252.7655
+    ],
+    "pierce_samples": 2,
+    "pierce_points_mm": [
+     [
+      -4.808817518665382,
+      0.30634230567971654,
+      252.7655278978853
+     ],
+     [
+      -4.947143506535453,
+      0.33400750325373063,
+      252.29521953912706
+     ]
+    ],
+    "samples": 162,
+    "sample_step_mm": 0.5,
+    "whole_path_min_clearance_mm": -1.25,
+    "whole_path_pierce_samples": 6,
+    "ends": [
+     {
+      "device": "hat",
+      "point": "centroid",
+      "connector_xyz_mm": [
+       59.58,
+       0.0,
+       251.06
+      ],
+      "located": false,
+      "kind": "board",
+      "why_unlocated": "HAT mesh centroid (bbox centre through the placement) \u2014 connector positions unpublished",
+      "housing_part": null,
+      "launch_mm": [
+       56.2229,
+       0.5,
+       251.4734
+      ],
+      "launch_offset_mm": 3.4192,
+      "launch_how": "nearest clear cell in any direction (endpoint unlocated)",
+      "start_mm": [
+       59.58,
+       0.0,
+       251.06
+      ]
+     },
+     {
+      "device": "speaker",
+      "point": "centroid",
+      "connector_xyz_mm": [
+       -5.42,
+       0.71,
+       249.11
+      ],
+      "located": false,
+      "kind": "transducer",
+      "why_unlocated": "speaker mesh centroid \u2014 terminal side unknown",
+      "housing_part": null,
+      "launch_mm": [
+       -5.7771,
+       0.5,
+       249.4734
+      ],
+      "launch_offset_mm": 0.5511,
+      "launch_how": "nearest clear cell in any direction (endpoint unlocated)",
+      "start_mm": [
+       -5.42,
+       0.71,
+       249.11
+      ]
+     }
+    ],
+    "verdict": "FAIL",
+    "verdict_why": "the centreline passes through material at 2 sample(s)",
+    "delta_vs_cable_mm": 2.1012,
+    "delta_vs_floor_mm": 7.1012
+   },
+   {
+    "id": "mic-hat",
+    "group": "hat-harness",
+    "od_mm": 2.2,
+    "od_basis": "NOMINAL \u2014 JST SH 1.0 mm 4-way lead; no OD published for the ToF board's cable. 4 x ~0.9 mm flat ribbon read as a 2.2 mm round envelope",
+    "od_is_nominal": true,
+    "conductors": 4,
+    "cable_mm_from_cables_json": null,
+    "floor_mm_from_cables_json": null,
+    "slack_mm_from_cables_json": null,
+    "crosses": [],
+    "clearance_floor_mm": 1.0,
+    "bend_target_mm": 6.6,
+    "status": "CANNOT DETERMINE",
+    "verdict": "CANNOT DETERMINE",
+    "why": "CANNOT DETERMINE: the mic has no mesh and no site; length is null, not a guess",
+    "routed": false
+   },
+   {
+    "id": "csi-radxa-camera",
+    "group": "hat-harness",
+    "od_mm": 2.0,
+    "od_basis": "NOMINAL and WRONG IN SHAPE \u2014 a 22-way 0.5 mm FFC is FLAT (~11.5 x 0.3 mm), swept here as a 2.0 mm round envelope so it has a length and a clearance at all; the flat ribbon is NOT modelled",
+    "od_is_nominal": true,
+    "conductors": 22,
+    "cable_mm_from_cables_json": 15,
+    "floor_mm_from_cables_json": 13.3,
+    "slack_mm_from_cables_json": 0.0,
+    "crosses": [],
+    "clearance_floor_mm": 1.0,
+    "bend_target_mm": 6.0,
+    "status": "FAIL",
+    "verdict": "FAIL",
+    "routed": false,
+    "why": "no path clears 2.0000 mm (cable radius 1.0000 + clearance floor 1.0000) between the two connectors at zero pose",
+    "ends": [
+     {
+      "device": "radxa",
+      "point": "centroid",
+      "connector_xyz_mm": [
+       68.11,
+       -0.01,
+       251.05
+      ],
+      "located": false,
+      "kind": "board",
+      "why_unlocated": "Radxa mesh centroid \u2014 the CSI connector's place on the 65x30 board is at one short edge (Radxa wiki) but not located here",
+      "housing_part": null,
+      "launch_mm": [
+       65.2229,
+       -0.5,
+       251.4734
+      ],
+      "launch_offset_mm": 2.9588,
+      "launch_how": "nearest clear cell in any direction (endpoint unlocated)",
+      "start_mm": [
+       68.11,
+       -0.01,
+       251.05
+      ]
+     },
+     {
+      "device": "camera",
+      "point": "site",
+      "connector_xyz_mm": [
+       81.4,
+       0.0,
+       251.1
+      ],
+      "located": false,
+      "kind": "sensor",
+      "why_unlocated": "MJCF head_camera site, world (docs \u00a75)",
+      "housing_part": null,
+      "launch_mm": [
+       81.2229,
+       0.5,
+       251.4734
+      ],
+      "launch_offset_mm": 0.6487,
+      "launch_how": "nearest clear cell in any direction (endpoint unlocated)",
+      "start_mm": [
+       81.4,
+       0.0,
+       251.1
+      ]
+     }
+    ]
+   },
+   {
+    "id": "bat-hat",
+    "group": "power",
+    "od_mm": 3.0,
+    "od_basis": "NOMINAL \u2014 two conductors from the pack to the HAT; neither the gauge nor the jacket is published (cables.json bat-hat connector = CANNOT DETERMINE)",
+    "od_is_nominal": true,
+    "conductors": 2,
+    "cable_mm_from_cables_json": 340,
+    "floor_mm_from_cables_json": 213.5,
+    "slack_mm_from_cables_json": 125.7,
+    "crosses": [
+     "neck_pitch",
+     "head_pitch",
+     "head_yaw",
+     "head_roll"
+    ],
+    "clearance_floor_mm": 1.0,
+    "bend_target_mm": 9.0,
+    "status": "FAIL",
+    "verdict": "FAIL",
+    "routed": false,
+    "why": "no path clears 2.5000 mm (cable radius 1.5000 + clearance floor 1.0000) between the two connectors at zero pose",
+    "ends": [
+     {
+      "device": "battery",
+      "point": "contact_end",
+      "connector_xyz_mm": [
+       -35.35,
+       0.0,
+       151.54
+      ],
+      "located": false,
+      "kind": "pack",
+      "why_unlocated": "the pack's end face nearer the banana_pcb_locker centroid (-30.4, -0.0, 154.8); the NP-F contact layout has no vendor drawing (part:np-f550 pinout)",
+      "housing_part": null,
+      "launch_mm": [
+       -35.7771,
+       0.5,
+       148.4734
+      ],
+      "launch_offset_mm": 3.1363,
+      "launch_how": "nearest clear cell in any direction (endpoint unlocated)",
+      "start_mm": [
+       -35.35,
+       0.0,
+       151.54
+      ]
+     },
+     {
+      "device": "hat",
+      "point": "centroid",
+      "connector_xyz_mm": [
+       59.58,
+       0.0,
+       251.06
+      ],
+      "located": false,
+      "kind": "board",
+      "why_unlocated": "HAT mesh centroid (bbox centre through the placement) \u2014 connector positions unpublished",
+      "housing_part": null,
+      "launch_mm": [
+       56.2229,
+       0.5,
+       251.4734
+      ],
+      "launch_offset_mm": 3.4192,
+      "launch_how": "nearest clear cell in any direction (endpoint unlocated)",
+      "start_mm": [
+       59.58,
+       0.0,
+       251.06
+      ]
+     }
+    ]
+   },
+   {
+    "id": "hat-radxa-40pin",
+    "group": "power",
+    "od_mm": 3.0,
+    "od_basis": "NOMINAL \u2014 two conductors from the pack to the HAT; neither the gauge nor the jacket is published (cables.json bat-hat connector = CANNOT DETERMINE)",
+    "od_is_nominal": true,
+    "conductors": 2,
+    "cable_mm_from_cables_json": 0,
+    "floor_mm_from_cables_json": 0.0,
+    "slack_mm_from_cables_json": 0.0,
+    "crosses": [],
+    "clearance_floor_mm": 1.0,
+    "bend_target_mm": 9.0,
+    "status": "not a cable",
+    "verdict": "CANNOT DETERMINE",
+    "routed": false,
+    "why": "HAT-to-Radxa board stack: 0 mm cable by construction (docs \u00a72 'on the 40-pin header')"
+   },
+   {
+    "id": "hat-dxl-port",
+    "group": "power",
+    "od_mm": 3.0,
+    "od_basis": "NOMINAL \u2014 two conductors from the pack to the HAT; neither the gauge nor the jacket is published (cables.json bat-hat connector = CANNOT DETERMINE)",
+    "od_is_nominal": true,
+    "conductors": 2,
+    "cable_mm_from_cables_json": null,
+    "floor_mm_from_cables_json": null,
+    "slack_mm_from_cables_json": null,
+    "crosses": [],
+    "clearance_floor_mm": 1.0,
+    "bend_target_mm": 9.0,
+    "status": "CANNOT DETERMINE",
+    "verdict": "CANNOT DETERMINE",
+    "why": "not a separate cable \u2014 'HAT -> bus power' IS the first hop dxl-hat-id34; qty 0 so it is not double-counted",
+    "routed": false
    }
-  ],
-  "device_points_mm": "wiring/cables.json record.devices (world, zero pose) — reused, not re-derived",
-  "cables": [],
-  "checks": {},
-  "renders": []
+  ]
  }
 }

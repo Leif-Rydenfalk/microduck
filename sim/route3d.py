@@ -51,6 +51,14 @@ from cecad.route import (Occupancy, astar, shortcut, fillet_corners, polyline_of
                          PASS, FAIL, CANNOT)
 
 OCC_NPZ = "/private/tmp/int-wire3d/occ.npz"
+PROGRESS = "/private/tmp/int-wire3d/route-progress.log"
+_pf = open(PROGRESS, "a", buffering=1)
+
+
+def say(*a):
+    s = " ".join(str(x) for x in a)
+    sys.stdout.write(s + "\n")
+    _pf.write(s + "\n")
 OUT_JSON = R + "/out/wiring/cables3d.json"
 PATHS_JSON = R + "/out/wiring/paths.json"
 
@@ -64,6 +72,8 @@ BUNDLE3 = INS_OD_NOM * (1.0 + 2.0 / math.sqrt(3.0))        # 3.1243, CHOSEN
 
 CLEAR_MIN = 1.0            # CHOSEN routing rule, mm, surface to surface
 PREFER_EXTRA = 1.5         # cost preference for a roomier lane, mm
+PLAN_FACTORS = (4, 2, 1)   # planning cell = factor x 1.0 mm; coarsest first
+COARSE = {}
 
 # per group: (bundle OD mm, od_basis, conductors)
 GROUP_OD = {
@@ -173,7 +183,11 @@ def launch_point(occ, p, normal, r_req, max_out=18.0):
 def main():
     t0 = time.time()
     occ = load_occ()
-    print("occupancy %s cell %.4f mm  occupied %d cells" % (occ.shape, occ.cell, int(occ.grid.sum())))
+    say("occupancy %s cell %.4f mm  occupied %d cells" % (occ.shape, occ.cell, int(occ.grid.sum())))
+    for f in PLAN_FACTORS:
+        COARSE[f] = occ.coarsen(f) if f > 1 else occ
+        say("  planning grid x%d: cell %.4f mm  shape %s  cells %d"
+            % (f, COARSE[f].cell, COARSE[f].shape, int(np.prod(COARSE[f].shape))))
 
     cab = json.load(open(R + "/wiring/cables.json"))["record"]
     rows = json.load(open(R + "/ce-assemblies/microduck/current/placements.json"))["record"]["rows"]
@@ -186,7 +200,7 @@ def main():
             continue
         row = rows[d["placements_row"]]
         frames[name] = {"+y": servo_socket_frame(row, +1), "-y": servo_socket_frame(row, -1)}
-    print("servo socket frames derived: %d servos x 2 flanks = %d"
+    say("servo socket frames derived: %d servos x 2 flanks = %d"
           % (len(frames), 2 * len(frames)))
 
     results, paths = [], {}
@@ -209,13 +223,13 @@ def main():
             rec.update(status="CANNOT DETERMINE", verdict=CANNOT,
                        why=c.get("how", ""), routed=False)
             results.append(rec)
-            print("%-18s CANNOT DETERMINE (no endpoint in cables.json)" % rid)
+            say("%-18s CANNOT DETERMINE (no endpoint in cables.json)" % rid)
             continue
         if c.get("cable_mm") == 0:
             rec.update(status="not a cable", verdict=CANNOT, routed=False,
                        why=c.get("how", ""))
             results.append(rec)
-            print("%-18s not a cable (%s)" % (rid, c.get("connector", "")[:40]))
+            say("%-18s not a cable (%s)" % (rid, c.get("connector", "")[:40]))
             continue
 
         ends = []
@@ -263,25 +277,48 @@ def main():
                        why="an endpoint has no clear cell within 40 mm — the connector is "
                            "buried in material at zero pose", ends=_clean(ends))
             results.append(rec)
-            print("%-18s FAIL (endpoint buried)" % rid)
+            say("%-18s FAIL (endpoint buried)" % rid)
             continue
 
-        a_idx = tuple(int(v) for v in occ.idx_of(launches[0]))
-        b_idx = tuple(int(v) for v in occ.idx_of(launches[1]))
+        # PLAN COARSE, MEASURE FINE. The coarse grid's distance is the MINIMUM over
+        # each block, so a coarse cell that clears means every fine cell in it
+        # clears: the plan is admissible, never optimistic. If the finished curve
+        # then fails to clear on the FINE grid, the run is re-planned one step
+        # finer and the escalation is recorded — the check is never loosened.
         t1 = time.time()
-        grid_path = astar(occ, a_idx, b_idx, r_req, prefer_clearance_mm=PREFER_EXTRA)
-        if grid_path is None:
+        pulled = None
+        used_factor = None
+        for f in PLAN_FACTORS:
+            g = COARSE.get(f) or occ
+            ga = g.nearest_free(launches[0], r_req, search_mm=30.0)
+            gb = g.nearest_free(launches[1], r_req, search_mm=30.0)
+            if ga is None or gb is None:
+                continue
+            gp = astar(g, ga[0], gb[0], r_req, prefer_clearance_mm=PREFER_EXTRA)
+            if gp is None:
+                continue
+            raw = [g.world_of(i) for i in gp]
+            raw[0] = launches[0]
+            raw[-1] = launches[1]
+            cand = shortcut(occ, raw, r_req, rounds=5)
+            chk = measure_path(occ, polyline_of(fillet_corners(_dedup(cand), 3.0 * od,
+                                                               occ=occ, r_clear_mm=r_req)[0],
+                                                arc_steps=16), r_cable)
+            used_factor = f
+            pulled = cand
+            if chk["min_clearance_mm"] >= CLEAR_MIN and chk["pierce_samples"] == 0:
+                break
+            say("  %s: plan at %.1f mm cells measured %.4f mm clearance — refining"
+                % (rid, g.cell, chk["min_clearance_mm"]))
+        if pulled is None:
             rec.update(status="FAIL", verdict=FAIL, routed=False,
                        why="no path clears %.4f mm (cable radius %.4f + clearance floor %.4f) "
                            "between the two connectors at zero pose" % (r_req, r_cable, CLEAR_MIN),
                        ends=_clean(ends))
             results.append(rec)
-            print("%-18s FAIL no path (r_req %.3f)" % (rid, r_req))
+            say("%-18s FAIL no path (r_req %.3f)" % (rid, r_req))
             continue
-        raw = [occ.world_of(i) for i in grid_path]
-        raw[0] = launches[0]
-        raw[-1] = launches[1]
-        pulled = shortcut(occ, raw, r_req, rounds=5)
+        rec["plan_grid_mm"] = round((COARSE.get(used_factor) or occ).cell, 4)
         # the connector stubs, in front of and behind the routed part
         full = [np.asarray(ends[0]["start_mm"], float)] + pulled + [np.asarray(ends[1]["start_mm"], float)]
         full = _dedup(full)
@@ -296,7 +333,7 @@ def main():
         m_routed = measure_path(occ, routed_poly, r_cable)
         rec.update(
             routed=True,
-            grid_nodes=len(grid_path), waypoints=len(pulled), corners=len(full) - 2,
+            plan_grid_mm=rec.get("plan_grid_mm"), waypoints=len(pulled), corners=len(full) - 2,
             plan_seconds=round(time.time() - t1, 2),
             routed_length_mm=round(L, 4),
             routed_length_routed_part_mm=round(path_length(routed_poly), 4),
@@ -326,7 +363,7 @@ def main():
                                 "insertion_dir": e.get("insertion_dir"),
                                 "row_dir": e.get("row_dir")} for e in ends]}
         results.append(rec)
-        print("%-18s %-18s L %8.3f mm (cables.json %4s)  bend %s  clear %7.4f  pierce %d  %.1fs"
+        say("%-18s %-18s L %8.3f mm (cables.json %4s)  bend %s  clear %7.4f  pierce %d  %.1fs"
               % (rid, v, L, c["cable_mm"],
                  ("%7.4f" % rb) if rb else "   n/a ", rec["min_clearance_mm"],
                  rec["pierce_samples"], rec["plan_seconds"]))
@@ -382,9 +419,9 @@ def main():
     json.dump({"$triad": 1, "kind": "cable-paths", "generated_by": "sim/route3d.py",
                "record": {"units": "mm", "paths": paths}},
               open(PATHS_JSON, "w"), indent=1)
-    print("\n%d runs in cables.json; %d routed; PASS %d FAIL %d CANNOT DETERMINE %d; %.1f s"
+    say("\n%d runs in cables.json; %d routed; PASS %d FAIL %d CANNOT DETERMINE %d; %.1f s"
           % (len(cab["cables"]), len(routed), npass, nfail, ncan, time.time() - t0))
-    print("wrote %s and %s" % (OUT_JSON, PATHS_JSON))
+    say("wrote %s and %s" % (OUT_JSON, PATHS_JSON))
 
 
 def _clean(ends):
