@@ -138,6 +138,90 @@ def export_stl(part, outdir, slug):
     return path
 
 
+#: A3 RULE 2's ANGLES — "4 isometric corners (front-left, front-right,
+#: rear-left, rear-right), top-down and bottom-up". Four of the six carry the
+#: word ISOMETRIC in their caption, which is what makes them count as
+#: isometric VIEWS to `cecad.sheetcheck` as well as renders; the last two are
+#: the top-down and bottom-up A3 rule 2 names, tipped 22 degrees off the pole
+#: so the surface still catches the light — a dead-flat plan view of a plate
+#: is one luminance and carries no form at all, which is exactly what A5.2's
+#: shadow half refuses.
+#:
+#: SHADOW DIRECTION IS CONSISTENT SHEET TO SHEET BY CONSTRUCTION: the light
+#: rig is `cecad.render.LIGHT_RIG`, a module constant, and every tile of
+#: every part is shaded by it. Nothing here chooses a light.
+MOSAIC_VIEWS = (
+    ("ISOMETRIC 1 — FRONT-LEFT", (26.0, -52.0)),
+    ("ISOMETRIC 2 — FRONT-RIGHT", (26.0, -128.0)),
+    ("ISOMETRIC 3 — REAR-RIGHT", (26.0, 128.0)),
+    ("ISOMETRIC 4 — REAR-LEFT", (26.0, 52.0)),
+    ("TOP-DOWN RENDER", (68.0, -90.0)),
+    ("BOTTOM-UP RENDER", (-68.0, -90.0)),
+)
+
+
+def render_mosaic_tiles(part, slug, outdir, size="A1"):
+    """The six shaded colour renders A3 rule 1 asks for, read back one by one.
+
+    Each is rendered at the pixel aspect of the cell it will be letterboxed
+    into (`cecad.sheets.mosaic_cell_sizes`), because a render shot at the
+    wrong aspect pays for the mismatch in white paper — the defect A3 rule 4
+    measures. `verify_png` refuses a blank, a near-blank or a truncated file,
+    so a tile that failed to draw stops the sheet instead of printing as an
+    empty box on a manufacturing drawing.
+
+    Returns [(path, caption), ...] and the measured facts per tile.
+    """
+    from cecad.render import render
+    from cecad.imgcheck import verify_png
+    from cecad.sheets import mosaic_cell_sizes
+    os.makedirs(outdir, exist_ok=True)
+    sizes = mosaic_cell_sizes(size, n=len(MOSAIC_VIEWS))
+    tiles, facts = [], []
+    for i, ((cap, cam), (w, h)) in enumerate(zip(MOSAIC_VIEWS, sizes), 1):
+        png = os.path.join(outdir, "%s-render%d.png" % (slug, i))
+        # WHITE PAPER BEHIND THE PART, not the renderer's grey gradient.
+        # A5.2 measures colour and shadow over the image's NON-WHITE pixels,
+        # and a grey backdrop is non-white: MEASURED on
+        # part:microduck-banana-pcb-locker, the gradient diluted the chroma
+        # of three of the six tiles to 2.89-4.90 % against the 5 % floor and
+        # lifted their 5th-percentile luminance to 0.90 of the median against
+        # a 0.70 ceiling, so three real shaded colour renders scored as
+        # neither coloured nor shadowed. On white the measurement sees the
+        # PART. It is also what a drawing sheet wants behind a view.
+        render(part, png, view=cam, W=w, H=h, ss=2, mode="pbr", bg=1.0,
+               verbose=False)
+        f = verify_png(png, what="mosaic tile %d (%s)" % (i, cap))
+        tiles.append((png, "%s — %d x %d px, RENDERED OFF THIS SOLID"
+                      % (cap, f["size"][0], f["size"][1])))
+        facts.append({"caption": cap, "png": png, "px": list(f["size"]),
+                      "camera_elev_azim": list(cam),
+                      "distinct_colors": f.get("distinct_colors"),
+                      "ink_frac": round(float(f.get("ink_frac", 0.0)), 5)})
+    return tiles, facts
+
+
+def feature_schedule_for(part, slug):
+    """THE A4 SCHEDULE — the same census the grader's denominator comes from.
+
+    `cecad.sheetcheck.enumerate_features` is the enumeration
+    `ce-cad/bin/sheetcheck` measures dim_coverage against. Printing a
+    schedule built from any OTHER list would be a sheet that dimensions
+    features nobody grades while the graded ones stay missing, so it is
+    imported and called here rather than re-derived. Its refusals travel with
+    it: A4 requires each to be printed on the sheet's own face.
+    """
+    from cecad import sheetcheck                              # noqa: PLC0415
+    shape = getattr(part, "shape", None) or getattr(part, "Shape", None)
+    feats, cds, meta = sheetcheck.enumerate_features(shape)
+    return {"features": feats, "cannot_determine": cds,
+            "tolerance": GENERAL_TOLERANCE,
+            "note": ("CENSUS cecad.sheetcheck.enumerate_features v%d — "
+                     "%d ROW(S), %d CANNOT DETERMINE, LISTED BELOW"
+                     % (sheetcheck.CENSUS_VERSION, len(feats), len(cds))),
+            "meta": meta}
+
+
 def render_reference(part, slug, outdir):
     """A shaded raster of the part, for the sheet's reference box.
 
@@ -370,6 +454,20 @@ def draw(slug):
         png, pfacts = render_reference(part, slug, outdir)
         out["reference_render"] = png
         out["reference_render_px"] = list(pfacts["size"])
+        tiles, tfacts = render_mosaic_tiles(part, slug, outdir)
+        out["mosaic_renders"] = tfacts
+        try:
+            sched = feature_schedule_for(part, slug)
+        except Exception as e:                                # noqa: BLE001
+            sched = None
+            out["feature_schedule_error"] = (
+                "cecad.sheetcheck.enumerate_features raised %s: %s — the "
+                "sheet carries no A4 schedule and dim_coverage will read the "
+                "shortfall" % (type(e).__name__, e))
+        out["schedule_features"] = None if sched is None else len(
+            sched["features"])
+        out["schedule_cannot_determine"] = None if sched is None else len(
+            sched["cannot_determine"])
         # The tolerance basis is a PROGRAMME fact, not a part fact — see
         # tools/drawing_facts.py, where every clause carries its source.
         bp = getattr(part, "blueprint", None)
@@ -378,7 +476,8 @@ def draw(slug):
         r = auto_blueprint(
             part, stem, manufacturing=True,
             source="ce-parts/%s/current/cad/part.py" % slug,
-            reference_image=png,
+            mosaic=tiles, schedule=sched,
+            reference_image=None,
             reference_caption="REFERENCE RENDER (ISO2) — rendered off this "
                               "solid, %d x %d px" % tuple(pfacts["size"]),
             dfm_extra=((TOLERANCE_DFM + VENDOR_DFM if out["bought"]
@@ -400,6 +499,10 @@ def draw(slug):
                               "details", "sec_rank", "verified", "reason")}
                             for a in r["attempts"]],
             "hidden_lines": r.get("hidden_lines"),
+            "mosaic_tiles": r.get("mosaic_tiles"),
+            "schedule_rows": r.get("schedule_rows"),
+            "schedule_cannot_determine_rows": r.get(
+                "schedule_cannot_determine"),
             "last_reason": r["attempts"][-1].get("reason", ""),
             "gave_up": {k: r["attempts"][-1].get(k)
                         for k in ("section", "dim", "holes", "details")},
