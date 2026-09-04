@@ -323,7 +323,7 @@ def main():
     assign_d = {cand[j]["refdes"]: math.hypot(bodies[i]["centre"][0] - cand[j]["pos_mm"][0],
                                               bodies[i]["centre"][1] - cand[j]["pos_mm"][1])
                 for i, j, _ in pairs}
-    local_lib, placed, shapes, dnp_bodies = {}, [], [], []
+    local_lib, placed, shapes, dnp_bodies, file_err = {}, [], [], [], []
     worst, worst_ref, over = 0.0, None, []
     for key, group in sorted(by_key.items()):
         i0, j0 = group[0]
@@ -332,12 +332,32 @@ def main():
         rep.Placement = placement(c0["pos_mm"][0], c0["pos_mm"][1],
                                   conv[side_of(c0)] * (c0["pos_rot_deg"] or 0.0),
                                   side_of(c0)).inverse().multiply(rep.Placement)
+        # BAKE the placement into the geometry before export. Import.export writes a
+        # Part::Feature's RAW geometry and drops the placement, so exporting the shape
+        # with its localising placement still attached writes the body at the position
+        # it had in the vendor's assembly -- which is exactly the defect that made
+        # out/pcb/hat/geometry/ unusable and that this tool exists to fix. Caught here
+        # by reading every file back (below); it was NOT caught by the round trip,
+        # which used the in-memory shape.
+        m = rep.Placement.toMatrix()
+        rep = rep.copy()
+        rep.Placement = App.Placement()
+        rep = rep.transformGeometry(m)
         lb = bb6(rep)
         # a localised body must sit on the origin: its xy centre is the pick point
         cx, cy = (lb[0] + lb[3]) / 2.0, (lb[1] + lb[4]) / 2.0
         lo = doc.addObject("Part::Feature", "loc_" + key.replace("-", "_")[:40])
         lo.Shape = rep
-        Import.export([lo], os.path.join(GEOL, key + ".step"))
+        path = os.path.join(GEOL, key + ".step")
+        Import.export([lo], path)
+        # READ IT BACK. A library file nobody re-opened is a claim, not a measurement.
+        back = Part.Shape()
+        back.read(path)
+        e_file = max(abs(a - b) for a, b in zip(bb6(back), lb))
+        if e_file > 1e-4:
+            file_err.append(dict(key=key, deviation_mm=round(e_file, 6),
+                                 in_memory=[round(v, 4) for v in lb],
+                                 read_back=[round(v, 4) for v in bb6(back)]))
         local_lib[key] = dict(representative=c0["refdes"], instances=[cand[j]["refdes"] for _, j in group],
                               qty=len(group), side=c0["pos_side"], value=c0.get("bom_value"),
                               footprint=c0.get("footprint"), lcsc=c0.get("bom_lcsc"),
@@ -387,6 +407,8 @@ def main():
             shapes.append(sh)
     P("ROUND TRIP over %d bodies: worst %.6f mm at %s; over 0.05 mm: %d"
       % (len(placed), worst, worst_ref, len(over)))
+    P("LIBRARY READ-BACK over %d exported files: %d disagree with the shape in memory%s"
+      % (len(local_lib), len(file_err), "" if not file_err else " -> " + str(file_err[:3])))
     P("localised library keys", len(local_lib),
       "worst local centre offset", round(max(max(abs(v["local_centre_offset_mm"][0]),
                                                  abs(v["local_centre_offset_mm"][1]))
@@ -470,6 +492,9 @@ def main():
                      for c in nomodel],
         dnp_bodies_excluded=dnp_bodies,
         unmatched_bodies=unmatched_body, unmatched_placements=unmatched_cand,
+        library_read_back=dict(files=len(local_lib), disagreeing=len(file_err), detail=file_err,
+                               what="every exported geometry-local/*.step re-opened and its bbox "
+                                    "compared with the shape that was written, to 1e-4 mm"),
         local_library=local_lib, placements=placed)
     json.dump(res, open(os.path.join(OUT, "pcba-measured.json"), "w"), indent=1)
 
