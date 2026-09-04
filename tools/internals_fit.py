@@ -123,6 +123,30 @@ def main():
     P("populated board rebuilt from the local library:", len(parts), "bodies "
       "(1 board +", len(meas["placements"]), "components)")
 
+    mesh_cache, solid_cache = {}, {}
+
+    def placed_mesh(r):
+        k = (r["mesh_file"], r["geom_index"], r["body"])
+        if k not in mesh_cache:
+            m = Mesh.Mesh(r["mesh_file"])
+            m.transform(App.Matrix(1000, 0, 0, 0, 0, 1000, 0, 0, 0, 0, 1000, 0, 0, 0, 0, 1))
+            m.Placement = App.Placement(App.Vector(*r["world_pos_mm"]), rot(r["world_quat_wxyz"]))
+            mesh_cache[k] = m
+        return mesh_cache[k]
+
+    def sewn(r):
+        """The placed mesh as a solid. Sewing is the expensive step, so it is done
+        once per geom and reused for both flips."""
+        k = (r["mesh_file"], r["geom_index"], r["body"])
+        if k not in solid_cache:
+            try:
+                shp = Part.Shape()
+                shp.makeShapeFromMesh(placed_mesh(r).Topology, MESH_TOL)
+                solid_cache[k] = (Part.makeSolid(shp) if shp.Shells else shp, None)
+            except Exception as e:
+                solid_cache[k] = (None, str(e))
+        return solid_cache[k]
+
     results = {}
     for flip in (0, 180):
         pl = App.Placement(App.Vector(*hat_row["world_pos_mm"]), rot(hat_row["world_quat_wxyz"]))
@@ -150,27 +174,22 @@ def main():
                 continue
             if not os.path.exists(r["mesh_file"]):
                 continue
-            m = Mesh.Mesh(r["mesh_file"])
-            m.transform(App.Matrix(1000, 0, 0, 0, 0, 1000, 0, 0, 0, 0, 1000, 0, 0, 0, 0, 1))
-            m.Placement = App.Placement(App.Vector(*r["world_pos_mm"]), rot(r["world_quat_wxyz"]))
+            m = placed_mesh(r)
             mb = m.BoundBox
             g = bbgap(cb, mb)
             if g > NEAR_MM:
                 continue
-            near.append((r["part"], r["mesh"], r["geom_index"], round(g, 4), m, mb))
+            near.append((r["part"], r["mesh"], r["geom_index"], round(g, 4), r, mb))
         P("flip %3d deg: bodies whose bbox comes within %.1f mm: %d"
           % (flip, NEAR_MM, len(near)))
 
-        for part, mesh, gi, g, m, mb in near:
-            try:
-                shp = Part.Shape()
-                shp.makeShapeFromMesh(m.Topology, MESH_TOL)
-                solid = Part.makeSolid(shp) if shp.Shells else shp
-            except Exception as e:
+        for part, mesh, gi, g, r, mb in near:
+            solid, err = sewn(r)
+            if solid is None:
                 hits.append(dict(part=part, mesh=mesh, geom=gi, bbox_gap_mm=g,
                                  verdict="CANNOT DETERMINE",
                                  why="the mesh would not sew into a solid at %.2f mm: %s"
-                                     % (MESH_TOL, e)))
+                                     % (MESH_TOL, err)))
                 continue
             vol, who = 0.0, []
             for label, s in world:
@@ -199,7 +218,7 @@ def main():
             total_interference_mm3=round(sum(h.get("interference_mm3", 0.0) for h in hits), 4),
             rows=hits)
         if flip == 0:
-            keep = world
+            keep, keepbb = world, cb
 
     # ---- render what we placed, and read it back ---------------------------
     try:
@@ -213,10 +232,8 @@ def main():
         for r in rows:
             if r is hat_row or not r.get("mesh_file") or not os.path.exists(r["mesh_file"]):
                 continue
-            m = Mesh.Mesh(r["mesh_file"])
-            m.transform(App.Matrix(1000, 0, 0, 0, 0, 1000, 0, 0, 0, 0, 1000, 0, 0, 0, 0, 1))
-            m.Placement = App.Placement(App.Vector(*r["world_pos_mm"]), rot(r["world_quat_wxyz"]))
-            if bbgap(Part.makeCompound([s for _, s in keep]).BoundBox, m.BoundBox) > 30.0:
+            m = placed_mesh(r)
+            if bbgap(keepbb, m.BoundBox) > 30.0:
                 continue
             try:
                 shp = Part.Shape()
@@ -224,7 +241,7 @@ def main():
                 items.append((shp, (0.72, 0.74, 0.76)))
             except Exception:
                 pass
-        for view in ("iso", "front", "right"):
+        for view in ("iso",):
             png = os.path.join(OUT, "hat-in-head-%s.png" % view)
             render(items, png, view=view, mode="pbr", W=1600, H=1100,
                    title="the POPULATED Robot HAT where our CAD puts the bare plate")
