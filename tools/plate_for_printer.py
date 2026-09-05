@@ -1,110 +1,129 @@
 #!/usr/bin/env python3
-"""plate_for_printer.py — bin-pack printed parts onto plates that FIT a given
-machine, slice each plate for real, and refuse rather than silently overflow.
+"""plate_for_printer.py — plate the printed parts for a given machine with
+BambuStudio, driven the way ce-slice drives it.
 
-Why this exists: out/print/plates/*.3mf were sliced for a Bambu H2S (340x320).
-The machine actually on the LAN is an X1 Carbon (256x256). Handing the H2S plate
-to the X1C returns BambuStudio error -52, "Some objects are located over the
-boundary of the heated bed" — a real failure, not a warning.
+DO NOT hand a leaf preset to `--load-filaments`. ce_slice.py's own header says why,
+and this file exists because I did it anyway:
 
-Strategy: greedy bin-pack by projected footprint under a fill target, slice each
-group, and on -52 SPLIT that group and retry. The fill target is a search
-parameter, not a constant: auto-orient rotates parts, so a pre-orientation
-footprint is an estimate and the slicer is the only authority.
+    "The CLI applies only the keys literally present in the file it is handed. It
+     does NOT resolve `inherits`. ... Hand the leaf straight to --load-filaments and
+     the slicer reports filament_settings_id = <leaf> (the preset WAS loaded) with
+     filament_density = 0 ... That is the entire root cause of every 0.00 g slice."
+
+Six plates were sliced that way. Every one carried `tray_info_idx=""` and
+`used_g="0.00"`, the printer had no filament identity to bind an AMS tray to, and
+the job ran at temperature with tray_now=255 and fed nothing. The slicer reported
+success throughout.
+
+So: presets are flattened through `ce_slice.presets().flatten()` — the project's
+own resolver — and BambuStudio does the arranging across as many plates as it
+needs. Nothing here reimplements slicing or packing.
 """
-import json, os, struct, subprocess, sys, tempfile
+import argparse, json, os, re, subprocess, sys, tempfile, zipfile
 
 BS = "/Applications/BambuStudio.app/Contents/MacOS/BambuStudio"
-PROF = "/Applications/BambuStudio.app/Contents/Resources/profiles/BBL"
+CE_SLICE = os.path.expanduser("~/dev/ce-slice")
 
 
-def footprint(path):
-    with open(path, "rb") as f:
-        f.read(80); n = struct.unpack("<I", f.read(4))[0]
-        xs = []; ys = []
-        for _ in range(n):
-            d = f.read(50)
-            for i in range(3):
-                x, y, _z = struct.unpack("<3f", d[12 + i * 12:24 + i * 12])
-                xs.append(x); ys.append(y)
-    return (max(xs) - min(xs)) * (max(ys) - min(ys))
+def flat_presets(work, machine, process, filament):
+    sys.path.insert(0, CE_SLICE)
+    import ce_slice as CS
+    globals()['CS'] = CS
+    idx = CS.presets()
+    try: idx.build()
+    except Exception: pass
+    out = {}
+    for kind, name in (("machine", machine), ("process", process), ("filament", filament)):
+        d = idx.flatten(kind, name)
+        if not d:
+            raise SystemExit("preset not found: %s / %s" % (kind, name))
+        d = dict(d); d["name"] = name; d["from"] = "system"
+        dens = d.get("filament_density")
+        if kind == "filament":
+            v = dens[0] if isinstance(dens, list) else dens
+            if not v or float(v) <= 0:
+                raise SystemExit("REFUSED: %s flattens to density %r — a 0 g slice would follow" % (name, dens))
+            print("  filament %s  id=%s density=%s" % (name, d.get("filament_id"), v))
+        out["_" + kind] = d
+        p = os.path.join(work, kind + ".json")
+        json.dump(d, open(p, "w"), indent=1)
+        out[kind] = p
+
+    # SECOND documented trap, also from ce_slice.py's header: no shipped process
+    # preset carries `curr_bed_type`, so the slicer assumes Cool Plate and refuses
+    # PETG/ABS/PA with return_code -61 "Filaments are not compatible with the plate
+    # type." ce-slice's _bed_type reads the plate temperatures out of the FILAMENT
+    # preset instead of hardcoding one, and distinguishes "declares zero for every
+    # plate" from "declares no plate at all" — the second is our flattening bug, not
+    # an unprintable filament.
+    bed, why = CS._bed_type(out["_filament"])
+    if bed is None:
+        raise SystemExit("REFUSED: no plate type for %s — %s" % (filament, why))
+    proc = dict(out["_process"]); proc["curr_bed_type"] = bed
+    json.dump(proc, open(out["process"], "w"), indent=1)
+    print("  bed type %s  (%s)" % (bed, why))
+    return out
 
 
-def slice_group(files, machine, process, filament, out3mf, outdir):
-    os.makedirs(outdir, exist_ok=True)
-    cmd = [BS,
-           "--load-settings", "%s;%s" % (machine, process),
-           "--load-filaments", filament,
-           "--arrange", "1", "--orient", "1", "--allow-rotations", "--ensure-on-bed",
-           "--slice", "0", "--export-3mf", out3mf, "--outputdir", outdir] + files
-    subprocess.run(cmd, capture_output=True, text=True, timeout=1800)
-    rj = os.path.join(outdir, "result.json")
-    if not os.path.exists(rj):
-        return None, "no result.json"
-    r = json.load(open(rj))
-    made = os.path.join(outdir, out3mf)
-    if r.get("return_code") == 0 and os.path.exists(made):
-        return r, None
-    return None, r.get("error_string", "return_code %s" % r.get("return_code"))
-
-
-def pack(files, bed_area, fill):
-    items = sorted(((footprint(f), f) for f in files), reverse=True)
-    plates = []
-    for a, f in items:
-        for p in plates:
-            if p["area"] + a <= bed_area * fill:
-                p["files"].append(f); p["area"] += a; break
-        else:
-            plates.append({"files": [f], "area": a})
-    return [p["files"] for p in plates]
+def verify(path):
+    """A slicer exit code of 0 is a claim. The evidence is inside the 3mf."""
+    z = zipfile.ZipFile(path)
+    si = [n for n in z.namelist() if n.endswith("slice_info.config")]
+    if not si: return [("no slice_info.config", False)]
+    t = z.read(si[0]).decode("utf-8", "ignore")
+    rows = []
+    for m in re.finditer(r'<filament\s+id="(\d+)"\s+tray_info_idx="([^"]*)"[^>]*used_m="([^"]*)"\s+used_g="([^"]*)"', t):
+        idx, um, ug = m.group(2), float(m.group(3)), float(m.group(4))
+        rows.append((("tray_info_idx=%r used_m=%.2f used_g=%.2f" % (idx, um, ug)), bool(idx) and ug > 0))
+    plates = len(set(re.findall(r'<plate>', t))) or len([n for n in z.namelist() if re.search(r'plate_\d+\.gcode$', n)])
+    return rows, plates
 
 
 def main():
-    import argparse
     ap = argparse.ArgumentParser()
     ap.add_argument("--stl-dir", required=True)
-    ap.add_argument("--machine", required=True)
-    ap.add_argument("--process", required=True)
-    ap.add_argument("--filament", required=True)
-    ap.add_argument("--bed", required=True, help="WxH in mm, e.g. 256x256")
+    ap.add_argument("--machine", default="Bambu Lab X1 Carbon 0.4 nozzle")
+    ap.add_argument("--process", default="0.20mm Standard @BBL X1C")
+    ap.add_argument("--filament", required=True, help="preset NAME, flattened here")
     ap.add_argument("--outdir", required=True)
-    ap.add_argument("--prefix", default="plate")
-    ap.add_argument("--dup", default="", help="comma-separated slugs to place twice")
-    ap.add_argument("--fill", type=float, default=0.50)
+    ap.add_argument("--out", default="plate.3mf")
+    ap.add_argument("--dup", default="")
+    ap.add_argument("--orient", type=int, default=1)
+    ap.add_argument("--only", default="", help="comma-separated slugs; default all")
     a = ap.parse_args()
 
-    W, H = (float(x) for x in a.bed.lower().split("x"))
     files = sorted(os.path.join(a.stl_dir, f) for f in os.listdir(a.stl_dir) if f.endswith(".stl"))
+    if a.only:
+        keep = set(a.only.split(","))
+        files = [f for f in files if os.path.basename(f)[:-4] in keep]
     for slug in [s for s in a.dup.split(",") if s]:
         p = os.path.join(a.stl_dir, slug + ".stl")
-        if os.path.exists(p): files.append(p)
-    print("%d objects, bed %.0fx%.0f = %.0f mm2, fill target %.0f%%"
-          % (len(files), W, H, W * H, 100 * a.fill))
+        if os.path.exists(p) and p in files: files.append(p)
 
-    queue = pack(files, W * H, a.fill)
-    done = []; n = 0
-    while queue:
-        grp = queue.pop(0)
-        n += 1
-        name = "%s-%02d.3mf" % (a.prefix, len(done) + 1)
-        r, err = slice_group(grp, a.machine, a.process, a.filament, name, a.outdir)
-        if err:
-            if len(grp) == 1:
-                print("  REFUSED %s: a single object does not fit — %s" % (os.path.basename(grp[0]), err))
-                continue
-            mid = len(grp) // 2
-            print("  plate of %d overflowed (%s) -> splitting %d/%d" % (len(grp), err, mid, len(grp) - mid))
-            queue.insert(0, grp[mid:]); queue.insert(0, grp[:mid])
-            continue
-        done.append((name, grp, r))
-        print("  %s  %2d objects  layer %.2f mm  OK" % (name, len(grp), r.get("layer_height", 0)))
-    print("\n%d plate(s) sliced into %s after %d attempts" % (len(done), a.outdir, n))
-    for name, grp, r in done:
-        print("  %s: %s" % (name, ", ".join(os.path.basename(g)[:28] for g in grp)))
-    json.dump({"plates": [{"file": nm, "objects": [os.path.basename(g) for g in grp]} for nm, grp, _ in done]},
-              open(os.path.join(a.outdir, "plates.json"), "w"), indent=2)
-    return 0 if done else 1
+    os.makedirs(a.outdir, exist_ok=True)
+    work = tempfile.mkdtemp(prefix="plate-")
+    print("%d objects -> %s" % (len(files), a.out))
+    pr = flat_presets(work, a.machine, a.process, a.filament)
+    cmd = [BS, "--load-settings", "%s;%s" % (pr["machine"], pr["process"]),
+           "--load-filaments", pr["filament"], "--arrange", "1", "--ensure-on-bed",
+           "--slice", "0", "--export-3mf", a.out, "--outputdir", a.outdir]
+    if a.orient: cmd += ["--orient", "1", "--allow-rotations"]
+    cmd += files
+    subprocess.run(cmd, capture_output=True, text=True, timeout=3600)
+    rj = os.path.join(a.outdir, "result.json")
+    r = json.load(open(rj)) if os.path.exists(rj) else {}
+    made = os.path.join(a.outdir, a.out)
+    if r.get("return_code") != 0 or not os.path.exists(made):
+        print("  SLICER REFUSED: %s (rc=%s)" % (r.get("error_string"), r.get("return_code")))
+        return 1
+    rows, plates = verify(made)
+    print("  sliced: %d plate(s) inside the 3mf" % plates)
+    ok = True
+    for desc, good in rows:
+        print("   %s  %s" % ("OK  " if good else "BAD ", desc)); ok &= good
+    print("  VERDICT: %s" % ("PASS — filament identity and mass are both present"
+                             if ok else "FAIL — the plate would print with no filament bound"))
+    return 0 if ok else 1
 
 
 if __name__ == "__main__":
