@@ -2,7 +2,7 @@ import json, os, struct, sys, time, zipfile, re, subprocess
 import numpy as np
 sys.path.insert(0, '/Users/leifrydenfalk/dev/ce-workshop/ce-print-scheduler')
 from scheduler import slicer, queue, config
-SCR=os.environ.get('SCR', os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'out', 'print', 'plates', 'H2D-COMPACT'))
+SCR='/private/tmp/claude-501/-Users-leifrydenfalk-dev/f5f13e03-e37d-40f7-b905-4faa16e201c7/scratchpad'
 STL=os.environ.get('STLDIR','/Users/leifrydenfalk/dev/ce-workshop/ce-designs/microduck/out/print/stl/oriented/PLA')
 fp=json.load(open(SCR+'/footprints.json'))
 GROUPS=[('head',['top-head-shell','bottom-head-shell','jaw','face-part','motor-support','yaw-roll-motion','neck-pitch-bracket','eye-ring','m12-lens-holder','neck-plate','neck-plate']),
@@ -12,7 +12,9 @@ GROUPS=[('head',['top-head-shell','bottom-head-shell','jaw','face-part','motor-s
         ('shins',['shin','shin']),('ankles',['ankle-left','ankle-right']),('feet',['foot-left','foot-right'])]
 MARGIN=3.0; GAP=float(__import__('os').environ.get('GAP','4')); BED=(300.0,320.0)
 SUPPORTED={'ankle-left','ankle-right','bottom-head-shell','foot-left','foot-right','motor-support','neck-pitch-bracket','power-support','top-head-shell','upper-leg-left','upper-leg-right','yaw-roll-motion'}
-PAD=float(__import__('os').environ.get('PAD','6'))  # extra clearance each side of a part that gets supports
+PAD=float(__import__('os').environ.get('PAD','6'))
+SKIP=set(x for x in __import__('os').environ.get('SKIP','').split(',') if x)
+GROUPS=[(g,[x for x in sl if x not in SKIP]) for g,sl in GROUPS]  # extra clearance each side of a part that gets supports
 W=BED[0]-2*MARGIN+GAP; H=BED[1]-2*MARGIN+GAP
 # ---- maxrects, best short side fit, rotation allowed
 class MaxRects:

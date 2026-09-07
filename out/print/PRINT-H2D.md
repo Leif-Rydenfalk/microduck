@@ -69,7 +69,13 @@ Sends 1–4 all paused at 0 % (stage 3) with print_error 05FE_8053. OrcaSlicer s
 
 So the plate prints on the **left 0.4 nozzle** at 0.20 mm, not the 0.6 the earlier sections assumed; times and grams above are superseded by the row in bold. OrcaSlicer refuses a mixed pair unless `bridge_line_width` ≤ the smaller nozzle, so it is 0.4. Each stopped send was at 0 % with nothing on the bed. The farm still knows one nozzle per machine; a per-extruder pair (`[0.4, 0.6]`) is what it needs to learn next, and until then the H2D record's notes say exactly this.
 
-## Known slicer warnings — printed through on purpose
+## The fifth send clumped at layer 18 — twice — and why: printing into air
+
+The fifth file ran to 15 % and paused with **0C00_803F "AI detected nozzle clumping"** at layer 18 (z 3.6 mm). Restarted from the screen after clearing the nozzle it did exactly the same at exactly the same layer. That is the file: `--no-check` let OrcaSlicer skip its empty-layer abort, and where a vendor mesh has a band with no closed contour but material above it (banana-pcb-locker 1.9–2.8 mm under a 3.8 mm top; bearing-roll 1.0–2.1 mm under a 3.0 mm top) the printer extrudes above nothing, the plastic balls up on the nozzle, and the camera stops the job. The lesson: **an empty-layer warning is a print failure waiting at that height, never something to print through.**
+
+**v2 plate (the one to run):** those three pieces dropped, `detect_thin_wall` on, sliced WITH every validity check — no empty layers, no toolpath conflicts, rc 0. 21 pieces: the 11 head pieces, trunk-shell-left/right, power-support, trunk-base, yaw2roll ×2, hip-bracket ×2, upper-leg-left, upper-leg-right. 9 h 07 m, 240 g, left 0.4 nozzle, `nozzle_diameter [0.4, 0.6]` Standard, no brim. Files: `plates/H2D-COMPACT/microduck-head-down-compact-v2.3mf`, `-v2.gcode.3mf`, `layout-v2.json`. Banana-pcb-locker and bearing-roll are shelved on the farm with the reason; banana is our own part.py and wants a clean re-export, bearing-roll is Pollen's mesh and wants a rebuild.
+
+## Known slicer warnings — the earlier plates, kept for the record
 
 OrcaSlicer's validity check aborts on "empty layer" bands in seven of the vendor meshes (bottom-head-shell 17.0–19.0 mm, jaw 28.4–28.9, neck-pitch-bracket 36.8–37.6, eye-ring 6.2–6.6, bearing-roll 1.0–2.1, banana-pcb-locker 1.9–2.8, trunk-base). admesh finds every one of those meshes watertight; the bands are features thinner than a 0.62 mm line (ribs, lips), which a 0.6 nozzle cannot print in any case. The plate was sliced with `--no-check` (it must be the FIRST argument, or Orca ignores it); the toolpath-conflict check was run separately on the same layout and found none. Expect those slivers to be missing on the printed parts.
 
