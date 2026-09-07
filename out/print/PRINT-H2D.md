@@ -2,7 +2,7 @@
 
 *2026-09-08, sent from the print farm (localhost:8770) as job-0001. Leif, verbatim: "start with printing parts of the head not the body", "use the h2d printer", "make it way more compact. remember no brim", "if youre able to print more of the body do that also on the same plate … from the head going down so we can actually build more and more connected together."*
 
-## What is on the plate — 24 pieces, 7 h 24 m, 273 g (OrcaSlicer's own numbers, second slice)
+## What is on the plate — 24 pieces, 9 h 01 m, 239 g (OrcaSlicer's own numbers, fifth slice, 0.4 nozzle)
 
 Order of inclusion followed the joint tree in `ce-assemblies/microduck/current/joints.json`: head (11 pieces), trunk (5), hips (6), then the upper legs one by one until the plate was full. **On the plate:** top-head-shell, bottom-head-shell, jaw, face-part, motor-support, yaw-roll-motion, neck-pitch-bracket, eye-ring, m12-lens-holder, neck-plate ×2 · trunk-shell-left, trunk-shell-right, power-support, trunk-base, banana-pcb-locker · yaw2roll ×2, bearing-roll ×2, hip-bracket ×2 · upper-leg-left, upper-leg-rigidity-plate ×1.
 **Not on it (next plate):** upper-leg-right, upper-leg-rigidity-plate ×1, shin ×2, ankle-left/right, foot-left/right (PLA) and the four TPU parts (no TPU loaded anywhere).
@@ -41,10 +41,10 @@ Bed used: 300 × 320 (the H2D's left-extruder reach), 3 mm margin, **6 mm gap, +
 | | |
 |---|---|
 | printer | Bambu Lab H2D "H2D AMS HT", 0947BJ610900152, 192.168.1.14, Black Ark / Trouble Maker, Shenzhen |
-| nozzles | **left 0.6 mm HS01, right 0.4 mm HS01** — read from the MQTT report (`device.nozzle.info`). The farm sliced for 0.4 by default; it now follows the fitted nozzle. The plate prints on the LEFT (0.6) extruder, `filament_map` 1 |
-| profiles | `Bambu Lab H2D 0.6 nozzle` · `0.18mm Balanced Quality @BBL H2D 0.6 nozzle` · `Bambu PLA Basic @BBL H2D 0.6 nozzle` (OrcaSlicer 2.4.2 — BambuStudio's CLI refuses the H2D with -66) |
+| nozzles | **left 0.4 mm HS01 (MQTT id 1), right 0.6 mm HS01 (id 0)**, both Standard flow. The plate prints on the LEFT (0.4) extruder, `filament_map` 1, `nozzle_diameter [0.4, 0.6]` |
+| profiles | `Bambu Lab H2D 0.4 nozzle` (nozzle_diameter overridden to [0.4, 0.6]) · `0.20mm Standard @BBL H2D` · `Bambu PLA Basic @BBL H2D` (OrcaSlicer 2.4.2 — BambuStudio's CLI refuses the H2D with -66) |
 | filament | AMS slot 2, black PLA, RFID-verified, 41 % left (~410 g for a 274 g plate). Slots 0/1 are "set by hand", amount unknown — the farm now takes `preferred_tray` |
-| plate | Textured PEI, first layer 0.3 mm / 0.62 mm wide, bed 55 °C |
+| plate | Textured PEI, first layer 0.2 mm / 0.5 mm wide, bed 55 °C |
 | brim | **no_brim, width 0** — the standing rule |
 | supports | normal(auto), on build plate only. tree(auto) refused this plate ("Potentially lost branch", critical) |
 | orientation | fixed by me — arrange/orient OFF in the slicer. `stl/oriented-repaired/PLA` is the print pose; `stl/PLA` is the MJCF model pose and must not be sliced as-is (1 mm plates on edge) |
@@ -55,9 +55,19 @@ Bed used: 300 × 320 (the H2D's left-extruder reach), 3 mm margin, **6 mm gap, +
 
 **Orientation.** The plate 3MF from 2026-09-02 (`plates/PLA/microduck-PLA.3mf`) has the top-head-shell on its side (116 mm tall) and the jaw standing on its 28 mm face — BambuStudio's auto-orient, not a choice. PRINT.md's rules (dome up, beak underside down, 8 mm plate flat, cradle on its back) are what is on this plate.
 
-## The first send paused at 0 % — 05FE_8053 — and why
+## Five sends before it ran — 05FE_8053, decoded from the slicer's own hms table
 
-The first file declared `nozzle_diameters 0.6,0.6` (the stock "H2D 0.6 nozzle" machine profile assumes both). The printer has 0.6 on the left and 0.4 on the right, and it paused at stage 3 with print_error 05FE_8053 (Bambu's nozzle-mismatch hold). The job was stopped at 0 % (nothing printed) and re-sliced with the machine preset's `nozzle_diameter` set to `["0.6","0.4"]`. OrcaSlicer then refuses the 0.6 process outright ("Bridge line width must not exceed nozzle diameter" — it checks bridge width against the smaller nozzle), so `bridge_line_width` is 0.4 on this plate and every other width stays the 0.6 profile's 0.62. Second send: 26 622 s (7 h 24 m), 273 g, `nozzle_diameters 0.6,0.4`, filament on extruder 1 (left). The farm still knows one nozzle per machine; a per-extruder pair is the next thing to teach it.
+Sends 1–4 all paused at 0 % (stage 3) with print_error 05FE_8053. OrcaSlicer ships the text (`Resources/hms/*.json`): **"The left nozzle is not matched with slicing file. Please initiate the print after re-slicing, or continue printing after replacing the correct nozzle."** What the printer reports over MQTT (`device.nozzle.info`): id 0 = 0.6 HS01, id 1 = 0.4 HS01. Bambu numbers the RIGHT extruder 0 and the LEFT 1, so **the left nozzle is the 0.4**, and the one AMS feeds the left extruder (its tray sits on extruder id 1). Every file that has ever run on this machine (read off its SD card over FTPS) declares `volume_type="Standard"`, so HS01 is a standard-flow nozzle, not high-flow.
+
+| send | file declared | result |
+|---|---|---|
+| 1 | 0.6,0.6 Standard (stock "H2D 0.6 nozzle" profile) | paused 05FE_8053 |
+| 2 | 0.6,0.4 Standard, filament on extruder 1 | paused |
+| 3 | 0.6,0.4 High Flow | paused |
+| 4 | 0.4,0.6 High Flow, 0.20mm Standard @BBL H2D | paused |
+| **5** | **0.4,0.6 Standard, 0.20mm Standard @BBL H2D, filament_map 1** | **printing — layer 1 at 01:30, tray 2 (black), 9 h 01 m, 239 g** |
+
+So the plate prints on the **left 0.4 nozzle** at 0.20 mm, not the 0.6 the earlier sections assumed; times and grams above are superseded by the row in bold. OrcaSlicer refuses a mixed pair unless `bridge_line_width` ≤ the smaller nozzle, so it is 0.4. Each stopped send was at 0 % with nothing on the bed. The farm still knows one nozzle per machine; a per-extruder pair (`[0.4, 0.6]`) is what it needs to learn next, and until then the H2D record's notes say exactly this.
 
 ## Known slicer warnings — printed through on purpose
 
