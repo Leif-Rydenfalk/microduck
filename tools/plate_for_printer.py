@@ -25,7 +25,7 @@ BS = "/Applications/BambuStudio.app/Contents/MacOS/BambuStudio"
 CE_SLICE = os.path.expanduser("~/dev/ce-slice")
 
 
-def flat_presets(work, machine, process, filament):
+def flat_presets(work, machine, process, filament, brim=0.0):
     sys.path.insert(0, CE_SLICE)
     import ce_slice as CS
     globals()['CS'] = CS
@@ -60,6 +60,11 @@ def flat_presets(work, machine, process, filament):
     if bed is None:
         raise SystemExit("REFUSED: no plate type for %s — %s" % (filament, why))
     proc = dict(out["_process"]); proc["curr_bed_type"] = bed
+    if brim > 0:
+        proc["brim_type"] = "outer_only"
+        proc["brim_width"] = str(brim)
+        proc["brim_object_gap"] = "0"
+        print("  brim %.1f mm, outer_only (adhesion fix)" % brim)
     json.dump(proc, open(out["process"], "w"), indent=1)
     print("  bed type %s  (%s)" % (bed, why))
     return out
@@ -90,6 +95,10 @@ def main():
     ap.add_argument("--dup", default="")
     ap.add_argument("--orient", type=int, default=1)
     ap.add_argument("--only", default="", help="comma-separated slugs; default all")
+    ap.add_argument("--brim", type=float, default=0.0,
+                    help="brim width in mm. Two prints detached and spaghettied (layer 5 and "
+                         "layer 25) on small-footprint parts - a thin eye-ring and a lens holder. "
+                         "A brim is the cheap fix for a part that will not stay down.")
     a = ap.parse_args()
 
     files = sorted(os.path.join(a.stl_dir, f) for f in os.listdir(a.stl_dir) if f.endswith(".stl"))
@@ -103,16 +112,20 @@ def main():
     os.makedirs(a.outdir, exist_ok=True)
     work = tempfile.mkdtemp(prefix="plate-")
     print("%d objects -> %s" % (len(files), a.out))
-    pr = flat_presets(work, a.machine, a.process, a.filament)
+    pr = flat_presets(work, a.machine, a.process, a.filament, brim=a.brim)
+    # BambuStudio picks the writer from the EXTENSION. Handed a bare name it opens
+    # "<name>.tmp", fails with "Unable to open the file", and returns 243 with an
+    # empty result.json -- which surfaces here as the uninformative "rc=None".
+    export_name = a.out if a.out.endswith(".3mf") else a.out + ".3mf"
     cmd = [BS, "--load-settings", "%s;%s" % (pr["machine"], pr["process"]),
            "--load-filaments", pr["filament"], "--arrange", "1", "--ensure-on-bed",
-           "--slice", "0", "--export-3mf", a.out, "--outputdir", a.outdir]
+           "--slice", "0", "--export-3mf", export_name, "--outputdir", os.path.abspath(a.outdir)]
     if a.orient: cmd += ["--orient", "1", "--allow-rotations"]
     cmd += files
     subprocess.run(cmd, capture_output=True, text=True, timeout=3600)
     rj = os.path.join(a.outdir, "result.json")
     r = json.load(open(rj)) if os.path.exists(rj) else {}
-    made = os.path.join(a.outdir, a.out)
+    made = os.path.join(a.outdir, export_name)
     if r.get("return_code") != 0 or not os.path.exists(made):
         print("  SLICER REFUSED: %s (rc=%s)" % (r.get("error_string"), r.get("return_code")))
         return 1

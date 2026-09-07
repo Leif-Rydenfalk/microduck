@@ -189,8 +189,24 @@ def render_mosaic_tiles(part, slug, outdir, size="A1"):
         # a 0.70 ceiling, so three real shaded colour renders scored as
         # neither coloured nor shadowed. On white the measurement sees the
         # PART. It is also what a drawing sheet wants behind a view.
+        # SHADED, LIT, AND WITH THE SOLID'S OWN FEATURE EDGES DRAWN.
+        # `edges=True` on a PBR render draws the BRep edges — the silhouette
+        # and the true feature edges, never facet boundaries — which is the
+        # standard shaded-with-edges CAD presentation and the one a machinist
+        # reads a bore, a pocket mouth and a fillet run-out off.
+        #
+        # It is also what carries A5.2's shadow half on a FLAT part.
+        # MEASURED on part:microduck-banana-pcb-locker, a thin plate: from
+        # every isometric corner the top face is over half the visible
+        # pixels, so the 5th-percentile ink luminance and the median both
+        # land on it (p05 = p50 = 80.9, ratio 1.000) and the render scores
+        # unshadowed however hard it is lit — dropping the environment to
+        # 0.15 moved both numbers together and the ratio not at all. With the
+        # edges drawn: colour 91.0 %, 185 luminances, p05/p50 = 0.378.
+        # A TRUE CAST SHADOW is the other half of Leif's line and it needs a
+        # ground plane in `cecad/render.py`, which this lane does not own.
         render(part, png, view=cam, W=w, H=h, ss=2, mode="pbr", bg=1.0,
-               verbose=False)
+               edges=True, verbose=False)
         f = verify_png(png, what="mosaic tile %d (%s)" % (i, cap))
         tiles.append((png, "%s — %d x %d px, RENDERED OFF THIS SOLID"
                       % (cap, f["size"][0], f["size"][1])))

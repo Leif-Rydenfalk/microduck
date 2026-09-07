@@ -1,6 +1,6 @@
 {
  "$schema": "microduck/out/drawings/index.json v1",
- "generated": "2026-09-04 23:21:06",
+ "generated": "2026-09-05 01:57:12",
  "standard": "docs/MANUFACTURING-REQUIREMENTS.md A + A2 + A3 + A4",
  "verdict_note": "EVERY ROW CARRIES TWO VERDICTS AND NO BARE ONE. build_verdict: cad/part.py built a solid, a sheet emitted, and every number on it re-measured off that solid. sheet_verdict: the sheet graded against MANUFACTURING-REQUIREMENTS A2+A3+A4 by ce-cad/bin/sheetcheck. ONLY sheet_verdict answers 'can a machinist cut this part from this sheet'.",
  "generator": "tools/collect_drawings.py",
@@ -426,7 +426,11 @@
   {
    "slug": "microduck-banana-pcb-locker",
    "kind": "drawing",
-   "generated": "2026-09-03 04:58:48",
+   "build_verdict": "PASS",
+   "sheet_verdict": "FAIL",
+   "sheet_verdict_why": "coverage FAIL, curve_density FAIL, dim_coverage FAIL, empty_rect FAIL, font FAIL, iso FAIL, renders FAIL",
+   "verdict_note": "build_verdict grades THE PART AND ITS READ-BACK (cad/part.py built a solid, a sheet emitted, and every number on the sheet re-measured off that solid). sheet_verdict grades THE SHEET against docs/MANUFACTURING-REQUIREMENTS.md A2+A3+A4 via ce-cad/bin/sheetcheck (line_ratio, coverage, empty_rect, font, iso, renders, curve_density, dim_coverage). ONLY sheet_verdict answers 'can a machinist cut this part from this sheet'. There is deliberately no bare 'verdict' key.",
+   "generated": "2026-09-04 23:30:05",
    "origin": "generated",
    "record_verdict": "PASS",
    "title": "Microduck banana PCB locker \u2014 the 'banana_pcb_locker' mesh of Pollen's MJCF: 54 x 1.5 x 6.6 mm retaining bar with two \u00d82.17 M2 holes in \u00d84 eyes, a 12 mm notch and two 2.5 x 2.3 x 2 key tabs",
@@ -441,6 +445,20 @@
    "faces": 82,
    "kind_why": "cad/part.py constructs a parametric solid",
    "bought": false,
+   "design_radii_named_in_builder": [
+    1.0,
+    2.0
+   ],
+   "arc_radii_on_solid": [
+    1.09
+   ],
+   "design_radii_gap": "RADII NAMED IN cad/part.py THAT ARE NOT CIRCULAR EDGES ON THIS SOLID: 1.00 mm, 2.00 mm. cecad.inspect.arc_radii measures 1 ARC(S) HERE AND EVERY ONE IS DIMENSIONED ABOVE. NO DIMENSION IS MISSING: A LEADER NEEDS AN EDGE. THE GEOMETRY FILE CARRIES THE SURFACE.",
+   "views_chosen": [
+    "front",
+    "top"
+   ],
+   "views_primary": "front",
+   "views_note": "ORTHOGRAPHIC VIEWS: 2 (FRONT, TOP) \u2014 cecad.autosheet.choose_views ON THE 54.015 x 3.800 x 6.626 mm BBOX, THIN/LONG 0.0704. A THIRD VIEW WOULD BE THIS PART EDGE-ON, WHICH A.2 ORDERS SUPPRESSED; THE SECTION AND THE ISOMETRIC CARRY IT.",
    "reference_render": "out/drawings/microduck-banana-pcb-locker/microduck-banana-pcb-locker-ref.png",
    "reference_render_px": [
     900,
@@ -449,8 +467,8 @@
    "dxf": "out/drawings/microduck-banana-pcb-locker/microduck-banana-pcb-locker.dxf",
    "svg": "out/drawings/microduck-banana-pcb-locker/microduck-banana-pcb-locker.svg",
    "pdf": "out/drawings/microduck-banana-pcb-locker/microduck-banana-pcb-locker.pdf",
-   "size": "A2",
-   "scale": "1:1",
+   "size": "A1",
+   "scale": "5:1",
    "views": [
     "front",
     "top",
@@ -461,19 +479,23 @@
    "details": [
     "A: thinnest wall 0.92 mm"
    ],
+   "details_dropped": [],
    "dfm": [
     "ORIENTATION: laid flat (54 x 4 x 7 mm)",
-    "THINNEST WALL: 0.92 mm (floor 0.80 mm = 2 perimeters @ 0.4 mm nozzle)",
+    "THINNEST WALL, WHOLE SOLID (RAY MINIMUM): 0.9210 mm \u2014 a distance through material, NOT a printable wall where it falls on an edge, a fillet run-out or a chamfer tip. Printability is judged on the next line.",
+    "PRINTABLE MINIMUM WALL: 0.9236 mm (smallest median wall over a 1.1100 mm neighbourhood, cecad.inspect.printable_wall_detail) against a 0.8000 mm floor (2 perimeters @ 0.4 mm nozzle): VERDICT PASS",
     "2 horizontal bore(s) bridge at the crown: ream any bearing or press-fit bore to size",
     "FILAMENT: PLA, ~1 g (modelled), 34 layers @ 0.2 mm",
     "TOLERANCE BASIS, IN-HOUSE: CANNOT DETERMINE. Every Bambu on this farm records tolerance_mm: null, cite \"no coupon printed and measured on this machine\" (ce-machines/bambu-h2s-*, bambu-h2d-*/capabilities.json, read 2026-09-02), and Bambu Lab's own H2D Pro spec sheet carries no dimensional-accuracy line. DIMENSIONS HERE ARE NOMINAL AS MODELLED.",
-    "TOLERANCE BASIS, OUTSOURCED: JLC3DP +/-0.3 mm FDM (jlc3dp.com, ce-machines/farm-jlc3dp); Hubs +/-0.5%, floor +/-0.5 mm (hubs.com/3d-printing/, ce-machines/farm-hubs). Apply the route's figure, not both. The +/-0.2 mm in cecad/machining.py fdm is a repo planning constant with no vendor cite and is NOT used here. One printed and measured coupon closes this note.",
-    "NO ISO 286 CLASS IS DECLARED ON ANY BORE: FDM cannot be sized to one (H7/p6 at O3 is a 0.010 mm band). REAM bearing and press-fit bores after printing."
+    "TOLERANCE BASIS, OUTSOURCED: JLC3DP \u00b10.3 mm FDM (jlc3dp.com, ce-machines/farm-jlc3dp); Hubs \u00b10.5%, floor \u00b10.5 mm (hubs.com/3d-printing/, ce-machines/farm-hubs). Apply the route's figure, not both. The \u00b10.2 mm in cecad/machining.py fdm is a repo planning constant with no vendor cite and is NOT used here. One printed and measured coupon closes this note.",
+    "NO ISO 286 CLASS IS DECLARED ON ANY BORE: FDM cannot be sized to one (H7/p6 at \u00d83 is a 0.010 mm band). REAM bearing and press-fit bores after printing.",
+    "RADII NAMED IN cad/part.py THAT ARE NOT CIRCULAR EDGES ON THIS SOLID: 1.00 mm, 2.00 mm. cecad.inspect.arc_radii measures 1 ARC(S) HERE AND EVERY ONE IS DIMENSIONED ABOVE. NO DIMENSION IS MISSING: A LEADER NEEDS AN EDGE. THE GEOMETRY FILE CARRIES THE SURFACE.",
+    "ORTHOGRAPHIC VIEWS: 2 (FRONT, TOP) \u2014 cecad.autosheet.choose_views ON THE 54.015 x 3.800 x 6.626 mm BBOX, THIN/LONG 0.0704. A THIRD VIEW WOULD BE THIS PART EDGE-ON, WHICH A.2 ORDERS SUPPRESSED; THE SECTION AND THE ISOMETRIC CARRY IT."
    ],
    "density": 6,
    "verified": true,
    "verify_sheet": true,
-   "attempts": 4,
+   "attempts": 5,
    "attempt_log": [
     {
      "size": "A3",
@@ -487,7 +509,7 @@
      "details": true,
      "sec_rank": 0,
      "verified": false,
-     "reason": "the notes column fits on the paper   \u2014 0.65 mm of notes below the frame \u2014 the sheet cannot hold what it was told to say; it needs bigger paper, not fewer facts; no two labels are printed on top of each other   \u2014 '2x \u00d82.17 THRU' over 'X \u2192   Y \u2191'; '   press-fit bore to size' over 'MICRODUCK-BANANA-PCB-LOCKER'; '4. FILAMENT: PLA, ~1 g (modelled), 34 layers @ 0.2 mm' over 'MICRODUCK-BANANA-PCB-LOCKER'; '5. TOLERANCE BASIS, IN-HOUSE: CANNOT DETERMINE. Every Bambu on this' over 'A'; every view's annotation is inside the drawing area   \u2014 6.81 mm outside \u2014 front: '6.63'"
+     "reason": "the notes column fits on the paper   \u2014 81.25 mm of notes below the frame \u2014 the sheet cannot hold what it was told to say; it needs bigger paper, not fewer facts; no two labels are printed on top of each other   \u2014 '4' over '4. 2 horizontal bore(s) bridge at the crown: ream any bearing or'; '2x \u00d82.17 THRU' over 'X \u2192   Y \u2191'; '   mm, AT X=26.55, Y=35.01 \u2014 A SCAN OF ONE CUT, NOT THE PART MINIMUM.' over 'REV'; '8. FRONT VIEW: hidden lines SUPPRESSED: all 768 edge samples still' over 'MICRODUCK-BANANA-PCB-LOCKER'; every view's annotation is inside the drawing area   \u2014 6.81 mm outside \u2014 front: '6.63'"
     },
     {
      "size": "A3",
@@ -501,7 +523,7 @@
      "details": true,
      "sec_rank": 0,
      "verified": false,
-     "reason": "the notes column fits on the paper   \u2014 0.65 mm of notes below the frame \u2014 the sheet cannot hold what it was told to say; it needs bigger paper, not fewer facts; every extra (isometric / detail) is inside the frame   \u2014 2.50 mm outside the frame / into the title block \u2014 DETA: 'DETAIL A'; no two labels are printed on top of each other   \u2014 '   press-fit bore to size' over 'MICRODUCK-BANANA-PCB-LOCKER'; '4. FILAMENT: PLA, ~1 g (modelled), 34 layers @ 0.2 mm' over 'MICRODUCK-BANANA-PCB-LOCKER'; '5. TOLERANCE BASIS, IN-HOUSE: CANNOT DETERMINE. Every Bambu on this' over 'A'; '   farm records tolerance_mm: null, cite \"no coupon printed and' over 'SCALE'"
+     "reason": "the notes column fits on the paper   \u2014 65.75 mm of notes below the frame \u2014 the sheet cannot hold what it was told to say; it needs bigger paper, not fewer facts; every extra (isometric / detail) is inside the frame   \u2014 2.50 mm outside the frame / into the title block \u2014 DETA: 'DETAIL A'; no two labels are printed on top of each other   \u2014 '4' over '   measured on this machine\" (ce-machines/bambu-h2s-*,'; 'PRINT / DFM' over 'MICRODUCK-BANANA-PCB-LOCKER'; '1. ORIENTATION: laid flat (54 x 4 x 7 mm)' over 'SCALE'; '   through material, NOT a printable wall where it falls on an edge,' over '1:1'"
     },
     {
      "size": "A2",
@@ -515,12 +537,26 @@
      "details": true,
      "sec_rank": 0,
      "verified": false,
-     "reason": "no two labels are printed on top of each other   \u2014 '2x \u00d82.17 THRU' over 'X \u2192   Y \u2191'"
+     "reason": "no two labels are printed on top of each other   \u2014 '2x \u00d82.17 THRU' over 'X \u2192   Y \u2191'; '   and press-fit bores after printing.' over 'MICRODUCK-BANANA-PCB-LOCKER'; '9. RADII NAMED IN cad/part.py THAT ARE NOT CIRCULAR EDGES ON' over 'MICRODUCK-BANANA-PCB-LOCKER'; '9. RADII NAMED IN cad/part.py THAT ARE NOT CIRCULAR EDGES ON' over 'A'"
     },
     {
      "size": "A2",
      "scale": [
       1,
+      1
+     ],
+     "section": true,
+     "dim": true,
+     "holes": true,
+     "details": true,
+     "sec_rank": 0,
+     "verified": false,
+     "reason": "no two labels are printed on top of each other   \u2014 '   and press-fit bores after printing.' over 'MICRODUCK-BANANA-PCB-LOCKER'; '9. RADII NAMED IN cad/part.py THAT ARE NOT CIRCULAR EDGES ON' over 'MICRODUCK-BANANA-PCB-LOCKER'; '9. RADII NAMED IN cad/part.py THAT ARE NOT CIRCULAR EDGES ON' over 'A'; '   measures 1 ARC(S) HERE AND EVERY ONE IS DIMENSIONED ABOVE.' over 'SCALE'"
+    },
+    {
+     "size": "A1",
+     "scale": [
+      5,
       1
      ],
      "section": true,
@@ -579,13 +615,10 @@
      1400,
      990
     ],
-    "ink_frac": 0.06028,
-    "max_stroke": 0.9821,
-    "distinct_colors": 2919
+    "ink_frac": 0.05183,
+    "max_stroke": 0.9883,
+    "distinct_colors": 3367
    },
-   "seconds": 7.9,
-   "build_verdict": "PASS",
-   "sheet_verdict": "FAIL",
    "sheet_rules": {
     "line_ratio": "PASS",
     "coverage": "FAIL",
@@ -602,13 +635,35 @@
     "A3": "FAIL",
     "A4": "FAIL"
    },
+   "sheet_measurements": {
+    "line_ratio": 3.0342,
+    "occupancy_pct": 26.404,
+    "largest_empty_rect_pct": 34.2193,
+    "font_min_mm": 1.7,
+    "iso_count": 2,
+    "shaded_render_count": 1,
+    "colour_and_shadow_render_count": 1,
+    "density_cells_over": 4,
+    "features_enumerated": 23,
+    "features_dimensioned": 13,
+    "dim_coverage_pct": 56.522
+   },
+   "sheet_failing_rules": [
+    "coverage",
+    "empty_rect",
+    "font",
+    "iso",
+    "renders",
+    "curve_density",
+    "dim_coverage"
+   ],
+   "seconds": 161.0,
    "sheet_features_enumerated": 23,
    "sheet_features_dimensioned": 13,
    "sheet_colour_shadow_renders": 1,
    "sheet_verdict_source": "ce-cad/bin/sheetcheck --all, measured 2026-09-04 22:56:40",
-   "sheet_verdict_why": "coverage FAIL, curve_density FAIL, dim_coverage FAIL, empty_rect FAIL, font FAIL, iso FAIL, renders FAIL",
-   "result_mtime": "2026-09-03 04:58:55",
-   "svg_mtime": "2026-09-03 04:58:53",
+   "result_mtime": "2026-09-04 23:32:46",
+   "svg_mtime": "2026-09-04 23:31:45",
    "state": "drawing",
    "record": {
     "title": "Microduck banana PCB locker \u2014 the 'banana_pcb_locker' mesh of Pollen's MJCF: 54 x 1.5 x 6.6 mm retaining bar with two \u00d82.17 M2 holes in \u00d84 eyes, a 12 mm notch and two 2.5 x 2.3 x 2 key tabs",

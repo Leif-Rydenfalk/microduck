@@ -100,6 +100,25 @@ def _y_wall(x):
     return Y_WALL0 + (x - X_OPEN) * DRAFT
 
 
+# The drafted -y wall crosses the R_OUT outline circle about A0 at x 66.68
+# (_y_wall = -12.2): 0.009 mm OUTSIDE the circle at the rim (x 66.5, probe D
+# reads -12.21 there) and inside it beyond. Lofting plate sections on both
+# sides of that crossing flips the wall/arc corner from a 0.009 mm step to a
+# junction and the ruled skin between them self-intersects in a 0.15 mm2
+# sliver (out/sim-evidence/fea_meshability_microduck-upper-leg-left.json:
+# gmsh surface 350 at (66.6, -12.2, 0), 6 sizes x 12 strategies refused).
+# Fix, 2026-09-04: inside the plate the wall is held at least JOIN_MIN inside
+# the circle so wall and arc always meet at a real corner, and the side-wall
+# sheet ends ON the rim plane with that same wall so the two solids share a
+# face instead of a 0.1 mm tangent overlap. Largest move against the measured
+# skin: 0.049 mm at x 66.5, tapering to 0 at x 42.5 and at x 67.44.
+JOIN_MIN = 0.04
+
+
+def _y_wall_plate(x):
+    return max(_y_wall(x), -R_OUT + JOIN_MIN)
+
+
 def _z_top(x, y=0.0):
     return Z_TOP0 - (x - X_OPEN) * DRAFT + TILT_Y * y
 
@@ -114,12 +133,16 @@ def _outline(x, d, n_arc=28, n_bend=16):
     outer skin, d = 1 the rim's inner face, d = 4 the flat back face.
     Same vertex count for every (x, d) so the sections can be lofted."""
     r = R_OUT - d
-    yw = _y_wall(x) + d
+    yw = _y_wall_plate(x) + d
     phi = math.degrees(math.atan2(A1[1] - A0[1], A1[0] - A0[0]))   # A0 -> A1 direction
     t_tan = phi - 90.0                                              # right-hand tangent
     pts = []
-    # circle A0: from the wall tangent (180) down and round to the tangent line
-    pts += _arc(A0, r, 180.0, 360.0 + t_tan, n_arc)
+    # circle A0: from where the wall line y = yw cuts it (a real corner, zj > 0
+    # by construction) down and round to the tangent line; the junction itself
+    # is the section's last vertex so the count stays constant
+    zj = math.sqrt(r * r - yw * yw)
+    th0 = math.degrees(math.atan2(zj, yw))
+    pts += _arc(A0, r, th0, 360.0 + t_tan, n_arc)[1:]
     # circle A1: from the tangent line up to where the (tilted) top line cuts it
     t = 60.0
     for _ in range(40):                                             # solve z(t) = z_top(y(t))
@@ -133,15 +156,16 @@ def _outline(x, d, n_arc=28, n_bend=16):
     rb = (BEND_C[0] - yw)
     pts.append((BEND_C[0], _z_top(x, BEND_C[0]) - d))
     pts += _arc(BEND_C, rb, 90.0, 180.0, n_bend)[1:]
-    pts.append((yw, A0[1]))
+    pts.append((yw, zj))
     return pts
 
 
-def _l_profile(x, y_far=34.0, z_low=-8.0, n_bend=24):
+def _l_profile(x, y_far=34.0, z_low=-8.0, n_bend=24, yw=None):
     """Closed (y, z) profile of the bent side-wall/top-flange sheet at depth
     x: outer skin, then the inner skin T_WALL inside. Over-long on both
-    legs; the measured edge curves trim it afterwards."""
-    yw = _y_wall(x)
+    legs; the measured edge curves trim it afterwards. `yw` overrides the
+    wall's outer y (the rim-plane section takes the plate's own wall)."""
+    yw = _y_wall(x) if yw is None else yw
     rb = BEND_C[0] - yw
     out = [(yw, z_low), (yw, BEND_C[1])]
     out += _arc(BEND_C, rb, 180.0, 90.0, n_bend)[1:]
@@ -168,10 +192,19 @@ def build(doc, params=None):
         secs.append((_outline(x, d), x))
     p.loft(secs, axis="x", smooth=False, ruled=False)
     # 2. hollow it: the cup interior between the rim's inner face and the plate
-    p.loft([(_outline(X_RIM - 0.2, T_WALL), X_RIM - 0.2), (_outline(X_PLATE_IN, T_WALL), X_PLATE_IN)],
-           axis="x", smooth=False, ruled=True, op="cut")
-    # 3. the bent side wall + top flange sheet, open face to the rim
-    p.loft([(_l_profile(X_OPEN), X_OPEN), (_l_profile(X_RIM + 0.1), X_RIM + 0.1)],
+  #    The ruled cut must pass EXACTLY through the rim-plane section (so the
+    #    cup wall at x 66.5 is the sheet's inner skin, not a 0.007 mm step), and
+    #    it must start 0.2 mm before the rim plane (a coplanar cut leaves a
+    #    zero-thickness skin). A third section twisted the ruled loft (measured
+    #    2026-09-04: +466 mm3, x 66.55..66.7 nearly solid), so the first section
+    #    is the rim-plane section extrapolated back 0.2 mm vertex by vertex.
+    sec_rim, sec_in = _outline(X_RIM, T_WALL), _outline(X_PLATE_IN, T_WALL)
+    k = 0.2 / (X_PLATE_IN - X_RIM)
+    sec_pre = [(a[0] + (a[0] - b[0]) * k, a[1] + (a[1] - b[1]) * k) for a, b in zip(sec_rim, sec_in)]
+    p.loft([(sec_pre, X_RIM - 0.2), (sec_in, X_PLATE_IN)], axis="x", smooth=False, ruled=True, op="cut")
+    # 3. the bent side wall + top flange sheet, ending ON the rim plane with
+    #    the plate's own wall (see JOIN_MIN)
+    p.loft([(_l_profile(X_OPEN), X_OPEN), (_l_profile(X_RIM, yw=_y_wall_plate(X_RIM)), X_RIM)],
            axis="x", smooth=False, ruled=True)
     # 4. trim the wall's bottom edge (prism along y takes (z, x) points)
     cut = [(z, x) for x, z in WALL_BOTTOM] + [(-14.0, WALL_BOTTOM[-1][0]), (-14.0, WALL_BOTTOM[0][0])]

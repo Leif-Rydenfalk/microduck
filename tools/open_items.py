@@ -55,7 +55,8 @@ SKIP_PREFIX = ("reference/", "out/handover/", "images/")
 # population. A census that includes its own census is not a census — the same
 # rule as "a check that can agree with what it checks is not a check".
 SKIP_FILES = {"out/open/cannot-determine.json", "out/open/cannot-determine-harvest.json",
-              "tools/open_items.py", "out/open/OPEN-ITEMS.html"}
+              "tools/open_items.py", "out/open/OPEN-ITEMS.html",
+              "out/open/triage.json", "out/open/triage.html"}
 TEXT_EXT = {".json", ".md", ".html", ".py", ".txt", ".csv", ".svg"}
 
 CD = re.compile(r"CANNOT[\s_-]?DETERMINE", re.I)
@@ -171,9 +172,41 @@ for it in items:
         g["files"].append(it["file"])
     g["states_what_settles_it"] = g["states_what_settles_it"] or it["states_what_settles_it"]
 distinct = list(groups.values())
+
+# THE TRIAGE. tools/gen_triage.py assigns every distinct item one of five routes
+# (measurable / research / in-sources / hardware / unclassifiable), each naming a
+# concrete check, source, file or bench test, joined on the SAME norm(subject)
+# key. An item counts as having a closure route if it states what settles it
+# itself OR a triage row routes it to something real. Unclassifiable triage rows
+# are NOT routes — they stay in the no-route number, with their one-line why.
+TRIAGE_PATH = os.path.join(ROOT, "out", "open", "triage.json")
+triage = None
+if os.path.exists(TRIAGE_PATH):
+    try:
+        _t = json.load(open(TRIAGE_PATH, encoding="utf-8"))
+        triage = {r["key"]: r for r in _t.get("rows", []) if r.get("route") != "unclassifiable"}
+        triage_meta = {"file": "out/open/triage.json", "generated": _t.get("generated"),
+                       "rows": len(_t.get("rows", [])),
+                       "by_route": (_t.get("totals") or {}).get("by_route"),
+                       "checks_ran_tonight": sorted((_t.get("checks_ran_tonight") or {}).keys())}
+    except Exception as e:
+        triage = None
+        triage_meta = {"file": "out/open/triage.json", "error": str(e)}
+else:
+    triage_meta = {"file": "out/open/triage.json", "error": "not generated yet — run python3 tools/gen_triage.py"}
+
+routed_by_triage = 0
+for g in distinct:
+    k = norm(g["subject"])
+    t = triage.get(k) if triage else None
+    if t:
+        g["triage_route"] = t["route"]
+        g["triage_target"] = t["target"]
+        routed_by_triage += 1
+
 by_class = collections.Counter(i["closure_class"] for i in distinct)
 by_file = collections.Counter(i["file"] for i in items)
-no_route = [i for i in distinct if not i["states_what_settles_it"]]
+no_route = [i for i in distinct if not i["states_what_settles_it"] and "triage_route" not in i]
 
 doc = dict(
     doc=dict(id="MD-OPEN-001", rev="A",
@@ -193,8 +226,10 @@ doc = dict(
                       "punctuation; occurrences counts every place one is republished, "
                       "which is how many documents a single closure must reach"),
     by_class=dict(by_class),
-    items_stating_what_settles_them=len(distinct) - len(no_route),
+    items_stating_what_settles_them=len(distinct) - len([i for i in distinct if not i["states_what_settles_it"]]),
     items_with_no_closure_route=len(no_route),
+    triage=triage_meta,
+    items_routed_by_triage=routed_by_triage,
     worst_files=by_file.most_common(15),
     items=distinct,
     occurrence_rows=items,
@@ -209,7 +244,9 @@ print(f"DISTINCT open items           : {len(distinct)}")
 print("by what would close them      :")
 for k, v in by_class.most_common():
     print(f"    {k:14s} {v:5d}")
-print(f"state what would settle them  : {len(distinct) - len(no_route)}")
+print(f"state what would settle them  : {len(distinct) - len([i for i in distinct if not i['states_what_settles_it']])}")
+if triage:
+    print(f"routed by out/open/triage.json: {routed_by_triage}   (routes name a check, source, file or bench)")
 print(f"NO closure route stated       : {len(no_route)}   <- these are the real defect")
 print("\nworst files:")
 for fn, n in by_file.most_common(10):

@@ -71,18 +71,16 @@ def _polyarea(h):
     return 0.5 * abs(float(np.dot(x, np.roll(y, -1)) - np.dot(y, np.roll(x, -1))))
 
 
-def _dist_in_poly(pt, h):
-    """signed distance from pt to the polygon boundary; + inside, - outside."""
-    n = len(h); best = 1e18; inside = True
-    for i in range(n):
-        a = h[i]; b = h[(i + 1) % n]
-        e = b - a; L = np.linalg.norm(e)
-        if L < 1e-15:
-            continue
-        t = float(np.clip((pt - a) @ e / (L * L), 0.0, 1.0))
-        best = min(best, float(np.linalg.norm(pt - (a + t * e))))
-        if np.cross(e, pt - a) < 0:
-            inside = False
+def _dist_in_poly(pt, h, a=None, e=None):
+    """signed distance from pt to the polygon boundary; + inside, - outside.
+    a/e are the precomputed hull vertices and edge vectors (optional)."""
+    if a is None:
+        a = h; e = np.roll(h, -1, axis=0) - h
+    d = pt[None, :] - a
+    L2 = np.einsum("ij,ij->i", e, e)
+    t = np.clip(np.einsum("ij,ij->i", d, e) / np.maximum(L2, 1e-30), 0.0, 1.0)
+    best = float(np.min(np.linalg.norm(d - t[:, None] * e, axis=1)))
+    inside = bool(np.all(e[:, 0] * d[:, 1] - e[:, 1] * d[:, 0] >= 0))
     return best if inside else -best
 
 
@@ -99,6 +97,7 @@ class Statics:
         # qpos address of each hinge (freejoint occupies 0..6)
         self.qadr = {self.jnames[j]: int(m.jnt_qposadr[j]) for j in self.hinges}
         self.augmented = augmented
+        self._sole_cache = {}
         self.mass_source = "MJCF link inertials only"
         if augmented:
             self._augment()
@@ -108,6 +107,20 @@ class Statics:
             self.desc[int(m.body_parentid[i])] |= self.desc[i]
         self.mass = np.array([float(m.body_mass[i]) for i in range(m.nbody)])
         self.total_mass = float(self.mass[1:].sum())
+        # vectorised subtree masks, one per hinge joint, in JOINT_NAMES order
+        self.jorder = list(common.JOINT_NAMES)
+        self.submask = np.zeros((len(self.jorder), m.nbody), bool)
+        self.jid = []
+        for k, nm in enumerate(self.jorder):
+            j = self.jnames.index(nm)
+            self.jid.append(j)
+            for i in self.desc[int(m.jnt_bodyid[j])]:
+                self.submask[k, i] = True
+        self.w_sub = self.submask * self.mass[None, :]
+        self.w_out = (~self.submask) * self.mass[None, :]
+        self.w_out[:, 0] = 0.0
+        self.M_sub = self.w_sub.sum(1)
+        self.M_out = self.w_out.sum(1)
 
     def _augment(self):
         p = os.path.join(ROOT, "out", "open", "mass-budget.json")
@@ -142,6 +155,36 @@ class Statics:
         mujoco.mj_comPos(self.model, d)
 
     # -- the free-body sums -------------------------------------------------
+    def bounds_all(self):
+        """(tau_bound_sub[14], tau_bound_out[14], axes[14,3], anchors[14,3],
+        c_sub[14,3], c_out[14,3]) for the CURRENT pose, vectorised."""
+        m = self.model; d = self.data
+        c = d.xipos                                   # (nbody,3)
+        axes = np.empty((14, 3)); anch = np.empty((14, 3))
+        for k, j in enumerate(self.jid):
+            b = int(m.jnt_bodyid[j])
+            a = d.xmat[b].reshape(3, 3) @ m.jnt_axis[j]
+            axes[k] = a / np.linalg.norm(a)
+            anch[k] = d.xanchor[j]
+        cs = (self.w_sub @ c) / self.M_sub[:, None]
+        co = (self.w_out @ c) / self.M_out[:, None]
+        Ss = self.M_sub[:, None] * (cs - anch)
+        So = self.M_out[:, None] * (co - anch)
+        bs = G * np.linalg.norm(np.cross(axes, Ss), axis=1)
+        bo = G * np.linalg.norm(np.cross(axes, So), axis=1)
+        return bs, bo, axes, anch, cs, co
+
+    def tau_all(self, g_hat):
+        """signed required torque for gravity g_hat, both sides, all 14 joints."""
+        bs, bo, axes, anch, cs, co = self.bounds_all()
+        gv = G * np.asarray(g_hat, float)
+        ts = np.einsum("ij,ij->i", axes, np.cross(self.M_sub[:, None] * (cs - anch), gv))
+        to = np.einsum("ij,ij->i", axes, np.cross(self.M_out[:, None] * (co - anch), gv))
+        return ts, to
+
+    def com(self):
+        return (self.mass @ self.data.xipos) / self.total_mass
+
     def sides(self, jname):
         """(M_sub, c_sub, M_out, c_out, axis, p) in kg / m, world frame."""
         m = self.model; d = self.data
@@ -184,7 +227,7 @@ class Statics:
 
     # -- the soles: contact plane and support polygon, MEASURED -------------
     def sole(self, side):
-        """Measure the sole plate of one foot: its plane normal and its contact
+        """(cached) Measure the sole plate of one foot: its plane normal and its contact
         polygon, both in the FOOT BODY's own frame, so they follow any pose.
 
         Nothing here is asserted from the MJCF's numbers. The vertices of the
@@ -194,6 +237,8 @@ class Statics:
         and the contact polygon is the convex hull of every vertex lying within
         SOLE_TOL of the extreme along that normal.
         """
+        if side in self._sole_cache:
+            return self._sole_cache[side]
         m = self.model
         gname = {"left": "left_foot_collision", "right": "right_foot_collision"}[side]
         g = mujoco.mj_name2id(m, mujoco.mjtObj.mjOBJ_GEOM, gname)
@@ -219,11 +264,17 @@ class Statics:
         e2 = np.cross(nrm, e1)
         uv = np.stack([keep @ e1, keep @ e2], axis=1)
         hull = _hull2d(uv)
-        return {"body": b, "n_local": nrm, "e1": e1, "e2": e2,
-                "plane_h": float(h.max()), "hull_uv": hull,
-                "verts": int(n), "contact_verts": int(len(keep)),
-                "plane_rms_mm": float(np.std(vb @ nrm) * 1000.0),
-                "area_mm2": float(_polyarea(hull) * 1e6)}
+        out = {"body": b, "n_local": nrm, "e1": e1, "e2": e2,
+               "plane_h": float(h.max()), "hull_uv": hull,
+               "verts": int(n), "contact_verts": int(len(keep)),
+               "plane_rms_mm": float(np.std(vb @ nrm) * 1000.0),
+               "area_mm2": float(_polyarea(hull) * 1e6)}
+        # hull edges precomputed for the point-in-polygon test, which runs
+        # inside the innermost loop of every sweep
+        out["edge_a"] = hull
+        out["edge_e"] = np.roll(hull, -1, axis=0) - hull
+        self._sole_cache[side] = out
+        return out
 
     def sole_world(self, side):
         """the sole's down-normal and contact polygon in WORLD at the current pose."""
@@ -356,6 +407,22 @@ def selftest():
     st0 = Statics(augmented=False)
     chk("un-augmented model still reads Pollen's 737.2432 g",
         abs(st0.total_mass * 1000 - 737.2432) < 1e-3, "%.4f g" % (st0.total_mass * 1000))
+
+    # vectorised path must agree with the scalar one, exactly
+    rng2 = np.random.default_rng(11)
+    wv = 0.0
+    for _ in range(4):
+        q = {k: rng2.uniform(*st.jrange[k]) for k in common.JOINT_NAMES}
+        st.set_pose(q)
+        bs, bo, _, _, _, _ = st.bounds_all()
+        gh = rng2.normal(size=3); gh /= np.linalg.norm(gh)
+        ts, to = st.tau_all(gh)
+        for k, nm in enumerate(common.JOINT_NAMES):
+            b1, _, _ = st.tau_bound(nm, "sub"); b2, _, _ = st.tau_bound(nm, "out")
+            wv = max(wv, abs(b1 - bs[k]), abs(b2 - bo[k]),
+                     abs(st.tau(nm, gh, "sub") - ts[k]), abs(st.tau(nm, gh, "out") - to[k]))
+    chk("vectorised bounds_all/tau_all == the scalar sides() path (4 poses x 14 joints x 4 quantities)",
+        wv < 1e-12, "worst |delta| = %.3e" % wv)
 
     npass = sum(1 for r in rows if r[1] == "PASS")
     for n, v, d in rows:

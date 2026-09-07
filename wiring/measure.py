@@ -132,7 +132,17 @@ def centroid_world(row):
 P = json.load(open(os.path.join(ASM, "placements.json")))["record"]
 J = json.load(open(os.path.join(ASM, "joints.json")))["record"]
 ROWS = P["rows"]
-JOINT = {r["params"]["joint"]: r["params"] for r in J["rows"]}
+# joints.json carries 78 rows: 14 joint rows (params.joint) and 64 fastener-run
+# rows (params = length_mm/state). Indexing every row with r["params"]["joint"]
+# crashed with KeyError on the first fastener row (measured 2026-09-05). Only
+# joint rows can be joints; the skipped ones are counted and printed, never
+# dropped silently.
+_joint_rows = [r for r in J["rows"] if "joint" in (r.get("params") or {})]
+_skipped_rows = len(J["rows"]) - len(_joint_rows)
+if _skipped_rows:
+    print("joints.json: %d rows indexed as joints, %d non-joint rows skipped (fastener runs, params carry no joint)"
+          % (len(_joint_rows), _skipped_rows), flush=True)
+JOINT = {r["params"]["joint"]: r["params"] for r in _joint_rows}
 
 
 def servo_conns(row_i):

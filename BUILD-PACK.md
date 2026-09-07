@@ -142,3 +142,12 @@ next-day.** Split by where it actually comes from:
    Measure the speaker and mic you actually buy and close two CANNOT DETERMINEs by doing it.
 4. **Design P1.** It is the critical path and everything electrical waits on it.
 5. **Replace the 22 NC-licensed meshes** if any of this is ever going to be sold.
+
+
+---
+
+## 6 · FOLLOW-UP, 2026-09-08 (Leif at Black Ark)
+
+**Printing.** The first head-and-body plate is on the H2D (job-0001 on the farm): 24 pieces, 7 h 10 m, 274 g, head → trunk → hips → one upper leg, no brim, 0.6 nozzle profiles, black PLA from AMS slot 2. Details, layout and every setting: `out/print/PRINT-H2D.md`. Left for the next plate: upper-leg-right, one rigidity plate, both shins, both ankles, both feet (PLA) and the four TPU parts, which cannot print until TPU is loaded on the external spool. The X1 Carbon is out of the farm under maintenance.
+
+**Buying — nothing has changed since §3, and nothing was bought.** The list in `out/procurement/SOURCING-CN.md` (bearings MR1622-ZZ ×11 and MR6700 ×3, M2 screws and 60 heat-set inserts, speaker, microphone, IMX219 + M12 lens, NP-F550 + charger, PLA and TPU, LCSC C181753) is still the walk-downstairs list; the 询价 messages are written and only need pasting. The decision that gates the largest line — Dynamixel XL330 ×15 ($358.50, import) vs Feetech STS3215 ×14 (≈¥1 400, local, re-model four parts and re-run the walk sim) — is still open and is still yours. The three PCBs still have no design files, so there is still nothing to send JLCPCB.

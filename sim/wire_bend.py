@@ -155,6 +155,20 @@ def main():
         rec = paths[rid]
         od = float(rec["od_mm"])
         P, total = resample(rec["polyline_mm"], RESAMPLE_MM)
+        # THE STUB QUESTION, reported both ways rather than decided silently.
+        # The first stub_from_mm and last stub_to_mm of the centreline run
+        # straight out through the connector housing (cables3d.json). The
+        # STRAIGHT part bends nothing, but the corner where it MEETS the route
+        # is a real bend the cable makes as it leaves the socket -- so the
+        # headline keeps the whole curve, and the stub-excluded radius is
+        # reported beside it. Where they differ, the tightest bend in that run
+        # is the one at the connector, which is a fact about the connector and
+        # not about the route.
+        pc = prev.get(rid) or {}
+        sf, st = float(pc.get("stub_from_mm") or 0.0), float(pc.get("stub_to_mm") or 0.0)
+        arc = np.arange(len(P)) * RESAMPLE_MM
+        keep = (arc >= sf) & (arc <= total - st)
+        P_ns = P[keep] if keep.sum() >= 5 else P
         windows = {}
         for w in (0.5, 1.0, 2.0, od, 2 * od, 3 * od):
             r, deg, at, rt, degt = radius_at_window(P, w, RESAMPLE_MM)
@@ -163,6 +177,7 @@ def main():
                                    "R_net_mm": fin(r), "turn_net_deg": (None if deg is None else round(deg, 3)),
                                    "R_total_mm": fin(rt), "turn_total_deg": (None if degt is None else round(degt, 3)),
                                    "at_mm": at}
+        r_ns, deg_ns, at_ns, rt_ns, _ = radius_at_window(P_ns, od, RESAMPLE_MM)
         head = windows["%.4f" % od]
         floor = od / 2.0
         prevR = prev.get(rid, {}).get("min_bend_radius_mm")
@@ -196,6 +211,9 @@ def main():
             "id": rid, "path_from": prov[rid], "od_mm": od,
             "length_mm": round(total, 4), "resample_mm": RESAMPLE_MM,
             "R_at_OD_window_mm": Rh, "R_total_at_OD_window_mm": Rt,
+            "R_at_OD_window_stubs_excluded_mm": (None if r_ns is None else
+                                                 (None if math.isinf(r_ns) else round(r_ns, 4))),
+            "stub_from_mm": round(sf, 4), "stub_to_mm": round(st, 4),
             "absolute_floor_mm": round(floor, 4),
             "lane_target_mm": round(3 * od, 4),
             "R_prev_3sample_mm": prevR,
@@ -217,6 +235,13 @@ def main():
                                         and r["prev_minus_new_mm"] > 0),
         "new_looser_than_3sample": sum(1 for r in rows if r["prev_minus_new_mm"] is not None
                                        and r["prev_minus_new_mm"] < 0),
+        "tightest_bend_is_at_a_connector_stub": sum(
+            1 for r in rows if r["R_at_OD_window_mm"] is not None
+            and r["R_at_OD_window_stubs_excluded_mm"] is not None
+            and r["R_at_OD_window_stubs_excluded_mm"] > r["R_at_OD_window_mm"] + 1e-6),
+        "below_one_OD_stubs_excluded": sum(
+            1 for r in rows if r["R_at_OD_window_stubs_excluded_mm"] is not None
+            and r["R_at_OD_window_stubs_excluded_mm"] < r["od_mm"]),
     }
     rec = {"$triad": 1, "kind": "wire-bend", "generated_by": "sim/wire_bend.py",
            "record": {"units": "mm", "method": __doc__.strip(), "counts": counts, "runs": rows}}
@@ -224,9 +249,9 @@ def main():
     json.dump(rec, open(OUT, "w"), indent=1)
     print(json.dumps(counts, indent=1))
     for r in rows:
-        print("%-22s Rnet(OD)=%-10s Rtot(OD)=%-10s prev3s=%-10s d=%-9s %s" % (
-            r["id"], r["R_at_OD_window_mm"], r["R_total_at_OD_window_mm"],
-            r["R_prev_3sample_mm"], r["prev_minus_new_mm"], r["verdict"]))
+        print("%-22s Rnet(OD)=%-10s nostub=%-10s Rtot=%-10s prev3s=%-10s %s" % (
+            r["id"], r["R_at_OD_window_mm"], r["R_at_OD_window_stubs_excluded_mm"],
+            r["R_total_at_OD_window_mm"], r["R_prev_3sample_mm"], r["verdict"]))
     print("wrote", OUT)
 
 
