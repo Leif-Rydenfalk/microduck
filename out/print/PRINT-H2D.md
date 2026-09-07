@@ -2,7 +2,7 @@
 
 *2026-09-08, sent from the print farm (localhost:8770) as job-0001. Leif, verbatim: "start with printing parts of the head not the body", "use the h2d printer", "make it way more compact. remember no brim", "if youre able to print more of the body do that also on the same plate … from the head going down so we can actually build more and more connected together."*
 
-## What is on the plate — 24 pieces, 7 h 10 m, 274 g (OrcaSlicer's own numbers)
+## What is on the plate — 24 pieces, 7 h 24 m, 273 g (OrcaSlicer's own numbers, second slice)
 
 Order of inclusion followed the joint tree in `ce-assemblies/microduck/current/joints.json`: head (11 pieces), trunk (5), hips (6), then the upper legs one by one until the plate was full. **On the plate:** top-head-shell, bottom-head-shell, jaw, face-part, motor-support, yaw-roll-motion, neck-pitch-bracket, eye-ring, m12-lens-holder, neck-plate ×2 · trunk-shell-left, trunk-shell-right, power-support, trunk-base, banana-pcb-locker · yaw2roll ×2, bearing-roll ×2, hip-bracket ×2 · upper-leg-left, upper-leg-rigidity-plate ×1.
 **Not on it (next plate):** upper-leg-right, upper-leg-rigidity-plate ×1, shin ×2, ankle-left/right, foot-left/right (PLA) and the four TPU parts (no TPU loaded anywhere).
@@ -41,7 +41,7 @@ Bed used: 300 × 320 (the H2D's left-extruder reach), 3 mm margin, **6 mm gap, +
 | | |
 |---|---|
 | printer | Bambu Lab H2D "H2D AMS HT", 0947BJ610900152, 192.168.1.14, Black Ark / Trouble Maker, Shenzhen |
-| nozzle | **0.6 mm HS01** — read from the MQTT report (`nozzle_diameter`). The farm sliced for 0.4 by default; it now follows the fitted nozzle |
+| nozzles | **left 0.6 mm HS01, right 0.4 mm HS01** — read from the MQTT report (`device.nozzle.info`). The farm sliced for 0.4 by default; it now follows the fitted nozzle. The plate prints on the LEFT (0.6) extruder, `filament_map` 1 |
 | profiles | `Bambu Lab H2D 0.6 nozzle` · `0.18mm Balanced Quality @BBL H2D 0.6 nozzle` · `Bambu PLA Basic @BBL H2D 0.6 nozzle` (OrcaSlicer 2.4.2 — BambuStudio's CLI refuses the H2D with -66) |
 | filament | AMS slot 2, black PLA, RFID-verified, 41 % left (~410 g for a 274 g plate). Slots 0/1 are "set by hand", amount unknown — the farm now takes `preferred_tray` |
 | plate | Textured PEI, first layer 0.3 mm / 0.62 mm wide, bed 55 °C |
@@ -54,6 +54,10 @@ Bed used: 300 × 320 (the H2D's left-extruder reach), 3 mm margin, **6 mm gap, +
 **Adhesion.** `tools/plate_for_printer.py` records it: two prints detached and spaghettied at layer 5 and layer 25, the eye-ring and the lens holder, and the fix chosen then was a 5 mm brim (`--brim`). That contradicts the workshop rule. This plate has no brim; its first layer is a 0.6-nozzle 0.3 mm layer, which is a far bigger foot than the 0.4/0.2 mm those two failed on. If a small part lifts again the answer is a raft or a different sheet, not a brim.
 
 **Orientation.** The plate 3MF from 2026-09-02 (`plates/PLA/microduck-PLA.3mf`) has the top-head-shell on its side (116 mm tall) and the jaw standing on its 28 mm face — BambuStudio's auto-orient, not a choice. PRINT.md's rules (dome up, beak underside down, 8 mm plate flat, cradle on its back) are what is on this plate.
+
+## The first send paused at 0 % — 05FE_8053 — and why
+
+The first file declared `nozzle_diameters 0.6,0.6` (the stock "H2D 0.6 nozzle" machine profile assumes both). The printer has 0.6 on the left and 0.4 on the right, and it paused at stage 3 with print_error 05FE_8053 (Bambu's nozzle-mismatch hold). The job was stopped at 0 % (nothing printed) and re-sliced with the machine preset's `nozzle_diameter` set to `["0.6","0.4"]`. OrcaSlicer then refuses the 0.6 process outright ("Bridge line width must not exceed nozzle diameter" — it checks bridge width against the smaller nozzle), so `bridge_line_width` is 0.4 on this plate and every other width stays the 0.6 profile's 0.62. Second send: 26 622 s (7 h 24 m), 273 g, `nozzle_diameters 0.6,0.4`, filament on extruder 1 (left). The farm still knows one nozzle per machine; a per-extruder pair is the next thing to teach it.
 
 ## Known slicer warnings — printed through on purpose
 
