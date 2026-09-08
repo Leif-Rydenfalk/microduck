@@ -375,10 +375,10 @@ def unknowns():
             "file": "out/open/cannot-determine-harvest.json",
             "n": len(harv),
             "records_stating_what_settles_them": stated,
-            "what_it_is_en": ("a HAND-CURATED list: the distinct open questions someone judged worth "
-                              "working, each written with what would settle it. It is the work "
-                              "queue, not a census."),
-            "what_it_is_zh": "人工整理的清单：被判定值得推进的独立未定问题，每条都写明如何定案。它是工作队列，不是普查结果。",
+            "what_it_is_en": ("a HAND-CURATED list of entries with proposed closure routes. Repeated "
+                              "subjects are retained, so its length is not a count of distinct requirements. "
+                              "Current power and identity holds override superseded procedures."),
+            "what_it_is_zh": "人工整理的条目及拟定解决路径。重复主题仍保留，因此条目数不等于独立要求数。当前供电及身份确认要求优先于已废止的程序。",
         },
         "repository_census": {
             "file": "out/open/cannot-determine.json",

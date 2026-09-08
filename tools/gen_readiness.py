@@ -385,7 +385,7 @@ for r in TR["results"]:
 
 # ---------------------------------------------------------------- 9 open unknowns
 HARV = J("out/open/cannot-determine-harvest.json")
-row("open", "cannot-determine-harvest", "Open CANNOT DETERMINE items", "NOT_YET", "%d unique items in out/open/cannot-determine-harvest.json" % len(HARV),
+row("open", "cannot-determine-harvest", "Open CANNOT DETERMINE entries", "NOT_YET", "%d harvested entries in out/open/cannot-determine-harvest.json; repeated subjects are retained, so this is not a distinct requirement count" % len(HARV),
     "out/open/cannot-determine-harvest.json", "Each names what settles it; the resolution workflow owns the list tonight.", "agent_tonight", "WF-UNKNOWNS", {"count": len(HARV)})
 
 # ------------------------------------------------- in-flight lanes, MEASURED

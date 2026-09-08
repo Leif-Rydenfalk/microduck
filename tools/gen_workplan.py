@@ -716,10 +716,8 @@ track(
 
 
 # ------------------------------------------------------- effort and what it needs
-# EVERY DAY FIGURE BELOW IS AN ESTIMATE AND IS LABELLED AS ONE. This workshop has
-# never built a physical unit, so no measured time-per-item exists for any of this
-# work (that absence is itself measured: 0 units built, 0 of 44 tests exercised,
-# spec/test-plan.json). Three things keep the estimates honest rather than invented:
+# Every day figure below is an estimate. Artifact counts do not establish
+# measured production time per item or unit-level test completion.
 #
 #   1. every parcel says WHAT the estimate is arithmetic on — a count we measured
 #      (30 print files, 145 holes, 23 cables, 42 gates) times a per-item rate;
@@ -1080,16 +1078,12 @@ h.append(f"<div class=\"stat\"><b class=\"no\">{summary['bom_fasteners']['fasten
          f"装配 BOM 中的紧固件行数（已装入 {FASTENER_PLACED} 颗螺钉）</span></div>")
 h.append(f"<div class=\"stat\"><b class=\"no\">{summary['unknowns']}</b>"
          "<span>open items on the curated queue<br>已整理未定项</span></div>")
-h.append(f"<div class=\"stat\"><b class=\"no\">0</b><span>physical units ever built<br>已制造实物台数</span></div>")
+h.append('<div class="stat"><b class="no">NOT YET</b><span>verified 1:1 physical acceptance<br>整机 1:1 验收尚未验证</span></div>')
 h.append("</div>")
-h.append("<p><b>No physical Microduck has ever been built or measured by us.</b> Every "
-         "number in this repository comes from Pollen Robotics' published simulation assets, "
-         "from product photographs, or from our own simulation. That is why metrology on a "
-         "real unit unblocks more work than anything else — and why the legal gate above has "
-         "to be answered first.</p>")
-h.append("<p class=\"zh\"><b>我们从未制造或测量过实物 Microduck。</b>本仓库中的每个数据都来自 "
-         "Pollen Robotics 公开的仿真资料、产品照片或我们自己的仿真。因此对实物进行测量"
-         "所解锁的后续工作最多——也正因如此，上面的法律前置必须最先解决。</p>")
+h.append("<p><b>The cited evidence does not establish a verified physical 1:1 recreation.</b> "
+         "Source files, component documentation, photographs and simulation support this pack; "
+         "original-unit metrology and recorded acceptance tests remain required.</p>")
+h.append('<p class="zh">现有证据尚不能证明整机 1:1 实物复刻已通过验收。此交付包基于源文件、元件资料、照片及仿真；仍需原机计量与记录完整的验收测试。</p>')
 h.append(f"<p class=\"lede\">Fastener counts on this page: the assembly BOM carries "
          f"{summary['bom_fasteners']['fastener_rows']} fastener ROWS totalling {FASTENER_PLACED} "
          f"screws placed through a connection, against a {summary['bom_fasteners']['hole_census']}-hole "
@@ -1358,8 +1352,7 @@ with open(OUT_JSON, "w", encoding="utf-8") as f:
                                        "a retail unit may start until L-0 names one of three lawful "
                                        "routes in writing.")},
                    earliest_start_day={pid: p["earliest_start_day"] for pid, p in THEME_PARCELS.items()},
-                   effort_note=("Every day figure is an ESTIMATE. No measured time-per-item exists in this "
-                                "workshop: 0 units built. Each parcel states the measured COUNT and the "
+                   effort_note=("Every day figure is an ESTIMATE. The cited records do not establish measured production time per item. Each parcel states the measured COUNT and the "
                                 "assumed per-item rate its estimate is arithmetic on.")),
               f, indent=1, ensure_ascii=False)
 

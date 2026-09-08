@@ -42,6 +42,7 @@ SECTIONS = [
         ("research/hat-pcba-rfq-2026-09-08/APPENDIX.html", "Public HAT conditional PCBA quote", "Physical BOM and placement reconciliation, DRC results and fabrication questions. Not a manufacturing release."),
         ("research/servo-power-audit-2026-09-08/AUDIT.md", "Servo supply and shutdown evidence", "Pinned runtime behavior, manufacturer limits and the factory evidence procedure."),
         ("research/fastener-reconciliation-2026-09-08/AUDIT.md", "Fastener purchase gaps", "Per-line modeled sizes, missing purchase lines and unresolved metric versus TAP identity."),
+        ("research/fastener-source-routes-2026-09-08/REPORT.html", "Conditional missing-size fastener sources", "Three nominal sizes, whole-pack quotes and a China catalog route; original hardware equivalence remains unverified."),
         ("research/bearing-sourcing-2026-09-08/REPORT.html", "Bearing source comparison", "Measured envelopes, conditional offers and the rejected shielded 4 mm substitute."),
         ("research/imu-contact-identity-2026-09-08/AUDIT.md", "IMU and battery contact-board identity", "Current official source search, known host protocol and still-unresolved hardware identity."),
         ("research/original-unit-route-2026-09-08/BRIEF.html", "Original-unit access route", "Official preorder terms, shipping coverage and an unsent request for earlier specimen access."),

@@ -260,13 +260,13 @@ NOT_READY = [
      "who": "agent, tonight (WF-UNKNOWNS) for the desk-answerable ones",
      "who_zh": "可查证部分由软件代理今晚完成（WF-UNKNOWNS）",
      "src": "out/open/cannot-determine-harvest.json (%d) AND out/open/cannot-determine.json (%s); reconciled in out/factory/reconcile.json unknowns" % (S["unknowns"], RC["unknowns"]["repository_census"]["distinct_subjects"])},
-    {"k": "physical units ever built or measured", "k_zh": "已制造或测量过的实物样机",
-     "n": "0",
-     "why": "The test plan is complete and has been exercised zero times. Every dynamic figure in this repository is simulation.",
-     "why_zh": "测试计划完整但执行次数为零。本仓库中所有动态数据均为仿真结果。",
+    {"k": "verified 1:1 physical acceptance", "k_zh": "已验证的整机 1:1 验收",
+     "n": "NOT YET",
+     "why": "The defined test plan does not establish physical completion. Five power procedures are held pending original identity and rated supply verification; source and simulation evidence do not prove a faithful assembled unit.",
+     "why_zh": "测试定义不能证明实物验收完成。五项供电程序暂停，须先确认原机身份及额定供电；资料和仿真不能证明整机 1:1 一致性。",
      "who": "the factory — this is the whole point of the pack",
      "who_zh": "由工厂完成——这正是本交付包的目的",
-     "src": "spec/test-plan.json (0 tests exercised), readiness.json test row"},
+     "src": "spec/test-plan.json power_execution_hold, out/factory/readiness.json test row"},
 ]
 
 # ------------------------------------------------------------------ 3.2 print
