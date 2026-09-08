@@ -30,7 +30,7 @@ _TESTS_PHRASE = ("%d gated tests" % _N_TESTS) if _N_TESTS else "Gated tests"
 SECTIONS = [
     ("1:1 recreation · September 8", "Current source corrections, factory inquiries and unresolved original-unit evidence.", [
         ("docs/RECREATION-2026-09-08.md", "Recreation status and evidence", "HAT, power, mechanics, exact sourcing and the remaining physical validation work."),
-        ("research/ming-handoff-2026-09-08/update-b/READ-FIRST.html", "Ming engineering review packet B", "Frozen ZIP sent to Ming Chan; outgoing file observed in WeChat. Recipient read/download and reply remain unverified."),
+        ("research/ming-handoff-2026-09-08/update-b/READ-FIRST.html", "Ming engineering review packet B", "Frozen ZIP sent to Ming Chan; outgoing file observed in WeChat. A later reply and the parallel session response are recorded; download status remains unverified."),
         ("research/tof-power-sourcing-2026-09-08/REPORT.html", "Battery kits and ToF interfaces", "Whole-package quantities, conditional replacements, current limits and interface mismatches."),
         ("research/camera-identity-2026-09-08/REPORT.html", "Camera identity and fit", "Rejected oversized board and remaining original camera, lens and cable revision questions."),
         ("research/head-peripherals-sourcing-2026-09-08/REPORT.html", "Speaker, LEDs and NFC sourcing", "Conditional dimensional matches and unresolved original electronics."),

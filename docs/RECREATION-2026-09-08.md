@@ -172,6 +172,15 @@ and a reply remain unknown. A parallel local session also delivered the
 [parts inquiry](../research/ming-parts-request-2026-09-08/DELIVERY.json).
 The archive is frozen; its builder now refuses to overwrite a sent packet.
 
+Later coordination evidence supersedes the initial unknown-reply status:
+Ming asked “How many virusses are in there?” at 21:55. Root inspected the
+parallel session's [conversation capture](../research/networking-2026-09-08/ming-reply-outgoing.png),
+which also shows its reply offering plain-text details and asking for trusted
+supplier introductions. No engineering quotation or component confirmation is
+established by that exchange. The parallel session also records a successful
+Claude CLI drafting result. Its networking files remain owned by that session;
+this record does not duplicate outreach or modify the frozen delivery snapshot.
+
 The [fastener endpoint audit](../research/fastener-endpoint-integrity-2026-09-08/AUDIT.md)
 maps all 64 modeled screws to explicit source-mesh pilot anchors. Five endpoint
 and six thread-confidence regressions pass. This repairs reference integrity;

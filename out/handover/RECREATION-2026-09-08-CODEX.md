@@ -41,42 +41,27 @@ The selected ROBOTIS package includes one bus lead per servo. For the existing
 16-lead plan, extra ten-pack purchases are 1/10/100 over batches of 1/100/1000
 robots. Other offers receive no credit without verified bundle evidence.
 
-## Coordination and delivery limits
+## Coordination and delivery evidence
 
-The cockpit at localhost:8877 returned health OK, but its Claude session
-records do not establish live Claude status. No delivery to the independent
-head-print session has been verified; this shared-file notice is available
-for it to read. Historical September 2 workflow IDs are not current ownership.
+The cockpit health check alone did not establish live Claude activity. Later,
+the parallel communications session recorded a successful Claude CLI drafting
+result in `research/networking-2026-09-08/claude-caption-output.json`. Root read
+its success status. Historical workflow IDs remain distinct from current owners.
+The networking and head-print files are foreign-owned; preserve them.
 
-The bilingual Ming inquiry and ZIP are in `research/ming-handoff-2026-09-08/`.
-User authorized contacting Ming. Delivery is pending selecting his WeChat
-conversation; consult `verification.json` for actual delivery evidence. Prepared
-files do not mean sent files. No component order has been placed.
-
-## Discovered parallel communications work
-
-Another local session has prepared a PCB-specific inquiry and CRM evidence in
-`../../ce-comms/docs/MING-PCB-INQUIRY-2026-09-08.txt` and
-`../../ce-comms/evidence/crm/ming-source-audit.json` (paths relative to this
-repository root). It correctly records the original package as unsent and the
-configured WeChat transport as a simulator. Those files are preserved.
-
-Native WeChat on this Mac is logged in. A conversation displayed as **Ming
-Chan** has prior factory/supplier automation context matching the requested
-contact. This is a candidate conversation match, not a recovered platform
-handle or verified factory identity. Its chat has not yet been selected for
-sending. Do not deliver a second duplicate inquiry if another session records
-actual delivery first; check both package verification and CRM evidence.
-
-## Delivery update — 21:46 China time
-
-Ming's parts inquiry was sent by the parallel session; its evidence is
+The parts inquiry was sent by the parallel session; its evidence is
 `research/ming-parts-request-2026-09-08/DELIVERY.json`. Root independently
-inspected the outgoing screenshot. Root then sent the supplemental ZIP B
+inspected the outgoing screenshot, then sent supplemental ZIP B at 21:46
 (with A inside unchanged) to the same Ming Chan conversation. Exact outgoing
-filename and empty composer were read through Accessibility and screenshot.
-See `research/ming-handoff-2026-09-08/update-b/delivery.json` and
-`delivery-ui.png`; the archive SHA-256 is recorded there. These supersede the
-pending-delivery notes above. Do not resend either inquiry or archive.
-Recipient read/download and response remain unknown. Await Ming's feedback;
-no purchase or production release was sent.
+filename and empty composer were verified. See
+`research/ming-handoff-2026-09-08/update-b/delivery.json` and `delivery-ui.png`.
+The archive and delivery snapshot are frozen. No order or production release
+was sent by this lane.
+
+Ming replied at 21:55 asking about the archive's safety. Root inspected
+`research/networking-2026-09-08/ming-reply-outgoing.png`, showing both the
+incoming question and the parallel session's reply offering plain-text details
+and requesting supplier introductions. That exchange does not establish a quote
+or component identity. Recipient read/download status is not inferred.
+Do not resend the inquiry, archive or already-delivered reply. Coordinate any
+further response with the existing communications owner.

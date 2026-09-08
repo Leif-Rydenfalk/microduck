@@ -29,9 +29,13 @@ carrying both. So:
 
   build_verdict   did `cad/part.py` build a solid, did a sheet emit, and does
                   every number on it read back off that solid (`verify_sheet`)?
-  sheet_verdict   is the SHEET usable in a shop — the eight rules of A2+A3+A4,
+  sheet_verdict   the eight measured layout/nominal-dimension rules of A2+A3+A4,
                   copied here from `cecad.sheetcheck.grade_sheet`, measured on
                   the file this run just wrote.
+
+Neither PASS establishes complete drafting-contract coverage or manufacturing
+release. The render-panels route reports full_contract_verdict separately;
+the legacy route has not independently established that full-contract status.
 
 `verdict` is NOT written. A reader who wants one number must say which.
 """
@@ -65,8 +69,10 @@ VERDICT_NOTE = (
     "that solid). sheet_verdict grades THE SHEET against "
     "docs/MANUFACTURING-REQUIREMENTS.md A2+A3+A4 via ce-cad/bin/sheetcheck "
     "(line_ratio, coverage, empty_rect, font, iso, renders, curve_density, "
-    "dim_coverage). ONLY sheet_verdict answers 'can a machinist cut this "
-    "part from this sheet'. There is deliberately no bare 'verdict' key.")
+    "dim_coverage). These eight measured gates do not establish complete "
+    "drawing-contract coverage or manufacturing acceptance. A separately "
+    "audited full_contract_verdict and qualified source/production evidence "
+    "are required for those claims. There is deliberately no bare 'verdict' key.")
 
 
 def grade_the_sheet(svg, slug, outdir):
