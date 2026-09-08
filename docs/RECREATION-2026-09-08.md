@@ -216,3 +216,14 @@ withdraws misclassified positive evidence through an audited, append-only CLI;
 all eight historical rows and geometry bytes remain unchanged. Its final T1 is
 simulation evidence, not physical acceptance. Structural PASS is kept separate
 from manufacturing readiness throughout the factory report.
+
+A read-only live farm refresh confirmed the independent head-print job at 16%,
+running without a reported print error. Its V9 artifact hash matches the reviewed
+file; see the [scoped observation](../out/handover/HEAD-JOB-OBSERVATION-2026-09-08.json).
+This establishes continued printing, not completed parts, adhesion quality or
+dimensional acceptance. The print-owning session retains control of the job.
+
+The three omitted nominal fastener sizes now have
+[conditional source routes](../research/fastener-source-routes-2026-09-08/REPORT.html)
+with whole-package quantities. These remain model candidates; original threads,
+material, grade and ROBOTIS TAP equivalence are not established.
