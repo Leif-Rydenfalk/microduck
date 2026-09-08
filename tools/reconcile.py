@@ -16,7 +16,8 @@ gap. Nothing is averaged, nothing is quietly dropped.
 
   1  robot_hat_outline   Pollen's published Apache-2.0 Robot HAT outline.
                          out/pcb/hat/components.json says 65.0000 x 30.9001 mm.
-                         out/open/identity-sourcing.json says 65.0 x 48.5 mm.
+                         out/open/identity-sourcing.json historically said 65.0 x 48.5 mm.
+                         Its dated correction is reported alongside that claim.
                          Same repository, same commit, 17.6 mm apart. MEASURED
                          here directly off the Edge.Cuts layer, with the layer
                          that produced the wrong figure named.
@@ -40,6 +41,8 @@ import datetime
 import json
 import os
 import re
+
+from audit_official_hat import inspect as inspect_official_hat
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, "out", "factory", "reconcile.json")
@@ -109,11 +112,37 @@ def _graphic_bboxes(text):
             for lay, b in per.items()}
 
 
+def robot_hat_mounting(raw, archived):
+    """Read drills inside footprints; MountingHole footprint names are insufficient.
+
+    The archived audit binds these source-file claims to the inspected revision.
+    Neither matching drills nor matching the hash proves production-unit identity.
+    """
+    measured = inspect_official_hat(raw)
+    for key in ("sha256", "mounting_holes", "mounting_pattern_footprint_local_xy_mm"):
+        if measured[key] != archived.get(key):
+            raise ValueError("Official HAT differs from archived audit: " + key)
+    return {
+        "verdict": "PASS",
+        "source": PCB_PATH,
+        "audit": "research/official-hat-audit-2026-09-08.json",
+        "sha256": measured["sha256"],
+        "revision": measured["revision"],
+        "count": len(measured["mounting_holes"]),
+        "holes": measured["mounting_holes"],
+        "pattern_footprint_local_xy_mm": measured["mounting_pattern_footprint_local_xy_mm"],
+        "method": "Read footprint pad drill declarations, including the four 2.7 mm drills inside J4; no standalone MountingHole footprint is required.",
+        "limits": measured["limits"],
+    }
+
+
 def robot_hat_outline():
     txt = T(PCB_PATH)
     if not txt:
         return {"verdict": "CANNOT DETERMINE",
                 "why": "%s is not in the tree; the outline cannot be measured here" % PCB_PATH}
+    with open(os.path.join(ROOT, PCB_PATH), "rb") as source:
+        mounting = robot_hat_mounting(source.read(), J("research/official-hat-audit-2026-09-08.json", {}))
     layers = _graphic_bboxes(txt)
     edge = layers.get("Edge.Cuts")
     comp = (J("out/pcb/hat/components.json") or {}).get("board", {})
@@ -147,6 +176,11 @@ def robot_hat_outline():
                  "is not the board." % (dw["width_mm"], dw["height_mm"],
                                         dw["height_mm"] - edge["height_mm"],
                                         abs(dw["height_mm"] - 48.5)))
+    identity_corrections = [
+        item for item in (J("out/open/identity-sourcing.json", {}) or {}).get("corrections_2026_09_08", [])
+        if item.get("evidence") == "research/official-hat-audit-2026-09-08.json"
+        and "ID-03" in item.get("supersedes", "")
+    ]
     rec = {
         "subject": "Pollen's published Apache-2.0 Robot HAT — the board outline",
         "measured_at": NOW,
@@ -165,15 +199,17 @@ def robot_hat_outline():
             {"file": "out/open/identity-sourcing.json", "line": "52-53",
              "claim": "Board measured off the kicad_pcb: 65.000 x 48.500 mm",
              "delta_mm": round(48.5 - ((edge or {}).get("height_mm") or 0), 4),
-             "verdict": "WRONG",
+             "verdict": ("CORRECTED by dated identity-sourcing addendum"
+                         if identity_corrections else "WRONG — correction missing"),
+             "corrections": identity_corrections,
              "why": cause or ("the Edge.Cuts layer measures %.4f mm in y, not 48.5 mm"
                               % ((edge or {}).get("height_mm") or 0)),
-             "owned_by": "the WF-UNKNOWNS lane (out/open/ is theirs to write); this lane cannot "
-                         "correct that file and states the contradiction instead"},
+             "record_policy": "Historical finding preserved; dated addendum supersedes its outline and mounting-hole claims"},
             {"file": "tools/data/readiness.json", "line": "robot-hat pcb_notes.design_status",
              "claim": "the published outline is 65.0 x 48.5 x 1.0 mm",
              "verdict": "CORRECTED in this pass — it now carries the measured 30.9001 mm and cites this file"},
         ],
+        "mounting": mounting,
         "layer_bboxes_mm": layers,
         "comparison": {
             "pollen_published_board": [(edge or {}).get("width_mm"), (edge or {}).get("height_mm")],
@@ -462,32 +498,37 @@ GLOSSARY = [
 ]
 
 # ====================================================================== write
-rec = {
-    "$doc": ("out/factory/reconcile.json — the cross-document reconciliations behind FACTORY-PACK.html "
-             "and FACTORY-QUESTIONS.html. Generated by tools/reconcile.py. Each entry names every "
-             "count that exists for one quantity, what each counts, and which one to act on."),
-    "generated": NOW,
-    "robot_hat_outline": robot_hat_outline(),
-    "fasteners": fasteners(),
-    "unknowns": unknowns(),
-    "eol_gates": eol_gates(),
-    "glossary": [{"on_drawing": g[0], "term_en": g[1], "term_zh": g[2],
-                  "what_en": g[3], "what_zh": g[4]} for g in GLOSSARY],
-}
-os.makedirs(os.path.dirname(OUT), exist_ok=True)
-with open(OUT, "w", encoding="utf-8") as f:
-    json.dump(rec, f, indent=1, ensure_ascii=False)
+def main():
+    rec = {
+        "$doc": ("out/factory/reconcile.json — the cross-document reconciliations behind FACTORY-PACK.html "
+                 "and FACTORY-QUESTIONS.html. Generated by tools/reconcile.py. Each entry names every "
+                 "count that exists for one quantity, what each counts, and which one to act on."),
+        "generated": NOW,
+        "robot_hat_outline": robot_hat_outline(),
+        "fasteners": fasteners(),
+        "unknowns": unknowns(),
+        "eol_gates": eol_gates(),
+        "glossary": [{"on_drawing": g[0], "term_en": g[1], "term_zh": g[2],
+                      "what_en": g[3], "what_zh": g[4]} for g in GLOSSARY],
+    }
+    os.makedirs(os.path.dirname(OUT), exist_ok=True)
+    with open(OUT, "w", encoding="utf-8") as f:
+        json.dump(rec, f, indent=1, ensure_ascii=False)
 
-hat = rec["robot_hat_outline"]
-print("wrote %s" % OUT)
-print("  Robot HAT outline MEASURED %s x %s mm (Edge.Cuts); the 48.5 claim is %s"
-      % (hat["measurement_mm"]["width"], hat["measurement_mm"]["height"], hat["contradicted"][0]["verdict"]))
-print("  fasteners: %s" % ", ".join("%s = %s" % (c["what_en"].split(" in ")[0], c["n"]) for c in rec["fasteners"]["counts"]))
-print("  unknowns: harvest %d vs census %s distinct / %s occurrences"
-      % (rec["unknowns"]["curated_harvest"]["n"], rec["unknowns"]["repository_census"]["distinct_subjects"],
-         rec["unknowns"]["repository_census"]["occurrences"]))
-print("  glossary: %d shop terms, both languages" % len(GLOSSARY))
-print("  eol gates: %s — %s" % (rec["eol_gates"]["verdict"], rec["eol_gates"]["arithmetic"]))
-if rec["eol_gates"]["verdict"] != "PASS":
-    raise SystemExit("reconcile: the end-of-line gate list is NOT complete: %s unaccounted for"
-                     % rec["eol_gates"]["unaccounted_for"])
+    hat = rec["robot_hat_outline"]
+    print("wrote %s" % OUT)
+    print("  Robot HAT outline MEASURED %s x %s mm (Edge.Cuts); the 48.5 claim is %s"
+          % (hat["measurement_mm"]["width"], hat["measurement_mm"]["height"], hat["contradicted"][0]["verdict"]))
+    print("  fasteners: %s" % ", ".join("%s = %s" % (c["what_en"].split(" in ")[0], c["n"]) for c in rec["fasteners"]["counts"]))
+    print("  unknowns: harvest %d vs census %s distinct / %s occurrences"
+          % (rec["unknowns"]["curated_harvest"]["n"], rec["unknowns"]["repository_census"]["distinct_subjects"],
+             rec["unknowns"]["repository_census"]["occurrences"]))
+    print("  glossary: %d shop terms, both languages" % len(GLOSSARY))
+    print("  eol gates: %s — %s" % (rec["eol_gates"]["verdict"], rec["eol_gates"]["arithmetic"]))
+    if rec["eol_gates"]["verdict"] != "PASS":
+        raise SystemExit("reconcile: the end-of-line gate list is NOT complete: %s unaccounted for"
+                         % rec["eol_gates"]["unaccounted_for"])
+
+
+if __name__ == "__main__":
+    main()

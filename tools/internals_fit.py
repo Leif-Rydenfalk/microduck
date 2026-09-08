@@ -14,13 +14,12 @@ WHAT IS PLACED AND ON WHAT AUTHORITY
   every revision (same file, "how_it_was_settled"), and the STL's own coordinates
   are the same board frame our KiCad-derived board is built in. So the mount
   pattern lands where Pollen puts it.
-  WHAT IS NOT SETTLED, and is recorded as CANNOT DETERMINE rather than assumed:
-  the 180 deg flip about the board normal. Every revision-independent feature
-  (4 mount holes, 2 anchors, 40-pin header) is symmetric about the board's x
-  centre, so nothing in the geometry picks an end; the features that DO break the
-  symmetry are exactly the connector holes that moved between revisions. Only a
-  photograph of the assembled head, or Pollen's own CAD carrying a released HAT,
-  settles it. BOTH orientations are therefore measured here.
+  CORRECTION 2026-09-08: the four mounting holes preserve an in-plane
+  180-degree rotation, but the GPIO header and anchors do not. The pinned
+  source drill audit moves their centroids 23.010002 mm. The second pose is
+  retained as a hypothetical clearance experiment and explicitly disqualified
+  as an interchangeable orientation of the same fixed stack. Original-unit
+  identity remains unresolved. See tools/audit_hat_orientation.py.
 
 OUTPUT out/internals/hat-fit.json, out/internals/*.png
 Run: ce-cad/bin/cad tools/internals_fit.py    (buffered stdout - read the log)
@@ -28,6 +27,10 @@ Run: ce-cad/bin/cad tools/internals_fit.py    (buffered stdout - read the log)
 import json
 import os
 import time
+import sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from audit_hat_orientation import inspect as inspect_orientation, qualify_fit, PCB as ORIENTATION_PCB
 
 import FreeCAD as App
 import Mesh
@@ -276,7 +279,7 @@ def main():
         import traceback
         LOG.write(traceback.format_exc())
 
-    json.dump(dict(_generated="tools/internals_fit.py",
+    json.dump(qualify_fit(dict(_generated="tools/internals_fit.py",
                    question="does the POPULATED Robot HAT fit where our CAD puts the bare plate?",
                    hat_placement=dict(parent_body=hat_row["body"],
                                       world_pos_mm=hat_row["world_pos_mm"],
@@ -287,19 +290,10 @@ def main():
                                                 "identical in every HAT revision, so the mount "
                                                 "pattern lands where Pollen puts it "
                                                 "(out/pcb/hat/mesh-revision.json)"),
-                   flip_about_board_normal=dict(
-                       verdict="CANNOT DETERMINE",
-                       why="every revision-independent feature of the board is symmetric about its "
-                           "x centre, and the features that break the symmetry are the connector "
-                           "holes that moved between the development revision Pollen's simulation "
-                           "mesh carries and the C1 board that was produced",
-                       settled_by="a photograph of the assembled head showing which end the JST EH "
-                                  "connectors face, or Pollen CAD carrying a released HAT",
-                       both_measured=True),
                    bare_plate_it_replaces=dict(thickness_mm=0.84,
                                                note="the mesh in placements.json is a flat plate"),
                    populated_height_mm=meas["pcba"]["size_mm"][2],
-                   results=results),
+                   results=results), inspect_orientation(ORIENTATION_PCB.read_bytes())),
               open(os.path.join(OUT, "hat-fit.json"), "w"), indent=1)
     P("seconds", round(time.time() - t0, 1))
     P("DONE")
