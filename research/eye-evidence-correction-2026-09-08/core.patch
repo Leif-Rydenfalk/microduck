@@ -1,0 +1,259 @@
+diff --git a/TRIAD.md b/TRIAD.md
+index 08e8a185..cefee2fb 100644
+--- a/TRIAD.md
++++ b/TRIAD.md
+@@ -741,3 +741,39 @@ was deleted and the case was watched turning from PASS into a **named** CANNOT
+ DETERMINE — not vanishing silently from the case list — and restored.
+ `tests/test_discipline_decoupling.py` is that proof, and a check nobody has
+ watched fail is not a check.
++
++## Withdrawing a positive claim — demotion only (2026-09-08)
++
++A historical `field/PASS` statement about licence position is not a field test;
++a `bench/PASS` measurement extracted from a digital mesh is not a physical bench
++measurement. Keeping such labels active falsely earns T2/T3. Their history must
++remain visible, and a correction must never erase a FAIL or increase trust.
++
++`bin/triad withdraw-positive <ref> --line N --entry-sha256 SHA --reason TEXT
++--artifact PATH --by WHO` appends an `export/CANNOT DETERMINE` row with exactly:
++
++```json
++{"positive_claim_withdrawal":{"line":8,"entry_sha256":"<canonical prior row SHA256>","reason":"why this positive evidence claim is unsupported"}}
++```
++
++The entry hash is SHA256 of canonical UTF-8 JSON (sorted keys, compact separators,
++non-ASCII preserved), excluding only the reader-added `_line`. The command requires
++an existing audit artifact and pins its SHA256. The target must be an earlier,
++exact-hash original PASS row. Missing, forward, self, duplicate, FAIL/CD, wrong-hash
++and reasonless targets are refused before any append. The generic `evidence` extra
++fields cannot bypass this command. The old `retracts/retraction` escape hatch stays
++prohibited.
++
++The original row stays byte-for-byte in the ledger. It is counted and reported as
++**WITHDRAWN POSITIVE CLAIM — historical CANNOT DETERMINE**; its historical artifact
++path is no longer a claim of current evidence. No replacement geometry is implied,
++and a different file must never be relabelled as the missing historical artifact.
++FAIL/CD rows retain all their artifact-integrity and negative-evidence checks.
++
++The command refuses any increase over either computed trust or a lower stored,
++generated trust tier. Only the selected positive contribution is withdrawn;
++negative outcomes remain in the ordinary failure-cap calculation. Invalid/tampered
++correction records produce FAIL findings and a T0 integrity cap; corrupt audit
++provenance must not resurrect the withdrawn physical-trust claim. Corrections and
++their audit hashes are exposed in computed trust.json. This is not a way to assert
++a new measurement, change licence terms, pass geometry or clear a negative test.
+diff --git a/bin/_triadlib.py b/bin/_triadlib.py
+index 2e6ee7af..eff494d9 100644
+--- a/bin/_triadlib.py
++++ b/bin/_triadlib.py
+@@ -354,6 +354,55 @@ def read_ledger(path):
+     return entries, problems
+ 
+ 
++def ledger_entry_sha256(entry):
++    """Canonical identity of the complete original row, excluding reader metadata."""
++    payload = {k: v for k, v in entry.items() if k != "_line"}
++    return hashlib.sha256(json.dumps(payload, sort_keys=True, separators=(",", ":"),
++                                     ensure_ascii=False).encode("utf-8")).hexdigest()
++
++
++def positive_claim_withdrawals(res, entries):
++    """Explicit demotion only: exact prior PASS claims, never negative evidence.
++
++    A valid export/CD correction cites a present hash-checked audit artifact.
++    Invalid corrections have no effect and are separately FAIL findings.
++    """
++    withdrawn, problems = {}, []
++    by_line = {e.get("_line"): e for e in entries}
++    for e in entries:
++        correction = e.get("positive_claim_withdrawal")
++        if correction is None:
++            continue
++        line = e.get("_line")
++        try:
++            if e.get("kind") != "export" or e.get("outcome") != "CANNOT DETERMINE":
++                raise ValueError("withdrawal must be export/CANNOT DETERMINE")
++            if not isinstance(correction, dict) or set(correction) != {"line", "entry_sha256", "reason"}:
++                raise ValueError("withdrawal requires exactly line, entry_sha256, reason")
++            target = correction["line"]
++            if type(target) is not int or type(line) is not int or not 0 < target < line:
++                raise ValueError("target must be an earlier positive ledger line")
++            old = by_line.get(target)
++            if not old or old.get("outcome") != "PASS" or old.get("positive_claim_withdrawal"):
++                raise ValueError("only original PASS claims are eligible; FAIL/CD cannot be withdrawn")
++            if target in withdrawn:
++                raise ValueError("target already withdrawn")
++            if correction["entry_sha256"] != ledger_entry_sha256(old):
++                raise ValueError("target entry hash does not match")
++            if not isinstance(correction["reason"], str) or not correction["reason"].strip():
++                raise ValueError("explicit correction reason required")
++            if not e.get("artifact") or not e.get("sha256"):
++                raise ValueError("a hash-pinned audit artifact is required")
++            audit = artifact_path(res, e["artifact"])
++            if not os.path.isfile(audit) or sha256_of(audit) != e["sha256"]:
++                raise ValueError("audit artifact absent or hash changed")
++            withdrawn[target] = {"correction_line": line, "reason": correction["reason"],
++                                 "entry_sha256": correction["entry_sha256"], "audit": e["artifact"]}
++        except (ValueError, TypeError, KeyError, OSError) as exc:
++            problems.append((line, str(exc)))
++    return withdrawn, problems
++
++
+ def append_ledger(res, entry):
+     path = ledger_path(res)
+     os.makedirs(os.path.dirname(path), exist_ok=True)
+@@ -750,12 +799,18 @@ def compute_trust(res, identity=None, entries=None, problems=None):
+     elsewhere, on_their_word = not_this_folders_evidence(res, entries)
+     envprobs = env_declaration_problems(res)
+     by_line_all = {e.get("_line"): e for e in entries}
++    withdrawn, withdrawal_problems = positive_claim_withdrawals(res, entries)
+     tier_entries = [e for e in entries
+                     if e.get("kind") not in TIER_IGNORED_KINDS
+-                    and e.get("_line") not in elsewhere]
++                    and e.get("_line") not in elsewhere
++                    and e.get("_line") not in withdrawn]
+     fails = unresolved_fails(tier_entries)
+     earned = _earned(tier_entries)
+     notes = []
++    if withdrawn:
++        notes.append("Positive claims withdrawn on exact ledger lines %s; retained as historical CANNOT DETERMINE, never physical evidence." % sorted(withdrawn))
++    if withdrawal_problems:
++        notes.append("Invalid positive-claim corrections have no effect; triad check reports each as FAIL.")
+     if fails:
+         first = tier_entries.index(fails[0])
+         capped = _earned(tier_entries[:first])
+@@ -770,6 +825,9 @@ def compute_trust(res, identity=None, entries=None, problems=None):
+ 
+     is_t4, t4_why = t4_evidence(res, identity)
+     tier = 4 if is_t4 else ledger_tier
++    if withdrawal_problems:
++        tier = 0  # corrupt correction evidence cannot resurrect physical trust
++        notes.append("T0 integrity cap: a malformed or unauthenticated correction must be repaired before trust can be computed reliably.")
+ 
+     if not entries:
+         why = "no evidence: %s has no ledger entries" % res.rel(ledger_path(res))
+@@ -806,7 +864,7 @@ def compute_trust(res, identity=None, entries=None, problems=None):
+             "scoped out by a fact it states, never by a silence."
+             % (len(on_their_word), _decl_env,
+                ", ".join(str(k) for k in sorted(on_their_word))))
+-    n_ignored = len(entries) - len(tier_entries) - len(elsewhere)
++    n_ignored = sum(e.get("kind") in TIER_IGNORED_KINDS for e in entries)
+     if n_ignored:
+         notes.append("%d %s row(s) counted but ignored by the tier (TRIAD.md 'Ledger kind "
+                      "export': an export proves a file was written, not that anything works)"
+@@ -833,6 +891,8 @@ def compute_trust(res, identity=None, entries=None, problems=None):
+             "computed_by": GEN,
+             "ledger_lines": len(entries),
+             "counts": dict(sorted(counts.items())),
++            "positive_claims_withdrawn": withdrawn,
++            "positive_claim_withdrawal_problems": withdrawal_problems,
+             "unresolved_fails": [
+                 {"line": e.get("_line"), "date": e.get("date"), "kind": e.get("kind"),
+                  "summary": e.get("summary")} for e in fails
+@@ -1748,13 +1808,24 @@ def check_folder(root, ref, ref_cache=None, coverage=None):
+     # The integrity guarantee is UNCHANGED: silently editing an artifact
+     # without appending a row still FAILs, because the last row's hash is the
+     # one compared. Superseded rows are REPORTED, never silently skipped.
++    _withdrawn, _withdrawal_problems = positive_claim_withdrawals(res, entries)
++    for line, why in _withdrawal_problems:
++        findings.append(Finding("FAIL", "%s:%s" % (res.rel(lp), line), why))
+     latest_row_for = {}
+     for e in entries:
++        if e.get("_line") in _withdrawn:
++            continue  # withdrawn history cannot supersede active artifact evidence
+         art = e.get("artifact")
+         if art and e.get("sha256"):
+             latest_row_for[art] = e.get("_line")
+     for e in entries:
+         art = e.get("artifact")
++        if e.get("_line") in _withdrawn:
++            correction = _withdrawn[e["_line"]]
++            findings.append(Finding("CANNOT DETERMINE", "%s:%s" % (res.rel(lp), e["_line"]),
++                "WITHDRAWN POSITIVE CLAIM: line %s cites audit %s; historical artifact %r is not current evidence. %s" %
++                (correction["correction_line"], correction["audit"], art, correction["reason"])))
++            continue
+         if not art:
+             continue
+         ap = artifact_path(res, art)
+@@ -2306,6 +2377,39 @@ def cmd_evidence(root, ref, kind, summary, artifact=None, by=None,
+                               "got %r" % (k,))
+         entry[k] = v
+ 
++    if "positive_claim_withdrawal" in entry:
++        raise BrokenInput("positive_claim_withdrawal requires cmd_withdraw_positive / triad withdraw-positive")
++    path = append_ledger(res, entry)
++    _tp, doc = write_trust(res)
++    return res, entry, path, doc
++
++
++def cmd_withdraw_positive(root, ref, line, entry_sha256, reason, artifact, by):
++    """Append an audited positive-only withdrawal; refuse any trust increase."""
++    res = resolve(root, ref)
++    entries, problems = read_ledger(ledger_path(res))
++    if problems:
++        raise BrokenInput("repair malformed ledger syntax before withdrawing a claim")
++    if not artifact or not by or not reason:
++        raise BrokenInput("--artifact, --by and --reason are required")
++    ap = artifact if os.path.isabs(artifact) else os.path.join(res.dir, artifact)
++    if not os.path.isfile(ap):
++        raise Failed("audit artifact does not exist: %s" % artifact)
++    entry = {"date": today(), "kind": "export", "outcome": "CANNOT DETERMINE",
++             "summary": "Withdraw positive evidence claim on line %s: %s" % (line, reason),
++             "artifact": os.path.relpath(ap, res.dir), "sha256": sha256_of(ap), "by": by,
++             "positive_claim_withdrawal": {"line": line, "entry_sha256": entry_sha256, "reason": reason}}
++    numbered = dict(entry, _line=max([e["_line"] for e in entries] or [0]) + 1)
++    _withdrawn, errors = positive_claim_withdrawals(res, entries + [numbered])
++    if errors:
++        raise BrokenInput("invalid positive withdrawal: %s" % errors)
++    before = compute_trust(res, entries=entries, problems=[])["record"]["tier"]
++    after = compute_trust(res, entries=entries + [numbered], problems=[])["record"]["tier"]
++    stored = try_json(os.path.join(res.dir, "trust.json")) or {}
++    stored_tier = record_of(stored).get("tier") if stored.get("$generated") else None
++    limit = min(before, stored_tier) if stored_tier in ("T0", "T1", "T2", "T3", "T4") else before
++    if after > limit:
++        raise BrokenInput("withdrawal must not increase computed or stored trust (%s -> %s, stored %s)" % (before, after, stored_tier))
+     path = append_ledger(res, entry)
+     _tp, doc = write_trust(res)
+     return res, entry, path, doc
+diff --git a/bin/triad b/bin/triad
+index 8487138c..2c2daefa 100755
+--- a/bin/triad
++++ b/bin/triad
+@@ -286,6 +286,28 @@ def do_evidence(root, argv):
+     return PASS
+ 
+ 
++def do_withdraw_positive(root, argv):
++    if not argv:
++        raise T.BrokenInput("withdraw-positive requires ref --line --entry-sha256 --reason --artifact --by")
++    ref, rest = argv[0], argv[1:]
++    fields = {"line": None, "entry-sha256": None, "reason": None, "artifact": None, "by": None}
++    while rest:
++        flag = rest.pop(0)
++        key = flag[2:] if flag.startswith("--") else None
++        if key not in fields or not rest or fields[key] is not None:
++            raise T.BrokenInput("unknown, repeated or valueless withdrawal flag: %s" % flag)
++        fields[key] = rest.pop(0)
++    try:
++        line = int(fields["line"])
++    except (TypeError, ValueError):
++        raise T.BrokenInput("--line must be the prior ledger line number")
++    res, entry, path, doc = T.cmd_withdraw_positive(root, ref, line, fields["entry-sha256"],
++                                                   fields["reason"], fields["artifact"], fields["by"])
++    print(json.dumps({"status": "APPENDED", "entry": entry, "ledger": path,
++                      "trust": doc["record"]["tier"]}, ensure_ascii=False))
++    return PASS
++
++
+ # --- index ------------------------------------------------------------------
+ 
+ 
+@@ -417,7 +439,7 @@ def do_selftest_verdicts(root, argv):
+ 
+ 
+ COMMANDS = {"check": do_check, "quote": do_quote, "trust": do_trust, "new": do_new,
+-            "iterate": do_iterate, "evidence": do_evidence, "index": do_index,
++            "iterate": do_iterate, "evidence": do_evidence, "withdraw-positive": do_withdraw_positive, "index": do_index,
+             "selftest-verdicts": do_selftest_verdicts}
+ 
+ 
