@@ -69,6 +69,22 @@ Sends 1–4 all paused at 0 % (stage 3) with print_error 05FE_8053. OrcaSlicer s
 
 So the plate prints on the **left 0.4 nozzle** at 0.20 mm, not the 0.6 the earlier sections assumed; times and grams above are superseded by the row in bold. OrcaSlicer refuses a mixed pair unless `bridge_line_width` ≤ the smaller nozzle, so it is 0.4. Each stopped send was at 0 % with nothing on the bed. The farm still knows one nozzle per machine; a per-extruder pair (`[0.4, 0.6]`) is what it needs to learn next, and until then the H2D record's notes say exactly this.
 
+## What the validator found afterwards, and the standard that came out of it
+
+Leif, after the nozzle: *"somehow layer generation fails because the models are weird. you have to build a validator … sometimes layers are missing and sometimes they are too close. you must validate and make sure. every single time."* The validator (`ce-print-scheduler/scheduler/validate.py`, now run by the farm on every send) read the G-code of what had been sent:
+
+| file | verdict | what it found |
+|---|---|---|
+| the 5th send (L04STD) | **FAIL** | **785 layers where the object has 232** — normal supports on their own layer heights, Z stepping 0.40 → 0.44 → 0.45 → 0.47; 8 of 21 objects missing dozens of layers; extrusion with nothing under it from layer 4 |
+| the engineer's Bambu Studio export (17:05) | **FAIL** | jaw and face-part each lose one layer near the top; both hip brackets print 57–67 % into air at Z 6.6; declares 0.4,0.4 for a 0.4/0.6 machine |
+| **HEAD v4** (`plates/HEAD-V4/`) | **PASS** | 231 layers, 0.2 mm ladder exact, every object contiguous from layer 1, nothing in the air, nozzles 0.4/0.6 Standard = the printer, PLA loaded |
+
+**What was actually wrong with the models.** Slicers cut every layer at its mid-height (0.1, 0.3, … 9.3, 9.5). These meshes carry vertex rings and flat faces exactly on those planes (the eye-ring's chamfer at 9.30 and top at 9.50; face-part has 25 000 vertices on odd tenths), and the cut degenerates: a dropped layer, then a sliver above it in the air. `scheduler/meshfix.py` moves every such vertex up 0.02 mm — `out/print/stl/fixed/PLA` is the result, and it is the only mesh set to plate from now on. The sub-nozzle fins (bearing-roll, banana-pcb-locker, bottom-head-shell tab) are handled by `detect_thin_wall`, and every part passes the slicer's own checks alone (`partgate`).
+
+**The standard** is `ce-print-scheduler/docs/PRINT-WORKFLOW.md`: meshfix → partgate → pack → slice with checks ON and the SAFE settings (tree supports, no independent support layers, thin wall on, no brim, the fitted nozzle pair) → validate → send, which validates again against the live machine and refuses a FAIL.
+
+**HEAD v4 is registered as farm job-0001, validated, and NOT sent** — Leif: *"until you're 100% certain don't send anything else to the printers."* 11 pieces (the whole head), 9 h 02 m, 144 g, `job_action("job-0001","send")` when he says so.
+
 ## The fifth send clumped at layer 18 — twice — and why: printing into air
 
 The fifth file ran to 15 % and paused with **0C00_803F "AI detected nozzle clumping"** at layer 18 (z 3.6 mm). Restarted from the screen after clearing the nozzle it did exactly the same at exactly the same layer. That is the file: `--no-check` let OrcaSlicer skip its empty-layer abort, and where a vendor mesh has a band with no closed contour but material above it (banana-pcb-locker 1.9–2.8 mm under a 3.8 mm top; bearing-roll 1.0–2.1 mm under a 3.0 mm top) the printer extrudes above nothing, the plastic balls up on the nozzle, and the camera stops the job. The lesson: **an empty-layer warning is a print failure waiting at that height, never something to print through.**
