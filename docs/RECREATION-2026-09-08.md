@@ -192,3 +192,10 @@ records package quantities, interface mismatches and unresolved current ratings.
 The test plan is NOT_YET. Its defined 42 end-of-line gates do not establish
 physical test completion. The connected-servo high-voltage procedures require
 correction and verified original power/servo identity before execution.
+
+The [original CAD access audit](../research/original-cad-access-2026-09-08/REPORT.html)
+maps all 43 source sidecars: 37 / 3 / 3 parts belong to three different CAD
+microversions. The old single-version source note now has an additive correction.
+These IDs do not identify production revisions. A fresh isolated browser redirects
+to Onshape sign-in and anonymous API calls return 401/403; no original STEP/BRep
+was acquired. Existing public source files and their hashes remain preserved.
