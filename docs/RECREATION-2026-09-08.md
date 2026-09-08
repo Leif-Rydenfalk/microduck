@@ -6,6 +6,13 @@ The repository does not yet prove that target. A supplier PASS in
 that the offered part is the one Pollen fits. Keep replacement candidates
 separate from confirmed original identities.
 
+The latest [servo geometry audit](../research/xl330-geometry-revision-2026-09-08/README.md)
+found a 6 mm modeled horn/idler pilot where ROBOTIS specifies 3 mm maximum
+and M2 tapping screws. A corrected research candidate passes 100 finished-solid
+probes; the published shelf iteration remains unchanged pending integration.
+35 of 52 nominal servo-face screw penetrations exceed that limit in the existing
+placement model. This is not a physical measurement or a replacement screw list.
+
 ## Electronics: correction that changes the next task
 
 Pollen publishes [the Robot HAT project](https://github.com/pollen-robotics/elec_RPI_Robot_HAT)
