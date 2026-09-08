@@ -1,10 +1,10 @@
 # ELECTRONICS AND SOFTWARE — what the Microduck's boards are and how the code reaches every part
 
-*Written 2026-09-01. Companion to `PARTS.md` (what each part is) and `BOM.md`
-(what to buy). Pollen's firmware and software are Apache-2.0 and were read
-line by line; their PCBs are not published. So this document is exact on the
-software side and inferential on the hardware side — every CANNOT DETERMINE
-says what would settle it.*
+*Written 2026-09-01; source correction 2026-09-08. Companion to `PARTS.md` and `BOM.md`. Historical runtime references below describe the captured software, not measured behavior of a production unit.*
+
+**NOT READY TO BUILD FROM.** Pollen's public HAT schematic, PCB and BOM at commit `23eab11927f95ceca0dfa35bf182caeb7db39ea0` establish that board's topology. Its installed Microduck revision remains unconfirmed. The IMU bridge MCU/firmware and battery-contact circuit remain unidentified in the inspected official sources. Local PCB reconstructions are separate designs with unresolved DRC and supply failures.
+
+Current evidence: [public HAT geometry and topology](RECREATION-2026-09-08.md), [servo supply and shutdown audit](../research/servo-power-audit-2026-09-08/AUDIT.md), [IMU/contact identity](../research/imu-contact-identity-2026-09-08/AUDIT.md), [camera module/lens/FFC](../research/camera-identity-2026-09-08/REPORT.html). The public HAT motor connectors connect to +BATT, while both standard XL330 variants are rated 3.7–6.0 V. Do not use this document to energize an unidentified servo chain from a 2S pack. Starting robotd can rewrite EEPROM; use the separate reviewed evidence procedure for original-unit identification.
 
 ## Source key
 
@@ -36,7 +36,7 @@ says what would settle it.*
 flowchart TB
   subgraph HEAD["HEAD (MJCF body jaw_soft, 188.8 g)"]
     RADXA["Radxa Zero 3W\nRK3566 · 1 GB · 32 GB eMMC\nWi-Fi 6 / BT 5.4 · 65×30 mm"]
-    HAT["Pollen RPI Robot HAT\n65×30×0.84 mm, on the 40-pin header\n(custom PCB, not published)"]
+    HAT["Pollen RPI Robot HAT\npublic C1 source available; fitted revision unknown\n40-pin header; mesh is separate evidence"]
     CODEC["TLV320AIC3104\nI2C 0x18 · I2S3"]
     BMI["BMI088 (dormant)\nI2C 0x19 / 0x68"]
     J5["Stemma J5"]
@@ -70,7 +70,7 @@ flowchart TB
   end
   RADXA -- "40-pin header" --- HAT
   RADXA -- "UART2 M0 → /dev/ttyS2\n1 Mbps · Dynamixel Protocol 2" --> BUS(("TTL half-duplex bus\n16 devices"))
-  HAT -. "transceiver on HAT (inferred, [C-elec])" .- BUS
+  HAT -. "public HAT TTL buffer circuit; installed revision unknown" .- BUS
   RADXA -- "22-pin MIPI CSI\nI2C addr 0x10" --> CAM
   HAT -- "I2C3 M0, header pins 3/5\nGPIO1_A0 SDA · GPIO1_A1 SCL · 400 kHz\n10k pull-ups R12/R13" --> CODEC
   HAT --> BMI
@@ -90,10 +90,7 @@ flowchart TB
 
 Dashed lines are inferred or unknown; solid lines are read out of Pollen's
 source. Servo ID → joint: `model.rs:15-19`; which servo sits in which body is
-inferred from the `xl330` mesh placements (`PARTS.md` row 32). Servo power
-(the bus VDD) comes from the pack through the HAT — the runtime reads the pack
-voltage *as the servos' own supply* (`model.rs:99-113`), which requires the
-XL330 VDD pin to be on battery, not on a regulated rail (see §3.4).
+inferred from the `xl330` mesh placements (`PARTS.md` row 32). Servo supply telemetry is interpreted as battery voltage by the runtime. That interpretation does not prove the installed power path. Independently, the pinned public HAT ties motor connector J3/J11/J13/J14 pad 2 to +BATT; U9's +5V branch supplies the compute stack. Original-unit routing and voltage measurements remain required (see §3.4).
 
 ## 2. Compute — Radxa Zero 3W
 
@@ -121,10 +118,10 @@ XL330 VDD pin to be on battery, not on a regulated rail (see §3.4).
 | fact | value | source |
 |---|---|---|
 | port | `/dev/ttyS2` = RK3566 UART2, M0 pin-mux (overlay `uart2-m0`); Armbian's `serial-getty@ttyS2` login console must be masked or `agetty` holds the bus | `robotd.toml [bus]`; `rdesign:58-61`; [R2 §3.1] |
-| header pins for UART2 M0 | **CANNOT DETERMINE** from our sources — the Radxa Zero 3W GPIO pinout page settles it | — |
+| header pins for UART2 M0 | pin **8 TX** GPIO0_D1; pin **10 RX** GPIO0_D0; 3.3 V logic. Boot-console traffic reaching the installed servo chain remains unverified | `ce-parts/radxa-zero-3w/electrical.host.json` header_40pin / servo_bus_uart2_m0; `electronics/netlist.py` uart2 segment |
 | rate / protocol | 1 000 000 baud, Dynamixel Protocol 2.0; EEPROM `baud_rate = 3` | `model.rs:80, 89-94` |
 | electrical | XL330: "TTL Multidrop Bus (3.3V Logic, 5V Compatible)", 3-pin | [XL330]; [R1 §4.1] |
-| direction control | no direction GPIO anywhere in the code → self-steering half-duplex circuit, assumed on the HAT | [C-elec] (community inference) |
+| direction control | host code exposes no direction GPIO; public HAT BOM identifies U5 74LVC1G08, U6 SN74LVC1G125DBV and U7 SN74LVC1G126DBVR; exact fitted circuit remains unconfirmed | pinned public HAT BOM; host code observation |
 | devices | 15 servos + `imu_to_dxl` (ID 200) — "There is no second bus and no second port" | `rdesign:23-38` |
 | exclusive access | `serialport` sets `TIOCEXCL`; `robotd` runs as root so exclusion is "arranged rather than enforced" | `rdesign:41-56` |
 | read timeout | 30 ms per transaction | `bus.rs:47` |
@@ -159,7 +156,7 @@ outright (`rdesign:444-446`).
 
 | what | value | source |
 |---|---|---|
-| EEPROM asserted **and corrected** at boot | `return_delay_time = 0` (ships at 250 = 500 µs per device; ×16 = 8 ms = 40 % of a 20 ms tick), `baud_rate = 3`, `pwm_slope = 255`, `shutdown = 52` (latches on overload, overheating, input-voltage fault) | `model.rs:82-94`; `bus.rs:122-140` |
+| EEPROM asserted **and corrected** at boot | `return_delay_time = 0` (ships at 250 = 500 µs per device; ×16 = 8 ms = 40 % of a 20 ms tick), `baud_rate = 3`, `pwm_slope = 255`, `shutdown = 52` (= 0x34: bits 2/4/5 set, input-voltage bit 0 clear; upstream comment is inconsistent with the manufacturer Shutdown table) | `model.rs:82-94`; `bus.rs:122-140` |
 | per-tick read | one `sync_read`, IMU first then 15 servos, address **124**, 12 bytes: present_pwm, present_current, present_velocity, present_position (…136) | `bus.rs:24-28, 100-104` |
 | per-tick write | one `sync_write` of goal positions | `bus.rs:1-4` |
 | slow read, every 1 s | address **144** u16 present_input_voltage (0.1 V/count) + **146** u8 present_temperature, 3 bytes, own transaction (~1 ms) — the 12-byte gap 136–144 is trajectory registers nobody wants | `bus.rs:32-44`; `rdesign:266-269` |
@@ -171,18 +168,14 @@ outright (`rdesign:444-446`).
 | loop / health | 50 Hz; unhealthy below 45 Hz achieved; wedged after 25 silent periods (500 ms); 10 consecutive bus errors | `robotd.toml [control] [update_gate]` |
 | stale-IMU tracker | identical 12-byte block counted; warns after 25 in a row (0.5 s) | `bus.rs:49-58` |
 
-### 3.4 The servo vs the pack (unexplained by any source)
+### 3.4 Published supply conflict; installed configuration unverified
 
 XL330-M288-T datasheet: input 3.7–6.0 V (5.0 V recommended), stall 0.42 /
 0.52 / 0.60 N·m at 3.7 / 5 / 6 V, 18 g, 288.4:1, 4096 counts/rev, cored
 motor [XL330]. The runtime reads the pack **through the servos' own
 `present_input_voltage`** and maps 6.6–8.2 V to 0–100 % (`model.rs:99-113`);
 the simulator fits ±0.96 N·m and randomises `vin_range = (6.5, 8.2)`
-(`const.py:160`; `joints_properties.xml` [R1 §4.3]). Both say the servos see
-the 2S pack directly at ~7.4 V nominal, above datasheet maximum. **Stock
-part over-spec, a regulated bus, or a custom variant: CANNOT DETERMINE** — a
-production unit with a meter on the servo VDD pin, or Pollen saying, settles
-it [R1 §19.3]. Sub-variant M288 vs M077: never named in Pollen files
+(`const.py:160`; `joints_properties.xml` [R1 §4.3]). These are runtime and simulation assumptions. The pinned public HAT independently places motor VDD on +BATT; neither source establishes the fitted robot's revision or measured supply. Both standard M288 and M077 variants have a 6.0 V maximum. A custom variant, intervening supply stage or different revision remains **CANNOT DETERMINE** pending original-unit identity and approved measurements. Changing voltage fault thresholds or selecting a generic regulator does not prove a 1:1 recreation. Sub-variant M288 vs M077: never named in Pollen files
 ("xl330" only); community says M288-T "seen on press prototype" [R2 §5.1].
 
 ## 4. IMUs
@@ -198,7 +191,7 @@ it [R1 §19.3]. Sub-variant M288 vs M077: never named in Pollen files
 | readiness | 25 live quaternion blocks (~0.25 s at 100 Hz) before fall detection may trust it | `imu.rs:96-100` |
 | all-zero quaternion | SFLP table not written yet — keep last good, never snap to identity | `imu.rs:113-116` |
 | location | MJCF `imu` site on `trunk_base` at body (−21, 0.1, −14.7) → world (−21, 0, 105.3) | [R2 §3.2]; [SPEC §3] |
-| MCU, transceiver, schematic, firmware | **CANNOT DETERMINE** — not in the repository; community says any Protocol-2-slave MCU (STM32G0/CH32V) would do | [R2 §5.4]; [C-elec] |
+| MCU, transceiver, schematic, firmware | **CANNOT DETERMINE** — no matching MCU, transceiver, board fabrication source or bridge firmware located in the September 8 inspected official trees; STM32G0/CH32V are hypothetical replacement choices, not original identities | [R2 §5.4]; [C-elec] |
 
 Fall handling built on it: fall *report* when projected gravity z > −0.5 for
 200 ms; predictive `limp_fall` when already tilted past z −0.90 (~26°), still
@@ -227,7 +220,7 @@ release binaries settles it [R1 §7.3].
 | position | `head_camera` site world (81.4, 0, 251.1), camera quat `0 0 -1 0`; 73 mm ahead and 15.5 mm above the head-roll axis | [SPEC §3]; [R2 §2] |
 | capture | `/dev/video0` `rkisp_mainpath`, native 3280 × 2464; sensor pinned to 1920×1080@30, ISP scales; default stream 720p30 H.264 constrained-baseline at 2 Mb/s via Rockchip MPP (`mpph264enc`) | `media:313, 449`; `robotd.toml [media]` |
 | indicator | "dedicated camera-use indicator inspired by classic REC lights" — GPIO/driver **CANNOT DETERMINE** (0 hits in source grep) | [presskit] |
-| ribbon / module part | CANNOT DETERMINE — teardown | — |
+| ribbon / module part | **CANNOT DETERMINE** for the original. Seeed 102110719 is 38 × 38 mm and rejected for the current 25 × 24 mm reference envelope; UCTRONICS B0183 is a conditional dimensional candidate, not confirmed original. Lens focal length/FOV and supplied FFC variant remain unverified for the target | [camera identity audit](../research/camera-identity-2026-09-08/REPORT.html) |
 
 ## 6. ToF (the "compact LiDAR")
 
@@ -247,9 +240,9 @@ release binaries settles it [R1 §7.3].
 | fact | value | source |
 |---|---|---|
 | codec | TI **TLV320AIC3104** on the HAT, I²C 0x18 (`compatible = "ti,tlv320aic3x"`), I²S3 (`i2s3_2ch`), fixed **12 MHz MCLK**, cpu-dai sysclk **12.288 MHz** (256 × 48 kHz), card name `aic3104`, ALSA `plughw:aic3104` | `aic.dts:21-93`; `robotd.toml [audio]` |
-| MCLK source | a `fixed-clock` node — whether a crystal on the HAT or an SoC clock pin: CANNOT DETERMINE | `aic.dts:25-30` |
-| mic | on the head (pet_detect README); codec input Mic3R mono [C-elec]; captures from `"<device>,0"` | [R2 §1b]; `robotd.toml [audio]` |
-| speaker | placeholder mesh 35 × 25 × 7 in the head; line out [C-elec]; amplifier CANNOT DETERMINE | [SPEC §4.3] |
+| MCLK source | public PCB Y1.3 drives codec U2.1; 12 MHz oscillator on +3V3, J4.13 is NC; fitted revision unconfirmed | pinned public HAT PCB Y1/U2/J4; `aic.dts:25-30` |
+| mic | public HAT **MK1 LMA2718T421-OA5-2** is an onboard analog MEMS microphone. **J2/J9 Wago 2059-302** are separate external microphone inputs; their presence does not establish additional installed microphones. Runtime captures from `"<device>,0"`; original fitted transducer/revision unconfirmed | pinned public HAT BOM/schematic; `robotd.toml [audio]` |
+| speaker | placeholder mesh 35 × 25 × 7 in the head; line out [C-elec]; public HAT U1 PAM8406D amplifier established; fitted speaker module remains unidentified | [SPEC §4.3] |
 | features | greet quack, pet-detect CNN (~20 KB, 40-band log-mel, thresholds 0.95/0.85), per-robot seeded voice bank `/var/lib/robot/sounds`, ToF theremin, chorale over Bluetooth (off by default) | `robotd.toml [audio] [theremin] [chorale]` |
 
 ## 8. NFC
@@ -270,11 +263,11 @@ a teardown settles it.
 | voltage window | full 8.2 V, empty 6.6 V, *under load through the bus*; nominal 7.4 V; linear % | `model.rs:99-128`; `robotd.toml [policy] nominal_voltage` |
 | gauge | **none** — "There is no fuel gauge and no ADC. The only measurement available is what the servos report as their own supply" | `model.rs:99-105` |
 | empty behaviour | EMA (~10 s) at 6.6 V → sit down gracefully and power the board off (`battery_empty_shutdown = true`); Select held 2 s does the same by hand | `robotd.toml [safety]`; `cheat:249` |
-| path | "In-robot power comes from the battery via the HAT regardless" — battery → banana contact PCB → HAT → Radxa; regulators on the HAT: CANNOT DETERMINE | `i2c3.dts:22`; `PARTS.md` row 2 |
-| USB-C | 5 V only — the overlay re-muxes I²C3 to M0 and **disables the FUSB302 PD controller** (`/i2c@fe5c0000/fusb302@22`); its power-on defaults present Rd on both CC lines so any charger still gives 5 V; maskrom flashing unaffected | `i2c3.dts:15-30, 50-58` |
+| path | "In-robot power comes from the battery via the HAT regardless" — battery → banana contact PCB → HAT → Radxa; public HAT U9 AP63205 produces +5V through the U10/Q2 path; U3 XC6206P182 produces +1V8 from host +3V3; installed path and capacity unverified | `i2c3.dts:22`; `PARTS.md` row 2 |
+| USB-C | 5 V only — the overlay re-muxes I²C3 to M0 and **disables the FUSB302 PD controller** (`/i2c@fe5c0000/fusb302@22`); the overlay comments describe default 5 V behavior and unaffected maskrom flashing; this is a software-source statement, not verification of every charger or the installed power path | `i2c3.dts:15-30, 50-58` |
 | which USB-C port charges; tethered running; in-situ charging | CANNOT DETERMINE — test on a unit | [R1 §19] |
 | charger | "Dual Battery Charger" in the Charger/Dev packs; specs CANNOT DETERMINE | `store_charger.json` |
-| power switch | none in any source | — |
+| power switch | exact installed switching/protection arrangement unverified | original board/harness evidence needed |
 
 ## 10. Software stack
 
@@ -369,17 +362,17 @@ Duck detector `duck_detect.rknn` at 2 Hz, threshold 0.35, off by default
 
 | interface | Radxa side | HAT / peripheral side | status |
 |---|---|---|---|
-| Dynamixel bus | UART2 M0 → `/dev/ttyS2`, 1 Mbps, 3.3 V TTL | 3-pin TTL leads to 15 XL330 + `imu_to_dxl`; half-duplex transceiver on HAT (inferred) | port **known**; header pin numbers, transceiver part, connector type on HAT **CANNOT DETERMINE** (Radxa pinout page; HAT photo) |
+| Dynamixel bus | UART2 M0 → `/dev/ttyS2`, 1 Mbps, 3.3 V TTL | 3-pin TTL leads to 15 XL330 + `imu_to_dxl`; public HAT half-duplex logic | host port known; public HAT U5/U6/U7 logic and J13/J14 B3B-EH-A three-pin TTL connectors identified; U8 SIT3088E is the separate RS-485 path, not proof of XL330 bus conversion; installed revision unconfirmed |
 | I²C3 (M0) | header **pins 3 / 5**, GPIO1_A0 SDA / GPIO1_A1 SCL, 400 kHz, `/dev/i2c-3` → `/dev/i2c-pihat` | codec 0x18, BMI088 0x19/0x68, ToF 0x29 via Stemma J5; one 10 kΩ pull-up pair R12/R13 | **known** (`i2c3.dts`) |
-| I²S3 | `i2s3_2ch`, bit/frame master, sysclk 12.288 MHz | TLV320AIC3104 | controller known; header pins CANNOT DETERMINE |
-| MCLK 12 MHz | `fixed-clock` node | codec MCLK | origin CANNOT DETERMINE |
-| MIPI CSI | 22-pin connector; sensor at I²C 0x10 on bus 2 | IMX219 board, upside down | **known**; ribbon length CANNOT DETERMINE |
-| USB-C | 5 V in; FUSB302 at `fusb302@22` disabled; Radxa has USB 3.0 host + USB 2.0 OTG Type-C | USB-C cable in box | which port charges: CANNOT DETERMINE |
-| battery | — | NP-F550 → banana contact PCB → HAT → 40-pin (5 V to Radxa) and bus VDD | path known; regulators, fusing CANNOT DETERMINE |
+| I²S3 | `i2s3_2ch`, bit/frame master, sysclk 12.288 MHz | TLV320AIC3104 | public PCB J4 pins 12 SCLK, 35 LRCK, 38 SDI, 40 SDO (M0); installed revision unconfirmed |
+| MCLK 12 MHz | `fixed-clock` node | codec MCLK | public Y1.3 → U2.1; J4.13 NC; installed revision unconfirmed |
+| MIPI CSI | 22-pin connector; sensor at I²C 0x10 on bus 2 | IMX219 board, upside down | sensor/runtime observation known; exact module, M12 lens and FFC length/contact orientation unverified; sensor match is not module identity |
+| USB-C | 5 V in; FUSB302 at `fusb302@22` disabled; Radxa has USB 3.0 host + USB 2.0 OTG Type-C | USB-C cable in box | in-robot battery charging is not established; USB host power does not prove a charger circuit |
+| battery | — | NP-F550 → banana contact PCB → HAT → 40-pin (5 V to Radxa) and bus VDD | public board topology known; installed harness, protection and current capacity unverified |
 | FUSB302 (USB PD) | `/i2c@fe5c0000/fusb302@22`, M1 pins GPIO3_B5/B6 | — | disabled by overlay (**known**) |
 | NFC ×2 | ? | ? | CANNOT DETERMINE |
 | REC LED | ? | ? | CANNOT DETERMINE |
-| mic(s), speaker | codec Mic3R / line out [C-elec] | transducers | parts CANNOT DETERMINE |
+| mic(s), speaker | codec Mic3R / line out [C-elec] | transducers | public HAT U1 PAM8406D and MK1 LMA2718T421-OA5-2 identified; installed transducers unconfirmed |
 | Wi-Fi / BT | on-module | gamepad (BT, `padd`), phone (BLE, `btd`), WebRTC (Wi-Fi) | **known** |
 | NPU | `rk3568-npu-enable.dts` | — | known |
 
@@ -387,14 +380,14 @@ Duck detector `duck_detect.rknn` at 2 Hz, threshold 0.35, off by default
 
 1. **Servo supply**: are the XL330s on the raw 6.6–8.2 V pack (over datasheet 6.0 V)? — meter on servo VDD of a production unit.
 2. **XL330 sub-variant** M288-T vs M077-T — label on a shipped servo or Dev Pack spare.
-3. **Head IMU**: the HAT's BMI088 or another chip; is it read? — `i2cdetect` + release binary grep.
-4. **Robot HAT schematic**: transceiver, regulators, connectors (J5 and the servo header), NFC — Pollen publishing, or a teardown; only the ODM community HAT (`blublear/open-duck-mini-hat`, KiCad, MIT) exists as a model [R2 §1c].
+3. **Head IMU**: the HAT's BMI088 or another chip; is it read? — readable chip/board identity and matching firmware evidence; an I2C address alone cannot identify a chip.
+4. **Installed Robot HAT revision**: compare silkscreen, both-side photographs and original BOM against the published C1 schematic/PCB/BOM. Public source availability is established; installed equivalence and NFC remain unverified.
 5. **`imu_to_dxl` v2**: MCU and firmware — not in the repo.
 6. **ToF generation** L5CX vs L8CX and its range — production unit.
 7. **Camera module + lens FOV** — press kit says provisional.
 8. **NFC reader IC and antenna placement** — no code yet.
 9. **Harness routing** through head_yaw (±170°) and neck — teardown photos.
-10. **UART2 / I²S header pins** on the Radxa Zero 3W — the Radxa GPIO page (not fetched).
+10. **Installed header/harness mapping**: UART2 M0 pins 8 TX / 10 RX are documented by Radxa; public HAT I²S uses pins 12/35/38/40. Confirm the installed board revision and boot-console interaction; those source pin identities are no longer unknown.
 11. **Mic / speaker / amplifier / REC LED** part numbers and GPIOs.
 12. **Charger and USB-C behaviour** with the pack fitted.
 

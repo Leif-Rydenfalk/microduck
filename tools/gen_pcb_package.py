@@ -329,12 +329,18 @@ def main():
 
     # ---- 1 -----------------------------------------------------------------
     A('<section id="s1"><h2><span class="n">1</span>What this is, and what it is not</h2>')
-    A('<p class="lede">Pollen Robotics publishes the Microduck&rsquo;s firmware, its '
-      'device-tree overlays and its simulation meshes. It publishes no PCB, no '
-      'schematic and no BOM for any of the three custom boards, and the press kit '
-      'asks that the robot not be described as open-source hardware. Everything in '
-      'this document is <em>our</em> reconstruction from the published behaviour '
-      'plus the vendor datasheets of the chips that behaviour names.</p>')
+    A('<p class="lede"><strong>NOT READY TO BUILD FROM.</strong> This package describes local '
+      'reconstruction boards, with the DRC results read from their own fabrication outputs. '
+      'Pollen publishes a HAT schematic, PCB and BOM at commit '
+      '<code>23eab11927f95ceca0dfa35bf182caeb7db39ea0</code>. Its installed Microduck '
+      'revision remains unconfirmed; the IMU bridge hardware/firmware and battery-contact '
+      'circuit remain unidentified in the inspected official sources. '
+      'See <a href="docs/RECREATION-2026-09-08.md">current source reconciliation</a> '
+      'and <a href="research/servo-power-audit-2026-09-08/AUDIT.md">servo supply evidence</a>. '
+      'Do not energize an unidentified standard XL330 chain from the 2S pack: the '
+      'published HAT motor path is +BATT and standard XL330 maximum is 6.0 V. '
+      'Historical local decisions below are retained with source corrections; no '
+      'local design or DRC failure is promoted to original identity.</p>')
     tags = " &middot; ".join(
         f'{b["decisions"][0][0]}&ndash;{b["decisions"][-1][0]}' for b in boards
         if b.get("decisions"))
@@ -377,7 +383,7 @@ def main():
     # ---- 2 -----------------------------------------------------------------
     pm = d["pollen_hat_mesh"]
     A('<section id="s2"><h2><span class="n">2</span>What Pollen&rsquo;s own HAT mesh measures</h2>')
-    A(f'<p class="lede">One of the three boards is not entirely unpublished. '
+    A(f'<p class="lede">This section measures the reference simulation mesh, not the public PCB. '
       f'<code>{esc(pm["file"])}</code> is Pollen&rsquo;s geometry for the Robot HAT, and it '
       f'was measured on {esc(pm["read"])}. Until then this project&rsquo;s HAT outline came '
       f'from the Raspberry&nbsp;Pi Zero mechanical drawing <em>by analogy</em>. It no longer does.</p>')
@@ -668,20 +674,19 @@ def main():
       '7.310&nbsp;mm, not the 8.500&nbsp;mm a generic 2&times;20 stacking header gives. '
       'Settled by <code>cecad.pcbview.board_assembly()</code> on the real solids, '
       'which needs FreeCAD and has not been run.</li>')
-    A('<li><strong>Pollen&rsquo;s real schematics.</strong> All three boards are '
-      'functional stand-ins. A teardown photograph of a production HAT&rsquo;s connector '
-      'side would settle the connector family and the 4.800&nbsp;mm column question in '
-      '&sect;2 on its own.</li>')
+    A('<li><strong>Installed original identities.</strong> The public C1 HAT schematic exists. These three '
+      'local layouts remain reconstructions. Readable original-board silkscreen, both-side photographs '
+      'and matching fabrication sources are needed to establish the installed HAT revision, IMU bridge '
+      'and battery-contact circuit; a photograph alone does not prove all electrical details.</li>')
     A('<li><strong>The NP-F terminal pitch.</strong> The banana board&rsquo;s 4.000&nbsp;mm '
       'is derived from the 12.000&nbsp;mm window in the cradle, not measured off a pack. '
       'A caliper across a physical NP-F550 settles it and nothing else does.</li>')
     A('<li><strong>The codec&rsquo;s 1.8&nbsp;V rail.</strong> Decision D5 leaves it on a '
       'test point instead of inventing a regulator. The HAT&rsquo;s codec cannot run '
-      'until something feeds TP1.</li>')
+      'in this local reconstruction: TP1 is unresolved. Public C1 uses U3 XC6206P182. This is not an instruction to energize TP1.</li>')
     A('<li><strong>SERVO_V: raw pack or regulated.</strong> Decision D2 reads it as raw '
-      'from <code>model.rs:99-113</code>. A meter on a production servo&rsquo;s VDD '
-      'settles it, and the 0&nbsp;&Omega; link R1 is there so the answer can be fitted '
-      'either way.</li>')
+      'from <code>model.rs:99-113</code>. Public C1 ties motor connectors to +BATT; installed revision is unconfirmed. Standard XL330 maximum is 6.0 V. Qualified original-unit identification and approved measurement '
+      'are required. R1 does not establish voltage suitability or authorize energization.</li>')
     A('<li><strong>The imu_to_dxl outline.</strong> Decision E8 is ours entirely. It has '
       'not been checked for clearance against the trunk cavity — that is a mechanical '
       'check, not a PCB one, and it has not been run.</li>')

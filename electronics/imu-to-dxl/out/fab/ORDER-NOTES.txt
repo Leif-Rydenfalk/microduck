@@ -7,17 +7,17 @@ ordering; several are the reason a number is what it is.
 
 DRC verdict: FAIL
 
-1. _resolve_offboard(): 118 netlist terminals resolved as not-pads-of-this-board. The robot netlist is the WHOLE robot; this board is one device on it. First ten reasons:
+1. _resolve_offboard(): 122 netlist terminals resolved as not-pads-of-this-board. The robot netlist is the WHOLE robot; this board is one device on it. First ten reasons:
   - host.5V (net V5_HAT): off-board — net V5_HAT has no pad on the imu_to_dxl board
   - hat.V5_OUT (net V5_HAT): off-board — net V5_HAT has no pad on the imu_to_dxl board
   - host.GND (net GND): another device on the same bus node — its terminal lands on this board's own pads on that net (J1.1)
   - battery.BAT- (net GND): another device on the same bus node — its terminal lands on this board's own pads on that net (J1.1)
   - hat.GND (net GND): another device on the same bus node — its terminal lands on this board's own pads on that net (J1.1)
+  - hat_y1.GND (net GND): another device on the same bus node — its terminal lands on this board's own pads on that net (J1.1)
   - codec.GND (net GND): another device on the same bus node — its terminal lands on this board's own pads on that net (J1.1)
   - bmi088.GND (net GND): another device on the same bus node — its terminal lands on this board's own pads on that net (J1.1)
   - tof.GND (net GND): another device on the same bus node — its terminal lands on this board's own pads on that net (J1.1)
   - id20.GND (net GND): another device on the same bus node — its terminal lands on this board's own pads on that net (J1.1)
-  - id21.GND (net GND): another device on the same bus node — its terminal lands on this board's own pads on that net (J1.1)
 
 2. THE `binding` CHECK REPORTS CANNOT DETERMINE, AND THAT IS CORRECT. Fourteen nets exist on this board and not in the robot netlist — BYPASS, DIR, DXL_DRV, IMU_INT1, MCU_RX, MCU_TX, NRST, SPI_MISO, SPI_MOSI, SPI_NSS, SPI_SCK, SWCLK, SWDIO, V3V3. They are board-LOCAL and they must be: electronics/netlist.py models this whole board as ONE device, `imu200`, with exactly three terminals (GND, VDD, DATA — 'rides the Dynamixel bus'), because that is all Pollen's published source says about it. Everything inside the box is this file's own circuit. The check is right to say it cannot verify what the netlist does not model, and it would be wrong to silence it.
 

@@ -1,0 +1,12 @@
+from pathlib import Path
+import subprocess,json,hashlib,importlib.util,contextlib,io
+D=Path(__file__).resolve().parent;R=D.parent.parent
+checks=[]
+for args in [['tools/gen_pcb_package.py','--self-test'],['electronics/netlist.py','--self-test']]:
+ p=subprocess.run(['python3']+args,cwd=R,text=True,capture_output=True);checks.append({'command':['python3']+args,'exit':p.returncode,'stdout':p.stdout,'stderr':p.stderr});assert p.returncode==0
+sp=importlib.util.spec_from_file_location('reviewed_netlist',R/'electronics/netlist.py');m=importlib.util.module_from_spec(sp);sp.loader.exec_module(m);report=m.check_all(m.electrical_design(),verbose=False);counts={'PASS':len(report.passed),'FAIL':len(report.failed),'CANNOT DETERMINE':len(report.undetermined)};assert counts=={'PASS':82,'FAIL':15,'CANNOT DETERMINE':26}
+md=(R/'docs/ELECTRONICS-AND-SOFTWARE.md').read_text();assert 'input-voltage bit 0 clear' in md and 'pin **8 TX**' in md and '25 × 24 mm reference envelope' in md and 'J2/J9 Wago 2059-302' in md
+page=(R/'PCB-PACKAGE.html').read_text();assert 'NOT READY TO BUILD FROM' in page and 'It publishes no PCB' not in page
+files=['docs/ELECTRONICS-AND-SOFTWARE.md','electronics/pcb-package.json','tools/gen_pcb_package.py','PCB-PACKAGE.html','electronics/netlist.py','electronics/firmware.json','electronics/robot-hat/out/schematic.svg']+['electronics/'+x+'/out/fab/ORDER-NOTES.txt' for x in ['robot-hat','imu-to-dxl','banana-contact']]
+sources=['research/servo-power-audit-2026-09-08/AUDIT.md','research/imu-contact-identity-2026-09-08/AUDIT.md','research/camera-identity-2026-09-08/audit.json','docs/RECREATION-2026-09-08.md','ce-parts/radxa-zero-3w/electrical.host.json','out/open/identity-evidence/hat/ASE01187-C1_elec_RPI_Robot_HAT_BOM.csv']
+data={'date':'2026-09-08','checks':checks,'electrical_counts':counts,'source_ownership':'FIRMWARE.html absent. firmware.json regenerated through N.firmware_json from electronics/netlist.py; only DXL source note edited, no topology or ratings changed. PCB package generator reads existing board.py/fab evidence, emits HTML/schematic/ORDER-NOTES. Original identity unverified and local DRC failures retained.','files':[{'path':f,'sha256':hashlib.sha256((R/f).read_bytes()).hexdigest()} for f in files],'evidence':[{'path':f,'sha256':hashlib.sha256((R/f).read_bytes()).hexdigest()} for f in sources]};(D/'verification.json').write_text(json.dumps(data,indent=2));print(json.dumps(counts));print('source assertions and existing negative controls PASS')

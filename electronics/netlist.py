@@ -309,14 +309,13 @@ def electrical_design(ids=None, gyro_addr="0x68", hat_keep_bus=False,
     d.declare_segment(
         "dxl", bus="UART", controller="host",
         signals={"DATA": "HAT:DXL_DATA"},
-        note="THE ONE DATA WIRE. UART2 TX/RX reach it through a half-duplex "
-             "transceiver on the HAT — inferred: 'no direction GPIO anywhere in "
-             "the code' (docs/ELECTRONICS-AND-SOFTWARE.md §3.1, [C-elec]). The "
-             "controller is the Radxa's UART2; the pin identifier HAT:DXL_DATA "
-             "names the HAT-side node because the HAT's connector and "
-             "transceiver part are CANNOT DETERMINE (ROBOTIS' reference is a "
-             "74LVC2G241 with a TX-enable, chips[XL330-M288-T]"
-             ".communication_circuit — which robotd never drives).")
+        note="THE ONE DATA WIRE. Host UART2 has no direction GPIO in the inspected runtime. "
+             "Pinned public HAT commit 23eab11927f95ceca0dfa35bf182caeb7db39ea0 "
+             "BOM identifies U5 74LVC1G08, U6 SN74LVC1G125DBV and U7 "
+             "SN74LVC1G126DBVR; J13/J14 are B3B-EH-A three-pin TTL motor connectors. "
+             "U8 SIT3088E serves the separate RS-485 path, not the XL330 TTL identity. "
+             "HAT:DXL_DATA names the public-board-side data node. Exact installed "
+             "Microduck board revision and harness remain CANNOT DETERMINE.")
     d.declare_segment(
         "i2s3", bus="I2S", controller="host",
         signals={"BCLK": PIN["I2S_SCLK"],

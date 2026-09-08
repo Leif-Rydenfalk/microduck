@@ -1,0 +1,99 @@
+{
+  "date": "2026-09-08",
+  "checks": [
+    {
+      "command": [
+        "python3",
+        "tools/gen_pcb_package.py",
+        "--self-test"
+      ],
+      "exit": 0,
+      "stdout": "  missing README -> verdict None OK (a missing verdict stays missing)\n  README with no DRC block -> verdict None OK\n  README says 'PASS' -> parser says 'PASS' OK\n  README says 'FAIL' -> parser says 'FAIL' OK\n  README says 'CANNOT DETERMINE' -> parser says 'CANNOT DETERMINE' OK\n  header from a README with no header -> {} OK\n  BOM from a missing file -> [] OK\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "python3",
+        "electronics/netlist.py",
+        "--self-test"
+      ],
+      "exit": 0,
+      "stdout": "=== netlist self-test: every check broken on purpose ===\n  [ok] baseline: I2C address rule ran and PASSed \u2014 i2c2; i2c3; system\n  [ok] baseline: UART (dxl) address rule ran and PASSed\n  [ok] baseline: SERVO_V vs XL330 band is FAIL (6.6-8.2 V vs 3.7-6.0 V)\n  [ok] two servos at ID 10 -> check_buses FAIL\n  [ok] two servos at ID 10 -> dxl/ids FAIL (not the published set)\n  [ok] BMI088 gyro at 0x18 -> I2C FAIL naming the codec\n  [ok] BMI088 gyro at 0x18 -> i2c3/overlay FAIL\n  [ok] SERVO_V declared 4.8-5.5 V -> servo band PASS\n  [ok] SERVO_V undeclared and provision nominal null -> CANNOT DETERMINE\n  [ok] host not powered -> check_host_power FAIL\n  [ok] HAT pass-throughs left as bus endpoints -> a no-address CANNOT DETERMINE on hat \u2014 the reason the design wires a bus-None view (docstring item 3)\n  [ok] wiring nets.json with id10.DATA moved onto SERVO_V -> cross/wiring FAIL\n=== self-test: PASS ===\n",
+      "stderr": ""
+    }
+  ],
+  "electrical_counts": {
+    "PASS": 82,
+    "FAIL": 15,
+    "CANNOT DETERMINE": 26
+  },
+  "source_ownership": "FIRMWARE.html absent. firmware.json regenerated through N.firmware_json from electronics/netlist.py; only DXL source note edited, no topology or ratings changed. PCB package generator reads existing board.py/fab evidence, emits HTML/schematic/ORDER-NOTES. Original identity unverified and local DRC failures retained.",
+  "files": [
+    {
+      "path": "docs/ELECTRONICS-AND-SOFTWARE.md",
+      "sha256": "1c56249320a639b62e91d9ca152999710325f0b05fb66e47688990a06c166c77"
+    },
+    {
+      "path": "electronics/pcb-package.json",
+      "sha256": "54cae731a6395d6b94b4aa94444937c2377e9372f610afd023b75e2048e01912"
+    },
+    {
+      "path": "tools/gen_pcb_package.py",
+      "sha256": "f2e0f044ba9ff1793b00b5fdc24dc8da1682db83893d488a055fee2d1ca65add"
+    },
+    {
+      "path": "PCB-PACKAGE.html",
+      "sha256": "b011827b430c8a64676da7c8211d0a8d7342ba1bc1f86dd80b112064dfff0499"
+    },
+    {
+      "path": "electronics/netlist.py",
+      "sha256": "29db538b0bba1694cc6a554838865f3f1485048f11eeccf408443495dea357fb"
+    },
+    {
+      "path": "electronics/firmware.json",
+      "sha256": "bfe941451487ae4c37bed3d4da1f3885a5ebe5ace0a3479f2289079cb06f2684"
+    },
+    {
+      "path": "electronics/robot-hat/out/schematic.svg",
+      "sha256": "2bf9dd1f88afcb6f0344c872a2bc78277deeeb19987f5e6776bbc35228eedc7d"
+    },
+    {
+      "path": "electronics/robot-hat/out/fab/ORDER-NOTES.txt",
+      "sha256": "5e648d7ba32588f4fc8d2051d3b605985aeb9d5298298c951dc76c8fc30d6b5e"
+    },
+    {
+      "path": "electronics/imu-to-dxl/out/fab/ORDER-NOTES.txt",
+      "sha256": "f4f51db264dc741debea691b88f9a00e9466161bcc5a60581cdbbae1b2bbbd25"
+    },
+    {
+      "path": "electronics/banana-contact/out/fab/ORDER-NOTES.txt",
+      "sha256": "8d222e7d655703384ec5d8c886e9ceb11b0ce0fb74ebc6079374ccca2377aa02"
+    }
+  ],
+  "evidence": [
+    {
+      "path": "research/servo-power-audit-2026-09-08/AUDIT.md",
+      "sha256": "07cf9e20b5b24d9f986725ad195eb3bea8de9899de97374c29493d1b874d8597"
+    },
+    {
+      "path": "research/imu-contact-identity-2026-09-08/AUDIT.md",
+      "sha256": "e050f0e1c5620b8b2344b8a545a92e2a96600db0f2f2fba542409efed0ffff4c"
+    },
+    {
+      "path": "research/camera-identity-2026-09-08/audit.json",
+      "sha256": "956fe6afba26737fddb60c4a2623f7341caa6cec679ceb1fcab23416a5a9c02a"
+    },
+    {
+      "path": "docs/RECREATION-2026-09-08.md",
+      "sha256": "45f791b81b80599313c84351039428e2bdcca6b5446d41579f54149fb5041c94"
+    },
+    {
+      "path": "ce-parts/radxa-zero-3w/electrical.host.json",
+      "sha256": "8e273432e006cf648e4bbafacaaf998fae43417a450e2538402edd17bd054831"
+    },
+    {
+      "path": "out/open/identity-evidence/hat/ASE01187-C1_elec_RPI_Robot_HAT_BOM.csv",
+      "sha256": "329f78533e4d0cc7a066cc430cdc8605aa0ab78a279db33baf716f31bc38bbd9"
+    }
+  ]
+}
