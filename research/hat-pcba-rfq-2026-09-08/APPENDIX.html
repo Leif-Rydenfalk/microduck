@@ -1,0 +1,156 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>Robot HAT PCBA RFQ</title><style>/* doc.css — the shared academic style for every document in this repo.
+   Link it, do not copy it.
+
+   THE FONT LINK: the axis is `opsz`, NOT `opt_sz`. Measured 2026-09-03 (lane T
+   fix pass), headless Chrome, document.fonts:
+
+     family=Source+Serif+4:opt_sz,wght@...   ->  HTTP 400, 0 @font-face rules
+                                                 declared, {} families
+     family=Source+Serif+4:opsz,wght@...     ->  HTTP 200, 42 @font-face rules,
+                                                 {Source Serif 4: 18,
+                                                  Source Sans 3: 14,
+                                                  IBM Plex Mono: 10}
+
+   One malformed axis name 400s the WHOLE css2 request, so it did not merely
+   drop the serif — it dropped Source Sans 3 and IBM Plex Mono with it, and
+   every one of the 21 documents that carried the typo silently fell back to
+   Georgia / system sans / Menlo with no error anywhere. Nothing on the page
+   says it happened; the only way to see it is to count faces. If you edit the
+   link, re-run that count before you commit.
+   (document.fonts.check() is not the test: it returns true for a family with
+   no faces at all. Count document.fonts.size.) */
+  :root{
+    --paper:#ffffff;--card:#fbfaf7;--ink:#1a1a1a;--ink-2:#565656;--ink2:#565656;
+    --line:#d7d3ca;--hair:#d7d3ca;--rule:#1a1a1a;--accent:#243b53;--wire:#243b53;--wire-ink:#243b53;
+    --ready:#1c6b3c;--pass-ink:#1c6b3c;--partial:#8a5a00;--cd:#8a5a00;--cd-ink:#8a5a00;--no:#9a2b1e;--rail:#9a2b1e;
+    --mint:#1c6b3c;--yellow:#8a5a00;--yellow-ink:#8a5a00;--graphite:#333;--figbg:#fbfaf7;
+    --pass-bg:transparent;--cd-bg:transparent;--chip-bg:transparent;--chip:transparent;--mono-bg:#fbfaf7;--head:#f2efe8;
+    --serif:"Source Serif 4",Georgia,"Times New Roman",serif;
+    --sans:"Source Sans 3",-apple-system,"Segoe UI",sans-serif;
+    --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  }
+  *{box-sizing:border-box}
+  body{background:var(--paper);color:var(--ink);margin:0;font-family:var(--serif);font-size:16px;line-height:1.55}
+  .wrap{max-width:920px;margin:0 auto;padding:0 40px 110px}
+  a{color:var(--accent);text-decoration:none;border-bottom:1px solid rgba(36,59,83,.28)}
+  a:hover{border-bottom-color:var(--accent)}
+  h1,h2,h3{font-family:var(--serif);font-weight:700;line-height:1.15;text-wrap:balance;color:var(--ink)}
+  code,.mono{font-family:var(--mono);font-size:.86em}
+  .eyebrow{font-family:var(--sans);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-2)}
+  /* masthead (header.top / header.hero) */
+  header.top,header.hero{display:block;padding:46px 0 14px;border-bottom:2.5px solid var(--rule);border-top:none}
+  header.top h1,header.hero h1{font-size:40px;letter-spacing:-.01em;font-weight:700}
+  header.top .sub,header.hero .sub{font-size:15.5px;color:var(--ink-2);margin-top:8px;max-width:40em}
+  header.hero .hero-img,.hero-img{background:#fff;border:1px solid var(--hair);border-radius:0}
+  .rev{margin-top:14px;font-family:var(--mono);font-size:11.5px;color:var(--ink-2);display:flex;flex-wrap:wrap;gap:6px 22px}
+  /* stat bar → clean inline figures */
+  .statbar{display:flex;flex-wrap:wrap;gap:0;border-bottom:1px solid var(--hair);margin:6px 0}
+  .stat{padding:14px 26px 14px 0;margin-right:24px}
+  .stat b{display:block;font-family:var(--serif);font-weight:700;font-size:22px;font-variant-numeric:tabular-nums}
+  .stat span{font-family:var(--sans);font-size:12px;color:var(--ink-2)}
+  /* toc */
+  nav.toc{position:static;background:none;border:none;border-bottom:1px solid var(--hair);display:flex;flex-wrap:wrap;gap:0 20px;padding:10px 0;font-family:var(--sans)}
+  nav.toc a{color:var(--ink);border:none;font-size:12.5px;letter-spacing:.02em;padding:4px 0;text-transform:none}
+  nav.toc a:hover{color:var(--accent)}
+  /* sections */
+  section{margin-top:36px;padding-top:0}
+  section>h2{font-size:22px;padding-bottom:6px;border-bottom:1px solid var(--hair);margin:0 0 12px;font-weight:700}
+  section>h2 .n,section>h2 .sec-no{font-family:var(--mono);font-weight:600;color:var(--accent);font-size:18px;padding-right:12px}
+  .lede{color:var(--ink-2);max-width:40em;margin:2px 0 14px}
+  h3{font-size:16.5px;margin:20px 0 6px}
+  /* cards → framed notes */
+  .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+  .card{background:var(--card);border:1px solid var(--hair);border-radius:0;padding:15px 18px}
+  .card h3{font-size:14px;margin:0 0 6px;font-family:var(--sans);font-weight:600}
+  .card p{font-size:13.5px;margin:0}
+  /* tables — booktabs */
+  .tablewrap,.tw{overflow-x:auto;border:none;border-radius:0;background:none;margin:12px 0}
+  table{border-collapse:collapse;width:100%;font-size:13.5px;font-variant-numeric:tabular-nums}
+  th{font-family:var(--sans);font-weight:600;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-2);text-align:left;padding:7px 12px 6px;border-bottom:1px solid var(--rule);border-top:1.5px solid var(--rule);white-space:nowrap}
+  td{padding:6px 12px;border-bottom:1px solid var(--hair);vertical-align:top}
+  tr:last-child td{border-bottom:1.5px solid var(--rule)}
+  td.num,td.n{text-align:right;font-family:var(--mono);white-space:nowrap}
+  /* chips → plain status words, no fill */
+  .chip{display:inline;font-family:var(--sans);font-weight:600;font-size:11.5px;letter-spacing:.03em;text-transform:uppercase;padding:0;border-radius:0;background:none;border:none;white-space:nowrap}
+  .chip.pass{color:var(--ready)} .chip.cd{color:var(--partial)} .chip.buy{color:var(--ink-2)} .chip.rail{color:var(--no);border:none}
+  /* figures */
+  figure{margin:16px 0;border:1px solid var(--hair);background:var(--figbg);border-radius:0;padding:10px;overflow:hidden}
+  figure img{display:block;width:100%;border:1px solid var(--hair);background:#fff}
+  figcaption{font-family:var(--sans);font-size:12.5px;color:var(--ink-2);padding:8px 2px 2px;border:none}
+  /* diagram / wiring embed */
+  .diagram{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:18px;align-items:start}
+  .dia{background:#fff;border:1px solid var(--hair);border-radius:0;padding:12px;overflow-x:auto}
+  .wirebox{border:1px solid var(--hair);border-radius:0;background:#fff;overflow:auto;max-height:720px;padding:10px}
+  .wirebox svg{width:100%;height:auto;display:block}
+  /* notes / callouts */
+  .note{border-left:2px solid var(--accent);background:var(--figbg);padding:10px 15px;border-radius:0;font-size:14px;margin:12px 0}
+  .mono-block{font-family:var(--mono);font-size:12.5px;background:var(--figbg);border:1px solid var(--hair);border-radius:0;padding:12px 15px;overflow-x:auto;line-height:1.6}
+  /* steps */
+  .steps{display:grid;gap:8px}
+  .step{display:grid;grid-template-columns:40px 1fr;gap:12px;background:var(--figbg);border:1px solid var(--hair);border-radius:0;padding:12px 15px}
+  .step::before{font-family:var(--mono);font-weight:600;font-size:18px;color:var(--accent);text-align:right}
+  .step b{display:block} .step span{color:var(--ink-2);font-size:13px}
+  footer{margin-top:48px;padding-top:14px;border-top:2.5px solid var(--rule);font-family:var(--sans);font-size:12px;color:var(--ink-2);display:flex;flex-wrap:wrap;gap:6px 26px}
+  @media(max-width:680px){.wrap{padding:0 22px 70px}.diagram,.grid2{grid-template-columns:1fr}}
+  .backlink{font-family:var(--sans);font-size:12.5px;margin:16px 0 0}
+  .backlink a{border:none}
+  .wrap>h2:first-of-type,.wrap>h1:first-child{margin-top:8px}
+  h2{font-size:24px;margin:30px 0 10px;padding-bottom:5px;border-bottom:1px solid var(--hair)}
+  h3{font-size:18px;margin:22px 0 6px}
+  h4{font-size:15px;font-family:var(--sans);font-weight:600;margin:16px 0 4px}
+  p{max-width:42em;margin:0 0 11px}
+  ul,ol{max-width:42em;margin:8px 0;padding-left:24px}
+  li{margin:3px 0}
+  pre.code{font-family:var(--mono);font-size:12.5px;background:var(--figbg);border:1px solid var(--hair);padding:12px 15px;overflow-x:auto;line-height:1.55;white-space:pre}
+  blockquote{border-left:2px solid var(--accent);background:var(--figbg);margin:12px 0;padding:9px 16px;color:var(--ink);font-style:italic;max-width:42em}
+  hr{border:none;border-top:1px solid var(--hair);margin:22px 0}
+  strong{font-weight:700}
+  table.data td{max-width:none}
+  /* compact: a wide evidence table that must still fit the 920px sheet in print/PDF,
+     where .tablewrap's horizontal scroll does not exist. Added 2026-09-03 (lane F2). */
+  table.data.compact{font-size:11.5px}
+  table.data.compact th{padding:5px 6px;font-size:9.5px;letter-spacing:.03em;white-space:normal}
+  table.data.compact td{padding:4px 6px}
+  table.data.compact td code{font-size:.94em;word-break:break-all}
+  table.data.compact .chip{font-size:10px}
+ body{max-width:1100px;margin:30px auto;padding:24px}table{width:100%;border-collapse:collapse}td,th{border-bottom:1px solid #ddd;padding:8px;text-align:left;overflow-wrap:anywhere}td{font-size:13px}h2{margin-top:32px}pre{white-space:pre-wrap}.notice{padding:18px;border:2px solid #a44220;background:#fff7f0}</style><body><p>MD-HAT-PCBA-RFQ-20260908-A · 2026-09-08</p><h1>Public Robot HAT PCBA quotation appendix<br>公开版 Robot HAT PCBA 询价附录</h1><p class="notice"><b>CONDITIONAL QUOTATION ONLY — NOT RELEASED FOR MANUFACTURE<br>仅供附条件报价 — 未批准制造</b><br>Public C1 source does not establish the installed Microduck revision. This appendix neither orders boards nor authorizes paid work.<br>公开 C1 版本不等于已确认原机同版本。本附录不构成订单，也不授权付费工作。</p><p>Source 23eab11927f95ceca0dfa35bf182caeb7db39ea0; PCB/assembly C1, source date 2026-07-08. Existing source files are reused; hashes identify the bytes to quote. No replacement Gerbers were generated.</p><h2>Decisions required before release / 放行前须确认</h2><ul><li>J4: 40 KiCad hole-clearance errors, 0.0200 mm actual vs 0.2000 mm configured; factory DFM and engineering disposition required</li><li>Production Microduck specimen/revision identity and head fit</li><li>A 180-degree board rotation preserves four mounts but moves GPIO/anchor patterns 23.010002 mm; lower historical collision volume does not establish fit in the same fixed stack</li><li>Copper-thickness conflict and surface finish</li><li>TP2/TP3/TP4 manufacturer and order code</li><li>DNP R36/R37 carry same C17168 code as fitted zero-ohm links but label DNP-1M: preserve DNP; do not procure/populate from this code without clarification</li><li>Y1 recommended solder-land mismatch, exact order-code timing/current guarantee</li><li>Supplier resolves complete manufacturer MPN and datasheet for each LCSC code; no silent substitution</li><li>Finished thickness/outline/hole tolerances, material grade/Tg, mask and legend colour, panelization and tooling rails</li><li>Stencil thickness/apertures, component moisture handling and reflow profile, bottom-side retention and connector assembly process</li><li>Inspection class, test coverage/fixtures, test program, programming/calibration, acceptance limits and approved golden sample</li><li>Price/currency, MOQ, stock as-of date, NRE, excess component attrition, lead time and shipping destination</li></ul><p lang="zh">优先确认：J4有40项孔间隙检查错误（实际0.0200mm，规则0.2000mm），须工厂DFM及工程确认；旋转180°虽保持四安装孔，却使GPIO／定位孔偏移23.010002mm，不能据历史干涉减少判断原位适配；外层铜厚70μm与图纸35μm备注冲突、表面处理、TP2/3/4准确料号、Y1焊盘差异。保持全部9个DNP不装；R36/R37虽然带C17168编号，也不能据此采购或装配。先核对原机版本，再决定是否使用本公开版本。</p><h2>BOM and placement reconciliation / BOM与贴装核对</h2><table><thead><tr><th>Measured count</th><th>Value</th></tr></thead><tbody><tr><td>bom_rows</td><td>47</td></tr><tr><td>bom_designators</td><td>123</td></tr><tr><td>pcb_footprints</td><td>127</td></tr><tr><td>pos_rows</td><td>117</td></tr><tr><td>dnp_designators</td><td>9</td></tr><tr><td>physical_fitted_components</td><td>113</td></tr><tr><td>fitted_with_lcsc_code</td><td>110</td></tr><tr><td>physical_sides</td><td>{&#x27;bottom&#x27;: 67, &#x27;top&#x27;: 46}</td></tr></tbody></table><p>POS contains 117 rows, including 3 fiducials and the H3 logo: quote 113 physical components, not 117 placements. The BOM includes H2 artwork and 9 DNP references. TP2/3/4 remain physical components with unspecified purchase codes.<br>POS共117行，含3个基准点和H3标志；实际器件113个。BOM内H2为图案，9个DNP不装。TP2/3/4仍为实体器件，采购料号未确定。</p><table><thead><tr><th>Check</th><th>Result</th></tr></thead><tbody><tr><td>bom_row_quantity_errors</td><td>[]</td></tr><tr><td>dnp_accidentally_in_pos</td><td>[]</td></tr><tr><td>fitted_bom_missing_pos</td><td>[]</td></tr><tr><td>physical_pos_missing_bom</td><td>[]</td></tr><tr><td>bom_lcsc_vs_pcb_mismatches</td><td>[]</td></tr><tr><td>existing_extraction_mismatches</td><td>[]</td></tr><tr><td>pos_only_artwork</td><td>[&quot;FID1&quot;, &quot;FID2&quot;, &quot;FID3&quot;, &quot;H3&quot;]</td></tr><tr><td>bom_only_artwork</td><td>[&quot;H2&quot;]</td></tr></tbody></table><h2>Do not populate / 不装清单</h2><table><thead><tr><th>Ref</th><th>Value</th><th>LCSC code (not authority to fit)</th></tr></thead><tbody><tr><td>C25</td><td>DNP-100n</td><td>none</td></tr><tr><td>R10</td><td>DNP-10k</td><td>none</td></tr><tr><td>R11</td><td>DNP-10k</td><td>none</td></tr><tr><td>R16</td><td>DNP-0R</td><td>none</td></tr><tr><td>R17</td><td>DNP-0R</td><td>none</td></tr><tr><td>R36</td><td>DNP-1M</td><td>C17168</td></tr><tr><td>R37</td><td>DNP-1M</td><td>C17168</td></tr><tr><td>R41</td><td>DNP-0R</td><td>none</td></tr><tr><td>U4</td><td>DNP-CAT24C32HU4</td><td>none</td></tr></tbody></table><h2>Fabrication facts / 制板资料</h2><p>Outline coordinate span [65.000034, 30.900064] mm; declared thickness 1.000000 mm. These are file readings, not tolerances. Four copper layers; stackup below is the source declaration. Surface finish is unresolved (KiCad value: None).<br>外形及厚度为文件值，不是公差；4层铜。下表为源文件叠层声明，表面处理尚未确定。</p><table><thead><tr><th>Layer</th><th>Type</th><th>Thickness mm</th><th>Material</th></tr></thead><tbody><tr><td>F.SilkS</td><td>Top Silk Screen</td><td>not stated</td><td>not stated</td></tr><tr><td>F.Paste</td><td>Top Solder Paste</td><td>not stated</td><td>not stated</td></tr><tr><td>F.Mask</td><td>Top Solder Mask</td><td>0.01</td><td>not stated</td></tr><tr><td>F.Cu</td><td>copper</td><td>0.07</td><td>not stated</td></tr><tr><td>dielectric 1</td><td>prepreg</td><td>0.1</td><td>FR4</td></tr><tr><td>In1.Cu</td><td>copper</td><td>0.035</td><td>not stated</td></tr><tr><td>dielectric 2</td><td>core</td><td>0.57</td><td>FR4</td></tr><tr><td>In2.Cu</td><td>copper</td><td>0.035</td><td>not stated</td></tr><tr><td>dielectric 3</td><td>prepreg</td><td>0.1</td><td>FR4</td></tr><tr><td>B.Cu</td><td>copper</td><td>0.07</td><td>not stated</td></tr><tr><td>B.Mask</td><td>Bottom Solder Mask</td><td>0.01</td><td>not stated</td></tr><tr><td>B.Paste</td><td>Bottom Solder Paste</td><td>not stated</td><td>not stated</td></tr><tr><td>B.SilkS</td><td>Bottom Silk Screen</td><td>not stated</td><td>not stated</td></tr></tbody></table><p><b>Conflict:</b> PCB drawing notes 35μm copper; stackup assigns 70μm outer and 35μm inner. Request separate quotes or owner clarification; do not choose silently.</p><p>{&quot;segment_count&quot;: 914, &quot;minimum_width_by_layer_mm&quot;: {&quot;B.Cu&quot;: 0.2, &quot;F.Cu&quot;: 0.2, &quot;In2.Cu&quot;: 0.25}, &quot;scope&quot;: &quot;track widths only; no measured clearance or current-carrying capacity inferred&quot;}</p><table><thead><tr><th>Drill file</th><th>Hits by diameter mm</th></tr></thead><tbody><tr><td>elec_RPI_Robot_HAT-PTH.drl</td><td>{&quot;0.3&quot;: 107, &quot;0.95&quot;: 14, &quot;1.0&quot;: 3, &quot;2.7&quot;: 4}</td></tr><tr><td>elec_RPI_Robot_HAT-NPTH.drl</td><td>{&quot;1.02&quot;: 40, &quot;2.0&quot;: 2}</td></tr></tbody></table><h2>Assembly files and coordinates / 装配文件与坐标</h2><p>Use the pinned original POS values and layer names. Do not mirror the bottom-side coordinates or rotate parts automatically; supplier CAM must document its convention and provide polarity/orientation review. Existing extraction reports 4 connector-centroid offsets; this is not a blanket origin error. Quote SMT and through-hole/manual assembly separately.</p><p lang="zh">使用固定版本POS原始坐标及面别。不要自动镜像底面或旋转器件；请工厂说明CAM坐标约定，并提供极性／方向复核。既有提取记录有4个连接器中心偏移，不能当成整板原点错误。SMT与通孔／手工装配分别报价。</p><h2>Verification limits / 验证范围</h2><pre>{
+  &quot;source_file&quot;: &quot;research/hat-orientation-audit-2026-09-08.json&quot;,
+  &quot;sha256&quot;: &quot;e95efbe1e1d5fc9aec13824c592daf7977fbc83cfbbce56b67219339b6ebe491&quot;,
+  &quot;verdict&quot;: &quot;FAIL \u2014 the half-turn preserves the mounts but moves the GPIO header and anchors&quot;,
+  &quot;implication&quot;: &quot;The historical 180-degree collision result is a hypothetical moved-header pose, not an interchangeable orientation of the same fixed stack.&quot;,
+  &quot;gpio_anchor_displacement_mm&quot;: 23.010002
+}</pre><pre>{
+  &quot;source_file&quot;: &quot;official-drc.json&quot;,
+  &quot;sha256&quot;: &quot;968c643882ddb249464bbc182cc4bdbf819e98c0aeae0834991f1baefc28b292&quot;,
+  &quot;summary&quot;: {
+    &quot;ignored_checks&quot;: 7,
+    &quot;included_severities&quot;: 3,
+    &quot;schematic_parity&quot;: 0,
+    &quot;unconnected_items&quot;: 0,
+    &quot;violations&quot;: 49
+  },
+  &quot;kicad_version&quot;: &quot;10.0.6&quot;,
+  &quot;report_date&quot;: &quot;2026-09-08T20:59:30&quot;,
+  &quot;severity_counts&quot;: {
+    &quot;error&quot;: 40,
+    &quot;warning&quot;: 9
+  },
+  &quot;type_counts&quot;: {
+    &quot;hole_clearance&quot;: 40,
+    &quot;lib_footprint_issues&quot;: 8,
+    &quot;lib_footprint_mismatch&quot;: 1
+  },
+  &quot;ignored_checks&quot;: [
+    &quot;missing_courtyard&quot;,
+    &quot;track_not_centered_on_via&quot;,
+    &quot;tuning_profile_track_geometries&quot;,
+    &quot;footprint_filters_mismatch&quot;,
+    &quot;pth_inside_courtyard&quot;,
+    &quot;npth_inside_courtyard&quot;,
+    &quot;footprint_type_mismatch&quot;
+  ],
+  &quot;command&quot;: &quot;kicad-cli pcb drc --format json --units mm --severity-all --exit-code-violations -o research/hat-pcba-rfq-2026-09-08/official-drc.json reference/pollen-elec-rpi-robot-hat/elec_RPI_Robot_HAT.kicad_pcb&quot;,
+  &quot;observed_exit_code&quot;: 5,
+  &quot;finding&quot;: &quot;40 J4 pad-to-hole clearance errors: 0.0200 mm actual vs 0.2000 mm configured. Eight missing-library warnings (LCSC_parts_lib / Library_Pollen), one SOT-323_SC-70 library mismatch. No waiver or design change made.&quot;,
+  &quot;scope&quot;: &quot;KiCad CLI checks existing fills, no refill/save; no schematic parity or physical test; seven checks ignored by existing configuration&quot;
+}</pre><p>Empty mismatch lists establish source-file consistency only. They do not establish current stock, electrical safety, solderability, DRC acceptance or compatibility with a production robot.</p><h2>Quotation return / 报价回复</h2><p>Quote 1 prototype PCBA, 100 PCBAs and 1,000 PCBAs separately. Use conditional-pcba-quote.csv for quantities; 9 DNP references are excluded. For each LCSC code return manufacturer, complete MPN, datasheet, package, stock/date, MOQ, unit price/currency and lead time. Separate PCB, SMT/THT, stencil/panel/tooling, testing/fixture, NRE, attrition, packaging, freight and taxes. State all substitutions and missing decisions. Do not begin production.</p><p lang="zh">分别报价1块样板、100块、1,000块PCBA，按附表数量核价，排除9个DNP。每个LCSC编号请返回厂家、完整料号、数据手册、封装、库存／日期、MOQ、单价／币种及交期。PCB、SMT／通孔装配、钢网／拼板／工装、测试／夹具、工程费、损耗、包装、运费及税费分列。替代项和待决事项明确列出，暂不启动生产。</p><h2>Source manifest / 源文件清单</h2><table><thead><tr><th>Existing repository path</th><th>SHA-256</th><th>Pinned remote checked</th></tr></thead><tbody><tr><td>reference/pollen-elec-rpi-robot-hat/elec_RPI_Robot_HAT.kicad_pcb</td><td>26c6d77af6a650c8f601edede4389699ca4ebb942763842d60b4c2c5cc1e2cb5</td><td>True</td></tr><tr><td>reference/pollen-elec-rpi-robot-hat/elec_RPI_Robot_HAT.kicad_pro</td><td>fcd5f7c946958b81b8075ef137a13386a2e83164ff49b29afd14317a134f933f</td><td>not rechecked</td></tr><tr><td>reference/pollen-elec-rpi-robot-hat/production/ASE01187-C1_elec_RPI_Robot_HAT_BOM.csv</td><td>329f78533e4d0cc7a066cc430cdc8605aa0ab78a279db33baf716f31bc38bbd9</td><td>True</td></tr><tr><td>reference/pollen-elec-rpi-robot-hat/production/ASE01187-C1_elec_RPI_Robot_HAT_POS.csv</td><td>fd01d2b304dcbb460702040fd4624e1b8d5d3234741d0fef0c2b5beb6f504d45</td><td>True</td></tr><tr><td>reference/pollen-elec-rpi-robot-hat/production/PCB01186-C1_elec_RPI_Robot_HAT_PCB.zip</td><td>e6e6cbe7d79fe2d2ef6ec4fb996ec583282d9d7bc7534536317dad0503fe5724</td><td>True</td></tr><tr><td>reference/pollen-elec-rpi-robot-hat/production/PCB01186-C1_elec_RPI_Robot_HAT_PCB.pdf</td><td>022b7351df59a1ead183ec2973df301491426cdf713ac9d3d5b718aa44d96df6</td><td>not rechecked</td></tr><tr><td>reference/pollen-elec-rpi-robot-hat/PROVENANCE.json</td><td>d9acf3711e407804d2fae9d377f476500dd88f6a7fc718739226df5d603ea124</td><td>not rechecked</td></tr></tbody></table><h2>Existing fabrication ZIP contents / 既有制板压缩包内容</h2><table><thead><tr><th>Member</th><th>Function</th><th>SHA-256</th></tr></thead><tbody><tr><td>elec_RPI_Robot_HAT-Edge_Cuts.gm1</td><td>Profile,NP</td><td>e290b2800d809ee587ad7794ef06dca413c74aac063df8039254bec03dc23efe</td></tr><tr><td>elec_RPI_Robot_HAT-F_Paste.gtp</td><td>Paste,Top</td><td>f248507b563d252f8771d15ec8b3a5b8620da54d8a0965f55a83b217d1fb96e6</td></tr><tr><td>elec_RPI_Robot_HAT-F_Mask.gts</td><td>Soldermask,Top</td><td>3a8b58fb41180d2eec48a16280ad6cc7f3870cb10d04686e60cfd4d9b3555db2</td></tr><tr><td>elec_RPI_Robot_HAT-B_Mask.gbs</td><td>Soldermask,Bot</td><td>2c8321b8a4a61f4b34d8a533b8f8a73d993ff434ea17d2f3eb001baa871288b2</td></tr><tr><td>elec_RPI_Robot_HAT-PTH.drl</td><td>Plated,1,4,PTH</td><td>e8ab5543e1bf0d638bc793118a7c703aa74f38069f4fa5f37569e88282026cc8</td></tr><tr><td>elec_RPI_Robot_HAT-B_Silkscreen.gbo</td><td>Legend,Bot</td><td>919b06f73c6068407723cd4fc46bbd434b790261bee598f301dbbc94d1f405ca</td></tr><tr><td>elec_RPI_Robot_HAT-In2_Cu.g2</td><td>Copper,L3,Inr</td><td>ea21c3157931aca72eb3f60fee5a182b3c66d620a15aeaa752aa4a4046722f09</td></tr><tr><td>elec_RPI_Robot_HAT-F_Cu.gtl</td><td>Copper,L1,Top</td><td>211a0c1665e8f51f30f8924a2112e1c82a0ce99dada0a6532e3dc21c36251fad</td></tr><tr><td>elec_RPI_Robot_HAT-NPTH-drl_map.gbr</td><td>Drillmap</td><td>ea3781583e9e64c55fe58c4783b676dd7a97f692717ecc9fc14401de6aef0aea</td></tr><tr><td>elec_RPI_Robot_HAT-B_Cu.gbl</td><td>Copper,L4,Bot</td><td>3674b1949022b3dd6eaf64cb801dc1f590d10b0ea6b361c642444ba9e6ec8ceb</td></tr><tr><td>elec_RPI_Robot_HAT-B_Paste.gbp</td><td>Paste,Bot</td><td>367bdb573d1aae639cbffc155023e64197966f0164f78586f8b6cb63a8691a9c</td></tr><tr><td>elec_RPI_Robot_HAT-F_Silkscreen.gto</td><td>Legend,Top</td><td>0e98e30c78e481a5b048fe724ba9ccf2c17d801720823d4dee251239af51b933</td></tr><tr><td>elec_RPI_Robot_HAT-NPTH.drl</td><td>NonPlated,1,4,NPTH</td><td>cdcca7ada5907516dbc163fa1e2425c4520483e945326a25755d7fda5c00538e</td></tr><tr><td>elec_RPI_Robot_HAT-PTH-drl_map.gbr</td><td>Drillmap</td><td>61b4b020816ffb9bba5a5ef826587386f9360a728db999730008adf6a5a14cca</td></tr><tr><td>elec_RPI_Robot_HAT-In1_Cu.g1</td><td>Copper,L2,Inr</td><td>2ecd6694cda1a47b3b6eb254c12c31b4b72c322de47c409e7a726a9e529404b3</td></tr></tbody></table></body></html>
