@@ -87,9 +87,9 @@
   },
   {
    "step": "Preamble: 'production may tap the plastic — CANNOT DETERMINE'",
-   "assumes": "Whether each threaded hole gets a heat-set insert or a tapped thread is undecided; the reader must choose.",
+   "assumes": "Original screw profile/pitch and per-joint fastening method are unresolved. Nominal ISO geometry, TAP hardware and inserts are not interchangeable evidence; the reader must not choose a replacement and count it as original closure.",
    "closer": "human",
-   "by": "design decision (Leif / partner) after the coupon test in PLAYBOOK §5.3"
+   "by": "Identify the original per-joint hardware, then verify matching engagement/torque; research/fastener-reconciliation-2026-09-08/AUDIT.md."
   },
   {
    "step": "1.2 'bolt both XL330s hanging from trunk_base, horn axes through world (6, ±17.5, 115)'",
@@ -143,11 +143,11 @@
    "step": "5.6 'screw the M12 lens holder to the IMX219 board (3 × M2)'",
    "assumes": "The holder is bought-or-printed CANNOT DETERMINE (PARTS row 27); lens thread-in depth / focus procedure absent.",
    "closer": "human",
-   "by": "factory buys a standard M12 holder and sets focus on the first unit"
+   "by": "Identify the original camera board, holder, lens and attachment/focus settings; a compatible generic M12 holder alone does not establish 1:1 identity."
   },
   {
    "step": "5.6 ToF, speaker, microphone mounting",
-   "assumes": "No fixing method (screw / adhesive / clip) for any of the three; speaker and microphone part numbers are CANNOT DETERMINE (B12, B13).",
+   "assumes": "Original ToF/speaker mounting and part identities remain unresolved. The public HAT has onboard MEMS MK1 and optional external mic inputs; an external microphone and its mounting/cable are not established for the target.",
    "closer": "human",
    "by": "teardown of a shipped unit or Pollen's answer"
   },
@@ -159,9 +159,9 @@
   },
   {
    "step": "6 Wiring",
-   "assumes": "Cable lengths are route floors rounded to 5 mm with no tolerance; JST EH pin-1 orientation and cable retention (ties/clips) not stated; 6 of 23 rows carry a CANNOT DETERMINE.",
+   "assumes": "Physical cable cuts are unknown; historical modeled lengths use proxy endpoints. Connector exits, JST EH contact orientation, servo port allocation, retention and service loops need verification against the first physical loom.",
    "closer": "agent_tonight",
-   "by": "WF-HARNESS; the tolerance needs the first physical loom"
+   "by": "Harness endpoint/route evidence plus the first measured physical loom"
   },
   {
    "step": "7.2 'Scan the bus'",
@@ -222,21 +222,21 @@
   "robot-hat": {
    "design_status": "CORRECTED 2026-09-04 by a measurement taken in this repo tonight: Pollen DO publish a Robot HAT — github.com/pollen-robotics/elec_RPI_Robot_HAT, Apache-2.0, tree 23eab11927f95ceca0dfa35bf182caeb7db39ea0, with KiCad 9 source (elec_RPI_Robot_HAT.kicad_sch 961 620 B, .kicad_pcb 2 213 353 B) AND a complete production/ folder (Gerber zip 323 691 B, BOM, POS, SCH.pdf, STEP.zip). Apache-2.0 permits manufacture, modification and SALE. CORRECTED AGAIN 2026-09-04 22:5x, and this correction MATTERS: the published outline is 65.0000 x 30.9001 x 1.000 mm, not 65.0 x 48.5. MEASURED tonight by tools/reconcile.py directly off the Edge.Cuts layer of reference/pollen-elec-rpi-robot-hat/elec_RPI_Robot_HAT.kicad_pcb (4 gr_line + 4 gr_arc, 20 points), agreeing with out/pcb/hat/components.json board.outline_bbox_mm.size = [65.0, 30.9001] to 0.0000 mm. The 48.5 figure is the bbox of the Dwgs.User ANNOTATION layer (65.0000 x 48.6000), whose dimension witness lines hang 17.6999 mm below the copper — a bbox taken over the drawing layer rather than the board outline; out/open/identity-sourcing.json:52-53 still carries it and is owned by another lane. So Pollen's board is 0.9001 mm wider in y than our 65.0 x 30.0 reconstruction and 0.8751 mm wider than the 65.025 x 30.025 simulation mesh — NOT 18.5 mm. It is still NOT proven to be the board inside the retail unit (production revision unresolved: the mesh and the published board both carry four D2.7 mounting holes. Source-file audit 2026-09-08 reads the four drilled pads inside J4 on a 23 x 58 mm footprint-local pattern; there are no standalone MountingHole footprints, which does not mean no holes. See tools/reconcile.py and out/factory/reconcile.json robot_hat_outline.mounting, verified against research/official-hat-audit-2026-09-08.json) — that stays CANNOT DETERMINE and only a teardown settles it. The Gerbers in electronics/robot-hat/ are still OUR footprint-accurate reconstruction, and they still FAIL DRC.",
    "closer": "human",
-   "what": "DECIDE FIRST, before any routing work: adopt Pollen's published Apache-2.0 package (fab it as-is and check the 65.0000 x 30.9001 outline against the HAT pocket in microduck-motor-support, which has never been measured — the delta against our own 65.0 x 30.0 is 0.9001 mm on one axis, so this is a clearance check and not a re-model) or keep our 65 x 30 reconstruction and re-route its 8 open nets to >= 0.1524 mm track. Evidence and licence reading: out/factory/licence.json fact F11, archived out/factory/licence-evidence/github-api_elec_RPI_Robot_HAT.json. Outline measurement and the full contradiction record: out/factory/reconcile.json robot_hat_outline."
+   "what": "Identify the board revision installed in the original target before choosing fabrication data. The published Pollen HAT package is a source-backed public-family candidate, not proof of that identity. After identification, verify its exact mounting/connector geometry, BOM and manufacturing checks; adopting C1 or rerouting our reconstruction alone does not close 1:1 recreation. Sources: research/hat-pcba-rfq-2026-09-08/ and out/factory/reconcile.json."
   },
   "imu-to-dxl": {
-   "design_status": "Unpublished by Pollen; MCU choice (STM32G031F6P6) and firmware are OURS, firmware not written.",
-   "closer": "agent_later",
-   "what": "route the 13 open connections; write the Protocol-2 slave firmware; then fab."
+   "design_status": "No original bridge schematic, BOM, MCU/transceiver identity or firmware image was located in the official repositories/releases inspected on 2026-09-08. STM32G031F6P6 is a local reconstruction choice, not an identified original. Host protocol evidence alone does not identify the board.",
+   "closer": "human",
+   "what": "Obtain original board silkscreen/markings, MCU/transceiver identification and firmware/source provenance. See research/imu-contact-identity-2026-09-08/AUDIT.md. Routing/fabbing a compatible local replacement does not close original identity."
   },
   "banana-contact": {
-   "design_status": "Passive strip; artwork complete and routed 3 of 3.",
+   "design_status": "The local reconstruction is drawn as a passive contact strip; that is not evidence of the original board circuit. Original revision, contact part numbers, pitch, plating, rating and circuit remain unresolved.",
    "closer": "human",
-   "what": "the spring-contact part has no part number and the contact pitch is derived, not measured; a caliper on a real NP-F550 pack and a contact selection settle it; JLCPCB accepts the 4.6 mm board with ENIG."
+   "what": "Identify and measure the original contact board and pack interface; obtain its drawings/BOM or source-backed contact specifications. The banana_pcb_locker source is a mechanical locker, not a PCB identity. Local artwork completion or fabrication capability does not establish a 1:1 board. See research/imu-contact-identity-2026-09-08/AUDIT.md."
   }
  },
  "licence": {
-  "en": "22 of the 30 print STLs are Pollen's simulation meshes, licensed CC BY-SA-NC (microduck_rl README §License: '3D model files are licensed under Creative Commons BY-SA-NC'). They may be printed for prototypes; they may NOT be sold. Only the 8 parametric rebuilds are ours. Pollen's mechanical CAD, BOM and PCBs are not published (SPEC.md:24).",
-  "zh": "30 个打印 STL 中有 22 个是 Pollen 的仿真网格，许可证为 CC BY-SA-NC（microduck_rl README §License）。可用于打印样机，不可用于销售。仅 8 个参数化重建件为我方自有。Pollen 的机械 CAD、BOM 和 PCB 未公开（SPEC.md:24）。"
+  "en": "22 of the 30 print STLs are Pollen's simulation meshes, licensed CC BY-SA-NC (microduck_rl README §License: '3D model files are licensed under Creative Commons BY-SA-NC'). They may be printed for prototypes; they may NOT be sold. Only the 8 parametric rebuilds are ours. Pollen's public HAT family PCB, BOM and manufacturing files are archived; the installed target revision and original IMU/contact-board identities remain unresolved. The blanket PCB-publication statement formerly cited from SPEC.md:24 is obsolete.",
+  "zh": "30 个打印 STL 中有 22 个是 Pollen 的仿真网格，许可证为 CC BY-SA-NC（microduck_rl README §License）。可用于打印样机，不可用于销售。仅 8 个参数化重建件为我方自有。Pollen 已公开 HAT 系列 PCB、BOM 和制造文件；目标原机安装的版本以及原始 IMU/电池触点板身份仍未确定。此前引用 SPEC.md:24 的“PCB 未公开”概括已过时。"
  }
 }

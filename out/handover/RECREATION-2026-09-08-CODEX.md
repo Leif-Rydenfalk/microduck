@@ -8,10 +8,10 @@ that goal and has not verified an assembled physical unit.
 
 - Root Codex: HAT source/fit evidence, reconciliation, readiness/factory documents,
   Ming inquiry delivery, integration and explicit-path commits.
-- Codex electrical agent: public HAT source/model reconciliation (completed in
-  `47448ff`), now `research/servo-power-audit-2026-09-08/`.
-- Codex sourcing agent: bundle quantities and Y1 evidence (completed in `47448ff`),
-  now `research/hat-pcba-rfq-2026-09-08/`.
+- Codex electrical agent: fastener endpoint/thread and harness evidence completed;
+  now correcting test procedure identity gates and readiness source claims.
+- Codex sourcing agent: component fit and package-quantity corrections completed;
+  now repairing four stale evidence hashes through the owning triad interface.
 - Codex drawing agent: `out/drawings/microduck-shin/`, `tools/draw_part.py`, narrowly
   scoped ce-cad drawing generator/checker corrections. No blanket drawing release.
 - Existing separate head-print session: its tools, head plate outputs and physical
@@ -52,3 +52,31 @@ The bilingual Ming inquiry and ZIP are in `research/ming-handoff-2026-09-08/`.
 User authorized contacting Ming. Delivery is pending selecting his WeChat
 conversation; consult `verification.json` for actual delivery evidence. Prepared
 files do not mean sent files. No component order has been placed.
+
+## Discovered parallel communications work
+
+Another local session has prepared a PCB-specific inquiry and CRM evidence in
+`../../ce-comms/docs/MING-PCB-INQUIRY-2026-09-08.txt` and
+`../../ce-comms/evidence/crm/ming-source-audit.json` (paths relative to this
+repository root). It correctly records the original package as unsent and the
+configured WeChat transport as a simulator. Those files are preserved.
+
+Native WeChat on this Mac is logged in. A conversation displayed as **Ming
+Chan** has prior factory/supplier automation context matching the requested
+contact. This is a candidate conversation match, not a recovered platform
+handle or verified factory identity. Its chat has not yet been selected for
+sending. Do not deliver a second duplicate inquiry if another session records
+actual delivery first; check both package verification and CRM evidence.
+
+## Delivery update — 21:46 China time
+
+Ming's parts inquiry was sent by the parallel session; its evidence is
+`research/ming-parts-request-2026-09-08/DELIVERY.json`. Root independently
+inspected the outgoing screenshot. Root then sent the supplemental ZIP B
+(with A inside unchanged) to the same Ming Chan conversation. Exact outgoing
+filename and empty composer were read through Accessibility and screenshot.
+See `research/ming-handoff-2026-09-08/update-b/delivery.json` and
+`delivery-ui.png`; the archive SHA-256 is recorded there. These supersede the
+pending-delivery notes above. Do not resend either inquiry or archive.
+Recipient read/download and response remain unknown. Await Ming's feedback;
+no purchase or production release was sent.

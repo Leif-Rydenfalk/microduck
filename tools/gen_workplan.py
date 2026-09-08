@@ -16,11 +16,10 @@ TEST that is a number or a command exit code (never an adjective), what it
 depends on, and what it unblocks. Work an agent is closing is marked IN FLIGHT
 so the factory does not duplicate it.
 
-EFFORT IS NOT INVENTED. No engineer-day estimate is stated, because this
-workshop has never built a physical unit and has no measured time-per-item for
-any of this work. Each parcel states its QUANTITY (the count of items) and its
-UNIT OF WORK instead, which is checkable; the schedule is the factory's to set
-from its own rates. That is a CANNOT DETERMINE, stated rather than guessed.
+EFFORT FIGURES ARE ESTIMATES, not measurements. The later EFFORT table uses
+explicit assumed rates and parcel quantities; no physical-unit time study
+supports those rates. The computed critical path excludes unquoted vendor and
+shipping waits. A factory must replace the assumptions with its own schedule.
 """
 import datetime
 import html
@@ -712,7 +711,7 @@ track(
           unblocks="turns our simulated numbers into measured ones — the whole point of the pilot",
           acceptance_zh="5 台整机 x %d 项判据，逐台按序列号记录；报告须指出为完成装配而必须修正的每一处文件内容。"
                         % len(TP_EOL),
-          evidence="spec/test-plan.json — %d end-of-line gates, 0 exercised" % len(TP_EOL)),
+          evidence="spec/test-plan.json — %d defined end-of-line gates; physical execution evidence not established by the plan" % len(TP_EOL)),
     ])
 
 
@@ -1272,15 +1271,12 @@ h.append("<p class=\"lede zh\">上表列出每条工作流占用的路径，贵�
 h.append("<section class=\"trk\" id=\"effort\"><h2>On effort estimates "
          "<span class=\"zh\" style=\"display:inline;font-size:15px\">关于工时估算</span></h2>")
 h.append("<p><b>Every day figure in this document is an ESTIMATE and is labelled as one on the parcel.</b> "
-         "This workshop has never built a physical unit, so it holds no measured time-per-item for any of "
-         f"this work — and that absence is itself measured: 0 units built, 0 of the {len(TP_EOL)} "
-         "end-of-line gates ever exercised. What keeps the estimates from being invented is that each one "
-         "states the arithmetic it rests on: a COUNT we measured (30 print files, 145 M2 holes, 23 cables, "
+         "The cited records do not establish measured production time per item or unit-level test completion. "
+         "Each estimate states its arithmetic: an artifact count (30 print files, 145 hole features, 23 cable rows, "
          f"{len(TP_EOL)} end-of-line gates, 22 vendor meshes) multiplied by a per-item rate that is written "
-         "into the row. Divide our rate out and put yours in — that is what the row is for.</p>")
-h.append("<p class=\"zh\"><b>本文件中的每个天数均为估算，并已在各工作包中如实标注。</b>我方从未制造过实物，"
-         f"因此没有任何一项工作的实测单件工时——这一点本身也是实测结论：已制造 0 台，{len(TP_EOL)} 项下线判据执行 0 项。"
-         "估算之所以不是臆测，在于每一条都写明其算式：一个我方实测的<b>数量</b>乘以写在该行中的单件定额。"
+         "into the row as an assumption. Replace these assumed rates with measured factory rates when available.</p>")
+h.append("<p class=\"zh\"><b>本文件中的每个天数均为估算，并已在各工作包中如实标注。</b>所引用记录尚不能证明实测生产单件工时或整机测试完成情况。"
+         "各项估算列明算式：文件中的数量乘以该行明确假定的单件工时。"
          "请用贵厂定额替换我方定额。</p>")
 h.append(f"<p>The largest single estimate, and the least certain, is L-2: {E(str(THEME_PARCELS['L-2']['days']))} "
          "engineer-days to rebuild 22 vendor meshes as parts we own. The 8 already rebuilt were done by a "

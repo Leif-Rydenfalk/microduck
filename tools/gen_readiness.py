@@ -84,8 +84,17 @@ for slug, sh in sorted(SC["sheets"].items()):
     kind = kinds.get(slug, "?")
     dimc = meas["dim_coverage"]
     tess = "TESSELLATION" in (c.get("dim_coverage", {}).get("why", "") or "")
-    if sh["verdict"] == "PASS":
+    result_path = os.path.join(ROOT, "out", "drawings", slug, "result.json")
+    result = J(result_path) if os.path.isfile(result_path) else {}
+    contract = result.get("full_contract_verdict", "CANNOT DETERMINE")
+    contract_gaps = result.get("full_contract_gaps", [])
+    if sh["verdict"] == "PASS" and contract == "PASS":
         grade, missing, closer, by = "READY", "", None, ""
+    elif sh["verdict"] == "PASS":
+        grade, closer = "NOT_YET", "agent_later"
+        missing = "Eight sheet gates PASS; full drawing contract %s. " % contract
+        missing += "; ".join(g.get("remaining", g.get("clause", "unresolved requirement")) for g in contract_gaps)
+        by = "Close the drawing contract gaps in the canonical result.json, including original-part measurements where required."
     else:
         parts = []
         if dimc is None:
@@ -105,7 +114,7 @@ for slug, sh in sorted(SC["sheets"].items()):
                 sh["verdict"], ("CD" if dimc is None else "%.1f %%" % dimc), meas["coverage"] or 0, meas["empty_rect"] or 0, meas["font"] or 0, meas["iso"], meas["renders"],
                 ("CD" if meas["line_ratio"] is None else "%.2f" % meas["line_ratio"]), ("CD" if meas["curve_density"] is None else "%.2f" % meas["curve_density"])),
             ev, missing, closer, by,
-            {"kind": kind, "checks": {k: {"measured": meas[k], "verdict": verd[k], "limit": c.get(k, {}).get("limit")} for k in RULES}, "fails": fails, "cannot_determine": cds})
+            {"kind": kind, "full_contract_verdict": contract, "full_contract_gaps": contract_gaps, "checks": {k: {"measured": meas[k], "verdict": verd[k], "limit": c.get(k, {}).get("limit")} for k in RULES}, "fails": fails, "cannot_determine": cds})
     sheet_table.append(r)
 
 # parts that have NO sheet at all — THE UNION OF TWO LISTS, because either alone
@@ -267,7 +276,7 @@ for i, b in enumerate(PCB["boards"]):
     d = drc[i] if i < len(drc) else ("?", "?", "?", "?")
     rt = routing.get(b["name"], ("", "?", "", "?"))
     note = D["pcb_notes"][slug]
-    grade = "NOT_YET" if d[0] == "FAIL" else ("CD" if d[0] == "CANNOT DETERMINE" else "READY")
+    grade = "READY" if d[0] == "PASS" else ("NOT_YET" if d[0] == "FAIL" else "CD")
     row("pcb", slug, b["title"], grade,
         "DRC %s — %s pass, %s fail, %s cannot determine; routed %s; %d Gerber zip, %d copper layer file(s) on disk; %s x %s mm, %d layers" % (
             d[0], d[1], d[2], d[3], rt[1], len(fab), len(gtl), b["outline_mm"][0], b["outline_mm"][1], b["layers"]),
@@ -280,28 +289,30 @@ CAB = J("wiring/cables.json")["record"]
 cables = CAB["cables"]
 cd_rows = [c["id"] for c in cables if "CANNOT DETERMINE" in json.dumps(c)]
 tol_rows = [c for c in cables if any("tol" in k for k in c)]
-# COUNT THE ROWS, do not subtract. `record.length_undetermined` names only
-# mic-hat, but hat-dxl-port ALSO carries no length (it is qty 0), and
-# hat-radxa-40pin carries 0 mm because it is a stacking header and not a cable
-# anyone cuts. A cut list that says "22 lengths" when 20 can be cut is the
-# defect this audit exists to catch (found 2026-09-04 by re-deriving the count
-# from wiring/cables.json instead of trusting the summary field).
+# Count wire rows separately from the zero-length stacking header. Historical
+# modeled lengths are retained by the source but are not manufacturing cuts.
 _len_rows = [c for c in cables if c.get("cable_mm") is not None]
 _zero_rows = [c["id"] for c in _len_rows if not c["cable_mm"]]
 _nolen_rows = [c["id"] for c in cables if c.get("cable_mm") is None]
 _cuttable = [c for c in _len_rows if c["cable_mm"]]
-row("harness", "wiring", "Harness — %d cables" % len(cables), "NOT_YET",
-    "%d cable rows; %d carry a length in mm (total %s mm), of which %d is %s at 0.0000 mm — a board-to-board stacking header, nothing to cut — so %d lengths can actually be cut; %d carry no length at all (%s); %d rows with a tolerance field; %d rows carry a CANNOT DETERMINE (%s); lengths are route FLOORS + slack, rounded to 5 mm; wire 21 AWG; voltage drop PASS at AWG 21/22, 8.2 V and 6.6 V" % (
-        len(cables), len(_len_rows), CAB.get("total_length_mm"), len(_zero_rows), ", ".join(_zero_rows) or "none",
-        len(_cuttable), len(_nolen_rows), ", ".join(_nolen_rows), len(tol_rows), len(cd_rows), ", ".join(cd_rows)),
-    "wiring/cables.json (wiring/measure.py), wiring/CABLES.md rule paragraph",
-    "A table of nominal floors, no cut tolerance, no service-loop rule per joint, and 6 of 23 connector ends or lengths CANNOT DETERMINE (mic loom, HAT bus port, ToF/speaker/CSI/battery far ends). The factory cannot cut a loom to this table without a first physical unit.",
-    "agent_tonight", "WF-HARNESS routes the loom in CAD around the servo bodies; the cut tolerance still needs one built loom measured",
+_drop_runs = J("wiring/drop.json").get("runs", [])
+_drop_verdicts = sorted({r.get("verdict", "CANNOT DETERMINE") for r in _drop_runs})
+_total = CAB.get("total_length_mm")
+_total_text = "CANNOT DETERMINE" if _total is None else str(_total)
+row("harness", "wiring", "Harness — %d rows" % len(cables), "NOT_YET",
+    "%d modeled rows; %d numerical length rows, including %d zero-length non-cable rows (%s); %d manufacturing cut lengths; %d rows without a cut length. Physical total: %s. Historical modeled total: %s mm, not a cutting/purchasing total. Voltage-drop verdicts: %s; calculations retain endpoint uncertainty. %d rows carry CANNOT DETERMINE." % (
+        len(cables), len(_len_rows), len(_zero_rows), ", ".join(_zero_rows) or "none",
+        len(_cuttable), len(_nolen_rows), _total_text, CAB.get("modeled_total_length_mm"),
+        ", ".join(_drop_verdicts) or "CANNOT DETERMINE", len(cd_rows)),
+    "wiring/cables.json, wiring/drop.json (wiring/measure.py and route_confidence.py)",
+    "Original connector exits, servo-port allocation, wire routing, bend radii, service loops and cut tolerances remain unverified. An optional external microphone lead is not established by the public board's onboard microphone.",
+    "agent_tonight", "Refine source-backed connector routes, then measure a physical loom against the identified original hardware.",
     {"cables": len(cables), "rows_with_a_length": len(_len_rows), "cuttable_lengths": len(_cuttable),
      "zero_length_rows": _zero_rows, "rows_with_no_length": _nolen_rows,
-     "total_mm": CAB.get("total_length_mm"), "cannot_determine_rows": cd_rows, "tolerance_rows": len(tol_rows),
+     "total_mm": _total, "modeled_total_mm": CAB.get("modeled_total_length_mm"),
+     "drop_verdicts": _drop_verdicts, "cannot_determine_rows": cd_rows, "tolerance_rows": len(tol_rows),
      "record_says_length_undetermined": CAB.get("length_undetermined"),
-     "count_defect_found": "wiring/cables.json record.length_undetermined names 1 row (mic-hat) but 2 rows carry no cable_mm (mic-hat, hat-dxl-port); this audit counts the rows"})
+     "count_method": "Count actual row fields; a zero-length board stack is not a cut, and modeled_* values are not released lengths."})
 
 # ---------------------------------------------------------------- 6 assembly sequence
 MANUAL = open(os.path.join(ROOT, "ce-assemblies/microduck/iterations/v0.0.1/manual/MANUAL.md"), encoding="utf-8").read()
@@ -315,27 +326,25 @@ fast_rows = [r for r in BOM["rows"] if re.search(r"screw|bolt|\bnut\b|insert|was
 spec = open(os.path.join(ROOT, "SPEC.md"), encoding="utf-8").read().splitlines()
 census = " ".join(spec[74:76])
 holes = [int(x) for x in re.findall(r"×(\d+)", census)]
-# RECONCILE the zero-fastener BOM against what SOURCING already buys. "0 fastener
-# rows" reads like "nobody knows what screws to buy", and that is not what is
-# wrong: spec/sourcing.json already carries M2 lines with quantities. What is
-# missing is the PER-HOLE SCHEDULE — which screw, which hole, what length, what
-# torque — not the purchase order. Measured here so the factory is not misled.
+# Hole features, placed screws and procurement pieces count different things.
+# Keep their source records separate and report the nominal-size mismatch.
+_fast_reconciliation = J("research/fastener-reconciliation-2026-09-08/reconciliation.json")["counts"]
 _fast_bought = [(r["id"], r.get("qty_per_robot"), r["name"])
                 for r in rows if r["class"] == "bought"
                 and re.search(r"screw|\bnut\b|insert|washer", (r["name"] or "").lower())]
 _fast_pieces = sum(q for _, q, _ in _fast_bought if isinstance(q, (int, float)))
 row("assembly", "manual", "Assembly sequence — MANUAL.md + PLAYBOOK stations", "NOT_YET",
-    "MANUAL: 7 steps, %d numbered sub-steps, %d '[community]'/community-derived fastener flags, %d CANNOT DETERMINE; PLAYBOOK: %d stations, %d steps, torque 3/3 CANNOT DETERMINE; bom.json %d rows, %d fastener rows against a %d-hole M2 census (SPEC.md:75-76: %s) — but note SOURCING already buys the hardware: %s = %d pieces per robot, so what is missing is the PER-HOLE SCHEDULE (which screw in which hole, at what length and torque), not the purchase order; %d steps assume knowledge not on the page (list below)" % (
+    "MANUAL: 7 steps, %d numbered sub-steps, %d '[community]'/community-derived fastener flags, %d CANNOT DETERMINE; PLAYBOOK: %d stations, %d steps, torque 3/3 CANNOT DETERMINE; bom.json %d rows, %d fastener rows; %d hole features (SPEC.md:75-76: %s). Nominal sourcing lines %s contain %d pieces per robot. These counts are not procurement bounds: the linked reconciliation identifies missing nominal screw sizes and unverified threads. %d steps retain assumptions (listed below)." % (
         n_steps, n_comm, n_cd, len(stations), n_station_steps, len(BOM["rows"]), len(fast_rows), sum(holes), "+".join(str(h) for h in holes),
         ", ".join("%s %s x%s" % (i, n.split(",")[0], q) for i, q, n in _fast_bought), _fast_pieces,
         len(D["manual_assumptions"])),
     "ce-assemblies/microduck/iterations/v0.0.1/manual/MANUAL.md; tools/data/playbook.json stations/torque/open; ce-assemblies/microduck/current/bom.json; SPEC.md:75-76",
-    "No screw-by-screw schedule (length per hole), no torque, no datums a caliper can use, no fixing method for ToF/speaker/mic, no software install step. A stranger stops at step 1.2.",
-    "agent_tonight", "WF-FASTENERS (schedule) + WF-HARNESS (per-joint pictures); torque and bearing interference need a coupon test by a person",
+    "A nominal 64-screw placement schedule exists, but original thread identity, qualified stack lengths and torque remain unverified. The nominal buy list omits %d modeled screws by size; ToF/speaker/mic attachment and physical harness routes remain unresolved." % _fast_reconciliation["missing_nominal_sizes_qty"],
+    "human", "Verify original fasteners and interfaces; qualify stack lengths, torque and bearing fits with measured parts and coupons.",
     {"manual_steps": n_steps, "community_flags": n_comm, "manual_cd": n_cd, "stations": len(stations), "station_steps": n_station_steps, "bom_rows": len(BOM["rows"]), "bom_fastener_rows": len(fast_rows), "hole_census": sum(holes),
      "fasteners_already_sourced": [{"line": i, "qty_per_robot": q, "item": n} for i, q, n in _fast_bought],
      "fastener_pieces_per_robot_sourced": _fast_pieces,
-     "reconciliation": "the assembly BOM carries 0 fastener rows, but spec/sourcing.json carries %d M2 lines totalling %d pieces per robot against a %d-hole census; the gap is the per-hole schedule, not the purchase" % (len(_fast_bought), _fast_pieces, sum(holes)),
+     "reconciliation": {"source": "research/fastener-reconciliation-2026-09-08/reconciliation.json", "counts": _fast_reconciliation, "meaning": "Different counting units; nominal placements do not verify thread identity or establish final procurement quantities."},
      "assumptions": D["manual_assumptions"]})
 
 # ---------------------------------------------------------------- 7 test plan
@@ -343,20 +352,24 @@ TP = J("spec/test-plan.json")
 tests = [t for s in TP["sections"] for t in (s.get("tests") or s.get("rows") or [])]
 tphtml = open(os.path.join(ROOT, "TEST-PLAN.html"), encoding="utf-8").read()
 placeholders = sorted(set(re.findall(r"@[A-Z_]+@", tphtml)))
-row("test", "test-plan", "Test and validation plan — %s rev %s" % (TP["doc"]["id"], TP["doc"]["rev"]), "READY",
-    "%d gated tests in %d sections; %d equipment items; %d end-of-line gates; %d open questions; %d unresolved @PLACEHOLDER@ tokens in TEST-PLAN.html; 0 tests exercised (no unit built)" % (
+row("test", "test-plan", "Test and validation plan — %s rev %s" % (TP["doc"]["id"], TP["doc"]["rev"]), "NOT_YET",
+    "%d defined tests in %d sections; %d equipment items; %d defined end-of-line gates; %d open questions; %d unresolved @PLACEHOLDER@ tokens in TEST-PLAN.html; physical execution evidence not established by this plan" % (
         len(tests), len(TP["sections"]), len(TP["equipment"]), len(TP["eol"]), len(TP["open"]), len(placeholders)),
     "spec/test-plan.json (TEST-PLAN.html, tools/gen_test_plan.py)",
-    "Executable as a bench procedure once a unit exists; the walk gate WK-02 is 75 %% of a simulated distance (a decision, not a measurement), SN-05 cannot run on a built robot, and %d questions are answered only by measuring the first units." % len(TP["open"]),
-    "human", "the first five built units on the bench (EB-04 servo voltage first)",
-    {"tests": len(tests), "sections": [s.get("id") for s in TP["sections"]], "open": [o.get("q") for o in TP["open"]], "placeholders": placeholders})
+    "EB-04 requires verified servo identity, voltage rating and power routing before energization: public HAT +BATT wiring and the standard XL330 6 V maximum conflict with the historical 8.2 V connected-servo procedure. WK-02 uses a simulated-distance criterion; SN-05 needs review for execution on an assembled unit. Defined gates are not completed tests.",
+    "human", "Resolve the documented servo-power contradiction and approve applicable procedures before recording bench and end-of-line results.",
+    {"tests": len(tests), "eol_defined": len(TP["eol"]), "physical_execution_verdict": "CANNOT DETERMINE", "sections": [s.get("id") for s in TP["sections"]], "open": [o.get("q") for o in TP["open"]], "placeholders": placeholders})
 
 # ---------------------------------------------------------------- 8 triad shelf
 TR = J(os.path.join(MEAS, "triad.json"))
 for r in TR["results"]:
     f = r["findings"][0] if r.get("findings") else {}
     why = (f.get("why") or "")
-    grade = "READY" if r["verdict"] == "PASS" else ("CD" if r["verdict"] == "CANNOT DETERMINE" else "NOT_YET")
+    # The shallow shelf checker verifies records/references, not manufacturing
+    # acceptance or the verdict of executed evidence scripts.
+    grade = "NOT_YET" if r["verdict"] == "FAIL" else "CD"
+    if r["verdict"] == "PASS":
+        why = "Structural shelf contract PASS; manufacturing readiness is not established by this check. Read and execute the applicable evidence, retaining original-identity and physical-test gaps."
     closer = None
     by = ""
     if grade != "READY":
@@ -368,7 +381,7 @@ for r in TR["results"]:
             closer, by = "agent_later", "measure the declared interface frame"
     row("triad", r["ref"], r["ref"], grade, "bin/triad check: %s (%s, %d measurements)" % (r["verdict"], r.get("iteration"), r.get("measured", 0)),
         "out/factory/measure/triad.json (bin/triad check --all --json, %s)" % TR.get("$generated", NOW), why, closer, by,
-        {"iteration": r.get("iteration"), "folder": r.get("folder")})
+        {"iteration": r.get("iteration"), "folder": r.get("folder"), "contract_verdict": r["verdict"], "manufacturing_verdict": "CANNOT DETERMINE"})
 
 # ---------------------------------------------------------------- 9 open unknowns
 HARV = J("out/open/cannot-determine-harvest.json")
@@ -555,8 +568,8 @@ for b, en, zh in [("%d / %d" % (s["sheets_graded"]["pass"], s["sheets_graded"]["
                   ("%d" % s["unknowns"], "open CANNOT DETERMINE", "未定项")]:
     A.append('<div class="stat"><b class="no">%s</b><span>%s<br>%s</span></div>' % (E(b), E(en), E(zh)))
 A.append('</div>')
-A.append('<p><b>Read this before anything else.</b> A working prototype is buildable from this pack today: every part prints, every off-the-shelf part is buyable, the assembly order is written down. A <i>factory release</i> is not: no drawing sheet passes our own standard, the custom boards do not pass their own design-rule check, no screw has a length or a torque, and the harness is a table of floors. The rows below say exactly which artifact is which.</p>')
-A.append('<p class="zh">请先阅读本段。今天可以按本交付包制作一台可工作的样机：每个零件可打印，每个外购件可买到，装配顺序已写明。但<b>尚不能量产</b>：没有一张图纸通过我方自己的标准，定制电路板未通过自身的设计规则检查，没有一颗螺钉有长度或扭矩，线束只是一张下限表。下表逐项说明。</p>')
+A.append('<p><b>Current release status.</b> This pack supports engineering review and conditional sourcing. A working 1:1 recreation has not been verified. Passing the eight sheet gates is recorded separately from satisfying the full drawing contract. Board DRC, original component identity, screw thread and torque requirements, and physical harness routes remain unresolved; modeled cable lengths are not manufacturing cut lengths.</p>')
+A.append('<p class="zh">本交付包用于工程审核和有条件询价，尚未验证可工作的 1:1 复刻。图纸八项检查与完整制图要求分别记录。电路板 DRC、原机元件身份、螺纹及扭矩要求和实物线束路径仍有未定项；模型线长不能作为生产裁线长度。</p>')
 A.append('<p><b>Licence · 许可证.</b> %s</p><p class="zh">%s</p>' % (E(D["licence"]["en"]), E(D["licence"]["zh"])))
 _d = summary["delta_vs_last_measurement"]
 _c = _d.get("compared") or {}
