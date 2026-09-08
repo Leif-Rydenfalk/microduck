@@ -1,0 +1,122 @@
+{
+ "study": "fea_meshability_microduck-upper-leg-left",
+ "part": "part:microduck-upper-leg-left",
+ "generated": "2026-09-02",
+ "script": "sim/stress_all.py (mesh strategy chain) + scratch gmsh sweeps recorded here",
+ "inputs": {
+  "solid": "ce-parts/microduck-upper-leg-left/current/cad/part.py via triad.load; STEP exported by cecad.stress.mesh_part (out/stress/microduck-upper-leg-left_standing_PLA/microduck-upper-leg-left.step)",
+  "solid_facts": {
+   "solids": 1,
+   "faces": 462,
+   "isValid": true,
+   "isClosed": true,
+   "volume_mm3": 3838.5671,
+   "smallest_face_areas_mm2": [
+    0.00073,
+    0.00073,
+    0.00073,
+    0.00073,
+    0.00073,
+    0.00073,
+    0.00073,
+    0.00075
+   ],
+   "face_350": {
+    "type": "BSplineSurface",
+    "area_mm2": 0.15077,
+    "bbox_mm": [
+     3.481,
+     2.172,
+     0.0
+    ],
+    "at": [
+     66.5,
+     -12.209,
+     0.0
+    ],
+    "min_edge_mm": 0.00397
+   }
+  },
+  "gmsh": "/Applications/FreeCAD.app/Contents/Resources/bin/gmsh (FreeCAD 1.1.3 bundle), -3 -order 2 -format inp -optimize_ho"
+ },
+ "method": "every mesher route tried on the same solid, one at a time; the tessellation checked for self-intersections with FreeCAD Mesh.getSelfIntersections()",
+ "outputs": {
+  "attempts": [
+   {
+    "route": "sim/stress_matrix.py size fallback",
+    "sizes_mm": [
+     null,
+     2.0,
+     1.5,
+     1.2,
+     1.0,
+     0.8
+    ],
+    "result": "all 6: 'Invalid boundary mesh (overlapping facets) on surface 350'; 0 volume elements (out/stress/matrix.json)"
+   },
+   {
+    "route": "2D algorithm sweep",
+    "options": [
+     "-algo del2d",
+     "-algo meshadapt",
+     "-algo front2d",
+     "-algo del2d -clmax 1.5 -clmin 0.5",
+     "-algo meshadapt -clmax 1.5 -clmin 0.5"
+    ],
+    "result": "all fail, same surface 350"
+   },
+   {
+    "route": "OCC healing",
+    "options": [
+     "Geometry.OCCFixDegenerated/FixSmallEdges/FixSmallFaces/SewFaces=1",
+     "Geometry.Tolerance=1e-2",
+     "Mesh.MeshSizeFromCurvature=20",
+     "Mesh.AngleToleranceFacetOverlap=0.05 / 0.5",
+     "Mesh.Algorithm3D=4 (frontal) / 10 (hxt)",
+     "-order 1"
+    ],
+    "result": "rc 0 but 0 volume elements, or the same overlapping-facets error"
+   },
+   {
+    "route": "Compound Surface{1:462} (cross-patch reparametrisation)",
+    "result": "7 errors, 0 volume elements"
+   },
+   {
+    "route": "Part.removeSplitter()",
+    "result": "462 -> 462 faces, nothing merged; same error"
+   },
+   {
+    "route": "STL boundary (Part.tessellate 0.05/0.02, MeshPart Mefisto MaxLength 1.0/0.6, standard deflection 0.02) -> gmsh volume",
+    "result": "'overlapping facets on surface 1' every time; ClassifySurfaces+CreateGeometry: 'Wrong topology of boundary mesh for parametrization'"
+   },
+   {
+    "route": "Mesh repair (removeDuplicatedPoints/Facets, fixSelfIntersections, fixDegenerations 0.0005, fillupHoles) then gmsh",
+    "result": "still self-intersecting (Mesh.hasSelfIntersections True), volume 3833.624 vs 3838.567 mm3, gmsh refuses"
+   }
+  ],
+  "self_intersections": {
+   "count": 16,
+   "all_within_mm_of": [
+    66.6,
+    -12.2,
+    0.0
+   ],
+   "clusters": {
+    "(67,-12,0)": 14,
+    "(67,-11,0)": 2
+   },
+   "sample_pairs": "facets 4902/5107 at (66.638, -12.196, 0.000)-(66.676, -12.190, 0.000); 4902/5126 at (66.676, -12.190, 0.000)"
+  },
+  "diagnosis": "the defect is LOCAL and GEOMETRIC, not a mesh-size question: every tessellation of the solid self-intersects at (x 66.6..66.7, y -12.19..-12.21, z 0.0) and gmsh's surface 350 (a 0.151 mm2 planar BSpline sliver with a 0.004 mm edge) sits exactly there. In the thigh's own frame that is z = 0 = the hip-pitch axis A0 height and y = -12.2 = the R12.2 outline radius about A0 \u2014 the point where the R12.2 arc of the back-plate outline becomes tangent to the -y side wall (part.py: 'outline = hull of two R12.2 circles about A0/A1, closed on -y by the side wall'). A tangent arc-to-line junction leaves a zero-angle sliver between the hull and the wall, which the kernel accepts as a valid solid (isValid True) but no surface mesher can triangulate without overlap.",
+  "what_settles_it": "in ce-parts/microduck-upper-leg-left/current/cad/part.py, break the tangency at (y -12.2, z 0): either extend the -y side wall 0.05 mm past the arc so the boolean union owns the junction, or fuse the hull outline and the wall as ONE sketch before extruding. Geometry change < 0.05 mm, inside the 1.0 mm p95 rebuild tolerance; re-run cad-refcheck, then sim/stress_all.py --force microduck-upper-leg-left."
+ },
+ "verdict": "CANNOT DETERMINE",
+ "why": "no tetrahedral mesh of the thigh housing exists: 6 mesh sizes x 12 mesher strategies all refuse on the same sliver at the R12.2-arc / side-wall tangency (x 66.6, y -12.2, z 0); the solid is valid to OCC but its every tessellation self-intersects there. The thigh's load case (walk 19.064 N, drop 109.556 N at the knee, loads_mujoco.json) is declared and waits on that one junction. Bounding evidence in the meantime: the 1 mm rigidity plate that closes the same cup is solved with 100 % of the thigh load (fea_microduck-upper-leg-rigidity-plate_*.json).",
+ "artifacts": [
+  "out/stress/matrix.json",
+  "out/stress/microduck-upper-leg-left_standing_PLA/microduck-upper-leg-left.step"
+ ],
+ "looked_at": [
+  "gmsh logs: 'Invalid boundary mesh (overlapping facets) on surface 350 surface 350', 'Surface mesh: worst distortion = -5.4665 (47 elements with jac. < 0)'"
+ ]
+}

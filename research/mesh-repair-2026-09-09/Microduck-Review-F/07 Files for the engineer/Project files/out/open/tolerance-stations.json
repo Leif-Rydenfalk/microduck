@@ -1,0 +1,2465 @@
+{
+ "study": "tolerance-stations",
+ "what": "every bearing station on the robot on one axial scale: the ring's bore and OD spans, the servo's Ø16 x 3.0 discs, and every printed feature on the axis, with the coverage arithmetic per ring (tools/tolerance_stations.py)",
+ "inputs": {
+  "mjcf": "sim/microduck_ours.xml",
+  "features": "out/laneT/features",
+  "axis_tol_deg": 0.5,
+  "radial_tol_mm": 0.3
+ },
+ "conventions": "child-frame +z is the joint axis (sim/joint_geometry.py asserts it); spans are along that axis in mm from the child body origin; a parent-body geom is transformed by R_child^T (p - pos_child)",
+ "joints": {
+  "left_hip_yaw": {
+   "child_body": "yaw2roll",
+   "parent_body": "trunk_base",
+   "on_axis_features": [
+    {
+     "where": "parent:trunk_base",
+     "mesh": "xl330",
+     "feature": "bosse",
+     "d_mm": 16.0,
+     "class": "Ø16 (inner-race seat / horn disc diameter)",
+     "span_axial_mm": [
+      -31.0005,
+      -27.9995
+     ],
+     "length_mm": 3.001,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0001,
+     "faces": 148,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/xl330.json (bosse d=16.0000 centre [13.0, -0.0, 0.0])",
+     "role": "servo Ø16 x 3.0 disc (horn or idler)"
+    },
+    {
+     "where": "parent:trunk_base",
+     "mesh": "trunk_base",
+     "feature": "hole",
+     "d_mm": 19.0,
+     "class": "Ø19 (inner-race thrust shoulder)",
+     "span_axial_mm": [
+      -5.0005,
+      -3.9995
+     ],
+     "length_mm": 1.001,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0,
+     "faces": 145,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/trunk_base.json (hole d=19.0000 centre [17.5, -2.0, 17.0])",
+     "role": "printed feature"
+    },
+    {
+     "where": "parent:trunk_base",
+     "mesh": "xl330",
+     "feature": "bosse",
+     "d_mm": 16.0,
+     "class": "Ø16 (inner-race seat / horn disc diameter)",
+     "span_axial_mm": [
+      -5.0,
+      -2.0
+     ],
+     "length_mm": 3.0,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0,
+     "faces": 144,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/xl330.json (bosse d=16.0000 centre [-13.0, 0.0, -0.0])",
+     "role": "servo Ø16 x 3.0 disc (horn or idler)"
+    },
+    {
+     "where": "parent:trunk_base",
+     "mesh": "seeed_bearing__configuration__22x16x4",
+     "feature": "hole",
+     "d_mm": 16.0,
+     "class": "Ø16 (inner-race seat / horn disc diameter)",
+     "span_axial_mm": [
+      -3.8,
+      -0.2
+     ],
+     "length_mm": 3.6,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0,
+     "faces": 144,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/seeed_bearing__configuration__22x16x4.json (hole d=16.0000 centre [0.0, 0.0, 2.0])",
+     "role": "bearing bore"
+    },
+    {
+     "where": "parent:trunk_base",
+     "mesh": "seeed_bearing__configuration__22x16x4",
+     "feature": "bosse",
+     "d_mm": 22.0,
+     "class": "Ø22 (outer-race pocket)",
+     "span_axial_mm": [
+      -3.7,
+      -0.3
+     ],
+     "length_mm": 3.4,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0,
+     "faces": 144,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/seeed_bearing__configuration__22x16x4.json (bosse d=22.0000 centre [0.0, 0.0, 2.0])",
+     "role": "bearing od"
+    },
+    {
+     "where": "child:yaw2roll",
+     "mesh": "yaw2roll",
+     "feature": "bosse",
+     "d_mm": 16.0,
+     "class": "Ø16 (inner-race seat / horn disc diameter)",
+     "span_axial_mm": [
+      -1.95,
+      0.0
+     ],
+     "length_mm": 1.95,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0,
+     "faces": 144,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/yaw2roll.json (bosse d=16.0000 centre [17.5, -2.0, 13.475])",
+     "role": "printed feature"
+    },
+    {
+     "where": "child:yaw2roll",
+     "mesh": "yaw2roll",
+     "feature": "bosse",
+     "d_mm": 19.0,
+     "class": "Ø19 (inner-race thrust shoulder)",
+     "span_axial_mm": [
+      0.0,
+      0.5
+     ],
+     "length_mm": 0.5,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0,
+     "faces": 144,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/yaw2roll.json (bosse d=19.0000 centre [17.5, -2.0, 12.25])",
+     "role": "printed feature"
+    }
+   ],
+   "servo_discs": [
+    {
+     "span_axial_mm": [
+      -31.0005,
+      -27.9995
+     ],
+     "where": "parent:trunk_base"
+    },
+    {
+     "span_axial_mm": [
+      -5.0,
+      -2.0
+     ],
+     "where": "parent:trunk_base"
+    }
+   ],
+   "coverage": [
+    {
+     "bearing": "seeed_bearing__configuration__22x16x4",
+     "bore_d_mm": 16.0,
+     "bore_span_axial_mm": [
+      -3.8,
+      -0.2
+     ],
+     "ring_width_mm": 3.6,
+     "carriers": [],
+     "covered_mm": 0.0,
+     "uncovered_mm": 3.6,
+     "covered_pct": 0.0,
+     "printed_carrier_mm": 0,
+     "horn_disc_carrier_mm": 0,
+     "flange_face_to_horn_face_gap_mm": null,
+     "gap_meaning": null
+    },
+    {
+     "bearing": "seeed_bearing__configuration__22x16x4",
+     "od_d_mm": 22.0,
+     "od_span_axial_mm": [
+      -3.7,
+      -0.3
+     ],
+     "ring_width_mm": 3.4,
+     "pockets": [],
+     "covered_mm": 0.0,
+     "uncovered_mm": 3.4,
+     "covered_pct": 0.0,
+     "note": "no Ø22 pocket feature found on the axis -- the outer race's housing is either not a cylinder the feature extractor kept, or is a Ø19 window/face (bearing_roll)"
+    }
+   ]
+  },
+  "left_hip_roll": {
+   "child_body": "hip_l",
+   "parent_body": "yaw2roll",
+   "on_axis_features": [
+    {
+     "where": "parent:yaw2roll",
+     "mesh": "xl330",
+     "feature": "bosse",
+     "d_mm": 16.0,
+     "class": "Ø16 (inner-race seat / horn disc diameter)",
+     "span_axial_mm": [
+      -31.0005,
+      -27.9995
+     ],
+     "length_mm": 3.001,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0001,
+     "faces": 148,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/xl330.json (bosse d=16.0000 centre [13.0, -0.0, 0.0])",
+     "role": "servo Ø16 x 3.0 disc (horn or idler)"
+    },
+    {
+     "where": "parent:yaw2roll",
+     "mesh": "xl330",
+     "feature": "bosse",
+     "d_mm": 16.0,
+     "class": "Ø16 (inner-race seat / horn disc diameter)",
+     "span_axial_mm": [
+      -5.0,
+      -2.0
+     ],
+     "length_mm": 3.0,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0,
+     "faces": 144,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/xl330.json (bosse d=16.0000 centre [-13.0, 0.0, -0.0])",
+     "role": "servo Ø16 x 3.0 disc (horn or idler)"
+    },
+    {
+     "where": "parent:yaw2roll",
+     "mesh": "bearing_roll",
+     "feature": "hole",
+     "d_mm": 19.0,
+     "class": "Ø19 (inner-race thrust shoulder)",
+     "span_axial_mm": [
+      -5.0,
+      -4.0
+     ],
+     "length_mm": 1.0,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0,
+     "faces": 144,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/bearing_roll.json (hole d=19.0000 centre [17.5, -14.0, -0.0])",
+     "role": "printed feature"
+    },
+    {
+     "where": "parent:yaw2roll",
+     "mesh": "seeed_bearing__configuration__22x16x4",
+     "feature": "hole",
+     "d_mm": 16.0,
+     "class": "Ø16 (inner-race seat / horn disc diameter)",
+     "span_axial_mm": [
+      -3.8,
+      -0.2
+     ],
+     "length_mm": 3.6,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0,
+     "faces": 144,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/seeed_bearing__configuration__22x16x4.json (hole d=16.0000 centre [0.0, 0.0, 2.0])",
+     "role": "bearing bore"
+    },
+    {
+     "where": "parent:yaw2roll",
+     "mesh": "seeed_bearing__configuration__22x16x4",
+     "feature": "bosse",
+     "d_mm": 22.0,
+     "class": "Ø22 (outer-race pocket)",
+     "span_axial_mm": [
+      -3.7,
+      -0.3
+     ],
+     "length_mm": 3.4,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0,
+     "faces": 144,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/seeed_bearing__configuration__22x16x4.json (bosse d=22.0000 centre [0.0, 0.0, 2.0])",
+     "role": "bearing od"
+    },
+    {
+     "where": "child:hip_l",
+     "mesh": "hip_l",
+     "feature": "bosse",
+     "d_mm": 16.0,
+     "class": "Ø16 (inner-race seat / horn disc diameter)",
+     "span_axial_mm": [
+      -1.95,
+      -0.0
+     ],
+     "length_mm": 1.95,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0,
+     "faces": 146,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/hip_l.json (bosse d=16.0000 centre [17.5, -17.525, -0.0])",
+     "role": "printed feature"
+    },
+    {
+     "where": "child:hip_l",
+     "mesh": "hip_l",
+     "feature": "hole",
+     "d_mm": 6.0,
+     "class": "Ø6 (horn-face centre bore)",
+     "span_axial_mm": [
+      -1.95,
+      -0.0
+     ],
+     "length_mm": 1.95,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0,
+     "faces": 146,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/hip_l.json (hole d=6.0000 centre [17.5, -17.525, -0.0])",
+     "role": "printed feature"
+    }
+   ],
+   "servo_discs": [
+    {
+     "span_axial_mm": [
+      -31.0005,
+      -27.9995
+     ],
+     "where": "parent:yaw2roll"
+    },
+    {
+     "span_axial_mm": [
+      -5.0,
+      -2.0
+     ],
+     "where": "parent:yaw2roll"
+    }
+   ],
+   "coverage": [
+    {
+     "bearing": "seeed_bearing__configuration__22x16x4",
+     "bore_d_mm": 16.0,
+     "bore_span_axial_mm": [
+      -3.8,
+      -0.2
+     ],
+     "ring_width_mm": 3.6,
+     "carriers": [],
+     "covered_mm": 0.0,
+     "uncovered_mm": 3.6,
+     "covered_pct": 0.0,
+     "printed_carrier_mm": 0,
+     "horn_disc_carrier_mm": 0,
+     "flange_face_to_horn_face_gap_mm": null,
+     "gap_meaning": null
+    },
+    {
+     "bearing": "seeed_bearing__configuration__22x16x4",
+     "od_d_mm": 22.0,
+     "od_span_axial_mm": [
+      -3.7,
+      -0.3
+     ],
+     "ring_width_mm": 3.4,
+     "pockets": [],
+     "covered_mm": 0.0,
+     "uncovered_mm": 3.4,
+     "covered_pct": 0.0,
+     "note": "no Ø22 pocket feature found on the axis -- the outer race's housing is either not a cylinder the feature extractor kept, or is a Ø19 window/face (bearing_roll)"
+    }
+   ]
+  },
+  "left_hip_pitch": {
+   "child_body": "upper_leg_left",
+   "parent_body": "hip_l",
+   "on_axis_features": [
+    {
+     "where": "parent:hip_l",
+     "mesh": "hip_l",
+     "feature": "bosse",
+     "d_mm": 16.0,
+     "class": "Ø16 (inner-race seat / horn disc diameter)",
+     "span_axial_mm": [
+      -4.0,
+      -2.05
+     ],
+     "length_mm": 1.95,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0,
+     "faces": 146,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/hip_l.json (bosse d=16.0000 centre [39.475, -0.0, -0.0])",
+     "role": "printed feature"
+    },
+    {
+     "where": "parent:hip_l",
+     "mesh": "hip_l",
+     "feature": "hole",
+     "d_mm": 6.0,
+     "class": "Ø6 (horn-face centre bore)",
+     "span_axial_mm": [
+      -4.0,
+      -2.05
+     ],
+     "length_mm": 1.95,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0001,
+     "faces": 145,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/hip_l.json (hole d=6.0000 centre [39.475, -0.0, 0.0])",
+     "role": "printed feature"
+    },
+    {
+     "where": "parent:hip_l",
+     "mesh": "seeed_bearing__configuration__22x16x4",
+     "feature": "hole",
+     "d_mm": 16.0,
+     "class": "Ø16 (inner-race seat / horn disc diameter)",
+     "span_axial_mm": [
+      -3.8,
+      -0.2
+     ],
+     "length_mm": 3.6,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0,
+     "faces": 144,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/seeed_bearing__configuration__22x16x4.json (hole d=16.0000 centre [0.0, 0.0, 2.0])",
+     "role": "bearing bore"
+    },
+    {
+     "where": "parent:hip_l",
+     "mesh": "seeed_bearing__configuration__22x16x4",
+     "feature": "bosse",
+     "d_mm": 22.0,
+     "class": "Ø22 (outer-race pocket)",
+     "span_axial_mm": [
+      -3.7,
+      -0.3
+     ],
+     "length_mm": 3.4,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0,
+     "faces": 144,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/seeed_bearing__configuration__22x16x4.json (bosse d=22.0000 centre [0.0, 0.0, 2.0])",
+     "role": "bearing od"
+    },
+    {
+     "where": "child:upper_leg_left",
+     "mesh": "xl330",
+     "feature": "bosse",
+     "d_mm": 16.0,
+     "class": "Ø16 (inner-race seat / horn disc diameter)",
+     "span_axial_mm": [
+      -2.0,
+      1.0
+     ],
+     "length_mm": 3.0,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0,
+     "faces": 144,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/xl330.json (bosse d=16.0000 centre [-13.0, 0.0, -0.0])",
+     "role": "servo Ø16 x 3.0 disc (horn or idler)"
+    },
+    {
+     "where": "child:upper_leg_left",
+     "mesh": "upper_leg_rigidity_plate",
+     "feature": "hole",
+     "d_mm": 19.0,
+     "class": "Ø19 (inner-race thrust shoulder)",
+     "span_axial_mm": [
+      0.0,
+      1.0
+     ],
+     "length_mm": 1.0,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0,
+     "faces": 144,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/upper_leg_rigidity_plate.json (hole d=19.0000 centre [43.0, 0.0, 0.0])",
+     "role": "printed feature"
+    },
+    {
+     "where": "child:upper_leg_left",
+     "mesh": "xl330",
+     "feature": "bosse",
+     "d_mm": 16.0,
+     "class": "Ø16 (inner-race seat / horn disc diameter)",
+     "span_axial_mm": [
+      23.9995,
+      27.0005
+     ],
+     "length_mm": 3.001,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0001,
+     "faces": 148,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/xl330.json (bosse d=16.0000 centre [13.0, -0.0, 0.0])",
+     "role": "servo Ø16 x 3.0 disc (horn or idler)"
+    }
+   ],
+   "servo_discs": [
+    {
+     "span_axial_mm": [
+      23.9995,
+      27.0005
+     ],
+     "where": "child:upper_leg_left"
+    },
+    {
+     "span_axial_mm": [
+      -2.0,
+      1.0
+     ],
+     "where": "child:upper_leg_left"
+    }
+   ],
+   "coverage": [
+    {
+     "bearing": "seeed_bearing__configuration__22x16x4",
+     "bore_d_mm": 16.0,
+     "bore_span_axial_mm": [
+      -3.8,
+      -0.2
+     ],
+     "ring_width_mm": 3.6,
+     "carriers": [],
+     "covered_mm": 0.0,
+     "uncovered_mm": 3.6,
+     "covered_pct": 0.0,
+     "printed_carrier_mm": 0,
+     "horn_disc_carrier_mm": 0,
+     "flange_face_to_horn_face_gap_mm": null,
+     "gap_meaning": null
+    },
+    {
+     "bearing": "seeed_bearing__configuration__22x16x4",
+     "od_d_mm": 22.0,
+     "od_span_axial_mm": [
+      -3.7,
+      -0.3
+     ],
+     "ring_width_mm": 3.4,
+     "pockets": [],
+     "covered_mm": 0.0,
+     "uncovered_mm": 3.4,
+     "covered_pct": 0.0,
+     "note": "no Ø22 pocket feature found on the axis -- the outer race's housing is either not a cylinder the feature extractor kept, or is a Ø19 window/face (bearing_roll)"
+    }
+   ]
+  },
+  "left_knee": {
+   "child_body": "leg",
+   "parent_body": "upper_leg_left",
+   "on_axis_features": [
+    {
+     "where": "parent:upper_leg_left",
+     "mesh": "xl330",
+     "feature": "bosse",
+     "d_mm": 16.0,
+     "class": "Ø16 (inner-race seat / horn disc diameter)",
+     "span_axial_mm": [
+      -31.0005,
+      -27.9995
+     ],
+     "length_mm": 3.001,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0001,
+     "faces": 148,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/xl330.json (bosse d=16.0000 centre [13.0, -0.0, 0.0])",
+     "role": "servo Ø16 x 3.0 disc (horn or idler)"
+    },
+    {
+     "where": "parent:upper_leg_left",
+     "mesh": "xl330",
+     "feature": "bosse",
+     "d_mm": 16.0,
+     "class": "Ø16 (inner-race seat / horn disc diameter)",
+     "span_axial_mm": [
+      -5.0,
+      -2.0
+     ],
+     "length_mm": 3.0,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0,
+     "faces": 144,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/xl330.json (bosse d=16.0000 centre [-13.0, 0.0, -0.0])",
+     "role": "servo Ø16 x 3.0 disc (horn or idler)"
+    },
+    {
+     "where": "parent:upper_leg_left",
+     "mesh": "upper_leg_rigidity_plate",
+     "feature": "hole",
+     "d_mm": 19.0,
+     "class": "Ø19 (inner-race thrust shoulder)",
+     "span_axial_mm": [
+      -5.0,
+      -4.0
+     ],
+     "length_mm": 1.0,
+     "radial_off_axis_mm": 0.0001,
+     "fit_residual_mm": 0.0,
+     "faces": 144,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/upper_leg_rigidity_plate.json (hole d=19.0000 centre [43.0, 22.0, 35.777])",
+     "role": "printed feature"
+    },
+    {
+     "where": "parent:upper_leg_left",
+     "mesh": "seeed_bearing__configuration__22x16x4",
+     "feature": "hole",
+     "d_mm": 16.0,
+     "class": "Ø16 (inner-race seat / horn disc diameter)",
+     "span_axial_mm": [
+      -3.8,
+      -0.2
+     ],
+     "length_mm": 3.6,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0,
+     "faces": 144,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/seeed_bearing__configuration__22x16x4.json (hole d=16.0000 centre [0.0, 0.0, 2.0])",
+     "role": "bearing bore"
+    },
+    {
+     "where": "parent:upper_leg_left",
+     "mesh": "seeed_bearing__configuration__22x16x4",
+     "feature": "bosse",
+     "d_mm": 22.0,
+     "class": "Ø22 (outer-race pocket)",
+     "span_axial_mm": [
+      -3.7,
+      -0.3
+     ],
+     "length_mm": 3.4,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0,
+     "faces": 144,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/seeed_bearing__configuration__22x16x4.json (bosse d=22.0000 centre [0.0, 0.0, 2.0])",
+     "role": "bearing od"
+    },
+    {
+     "where": "child:leg",
+     "mesh": "leg",
+     "feature": "bosse",
+     "d_mm": 15.897,
+     "class": "Ø15.9 (shin knee flange disc)",
+     "span_axial_mm": [
+      -1.9505,
+      0.0005
+     ],
+     "length_mm": 1.951,
+     "radial_off_axis_mm": 0.0001,
+     "fit_residual_mm": 0.034,
+     "faces": 148,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/leg.json (bosse d=15.8970 centre [39.475, 22.0, 35.777])",
+     "role": "printed feature"
+    },
+    {
+     "where": "child:leg",
+     "mesh": "leg",
+     "feature": "hole",
+     "d_mm": 6.0,
+     "class": "Ø6 (horn-face centre bore)",
+     "span_axial_mm": [
+      -1.95,
+      -0.0
+     ],
+     "length_mm": 1.95,
+     "radial_off_axis_mm": 0.0001,
+     "fit_residual_mm": 0.0,
+     "faces": 144,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/leg.json (hole d=6.0000 centre [39.475, 22.0, 35.777])",
+     "role": "printed feature"
+    }
+   ],
+   "servo_discs": [
+    {
+     "span_axial_mm": [
+      -31.0005,
+      -27.9995
+     ],
+     "where": "parent:upper_leg_left"
+    },
+    {
+     "span_axial_mm": [
+      -5.0,
+      -2.0
+     ],
+     "where": "parent:upper_leg_left"
+    }
+   ],
+   "coverage": [
+    {
+     "bearing": "seeed_bearing__configuration__22x16x4",
+     "bore_d_mm": 16.0,
+     "bore_span_axial_mm": [
+      -3.8,
+      -0.2
+     ],
+     "ring_width_mm": 3.6,
+     "carriers": [],
+     "covered_mm": 0.0,
+     "uncovered_mm": 3.6,
+     "covered_pct": 0.0,
+     "printed_carrier_mm": 0,
+     "horn_disc_carrier_mm": 0,
+     "flange_face_to_horn_face_gap_mm": null,
+     "gap_meaning": null
+    },
+    {
+     "bearing": "seeed_bearing__configuration__22x16x4",
+     "od_d_mm": 22.0,
+     "od_span_axial_mm": [
+      -3.7,
+      -0.3
+     ],
+     "ring_width_mm": 3.4,
+     "pockets": [],
+     "covered_mm": 0.0,
+     "uncovered_mm": 3.4,
+     "covered_pct": 0.0,
+     "note": "no Ø22 pocket feature found on the axis -- the outer race's housing is either not a cylinder the feature extractor kept, or is a Ø19 window/face (bearing_roll)"
+    }
+   ]
+  },
+  "left_ankle": {
+   "child_body": "ankle_left",
+   "parent_body": "leg",
+   "on_axis_features": [
+    {
+     "where": "child:ankle_left",
+     "mesh": "ankle_left",
+     "feature": "hole",
+     "d_mm": 14.0,
+     "class": "Ø14 (ankle pocket window)",
+     "span_axial_mm": [
+      -34.038,
+      -32.2
+     ],
+     "length_mm": 1.838,
+     "radial_off_axis_mm": 0.0001,
+     "fit_residual_mm": 0.0,
+     "faces": 180,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/ankle_left.json (hole d=14.0000 centre [31.581, 22.0, -6.223])",
+     "role": "printed feature"
+    },
+    {
+     "where": "child:ankle_left",
+     "mesh": "ankle_left",
+     "feature": "hole",
+     "d_mm": 15.0,
+     "class": "Ø15 (15x10x3 outer-race pocket)",
+     "span_axial_mm": [
+      -32.2,
+      -29.9
+     ],
+     "length_mm": 2.3,
+     "radial_off_axis_mm": 0.0001,
+     "fit_residual_mm": 0.0,
+     "faces": 144,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/ankle_left.json (hole d=15.0000 centre [33.65, 22.0, -6.223])",
+     "role": "printed feature"
+    },
+    {
+     "where": "child:ankle_left",
+     "mesh": "seeed_bearing__configuration_default",
+     "feature": "hole",
+     "d_mm": 10.0,
+     "class": "Ø10 (15x10x3 inner-race seat)",
+     "span_axial_mm": [
+      -32.0,
+      -29.4
+     ],
+     "length_mm": 2.6,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0,
+     "faces": 144,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/seeed_bearing__configuration_default.json (hole d=10.0000 centre [-0.0, 0.0, 1.5])",
+     "role": "bearing bore"
+    },
+    {
+     "where": "parent:leg",
+     "mesh": "leg",
+     "feature": "bosse",
+     "d_mm": 10.0,
+     "class": "Ø10 (15x10x3 inner-race seat)",
+     "span_axial_mm": [
+      -32.0,
+      -29.0
+     ],
+     "length_mm": 3.0,
+     "radial_off_axis_mm": 0.0001,
+     "fit_residual_mm": 0.0,
+     "faces": 144,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/leg.json (bosse d=10.0000 centre [34.0, 22.0, -6.223])",
+     "role": "printed feature"
+    },
+    {
+     "where": "child:ankle_left",
+     "mesh": "seeed_bearing__configuration_default",
+     "feature": "bosse",
+     "d_mm": 15.0,
+     "class": "Ø15 (15x10x3 outer-race pocket)",
+     "span_axial_mm": [
+      -31.9,
+      -29.5
+     ],
+     "length_mm": 2.4,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0,
+     "faces": 144,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/seeed_bearing__configuration_default.json (bosse d=15.0000 centre [0.0, 0.0, 1.5])",
+     "role": "bearing od"
+    },
+    {
+     "where": "parent:leg",
+     "mesh": "xl330",
+     "feature": "bosse",
+     "d_mm": 16.0,
+     "class": "Ø16 (inner-race seat / horn disc diameter)",
+     "span_axial_mm": [
+      -29.0005,
+      -25.9995
+     ],
+     "length_mm": 3.001,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0001,
+     "faces": 148,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/xl330.json (bosse d=16.0000 centre [13.0, -0.0, 0.0])",
+     "role": "servo Ø16 x 3.0 disc (horn or idler)"
+    },
+    {
+     "where": "parent:leg",
+     "mesh": "leg",
+     "feature": "bosse",
+     "d_mm": 10.0,
+     "class": "Ø10 (15x10x3 inner-race seat)",
+     "span_axial_mm": [
+      -26.5,
+      -26.0
+     ],
+     "length_mm": 0.5,
+     "radial_off_axis_mm": 0.0001,
+     "fit_residual_mm": 0.0,
+     "faces": 144,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/leg.json (bosse d=10.0000 centre [38.25, 22.0, -6.223])",
+     "role": "printed feature"
+    },
+    {
+     "where": "parent:leg",
+     "mesh": "xl330",
+     "feature": "bosse",
+     "d_mm": 16.0,
+     "class": "Ø16 (inner-race seat / horn disc diameter)",
+     "span_axial_mm": [
+      -3.0,
+      0.0
+     ],
+     "length_mm": 3.0,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0,
+     "faces": 144,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/xl330.json (bosse d=16.0000 centre [-13.0, 0.0, -0.0])",
+     "role": "servo Ø16 x 3.0 disc (horn or idler)"
+    }
+   ],
+   "servo_discs": [
+    {
+     "span_axial_mm": [
+      -29.0005,
+      -25.9995
+     ],
+     "where": "parent:leg"
+    },
+    {
+     "span_axial_mm": [
+      -3.0,
+      0.0
+     ],
+     "where": "parent:leg"
+    }
+   ],
+   "coverage": [
+    {
+     "bearing": "seeed_bearing__configuration_default",
+     "bore_d_mm": 10.0,
+     "bore_span_axial_mm": [
+      -32.0,
+      -29.4
+     ],
+     "ring_width_mm": 2.6,
+     "carriers": [],
+     "covered_mm": 0.0,
+     "uncovered_mm": 2.6,
+     "covered_pct": 0.0,
+     "printed_carrier_mm": 0,
+     "horn_disc_carrier_mm": 0,
+     "flange_face_to_horn_face_gap_mm": null,
+     "gap_meaning": null
+    },
+    {
+     "bearing": "seeed_bearing__configuration_default",
+     "od_d_mm": 15.0,
+     "od_span_axial_mm": [
+      -31.9,
+      -29.5
+     ],
+     "ring_width_mm": 2.4,
+     "pockets": [
+      {
+       "mesh": "ankle_left",
+       "where": "child:ankle_left",
+       "d_mm": 15.0,
+       "span_axial_mm": [
+        -32.2,
+        -29.9
+       ],
+       "overlap_with_od_mm": 2.0
+      }
+     ],
+     "covered_mm": 2.0,
+     "uncovered_mm": 0.4,
+     "covered_pct": 83.33,
+     "note": null
+    }
+   ]
+  },
+  "neck_pitch": {
+   "child_body": "neck",
+   "parent_body": "trunk_base",
+   "on_axis_features": [
+    {
+     "where": "child:neck",
+     "mesh": "xl330",
+     "feature": "bosse",
+     "d_mm": 16.0,
+     "class": "Ø16 (inner-race seat / horn disc diameter)",
+     "span_axial_mm": [
+      0.0,
+      3.0
+     ],
+     "length_mm": 3.0,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0,
+     "faces": 144,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/xl330.json (bosse d=16.0000 centre [-13.0, 0.0, -0.0])",
+     "role": "servo Ø16 x 3.0 disc (horn or idler)"
+    },
+    {
+     "where": "child:neck",
+     "mesh": "xl330",
+     "feature": "bosse",
+     "d_mm": 16.0,
+     "class": "Ø16 (inner-race seat / horn disc diameter)",
+     "span_axial_mm": [
+      25.9995,
+      29.0005
+     ],
+     "length_mm": 3.001,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0001,
+     "faces": 148,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/xl330.json (bosse d=16.0000 centre [13.0, -0.0, 0.0])",
+     "role": "servo Ø16 x 3.0 disc (horn or idler)"
+    }
+   ],
+   "servo_discs": [
+    {
+     "span_axial_mm": [
+      25.9995,
+      29.0005
+     ],
+     "where": "child:neck"
+    },
+    {
+     "span_axial_mm": [
+      0.0,
+      3.0
+     ],
+     "where": "child:neck"
+    }
+   ],
+   "coverage": []
+  },
+  "head_pitch": {
+   "child_body": "neck_pitch",
+   "parent_body": "neck",
+   "on_axis_features": [
+    {
+     "where": "child:neck_pitch",
+     "mesh": "neck_pitch",
+     "feature": "hole",
+     "d_mm": 6.0,
+     "class": "Ø6 (horn-face centre bore)",
+     "span_axial_mm": [
+      -32.0,
+      -29.0
+     ],
+     "length_mm": 3.0,
+     "radial_off_axis_mm": 0.0001,
+     "fit_residual_mm": 0.0,
+     "faces": 148,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/neck_pitch.json (hole d=6.0000 centre [-16.0, -0.0, -28.793])",
+     "role": "printed feature"
+    },
+    {
+     "where": "parent:neck",
+     "mesh": "xl330",
+     "feature": "bosse",
+     "d_mm": 16.0,
+     "class": "Ø16 (inner-race seat / horn disc diameter)",
+     "span_axial_mm": [
+      -29.0005,
+      -25.9995
+     ],
+     "length_mm": 3.001,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0001,
+     "faces": 148,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/xl330.json (bosse d=16.0000 centre [13.0, -0.0, 0.0])",
+     "role": "servo Ø16 x 3.0 disc (horn or idler)"
+    },
+    {
+     "where": "parent:neck",
+     "mesh": "xl330",
+     "feature": "bosse",
+     "d_mm": 16.0,
+     "class": "Ø16 (inner-race seat / horn disc diameter)",
+     "span_axial_mm": [
+      -3.0,
+      0.0
+     ],
+     "length_mm": 3.0,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0,
+     "faces": 144,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/xl330.json (bosse d=16.0000 centre [-13.0, 0.0, -0.0])",
+     "role": "servo Ø16 x 3.0 disc (horn or idler)"
+    },
+    {
+     "where": "child:neck_pitch",
+     "mesh": "neck_pitch",
+     "feature": "hole",
+     "d_mm": 6.0,
+     "class": "Ø6 (horn-face centre bore)",
+     "span_axial_mm": [
+      0.0,
+      3.0
+     ],
+     "length_mm": 3.0,
+     "radial_off_axis_mm": 0.0001,
+     "fit_residual_mm": 0.0,
+     "faces": 148,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/neck_pitch.json (hole d=6.0000 centre [16.0, -0.0, -28.793])",
+     "role": "printed feature"
+    }
+   ],
+   "servo_discs": [
+    {
+     "span_axial_mm": [
+      -29.0005,
+      -25.9995
+     ],
+     "where": "parent:neck"
+    },
+    {
+     "span_axial_mm": [
+      -3.0,
+      0.0
+     ],
+     "where": "parent:neck"
+    }
+   ],
+   "coverage": []
+  },
+  "head_yaw": {
+   "child_body": "yaw_roll_motion",
+   "parent_body": "neck_pitch",
+   "on_axis_features": [
+    {
+     "where": "parent:neck_pitch",
+     "mesh": "neck_pitch",
+     "feature": "hole",
+     "d_mm": 6.0,
+     "class": "Ø6 (horn-face centre bore)",
+     "span_axial_mm": [
+      -5.23,
+      -0.0
+     ],
+     "length_mm": 5.23,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0,
+     "faces": 196,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/neck_pitch.json (hole d=6.0000 centre [-0.0, -0.0, -12.715])",
+     "role": "printed feature"
+    },
+    {
+     "where": "parent:neck_pitch",
+     "mesh": "neck_pitch",
+     "feature": "bosse",
+     "d_mm": 16.0,
+     "class": "Ø16 (inner-race seat / horn disc diameter)",
+     "span_axial_mm": [
+      -1.9,
+      -0.0
+     ],
+     "length_mm": 1.9,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0,
+     "faces": 146,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/neck_pitch.json (bosse d=16.0000 centre [-0.0, -0.0, -11.05])",
+     "role": "printed feature"
+    },
+    {
+     "where": "parent:neck_pitch",
+     "mesh": "seeed_bearing__configuration__22x16x4",
+     "feature": "hole",
+     "d_mm": 16.0,
+     "class": "Ø16 (inner-race seat / horn disc diameter)",
+     "span_axial_mm": [
+      -1.7,
+      1.9
+     ],
+     "length_mm": 3.6,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0,
+     "faces": 144,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/seeed_bearing__configuration__22x16x4.json (hole d=16.0000 centre [0.0, 0.0, 2.0])",
+     "role": "bearing bore"
+    },
+    {
+     "where": "parent:neck_pitch",
+     "mesh": "seeed_bearing__configuration__22x16x4",
+     "feature": "bosse",
+     "d_mm": 22.0,
+     "class": "Ø22 (outer-race pocket)",
+     "span_axial_mm": [
+      -1.6,
+      1.8
+     ],
+     "length_mm": 3.4,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0,
+     "faces": 144,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/seeed_bearing__configuration__22x16x4.json (bosse d=22.0000 centre [0.0, 0.0, 2.0])",
+     "role": "bearing od"
+    },
+    {
+     "where": "child:yaw_roll_motion",
+     "mesh": "xl330",
+     "feature": "bosse",
+     "d_mm": 16.0,
+     "class": "Ø16 (inner-race seat / horn disc diameter)",
+     "span_axial_mm": [
+      0.0,
+      3.0
+     ],
+     "length_mm": 3.0,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0,
+     "faces": 144,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/xl330.json (bosse d=16.0000 centre [-13.0, 0.0, -0.0])",
+     "role": "servo Ø16 x 3.0 disc (horn or idler)"
+    },
+    {
+     "where": "child:yaw_roll_motion",
+     "mesh": "xl330",
+     "feature": "bosse",
+     "d_mm": 16.0,
+     "class": "Ø16 (inner-race seat / horn disc diameter)",
+     "span_axial_mm": [
+      25.9995,
+      29.0005
+     ],
+     "length_mm": 3.001,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0001,
+     "faces": 148,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/xl330.json (bosse d=16.0000 centre [13.0, -0.0, 0.0])",
+     "role": "servo Ø16 x 3.0 disc (horn or idler)"
+    }
+   ],
+   "servo_discs": [
+    {
+     "span_axial_mm": [
+      25.9995,
+      29.0005
+     ],
+     "where": "child:yaw_roll_motion"
+    },
+    {
+     "span_axial_mm": [
+      0.0,
+      3.0
+     ],
+     "where": "child:yaw_roll_motion"
+    }
+   ],
+   "coverage": [
+    {
+     "bearing": "seeed_bearing__configuration__22x16x4",
+     "bore_d_mm": 16.0,
+     "bore_span_axial_mm": [
+      -1.7,
+      1.9
+     ],
+     "ring_width_mm": 3.6,
+     "carriers": [],
+     "covered_mm": 0.0,
+     "uncovered_mm": 3.6,
+     "covered_pct": 0.0,
+     "printed_carrier_mm": 0,
+     "horn_disc_carrier_mm": 0,
+     "flange_face_to_horn_face_gap_mm": null,
+     "gap_meaning": null
+    },
+    {
+     "bearing": "seeed_bearing__configuration__22x16x4",
+     "od_d_mm": 22.0,
+     "od_span_axial_mm": [
+      -1.6,
+      1.8
+     ],
+     "ring_width_mm": 3.4,
+     "pockets": [],
+     "covered_mm": 0.0,
+     "uncovered_mm": 3.4,
+     "covered_pct": 0.0,
+     "note": "no Ø22 pocket feature found on the axis -- the outer race's housing is either not a cylinder the feature extractor kept, or is a Ø19 window/face (bearing_roll)"
+    }
+   ]
+  },
+  "head_roll": {
+   "child_body": "jaw_soft",
+   "parent_body": "yaw_roll_motion",
+   "on_axis_features": [
+    {
+     "where": "parent:yaw_roll_motion",
+     "mesh": "yaw_roll_motion",
+     "feature": "bosse",
+     "d_mm": 16.0,
+     "class": "Ø16 (inner-race seat / horn disc diameter)",
+     "span_axial_mm": [
+      -35.9,
+      -31.9
+     ],
+     "length_mm": 4.0,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0,
+     "faces": 144,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/yaw_roll_motion.json (bosse d=16.0000 centre [0.0, -16.0, 4.5])",
+     "role": "printed feature"
+    },
+    {
+     "where": "parent:yaw_roll_motion",
+     "mesh": "yaw_roll_motion",
+     "feature": "hole",
+     "d_mm": 12.0,
+     "class": "Ø12 (through bore in a full-width seat)",
+     "span_axial_mm": [
+      -35.9,
+      -27.9
+     ],
+     "length_mm": 8.0,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0,
+     "faces": 144,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/yaw_roll_motion.json (hole d=12.0000 centre [0.0, -14.0, 4.5])",
+     "role": "printed feature"
+    },
+    {
+     "where": "parent:yaw_roll_motion",
+     "mesh": "seeed_bearing__configuration__22x16x4",
+     "feature": "hole",
+     "d_mm": 16.0,
+     "class": "Ø16 (inner-race seat / horn disc diameter)",
+     "span_axial_mm": [
+      -35.7,
+      -32.1
+     ],
+     "length_mm": 3.6,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0,
+     "faces": 144,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/seeed_bearing__configuration__22x16x4.json (hole d=16.0000 centre [0.0, 0.0, 2.0])",
+     "role": "bearing bore"
+    },
+    {
+     "where": "parent:yaw_roll_motion",
+     "mesh": "seeed_bearing__configuration__22x16x4",
+     "feature": "bosse",
+     "d_mm": 22.0,
+     "class": "Ø22 (outer-race pocket)",
+     "span_axial_mm": [
+      -35.6,
+      -32.2
+     ],
+     "length_mm": 3.4,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0,
+     "faces": 144,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/seeed_bearing__configuration__22x16x4.json (bosse d=22.0000 centre [0.0, 0.0, 2.0])",
+     "role": "bearing od"
+    },
+    {
+     "where": "parent:yaw_roll_motion",
+     "mesh": "yaw_roll_motion",
+     "feature": "hole",
+     "d_mm": 6.0,
+     "class": "Ø6 (horn-face centre bore)",
+     "span_axial_mm": [
+      -5.9,
+      -0.0
+     ],
+     "length_mm": 5.9,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0,
+     "faces": 148,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/yaw_roll_motion.json (hole d=6.0000 centre [0.0, 14.95, 4.5])",
+     "role": "printed feature"
+    },
+    {
+     "where": "parent:yaw_roll_motion",
+     "mesh": "yaw_roll_motion",
+     "feature": "bosse",
+     "d_mm": 16.0,
+     "class": "Ø16 (inner-race seat / horn disc diameter)",
+     "span_axial_mm": [
+      -1.9,
+      -0.0
+     ],
+     "length_mm": 1.9,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0,
+     "faces": 146,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/yaw_roll_motion.json (bosse d=16.0000 centre [-0.0, 16.95, 4.5])",
+     "role": "printed feature"
+    },
+    {
+     "where": "parent:yaw_roll_motion",
+     "mesh": "seeed_bearing__configuration__22x16x4",
+     "feature": "hole",
+     "d_mm": 16.0,
+     "class": "Ø16 (inner-race seat / horn disc diameter)",
+     "span_axial_mm": [
+      -1.7,
+      1.9
+     ],
+     "length_mm": 3.6,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0,
+     "faces": 144,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/seeed_bearing__configuration__22x16x4.json (hole d=16.0000 centre [0.0, 0.0, 2.0])",
+     "role": "bearing bore"
+    },
+    {
+     "where": "parent:yaw_roll_motion",
+     "mesh": "seeed_bearing__configuration__22x16x4",
+     "feature": "bosse",
+     "d_mm": 22.0,
+     "class": "Ø22 (outer-race pocket)",
+     "span_axial_mm": [
+      -1.6,
+      1.8
+     ],
+     "length_mm": 3.4,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0,
+     "faces": 144,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/seeed_bearing__configuration__22x16x4.json (bosse d=22.0000 centre [0.0, 0.0, 2.0])",
+     "role": "bearing od"
+    },
+    {
+     "where": "child:jaw_soft",
+     "mesh": "xl330",
+     "feature": "bosse",
+     "d_mm": 16.0,
+     "class": "Ø16 (inner-race seat / horn disc diameter)",
+     "span_axial_mm": [
+      0.0,
+      3.0
+     ],
+     "length_mm": 3.0,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0,
+     "faces": 144,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/xl330.json (bosse d=16.0000 centre [-13.0, 0.0, -0.0])",
+     "role": "servo Ø16 x 3.0 disc (horn or idler)"
+    },
+    {
+     "where": "child:jaw_soft",
+     "mesh": "xl330",
+     "feature": "bosse",
+     "d_mm": 16.0,
+     "class": "Ø16 (inner-race seat / horn disc diameter)",
+     "span_axial_mm": [
+      25.9995,
+      29.0005
+     ],
+     "length_mm": 3.001,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0001,
+     "faces": 148,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/xl330.json (bosse d=16.0000 centre [13.0, -0.0, 0.0])",
+     "role": "servo Ø16 x 3.0 disc (horn or idler)"
+    }
+   ],
+   "servo_discs": [
+    {
+     "span_axial_mm": [
+      25.9995,
+      29.0005
+     ],
+     "where": "child:jaw_soft"
+    },
+    {
+     "span_axial_mm": [
+      0.0,
+      3.0
+     ],
+     "where": "child:jaw_soft"
+    }
+   ],
+   "coverage": [
+    {
+     "bearing": "seeed_bearing__configuration__22x16x4",
+     "bore_d_mm": 16.0,
+     "bore_span_axial_mm": [
+      -1.7,
+      1.9
+     ],
+     "ring_width_mm": 3.6,
+     "carriers": [],
+     "covered_mm": 0.0,
+     "uncovered_mm": 3.6,
+     "covered_pct": 0.0,
+     "printed_carrier_mm": 0,
+     "horn_disc_carrier_mm": 0,
+     "flange_face_to_horn_face_gap_mm": null,
+     "gap_meaning": null
+    },
+    {
+     "bearing": "seeed_bearing__configuration__22x16x4",
+     "bore_d_mm": 16.0,
+     "bore_span_axial_mm": [
+      -35.7,
+      -32.1
+     ],
+     "ring_width_mm": 3.6,
+     "carriers": [],
+     "covered_mm": 0.0,
+     "uncovered_mm": 3.6,
+     "covered_pct": 0.0,
+     "printed_carrier_mm": 0,
+     "horn_disc_carrier_mm": 0,
+     "flange_face_to_horn_face_gap_mm": null,
+     "gap_meaning": null
+    },
+    {
+     "bearing": "seeed_bearing__configuration__22x16x4",
+     "od_d_mm": 22.0,
+     "od_span_axial_mm": [
+      -1.6,
+      1.8
+     ],
+     "ring_width_mm": 3.4,
+     "pockets": [],
+     "covered_mm": 0.0,
+     "uncovered_mm": 3.4,
+     "covered_pct": 0.0,
+     "note": "no Ø22 pocket feature found on the axis -- the outer race's housing is either not a cylinder the feature extractor kept, or is a Ø19 window/face (bearing_roll)"
+    },
+    {
+     "bearing": "seeed_bearing__configuration__22x16x4",
+     "od_d_mm": 22.0,
+     "od_span_axial_mm": [
+      -35.6,
+      -32.2
+     ],
+     "ring_width_mm": 3.4,
+     "pockets": [],
+     "covered_mm": 0.0,
+     "uncovered_mm": 3.4,
+     "covered_pct": 0.0,
+     "note": "no Ø22 pocket feature found on the axis -- the outer race's housing is either not a cylinder the feature extractor kept, or is a Ø19 window/face (bearing_roll)"
+    }
+   ]
+  },
+  "right_hip_yaw": {
+   "child_body": "bearing_roll",
+   "parent_body": "trunk_base",
+   "on_axis_features": [
+    {
+     "where": "parent:trunk_base",
+     "mesh": "xl330",
+     "feature": "bosse",
+     "d_mm": 16.0,
+     "class": "Ø16 (inner-race seat / horn disc diameter)",
+     "span_axial_mm": [
+      -31.0005,
+      -27.9995
+     ],
+     "length_mm": 3.001,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0001,
+     "faces": 148,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/xl330.json (bosse d=16.0000 centre [13.0, -0.0, 0.0])",
+     "role": "servo Ø16 x 3.0 disc (horn or idler)"
+    },
+    {
+     "where": "parent:trunk_base",
+     "mesh": "trunk_base",
+     "feature": "hole",
+     "d_mm": 19.0,
+     "class": "Ø19 (inner-race thrust shoulder)",
+     "span_axial_mm": [
+      -5.0,
+      -4.0
+     ],
+     "length_mm": 1.0,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0,
+     "faces": 144,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/trunk_base.json (hole d=19.0000 centre [-17.5, -2.0, 17.0])",
+     "role": "printed feature"
+    },
+    {
+     "where": "parent:trunk_base",
+     "mesh": "xl330",
+     "feature": "bosse",
+     "d_mm": 16.0,
+     "class": "Ø16 (inner-race seat / horn disc diameter)",
+     "span_axial_mm": [
+      -5.0,
+      -2.0
+     ],
+     "length_mm": 3.0,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0,
+     "faces": 144,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/xl330.json (bosse d=16.0000 centre [-13.0, 0.0, -0.0])",
+     "role": "servo Ø16 x 3.0 disc (horn or idler)"
+    },
+    {
+     "where": "parent:trunk_base",
+     "mesh": "seeed_bearing__configuration__22x16x4",
+     "feature": "hole",
+     "d_mm": 16.0,
+     "class": "Ø16 (inner-race seat / horn disc diameter)",
+     "span_axial_mm": [
+      -3.8,
+      -0.2
+     ],
+     "length_mm": 3.6,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0,
+     "faces": 144,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/seeed_bearing__configuration__22x16x4.json (hole d=16.0000 centre [0.0, 0.0, 2.0])",
+     "role": "bearing bore"
+    },
+    {
+     "where": "parent:trunk_base",
+     "mesh": "seeed_bearing__configuration__22x16x4",
+     "feature": "bosse",
+     "d_mm": 22.0,
+     "class": "Ø22 (outer-race pocket)",
+     "span_axial_mm": [
+      -3.7,
+      -0.3
+     ],
+     "length_mm": 3.4,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0,
+     "faces": 144,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/seeed_bearing__configuration__22x16x4.json (bosse d=22.0000 centre [0.0, 0.0, 2.0])",
+     "role": "bearing od"
+    },
+    {
+     "where": "child:bearing_roll",
+     "mesh": "yaw2roll",
+     "feature": "bosse",
+     "d_mm": 16.0,
+     "class": "Ø16 (inner-race seat / horn disc diameter)",
+     "span_axial_mm": [
+      -1.95,
+      0.0
+     ],
+     "length_mm": 1.95,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0,
+     "faces": 144,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/yaw2roll.json (bosse d=16.0000 centre [17.5, -2.0, 13.475])",
+     "role": "printed feature"
+    },
+    {
+     "where": "child:bearing_roll",
+     "mesh": "yaw2roll",
+     "feature": "bosse",
+     "d_mm": 19.0,
+     "class": "Ø19 (inner-race thrust shoulder)",
+     "span_axial_mm": [
+      0.0,
+      0.5
+     ],
+     "length_mm": 0.5,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0,
+     "faces": 144,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/yaw2roll.json (bosse d=19.0000 centre [17.5, -2.0, 12.25])",
+     "role": "printed feature"
+    }
+   ],
+   "servo_discs": [
+    {
+     "span_axial_mm": [
+      -31.0005,
+      -27.9995
+     ],
+     "where": "parent:trunk_base"
+    },
+    {
+     "span_axial_mm": [
+      -5.0,
+      -2.0
+     ],
+     "where": "parent:trunk_base"
+    }
+   ],
+   "coverage": [
+    {
+     "bearing": "seeed_bearing__configuration__22x16x4",
+     "bore_d_mm": 16.0,
+     "bore_span_axial_mm": [
+      -3.8,
+      -0.2
+     ],
+     "ring_width_mm": 3.6,
+     "carriers": [],
+     "covered_mm": 0.0,
+     "uncovered_mm": 3.6,
+     "covered_pct": 0.0,
+     "printed_carrier_mm": 0,
+     "horn_disc_carrier_mm": 0,
+     "flange_face_to_horn_face_gap_mm": null,
+     "gap_meaning": null
+    },
+    {
+     "bearing": "seeed_bearing__configuration__22x16x4",
+     "od_d_mm": 22.0,
+     "od_span_axial_mm": [
+      -3.7,
+      -0.3
+     ],
+     "ring_width_mm": 3.4,
+     "pockets": [],
+     "covered_mm": 0.0,
+     "uncovered_mm": 3.4,
+     "covered_pct": 0.0,
+     "note": "no Ø22 pocket feature found on the axis -- the outer race's housing is either not a cylinder the feature extractor kept, or is a Ø19 window/face (bearing_roll)"
+    }
+   ]
+  },
+  "right_hip_roll": {
+   "child_body": "hip_l_2",
+   "parent_body": "bearing_roll",
+   "on_axis_features": [
+    {
+     "where": "parent:bearing_roll",
+     "mesh": "xl330",
+     "feature": "bosse",
+     "d_mm": 16.0,
+     "class": "Ø16 (inner-race seat / horn disc diameter)",
+     "span_axial_mm": [
+      -31.0005,
+      -27.9995
+     ],
+     "length_mm": 3.001,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0001,
+     "faces": 148,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/xl330.json (bosse d=16.0000 centre [13.0, -0.0, 0.0])",
+     "role": "servo Ø16 x 3.0 disc (horn or idler)"
+    },
+    {
+     "where": "parent:bearing_roll",
+     "mesh": "xl330",
+     "feature": "bosse",
+     "d_mm": 16.0,
+     "class": "Ø16 (inner-race seat / horn disc diameter)",
+     "span_axial_mm": [
+      -5.0,
+      -2.0
+     ],
+     "length_mm": 3.0,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0,
+     "faces": 144,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/xl330.json (bosse d=16.0000 centre [-13.0, 0.0, -0.0])",
+     "role": "servo Ø16 x 3.0 disc (horn or idler)"
+    },
+    {
+     "where": "parent:bearing_roll",
+     "mesh": "bearing_roll",
+     "feature": "hole",
+     "d_mm": 19.0,
+     "class": "Ø19 (inner-race thrust shoulder)",
+     "span_axial_mm": [
+      -5.0,
+      -4.0
+     ],
+     "length_mm": 1.0,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0,
+     "faces": 144,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/bearing_roll.json (hole d=19.0000 centre [17.5, -14.0, -0.0])",
+     "role": "printed feature"
+    },
+    {
+     "where": "parent:bearing_roll",
+     "mesh": "seeed_bearing__configuration__22x16x4",
+     "feature": "hole",
+     "d_mm": 16.0,
+     "class": "Ø16 (inner-race seat / horn disc diameter)",
+     "span_axial_mm": [
+      -3.8,
+      -0.2
+     ],
+     "length_mm": 3.6,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0,
+     "faces": 144,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/seeed_bearing__configuration__22x16x4.json (hole d=16.0000 centre [0.0, 0.0, 2.0])",
+     "role": "bearing bore"
+    },
+    {
+     "where": "parent:bearing_roll",
+     "mesh": "seeed_bearing__configuration__22x16x4",
+     "feature": "bosse",
+     "d_mm": 22.0,
+     "class": "Ø22 (outer-race pocket)",
+     "span_axial_mm": [
+      -3.7,
+      -0.3
+     ],
+     "length_mm": 3.4,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0,
+     "faces": 144,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/seeed_bearing__configuration__22x16x4.json (bosse d=22.0000 centre [0.0, 0.0, 2.0])",
+     "role": "bearing od"
+    },
+    {
+     "where": "child:hip_l_2",
+     "mesh": "hip_l",
+     "feature": "bosse",
+     "d_mm": 16.0,
+     "class": "Ø16 (inner-race seat / horn disc diameter)",
+     "span_axial_mm": [
+      -1.95,
+      -0.0
+     ],
+     "length_mm": 1.95,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0,
+     "faces": 146,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/hip_l.json (bosse d=16.0000 centre [17.5, -17.525, -0.0])",
+     "role": "printed feature"
+    },
+    {
+     "where": "child:hip_l_2",
+     "mesh": "hip_l",
+     "feature": "hole",
+     "d_mm": 6.0,
+     "class": "Ø6 (horn-face centre bore)",
+     "span_axial_mm": [
+      -1.95,
+      -0.0
+     ],
+     "length_mm": 1.95,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0,
+     "faces": 146,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/hip_l.json (hole d=6.0000 centre [17.5, -17.525, -0.0])",
+     "role": "printed feature"
+    }
+   ],
+   "servo_discs": [
+    {
+     "span_axial_mm": [
+      -31.0005,
+      -27.9995
+     ],
+     "where": "parent:bearing_roll"
+    },
+    {
+     "span_axial_mm": [
+      -5.0,
+      -2.0
+     ],
+     "where": "parent:bearing_roll"
+    }
+   ],
+   "coverage": [
+    {
+     "bearing": "seeed_bearing__configuration__22x16x4",
+     "bore_d_mm": 16.0,
+     "bore_span_axial_mm": [
+      -3.8,
+      -0.2
+     ],
+     "ring_width_mm": 3.6,
+     "carriers": [],
+     "covered_mm": 0.0,
+     "uncovered_mm": 3.6,
+     "covered_pct": 0.0,
+     "printed_carrier_mm": 0,
+     "horn_disc_carrier_mm": 0,
+     "flange_face_to_horn_face_gap_mm": null,
+     "gap_meaning": null
+    },
+    {
+     "bearing": "seeed_bearing__configuration__22x16x4",
+     "od_d_mm": 22.0,
+     "od_span_axial_mm": [
+      -3.7,
+      -0.3
+     ],
+     "ring_width_mm": 3.4,
+     "pockets": [],
+     "covered_mm": 0.0,
+     "uncovered_mm": 3.4,
+     "covered_pct": 0.0,
+     "note": "no Ø22 pocket feature found on the axis -- the outer race's housing is either not a cylinder the feature extractor kept, or is a Ø19 window/face (bearing_roll)"
+    }
+   ]
+  },
+  "right_hip_pitch": {
+   "child_body": "upper_leg_right",
+   "parent_body": "hip_l_2",
+   "on_axis_features": [
+    {
+     "where": "parent:hip_l_2",
+     "mesh": "hip_l",
+     "feature": "bosse",
+     "d_mm": 16.0,
+     "class": "Ø16 (inner-race seat / horn disc diameter)",
+     "span_axial_mm": [
+      -4.0,
+      -2.05
+     ],
+     "length_mm": 1.95,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0,
+     "faces": 146,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/hip_l.json (bosse d=16.0000 centre [39.475, -0.0, -0.0])",
+     "role": "printed feature"
+    },
+    {
+     "where": "parent:hip_l_2",
+     "mesh": "hip_l",
+     "feature": "hole",
+     "d_mm": 6.0,
+     "class": "Ø6 (horn-face centre bore)",
+     "span_axial_mm": [
+      -4.0,
+      -2.05
+     ],
+     "length_mm": 1.95,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0001,
+     "faces": 145,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/hip_l.json (hole d=6.0000 centre [39.475, -0.0, 0.0])",
+     "role": "printed feature"
+    },
+    {
+     "where": "parent:hip_l_2",
+     "mesh": "seeed_bearing__configuration__22x16x4",
+     "feature": "hole",
+     "d_mm": 16.0,
+     "class": "Ø16 (inner-race seat / horn disc diameter)",
+     "span_axial_mm": [
+      -3.8,
+      -0.2
+     ],
+     "length_mm": 3.6,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0,
+     "faces": 144,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/seeed_bearing__configuration__22x16x4.json (hole d=16.0000 centre [0.0, 0.0, 2.0])",
+     "role": "bearing bore"
+    },
+    {
+     "where": "parent:hip_l_2",
+     "mesh": "seeed_bearing__configuration__22x16x4",
+     "feature": "bosse",
+     "d_mm": 22.0,
+     "class": "Ø22 (outer-race pocket)",
+     "span_axial_mm": [
+      -3.7,
+      -0.3
+     ],
+     "length_mm": 3.4,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0,
+     "faces": 144,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/seeed_bearing__configuration__22x16x4.json (bosse d=22.0000 centre [0.0, 0.0, 2.0])",
+     "role": "bearing od"
+    },
+    {
+     "where": "child:upper_leg_right",
+     "mesh": "xl330",
+     "feature": "bosse",
+     "d_mm": 16.0,
+     "class": "Ø16 (inner-race seat / horn disc diameter)",
+     "span_axial_mm": [
+      -2.0,
+      1.0
+     ],
+     "length_mm": 3.0,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0,
+     "faces": 144,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/xl330.json (bosse d=16.0000 centre [-13.0, 0.0, -0.0])",
+     "role": "servo Ø16 x 3.0 disc (horn or idler)"
+    },
+    {
+     "where": "child:upper_leg_right",
+     "mesh": "upper_leg_rigidity_plate",
+     "feature": "hole",
+     "d_mm": 19.0,
+     "class": "Ø19 (inner-race thrust shoulder)",
+     "span_axial_mm": [
+      0.0,
+      1.0
+     ],
+     "length_mm": 1.0,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0,
+     "faces": 144,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/upper_leg_rigidity_plate.json (hole d=19.0000 centre [43.0, 0.0, 0.0])",
+     "role": "printed feature"
+    },
+    {
+     "where": "child:upper_leg_right",
+     "mesh": "xl330",
+     "feature": "bosse",
+     "d_mm": 16.0,
+     "class": "Ø16 (inner-race seat / horn disc diameter)",
+     "span_axial_mm": [
+      23.9995,
+      27.0005
+     ],
+     "length_mm": 3.001,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0001,
+     "faces": 148,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/xl330.json (bosse d=16.0000 centre [13.0, -0.0, 0.0])",
+     "role": "servo Ø16 x 3.0 disc (horn or idler)"
+    }
+   ],
+   "servo_discs": [
+    {
+     "span_axial_mm": [
+      23.9995,
+      27.0005
+     ],
+     "where": "child:upper_leg_right"
+    },
+    {
+     "span_axial_mm": [
+      -2.0,
+      1.0
+     ],
+     "where": "child:upper_leg_right"
+    }
+   ],
+   "coverage": [
+    {
+     "bearing": "seeed_bearing__configuration__22x16x4",
+     "bore_d_mm": 16.0,
+     "bore_span_axial_mm": [
+      -3.8,
+      -0.2
+     ],
+     "ring_width_mm": 3.6,
+     "carriers": [],
+     "covered_mm": 0.0,
+     "uncovered_mm": 3.6,
+     "covered_pct": 0.0,
+     "printed_carrier_mm": 0,
+     "horn_disc_carrier_mm": 0,
+     "flange_face_to_horn_face_gap_mm": null,
+     "gap_meaning": null
+    },
+    {
+     "bearing": "seeed_bearing__configuration__22x16x4",
+     "od_d_mm": 22.0,
+     "od_span_axial_mm": [
+      -3.7,
+      -0.3
+     ],
+     "ring_width_mm": 3.4,
+     "pockets": [],
+     "covered_mm": 0.0,
+     "uncovered_mm": 3.4,
+     "covered_pct": 0.0,
+     "note": "no Ø22 pocket feature found on the axis -- the outer race's housing is either not a cylinder the feature extractor kept, or is a Ø19 window/face (bearing_roll)"
+    }
+   ]
+  },
+  "right_knee": {
+   "child_body": "leg_2",
+   "parent_body": "upper_leg_right",
+   "on_axis_features": [
+    {
+     "where": "parent:upper_leg_right",
+     "mesh": "xl330",
+     "feature": "bosse",
+     "d_mm": 16.0,
+     "class": "Ø16 (inner-race seat / horn disc diameter)",
+     "span_axial_mm": [
+      -31.0005,
+      -27.9995
+     ],
+     "length_mm": 3.001,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0001,
+     "faces": 148,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/xl330.json (bosse d=16.0000 centre [13.0, -0.0, 0.0])",
+     "role": "servo Ø16 x 3.0 disc (horn or idler)"
+    },
+    {
+     "where": "parent:upper_leg_right",
+     "mesh": "xl330",
+     "feature": "bosse",
+     "d_mm": 16.0,
+     "class": "Ø16 (inner-race seat / horn disc diameter)",
+     "span_axial_mm": [
+      -5.0,
+      -2.0
+     ],
+     "length_mm": 3.0,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0,
+     "faces": 144,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/xl330.json (bosse d=16.0000 centre [-13.0, 0.0, -0.0])",
+     "role": "servo Ø16 x 3.0 disc (horn or idler)"
+    },
+    {
+     "where": "parent:upper_leg_right",
+     "mesh": "upper_leg_rigidity_plate",
+     "feature": "hole",
+     "d_mm": 19.0,
+     "class": "Ø19 (inner-race thrust shoulder)",
+     "span_axial_mm": [
+      -5.0,
+      -4.0
+     ],
+     "length_mm": 1.0,
+     "radial_off_axis_mm": 0.0001,
+     "fit_residual_mm": 0.0,
+     "faces": 144,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/upper_leg_rigidity_plate.json (hole d=19.0000 centre [43.0, 22.0, 35.777])",
+     "role": "printed feature"
+    },
+    {
+     "where": "parent:upper_leg_right",
+     "mesh": "seeed_bearing__configuration__22x16x4",
+     "feature": "hole",
+     "d_mm": 16.0,
+     "class": "Ø16 (inner-race seat / horn disc diameter)",
+     "span_axial_mm": [
+      -3.8,
+      -0.2
+     ],
+     "length_mm": 3.6,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0,
+     "faces": 144,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/seeed_bearing__configuration__22x16x4.json (hole d=16.0000 centre [0.0, 0.0, 2.0])",
+     "role": "bearing bore"
+    },
+    {
+     "where": "parent:upper_leg_right",
+     "mesh": "seeed_bearing__configuration__22x16x4",
+     "feature": "bosse",
+     "d_mm": 22.0,
+     "class": "Ø22 (outer-race pocket)",
+     "span_axial_mm": [
+      -3.7,
+      -0.3
+     ],
+     "length_mm": 3.4,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0,
+     "faces": 144,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/seeed_bearing__configuration__22x16x4.json (bosse d=22.0000 centre [0.0, 0.0, 2.0])",
+     "role": "bearing od"
+    },
+    {
+     "where": "child:leg_2",
+     "mesh": "leg",
+     "feature": "bosse",
+     "d_mm": 15.897,
+     "class": "Ø15.9 (shin knee flange disc)",
+     "span_axial_mm": [
+      -1.9505,
+      0.0005
+     ],
+     "length_mm": 1.951,
+     "radial_off_axis_mm": 0.0001,
+     "fit_residual_mm": 0.034,
+     "faces": 148,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/leg.json (bosse d=15.8970 centre [39.475, 22.0, 35.777])",
+     "role": "printed feature"
+    },
+    {
+     "where": "child:leg_2",
+     "mesh": "leg",
+     "feature": "hole",
+     "d_mm": 6.0,
+     "class": "Ø6 (horn-face centre bore)",
+     "span_axial_mm": [
+      -1.95,
+      0.0
+     ],
+     "length_mm": 1.95,
+     "radial_off_axis_mm": 0.0001,
+     "fit_residual_mm": 0.0,
+     "faces": 144,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/leg.json (hole d=6.0000 centre [39.475, 22.0, 35.777])",
+     "role": "printed feature"
+    }
+   ],
+   "servo_discs": [
+    {
+     "span_axial_mm": [
+      -31.0005,
+      -27.9995
+     ],
+     "where": "parent:upper_leg_right"
+    },
+    {
+     "span_axial_mm": [
+      -5.0,
+      -2.0
+     ],
+     "where": "parent:upper_leg_right"
+    }
+   ],
+   "coverage": [
+    {
+     "bearing": "seeed_bearing__configuration__22x16x4",
+     "bore_d_mm": 16.0,
+     "bore_span_axial_mm": [
+      -3.8,
+      -0.2
+     ],
+     "ring_width_mm": 3.6,
+     "carriers": [],
+     "covered_mm": 0.0,
+     "uncovered_mm": 3.6,
+     "covered_pct": 0.0,
+     "printed_carrier_mm": 0,
+     "horn_disc_carrier_mm": 0,
+     "flange_face_to_horn_face_gap_mm": null,
+     "gap_meaning": null
+    },
+    {
+     "bearing": "seeed_bearing__configuration__22x16x4",
+     "od_d_mm": 22.0,
+     "od_span_axial_mm": [
+      -3.7,
+      -0.3
+     ],
+     "ring_width_mm": 3.4,
+     "pockets": [],
+     "covered_mm": 0.0,
+     "uncovered_mm": 3.4,
+     "covered_pct": 0.0,
+     "note": "no Ø22 pocket feature found on the axis -- the outer race's housing is either not a cylinder the feature extractor kept, or is a Ø19 window/face (bearing_roll)"
+    }
+   ]
+  },
+  "right_ankle": {
+   "child_body": "ankle_right",
+   "parent_body": "leg_2",
+   "on_axis_features": [
+    {
+     "where": "child:ankle_right",
+     "mesh": "ankle_right",
+     "feature": "hole",
+     "d_mm": 14.0,
+     "class": "Ø14 (ankle pocket window)",
+     "span_axial_mm": [
+      -34.038,
+      -32.2
+     ],
+     "length_mm": 1.838,
+     "radial_off_axis_mm": 0.0001,
+     "fit_residual_mm": 0.0,
+     "faces": 180,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/ankle_right.json (hole d=14.0000 centre [-31.581, 22.0, -6.223])",
+     "role": "printed feature"
+    },
+    {
+     "where": "child:ankle_right",
+     "mesh": "ankle_right",
+     "feature": "hole",
+     "d_mm": 15.0,
+     "class": "Ø15 (15x10x3 outer-race pocket)",
+     "span_axial_mm": [
+      -32.2,
+      -29.9
+     ],
+     "length_mm": 2.3,
+     "radial_off_axis_mm": 0.0001,
+     "fit_residual_mm": 0.0,
+     "faces": 144,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/ankle_right.json (hole d=15.0000 centre [-33.65, 22.0, -6.223])",
+     "role": "printed feature"
+    },
+    {
+     "where": "child:ankle_right",
+     "mesh": "seeed_bearing__configuration_default",
+     "feature": "hole",
+     "d_mm": 10.0,
+     "class": "Ø10 (15x10x3 inner-race seat)",
+     "span_axial_mm": [
+      -32.0,
+      -29.4
+     ],
+     "length_mm": 2.6,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0,
+     "faces": 144,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/seeed_bearing__configuration_default.json (hole d=10.0000 centre [-0.0, 0.0, 1.5])",
+     "role": "bearing bore"
+    },
+    {
+     "where": "parent:leg_2",
+     "mesh": "leg",
+     "feature": "bosse",
+     "d_mm": 10.0,
+     "class": "Ø10 (15x10x3 inner-race seat)",
+     "span_axial_mm": [
+      -32.0,
+      -29.0
+     ],
+     "length_mm": 3.0,
+     "radial_off_axis_mm": 0.0001,
+     "fit_residual_mm": 0.0,
+     "faces": 144,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/leg.json (bosse d=10.0000 centre [34.0, 22.0, -6.223])",
+     "role": "printed feature"
+    },
+    {
+     "where": "child:ankle_right",
+     "mesh": "seeed_bearing__configuration_default",
+     "feature": "bosse",
+     "d_mm": 15.0,
+     "class": "Ø15 (15x10x3 outer-race pocket)",
+     "span_axial_mm": [
+      -31.9,
+      -29.5
+     ],
+     "length_mm": 2.4,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0,
+     "faces": 144,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/seeed_bearing__configuration_default.json (bosse d=15.0000 centre [0.0, 0.0, 1.5])",
+     "role": "bearing od"
+    },
+    {
+     "where": "parent:leg_2",
+     "mesh": "xl330",
+     "feature": "bosse",
+     "d_mm": 16.0,
+     "class": "Ø16 (inner-race seat / horn disc diameter)",
+     "span_axial_mm": [
+      -29.0005,
+      -25.9995
+     ],
+     "length_mm": 3.001,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0001,
+     "faces": 148,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/xl330.json (bosse d=16.0000 centre [13.0, -0.0, 0.0])",
+     "role": "servo Ø16 x 3.0 disc (horn or idler)"
+    },
+    {
+     "where": "parent:leg_2",
+     "mesh": "leg",
+     "feature": "bosse",
+     "d_mm": 10.0,
+     "class": "Ø10 (15x10x3 inner-race seat)",
+     "span_axial_mm": [
+      -26.5,
+      -26.0
+     ],
+     "length_mm": 0.5,
+     "radial_off_axis_mm": 0.0001,
+     "fit_residual_mm": 0.0,
+     "faces": 144,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/leg.json (bosse d=10.0000 centre [38.25, 22.0, -6.223])",
+     "role": "printed feature"
+    },
+    {
+     "where": "parent:leg_2",
+     "mesh": "xl330",
+     "feature": "bosse",
+     "d_mm": 16.0,
+     "class": "Ø16 (inner-race seat / horn disc diameter)",
+     "span_axial_mm": [
+      -3.0,
+      -0.0
+     ],
+     "length_mm": 3.0,
+     "radial_off_axis_mm": 0.0,
+     "fit_residual_mm": 0.0,
+     "faces": 144,
+     "cover_deg": 355.0,
+     "source": "out/laneT/features/xl330.json (bosse d=16.0000 centre [-13.0, 0.0, -0.0])",
+     "role": "servo Ø16 x 3.0 disc (horn or idler)"
+    }
+   ],
+   "servo_discs": [
+    {
+     "span_axial_mm": [
+      -29.0005,
+      -25.9995
+     ],
+     "where": "parent:leg_2"
+    },
+    {
+     "span_axial_mm": [
+      -3.0,
+      -0.0
+     ],
+     "where": "parent:leg_2"
+    }
+   ],
+   "coverage": [
+    {
+     "bearing": "seeed_bearing__configuration_default",
+     "bore_d_mm": 10.0,
+     "bore_span_axial_mm": [
+      -32.0,
+      -29.4
+     ],
+     "ring_width_mm": 2.6,
+     "carriers": [],
+     "covered_mm": 0.0,
+     "uncovered_mm": 2.6,
+     "covered_pct": 0.0,
+     "printed_carrier_mm": 0,
+     "horn_disc_carrier_mm": 0,
+     "flange_face_to_horn_face_gap_mm": null,
+     "gap_meaning": null
+    },
+    {
+     "bearing": "seeed_bearing__configuration_default",
+     "od_d_mm": 15.0,
+     "od_span_axial_mm": [
+      -31.9,
+      -29.5
+     ],
+     "ring_width_mm": 2.4,
+     "pockets": [
+      {
+       "mesh": "ankle_right",
+       "where": "child:ankle_right",
+       "d_mm": 15.0,
+       "span_axial_mm": [
+        -32.2,
+        -29.9
+       ],
+       "overlap_with_od_mm": 2.0
+      }
+     ],
+     "covered_mm": 2.0,
+     "uncovered_mm": 0.4,
+     "covered_pct": 83.33,
+     "note": null
+    }
+   ]
+  }
+ },
+ "n_joints": 14
+}

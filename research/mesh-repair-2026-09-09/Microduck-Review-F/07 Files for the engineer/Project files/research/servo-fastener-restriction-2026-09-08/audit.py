@@ -1,0 +1,20 @@
+from pathlib import Path
+import json,importlib.util,copy,hashlib,subprocess,html
+D=Path(__file__).resolve().parent;R=D.parent.parent
+tracked=['out/fasteners/runs.json','out/fasteners/placed.json','ce-assemblies/microduck/current/placements.json','ce-assemblies/microduck/current/joints.json','ce-assemblies/microduck/current/bom.json']
+def hashes():return {p:hashlib.sha256((R/p).read_bytes()).hexdigest() for p in tracked}
+before=hashes();sp=importlib.util.spec_from_file_location('fastener_limits',R/'tools/fastener_runs.py');m=importlib.util.module_from_spec(sp);sp.loader.exec_module(m);old=json.loads((D/'historical-runs.json').read_text())['runs'];rows=[]
+for index,r in enumerate(old):
+ if r.get('pilot_mesh')!='xl330':continue
+ g=copy.deepcopy(r['features'])
+ for h in g:h['axis_world']=r['axis_world']
+ now=m.classify(g);rows.append({'historical_run_index':index,'historical_length_mm':r['stocked_length_mm'],'modeled_penetration_mm':r['stocked_length_mm']-r['grip_mm'],'exceeds_manufacturer_max':r['stocked_length_mm']-r['grip_mm']>3+1e-6,'staged_run':now})
+assert len(rows)==52 and sum(r['exceeds_manufacturer_max'] for r in rows)==35
+assert all(x['staged_run']['stocked_length_mm'] is None for x in rows)
+p=subprocess.run(['python3','tools/test_fastener_servo_limits.py'],cwd=R,text=True,capture_output=True);assert p.returncode==0
+assert hashes()==before
+facts={'scope':'Staged source correction; live historical runs/placed/assembly outputs untouched. No replacement length, thread pitch/profile or original joint identity asserted.','source':'tools/fastener_runs.py restrict_xl330_face','counts':{'withdrawn_iso_proposals':52,'historical_model_penetration_over_3mm':35,'other_servo_proposals_unapproved':17},'source_hash':hashlib.sha256((R/'tools/fastener_runs.py').read_bytes()).hexdigest(),'preserved_artifact_hashes':before,'test':{'command':'python3 tools/test_fastener_servo_limits.py','exit':p.returncode,'stdout':p.stdout,'stderr':p.stderr},'rows':rows}
+(D/'consequences.json').write_text(json.dumps(facts,indent=2));(D/'test.log').write_text(p.stdout+p.stderr)
+h='<h1>Servo face-pilot screw approval withdrawn</h1><p><strong>NOT READY TO BUILD FROM.</strong> Manufacturer X330 drawing specifies M2 tapping screws and a 3 mm maximum face-pilot depth. Local mesh6mm depth is retained as geometric evidence, not physical engagement.</p><p>All52 servo ISO-length proposals are withdrawn in this staged rerun.35 historical model length-minus-grip values exceed3mm; the remaining17 are also unapproved because original thread/head/seating and minimum engagement are unknown. No replacement lengths were selected.</p><p>The source now records raw mesh span separately, a conditional maximum bounded by3mm, null available/minimum engagement, null stocked length, and an empty approved-length list. Historical proposals remain explicitly withdrawn metadata. This report does not update the existing assembly or purchase outputs.</p><p>Eight regressions pass, including source hash refusal before output mutation and a frozen historical fixture:52 real servo rows withdraw approval and retain features/transforms/grip; shorter mesh span does not expand; unrelated identities untouched; non-servo lengths unchanged; drawing hash verified;35-over-limit census retained. Existing live runs, placed screws and assembly placements/joints/BOM hashes are unchanged.</p><p><a href="consequences.json">52-row consequence data and unchanged artifact hashes</a> · <a href="test.log">Regression log</a> · <a href="../xl330-mechanical-source-2026-09-08/REPORT.html">Manufacturer evidence</a> · <a href="../../tools/fastener_runs.py">Owning generator</a></p>'
+for a,b in [('mesh6','mesh 6'),('All52','All 52'),('.35','. 35'),('exceed3','exceed 3'),('remaining17','remaining 17'),('by3','by 3'),(':52',': 52'),(';35','; 35'),('3mm','3 mm'),('6mm','6 mm')]:h=h.replace(a,b)
+(D/'REPORT.html').write_text('<!doctype html><meta charset="utf-8"><title>Servo fastener restriction</title><link rel="stylesheet" href="../../tools/doc.css"><main>'+h+'</main>');print(json.dumps(facts['counts']));print('Live historical outputs unchanged')

@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';
+import {readFileSync,writeFileSync,readdirSync} from 'node:fs';
+import {resolve,join} from 'node:path';
+import {pathToFileURL} from 'node:url';
+import {launch,sleep,collectErrors} from '../../web/_cdp.mjs';
+const dir=resolve(process.argv[2]);const b=await launch({url:'about:blank',port:9491,windowSize:'1400,1000'});const evidence={checks:[],images:[],errors:collectErrors(b)};
+async function load(p){await b.send('Page.navigate',{url:pathToFileURL(p).href});for(let n=0;n<200;n++){if(await b.evaluate('!!window.__review'))return;await sleep(100);}throw Error('Viewer failed '+p)}
+async function shot(path){const rect=await b.evaluate('(()=>{let r=document.querySelector("canvas").getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height,scale:1}})()');const s=await b.send('Page.captureScreenshot',{format:'png',clip:rect});writeFileSync(path,Buffer.from(s.data,'base64'));evidence.images.push(path)}
+try{await b.send('Page.enable');await b.send('Runtime.enable');await load(join(dir,'01 See the robot/Turn the robot around.html'));assert.equal(await b.evaluate('__review.total'),70);evidence.checks.push('offline full model draws all70 published pieces');await shot(join(dir,'01 See the robot/Whole robot.png'));await b.evaluate('document.querySelector("#inside").click()');const visible=await b.evaluate('__review.visible');assert.ok(visible>0&&visible<70);evidence.checks.push('remove covers changes actual visible components');await shot(join(dir,'01 See the robot/Inside the robot.png'));await b.evaluate('document.querySelector("#all").click();document.querySelector("#explode").value=.65;document.querySelector("#explode").dispatchEvent(new Event("input"))');await shot(join(dir,'01 See the robot/Separated pieces.png'));
+for(const folder of readdirSync(join(dir,'02 Look at the parts'))){const p=join(dir,'02 Look at the parts',folder);await load(join(p,'Look at this part.html'));assert.equal(await b.evaluate('__review.visible'),1);assert.ok(await b.evaluate('__review.triangles>0'));await shot(join(p,'Part picture.png'));evidence.checks.push(folder+' offline STL geometry draws');}
+}finally{writeFileSync(join(dir,'BROWSER CHECK.json'),JSON.stringify(evidence,null,2));await b.close()}

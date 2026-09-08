@@ -1,0 +1,90 @@
+{
+ "$parts_folder": 1,
+ "kind": "part",
+ "record": {
+  "slug": "microduck-camera-module",
+  "kind": "module",
+  "chip": "imx219",
+  "title": "IMX219 camera board with M12 lens, on the Radxa's 22-pin 0.5 mm MIPI CSI connector (2 data lanes as the rpi-camera-v2 overlay drives it), mounted upside down in the head",
+  "attach": {
+   "how": "direct"
+  },
+  "requires": [
+   {
+    "need": "ground",
+    "name": "GND",
+    "direction": "input",
+    "quote": "1 GND, ... 4 GND, ... 7 GND, ... 10 GND",
+    "cite": "part:radxa-zero-3w buses_the_microduck_uses.mipi_csi ([wiki] 22-pin table)"
+   },
+   {
+    "need": "supply",
+    "name": "VCC_3V3",
+    "direction": "input",
+    "v_typ": 3.3,
+    "quote": "22 VCC_3V3",
+    "cite": "part:radxa-zero-3w buses_the_microduck_uses.mipi_csi; the board must regulate 2.8/1.2/1.8 V itself (part:imx219 supplies[2] cite)",
+    "current_from": "chips[imx219].current_mA",
+    "current_from_basis": "per-rail only on the die (VANA 33 mA + VDDL 100 mA streaming, part:imx219 Table 45); the board total through its own regulators is CANNOT DETERMINE."
+   },
+   {
+    "need": "signal",
+    "name": "CSI_CLK",
+    "direction": "output",
+    "bus": "CSI",
+    "quote": "8 CLK0N, 9 CLK0P",
+    "cite": "part:radxa-zero-3w buses_the_microduck_uses.mipi_csi"
+   },
+   {
+    "need": "signal",
+    "name": "CSI_D0",
+    "direction": "output",
+    "bus": "CSI",
+    "quote": "2 MIPI_CSI_RX_D0N, 3 D0P",
+    "cite": "part:radxa-zero-3w buses_the_microduck_uses.mipi_csi"
+   },
+   {
+    "need": "signal",
+    "name": "CSI_D1",
+    "direction": "output",
+    "bus": "CSI",
+    "quote": "5 D1N, 6 D1P",
+    "cite": "part:radxa-zero-3w buses_the_microduck_uses.mipi_csi; overlay radxa-zero3-rpi-camera-v2 (media:51-65) — a Pi-Camera-v2-class 2-lane module; lanes D2/D3 unused is the lane's inference"
+   },
+   {
+    "need": "signal",
+    "name": "I2C2_SDA",
+    "direction": "bidirectional",
+    "bus": "I2C",
+    "address": "0x10",
+    "address_quote": "imx219 2-0010: Model ID 0x0219",
+    "address_cite": "docs/ELECTRONICS-AND-SOFTWARE.md §5 (media:312) — bus 2, addr 0x10",
+    "quote": "21 I2C2_SDA_M1",
+    "cite": "part:radxa-zero-3w buses_the_microduck_uses.mipi_csi"
+   },
+   {
+    "need": "signal",
+    "name": "I2C2_SCL",
+    "direction": "input",
+    "bus": "I2C",
+    "quote": "20 I2C2_SCL_M1",
+    "cite": "part:radxa-zero-3w buses_the_microduck_uses.mipi_csi"
+   },
+   {
+    "need": "signal",
+    "name": "PDN",
+    "direction": "input",
+    "bus": "GPIO",
+    "quote": "17 CAMERAB_PDN_L",
+    "cite": "part:radxa-zero-3w buses_the_microduck_uses.mipi_csi ([sch1.12] sheet 9, GPIO3_C6_d)"
+   }
+  ],
+  "provides": [],
+  "uncertainties": [
+   "Camera module part, ribbon part and ribbon length: CANNOT DETERMINE (docs §5 last row) — the wiring lane measures the floor off the placements.",
+   "Whether the module's ribbon is 22-pin 0.5 mm at both ends or 15-pin 1.0 mm (Pi style) at the camera end with an adapter: CANNOT DETERMINE."
+  ],
+  "note": "Position: MJCF `head_camera` site at world (81.4, 0, 251.1) mm, lens mesh at (63.6, -0.1, 251.1); the Radxa itself is at (68.1, 0, 251.05) in the SAME body (jaw_soft) — measured off placements.json.",
+  "written": "2026-09-02, wiring lane (GOAL.md rung 5). Every figure names the document it came from; a figure with no document is null and says so."
+ }
+}

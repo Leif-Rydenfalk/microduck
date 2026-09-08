@@ -1,0 +1,60 @@
+{
+ "$parts_folder": 1,
+ "kind": "part",
+ "record": {
+  "slug": "microduck-tof-module",
+  "kind": "module",
+  "chip": "vl53l5cx",
+  "title": "8x8 ToF module on the HAT's Stemma J5 (JST-SH 4-pin: GND, 3V3, SDA, SCL) — VL53L5CX or VL53L8CX, breakout board unidentified",
+  "attach": {
+   "how": "direct"
+  },
+  "requires": [
+   {
+    "need": "ground",
+    "name": "GND",
+    "direction": "input",
+    "quote": "Stemma J5",
+    "cite": "research/raw/deploy_audio_i2c3-pihat.dts:10 — a Stemma/Qwiic-class 4-pin JST-SH carries GND, V+, SDA, SCL (part:conn-jst-sh-1mm on the workshop shelf)"
+   },
+   {
+    "need": "supply",
+    "name": "3V3",
+    "direction": "input",
+    "v_min": 3.0,
+    "v_typ": 3.3,
+    "v_max": 3.6,
+    "quote": "IOVDD supply | 3.3 V configuration | 3.0 | 3.3 | 3.6",
+    "cite": "part:vl53l5cx supplies[1] (DS13754 Rev 13 Table 12 p.17)",
+    "current_from": "chips[vl53l5cx].current_mA",
+    "current_from_basis": "the die's active-ranging figure (95 mA derived sum, part:vl53l5cx); the breakout's own regulator/level shifter, if any, is CANNOT DETERMINE. If the fitted part is the L8CX its figures differ (part:vl53l8cx)."
+   },
+   {
+    "need": "signal",
+    "name": "SDA",
+    "direction": "bidirectional",
+    "bus": "I2C",
+    "address": "0x29",
+    "address_quote": "I2C: 400 kHz to 1 MHz serial bus, address: 0x52",
+    "address_cite": "part:vl53l5cx i2c_address (0x52 8-bit = 0x29 7-bit, tof_src_main.rs:80-87)",
+    "quote": "/dev/i2c-pihat (udev symlink) then /dev/i2c-3; 7-bit 0x29",
+    "cite": "docs/ELECTRONICS-AND-SOFTWARE.md §6 (tof:80-87)"
+   },
+   {
+    "need": "signal",
+    "name": "SCL",
+    "direction": "input",
+    "bus": "I2C",
+    "quote": "8×8 at 15 Hz ('about 5 % of a 400 kHz bus')",
+    "cite": "docs/ELECTRONICS-AND-SOFTWARE.md §6 (tof:105-107)"
+   }
+  ],
+  "provides": [],
+  "uncertainties": [
+   "Which generation ships (L5CX vs L8CX) and which breakout: CANNOT DETERMINE (docs §6, open question 6).",
+   "Position: MJCF `tof` site at world (81.4, 22.4, 249.1) mm — 22.4 mm left of the camera (docs §6)."
+  ],
+  "note": "The 'compact LiDAR'. On I2C3 with the codec (0x18) and the dormant BMI088 (0x19/0x68); no address collision among the four.",
+  "written": "2026-09-02, wiring lane (GOAL.md rung 5). Every figure names the document it came from; a figure with no document is null and says so."
+ }
+}

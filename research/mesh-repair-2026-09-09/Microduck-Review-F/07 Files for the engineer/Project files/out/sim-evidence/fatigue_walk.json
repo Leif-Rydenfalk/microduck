@@ -1,0 +1,680 @@
+{
+ "study": "fatigue_walk",
+ "generated": "2026-09-03",
+ "script": "sim/fatigue_walk.py",
+ "inputs": {
+  "gait": {
+   "period_s_mean": 0.405,
+   "period_s_min": 0.4,
+   "period_s_max": 0.41,
+   "n_cycles_measured": 16,
+   "stride_m_per_cycle": 0.04452,
+   "cycles_per_km": 22461.3,
+   "source": "out/sim-evidence/loads_mujoco.json walk.gait (sim/measure_loads.py: left-foot touchdowns, BEST_alpha_walking vx 0.25 m/s, 8 s)"
+  },
+  "sn_curve": {
+   "paper": "O.H. Ezeh, L. Susmel, 'Fatigue strength of additively manufactured polylactide (PLA): effect of raster angle and non-zero mean stresses', International Journal of Fatigue 126 (2019) 319-326, doi:10.1016/j.ijfatigue.2019.05.014",
+   "file": "research/fatigue/ezeh-susmel-2019-ijfatigue-126-319-pla-fatigue.pdf",
+   "sha256": "6539146573d830076e5f3b1ec0feca62fa64d08a255a1487da4e211404d7ae13",
+   "design_curve": "P_s >= 90 %: k = 5.5, sigma_MAX = 0.1 sigma_UTS at N_ref = 2e6 cycles (eqs 5-6; 100 % infill printed flat; no notch factor)",
+   "scatter": "T_sigma ~ 2.9 in terms of sigma_max across all angles and load ratios (Fig 9)"
+  },
+  "median_R0": {
+   "sigma_max_2e6_mpa": 12.2,
+   "k": 7.4,
+   "source": "Ezeh & Susmel 2019 Table 1, theta_p 0 deg, R = 0: sigma_A50 6.1 MPa (x2 for sigma_max), k 7.4"
+  },
+  "uts_bases": [
+   {
+    "basis": "paper_theta0",
+    "uts_mpa": 42.6,
+    "source": "Ezeh & Susmel 2019 Table 1, theta_p 0 deg (New Verbatim PLA, Ultimaker 2 Extended+)"
+   },
+   {
+    "basis": "prusament_tds",
+    "uts_mpa": 51.0,
+    "source": "research/tds/prusament-pla-tds-2021-10-en.pdf: 51 +- 3 MPa yield printed horizontal, used as UTS (brittle: yield and UTS coincide within tolerance)"
+   }
+  ],
+  "load_ratio_R": "~0 on every part (stance loads, swing unloads)",
+  "life_km_required": {
+   "value": 10.0,
+   "source": "lane F1's own threshold (the one fatigue_ankle.py used); no requirement document sets a walking life \u2014 docs/MANUFACTURING-REQUIREMENTS.md has none"
+  },
+  "stress_basis": "peak nodal von Mises of each part's walk-peak linear FEA \u2014 the worst point, unscaled for mesh (the ankle's convergence ratio 1.0221 is specific to its load path and is not applied to other parts)"
+ },
+ "method": "Basquin on the design curve: N = 2e6 (0.1 UTS / sigma_max)^5.5; life_km = N / cycles_per_km; median estimate N = 2e6 (12.2 / sigma_max)^7.4",
+ "outputs": {
+  "rows": [
+   {
+    "part": "part:microduck-ankle-left",
+    "walk_study": "out/sim-evidence/fea_microduck-ankle-left_walk.json",
+    "material": "PLA",
+    "force_N": 22.0262,
+    "sigma_max_mpa": 1.247576821953209,
+    "static_verdict": "PASS",
+    "static_sf": 40.077692,
+    "curves": [
+     {
+      "basis": "paper_theta0",
+      "uts_mpa": 42.6,
+      "uts_source": "Ezeh & Susmel 2019 Table 1, theta_p 0 deg (New Verbatim PLA, Ultimaker 2 Extended+)",
+      "design_endurance_sigma_max_2e6_mpa": 4.26,
+      "k": 5.5,
+      "sigma_over_endurance": 0.2929,
+      "cycles_design_Ps90": 1715586632.7330241,
+      "life_km_design_Ps90": 76379.66781677927
+     },
+     {
+      "basis": "prusament_tds",
+      "uts_mpa": 51.0,
+      "uts_source": "research/tds/prusament-pla-tds-2021-10-en.pdf: 51 +- 3 MPa yield printed horizontal, used as UTS (brittle: yield and UTS coincide within tolerance)",
+      "design_endurance_sigma_max_2e6_mpa": 5.1,
+      "k": 5.5,
+      "sigma_over_endurance": 0.2446,
+      "cycles_design_Ps90": 4616319160.327384,
+      "life_km_design_Ps90": 205523.24043253882
+     }
+    ],
+    "median_estimate": {
+     "basis": "median_R0_theta0",
+     "sigma_max_2e6_mpa": 12.2,
+     "k": 7.4,
+     "source": "Ezeh & Susmel 2019 Table 1, theta_p 0 deg, R = 0: sigma_A50 6.1 MPa (x2 for sigma_max), k 7.4",
+     "sigma_over_endurance": 0.1023,
+     "cycles_Ps50": 42578929667692.38,
+     "life_km_Ps50": 1895657404.8560138
+    },
+    "worst_basis": "paper_theta0",
+    "design_endurance_mpa_worst": 4.26,
+    "sigma_over_endurance_worst": 0.2929,
+    "life_km_design_Ps90_worst": null,
+    "life_km_Ps50": null,
+    "verdict": "PASS",
+    "why": "walk peak 1.2476 MPa is 29.3 % of the P_s>=90 % design endurance 4.26 MPa (0.1 x UTS 42.6 MPa) on the least favourable basis \u2014 infinite life by the design curve"
+   },
+   {
+    "part": "part:microduck-foot-left",
+    "walk_study": "out/sim-evidence/fea_microduck-foot-left_walk.json",
+    "material": "PLA",
+    "force_N": 23.1162,
+    "sigma_max_mpa": 6.254190363141596,
+    "static_verdict": "PASS",
+    "static_sf": 7.99464,
+    "curves": [
+     {
+      "basis": "paper_theta0",
+      "uts_mpa": 42.6,
+      "uts_source": "Ezeh & Susmel 2019 Table 1, theta_p 0 deg (New Verbatim PLA, Ultimaker 2 Extended+)",
+      "design_endurance_sigma_max_2e6_mpa": 4.26,
+      "k": 5.5,
+      "sigma_over_endurance": 1.4681,
+      "cycles_design_Ps90": 242014.70929499363,
+      "life_km_design_Ps90": 10.774741857995469
+     },
+     {
+      "basis": "prusament_tds",
+      "uts_mpa": 51.0,
+      "uts_source": "research/tds/prusament-pla-tds-2021-10-en.pdf: 51 +- 3 MPa yield printed horizontal, used as UTS (brittle: yield and UTS coincide within tolerance)",
+      "design_endurance_sigma_max_2e6_mpa": 5.1,
+      "k": 5.5,
+      "sigma_over_endurance": 1.2263,
+      "cycles_design_Ps90": 651215.8105474112,
+      "life_km_design_Ps90": 28.99279251634639
+     }
+    ],
+    "median_estimate": {
+     "basis": "median_R0_theta0",
+     "sigma_max_2e6_mpa": 12.2,
+     "k": 7.4,
+     "source": "Ezeh & Susmel 2019 Table 1, theta_p 0 deg, R = 0: sigma_A50 6.1 MPa (x2 for sigma_max), k 7.4",
+     "sigma_over_endurance": 0.5126,
+     "cycles_Ps50": 280819092.81399506,
+     "life_km_Ps50": 12502.35261601043
+    },
+    "worst_basis": "paper_theta0",
+    "design_endurance_mpa_worst": 4.26,
+    "sigma_over_endurance_worst": 1.4681,
+    "life_km_design_Ps90_worst": 10.774741857995469,
+    "life_km_Ps50": null,
+    "verdict": "PASS",
+    "why": "walk peak 6.2542 MPa is 1.47x the P_s>=90 % design endurance 4.26 MPa: design life 2.42e+05 cycles = 10.77 km at 22461.3 cycles/km (median P_s 50 % curve: infinite km); lane threshold 10 km -> PASS"
+   },
+   {
+    "part": "part:microduck-hip-bracket",
+    "walk_study": "out/sim-evidence/fea_microduck-hip-bracket_walk.json",
+    "material": "PLA",
+    "force_N": 18.8405,
+    "sigma_max_mpa": 13.205639494149763,
+    "static_verdict": "PASS",
+    "static_sf": 3.786261,
+    "curves": [
+     {
+      "basis": "paper_theta0",
+      "uts_mpa": 42.6,
+      "uts_source": "Ezeh & Susmel 2019 Table 1, theta_p 0 deg (New Verbatim PLA, Ultimaker 2 Extended+)",
+      "design_endurance_sigma_max_2e6_mpa": 4.26,
+      "k": 5.5,
+      "sigma_over_endurance": 3.0999,
+      "cycles_design_Ps90": 3968.3126966410323,
+      "life_km_design_Ps90": 0.1766733313139058
+     },
+     {
+      "basis": "prusament_tds",
+      "uts_mpa": 51.0,
+      "uts_source": "research/tds/prusament-pla-tds-2021-10-en.pdf: 51 +- 3 MPa yield printed horizontal, used as UTS (brittle: yield and UTS coincide within tolerance)",
+      "design_endurance_sigma_max_2e6_mpa": 5.1,
+      "k": 5.5,
+      "sigma_over_endurance": 2.5893,
+      "cycles_design_Ps90": 10677.978940935924,
+      "life_km_design_Ps90": 0.47539452039445285
+     }
+    ],
+    "median_estimate": {
+     "basis": "median_R0_theta0",
+     "sigma_max_2e6_mpa": 12.2,
+     "k": 7.4,
+     "source": "Ezeh & Susmel 2019 Table 1, theta_p 0 deg, R = 0: sigma_A50 6.1 MPa (x2 for sigma_max), k 7.4",
+     "sigma_over_endurance": 1.0824,
+     "cycles_Ps50": 1112942.9632391545,
+     "life_km_Ps50": 49.5493565928577
+    },
+    "worst_basis": "paper_theta0",
+    "design_endurance_mpa_worst": 4.26,
+    "sigma_over_endurance_worst": 3.0999,
+    "life_km_design_Ps90_worst": 0.1766733313139058,
+    "life_km_Ps50": 49.5493565928577,
+    "verdict": "FAIL",
+    "why": "walk peak 13.2056 MPa is 3.10x the P_s>=90 % design endurance 4.26 MPa: design life 3968 cycles = 0.1767 km at 22461.3 cycles/km (median P_s 50 % curve: 49.55 km); lane threshold 10 km -> FAIL"
+   },
+   {
+    "part": "part:microduck-motor-support",
+    "walk_study": "out/sim-evidence/fea_microduck-motor-support_walk.json",
+    "material": "PLA",
+    "force_N": 6.3418,
+    "sigma_max_mpa": 35.426871141704005,
+    "static_verdict": "FAIL",
+    "static_sf": 1.411358,
+    "curves": [
+     {
+      "basis": "paper_theta0",
+      "uts_mpa": 42.6,
+      "uts_source": "Ezeh & Susmel 2019 Table 1, theta_p 0 deg (New Verbatim PLA, Ultimaker 2 Extended+)",
+      "design_endurance_sigma_max_2e6_mpa": 4.26,
+      "k": 5.5,
+      "sigma_over_endurance": 8.3162,
+      "cycles_design_Ps90": 17.436222550168576,
+      "life_km_design_Ps90": 0.0007762784233400817
+     },
+     {
+      "basis": "prusament_tds",
+      "uts_mpa": 51.0,
+      "uts_source": "research/tds/prusament-pla-tds-2021-10-en.pdf: 51 +- 3 MPa yield printed horizontal, used as UTS (brittle: yield and UTS coincide within tolerance)",
+      "design_endurance_sigma_max_2e6_mpa": 5.1,
+      "k": 5.5,
+      "sigma_over_endurance": 6.9464,
+      "cycles_design_Ps90": 46.91757717524803,
+      "life_km_design_Ps90": 0.0020888184199155005
+     }
+    ],
+    "median_estimate": {
+     "basis": "median_R0_theta0",
+     "sigma_max_2e6_mpa": 12.2,
+     "k": 7.4,
+     "source": "Ezeh & Susmel 2019 Table 1, theta_p 0 deg, R = 0: sigma_A50 6.1 MPa (x2 for sigma_max), k 7.4",
+     "sigma_over_endurance": 2.9038,
+     "cycles_Ps50": 749.9460809418679,
+     "life_km_Ps50": 0.033388364918409345
+    },
+    "worst_basis": "paper_theta0",
+    "design_endurance_mpa_worst": 4.26,
+    "sigma_over_endurance_worst": 8.3162,
+    "life_km_design_Ps90_worst": 0.0007762784233400817,
+    "life_km_Ps50": 0.033388364918409345,
+    "verdict": "FAIL",
+    "why": "walk peak 35.4269 MPa is 8.32x the P_s>=90 % design endurance 4.26 MPa: design life 17.44 cycles = 0.0007763 km at 22461.3 cycles/km (median P_s 50 % curve: 0.03339 km); lane threshold 10 km -> FAIL"
+   },
+   {
+    "part": "part:microduck-neck-pitch-bracket",
+    "walk_study": "out/sim-evidence/fea_microduck-neck-pitch-bracket_walk.json",
+    "material": "PLA",
+    "force_N": 8.1571,
+    "sigma_max_mpa": 1.1621721443839548,
+    "static_verdict": "PASS",
+    "static_sf": 43.022886,
+    "curves": [
+     {
+      "basis": "paper_theta0",
+      "uts_mpa": 42.6,
+      "uts_source": "Ezeh & Susmel 2019 Table 1, theta_p 0 deg (New Verbatim PLA, Ultimaker 2 Extended+)",
+      "design_endurance_sigma_max_2e6_mpa": 4.26,
+      "k": 5.5,
+      "sigma_over_endurance": 0.2728,
+      "cycles_design_Ps90": 2533933719.5671372,
+      "life_km_design_Ps90": 112813.31532756952
+     },
+     {
+      "basis": "prusament_tds",
+      "uts_mpa": 51.0,
+      "uts_source": "research/tds/prusament-pla-tds-2021-10-en.pdf: 51 +- 3 MPa yield printed horizontal, used as UTS (brittle: yield and UTS coincide within tolerance)",
+      "design_endurance_sigma_max_2e6_mpa": 5.1,
+      "k": 5.5,
+      "sigma_over_endurance": 0.2279,
+      "cycles_design_Ps90": 6818336397.272303,
+      "life_km_design_Ps90": 303559.2951998461
+     }
+    ],
+    "median_estimate": {
+     "basis": "median_R0_theta0",
+     "sigma_max_2e6_mpa": 12.2,
+     "k": 7.4,
+     "source": "Ezeh & Susmel 2019 Table 1, theta_p 0 deg, R = 0: sigma_A50 6.1 MPa (x2 for sigma_max), k 7.4",
+     "sigma_over_endurance": 0.0953,
+     "cycles_Ps50": 71960028271252.33,
+     "life_km_Ps50": 3203733901.032101
+    },
+    "worst_basis": "paper_theta0",
+    "design_endurance_mpa_worst": 4.26,
+    "sigma_over_endurance_worst": 0.2728,
+    "life_km_design_Ps90_worst": null,
+    "life_km_Ps50": null,
+    "verdict": "PASS",
+    "why": "walk peak 1.1622 MPa is 27.3 % of the P_s>=90 % design endurance 4.26 MPa (0.1 x UTS 42.6 MPa) on the least favourable basis \u2014 infinite life by the design curve"
+   },
+   {
+    "part": "part:microduck-neck-plate",
+    "walk_study": "out/sim-evidence/fea_microduck-neck-plate_walk.json",
+    "material": "PLA",
+    "force_N": 4.65275,
+    "sigma_max_mpa": 7.9059947586896575,
+    "static_verdict": "PASS",
+    "static_sf": 6.324315,
+    "curves": [
+     {
+      "basis": "paper_theta0",
+      "uts_mpa": 42.6,
+      "uts_source": "Ezeh & Susmel 2019 Table 1, theta_p 0 deg (New Verbatim PLA, Ultimaker 2 Extended+)",
+      "design_endurance_sigma_max_2e6_mpa": 4.26,
+      "k": 5.5,
+      "sigma_over_endurance": 1.8559,
+      "cycles_design_Ps90": 66684.04244031552,
+      "life_km_design_Ps90": 2.9688416271683082
+     },
+     {
+      "basis": "prusament_tds",
+      "uts_mpa": 51.0,
+      "uts_source": "research/tds/prusament-pla-tds-2021-10-en.pdf: 51 +- 3 MPa yield printed horizontal, used as UTS (brittle: yield and UTS coincide within tolerance)",
+      "design_endurance_sigma_max_2e6_mpa": 5.1,
+      "k": 5.5,
+      "sigma_over_endurance": 1.5502,
+      "cycles_design_Ps90": 179434.1462750354,
+      "life_km_design_Ps90": 7.988591322632056
+     }
+    ],
+    "median_estimate": {
+     "basis": "median_R0_theta0",
+     "sigma_max_2e6_mpa": 12.2,
+     "k": 7.4,
+     "source": "Ezeh & Susmel 2019 Table 1, theta_p 0 deg, R = 0: sigma_A50 6.1 MPa (x2 for sigma_max), k 7.4",
+     "sigma_over_endurance": 0.648,
+     "cycles_Ps50": 49569493.25759454,
+     "life_km_Ps50": 2206.8844304467925
+    },
+    "worst_basis": "paper_theta0",
+    "design_endurance_mpa_worst": 4.26,
+    "sigma_over_endurance_worst": 1.8559,
+    "life_km_design_Ps90_worst": 2.9688416271683082,
+    "life_km_Ps50": null,
+    "verdict": "FAIL",
+    "why": "walk peak 7.9060 MPa is 1.86x the P_s>=90 % design endurance 4.26 MPa: design life 6.668e+04 cycles = 2.969 km at 22461.3 cycles/km (median P_s 50 % curve: infinite km); lane threshold 10 km -> FAIL"
+   },
+   {
+    "part": "part:microduck-power-support",
+    "walk_study": "out/sim-evidence/fea_microduck-power-support_walk.json",
+    "material": "PLA",
+    "force_N": 4.13185,
+    "sigma_max_mpa": 6.772726019224091,
+    "static_verdict": "PASS",
+    "static_sf": 7.382552,
+    "curves": [
+     {
+      "basis": "paper_theta0",
+      "uts_mpa": 42.6,
+      "uts_source": "Ezeh & Susmel 2019 Table 1, theta_p 0 deg (New Verbatim PLA, Ultimaker 2 Extended+)",
+      "design_endurance_sigma_max_2e6_mpa": 4.26,
+      "k": 5.5,
+      "sigma_over_endurance": 1.5898,
+      "cycles_design_Ps90": 156164.92647919615,
+      "life_km_design_Ps90": 6.952621908758449
+     },
+     {
+      "basis": "prusament_tds",
+      "uts_mpa": 51.0,
+      "uts_source": "research/tds/prusament-pla-tds-2021-10-en.pdf: 51 +- 3 MPa yield printed horizontal, used as UTS (brittle: yield and UTS coincide within tolerance)",
+      "design_endurance_sigma_max_2e6_mpa": 5.1,
+      "k": 5.5,
+      "sigma_over_endurance": 1.328,
+      "cycles_design_Ps90": 420210.28173236887,
+      "life_km_design_Ps90": 18.70819060928659
+     }
+    ],
+    "median_estimate": {
+     "basis": "median_R0_theta0",
+     "sigma_max_2e6_mpa": 12.2,
+     "k": 7.4,
+     "source": "Ezeh & Susmel 2019 Table 1, theta_p 0 deg, R = 0: sigma_A50 6.1 MPa (x2 for sigma_max), k 7.4",
+     "sigma_over_endurance": 0.5551,
+     "cycles_Ps50": 155755284.09797224,
+     "life_km_Ps50": 6934.384211865397
+    },
+    "worst_basis": "paper_theta0",
+    "design_endurance_mpa_worst": 4.26,
+    "sigma_over_endurance_worst": 1.5898,
+    "life_km_design_Ps90_worst": 6.952621908758449,
+    "life_km_Ps50": null,
+    "verdict": "FAIL",
+    "why": "walk peak 6.7727 MPa is 1.59x the P_s>=90 % design endurance 4.26 MPa: design life 1.562e+05 cycles = 6.953 km at 22461.3 cycles/km (median P_s 50 % curve: infinite km); lane threshold 10 km -> FAIL"
+   },
+   {
+    "part": "part:microduck-shin",
+    "walk_study": "out/sim-evidence/fea_microduck-shin_walk.json",
+    "material": "PLA",
+    "force_N": 21.1476,
+    "sigma_max_mpa": 13.922589711368357,
+    "static_verdict": "PASS",
+    "static_sf": 3.591286,
+    "curves": [
+     {
+      "basis": "paper_theta0",
+      "uts_mpa": 42.6,
+      "uts_source": "Ezeh & Susmel 2019 Table 1, theta_p 0 deg (New Verbatim PLA, Ultimaker 2 Extended+)",
+      "design_endurance_sigma_max_2e6_mpa": 4.26,
+      "k": 5.5,
+      "sigma_over_endurance": 3.2682,
+      "cycles_design_Ps90": 2967.0348900723206,
+      "life_km_design_Ps90": 0.1320954214614613
+     },
+     {
+      "basis": "prusament_tds",
+      "uts_mpa": 51.0,
+      "uts_source": "research/tds/prusament-pla-tds-2021-10-en.pdf: 51 +- 3 MPa yield printed horizontal, used as UTS (brittle: yield and UTS coincide within tolerance)",
+      "design_endurance_sigma_max_2e6_mpa": 5.1,
+      "k": 5.5,
+      "sigma_over_endurance": 2.7299,
+      "cycles_design_Ps90": 7983.729734814366,
+      "life_km_design_Ps90": 0.3554437959875148
+     }
+    ],
+    "median_estimate": {
+     "basis": "median_R0_theta0",
+     "sigma_max_2e6_mpa": 12.2,
+     "k": 7.4,
+     "source": "Ezeh & Susmel 2019 Table 1, theta_p 0 deg, R = 0: sigma_A50 6.1 MPa (x2 for sigma_max), k 7.4",
+     "sigma_over_endurance": 1.1412,
+     "cycles_Ps50": 752600.5957715093,
+     "life_km_Ps50": 33.506546627822495
+    },
+    "worst_basis": "paper_theta0",
+    "design_endurance_mpa_worst": 4.26,
+    "sigma_over_endurance_worst": 3.2682,
+    "life_km_design_Ps90_worst": 0.1320954214614613,
+    "life_km_Ps50": 33.506546627822495,
+    "verdict": "FAIL",
+    "why": "walk peak 13.9226 MPa is 3.27x the P_s>=90 % design endurance 4.26 MPa: design life 2967 cycles = 0.1321 km at 22461.3 cycles/km (median P_s 50 % curve: 33.51 km); lane threshold 10 km -> FAIL"
+   },
+   {
+    "part": "part:microduck-sole-left",
+    "walk_study": "out/sim-evidence/fea_microduck-sole-left_walk.json",
+    "material": "TPU",
+    "force_N": 23.1162,
+    "sigma_max_mpa": 0.03065784852338794,
+    "static_verdict": "PASS",
+    "static_sf": 130.4723,
+    "verdict": "CANNOT DETERMINE",
+    "why": "no cited S-N curve for TPU: the Ezeh & Susmel curve is PLA only, and no NinjaFlex 85A fatigue data was fetched; walk peak 0.0307 MPa against the TDS yield 4 MPa",
+    "what_settles_it": "a cited TPU 85A S-N dataset (R = 0, 100 % infill), or a flex-fatigue coupon of the sole filament"
+   },
+   {
+    "part": "part:microduck-trunk-base",
+    "walk_study": "out/sim-evidence/fea_microduck-trunk-base_walk.json",
+    "material": "PLA",
+    "force_N": 18.0919,
+    "sigma_max_mpa": 145.3569691059593,
+    "static_verdict": "CANNOT DETERMINE",
+    "static_sf": 0.343981,
+    "curves": [
+     {
+      "basis": "paper_theta0",
+      "uts_mpa": 42.6,
+      "uts_source": "Ezeh & Susmel 2019 Table 1, theta_p 0 deg (New Verbatim PLA, Ultimaker 2 Extended+)",
+      "design_endurance_sigma_max_2e6_mpa": 4.26,
+      "k": 5.5,
+      "sigma_over_endurance": 34.1214,
+      "cycles_design_Ps90": 0.007402621897933521,
+      "life_km_design_Ps90": 3.295722820109932e-07
+     },
+     {
+      "basis": "prusament_tds",
+      "uts_mpa": 51.0,
+      "uts_source": "research/tds/prusament-pla-tds-2021-10-en.pdf: 51 +- 3 MPa yield printed horizontal, used as UTS (brittle: yield and UTS coincide within tolerance)",
+      "design_endurance_sigma_max_2e6_mpa": 5.1,
+      "k": 5.5,
+      "sigma_over_endurance": 28.5014,
+      "cycles_design_Ps90": 0.019919055471801096,
+      "life_km_design_Ps90": 8.86816678990134e-07
+     }
+    ],
+    "median_estimate": {
+     "basis": "median_R0_theta0",
+     "sigma_max_2e6_mpa": 12.2,
+     "k": 7.4,
+     "source": "Ezeh & Susmel 2019 Table 1, theta_p 0 deg, R = 0: sigma_A50 6.1 MPa (x2 for sigma_max), k 7.4",
+     "sigma_over_endurance": 11.9145,
+     "cycles_Ps50": 0.02178047705816538,
+     "life_km_Ps50": 9.696890677817126e-07
+    },
+    "worst_basis": "paper_theta0",
+    "design_endurance_mpa_worst": 4.26,
+    "sigma_over_endurance_worst": 34.1214,
+    "life_km_design_Ps90_worst": 3.295722820109932e-07,
+    "life_km_Ps50": 9.696890677817126e-07,
+    "verdict": "CANNOT DETERMINE",
+    "why": "the walk stress 145.3570 MPa is itself a BOUND (100 % of a shared force, sim/load_share.py): on the design curve it would be 3.296e-07 km; nothing here measured the share",
+    "what_settles_it": "a two-body solve (shells + base, bolted) in cecad.stress / ce-struct, or a printed trunk loaded to the walk peak at one hip on a bench"
+   },
+   {
+    "part": "part:microduck-upper-leg-left",
+    "walk_study": "out/sim-evidence/fea_microduck-upper-leg-left_walk.json",
+    "material": null,
+    "force_N": 19.0636,
+    "sigma_max_mpa": null,
+    "static_verdict": "CANNOT DETERMINE",
+    "static_sf": null,
+    "verdict": "CANNOT DETERMINE",
+    "why": "no walk solve exists (no tetrahedral mesh exists for this solid \u2014 see out/sim-evidence/fea_meshability_microduck-upper-leg-left.json)",
+    "what_settles_it": "a mesh for the housing (fea_meshability) then the walk solve"
+   },
+   {
+    "part": "part:microduck-upper-leg-rigidity-plate",
+    "walk_study": "out/sim-evidence/fea_microduck-upper-leg-rigidity-plate_walk.json",
+    "material": "PLA",
+    "force_N": 19.0636,
+    "sigma_max_mpa": 48.19294215013543,
+    "static_verdict": "CANNOT DETERMINE",
+    "static_sf": 1.037496,
+    "curves": [
+     {
+      "basis": "paper_theta0",
+      "uts_mpa": 42.6,
+      "uts_source": "Ezeh & Susmel 2019 Table 1, theta_p 0 deg (New Verbatim PLA, Ultimaker 2 Extended+)",
+      "design_endurance_sigma_max_2e6_mpa": 4.26,
+      "k": 5.5,
+      "sigma_over_endurance": 11.3129,
+      "cycles_design_Ps90": 3.209030669888456,
+      "life_km_design_Ps90": 0.0001428693205597386
+     },
+     {
+      "basis": "prusament_tds",
+      "uts_mpa": 51.0,
+      "uts_source": "research/tds/prusament-pla-tds-2021-10-en.pdf: 51 +- 3 MPa yield printed horizontal, used as UTS (brittle: yield and UTS coincide within tolerance)",
+      "design_endurance_sigma_max_2e6_mpa": 5.1,
+      "k": 5.5,
+      "sigma_over_endurance": 9.4496,
+      "cycles_design_Ps90": 8.6348946097143,
+      "life_km_design_Ps90": 0.0003844343207968506
+     }
+    ],
+    "median_estimate": {
+     "basis": "median_R0_theta0",
+     "sigma_max_2e6_mpa": 12.2,
+     "k": 7.4,
+     "source": "Ezeh & Susmel 2019 Table 1, theta_p 0 deg, R = 0: sigma_A50 6.1 MPa (x2 for sigma_max), k 7.4",
+     "sigma_over_endurance": 3.9502,
+     "cycles_Ps50": 76.91575063405435,
+     "life_km_Ps50": 0.003424367718433677
+    },
+    "worst_basis": "paper_theta0",
+    "design_endurance_mpa_worst": 4.26,
+    "sigma_over_endurance_worst": 11.3129,
+    "life_km_design_Ps90_worst": 0.0001428693205597386,
+    "life_km_Ps50": 0.003424367718433677,
+    "verdict": "CANNOT DETERMINE",
+    "why": "the walk stress 48.1929 MPa is itself a BOUND (100 % of a shared force, sim/load_share.py): on the design curve it would be 0.0001429 km; nothing here measured the share",
+    "what_settles_it": "a housing that meshes plus a two-body (plate + housing, bolted) solve in cecad.stress / ce-struct, or a printed thigh loaded to the walk peak on a bench with the plate strain-gauged"
+   },
+   {
+    "part": "part:microduck-yaw-roll-motion",
+    "walk_study": "out/sim-evidence/fea_microduck-yaw-roll-motion_walk.json",
+    "material": "PLA",
+    "force_N": 7.9689,
+    "sigma_max_mpa": 1.2064188173826698,
+    "static_verdict": "PASS",
+    "static_sf": 41.444977,
+    "curves": [
+     {
+      "basis": "paper_theta0",
+      "uts_mpa": 42.6,
+      "uts_source": "Ezeh & Susmel 2019 Table 1, theta_p 0 deg (New Verbatim PLA, Ultimaker 2 Extended+)",
+      "design_endurance_sigma_max_2e6_mpa": 4.26,
+      "k": 5.5,
+      "sigma_over_endurance": 0.2832,
+      "cycles_design_Ps90": 2063209013.9720676,
+      "life_km_design_Ps90": 91856.17101290076
+     },
+     {
+      "basis": "prusament_tds",
+      "uts_mpa": 51.0,
+      "uts_source": "research/tds/prusament-pla-tds-2021-10-en.pdf: 51 +- 3 MPa yield printed horizontal, used as UTS (brittle: yield and UTS coincide within tolerance)",
+      "design_endurance_sigma_max_2e6_mpa": 5.1,
+      "k": 5.5,
+      "sigma_over_endurance": 0.2366,
+      "cycles_design_Ps90": 5551705242.530644,
+      "life_km_design_Ps90": 247167.5834671477
+     }
+    ],
+    "median_estimate": {
+     "basis": "median_R0_theta0",
+     "sigma_max_2e6_mpa": 12.2,
+     "k": 7.4,
+     "source": "Ezeh & Susmel 2019 Table 1, theta_p 0 deg, R = 0: sigma_A50 6.1 MPa (x2 for sigma_max), k 7.4",
+     "sigma_over_endurance": 0.0989,
+     "cycles_Ps50": 54576638573136.664,
+     "life_km_Ps50": 2429807650.1866174
+    },
+    "worst_basis": "paper_theta0",
+    "design_endurance_mpa_worst": 4.26,
+    "sigma_over_endurance_worst": 0.2832,
+    "life_km_design_Ps90_worst": null,
+    "life_km_Ps50": null,
+    "verdict": "PASS",
+    "why": "walk peak 1.2064 MPa is 28.3 % of the P_s>=90 % design endurance 4.26 MPa (0.1 x UTS 42.6 MPa) on the least favourable basis \u2014 infinite life by the design curve"
+   },
+   {
+    "part": "part:microduck-yaw2roll",
+    "walk_study": "out/sim-evidence/fea_microduck-yaw2roll_walk.json",
+    "material": "PLA",
+    "force_N": 18.0919,
+    "sigma_max_mpa": 4.119084711833088,
+    "static_verdict": "PASS",
+    "static_sf": 12.138619,
+    "curves": [
+     {
+      "basis": "paper_theta0",
+      "uts_mpa": 42.6,
+      "uts_source": "Ezeh & Susmel 2019 Table 1, theta_p 0 deg (New Verbatim PLA, Ultimaker 2 Extended+)",
+      "design_endurance_sigma_max_2e6_mpa": 4.26,
+      "k": 5.5,
+      "sigma_over_endurance": 0.9669,
+      "cycles_design_Ps90": 2406460.90641866,
+      "life_km_design_Ps90": 107.138095587462
+     },
+     {
+      "basis": "prusament_tds",
+      "uts_mpa": 51.0,
+      "uts_source": "research/tds/prusament-pla-tds-2021-10-en.pdf: 51 +- 3 MPa yield printed horizontal, used as UTS (brittle: yield and UTS coincide within tolerance)",
+      "design_endurance_sigma_max_2e6_mpa": 5.1,
+      "k": 5.5,
+      "sigma_over_endurance": 0.8077,
+      "cycles_design_Ps90": 6475331.165982583,
+      "life_km_design_Ps90": 288.28835223173115
+     }
+    ],
+    "median_estimate": {
+     "basis": "median_R0_theta0",
+     "sigma_max_2e6_mpa": 12.2,
+     "k": 7.4,
+     "source": "Ezeh & Susmel 2019 Table 1, theta_p 0 deg, R = 0: sigma_A50 6.1 MPa (x2 for sigma_max), k 7.4",
+     "sigma_over_endurance": 0.3376,
+     "cycles_Ps50": 6174010843.486352,
+     "life_km_Ps50": 274873.2639467151
+    },
+    "worst_basis": "paper_theta0",
+    "design_endurance_mpa_worst": 4.26,
+    "sigma_over_endurance_worst": 0.9669,
+    "life_km_design_Ps90_worst": null,
+    "life_km_Ps50": null,
+    "verdict": "PASS",
+    "why": "walk peak 4.1191 MPa is 96.7 % of the P_s>=90 % design endurance 4.26 MPa (0.1 x UTS 42.6 MPa) on the least favourable basis \u2014 infinite life by the design curve"
+   }
+  ],
+  "counts": {
+   "PASS": 5,
+   "FAIL": 5,
+   "CANNOT DETERMINE": 4
+  },
+  "worst_finite_life": {
+   "part": "part:microduck-trunk-base",
+   "life_km_design_Ps90": 3.295722820109932e-07
+  },
+  "cycles_for_10_km": 224613,
+  "cycles_for_100_km": 2246130
+ },
+ "verdict": "FAIL",
+ "why": "5 of 14 parts with a walk solve pass the design endurance or the 10 km threshold, 5 FAIL, 4 CANNOT DETERMINE; the shortest design life is part:microduck-trunk-base at 3.296e-07 km (P_s >= 90 %)",
+ "limits": [
+  "isotropic linear FEA peak at a nodal point: mesh-sensitive at re-entrant corners (measured on the ankle only, +2.21 % finest vs first mesh); each other part's sensitivity is unmeasured",
+  "the S-N curve is for printed-FLAT 100 %-infill coupons; no part.py declares print orientation or infill (across-layer strength 17 +- 3 MPa per the Prusament TDS is the weaker axis)",
+  "the design curve has no notch factor; a screw hole edge or a fillet root is a notch and the FEA peak sits at one on most parts",
+  "gait measured in MuJoCo at 0.25 m/s on flat ground; the peak and the cycle count both change with gait and terrain",
+  "one stress level per part (the walk peak) \u2014 no rainflow over the cycle, so the count assumes every cycle reaches the peak (conservative)"
+ ],
+ "what_settles_it": "tensile-fatigue coupons of THE filament on THE printer in each part's orientation (R = 0, 10 Hz, 4 levels x 2, run-out 2e6 as the paper did), and a walked-km log of a printed leg",
+ "artifacts": [
+  "out/sim-evidence/fea_microduck-ankle-left_walk.json",
+  "out/sim-evidence/fea_microduck-foot-left_walk.json",
+  "out/sim-evidence/fea_microduck-hip-bracket_walk.json",
+  "out/sim-evidence/fea_microduck-motor-support_walk.json",
+  "out/sim-evidence/fea_microduck-neck-pitch-bracket_walk.json",
+  "out/sim-evidence/fea_microduck-neck-plate_walk.json",
+  "out/sim-evidence/fea_microduck-power-support_walk.json",
+  "out/sim-evidence/fea_microduck-shin_walk.json",
+  "out/sim-evidence/fea_microduck-sole-left_walk.json",
+  "out/sim-evidence/fea_microduck-trunk-base_walk.json",
+  "out/sim-evidence/fea_microduck-upper-leg-left_walk.json",
+  "out/sim-evidence/fea_microduck-upper-leg-rigidity-plate_walk.json",
+  "out/sim-evidence/fea_microduck-yaw-roll-motion_walk.json",
+  "out/sim-evidence/fea_microduck-yaw2roll_walk.json",
+  "out/sim-evidence/loads_mujoco.json"
+ ],
+ "looked_at": []
+}

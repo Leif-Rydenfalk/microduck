@@ -1,0 +1,2054 @@
+.cargo/config.toml:3:# Target: Radxa Zero 3 (RK3566, Cortex-A55 → aarch64) running Armbian 26.2.x.
+.github/workflows/ci.yml:253:      # (`duck-control/src/bus.rs` is the Dynamixel driver, and `FakeIo` deliberately
+.github/workflows/ci.yml:75:      # `ci-release-notes.sh` is here despite running only in CI: it runs
+CONTRIBUTING.md:31:`vendor/platform.c` reaches the bus through `linux/i2c.h`, so `build.rs` compiles it on Linux
+LICENSE:59:      excluding communication that is conspicuously marked or otherwise
+README.md:26:Rockchip RK3566: a 50 Hz control loop driving fifteen servos from neural policies, the radios and
+btd/Cargo.toml:26:# Radxa — but the crate must still *build* on a macOS laptop, because `cargo test` there is the
+btd/src/bluez.rs:101:/// `aic-bluetooth.service` attaches the AIC8800's UART late, and `bluetooth.service` itself
+btd/src/bluez.rs:110:/// so this is generous enough to survive a loaded board rather than tuned for a spinner.
+btd/src/bluez.rs:263:    // flashed from one image appeared as `radxa-zero3`, and renaming one changed nothing a phone
+btd/src/bluez.rs:565:/// `duck-5b21` while answering `radxa-zero3` to anyone who read the characteristic — and a client
+btd/src/bluez.rs:569:///   on Linux a robot is `duck-5b21` until the first connection and `radxa-zero3` after it, and
+btd/src/bluez.rs:571:/// - **CoreBluetooth keeps both**, and `btleplug` joins them as `radxa-zero3 [duck-5b21]`;
+btd/src/main.rs:112:    // board's SoC serial, so `radxa-zero3` appears only when `configd` cannot be reached at all.
+btd/src/pairing.rs:72:/// Short: BlueZ is holding a pairing exchange open, and a phone shows a spinner while we decide.
+btd/src/upstream.rs:24:/// spinner. A unix socket connect either succeeds immediately or the daemon is not there.
+btd/src/upstream.rs:75:/// shows a spinner, whereas nothing is waiting on a name.
+btd/systemd/btd.service:23:# On the Radxa, hci0 does not exist until ~73s after power-on: aic-bluetooth.service attaches
+btd/systemd/btd.service:24:# the AIC8800's UART late, and bluetooth.service itself spends ~26s blocked behind dbus. So
+configd/src/bluez.rs:127://! **Run against a real BlueZ on a Radxa Zero 3W with an Xbox Wireless Controller**, which is where
+configd/src/bluez.rs:68://! BlueZ defaults to `off`, and `off` works on some Radxa Zero 3W units. On the others a pad will
+configd/src/identity.rs:39:/// Hardcoded rather than built from the hostname, which would give `radxa-zero3-7f3a` — longer
+configd/src/identity.rs:4://! one image used to advertise `radxa-zero3`, so a phone could not tell them apart — and picking
+configd/src/nm.rs:64:/// slow one, short enough that a phone gets an answer instead of a spinner — and a `Timeout` is
+configd/src/pad.rs:40:/// than a spinner.
+configd/src/store.rs:214:        Store::new(dir.join("config.json"), "radxa-zero3")
+configd/src/store.rs:221:        assert_eq!(store(dir.path()).name(), "radxa-zero3");
+configd/src/store.rs:243:        assert_eq!(store(dir.path()).name(), "radxa-zero3");
+configd/src/store.rs:278:        assert_eq!(store(dir.path()).name(), "radxa-zero3");
+deploy/README.md:194:otherwise very hard to diagnose: Armbian ships `overlay_prefix=rk35xx`, but the RK3566 shares
+deploy/README.md:196:the loader finds nothing, the board boots happily, and there is simply no `/dev/ttyS2`.
+deploy/README.md:38:./scripts/provision-board.sh radxa@192.168.1.42
+deploy/README.md:55:scp deploy/dev-key/team.dev.pub radxa@192.168.1.42:/tmp/
+deploy/audio/aic3104-i2c3.dts:10: * i2c-gpio-pihat bus. Pair them:
+deploy/audio/aic3104-i2c3.dts:11: *   - hw mode      (default): overlays = i2c3-pihat aic3104-i2c3
+deploy/audio/aic3104-i2c3.dts:12: *   - bitbang mode (revert):  overlays = i2c-gpio-pihat aic3104-pihat
+deploy/audio/aic3104-i2c3.dts:13: * install.sh selects the pair via MICRODUCK_I2C_MODE.
+deploy/audio/aic3104-i2c3.dts:21:    compatible = "radxa,zero-3w", "rockchip,rk3566";
+deploy/audio/aic3104-i2c3.dts:42:        target = <&i2c3>;
+deploy/audio/aic3104-i2c3.dts:6: * Radxa Zero 3W, HARDWARE-I2C variant.
+deploy/audio/aic3104-i2c3.dts:9: * the hardware i2c3 bus (see i2c3-pihat.dts) instead of the bit-banged
+deploy/audio/aic3104-init.sh:10:# Radxa the card probe is deferred until the DKMS codec module autoloads.
+deploy/audio/aic3x-dkms/Makefile:10:obj-m += snd-soc-tlv320aic3x-i2c.o
+deploy/audio/aic3x-dkms/Makefile:2:# I2C interface), mirroring sound/soc/codecs/Makefile in-tree naming so
+deploy/audio/aic3x-dkms/Makefile:3:# the modules land as snd-soc-tlv320aic3x[-i2c].ko. Built via DKMS —
+deploy/audio/aic3x-dkms/Makefile:7:snd-soc-tlv320aic3x-i2c-objs := tlv320aic3x-i2c.o
+deploy/audio/aic3x-dkms/dkms.conf:4:BUILT_MODULE_NAME[1]="snd-soc-tlv320aic3x-i2c"
+deploy/audio/aic3x-dkms/tlv320aic3x-i2c.c:12:#include <linux/i2c.h>
+deploy/audio/aic3x-dkms/tlv320aic3x-i2c.c:20:static const struct i2c_device_id aic3x_i2c_id[] = {
+deploy/audio/aic3x-dkms/tlv320aic3x-i2c.c:28:MODULE_DEVICE_TABLE(i2c, aic3x_i2c_id);
+deploy/audio/aic3x-dkms/tlv320aic3x-i2c.c:30:static int aic3x_i2c_probe(struct i2c_client *i2c)
+deploy/audio/aic3x-dkms/tlv320aic3x-i2c.c:34:	const struct i2c_device_id *id = i2c_match_id(aic3x_i2c_id, i2c);
+deploy/audio/aic3x-dkms/tlv320aic3x-i2c.c:3: * ALSA SoC TLV320AIC3x codec driver I2C interface
+deploy/audio/aic3x-dkms/tlv320aic3x-i2c.c:40:	regmap = devm_regmap_init_i2c(i2c, &config);
+deploy/audio/aic3x-dkms/tlv320aic3x-i2c.c:41:	return aic3x_probe(&i2c->dev, regmap, id->driver_data);
+deploy/audio/aic3x-dkms/tlv320aic3x-i2c.c:44:static void aic3x_i2c_remove(struct i2c_client *i2c)
+deploy/audio/aic3x-dkms/tlv320aic3x-i2c.c:46:	aic3x_remove(&i2c->dev);
+deploy/audio/aic3x-dkms/tlv320aic3x-i2c.c:59:static struct i2c_driver aic3x_i2c_driver = {
+deploy/audio/aic3x-dkms/tlv320aic3x-i2c.c:64:	.probe_new = aic3x_i2c_probe,
+deploy/audio/aic3x-dkms/tlv320aic3x-i2c.c:65:	.remove = aic3x_i2c_remove,
+deploy/audio/aic3x-dkms/tlv320aic3x-i2c.c:66:	.id_table = aic3x_i2c_id,
+deploy/audio/aic3x-dkms/tlv320aic3x-i2c.c:69:module_i2c_driver(aic3x_i2c_driver);
+deploy/audio/aic3x-dkms/tlv320aic3x-i2c.c:71:MODULE_DESCRIPTION("ASoC TLV320AIC3x codec driver I2C");
+deploy/audio/aic3x-dkms/tlv320aic3x.c:1591:	/*  Output common-mode voltage = 1.5 V */
+deploy/audio/aic3x-dkms/tlv320aic3x.c:1666:	/* set mic bias voltage */
+deploy/audio/aic3x-dkms/tlv320aic3x.c:1716:	dvdd = regulator_get_voltage(aic3x->supplies[1].consumer);
+deploy/audio/aic3x-dkms/tlv320aic3x.c:1717:	avdd = regulator_get_voltage(aic3x->supplies[2].consumer);
+deploy/audio/aic3x-dkms/tlv320aic3x.c:1721:			 "Too high supply voltage(s) AVDD: %d, DVDD: %d\n",
+deploy/audio/aic3x-dkms/tlv320aic3x.c:1733:			 "Invalid supply voltage(s) AVDD: %d, DVDD: %d\n",
+deploy/audio/aic3x-dkms/tlv320aic3x.c:1811:				dev_err(dev, "Unsuitable MicBias voltage "
+deploy/audio/aic3x-dkms/tlv320aic3x.c:198: * output voltage of mic bias. when power on mic bias, we
+deploy/audio/aic3x-dkms/tlv320aic3x.c:199: * need reclaim it to voltage value.
+deploy/audio/aic3x-dkms/tlv320aic3x.c:213:		/* change mic bias voltage to user defined */
+deploy/audio/aic3x-dkms/tlv320aic3x.c:293:static SOC_ENUM_SINGLE_DECL(aic3x_poweron_time_enum, HPOUT_POP_REDUCTION, 4,
+deploy/audio/aic3x-dkms/tlv320aic3x.c:297:static SOC_ENUM_SINGLE_DECL(aic3x_rampup_step_enum, HPOUT_POP_REDUCTION, 2,
+deploy/audio/aic3x-dkms/tlv320aic3x.c:36:#include <linux/i2c.h>
+deploy/audio/aic3x-dkms/tlv320aic3x.c:418:	/* Pop reduction */
+deploy/audio/aic3x-dkms/tlv320aic3x.c:54:	"IOVDD",	/* I/O Voltage */
+deploy/audio/aic3x-dkms/tlv320aic3x.c:55:	"DVDD",		/* Digital Core Voltage */
+deploy/audio/aic3x-dkms/tlv320aic3x.c:56:	"AVDD",		/* Analog DAC Voltage */
+deploy/audio/aic3x-dkms/tlv320aic3x.c:57:	"DRVDD",	/* ADC Analog and Output Driver Voltage */
+deploy/audio/aic3x-dkms/tlv320aic3x.c:86:	/* Selects the micbias voltage */
+deploy/audio/aic3x-dkms/tlv320aic3x.c:87:	enum aic3x_micbias_voltage micbias_vg;
+deploy/audio/aic3x-dkms/tlv320aic3x.c:88:	/* Output Common-Mode Voltage */
+deploy/audio/aic3x-dkms/tlv320aic3x.h:168:/* New Programmable ADC Digital Path and I2C Bus Condition Register */
+deploy/audio/aic3x-dkms/tlv320aic3x.h:91:/* High Power Output Driver Pop Reduction registers */
+deploy/audio/aic3x-dkms/tlv320aic3x.h:92:#define HPOUT_POP_REDUCTION		42
+deploy/audio/i2c3-pihat.dts:10: * I2C function was wrong. Same physical wiring as the Robot HAT expects
+deploy/audio/i2c3-pihat.dts:11: * (codec 0x18, dormant BMI088 0x19/0x68, ToF via Stemma J5), but the
+deploy/audio/i2c3-pihat.dts:13: * of the i2c-gpio driver's udelay() busy-wait, i.e. ~zero CPU while
+deploy/audio/i2c3-pihat.dts:16: * THE CATCH — i2c3 is not free in the vendor DTB: it runs in its M1 mux
+deploy/audio/i2c3-pihat.dts:27: *   - In-robot power comes from the battery via the HAT regardless.
+deploy/audio/i2c3-pihat.dts:31: * (unused but still connected) BMI088. The VL53L5CX would take 1 MHz,
+deploy/audio/i2c3-pihat.dts:36: * The bus keeps its fixed alias /dev/i2c-3. The udev rule installed by
+deploy/audio/i2c3-pihat.dts:37: * install.sh points the stable /dev/i2c-pihat symlink at it, so
+deploy/audio/i2c3-pihat.dts:40: * MUTUALLY EXCLUSIVE with i2c-gpio-pihat: both claim GPIO1_A0/A1.
+deploy/audio/i2c3-pihat.dts:42: * (MICRODUCK_I2C_MODE=hw|bitbang; bitbang restores the fusb302).
+deploy/audio/i2c3-pihat.dts:46:    compatible = "radxa,zero-3w", "rockchip,rk3566";
+deploy/audio/i2c3-pihat.dts:49:        target = <&i2c3>;
+deploy/audio/i2c3-pihat.dts:54:            pinctrl-0 = <&i2c3m0_xfer>;
+deploy/audio/i2c3-pihat.dts:5: * Hardware I2C3 (M0 pinmux) on header pins 3/5 — Radxa Zero 3W only.
+deploy/audio/i2c3-pihat.dts:64:        target-path = "/i2c@fe5c0000/fusb302@22";
+deploy/audio/i2c3-pihat.dts:7: * Replaces the bit-banged i2c-gpio-pihat overlay: header pins 3/5
+deploy/audio/i2c3-pihat.dts:8: * (GPIO1_A0 = SDA, GPIO1_A1 = SCL) are ALSO the RK3566's i2c3 controller
+deploy/overlays/rk3568-npu-enable.dts:22:		compatible = "rockchip,rk3566", "rockchip,rk3568";
+deploy/overlays/rk3568-npu-enable.dts:24:		description = "Enable the RKNPU, which the Radxa Zero 3 device tree ships disabled.";
+deploy/overlays/rk3568-npu-enable.dts:2: * Turn the RK3566's NPU on.
+deploy/overlays/rk3568-npu-enable.dts:4: * Armbian's `rk3566-radxa-zero3.dtb` ships `npu@fde40000` with `status = "disabled"`, and the only
+deploy/robotd.toml:158:# Scale actions with battery voltage: effective scale = action_scale * (nominal / measured
+deploy/robotd.toml:161:# voltage_adapt = false
+deploy/robotd.toml:162:# nominal_voltage = 7.4
+deploy/robotd.toml:16:# Serial port the 15 servos and the imu_to_dxl board share. /dev/ttyS2 is the Radxa
+deploy/robotd.toml:19:port = "/dev/ttyS2"
+deploy/robotd.toml:245:# Sit down gracefully and power the machine off when the battery EMA reaches the empty
+deploy/robotd.toml:246:# floor (6.6 V — the same value the battery percentage maps to 0%). The EMA moves over
+deploy/robotd.toml:248:# battery_empty_shutdown = true
+deploy/robotd.toml:30:# 50 is inherited from the prototype, where it was chosen on a Raspberry Pi Zero 2W. It
+deploy/robotd.toml:31:# has never been re-derived on the Radxa. Before trusting it, measure: `bench_dynamixel_bus`
+deploy/robotd.toml:326:# switched off in its device tree, which is how Armbian ships the Radxa Zero 3. `sudo sh
+deploy/robotd.toml:331:# Radxa Zero 3 and the CPU throttles to 408 MHz, which is a robot that walks badly to see well.
+deploy/robotd.toml:52:# this: battery, motor temperature, loop and bus counters. None of those may reach a verdict
+deploy/robotd.toml:73:# not healthy whatever rate the loop is spinning at.
+docs/README.md:34:| [`robotd-design.md`](design/robotd-design.md) | The control loop: the Dynamixel bus and who owns the port, the model, sensing, observations, policy, safety — and what else hangs off the tick. |
+docs/README.md:51:| [`slice-2-bringup.md`](project/slice-2-bringup.md) | What a real Radxa Zero 3W did with slice 2. |
+docs/README.md:53:| [`media-bringup.md`](project/media-bringup.md) | What a Radxa Zero 3W does about video: the VPU, what MPP needs, and the two plugins that have to be built. |
+docs/README.md:70:| [`project/npu-bringup.md`](project/npu-bringup.md) | The duck detector on the RK3566's NPU: what runs, how to benchmark it, and the frame path that is still missing. |
+docs/design/app-path-design.md:12:Sections marked **measured** were established on a Radxa Zero 3W rather than reasoned about.
+docs/design/app-path-design.md:382:`BUSY` into a spinner that resolves minutes later.
+docs/design/app-path-design.md:533:Proven end to end, on a Radxa Zero 3 with a Mac as the client: discovery, connection, the version
+docs/design/app-path-design.md:587:  AIC8800's UART, and `bluetooth.service` spends 26s blocked behind `dbus`. `btd` waits and retries
+docs/design/app-path-design.md:622:could: every board flashed from one image advertised `radxa-zero3`.
+docs/design/app-path-design.md:672:`radxa-zero3` to anyone who read the characteristic — and reading it is what a central does on
+docs/design/app-path-design.md:674:`duck-c51b` until first contact and `radxa-zero3` after it, and `--name duck-c51b` stopped finding
+docs/design/app-path-design.md:675:it; CoreBluetooth keeps both and reports `radxa-zero3 [duck-c51b]`. A phone's own Bluetooth settings
+docs/design/architecture.md:139:the specifics make the case: bringing a VL53L5/8CX up uploads ~90 KB of firmware
+docs/design/architecture.md:205:| `varlink` | 24 | close in spirit; less familiar, little gained over JSON-RPC |
+docs/design/architecture.md:43:        │ Dynamixel           │ D-Bus                   │ systemctl restart,
+docs/design/architecture.md:459:- **Deadman / heartbeat.** If commands stop arriving or RTT spikes past a
+docs/design/architecture.md:46:  on one UART                                    /opt/robot/daemon/current
+docs/design/architecture.md:82:| `robotd` | motor control, sensing, policies, safety, `robot.health` | `/run/robotd.sock` | the Dynamixel bus |
+docs/design/remote-webrtc.md:13:A Radxa Zero 3W streams `videotestsrc` through the hardware encoder to a browser on the LAN, and
+docs/design/remote-webrtc.md:56:**The pixel format.** rkisp offers a non-contiguous two-plane `NM12` alongside single-plane
+docs/design/remote-webrtc.md:62:| `NV12` (selects `NM12`) | 19.5 fps | 19.6 fps |
+docs/design/remote-webrtc.md:84:own `INFO`-level log never reaches the journal despite the bridge mapping it to `tracing::info!`,
+docs/design/robotd-design.md:10:**Only the alpha variant, only the Radxa, only the v2 `imu_to_dxl` board.** v1/v1.5/v1.6, the
+docs/design/robotd-design.md:139:every 1 s       slow_sensors() · registers 144–146 · voltage + temperature   (§2.1)
+docs/design/robotd-design.md:145:  Dynamixel bus
+docs/design/robotd-design.md:171:              Dynamixel bus
+docs/design/robotd-design.md:239:5. **Only what a release can be blamed for may reach the health verdict.** Battery and
+docs/design/robotd-design.md:23:Fifteen servos and the `imu_to_dxl` board share one UART. There is no second bus and no
+docs/design/robotd-design.md:253:  `return_delay_time=0`, `baud_rate=3`, `pwm_slope=255`, `shutdown=52`. The first is
+docs/design/robotd-design.md:254:  load-bearing — at the XL330 default of 250 that is 500 µs of turnaround per device, so
+docs/design/robotd-design.md:258:  input-voltage faults.
+docs/design/robotd-design.md:266:block at 124–136 (pwm, current, velocity, position). Voltage and temperature sit at 144–146,
+docs/design/robotd-design.md:272:Voltage is averaged across the servos: all fifteen sit on one pack, so a single reading is the
+docs/design/robotd-design.md:29:                              │  duck_control::bus::DynamixelIo
+docs/design/robotd-design.md:309:    fn slow_sensors(&mut self) -> Result<SlowSensors>;     // voltage + per-joint temperature
+docs/design/robotd-design.md:322:Two implementations: `DynamixelIo` and `FakeIo` (scripted samples, optionally frozen or
+docs/design/robotd-design.md:32:         /dev/ttyS2 · 1 Mbps · Dynamixel protocol v2
+docs/design/robotd-design.md:429:scale, voltage-adaptive scaling, the standing-transition gain change. These are tunables
+docs/design/robotd-design.md:42:the hardware does: the v2 board sits on the Dynamixel bus and serves an on-chip SFLP
+docs/design/robotd-design.md:499:`safety.battery_empty_shutdown` (on by default), reaching the empty floor on the smoothed
+docs/design/robotd-design.md:500:voltage sits the robot down and powers the board off. The EMA moves over ~10 s, so a load sag
+docs/design/robotd-design.md:505:Rust consts for alpha only: 15 joints, Dynamixel IDs `20–24 / 30–34 / 10–14`, names,
+docs/design/robotd-design.md:567:  "battery":{"volts":7.62,"percent":64}
+docs/design/robotd-design.md:571:**Battery carries both volts and percent**, here and in `robot.health`. The mapping — 6.6 V
+docs/design/robotd-design.md:572:empty, 8.2 V full under load, an NP-F550 — lives in `duck_control::model::battery_percent` and
+docs/design/robotd-design.md:573:travels already applied. The prototype sent volts only and the app re-derived the percentage
+docs/design/robotd-design.md:575:screens. A client drawing a battery pill should not have to know which pack this robot ships
+docs/design/robotd-design.md:576:with. There is no fuel gauge: the measurement is the servos' own supply voltage (§2.1), so it
+docs/design/robotd-design.md:58:- **`serial-getty@ttyS2`** — Armbian runs a login console on UART2 by default, and an `agetty`
+docs/design/robotd-design.md:608:as targets, and does not touch torque. Dynamixels hold their last commanded goal while the
+docs/design/robotd-design.md:60:  masks the unit; `fuser -v /dev/ttyS2` naming `agetty` is how that was found, and it is still
+docs/design/robotd-design.md:668:| `robot.health` | **the loop is meeting its deadline** — from achieved rate and missed-deadline count — plus a description of the robot the verdict never consults: loop, bus, IMU, batter
+docs/design/robotd-design.md:683:**description**, and no automatic decision may read it: battery, motor temperature, and the
+docs/design/robotd-design.md:684:loop/bus/IMU counters. Gating on the battery would mean a robot updated on a low pack rolls the
+docs/design/robotd-design.md:889:The measurement already exists: `bench_dynamixel_bus` reports achieved rate, jitter, read time, bus
+docs/design/robotd-design.md:941:1. **Control rate on the Radxa.** 50 Hz is inherited from a Pi Zero 2W. Measurable now that boards
+docs/design/robotd-design.md:942:   exist — `bench_dynamixel_bus` and the loop's own five-minute summary report the same figures.
+docs/design/updater-design.md:1397:step and the 30s timeout. Both land in M4 on the Radxa.
+docs/design/updater-design.md:393:**Current target: Radxa Zero 3** (RK3566, Cortex-A55 → `aarch64`) running **Armbian
+docs/design/updater-design.md:581:- **Clock sanity.** A Pi/eMMC board has no battery-backed RTC; a wrong clock
+docs/design/updater-design.md:719:restarts `robotd`, so every robot is both unusable and wearing out, on battery, with no
+docs/design/updater-design.md:7:The robot runs a Rust daemon on a Raspberry-Pi-class board (Raspberry Pi OS /
+docs/design/updater-design.md:959:   beside the hostname — `microduck@radxa-zero3 (coincoin):~$` — so that three ssh windows to
+docs/design/webrtc-console.md:128:The robot's address on stdout and nothing else, so `ssh radxa@$(duckctl ip)` works — the split
+docs/design/webrtc-console.md:27:| the URL is typed by hand | `ws://radxa-zero3.local:8443` — and `radxa-zero3` is the hostname on **every** board flashed from one image (`configd/src/main.rs` says so where it falls back
+docs/ideas/autonomous_behavior.md:107:  it exercises the BLE discovery layer — the part still under hardware suspicion.
+docs/ideas/autonomous_behavior.md:73:which neither ToF nor BLE can give. The RK3566 has a 0.8 TOPS INT8 NPU (`rknpu2` /
+docs/ideas/autonomous_behavior.md:75:leaving the CPUs alone. Range math: IMX219 ~62° HFOV, a 25 cm duck is ~25 px at 3 m — room
+docs/ideas/autonomous_behavior.md:88:  kill. Fix the placeholder IMX219 intrinsics during the mediad port (audit §04 TODO).
+docs/project/install-path-gap.md:472:  `LoopHealth`, `Battery` and `MotorThermal` deliberately do **not**, and the exception is the
+docs/project/media-bringup.md:100:Rockchip MPP is not in Debian. Radxa publish it as a GitHub Pages apt repo, and the packages are
+docs/project/media-bringup.md:102:the route `microduck_runtime/radxa_setup/setup_rkaiq.sh` already uses on this board for
+docs/project/media-bringup.md:103:`rkaiq_3A_server`. Base: `https://radxa-repo.github.io/bullseye/pool/main`.
+docs/project/media-bringup.md:121:### Radxa's prebuilt plugin is *not* decode-only, and this page said it was
+docs/project/media-bringup.md:134:| Radxa's deb was decode-only | it has every encoder |
+docs/project/media-bringup.md:155:| `gstreamer-rockchip` | [`JeffyCN/mirrors`](https://github.com/JeffyCN/mirrors) branch `gstreamer-rockchip`, meson | `mpph264enc` — the hardware encoder | Debian has no Rockchip encoder
+docs/project/media-bringup.md:160:presents as a client spinning forever on "connecting" — and 0.15.3 is simply newer. Both series
+docs/project/media-bringup.md:182:| Radxa `bullseye` pool | `gstreamer1.0-rockchip1_1.14-4` — installed and inspected: `mppvideodec` + `mppjpegdec` only |
+docs/project/media-bringup.md:183:| Radxa `rk3588s2-bookworm` pool | the same `1.14-4`, byte-identical |
+docs/project/media-bringup.md:189:Radxa built, at a revision with the encoders enabled. `mpph264enc`, `mpph265enc`, `mppjpegenc`
+docs/project/media-bringup.md:201:- **Not on the board.** An RK3566 compiles the Rust half far too slowly to wait for.
+docs/project/media-bringup.md:215:the prebuilt Radxa deb depends on `libx11-6`), and publishes a tarball plus its sha256 with a
+docs/project/media-bringup.md:222:for direct `.deb` downloads, so the Radxa closure is installed in one call.
+docs/project/media-bringup.md:265:description and ICE handling, which presents as a client spinning forever on "connecting".
+docs/project/media-bringup.md:289:root; that bitstream decoding clean as High/4.0; the Radxa debs' dependency closure; the rockchip
+docs/project/media-bringup.md:312:| sensor identified | `imx219 2-0010: Model ID 0x0219, Lot ID 0x5a8e73, Chip ID 0x0773` |
+docs/project/media-bringup.md:337:The camera is mounted a quarter turn off, and the obvious fix — `videoflip` before the tee, so every
+docs/project/media-bringup.md:3:What a Radxa Zero 3W does about video. Everything below was observed on a board, not inferred —
+docs/project/media-bringup.md:449:latter, the sensor mode is the suspect: the IMX219 boots in 3280x2464 and the prototype pins the
+docs/project/media-bringup.md:472:| `rotation` | `0` | **`180`** on the alpha | the IMX219 is mounted upside down. `microduck_runtime` fixes it with `videoflip method=rotate-180` — a full CPU pass over every frame, on th
+docs/project/media-bringup.md:55:`radxa-zero3-rpi-camera-v2.dtbo` with **no `rk3568-` prefix**, while the board runs
+docs/project/media-bringup.md:57:`rk3568-radxa-zero3-rpi-camera-v2.dtbo`, the loader finds nothing, and the board boots happily
+docs/project/media-bringup.md:58:with no camera — the same silent failure `configure_overlay` exists to prevent for `uart2-m0`.
+docs/project/media-bringup.md:65:and for this board that is `radxa-zero3-rpi-camera-v2` (Pi Cam v2 / IMX219) or
+docs/project/media-bringup.md:66:`radxa-zero3-rpi-camera-v1.3` (Pi Cam v1.3 / OV5647). Only the first has ever been used here.
+docs/project/media-bringup.md:87:`mediad` will run as its own user, like every other daemon here — `tofd` rides into `i2c`,
+docs/project/media-bringup.md:91:0660), following the shape of `configure_tof`'s i2c rule in `setup-board.sh`.
+docs/project/media-bringup.md:98:## What Radxa's pool provides
+docs/project/npu-bringup.md:3:The RK3566 has a small INT8 NPU — 0.8 TOPS, one core. This is the record of putting a trained duck
+docs/project/npu-bringup.md:43:`status = "disabled"` on every Radxa Zero 3, so a stock board has the hardware, the kernel and the
+docs/project/npu-bringup.md:83:From a Radxa Zero 3, `duck-bench` at the paced 2 Hz, 30 frames over 3 passes:
+docs/project/pad-minimal-pairing.md:3:Recorded 2026-08-18, on Radxa Zero 3W `50:37:CD:16:2A:39`, with an Xbox Wireless Controller
+docs/project/pad-minimal-pairing.md:8:Flash Armbian for Radxa Zero 3, Minimal. Fill in wifi and the username in the imager. Install
+docs/project/roadmap.md:100:**Done:** all three on a Radxa Zero 3W. It walks driven through the intent API; an update
+docs/project/roadmap.md:107:Radxa. Nearly all of it was answered as a side effect of shipping — the loop holds 50.0 Hz on a
+docs/project/roadmap.md:109:`/dev/ttyS2`, thermals have a real reading across every zone, `systemctl restart` in `on_apply`
+docs/project/roadmap.md:124:timing and battery under load. They belong to M7, which is the milestone about knowing what a
+docs/project/roadmap.md:184:- **The app.** #107 designs it and builds nothing. The blocker is a phone spike — scan, connect,
+docs/project/roadmap.md:204:battery, per-motor temperatures and the SoC; `robotctl monitor` draws the loop, the pad stream,
+docs/project/roadmap.md:216:  ToF present, camera present, NPU present, mic and speaker, battery under load. Closer to
+docs/project/roadmap.md:217:  `board-test.sh` in spirit, aimed at the hardware rather than the release.
+docs/project/roadmap.md:228:M4's two unmeasured numbers land here: eMMC write timing and battery under load.
+docs/project/roadmap.md:22:| `mediad/` | camera, mic, encode and the WebRTC gateway, plus the console it serves. **Streaming to a browser on the LAN from a Radxa Zero 3W**, hardware H.264 through `mpph264enc`, `control` 
+docs/project/roadmap.md:28:| tests | **942 passing** on a Mac with nothing excluded, a few more on Linux — including the health gate, the battery and thermal readout and the policy/safety path against a real `robotd` pro
+docs/project/roadmap.md:87:as a race against a moving target. Slice 1 was a real 50 Hz Dynamixel loop holding its pose —
+docs/project/slice-2-bringup.md:27:- 15 servos and the `imu_to_dxl` board answering on `/dev/ttyS2`
+docs/project/slice-2-bringup.md:3:Notes from running slice 2 on a real robot. Everything below was observed on a Radxa Zero 3W,
+docs/robot/cheatsheet-dev.md:107:scripts/dev-push.sh radxa@<board>
+docs/robot/cheatsheet-dev.md:128:ssh -L /tmp/robotd.sock:/run/robotd.sock radxa@192.168.1.42
+docs/robot/cheatsheet.md:109:switches first (policy on/off, walk/roller, limp-fall, audio, pet detection, battery
+docs/robot/cheatsheet.md:164:walk = "/home/radxa/my_walking.onnx"
+docs/robot/cheatsheet.md:165:stand = "/home/radxa/my_stand.onnx"
+docs/robot/cheatsheet.md:198:a robot whose daemon is not running, and it needs the daemon stopped, because two writers on one UART
+docs/robot/cheatsheet.md:287:scp scripts/pad-link-test.sh radxa@<board>:/tmp/
+docs/robot/cheatsheet.md:310:scp scripts/pad-stack-report.sh radxa@<board>:/tmp/
+docs/robot/cheatsheet.md:461:┌ tof VL53L8CX · 15 Hz · 8×8 · 48/64 ranged · 0.12–3.54 m ─────────────┐
+docs/robot/cheatsheet.md:489:sudo i2cdetect -y -r 3
+docs/robot/cheatsheet.md:494:provisions the bus itself; the ToF step only adds the stable `/dev/i2c-pihat`
+docs/robot/cheatsheet.md:495:name. Both sensor generations are supported — a VL53L5CX and a VL53L8CX are
+docs/robot/cheatsheet.md:52:volts and as a fraction, the hottest servo and the board's own temperature. It comes from
+docs/robot/cheatsheet.md:59:0% is `BATTERY_EMPTY_V`, which is where `robotd` sits the robot down and cuts power, so the figure
+docs/robot/dev-push.md:127:ssh radxa@192.168.1.42 'journalctl -f -u robotd -u configd -u btd -u padd'
+docs/robot/dev-push.md:134:ssh radxa@192.168.1.42 'journalctl -f -u updaterd'
+docs/robot/dev-push.md:141:ssh radxa@192.168.1.42 robotctl health
+docs/robot/dev-push.md:180:scripts/dev-push.sh --dry-run radxa@192.168.1.42
+docs/robot/dev-push.md:191:scripts/dev-push.sh --docker radxa@192.168.1.42
+docs/robot/dev-push.md:233:scripts/dev-push.sh --bootstrap radxa@192.168.1.42
+docs/robot/dev-push.md:288:scripts/dev-push.sh radxa@192.168.1.42
+docs/robot/dev-push.md:304:./scripts/provision-board.sh radxa@192.168.1.42 --forget-host-key
+docs/robot/dev-push.md:336:| `DUCK_BOARD_USER` | The ssh user on the board, for the name path. Default `radxa`. |
+docs/robot/dev-push.md:339:| `DUCK_BOARD` | The board, by address, instead of an argument. `radxa@192.168.1.42`. |
+docs/robot/dev-push.md:58:The ssh user is `radxa`. If yours is not:
+docs/robot/dev-push.md:67:scripts/dev-push.sh radxa@192.168.1.42
+docs/robot/dev-push.md:71:export DUCK_BOARD=radxa@192.168.1.42
+docs/robot/dev-push.md:82:==> copying to radxa@192.168.1.42:/home/radxa/duck-sideload
+docs/robot/dev-push.md:83:==> applying on radxa@192.168.1.42
+docs/robot/dev-push.md:84:==> 0.5.1-dev.local.1763400000.g7fc1444 is live on radxa@192.168.1.42
+docs/robot/dev-push.md:94:==> every daemon on radxa@192.168.1.42 is running 0.5.1-dev.local.1763400000.g7fc1444
+docs/robot/duckctl.md:70:ssh radxa@$(duckctl ip)
+docs/robot/duckctl.md:86:`radxa-zero3 [duck-c51b]` — works as `--name`.
+docs/robot/duckctl.md:88:A robot that scanned as `duck-c51b` and then, after one connection, only as `radxa-zero3` is on a
+docs/robot/duckctl.md:97:2 robots answer to "radxa-zero3": radxa-zero3, radxa-zero3
+docs/robot/install-by-hand.md:138:kernel: the VPU is reached through MPP rather than V4L2, and the report names the two Radxa debs
+docs/robot/install-by-hand.md:31:Board bring-up — device-tree overlay, kernel console off the motor UART, the getty mask,
+docs/robot/install-dev.md:116:ssh -t radxa@192.168.1.42 'sudo tail -f /var/lib/robot/provision.log'
+docs/robot/install-dev.md:164:./scripts/provision-board.sh radxa@192.168.1.42 --forget-host-key
+docs/robot/install-dev.md:17:Use the [Armbian imager](https://www.armbian.com/radxa-zero-3/). Pick **Radxa Zero 3**, then
+docs/robot/install-dev.md:27:ssh-copy-id radxa@192.168.1.42
+docs/robot/install-dev.md:53:./scripts/provision-board.sh --pause-btd-on-pair --name <MY_COOL_ROBOT_NAME> radxa@192.168.1.42
+docs/robot/pair-a-gamepad.md:183:so a stall is a spike, and one that has already recovered is still on screen. Full height is 100 ms
+docs/robot/pair-a-gamepad.md:199:scp scripts/pad-link-test.sh radxa@<board>:/tmp/
+docs/robot/pair-a-gamepad.md:235:scp scripts/pad-stack-report.sh radxa@<board>:/tmp/
+docs/robot/pair-a-gamepad.md:251:ssh radxa@<board-a> sudo sh /tmp/pad-stack-report.sh --fingerprint > /tmp/a.fp
+docs/robot/pair-a-gamepad.md:255:ssh radxa@<board-b> sudo sh /tmp/pad-stack-report.sh --fingerprint > /tmp/b.fp
+duck-control/src/bus.rs:100:impl DynamixelIo {
+duck-control/src/bus.rs:102:        let serial = serialport::new(port, BAUD_RATE)
+duck-control/src/bus.rs:110:        let controller = Xl330Controller::new()
+duck-control/src/bus.rs:140:                    "baud_rate" => self.controller.read_baud_rate(id),
+duck-control/src/bus.rs:159:                    "baud_rate" => self.controller.write_baud_rate(id, want),
+duck-control/src/bus.rs:18:use rustypot::servo::dynamixel::xl330::Xl330Controller;
+duck-control/src/bus.rs:1://! The Dynamixel bus.
+duck-control/src/bus.rs:22:use crate::model::{BAUD_RATE, EXPECTED_REGISTERS, IMU_DXL_ID, JOINT_IDS, NUM_JOINTS};
+duck-control/src/bus.rs:232:impl RobotIo for DynamixelIo {
+duck-control/src/bus.rs:301:        DynamixelIo::set_torque(self, on)
+duck-control/src/bus.rs:327:    /// Supply voltage and case temperatures, in one `sync_read` over registers 144–146.
+duck-control/src/bus.rs:329:    /// Voltage is averaged because all 15 servos sit on one pack: a single reading is the
+duck-control/src/bus.rs:337:    /// treat one miss as news. The zero filter on voltage guards a device that answers with a
+duck-control/src/bus.rs:33:/// The second, slower block: `present_input_voltage` (144, `u16`) then `present_temperature`
+duck-control/src/bus.rs:343:            .map_err(|e| IoError::Bus(format!("voltage+temperature sync_read: {e}")))?;
+duck-control/src/bus.rs:347:                what: "voltage+temperature blocks",
+duck-control/src/bus.rs:34:/// (146, `u8`). Three bytes covers both, so voltage and thermals cost *one* extra transaction
+duck-control/src/bus.rs:354:        let mut volts = Vec::with_capacity(NUM_JOINTS);
+duck-control/src/bus.rs:358:                    what: "voltage+temperature block",
+duck-control/src/bus.rs:363:            // [0..2] present_input_voltage · [2] present_temperature, already in whole °C.
+duck-control/src/bus.rs:365:            let v = counts as f64 * VOLTS_PER_COUNT;
+duck-control/src/bus.rs:367:                volts.push(v);
+duck-control/src/bus.rs:372:        if volts.is_empty() {
+duck-control/src/bus.rs:374:                what: "input voltage",
+duck-control/src/bus.rs:380:            volts: volts.iter().sum::<f64>() / volts.len() as f64,
+duck-control/src/bus.rs:44:/// `present_input_voltage` counts 0.1 V each.
+duck-control/src/bus.rs:45:const VOLTS_PER_COUNT: f64 = 0.1;
+duck-control/src/bus.rs:7://! Battery and thermals are the one thing that does not fit that shape: they live at registers
+duck-control/src/bus.rs:89:pub struct DynamixelIo {
+duck-control/src/bus.rs:90:    controller: Xl330Controller,
+duck-control/src/fall.rs:228:    /// the standing policy has a quarter-second to catch it. Waiting is the right answer:
+duck-control/src/fall.rs:29://! will gravity be a quarter-second from now" — trigger when *that* is past the point of
+duck-control/src/fall.rs:32://!  - **Already tilted** past `tilt_z`. A gyro spike on an upright robot is a footfall, a
+duck-control/src/imu.rs:159:/// Single-sample spike rejection. A dropped or corrupted block shows up as one wild value;
+duck-control/src/imu.rs:170:/// IEEE 754 binary16 → f64. The LSM6DSV16X ships quaternion components in this format.
+duck-control/src/imu.rs:1://! The `imu_to_dxl` v2 board (LSM6DSV16X), decoded.
+duck-control/src/imu.rs:282:    /// the robot would be judged on a default orientation for the first quarter second.
+duck-control/src/imu.rs:337:    /// into a large positive one, which reads as a robot spinning.
+duck-control/src/imu.rs:3://! One IMU, one code path. The board rides the Dynamixel bus and its 12-byte block is
+duck-control/src/imu.rs:52:/// Stateful only for spike rejection and for holding the last good quaternion — there is
+duck-control/src/io.rs:137:    /// Supply voltage and case temperatures, in one extra transaction.
+duck-control/src/io.rs:214:                volts: 7.4,
+duck-control/src/io.rs:7://! the IMU board sits on the Dynamixel bus and is fetched in the same transaction as the
+duck-control/src/io.rs:82:    /// Mean supply voltage across the servos, in volts — the only battery measurement the
+duck-control/src/io.rs:84:    pub volts: f64,
+duck-control/src/lib.rs:22:    BATTERY_EMPTY_V, BATTERY_FULL_V, DEFAULT_POSITION, JOINT_IDS, JOINT_NAMES, NUM_JOINTS,
+duck-control/src/lib.rs:23:    battery_percent,
+duck-control/src/model.rs:101:// ── battery ──────────────────────────────────────────────────────────────────
+duck-control/src/model.rs:104:// report as their own supply (`crate::bus::DynamixelIo::bus_voltage`), which is the pack
+duck-control/src/model.rs:109:pub const BATTERY_FULL_V: f64 = 8.2;
+duck-control/src/model.rs:113:pub const BATTERY_EMPTY_V: f64 = 6.6;
+duck-control/src/model.rs:115:/// Fraction of a pack, 0–100, for a bus voltage.
+duck-control/src/model.rs:117:/// Linear, and the numbers come from `microduck_runtime`'s `check_battery`, where they were
+duck-control/src/model.rs:124:pub fn battery_percent(volts: f64) -> f64 {
+duck-control/src/model.rs:125:    if !volts.is_finite() || volts <= 0.0 {
+duck-control/src/model.rs:128:    ((volts - BATTERY_EMPTY_V) / (BATTERY_FULL_V - BATTERY_EMPTY_V)).clamp(0.0, 1.0) * 100.0
+duck-control/src/model.rs:144:    /// A duplicated Dynamixel ID makes a `sync_read` return blocks that cannot be matched
+duck-control/src/model.rs:14:/// Dynamixel IDs, indexed as [`JOINT_NAMES`].
+duck-control/src/model.rs:152:            .for_each(|w| assert_ne!(w[0], w[1], "duplicate Dynamixel ID {}", w[0]));
+duck-control/src/model.rs:172:    fn battery_percent_spans_the_usable_range() {
+duck-control/src/model.rs:173:        assert_eq!(battery_percent(BATTERY_FULL_V), 100.0);
+duck-control/src/model.rs:174:        assert_eq!(battery_percent(BATTERY_EMPTY_V), 0.0);
+duck-control/src/model.rs:175:        assert!((battery_percent(7.4) - 50.0).abs() < 0.001);
+duck-control/src/model.rs:178:    /// Voltages outside the span are ordinary — a fresh pack reads over 8.2 V off the
+duck-control/src/model.rs:182:    fn battery_percent_clamps_rather_than_extrapolating() {
+duck-control/src/model.rs:183:        assert_eq!(battery_percent(9.5), 100.0);
+duck-control/src/model.rs:184:        assert_eq!(battery_percent(5.0), 0.0);
+duck-control/src/model.rs:190:    fn battery_percent_treats_no_reading_as_zero() {
+duck-control/src/model.rs:191:        assert_eq!(battery_percent(0.0), 0.0);
+duck-control/src/model.rs:192:        assert_eq!(battery_percent(f64::NAN), 0.0);
+duck-control/src/model.rs:193:        assert_eq!(battery_percent(-1.0), 0.0);
+duck-control/src/model.rs:76:/// The `imu_to_dxl` v2 board's Dynamixel ID. It rides the motor bus and is read in the
+duck-control/src/model.rs:80:pub const BAUD_RATE: u32 = 1_000_000;
+duck-control/src/model.rs:84:/// `return_delay_time` is the load-bearing one: the XL330 ships at 250, which is 500 µs of
+duck-control/src/model.rs:88:/// overload, overheating and input-voltage faults.
+duck-control/src/model.rs:91:    ("baud_rate", 3), // 3 = 1 Mbps, must agree with BAUD_RATE
+duck-control/src/policy.rs:461:    /// The message must survive too. This is the panic a Radxa actually produced, and the two
+duck-control/src/safety.rs:314:    /// A hard footfall spikes gravity briefly. Treating that as a fall would drop the robot
+duck-control/src/safety.rs:40:/// The XL330's position range: one turn, centred, from the count↔radian conversion.
+duck-detect/src/bin/duck-bench.rs:55:    /// Run flat out, this took a Radxa Zero 3 to 95 °C and the CPU throttled to 408 MHz — so the
+duck-detect/src/lib.rs:113:    /// A quarter turn clockwise: what this robot's camera mount needs.
+duck-detect/src/lib.rs:131:    /// The frame's size once turned — a quarter turn swaps the axes.
+duck-detect/src/lib.rs:146:            // A quarter turn clockwise sends source (x, y) to upright (h-1-y, x), so the inverse
+duck-detect/src/lib.rs:296:    /// The camera is portrait after the daemon's quarter turn — 720×1280 — so this is the only case
+duck-detect/src/lib.rs:353:    /// A quarter turn swaps the axes and lands the corners where a rotation should.
+duck-detect/src/lib.rs:359:    fn a_quarter_turn_happens_while_sampling() {
+duck-detect/src/onnx.rs:3://! **Why this exists at all.** The RK3566 has an NPU, the vendor kernel has the driver — and on
+duck-detect/src/rknn.rs:154:/// `npu@fde40000` as `status = "disabled"` on the Radxa Zero 3, so a robot that nobody has run
+duck-detect/src/rknn.rs:165:             tree, which is how Armbian ships the Radxa Zero 3 — so the driver never bound and \
+duck-detect/src/rknn.rs:170:        // No node at all: not an RK3566, or a kernel whose device tree does not describe one.
+duck-ipc-proto/src/lib.rs:2339:// No `Eq`: the battery reading is a float. Nothing compares these for exact equality
+duck-ipc-proto/src/lib.rs:2363:    /// Motor-bus voltage, when it has been read.
+duck-ipc-proto/src/lib.rs:2372:    /// answer, or an older `robotd`. Absent is not zero volts, and a client must not render
+duck-ipc-proto/src/lib.rs:2373:    /// it as an empty battery.
+duck-ipc-proto/src/lib.rs:2375:    pub battery: Option<Battery>,
+duck-ipc-proto/src/lib.rs:2376:    /// Hottest servo, when temperatures have been read. Same rule as the battery: reported,
+duck-ipc-proto/src/lib.rs:2457:/// [`Battery`], [`MotorThermal`], [`LoopHealth`] — do **not** get the same treatment: a
+duck-ipc-proto/src/lib.rs:2513:/// Motor-bus voltage, and what fraction of a pack that is.
+duck-ipc-proto/src/lib.rs:2515:/// Both, deliberately. Volts is the measurement; percent is a *mapping* over a pack the
+duck-ipc-proto/src/lib.rs:2516:/// robot knows and a client should not have to (`duck_control::model::battery_percent`).
+duck-ipc-proto/src/lib.rs:2517:/// The prototype shipped volts only, and the mapping was duplicated into the app — which is
+duck-ipc-proto/src/lib.rs:2518:/// how two screens end up disagreeing about the same battery.
+duck-ipc-proto/src/lib.rs:2520:pub struct Battery {
+duck-ipc-proto/src/lib.rs:2521:    pub volts: f64,
+duck-ipc-proto/src/lib.rs:3187:    /// The sensor generation that answered, e.g. `VL53L8CX`. `None` when there is
+duck-ipc-proto/src/lib.rs:328:    // on one UART corrupt each other's replies. The daemon owns the bus; ask the daemon.
+duck-ipc-proto/src/lib.rs:3336:    /// There is room: the controller reports a 251-byte advertising budget and a full quartet's
+duck-ipc-proto/src/lib.rs:4322:    /// beacon — a lenient read would seat a quartet from three ducks' worth of bytes.
+duck-ipc-proto/src/lib.rs:4608:    /// An absent battery must stay absent, not become zero volts.
+duck-ipc-proto/src/lib.rs:4614:    fn a_missing_battery_is_unknown_not_empty() {
+duck-ipc-proto/src/lib.rs:4616:        assert!(answer.battery.is_none());
+duck-ipc-proto/src/lib.rs:4622:        assert!(!serde_json::to_string(&unread).unwrap().contains("battery"));
+duck-ipc-proto/src/lib.rs:4625:            battery: Some(Battery {
+duck-ipc-proto/src/lib.rs:4626:                volts: 7.62,
+duck-ipc-proto/src/lib.rs:4632:        assert!(line.contains(r#""volts":7.62"#), "{line}");
+duck-ipc-proto/src/lib.rs:4671:        let secret = "correct horse battery staple";
+duck-ipc-proto/src/lib.rs:4786:        let from_the_future = r#"{"at":1700000001,"event":"quantum_realignment","spin":7}"#;
+duck-ipc-proto/src/lib.rs:853:            // (`BUSY`), and queueing it behind the update would turn that into a spinner that
+duckctl/examples/advwatch.rs:42:    let wanted = std::env::args().nth(1).unwrap_or("radxa-zero3".to_owned());
+duckctl/src/main.rs:1777:        let reported = "radxa-zero3 [duck-c51b]";
+duckctl/src/main.rs:1779:        assert!(answers_to(reported, "radxa-zero3"), "the cached GAP name");
+duckctl/src/main.rs:1822:            candidates(&["duck-aaaa", "radxa-zero3 [duck-c51b]"]),
+duckctl/src/main.rs:1831:    /// from one image is full of `radxa-zero3`. Whichever the scan reported first is not a choice,
+duckctl/src/main.rs:1836:            candidates(&["radxa-zero3", "radxa-zero3", "duck-c51b"]),
+duckctl/src/main.rs:1837:            &asked_for("radxa-zero3"),
+duckctl/src/main.rs:1843:        assert!(error.contains("radxa-zero3, radxa-zero3"), "{error}");
+duckctl/src/main.rs:1852:        let from_env = Target::new(None, Some("radxa-zero3".to_owned()));
+duckctl/src/main.rs:1853:        let error = choose(candidates(&["radxa-zero3", "radxa-zero3"]), &from_env)
+duckctl/src/main.rs:1916:            &candidates(&["radxa-zero3 [olducky]"]),
+duckctl/src/main.rs:1934:            any_answers(&candidates(&["radxa-zero3", "radxa-zero3"]), "radxa-zero3"),
+duckctl/src/main.rs:2073:            target.marks(Some("radxa-zero3 [duck-c51b]")),
+duckctl/src/main.rs:207:/// `radxa-zero3 [duck-c51b]` (`corebluetooth/internal.rs`, `on_discovered_peripheral`).
+duckctl/src/main.rs:210:/// name is BlueZ's adapter alias, hostname-derived and therefore `radxa-zero3` on every board
+duckctl/src/main.rs:364:/// from one image answers to `radxa-zero3`.
+duckctl/src/main.rs:417:/// and data on stdout: `ssh radxa@$(duckctl ip)` only works if that is the whole of what stdout
+duckctl/src/main.rs:792:    /// `ssh radxa@$(duckctl ip)`. Read from the advertisement `btd` already broadcasts, so no
+hooks/preinstall.in:188:# `npu@fde40000` disabled on every Radxa Zero 3, so the first update carrying this enables the node
+kinematics/src/head.rs:18:/// Sensor frame (+x forward, +y left, +z up — the VL53L5CX/L8CX integration
+kinematics/src/math.rs:146:    /// A quarter turn about +z takes +x to +y — the one orientation everyone
+kinematics/src/math.rs:150:    fn quarter_turn_about_z_sends_x_to_y() {
+kinematics/src/math.rs:155:        // Two quarter turns composed = one half turn: +x to -x.
+kinematics/src/tof.rs:27:/// The grid every VL53L5CX/L8CX ranges in 8×8 mode.
+kinematics/src/tof.rs:300:            "three quarters of the way to the floor is an obstacle: {:?}",
+mediad/src/detect.rs:11://! **Paced, and the pace is a thermal number.** Flat out on a Radxa Zero 3 the detector reaches
+mediad/src/detect.rs:292:/// receives is the picture the camera took — sideways, on a robot whose camera is mounted a quarter
+mediad/src/exposure.rs:4://! does white balance, the colour matrix, gamma and noise reduction, and `scripts/setup-rkaiq.sh`
+mediad/src/exposure.rs:71:/// The IMX219 in the mode [`crate::pipeline`] pins (1920x1080, one line ≈ 19.05 µs).
+mediad/src/main.rs:78:    /// **90, because the head camera is mounted a quarter turn off**, and this is the one place that
+mediad/src/main.rs:88:    /// `rkaiq_3A_server` owns white balance, gamma and noise reduction, and its AE converges the
+mediad/src/pipeline.rs:1021:        "read {nodes} media device(s) and none has an imx219 entity. The overlay loaded something, \
+mediad/src/pipeline.rs:102:/// So the pipeline no longer rotates pixels. The camera is still mounted a quarter turn off, and the
+mediad/src/pipeline.rs:112:    /// A quarter turn clockwise: what this robot's mount needs.
+mediad/src/pipeline.rs:115:    /// A quarter turn anticlockwise, for a head assembled the other way round.
+mediad/src/pipeline.rs:1386:    /// A quarter turn swaps the frame's axes; a half turn does not.
+mediad/src/pipeline.rs:1393:    fn a_quarter_turn_swaps_the_frame_size() {
+mediad/src/pipeline.rs:1400:    /// The mount is a quarter turn clockwise, and `90r` is GStreamer's name for that.
+mediad/src/pipeline.rs:145:    /// The frame size after the turn. A quarter turn swaps the axes; a half turn does not.
+mediad/src/pipeline.rs:28://! **Nothing converts and nothing rotates.** The head camera is mounted a quarter turn off, and for
+mediad/src/pipeline.rs:317:    // offers a two-plane, non-contiguous `NM12` alongside single-plane formats, and asking for
+mediad/src/pipeline.rs:318:    // GStreamer `NV12` selects `NM12` — which `v4l2src` cannot push at full rate on this driver
+mediad/src/pipeline.rs:323:    // | `NV12` (selects `NM12`, 2 planes) | 19.5 fps | 19.6 fps |
+mediad/src/pipeline.rs:480:    // would fail negotiation on a quarter turn, and silently describe the wrong shape on a half
+mediad/src/pipeline.rs:602:                // `NM12` this used to carry, where mapping silently copied two non-contiguous
+mediad/src/pipeline.rs:793:/// Single-plane on purpose: `v4l2src` cannot drive rkisp's two-plane `NM12` at full rate, and
+mediad/src/pipeline.rs:825:/// contiguous `NV12` — it offers the two-plane `NM12`, which `v4l2src` prefers and which only a
+mediad/src/pipeline.rs:917:/// Switch the IMX219 out of its boot mode, which caps capture at 21 fps.
+mediad/src/pipeline.rs:924:/// entity whose name embeds its I2C bus and address (`m00_b_imx219 2-0010`) and therefore has to
+mediad/src/pipeline.rs:94:/// **This defaulted to a quarter turn for one afternoon and cost 145% of a core.** `mpph264enc`
+mediad/src/pipeline.rs:951:/// The media device and entity name of the IMX219, from the topology.
+mediad/src/pipeline.rs:953:/// Matched on a substring rather than a fixed name: the entity is `m00_b_imx219 2-0010`, which
+mediad/src/pipeline.rs:954:/// embeds the I2C bus and address, and those move with the overlay.
+mediad/src/pipeline.rs:957:/// reported "no imx219 entity" for all of them, which sent the first real run chasing the
+mediad/src/pipeline.rs:988:            // "- entity 76: m00_b_imx219 2-0010 (1 pad, 1 link, 0 routes)"
+mediad/src/pipeline.rs:990:            if !line.starts_with("- entity") || !line.contains("imx219") {
+mediad/src/session.rs:59:/// quarter turn off. The page cannot work out by how much: a 180° mount is indistinguishable from an
+mediad/src/session.rs:60:/// upright one, and even a quarter turn is only a guess from the aspect ratio. So it is told.
+mediad/src/upstream.rs:32:/// Long enough for a loaded board, short enough that a peer gets an answer rather than a spinner.
+mediad/systemd/mediad.service:63:# fixed and is not worth writing down: on a Radxa Zero 3 the display and Mali already hold 128 and
+mediad/webclient/index.html:234:      <tr><th>battery</th><td id="t-battery">–</td></tr>
+mediad/webclient/index.html:635:    $("t-battery").textContent = health.battery
+mediad/webclient/index.html:636:      ? `${health.battery.volts.toFixed(2)} V · ${Math.round(health.battery.percent)}%`
+mediad/webclient/index.html:71:     quarter turn off and nothing on the robot rotates the picture — so this does, on the GPU.
+mediad/webclient/index.html:835:  const quarter = mountRotation === 90 || mountRotation === 270;
+mediad/webclient/index.html:836:  const [uw, uh] = quarter ? [height, width] : [width, height];
+mediad/webclient/index.html:84:  /* `100cqh`/`100cqw` are the wrapper's own height and width — the quarter turn's axis swap, done by
+padd/src/main.rs:151:/// of the time there is no pad connected at all — spinning at the control rate to discover that
+padd/src/tap.rs:75:/// It bounds a spin. Two of the ways a stream ends leave the state that started it unchanged — the
+padd/src/tap.rs:82:/// A quarter of a second: four attempts a second is nothing, and nobody notices it when a pad that
+padd/systemd/padd.service:53:# for is a boot finishing or a daemon restarting, neither of which is helped by spinning.
+policies/README.md:68:walk  = "/home/radxa/my_walk.onnx"
+policies/README.md:69:stand = "/home/radxa/my_stand.onnx"
+robotctl/src/duck.rs:348:    /// Camera azimuth, radians. Starts on the three-quarter view the sim opens with.
+robotctl/src/main.rs:1212:/// command that failed because of a low battery would be a command nobody could script.
+robotctl/src/main.rs:1347:            if let Some(b) = &health.battery {
+robotctl/src/main.rs:1351:                    "battery", b.volts, b.percent
+robotctl/src/main.rs:2279:/// in a daemon.** Measured on a Radxa Zero 3W on 2026-08-19: with `btd` running, a pad cannot form a
+robotctl/src/main.rs:237:    /// and bus numbers behind it, the IMU, the battery and the motor temperatures. Software
+robotctl/src/main.rs:3545:                battery: Some(proto::Battery {
+robotctl/src/main.rs:3546:                    volts: 7.62,
+robotctl/src/main.rs:3617:    /// Hz" and "0.00 V" describe a stopped loop on a dead battery — the opposite of a robot
+robotctl/src/main.rs:3647:        // No battery line and no motors line at all, rather than zeroed ones.
+robotctl/src/main.rs:4027:    /// `robotctl health` on the Radxa reported "robotd is running 0.1.4 but the installed
+robotctl/src/monitor.rs:1168:    /// The last answer to `robot.health`: the battery, the temperatures, the bus counters and
+robotctl/src/monitor.rs:119:/// slowest thing on the answer — the battery, which `robotd` reports as a ~10 s EMA — so a
+robotctl/src/monitor.rs:130:/// Battery percentages the reading is coloured at.
+robotctl/src/monitor.rs:132:/// Not display taste: 0% is `duck_control::model::BATTERY_EMPTY_V`, which is the voltage at
+robotctl/src/monitor.rs:135:const BATTERY_LOW_PCT: f64 = 30.0;
+robotctl/src/monitor.rs:136:const BATTERY_CRITICAL_PCT: f64 = 15.0;
+robotctl/src/monitor.rs:1817:                None => " power   asking robotd for the battery…".to_owned(),
+robotctl/src/monitor.rs:1825:        // The charge first, and unconditionally. 0% is `BATTERY_EMPTY_V`, which is where
+robotctl/src/monitor.rs:1828:        said.push(match &health.battery {
+robotctl/src/monitor.rs:1830:                format!("batt {:.2} V {:.0}%", b.volts, b.percent),
+robotctl/src/monitor.rs:1831:                if b.percent <= BATTERY_CRITICAL_PCT {
+robotctl/src/monitor.rs:1833:                } else if b.percent <= BATTERY_LOW_PCT {
+robotctl/src/monitor.rs:259:    /// One answer to `robot.health` — the battery, the temperatures, the bus counters and the
+robotctl/src/monitor.rs:3209:            battery: Some(proto::Battery {
+robotctl/src/monitor.rs:3210:                volts: 7.66,
+robotctl/src/monitor.rs:3263:    /// The pack's charge is on the frame, in volts *and* as a fraction — the mapping between
+robotctl/src/monitor.rs:3265:    /// cannot disagree about the same battery.
+robotctl/src/monitor.rs:3278:    /// An unread battery says so. Rendered as `0.00 V, 0%` it would put a flat-pack warning in
+robotctl/src/monitor.rs:3282:    fn an_unmeasured_battery_is_not_an_empty_one() {
+robotctl/src/monitor.rs:3284:            battery: None,
+robotctl/src/monitor.rs:3302:            waiting.contains("asking robotd for the battery"),
+robotctl/src/monitor.rs:3350:            battery: None,
+robotctl/src/monitor.rs:340:    // A fourth connection — to the daemon the first one is already streaming from. The battery,
+robotctl/src/monitor.rs:3717:                sensor: Some("VL53L8CX".to_owned()),
+robotctl/src/monitor.rs:3726:        assert!(live.contains("tof VL53L8CX"), "{live}");
+robotctl/src/monitor.rs:591:/// stream is being rendered on the first, and a battery reading that stopped arriving is not a
+robotctl/src/monitor.rs:814:    // without spinning. Clamped: `--hz 1000` must not turn this into a busy loop.
+robotd-params/src/lib.rs:1116:        let path = write(dir.path(), "[bus]\nport = \"/dev/ttyUSB0\"\n");
+robotd-params/src/lib.rs:1118:        assert_eq!(p.bus.port, "/dev/ttyUSB0");
+robotd-params/src/lib.rs:1213:            from_file.safety.battery_empty_shutdown,
+robotd-params/src/lib.rs:1214:            built_in.safety.battery_empty_shutdown
+robotd-params/src/lib.rs:1269:        assert!(!p.voltage_adapt, "off by default in the prototype");
+robotd-params/src/lib.rs:1270:        assert_eq!(p.nominal_voltage, 7.4);
+robotd-params/src/lib.rs:1473:    /// Zero would divide by zero when computing the period; absurdly high would spin.
+robotd-params/src/lib.rs:265:    /// **2 Hz is a thermal number, not a taste.** Flat out on a Radxa Zero 3 this reaches 95 °C and
+robotd-params/src/lib.rs:301:    /// disabled in its device tree (which is how Armbian ships the Radxa Zero 3) or which never ran
+robotd-params/src/lib.rs:559:    /// Scale actions with battery voltage: effective scale × (nominal / measured). The
+robotd-params/src/lib.rs:562:    pub voltage_adapt: bool,
+robotd-params/src/lib.rs:563:    /// Reference voltage for `voltage_adapt` — the supply the gains were identified at.
+robotd-params/src/lib.rs:564:    pub nominal_voltage: f64,
+robotd-params/src/lib.rs:600:    pub voltage_adapt: bool,
+robotd-params/src/lib.rs:601:    pub nominal_voltage: f64,
+robotd-params/src/lib.rs:670:            voltage_adapt: self.voltage_adapt,
+robotd-params/src/lib.rs:671:            nominal_voltage: self.nominal_voltage,
+robotd-params/src/lib.rs:688:    /// Sit down and power the machine off when the battery EMA reaches the empty floor
+robotd-params/src/lib.rs:689:    /// (6.6 V — `duck_control::model::BATTERY_EMPTY_V`). The EMA moves over ~10 s, so a
+robotd-params/src/lib.rs:691:    pub battery_empty_shutdown: bool,
+robotd-params/src/lib.rs:760:            voltage_adapt: false,
+robotd-params/src/lib.rs:761:            nominal_voltage: 7.4,
+robotd-params/src/lib.rs:773:            battery_empty_shutdown: true,
+robotd-params/src/lib.rs:791:    /// Serial port the servos and the IMU board share. The Radxa Zero 3W wires them to
+robotd-params/src/lib.rs:792:    /// `/dev/ttyS2`.
+robotd-params/src/lib.rs:800:    /// Pi Zero 2W — re-derive it on the Radxa rather than trusting it.
+robotd-params/src/lib.rs:813:/// battery, the motor temperatures and the loop counters, and none of those may reach a verdict
+robotd-params/src/lib.rs:848:            port: "/dev/ttyS2".into(),
+robotd-params/src/registry.rs:16://! for four paragraphs on voltage adaptation.
+robotd-params/src/registry.rs:206:        "policy.voltage_adapt",
+robotd-params/src/registry.rs:208:        "Scale actions with battery voltage (nominal/measured)",
+robotd-params/src/registry.rs:211:        "policy.nominal_voltage",
+robotd-params/src/registry.rs:213:        "Reference voltage the gains were identified at",
+robotd-params/src/registry.rs:237:        "safety.battery_empty_shutdown",
+robotd-params/src/registry.rs:239:        "Sit and power off when the battery EMA reaches empty",
+robotd-params/src/registry.rs:573:                "policy.voltage_adapt",
+robotd-params/src/registry.rs:574:                "safety.battery_empty_shutdown",
+robotd-params/src/registry.rs:80:    entry("bus.port", Kind::Text, "Dynamixel serial port device"),
+robotd/src/control.rs:302:    /// `scale_mult` multiplies the action scale — voltage adaptation, 1.0 when off.
+robotd/src/main.rs:108:/// **One dropped Dynamixel transaction is ordinary** — `robotd` says so itself when it logs
+robotd/src/main.rs:1574:        // The battery reading is a ~10 s EMA refreshed once a second, so a load sag cannot
+robotd/src/main.rs:1576:        let battery_v = f64::from_bits(state.battery_v.load(Ordering::Relaxed));
+robotd/src/main.rs:1577:        let battery_empty = params.safety.battery_empty_shutdown
+robotd/src/main.rs:1578:            && battery_v > 0.0
+robotd/src/main.rs:1579:            && battery_v <= duck_control::model::BATTERY_EMPTY_V;
+robotd/src/main.rs:1580:        if !powered_off && shutdown_sit.is_none() && (intents.take_shutdown() || battery_empty) {
+robotd/src/main.rs:1586:                tracing::warn!(battery_empty, "shutdown: sitting down before power off");
+robotd/src/main.rs:1597:                tracing::warn!(battery_empty, "shutdown: cutting torque and powering off");
+robotd/src/main.rs:1926:        // Voltage adaptation: the servos' effective kP tracks their supply, so scaling the
+robotd/src/main.rs:1930:        let scale_mult = if policy_cfg.voltage_adapt && battery_v > 0.0 {
+robotd/src/main.rs:1931:            policy_cfg.nominal_voltage / battery_v.clamp(6.0, 9.5)
+robotd/src/main.rs:2250:                    battery_v = format!(
+robotd/src/main.rs:2252:                        f64::from_bits(state.battery_v.load(Ordering::Relaxed))
+robotd/src/main.rs:2362:/// Not part of the tick. The voltage/temperature registers are a second bus transaction —
+robotd/src/main.rs:2385:            let previous = f64::from_bits(state.battery_v.load(Ordering::Relaxed));
+robotd/src/main.rs:2387:            // spend ten seconds reporting a battery flatter than it is.
+robotd/src/main.rs:2389:                BATTERY_EMA_ALPHA * slow.volts + (1.0 - BATTERY_EMA_ALPHA) * previous
+robotd/src/main.rs:2391:                slow.volts
+robotd/src/main.rs:2393:            state.battery_v.store(smoothed.to_bits(), Ordering::Relaxed);
+robotd/src/main.rs:2412:        // dropping to "unknown" over one would make the reported battery flicker. A bus that
+robotd/src/main.rs:353:    /// Motor-bus voltage, EMA-smoothed, as `f64::to_bits`. Zero means *not read yet* — a
+robotd/src/main.rs:354:    /// distinction that has to survive to the wire, since zero volts and unknown volts look
+robotd/src/main.rs:356:    battery_v: AtomicU64,
+robotd/src/main.rs:358:    /// joint it was. Zero means *not read yet*, same as the battery.
+robotd/src/main.rs:3665:        // The battery must read as healthy, or this would also exercise the empty-pack path.
+robotd/src/main.rs:4124:    /// **The invariant the battery field lives or dies by.** A flat pack must be reported and
+robotd/src/main.rs:4127:    /// If it ever did, updating a robot on a low battery would roll the release back — and the
+robotd/src/main.rs:4128:    /// replacement would be judged on the same low battery, so the robot could not be updated
+robotd/src/main.rs:4130:    /// keep board conditions out of the rollback decision; a battery that gated would walk
+robotd/src/main.rs:4133:    fn a_flat_battery_is_reported_and_changes_no_verdict() {
+robotd/src/main.rs:4136:        // Below BATTERY_EMPTY_V: the pack is done and the robot is struggling.
+robotd/src/main.rs:4137:        s.battery_v.store(6.1f64.to_bits(), Ordering::Relaxed);
+robotd/src/main.rs:4140:        let battery = health.battery.expect("a flat battery is still a reading");
+robotd/src/main.rs:4141:        assert!(battery.volts < duck_control::BATTERY_EMPTY_V);
+robotd/src/main.rs:4142:        assert_eq!(battery.percent, 0.0);
+robotd/src/main.rs:4148:    /// Zero volts is what the atomic holds before the first read lands, and it must reach the
+robotd/src/main.rs:4150:    /// flat battery on every robot that has been up for less than a second.
+robotd/src/main.rs:4152:    fn an_unread_battery_is_absent_not_empty() {
+robotd/src/main.rs:4155:        assert_eq!(s.battery_v.load(Ordering::Relaxed), 0);
+robotd/src/main.rs:4156:        assert!(s.health().battery.is_none());
+robotd/src/main.rs:4162:    fn battery_is_reported_alongside_an_unhealthy_verdict() {
+robotd/src/main.rs:4165:        s.battery_v.store(7.5f64.to_bits(), Ordering::Relaxed);
+robotd/src/main.rs:4171:            health.battery.is_some(),
+robotd/src/main.rs:4172:            "battery dropped from a bad answer"
+robotd/src/main.rs:451:            battery_v: AtomicU64::new(0),
+robotd/src/main.rs:493:                battery: self.battery(),
+robotd/src/main.rs:496:                    // Zero is "never read", the same sentinel the battery uses: a board at
+robotd/src/main.rs:602:    /// The last battery reading, mapped to a percentage — or `None` if there has not been
+robotd/src/main.rs:607:    /// would put a flat-battery warning in front of anyone whose robot has been up for less
+robotd/src/main.rs:609:    fn battery(&self) -> Option<proto::Battery> {
+robotd/src/main.rs:610:        let volts = f64::from_bits(self.battery_v.load(Ordering::Relaxed));
+robotd/src/main.rs:611:        (volts > 0.0).then(|| proto::Battery {
+robotd/src/main.rs:612:            volts,
+robotd/src/main.rs:613:            percent: duck_control::battery_percent(volts),
+robotd/src/main.rs:743:    let mut io = match duck_control::bus::DynamixelIo::open(&params.bus.port) {
+robotd/src/main.rs:846:type BusIo = duck_control::bus::DynamixelIo;
+robotd/src/main.rs:887:    let mut io = match duck_control::bus::DynamixelIo::open(port) {
+robotd/src/main.rs:94:/// Smoothing on the reported battery voltage. At one sample per [`RATE_WINDOW`] this is a
+robotd/src/main.rs:95:/// ~10 s time constant, which is what makes the number readable: the raw voltage sags
+robotd/src/main.rs:96:/// several tenths of a volt on every step and recovers between them, so an unsmoothed
+robotd/src/main.rs:977:    /// Linear, like `DynamixelIo::interpolate_to` which `robotd init` uses — same shape, except this
+robotd/src/main.rs:99:const BATTERY_EMA_ALPHA: f64 = 0.1;
+robotd/src/soc.rs:20:/// **The maximum across zones, not the CPU's alone.** A Radxa Zero 3 exposes `soc-thermal` and
+robotd/src/soc.rs:4://! the Dynamixel bus. It is a `sysfs` read, so it belongs to the daemon that runs on a Linux
+robotd/src/sound.rs:61:/// the alternative was a quartet that saturated, which is what the first run on the robot sounded
+robotd/systemd/robotd.service:17:# Target: Radxa Zero 3 (aarch64) running Armbian 26.2.x with the Debian 13 (Trixie)
+robotd/systemd/robotd.service:37:# Root for now, because motor control needs the i2c/spi/gpio character devices. This
+robotd/systemd/robotd.service:56:# zero, so a robotd that cannot start does not spin.
+robotd/tests/updater_gate.rs:116:    /// battery this exists to look at. These are the bytes `robotctl health` sends.
+robotd/tests/updater_gate.rs:289:/// The battery reaches the wire, mapped, from a real process.
+robotd/tests/updater_gate.rs:291:/// The only test that covers the whole chain: the loop calling `RobotIo::bus_voltage`, the
+robotd/tests/updater_gate.rs:292:/// EMA, the published atomic, the volts→percent mapping, and the JSON. Unit tests write the
+robotd/tests/updater_gate.rs:294:/// is precisely the bug worth catching, because on a board it looks like a flat battery.
+robotd/tests/updater_gate.rs:296:async fn real_robotd_reports_a_mapped_battery() {
+robotd/tests/updater_gate.rs:305:    while health.battery.is_none() && Instant::now() < deadline {
+robotd/tests/updater_gate.rs:310:    let battery = health
+robotd/tests/updater_gate.rs:311:        .battery
+robotd/tests/updater_gate.rs:312:        .expect("battery must be sampled within a few seconds of the loop starting");
+robotd/tests/updater_gate.rs:315:        (battery.volts - 7.4).abs() < 0.01,
+robotd/tests/updater_gate.rs:316:        "expected the fake bus voltage, got {battery:?}"
+robotd/tests/updater_gate.rs:319:        (battery.percent - 50.0).abs() < 1.0,
+robotd/tests/updater_gate.rs:320:        "percent must be mapped from volts, got {battery:?}"
+robotd/tests/updater_gate.rs:51:        // No Dynamixel bus here, and there must never need to be: this test runs in CI and
+scripts/bake-duck-mesh.py:140:    # more triangles than a 22 mm bearing. Instanced meshes (the xl330 appears a dozen
+scripts/bake-duck-mesh.py:44:    "pcb__raspberry_pi_zero_2_w",
+scripts/board-test.sh:4:# Target: Radxa Zero 3 (RK3566, Cortex-A55 → aarch64) running Armbian 26.2.x.
+scripts/board-test.sh:525:Name = radxa
+scripts/board-test.sh:528:# The wrong overlay prefix and a console on the motor UART: what Armbian actually ships.
+scripts/board-test.sh:536:# The RK3566 shares overlays with the RK3568, so the wrong prefix boots happily with no
+scripts/board-test.sh:537:# /dev/ttyS2 at all.
+scripts/board-test.sh:539:grep -E "^overlays=" /boot/armbianEnv.txt | grep -qw uart2-m0
+scripts/board-test.sh:540:echo "    [ok] setup-board fixes overlay_prefix and enables uart2-m0"
+scripts/board-test.sh:550:echo "    [ok] setup-board takes the kernel console off the UART"
+scripts/board-test.sh:557:test "$(grep -c uart2-m0 /boot/armbianEnv.txt)" = 1
+scripts/board-test.sh:561:# now had both ways round. `Privacy = device` is what a Radxa Zero 3W was measured bonding an Xbox
+scripts/dev-push.sh:178:# both tools — and empty means unset in both, so `DUCK_ROBOT= scripts/dev-push.sh radxa@…` works.
+scripts/dev-push.sh:199:    echo "  scripts/dev-push.sh radxa@192.168.1.42" >&2
+scripts/dev-push.sh:82:# nobody can keep in a shell profile: `DUCK_BOARD=radxa@192.168.1.42` goes stale, and the way
+scripts/dev-push.sh:92:BOARD_USER="${DUCK_BOARD_USER:-radxa}"
+scripts/install.sh:207:# The board has no battery-backed RTC. A clock reading 1970 fails TLS certificate-date
+scripts/install.sh:7:# Target: 64-bit Debian userland on aarch64 — Armbian 26.2.x on the Radxa Zero 3, and
+scripts/install.sh:962:MOTOR_PORT="${MOTOR_PORT:-/dev/ttyS2}"
+scripts/install.sh:966:        # Existing is not the same as usable. Armbian runs a login console on this UART by
+scripts/migrate-network.sh:184:  On a board with no battery-backed RTC this is usually the clock: a system reading 1970
+scripts/pad-link-test.sh:310:            # this the loop spins at full CPU for the rest of the window — on a robot that is being
+scripts/pad-stack-report.sh:13:# including the volatile parts — who is connected, what the battery says, when it ran. None of that
+scripts/pad-stack-report.sh:155:# The radio as the kernel has it wired up: the driver bound to it, and for a UART-attached part the
+scripts/pad-stack-report.sh:306:    # The controller's own firmware, which on a UART-attached radio is a blob the kernel loads at
+scripts/pad-stack-report.sh:313:            | grep -iE 'firmware|patch|version|chip|hci_uart|RTL|BCM' | tail -6 \
+scripts/pad-stack-report.sh:58:WATCHED_MODULES="bluetooth hci_uart btusb btrtl btbcm hidp uhid joydev"
+scripts/pad-stack-report.sh:635:# other board could differ on; nothing here is an address, a timestamp or a battery level.
+scripts/provision-board.sh:41:#                     for a Radxa Zero 3W that pairs a gamepad only while `btd` is out of the way.
+scripts/provision-board.sh:55:#   --weird-ble       for a Radxa Zero 3W whose Bluetooth cannot bond a gamepad at all, even with
+scripts/provision-board.sh:5:#   ./scripts/provision-board.sh radxa@192.168.1.42
+scripts/provision-board.sh:8:# normal case on this hardware: mDNS on the Radxa image is unreliable, so `radxa-zero3.local`
+scripts/provision.sh:111:# Off by default because most Radxa Zero 3W units do not need it and the workarounds have a cost:
+scripts/provision.sh:119:# **On** by default, since it installed cleanly and reported correctly on a Radxa Zero 3W
+scripts/provision.sh:315:# is wrong on this hardware: the board has no battery-backed RTC, starts at 1970, and NTP steps
+scripts/provision.sh:325:# there is no /dev/ttyS2 — `robotd` would start, see no bus, and report a hardware fault that
+scripts/provision.sh:32:#   - Phase 2 runs against live boot config, so the motor UART exists by the time `robotd`
+scripts/provision.sh:793:  so there is no /dev/ttyS2, and robotd would start and report a hardware fault that is
+scripts/rkaiq-modinfo-shim.c:1:/* LD_PRELOAD shim for rkaiq_3A_server on the Radxa Zero 3W (RK3566).
+scripts/rkaiq-modinfo-shim.c:28: * Carried here from the prototype (microduck_runtime/radxa_setup) unchanged in
+scripts/rkaiq-modinfo-shim.c:29: * substance: it is the only thing that makes the Radxa engine deb run on the
+scripts/rkaiq-modinfo-shim.c:7: * the Radxa camera-engine-rkaiq deb was built against different headers
+scripts/setup-board.sh:108:# Only what `robotd` needs. The prototype also enables i2c-gpio-pihat, aic3104-pihat and a
+scripts/setup-board.sh:109:# camera overlay; none apply here — our IMU rides the Dynamixel bus rather than I²C, and
+scripts/setup-board.sh:111:REQUIRED_OVERLAY=uart2-m0
+scripts/setup-board.sh:161:# Which serial port the *running* kernel prints to — bare tty name, no baud — or nothing.
+scripts/setup-board.sh:168:# SoC debug UART — uart2 on the RK3566, which is the motor bus — so a kernel printing there
+scripts/setup-board.sh:177:        # console=ttyS2,1500000 — the baud is not part of the device name.
+scripts/setup-board.sh:20:# Radxa Zero 3W on Armbian. Nothing here is specific to a robot revision.
+scripts/setup-board.sh:221:# Enable the UART the Dynamixel bus lives on.
+scripts/setup-board.sh:226:#  1. Armbian ships `overlay_prefix=rk35xx`, but the RK3566 shares device-tree overlays with
+scripts/setup-board.sh:228:#     nothing, boots happily, and there is no /dev/ttyS2.
+scripts/setup-board.sh:237:  Enable the UART that ${MOTOR_PORT} lives on by whatever means this image provides, then
+scripts/setup-board.sh:375:# Take the login console off the motor UART.
+scripts/setup-board.sh:377:# UART2 is the RK3566 debug console, so Armbian runs `serial-getty@ttyS2` on it by default.
+scripts/setup-board.sh:378:# A getty does not merely hold the port open — it *reads* from it, consuming the Dynamixel
+scripts/setup-board.sh:384:# and every servo visible to other tools. `fuser -v /dev/ttyS2` naming `agetty` was the
+scripts/setup-board.sh:387:# Two halves, because two things write to that UART:
+scripts/setup-board.sh:38:# The Dynamixel bus. Every servo and the imu_to_dxl board share it, so without this there
+scripts/setup-board.sh:395:#     and takes it off the UART.
+scripts/setup-board.sh:397:# A UART cannot be both a console and a motor bus. Choosing the motor bus is the whole point
+scripts/setup-board.sh:40:MOTOR_PORT="${MOTOR_PORT:-/dev/ttyS2}"
+scripts/setup-board.sh:414:        say "taking the kernel console off the motor UART (console=display)"
+scripts/setup-board.sh:428:# The split. On a fresh Armbian with nothing installed, some Radxa Zero 3W units bond an Xbox pad
+scripts/setup-board.sh:489:#      hardware i2c3 bus on header pins 3/5, and the codec + I²S sound card grafted onto it.
+scripts/setup-board.sh:490:#      (The prototype also kept a bit-banged i2c-gpio fallback; it was the revert path for
+scripts/setup-board.sh:534:    # 1. Packages. i2c-tools is here rather than with the ToF below because it is
+scripts/setup-board.sh:535:    #    what *creates the `i2c` group* (its postinst does), and both the codec and
+scripts/setup-board.sh:536:    #    the ToF sit on that bus — plus `i2cdetect` is the first thing anyone runs
+scripts/setup-board.sh:538:    audio_pkgs="alsa-utils device-tree-compiler dkms gcc make i2c-tools"
+scripts/setup-board.sh:586:        for ov_name in i2c3-pihat aic3104-i2c3; do
+scripts/setup-board.sh:610:    for f in dkms.conf Makefile tlv320aic3x.c tlv320aic3x.h tlv320aic3x-i2c.c; do
+scripts/setup-board.sh:617:        for f in dkms.conf Makefile tlv320aic3x.c tlv320aic3x.h tlv320aic3x-i2c.c; do
+scripts/setup-board.sh:692:# The sensor is a VL53L5CX or VL53L8CX on the *same* i2c3 bus the audio codec is
+scripts/setup-board.sh:694:# vendor kernel, and i2c-tools (which is what creates the `i2c` group `tofd`
+scripts/setup-board.sh:697:# `/dev/i2c-3` is what the overlay happens to produce today, and a kernel or
+scripts/setup-board.sh:699:# across that. `tofd` also falls back to `/dev/i2c-3` on a board provisioned
+scripts/setup-board.sh:702:    rule=/etc/udev/rules.d/99-robot-i2c-pihat.rules
+scripts/setup-board.sh:703:    # Two matchers, one per bus flavour the board may end up with: the RK3566's
+scripts/setup-board.sh:704:    # i2c3 controller by its device-tree address, and the bit-banged i2c-gpio bus
+scripts/setup-board.sh:706:    content='SUBSYSTEM=="i2c-dev", KERNELS=="fe5c0000.i2c", SYMLINK+="i2c-pihat"
+scripts/setup-board.sh:707:SUBSYSTEM=="i2c-dev", ATTR{name}=="i2c-gpio-pihat", SYMLINK+="i2c-pihat"'
+scripts/setup-board.sh:710:        say "ToF: /dev/i2c-pihat rule already in place"
+scripts/setup-board.sh:713:    say "ToF: installing the /dev/i2c-pihat udev rule"
+scripts/setup-board.sh:719:    udevadm trigger --subsystem-match=i2c-dev 2>/dev/null || true
+scripts/setup-board.sh:728:# Armbian ships it as `radxa-zero3-rpi-camera-v2.dtbo` with no `rk3568-` prefix, while this
+scripts/setup-board.sh:730:# `rk3568-radxa-zero3-rpi-camera-v2.dtbo`, finds nothing, and boots happily with no camera.
+scripts/setup-board.sh:738:# `DUCK_CAMERA_OVERLAY` selects another module — `radxa-zero3-rpi-camera-v1.3` is the Pi Cam
+scripts/setup-board.sh:739:# v1.3 / OV5647, which nothing here has tested.
+scripts/setup-board.sh:748:    cam="${DUCK_CAMERA_OVERLAY:-radxa-zero3-rpi-camera-v2}"
+scripts/setup-board.sh:940:  console=serial. Kernel messages on the motor UART corrupt servo replies intermittently,
+scripts/setup-board.sh:997:    # A board with no battery-backed RTC reading 1970 fails TLS certificate validation, and
+scripts/setup-gstreamer.sh:122:#                               finds no camera (`microduck_runtime/radxa_setup/setup.md`).
+scripts/setup-gstreamer.sh:386:  silently omitted from a plugin that contains them — which is what made Radxa's own deb look
+scripts/setup-gstreamer.sh:396:    R=https://radxa-repo.github.io/bullseye/pool/main
+scripts/setup-gstreamer.sh:40:# Radxa Zero 3W on Armbian, Debian 13 (trixie) userland. `apt-cache policy` on a provisioned
+scripts/setup-gstreamer.sh:429:# Rockchip's MPP and RGA runtime libraries, from Radxa's pool.
+scripts/setup-gstreamer.sh:440:# Direct .deb downloads, the same route `microduck_runtime/radxa_setup/setup_rkaiq.sh` uses for
+scripts/setup-gstreamer.sh:445:RADXA_POOL="${RADXA_POOL:-https://radxa-repo.github.io/bullseye/pool/main}"
+scripts/setup-gstreamer.sh:458:        curl -fsSL -o "${tmp}/$(basename "$path")" "${RADXA_POOL}/${path}" || ok=0
+scripts/setup-gstreamer.sh:464:    [ "$ok" = 1 ] || warn "could not install Rockchip MPP/RGA from ${RADXA_POOL}.
+scripts/setup-gstreamer.sh:533:# kernel resource on a supplementary group — `tofd` into `i2c`, `padd` into `input`, `btd` into
+scripts/setup-gstreamer.sh:610:  description and ICE handling that presents as a client spinning forever on "connecting".
+scripts/setup-login.sh:72:# The robot's name beside the hostname in the prompt: `microduck@radxa-zero3 (coincoin):~$`.
+scripts/setup-login.sh:74:# Every board flashed from one image says `microduck@radxa-zero3`, so three ssh windows to
+scripts/setup-npu.sh:177:            # camera, the audio codec and the uart, and a robot without them is a brick of a
+scripts/setup-npu.sh:19:#                   Armbian's rk3566-radxa-zero3.dtb ships `npu@fde40000` as `status = "disabled"`
+scripts/setup-npu.sh:20:#                   on *every* Radxa Zero 3 — so a runtime installed without it can never run
+scripts/setup-npu.sh:4:# The RK3566 has a small (0.8 TOPS) INT8 NPU. Using it needs two halves that arrive from different
+scripts/setup-rkaiq.sh:137:  Radxa's package ships imx219 and ov5647 only. The engine will run on raw ISP defaults, which
+scripts/setup-rkaiq.sh:141:# Two enum names in Radxa's IQ file are newer than the parser in Radxa's own engine deb. Left
+scripts/setup-rkaiq.sh:145:# Only characterised for imx219: another sensor's file may not contain these names at all, and
+scripts/setup-rkaiq.sh:147:if [ "$SENSOR" = imx219 ] && [ -f "${IQ_DIR}/imx219_rpi-camera-v2_default.json" ]; then
+scripts/setup-rkaiq.sh:152:path = "/etc/iqfiles/imx219_rpi-camera-v2_default.json"
+scripts/setup-rkaiq.sh:20:#   --sensor NAME   tuning to install for (default imx219). Radxa's IQ package only ships
+scripts/setup-rkaiq.sh:21:#                   imx219 and ov5647; anything else needs its own
+scripts/setup-rkaiq.sh:227:# with it for every stream afterwards. The IMX219 boots in 3280x2464; `mediad` captures from
+scripts/setup-rkaiq.sh:29:# Radxa Zero 3W on the Armbian vendor kernel. Needs the camera overlay active — the ISP
+scripts/setup-rkaiq.sh:2:# Install Rockchip's rkaiq 3A engine and the IMX219 tuning, so the camera has white balance,
+scripts/setup-rkaiq.sh:39:# Radxa's pool, taken as a direct download the way the MPP packages are — is the route.
+scripts/setup-rkaiq.sh:3:# colour and noise reduction instead of raw ISP defaults.
+scripts/setup-rkaiq.sh:55:# gamma and noise reduction. Its one-shot is disabled rather than tolerated because it lands at
+scripts/setup-rkaiq.sh:60:SENSOR=imx219
+scripts/setup-rkaiq.sh:67:# Radxa's apt pool, as direct .deb downloads rather than an entry in sources.list — the same
+scripts/setup-rkaiq.sh:70:POOL=https://radxa-repo.github.io/bullseye/pool/main
+scripts/systemd-test.sh:348:    && fail "the update reported success despite a unit that cannot start"
+sounds/src/chorale/beat.rs:315:    /// Run for a full quartet — a conductor and three followers — because that is what the piece is
+sounds/src/chorale/beat.rs:321:    fn a_whole_quartet_agrees_within_the_ensemble_budget() {
+sounds/src/chorale/midi.rs:117:    // Microseconds per quarter note. 500_000 is MIDI's default — 120 bpm.
+sounds/src/chorale/mod.rs:1080:        let quartet = seat_all(&[214.0, 520.0, 390.0, 300.0]);
+sounds/src/chorale/mod.rs:1081:        assert_eq!(&quartet[..3], &trio[..], "{quartet:?}");
+sounds/src/chorale/mod.rs:1082:        assert_eq!(quartet[3], Part::Tenor);
+sounds/src/chorale/mod.rs:1109:        let quartet = cast(
+sounds/src/chorale/mod.rs:1125:        let fifth = seat(&quartet, &low);
+sounds/src/chorale/mod.rs:1141:        assert_eq!(seat(&quartet, &high).part, Part::Soprano);
+sounds/src/chorale/mod.rs:958:    /// The embedded upbeat piece must parse, be a full quartet, stay inside the duck part
+sounds/src/chorale/mod.rs:962:    fn duck_strut_is_a_quartet_a_duck_can_sing() {
+sounds/src/synth.rs:4://! because the Radxa's I²S clock tree is pinned to the 48 k family (44.1 k-family rates play
+tof/Cargo.toml:1:# The head ToF sensor: an 8x8 depth matrix from a VL53L8CX, and the daemon that
+tof/build.rs:18://! Warnings are not errors here: `vl53l?cx_api.c` is upstream code we do not
+tof/build.rs:23://! `linux/i2c.h`'s `I2C_RDWR` ioctl, which exists on no other platform — so on a
+tof/build.rs:40:        dir: "vl53l8cx",
+tof/build.rs:42:        platform: "VL53L8CX_Platform",
+tof/build.rs:45:        dir: "vl53l5cx",
+tof/build.rs:47:        platform: "VL53L5CX_Platform",
+tof/src/lib.rs:20://! vendored verbatim (BSD-3-Clause, `vendor/LICENSE.txt`), the Linux i2c-dev
+tof/src/lib.rs:3://! A VL53L5CX or VL53L8CX on the HAT's I²C bus — the same `i2c3` bus the audio
+tof/src/main.rs:75:/// `/dev/i2c-pihat` is the udev symlink `setup-board.sh` installs, which follows
+tof/src/main.rs:76:/// the HAT bus; `/dev/i2c-3` is what the `i2c3-pihat` overlay creates and is the
+tof/src/main.rs:80:const BUS_CANDIDATES: [&str; 2] = ["/dev/i2c-pihat", "/dev/i2c-3"];
+tof/src/main.rs:85:/// moved a VL53L5CX when an I²C IMU wanted 0x29 — that IMU is gone, but a sensor
+tof/src/main.rs:96:    /// I²C bus device. Unset tries the HAT symlink, then the i2c3 bus.
+tof/src/sensor.rs:100:            Self::L5cx => "VL53L5CX",
+tof/src/sensor.rs:258:                 revision {revision_id:#04x}, which is neither a VL53L5CX nor a VL53L8CX"
+tof/src/sensor.rs:342:/// The same type on a platform with no i2c-dev, so the daemon still builds there.
+tof/src/sensor.rs:344:/// `vendor/platform.c` reaches the bus through Linux's `I2C_RDWR` ioctl, so
+tof/src/sensor.rs:360:            "no i2c-dev on this platform, so {} cannot be opened — off a board, run `tofd --fake`",
+tof/src/sensor.rs:415:        let nowhere = Path::new("/dev/definitely-not-an-i2c-bus");
+tof/src/sensor.rs:8://! **Two generations, one interface.** A VL53L5CX and a VL53L8CX are the same
+tof/src/sensor.rs:99:            Self::L8cx => "VL53L8CX",
+tof/src/status.rs:90:        status.up("VL53L8CX");
+tof/src/status.rs:92:        assert_eq!(ranging.sensor.as_deref(), Some("VL53L8CX"));
+tof/systemd/sysusers.d/tofd.conf:10:#   i2c   — /dev/i2c-* is root:i2c mode 0660
+tof/systemd/tofd.service:15:# The i2c3 bus arrives with the device-tree overlay, so there is nothing to wait
+tof/systemd/tofd.service:24:# i2c  — /dev/i2c-* is root:i2c mode 0660, which is the whole of this daemon's
+tof/systemd/tofd.service:28:SupplementaryGroups=i2c robot
+tof/systemd/tofd.service:34:# one that has no i2c node, and the failure would read as "no sensor fitted".
+tof/vendor/platform.c:20: * I2C_RDWR ioctls, chunked. Doing the transfers in C rather than through a
+tof/vendor/platform.c:2: * Linux i2c-dev platform layer for ST's VL53L5CX and VL53L8CX ULDs.
+tof/vendor/platform.c:32:#include <linux/i2c.h>
+tof/vendor/platform.c:33:#include <linux/i2c-dev.h>
+tof/vendor/platform.c:38:/* One chunk per I2C_RDWR message. The rk3x controller handles large
+tof/vendor/platform.c:46:static uint8_t xfer(Platform *p, struct i2c_msg *msgs, int n)
+tof/vendor/platform.c:48:    struct i2c_rdwr_ioctl_data data = { .msgs = msgs, .nmsgs = (uint32_t)n };
+tof/vendor/platform.c:49:    return ioctl(p->fd, I2C_RDWR, &data) < 0 ? 255 : 0;
+tof/vendor/platform.c:60:        struct i2c_msg msgs[2] = {
+tof/vendor/platform.c:63:            { .addr = (uint16_t)(p->address >> 1), .flags = I2C_M_RD,
+tof/vendor/platform.c:82:        struct i2c_msg msg = {
+tof/vendor/probe.c:16:#include <linux/i2c.h>
+tof/vendor/probe.c:17:#include <linux/i2c-dev.h>
+tof/vendor/probe.c:26:    struct i2c_msg msg = { .addr = addr7, .flags = 0, .len = 3, .buf = buf };
+tof/vendor/probe.c:27:    struct i2c_rdwr_ioctl_data data = { .msgs = &msg, .nmsgs = 1 };
+tof/vendor/probe.c:28:    return ioctl(fd, I2C_RDWR, &data) < 0 ? -1 : 0;
+tof/vendor/probe.c:35:    struct i2c_msg msgs[2] = {
+tof/vendor/probe.c:37:        { .addr = addr7, .flags = I2C_M_RD, .len = len, .buf = out },
+tof/vendor/probe.c:39:    struct i2c_rdwr_ioctl_data data = { .msgs = msgs, .nmsgs = 2 };
+tof/vendor/probe.c:40:    return ioctl(fd, I2C_RDWR, &data) < 0 ? -1 : 0;
+tof/vendor/probe.c:5: * registers, put the bank back. Revision 0x02 is a VL53L5CX, 0x0C a VL53L8CX,
+tof/vendor/vl53l5cx/platform.h:22:    /* 8-bit I2C address (7-bit << 1), the format the ULD expects. */
+tof/vendor/vl53l5cx/platform.h:24:    /* Open file descriptor on /dev/i2c-N. */
+tof/vendor/vl53l5cx/platform.h:26:} VL53L5CX_Platform;
+tof/vendor/vl53l5cx/platform.h:28:#define VL53L5CX_NB_TARGET_PER_ZONE 1U
+tof/vendor/vl53l5cx/platform.h:2: * Linux i2c-dev platform layer for the ST VL53L5CX ULD — microduck.
+tof/vendor/vl53l5cx/platform.h:37:#define VL53L5CX_DISABLE_AMBIENT_PER_SPAD
+tof/vendor/vl53l5cx/platform.h:38:#define VL53L5CX_DISABLE_NB_SPADS_ENABLED
+tof/vendor/vl53l5cx/platform.h:39:#define VL53L5CX_DISABLE_NB_TARGET_DETECTED
+tof/vendor/vl53l5cx/platform.h:40:#define VL53L5CX_DISABLE_SIGNAL_PER_SPAD
+tof/vendor/vl53l5cx/platform.h:41:#define VL53L5CX_DISABLE_RANGE_SIGMA_MM
+tof/vendor/vl53l5cx/platform.h:42:/* VL53L5CX_DISABLE_DISTANCE_MM      — kept */
+tof/vendor/vl53l5cx/platform.h:43:#define VL53L5CX_DISABLE_REFLECTANCE_PERCENT
+tof/vendor/vl53l5cx/platform.h:44:/* VL53L5CX_DISABLE_TARGET_STATUS   — kept */
+tof/vendor/vl53l5cx/platform.h:45:#define VL53L5CX_DISABLE_MOTION_INDICATOR
+tof/vendor/vl53l5cx/platform.h:47:uint8_t RdByte(VL53L5CX_Platform *p_platform, uint16_t RegisterAdress,
+tof/vendor/vl53l5cx/platform.h:49:uint8_t WrByte(VL53L5CX_Platform *p_platform, uint16_t RegisterAdress,
+tof/vendor/vl53l5cx/platform.h:51:uint8_t RdMulti(VL53L5CX_Platform *p_platform, uint16_t RegisterAdress,
+tof/vendor/vl53l5cx/platform.h:53:uint8_t WrMulti(VL53L5CX_Platform *p_platform, uint16_t RegisterAdress,
+tof/vendor/vl53l5cx/platform.h:56:uint8_t WaitMs(VL53L5CX_Platform *p_platform, uint32_t TimeMs);
+tof/vendor/vl53l5cx/platform.h:5: * Talks to /dev/i2c-N via I2C_RDWR ioctls (../platform.c, shared with the
+tof/vendor/vl53l5cx/platform.h:6: * VL53L8CX generation); used by shim.c, which exposes the flat API
+tof/vendor/vl53l5cx/shim.c:11: * VL53L5CX_STATUS_OK — except `vl5_is_alive` and `vl5_data_ready`, which
+tof/vendor/vl53l5cx/shim.c:25:#include "vl53l5cx_api.h"
+tof/vendor/vl53l5cx/shim.c:27:static VL53L5CX_Configuration dev;
+tof/vendor/vl53l5cx/shim.c:28:static VL53L5CX_ResultsData results;
+tof/vendor/vl53l5cx/shim.c:2: * Flat C API over the VL53L5CX ULD, for `tof`'s Rust wrapper.
+tof/vendor/vl53l5cx/shim.c:46:/* 1 = a live VL53L5CX answers at the configured address. */
+tof/vendor/vl53l5cx/shim.c:50:    if (vl53l5cx_is_alive(&dev, &alive)) return 0;
+tof/vendor/vl53l5cx/shim.c:57:    return (int)vl53l5cx_init(&dev);
+tof/vendor/vl53l5cx/shim.c:5: * point: `VL53L5CX_Configuration` embeds the platform struct, the firmware
+tof/vendor/vl53l5cx/shim.c:62:    return (int)vl53l5cx_set_i2c_address(&dev, (uint16_t)(new_addr_7bit << 1));
+tof/vendor/vl53l5cx/shim.c:67:    uint8_t s = vl53l5cx_set_resolution(&dev, VL53L5CX_RESOLUTION_8X8);
+tof/vendor/vl53l5cx/shim.c:69:    s = vl53l5cx_set_ranging_frequency_hz(&dev, freq_hz);
+tof/vendor/vl53l5cx/shim.c:71:    return (int)vl53l5cx_start_ranging(&dev);
+tof/vendor/vl53l5cx/shim.c:76:    return (int)vl53l5cx_stop_ranging(&dev);
+tof/vendor/vl53l5cx/shim.c:83:    if (vl53l5cx_check_data_ready(&dev, &ready)) return -1;
+tof/vendor/vl53l5cx/shim.c:90:    uint8_t s = vl53l5cx_get_ranging_data(&dev, &results);
+tof/vendor/vl53l5cx/vl53l5cx_api.c:1001:	status |= vl53l5cx_dci_read_data(p_dev, (uint8_t*)p_dev->temp_buffer,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:1002:			VL53L5CX_DCI_INT_TIME, 20);
+tof/vendor/vl53l5cx/vl53l5cx_api.c:1010:uint8_t vl53l5cx_set_integration_time_ms(
+tof/vendor/vl53l5cx/vl53l5cx_api.c:1011:		VL53L5CX_Configuration		*p_dev,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:1014:	uint8_t status = VL53L5CX_STATUS_OK;
+tof/vendor/vl53l5cx/vl53l5cx_api.c:1021:		status |= VL53L5CX_STATUS_INVALID_PARAM;
+tof/vendor/vl53l5cx/vl53l5cx_api.c:1026:		status |= vl53l5cx_dci_replace_data(p_dev, p_dev->temp_buffer,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:1027:				VL53L5CX_DCI_INT_TIME, 20,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:1034:uint8_t vl53l5cx_get_sharpener_percent(
+tof/vendor/vl53l5cx/vl53l5cx_api.c:1035:		VL53L5CX_Configuration		*p_dev,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:1038:	uint8_t status = VL53L5CX_STATUS_OK;
+tof/vendor/vl53l5cx/vl53l5cx_api.c:1040:	status |= vl53l5cx_dci_read_data(p_dev,p_dev->temp_buffer,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:1041:			VL53L5CX_DCI_SHARPENER, 16);
+tof/vendor/vl53l5cx/vl53l5cx_api.c:1049:uint8_t vl53l5cx_set_sharpener_percent(
+tof/vendor/vl53l5cx/vl53l5cx_api.c:1050:		VL53L5CX_Configuration		*p_dev,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:1053:	uint8_t status = VL53L5CX_STATUS_OK;
+tof/vendor/vl53l5cx/vl53l5cx_api.c:1058:		status |= VL53L5CX_STATUS_INVALID_PARAM;
+tof/vendor/vl53l5cx/vl53l5cx_api.c:1063:		status |= vl53l5cx_dci_replace_data(p_dev, p_dev->temp_buffer,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:1064:				VL53L5CX_DCI_SHARPENER, 16,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:1071:uint8_t vl53l5cx_get_target_order(
+tof/vendor/vl53l5cx/vl53l5cx_api.c:1072:		VL53L5CX_Configuration		*p_dev,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:1075:	uint8_t status = VL53L5CX_STATUS_OK;
+tof/vendor/vl53l5cx/vl53l5cx_api.c:1077:	status |= vl53l5cx_dci_read_data(p_dev, (uint8_t*)p_dev->temp_buffer,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:1078:			VL53L5CX_DCI_TARGET_ORDER, 4);
+tof/vendor/vl53l5cx/vl53l5cx_api.c:1084:uint8_t vl53l5cx_set_target_order(
+tof/vendor/vl53l5cx/vl53l5cx_api.c:1085:		VL53L5CX_Configuration		*p_dev,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:1088:	uint8_t status = VL53L5CX_STATUS_OK;
+tof/vendor/vl53l5cx/vl53l5cx_api.c:1090:	if((target_order == (uint8_t)VL53L5CX_TARGET_ORDER_CLOSEST)
+tof/vendor/vl53l5cx/vl53l5cx_api.c:1091:		|| (target_order == (uint8_t)VL53L5CX_TARGET_ORDER_STRONGEST))
+tof/vendor/vl53l5cx/vl53l5cx_api.c:1093:		status |= vl53l5cx_dci_replace_data(p_dev, p_dev->temp_buffer,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:1094:				VL53L5CX_DCI_TARGET_ORDER, 4,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:1098:		status |= VL53L5CX_STATUS_INVALID_PARAM;
+tof/vendor/vl53l5cx/vl53l5cx_api.c:1104:uint8_t vl53l5cx_get_ranging_mode(
+tof/vendor/vl53l5cx/vl53l5cx_api.c:1105:		VL53L5CX_Configuration		*p_dev,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:1108:	uint8_t status = VL53L5CX_STATUS_OK;
+tof/vendor/vl53l5cx/vl53l5cx_api.c:110:static uint8_t _vl53l5cx_poll_for_mcu_boot(
+tof/vendor/vl53l5cx/vl53l5cx_api.c:1110:	status |= vl53l5cx_dci_read_data(p_dev, p_dev->temp_buffer,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:1111:			VL53L5CX_DCI_RANGING_MODE, 8);
+tof/vendor/vl53l5cx/vl53l5cx_api.c:1115:		*p_ranging_mode = VL53L5CX_RANGING_MODE_CONTINUOUS;
+tof/vendor/vl53l5cx/vl53l5cx_api.c:1119:		*p_ranging_mode = VL53L5CX_RANGING_MODE_AUTONOMOUS;
+tof/vendor/vl53l5cx/vl53l5cx_api.c:111:              VL53L5CX_Configuration      *p_dev)
+tof/vendor/vl53l5cx/vl53l5cx_api.c:1125:uint8_t vl53l5cx_set_ranging_mode(
+tof/vendor/vl53l5cx/vl53l5cx_api.c:1126:		VL53L5CX_Configuration		*p_dev,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:1129:	uint8_t status = VL53L5CX_STATUS_OK;
+tof/vendor/vl53l5cx/vl53l5cx_api.c:1132:	status |= vl53l5cx_dci_read_data(p_dev, p_dev->temp_buffer,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:1133:			VL53L5CX_DCI_RANGING_MODE, 8);
+tof/vendor/vl53l5cx/vl53l5cx_api.c:1137:		case VL53L5CX_RANGING_MODE_CONTINUOUS:
+tof/vendor/vl53l5cx/vl53l5cx_api.c:113:   uint8_t go2_status0, go2_status1, status = VL53L5CX_STATUS_OK;
+tof/vendor/vl53l5cx/vl53l5cx_api.c:1143:		case VL53L5CX_RANGING_MODE_AUTONOMOUS:
+tof/vendor/vl53l5cx/vl53l5cx_api.c:1150:			status = VL53L5CX_STATUS_INVALID_PARAM;
+tof/vendor/vl53l5cx/vl53l5cx_api.c:1154:	status |= vl53l5cx_dci_write_data(p_dev, p_dev->temp_buffer,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:1155:			VL53L5CX_DCI_RANGING_MODE, (uint16_t)8);
+tof/vendor/vl53l5cx/vl53l5cx_api.c:1157:	status |= vl53l5cx_dci_write_data(p_dev, (uint8_t*)&single_range,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:1158:			VL53L5CX_DCI_SINGLE_RANGE, 
+tof/vendor/vl53l5cx/vl53l5cx_api.c:1164:uint8_t vl53l5cx_dci_read_data(
+tof/vendor/vl53l5cx/vl53l5cx_api.c:1165:		VL53L5CX_Configuration		*p_dev,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:1171:	uint8_t status = VL53L5CX_STATUS_OK;
+tof/vendor/vl53l5cx/vl53l5cx_api.c:1178:	if((data_size + (uint16_t)12)>(uint16_t)VL53L5CX_TEMPORARY_BUFFER_SIZE)
+tof/vendor/vl53l5cx/vl53l5cx_api.c:1180:		status |= VL53L5CX_STATUS_ERROR;
+tof/vendor/vl53l5cx/vl53l5cx_api.c:1191:			(VL53L5CX_UI_CMD_END-(uint16_t)11),cmd, sizeof(cmd));
+tof/vendor/vl53l5cx/vl53l5cx_api.c:1192:		status |= _vl53l5cx_poll_for_answer(p_dev, 4, 1,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:1193:			VL53L5CX_UI_CMD_STATUS,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:1197:		status |= RdMulti(&(p_dev->platform), VL53L5CX_UI_CMD_START,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:1210:uint8_t vl53l5cx_dci_write_data(
+tof/vendor/vl53l5cx/vl53l5cx_api.c:1211:		VL53L5CX_Configuration		*p_dev,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:1216:	uint8_t status = VL53L5CX_STATUS_OK;
+tof/vendor/vl53l5cx/vl53l5cx_api.c:1224:	uint16_t address = (uint16_t)VL53L5CX_UI_CMD_END - 
+tof/vendor/vl53l5cx/vl53l5cx_api.c:1229:           > (uint16_t)VL53L5CX_TEMPORARY_BUFFER_SIZE)
+tof/vendor/vl53l5cx/vl53l5cx_api.c:1231:		status |= VL53L5CX_STATUS_ERROR;
+tof/vendor/vl53l5cx/vl53l5cx_api.c:1256:		status |= _vl53l5cx_poll_for_answer(p_dev, 4, 1,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:1257:			VL53L5CX_UI_CMD_STATUS, 0xff, 0x03);
+tof/vendor/vl53l5cx/vl53l5cx_api.c:1265:uint8_t vl53l5cx_dci_replace_data(
+tof/vendor/vl53l5cx/vl53l5cx_api.c:1266:		VL53L5CX_Configuration		*p_dev,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:1274:	uint8_t status = VL53L5CX_STATUS_OK;
+tof/vendor/vl53l5cx/vl53l5cx_api.c:1276:	status |= vl53l5cx_dci_read_data(p_dev, data, index, data_size);
+tof/vendor/vl53l5cx/vl53l5cx_api.c:1278:	status |= vl53l5cx_dci_write_data(p_dev, data, index, data_size);
+tof/vendor/vl53l5cx/vl53l5cx_api.c:140:static uint8_t _vl53l5cx_send_offset_data(
+tof/vendor/vl53l5cx/vl53l5cx_api.c:141:		VL53L5CX_Configuration		*p_dev,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:144:	uint8_t status = VL53L5CX_STATUS_OK;
+tof/vendor/vl53l5cx/vl53l5cx_api.c:153:               p_dev->offset_data, VL53L5CX_OFFSET_BUFFER_SIZE);
+tof/vendor/vl53l5cx/vl53l5cx_api.c:156:	if(resolution == (uint8_t)VL53L5CX_RESOLUTION_4X4){
+tof/vendor/vl53l5cx/vl53l5cx_api.c:158:		SwapBuffer(p_dev->temp_buffer, VL53L5CX_OFFSET_BUFFER_SIZE);
+tof/vendor/vl53l5cx/vl53l5cx_api.c:188:            SwapBuffer(p_dev->temp_buffer, VL53L5CX_OFFSET_BUFFER_SIZE);
+tof/vendor/vl53l5cx/vl53l5cx_api.c:191:	for(k = 0; k < (VL53L5CX_OFFSET_BUFFER_SIZE - (uint16_t)4); k++)
+tof/vendor/vl53l5cx/vl53l5cx_api.c:198:		VL53L5CX_OFFSET_BUFFER_SIZE);
+tof/vendor/vl53l5cx/vl53l5cx_api.c:199:	status |=_vl53l5cx_poll_for_answer(p_dev, 4, 1,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:200:		VL53L5CX_UI_CMD_STATUS, 0xff, 0x03);
+tof/vendor/vl53l5cx/vl53l5cx_api.c:210:static uint8_t _vl53l5cx_send_xtalk_data(
+tof/vendor/vl53l5cx/vl53l5cx_api.c:211:		VL53L5CX_Configuration		*p_dev,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:214:	uint8_t status = VL53L5CX_STATUS_OK;
+tof/vendor/vl53l5cx/vl53l5cx_api.c:222:		VL53L5CX_XTALK_BUFFER_SIZE);
+tof/vendor/vl53l5cx/vl53l5cx_api.c:225:	if(resolution == (uint8_t)VL53L5CX_RESOLUTION_4X4)
+tof/vendor/vl53l5cx/vl53l5cx_api.c:232:		SwapBuffer(p_dev->temp_buffer, VL53L5CX_XTALK_BUFFER_SIZE);
+tof/vendor/vl53l5cx/vl53l5cx_api.c:24:* Alternatively, the VL53L5CX Ultra Lite Driver may be distributed under the
+tof/vendor/vl53l5cx/vl53l5cx_api.c:250:	    SwapBuffer(p_dev->temp_buffer, VL53L5CX_XTALK_BUFFER_SIZE);
+tof/vendor/vl53l5cx/vl53l5cx_api.c:258:			p_dev->temp_buffer, VL53L5CX_XTALK_BUFFER_SIZE);
+tof/vendor/vl53l5cx/vl53l5cx_api.c:259:	status |=_vl53l5cx_poll_for_answer(p_dev, 4, 1,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:260:			VL53L5CX_UI_CMD_STATUS, 0xff, 0x03);
+tof/vendor/vl53l5cx/vl53l5cx_api.c:265:uint8_t vl53l5cx_is_alive(
+tof/vendor/vl53l5cx/vl53l5cx_api.c:266:		VL53L5CX_Configuration		*p_dev,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:269:	uint8_t status = VL53L5CX_STATUS_OK;
+tof/vendor/vl53l5cx/vl53l5cx_api.c:289:uint8_t vl53l5cx_init(
+tof/vendor/vl53l5cx/vl53l5cx_api.c:290:		VL53L5CX_Configuration		*p_dev)
+tof/vendor/vl53l5cx/vl53l5cx_api.c:292:	uint8_t tmp, status = VL53L5CX_STATUS_OK;
+tof/vendor/vl53l5cx/vl53l5cx_api.c:293:	uint8_t pipe_ctrl[] = {VL53L5CX_NB_TARGET_PER_ZONE, 0x00, 0x01, 0x00};
+tof/vendor/vl53l5cx/vl53l5cx_api.c:296:	p_dev->default_xtalk = (uint8_t*)VL53L5CX_DEFAULT_XTALK;
+tof/vendor/vl53l5cx/vl53l5cx_api.c:297:	p_dev->default_configuration = (uint8_t*)VL53L5CX_DEFAULT_CONFIGURATION;
+tof/vendor/vl53l5cx/vl53l5cx_api.c:324:	status |= _vl53l5cx_poll_for_answer(p_dev, 1, 0, 0x06, 0xff, 1);
+tof/vendor/vl53l5cx/vl53l5cx_api.c:332:	status |= _vl53l5cx_poll_for_answer(p_dev, 1, 0, 0x21, 0x10, 0x10);
+tof/vendor/vl53l5cx/vl53l5cx_api.c:364:	/* Download FW into VL53L5 */
+tof/vendor/vl53l5cx/vl53l5cx_api.c:367:		(uint8_t*)&VL53L5CX_FIRMWARE[0],0x8000);
+tof/vendor/vl53l5cx/vl53l5cx_api.c:370:		(uint8_t*)&VL53L5CX_FIRMWARE[0x8000],0x8000);
+tof/vendor/vl53l5cx/vl53l5cx_api.c:373:		(uint8_t*)&VL53L5CX_FIRMWARE[0x10000],0x5000);
+tof/vendor/vl53l5cx/vl53l5cx_api.c:380:	status |= _vl53l5cx_poll_for_answer(p_dev, 1, 0, 0x21, 0x10, 0x10);
+tof/vendor/vl53l5cx/vl53l5cx_api.c:395:	status |= _vl53l5cx_poll_for_mcu_boot(p_dev);
+tof/vendor/vl53l5cx/vl53l5cx_api.c:400:		(uint8_t*)VL53L5CX_GET_NVM_CMD, sizeof(VL53L5CX_GET_NVM_CMD));
+tof/vendor/vl53l5cx/vl53l5cx_api.c:401:	status |= _vl53l5cx_poll_for_answer(p_dev, 4, 0,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:402:		VL53L5CX_UI_CMD_STATUS, 0xff, 2);
+tof/vendor/vl53l5cx/vl53l5cx_api.c:403:	status |= RdMulti(&(p_dev->platform), VL53L5CX_UI_CMD_START,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:404:		p_dev->temp_buffer, VL53L5CX_NVM_DATA_SIZE);
+tof/vendor/vl53l5cx/vl53l5cx_api.c:406:		VL53L5CX_OFFSET_BUFFER_SIZE);
+tof/vendor/vl53l5cx/vl53l5cx_api.c:407:	status |= _vl53l5cx_send_offset_data(p_dev, VL53L5CX_RESOLUTION_4X4);
+tof/vendor/vl53l5cx/vl53l5cx_api.c:410:	(void)memcpy(p_dev->xtalk_data, (uint8_t*)VL53L5CX_DEFAULT_XTALK,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:411:		VL53L5CX_XTALK_BUFFER_SIZE);
+tof/vendor/vl53l5cx/vl53l5cx_api.c:412:	status |= _vl53l5cx_send_xtalk_data(p_dev, VL53L5CX_RESOLUTION_4X4);
+tof/vendor/vl53l5cx/vl53l5cx_api.c:414:	/* Send default configuration to VL53L5CX firmware */
+tof/vendor/vl53l5cx/vl53l5cx_api.c:417:		sizeof(VL53L5CX_DEFAULT_CONFIGURATION));
+tof/vendor/vl53l5cx/vl53l5cx_api.c:418:	status |= _vl53l5cx_poll_for_answer(p_dev, 4, 1,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:419:		VL53L5CX_UI_CMD_STATUS, 0xff, 0x03);
+tof/vendor/vl53l5cx/vl53l5cx_api.c:421:	status |= vl53l5cx_dci_write_data(p_dev, (uint8_t*)&pipe_ctrl,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:422:		VL53L5CX_DCI_PIPE_CONTROL, (uint16_t)sizeof(pipe_ctrl));
+tof/vendor/vl53l5cx/vl53l5cx_api.c:423:#if VL53L5CX_NB_TARGET_PER_ZONE != 1
+tof/vendor/vl53l5cx/vl53l5cx_api.c:424:	tmp = VL53L5CX_NB_TARGET_PER_ZONE;
+tof/vendor/vl53l5cx/vl53l5cx_api.c:425:	status |= vl53l5cx_dci_replace_data(p_dev, p_dev->temp_buffer,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:426:		VL53L5CX_DCI_FW_NB_TARGET, 16,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:430:	status |= vl53l5cx_dci_write_data(p_dev, (uint8_t*)&single_range,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:431:			VL53L5CX_DCI_SINGLE_RANGE,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:437:uint8_t vl53l5cx_set_i2c_address(
+tof/vendor/vl53l5cx/vl53l5cx_api.c:438:		VL53L5CX_Configuration		*p_dev,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:439:		uint16_t		        i2c_address)
+tof/vendor/vl53l5cx/vl53l5cx_api.c:441:	uint8_t status = VL53L5CX_STATUS_OK;
+tof/vendor/vl53l5cx/vl53l5cx_api.c:444:	status |= WrByte(&(p_dev->platform), 0x4, (uint8_t)(i2c_address >> 1));
+tof/vendor/vl53l5cx/vl53l5cx_api.c:445:	p_dev->platform.address = i2c_address;
+tof/vendor/vl53l5cx/vl53l5cx_api.c:451:uint8_t vl53l5cx_get_power_mode(
+tof/vendor/vl53l5cx/vl53l5cx_api.c:452:		VL53L5CX_Configuration		*p_dev,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:455:	uint8_t tmp, status = VL53L5CX_STATUS_OK;
+tof/vendor/vl53l5cx/vl53l5cx_api.c:463:			*p_power_mode = VL53L5CX_POWER_MODE_WAKEUP;
+tof/vendor/vl53l5cx/vl53l5cx_api.c:466:			*p_power_mode = VL53L5CX_POWER_MODE_SLEEP;
+tof/vendor/vl53l5cx/vl53l5cx_api.c:471:			status = VL53L5CX_STATUS_ERROR;
+tof/vendor/vl53l5cx/vl53l5cx_api.c:480:uint8_t vl53l5cx_set_power_mode(
+tof/vendor/vl53l5cx/vl53l5cx_api.c:481:		VL53L5CX_Configuration		*p_dev,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:484:	uint8_t current_power_mode, status = VL53L5CX_STATUS_OK;
+tof/vendor/vl53l5cx/vl53l5cx_api.c:486:	status |= vl53l5cx_get_power_mode(p_dev, &current_power_mode);
+tof/vendor/vl53l5cx/vl53l5cx_api.c:491:		case VL53L5CX_POWER_MODE_WAKEUP:
+tof/vendor/vl53l5cx/vl53l5cx_api.c:494:			status |= _vl53l5cx_poll_for_answer(
+tof/vendor/vl53l5cx/vl53l5cx_api.c:498:		case VL53L5CX_POWER_MODE_SLEEP:
+tof/vendor/vl53l5cx/vl53l5cx_api.c:4:* This file is part of the VL53L5CX Ultra Lite Driver and is dual licensed,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:501:			status |= _vl53l5cx_poll_for_answer(
+tof/vendor/vl53l5cx/vl53l5cx_api.c:506:			status = VL53L5CX_STATUS_ERROR;
+tof/vendor/vl53l5cx/vl53l5cx_api.c:515:uint8_t vl53l5cx_start_ranging(
+tof/vendor/vl53l5cx/vl53l5cx_api.c:516:		VL53L5CX_Configuration		*p_dev)
+tof/vendor/vl53l5cx/vl53l5cx_api.c:518:	uint8_t resolution, status = VL53L5CX_STATUS_OK;
+tof/vendor/vl53l5cx/vl53l5cx_api.c:526:	status |= vl53l5cx_get_resolution(p_dev, &resolution);
+tof/vendor/vl53l5cx/vl53l5cx_api.c:538:	uint32_t output[] ={VL53L5CX_START_BH,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:539:		VL53L5CX_METADATA_BH,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:540:		VL53L5CX_COMMONDATA_BH,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:541:		VL53L5CX_AMBIENT_RATE_BH,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:542:		VL53L5CX_SPAD_COUNT_BH,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:543:		VL53L5CX_NB_TARGET_DETECTED_BH,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:544:		VL53L5CX_SIGNAL_RATE_BH,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:545:		VL53L5CX_RANGE_SIGMA_MM_BH,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:546:		VL53L5CX_DISTANCE_BH,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:547:		VL53L5CX_REFLECTANCE_BH,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:548:		VL53L5CX_TARGET_STATUS_BH,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:549:		VL53L5CX_MOTION_DETECT_BH};
+tof/vendor/vl53l5cx/vl53l5cx_api.c:552:#ifndef VL53L5CX_DISABLE_AMBIENT_PER_SPAD
+tof/vendor/vl53l5cx/vl53l5cx_api.c:555:#ifndef VL53L5CX_DISABLE_NB_SPADS_ENABLED
+tof/vendor/vl53l5cx/vl53l5cx_api.c:558:#ifndef VL53L5CX_DISABLE_NB_TARGET_DETECTED
+tof/vendor/vl53l5cx/vl53l5cx_api.c:561:#ifndef VL53L5CX_DISABLE_SIGNAL_PER_SPAD
+tof/vendor/vl53l5cx/vl53l5cx_api.c:564:#ifndef VL53L5CX_DISABLE_RANGE_SIGMA_MM
+tof/vendor/vl53l5cx/vl53l5cx_api.c:567:#ifndef VL53L5CX_DISABLE_DISTANCE_MM
+tof/vendor/vl53l5cx/vl53l5cx_api.c:570:#ifndef VL53L5CX_DISABLE_REFLECTANCE_PERCENT
+tof/vendor/vl53l5cx/vl53l5cx_api.c:573:#ifndef VL53L5CX_DISABLE_TARGET_STATUS
+tof/vendor/vl53l5cx/vl53l5cx_api.c:576:#ifndef VL53L5CX_DISABLE_MOTION_INDICATOR
+tof/vendor/vl53l5cx/vl53l5cx_api.c:602:                                  * (uint8_t)VL53L5CX_NB_TARGET_PER_ZONE);
+tof/vendor/vl53l5cx/vl53l5cx_api.c:614:	status |= vl53l5cx_dci_write_data(p_dev,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:615:			(uint8_t*)&(output), VL53L5CX_DCI_OUTPUT_LIST,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:621:	status |= vl53l5cx_dci_write_data(p_dev,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:622:			(uint8_t*)&(header_config), VL53L5CX_DCI_OUTPUT_CONFIG,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:625:	status |= vl53l5cx_dci_write_data(p_dev,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:626:			(uint8_t*)&(output_bh_enable), VL53L5CX_DCI_OUTPUT_ENABLES,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:635:	status |= WrMulti(&(p_dev->platform), VL53L5CX_UI_CMD_END -
+tof/vendor/vl53l5cx/vl53l5cx_api.c:637:	status |= _vl53l5cx_poll_for_answer(p_dev, 4, 1,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:638:			VL53L5CX_UI_CMD_STATUS, 0xff, 0x03);
+tof/vendor/vl53l5cx/vl53l5cx_api.c:641:	status += vl53l5cx_dci_read_data(p_dev,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:646:		status |= VL53L5CX_STATUS_ERROR;
+tof/vendor/vl53l5cx/vl53l5cx_api.c:652:uint8_t vl53l5cx_stop_ranging(
+tof/vendor/vl53l5cx/vl53l5cx_api.c:653:		VL53L5CX_Configuration		*p_dev)
+tof/vendor/vl53l5cx/vl53l5cx_api.c:655:	uint8_t tmp = 0, status = VL53L5CX_STATUS_OK;
+tof/vendor/vl53l5cx/vl53l5cx_api.c:65:#include "vl53l5cx_api.h"
+tof/vendor/vl53l5cx/vl53l5cx_api.c:66:#include "vl53l5cx_buffers.h"
+tof/vendor/vl53l5cx/vl53l5cx_api.c:705:uint8_t vl53l5cx_check_data_ready(
+tof/vendor/vl53l5cx/vl53l5cx_api.c:706:		VL53L5CX_Configuration		*p_dev,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:709:	uint8_t status = VL53L5CX_STATUS_OK;
+tof/vendor/vl53l5cx/vl53l5cx_api.c:70: * to wait for an answer from VL53L5CX sensor.
+tof/vendor/vl53l5cx/vl53l5cx_api.c:736:uint8_t vl53l5cx_get_ranging_data(
+tof/vendor/vl53l5cx/vl53l5cx_api.c:737:		VL53L5CX_Configuration		*p_dev,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:738:		VL53L5CX_ResultsData		*p_results)
+tof/vendor/vl53l5cx/vl53l5cx_api.c:73:static uint8_t _vl53l5cx_poll_for_answer(
+tof/vendor/vl53l5cx/vl53l5cx_api.c:740:	uint8_t status = VL53L5CX_STATUS_OK;
+tof/vendor/vl53l5cx/vl53l5cx_api.c:74:		VL53L5CX_Configuration	*p_dev,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:764:			case VL53L5CX_METADATA_IDX:
+tof/vendor/vl53l5cx/vl53l5cx_api.c:769:#ifndef VL53L5CX_DISABLE_AMBIENT_PER_SPAD
+tof/vendor/vl53l5cx/vl53l5cx_api.c:770:			case VL53L5CX_AMBIENT_RATE_IDX:
+tof/vendor/vl53l5cx/vl53l5cx_api.c:775:#ifndef VL53L5CX_DISABLE_NB_SPADS_ENABLED
+tof/vendor/vl53l5cx/vl53l5cx_api.c:776:			case VL53L5CX_SPAD_COUNT_IDX:
+tof/vendor/vl53l5cx/vl53l5cx_api.c:781:#ifndef VL53L5CX_DISABLE_NB_TARGET_DETECTED
+tof/vendor/vl53l5cx/vl53l5cx_api.c:782:			case VL53L5CX_NB_TARGET_DETECTED_IDX:
+tof/vendor/vl53l5cx/vl53l5cx_api.c:787:#ifndef VL53L5CX_DISABLE_SIGNAL_PER_SPAD
+tof/vendor/vl53l5cx/vl53l5cx_api.c:788:			case VL53L5CX_SIGNAL_RATE_IDX:
+tof/vendor/vl53l5cx/vl53l5cx_api.c:793:#ifndef VL53L5CX_DISABLE_RANGE_SIGMA_MM
+tof/vendor/vl53l5cx/vl53l5cx_api.c:794:			case VL53L5CX_RANGE_SIGMA_MM_IDX:
+tof/vendor/vl53l5cx/vl53l5cx_api.c:799:#ifndef VL53L5CX_DISABLE_DISTANCE_MM
+tof/vendor/vl53l5cx/vl53l5cx_api.c:800:			case VL53L5CX_DISTANCE_IDX:
+tof/vendor/vl53l5cx/vl53l5cx_api.c:805:#ifndef VL53L5CX_DISABLE_REFLECTANCE_PERCENT
+tof/vendor/vl53l5cx/vl53l5cx_api.c:806:			case VL53L5CX_REFLECTANCE_EST_PC_IDX:
+tof/vendor/vl53l5cx/vl53l5cx_api.c:811:#ifndef VL53L5CX_DISABLE_TARGET_STATUS
+tof/vendor/vl53l5cx/vl53l5cx_api.c:812:			case VL53L5CX_TARGET_STATUS_IDX:
+tof/vendor/vl53l5cx/vl53l5cx_api.c:817:#ifndef VL53L5CX_DISABLE_MOTION_INDICATOR
+tof/vendor/vl53l5cx/vl53l5cx_api.c:818:			case VL53L5CX_MOTION_DETEC_IDX:
+tof/vendor/vl53l5cx/vl53l5cx_api.c:81:	uint8_t status = VL53L5CX_STATUS_OK;
+tof/vendor/vl53l5cx/vl53l5cx_api.c:829:#ifndef VL53L5CX_USE_RAW_FORMAT
+tof/vendor/vl53l5cx/vl53l5cx_api.c:832:#ifndef VL53L5CX_DISABLE_AMBIENT_PER_SPAD
+tof/vendor/vl53l5cx/vl53l5cx_api.c:833:	for(i = 0; i < (uint32_t)VL53L5CX_RESOLUTION_8X8; i++)
+tof/vendor/vl53l5cx/vl53l5cx_api.c:839:	for(i = 0; i < (uint32_t)(VL53L5CX_RESOLUTION_8X8
+tof/vendor/vl53l5cx/vl53l5cx_api.c:840:			*VL53L5CX_NB_TARGET_PER_ZONE); i++)
+tof/vendor/vl53l5cx/vl53l5cx_api.c:842:#ifndef VL53L5CX_DISABLE_DISTANCE_MM
+tof/vendor/vl53l5cx/vl53l5cx_api.c:849:#ifndef VL53L5CX_DISABLE_REFLECTANCE_PERCENT
+tof/vendor/vl53l5cx/vl53l5cx_api.c:852:#ifndef VL53L5CX_DISABLE_RANGE_SIGMA_MM
+tof/vendor/vl53l5cx/vl53l5cx_api.c:855:#ifndef VL53L5CX_DISABLE_SIGNAL_PER_SPAD
+tof/vendor/vl53l5cx/vl53l5cx_api.c:861:#ifndef VL53L5CX_DISABLE_NB_TARGET_DETECTED
+tof/vendor/vl53l5cx/vl53l5cx_api.c:862:	for(i = 0; i < (uint32_t)VL53L5CX_RESOLUTION_8X8; i++)
+tof/vendor/vl53l5cx/vl53l5cx_api.c:866:				VL53L5CX_NB_TARGET_PER_ZONE; j++)
+tof/vendor/vl53l5cx/vl53l5cx_api.c:868:#ifndef VL53L5CX_DISABLE_TARGET_STATUS
+tof/vendor/vl53l5cx/vl53l5cx_api.c:870:				[((uint32_t)VL53L5CX_NB_TARGET_PER_ZONE
+tof/vendor/vl53l5cx/vl53l5cx_api.c:878:#ifndef VL53L5CX_DISABLE_MOTION_INDICATOR
+tof/vendor/vl53l5cx/vl53l5cx_api.c:889:uint8_t vl53l5cx_get_resolution(
+tof/vendor/vl53l5cx/vl53l5cx_api.c:890:		VL53L5CX_Configuration		*p_dev,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:893:	uint8_t status = VL53L5CX_STATUS_OK;
+tof/vendor/vl53l5cx/vl53l5cx_api.c:895:	status |= vl53l5cx_dci_read_data(p_dev, p_dev->temp_buffer,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:896:			VL53L5CX_DCI_ZONE_CONFIG, 8);
+tof/vendor/vl53l5cx/vl53l5cx_api.c:904:uint8_t vl53l5cx_set_resolution(
+tof/vendor/vl53l5cx/vl53l5cx_api.c:905:		VL53L5CX_Configuration 		 *p_dev,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:908:	uint8_t status = VL53L5CX_STATUS_OK;
+tof/vendor/vl53l5cx/vl53l5cx_api.c:911:		case VL53L5CX_RESOLUTION_4X4:
+tof/vendor/vl53l5cx/vl53l5cx_api.c:912:			status |= vl53l5cx_dci_read_data(p_dev,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:914:					VL53L5CX_DCI_DSS_CONFIG, 16);
+tof/vendor/vl53l5cx/vl53l5cx_api.c:918:			status |= vl53l5cx_dci_write_data(p_dev,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:91:			status |= (uint8_t)VL53L5CX_STATUS_TIMEOUT_ERROR;
+tof/vendor/vl53l5cx/vl53l5cx_api.c:920:					VL53L5CX_DCI_DSS_CONFIG, 16);
+tof/vendor/vl53l5cx/vl53l5cx_api.c:922:			status |= vl53l5cx_dci_read_data(p_dev,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:924:					VL53L5CX_DCI_ZONE_CONFIG, 8);
+tof/vendor/vl53l5cx/vl53l5cx_api.c:929:			status |= vl53l5cx_dci_write_data(p_dev,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:931:					VL53L5CX_DCI_ZONE_CONFIG, 8);
+tof/vendor/vl53l5cx/vl53l5cx_api.c:934:		case VL53L5CX_RESOLUTION_8X8:
+tof/vendor/vl53l5cx/vl53l5cx_api.c:935:			status |= vl53l5cx_dci_read_data(p_dev,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:937:					VL53L5CX_DCI_DSS_CONFIG, 16);
+tof/vendor/vl53l5cx/vl53l5cx_api.c:941:			status |= vl53l5cx_dci_write_data(p_dev,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:943:					VL53L5CX_DCI_DSS_CONFIG, 16);
+tof/vendor/vl53l5cx/vl53l5cx_api.c:945:			status |= vl53l5cx_dci_read_data(p_dev,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:947:					VL53L5CX_DCI_ZONE_CONFIG, 8);
+tof/vendor/vl53l5cx/vl53l5cx_api.c:952:			status |= vl53l5cx_dci_write_data(p_dev,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:954:					VL53L5CX_DCI_ZONE_CONFIG, 8);
+tof/vendor/vl53l5cx/vl53l5cx_api.c:959:			status = VL53L5CX_STATUS_INVALID_PARAM;
+tof/vendor/vl53l5cx/vl53l5cx_api.c:95:			status |= VL53L5CX_MCU_ERROR;
+tof/vendor/vl53l5cx/vl53l5cx_api.c:963:	status |= _vl53l5cx_send_offset_data(p_dev, resolution);
+tof/vendor/vl53l5cx/vl53l5cx_api.c:964:	status |= _vl53l5cx_send_xtalk_data(p_dev, resolution);
+tof/vendor/vl53l5cx/vl53l5cx_api.c:969:uint8_t vl53l5cx_get_ranging_frequency_hz(
+tof/vendor/vl53l5cx/vl53l5cx_api.c:970:		VL53L5CX_Configuration		*p_dev,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:973:	uint8_t status = VL53L5CX_STATUS_OK;
+tof/vendor/vl53l5cx/vl53l5cx_api.c:975:	status |= vl53l5cx_dci_read_data(p_dev, (uint8_t*)p_dev->temp_buffer,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:976:			VL53L5CX_DCI_FREQ_HZ, 4);
+tof/vendor/vl53l5cx/vl53l5cx_api.c:982:uint8_t vl53l5cx_set_ranging_frequency_hz(
+tof/vendor/vl53l5cx/vl53l5cx_api.c:983:		VL53L5CX_Configuration		*p_dev,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:986:	uint8_t status = VL53L5CX_STATUS_OK;
+tof/vendor/vl53l5cx/vl53l5cx_api.c:988:	status |= vl53l5cx_dci_replace_data(p_dev, p_dev->temp_buffer,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:989:					VL53L5CX_DCI_FREQ_HZ, 4,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:995:uint8_t vl53l5cx_get_integration_time_ms(
+tof/vendor/vl53l5cx/vl53l5cx_api.c:996:		VL53L5CX_Configuration		*p_dev,
+tof/vendor/vl53l5cx/vl53l5cx_api.c:999:	uint8_t status = VL53L5CX_STATUS_OK;
+tof/vendor/vl53l5cx/vl53l5cx_api.h:102:#define VL53L5CX_TARGET_ORDER_CLOSEST		((uint8_t) 1U)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:103:#define VL53L5CX_TARGET_ORDER_STRONGEST		((uint8_t) 2U)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:106: * @brief Macro VL53L5CX_RANGING_MODE_CONTINUOUS and
+tof/vendor/vl53l5cx/vl53l5cx_api.h:107: * VL53L5CX_RANGING_MODE_AUTONOMOUS are used to change the ranging mode.
+tof/vendor/vl53l5cx/vl53l5cx_api.h:112:#define VL53L5CX_RANGING_MODE_CONTINUOUS	((uint8_t) 1U)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:113:#define VL53L5CX_RANGING_MODE_AUTONOMOUS	((uint8_t) 3U)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:116: * @brief The default power mode is VL53L5CX_POWER_MODE_WAKEUP. User can choose
+tof/vendor/vl53l5cx/vl53l5cx_api.h:117: * the mode VL53L5CX_POWER_MODE_SLEEP to save power consumption is the device
+tof/vendor/vl53l5cx/vl53l5cx_api.h:119: * Both modes can be changed using function vl53l5cx_set_power_mode().
+tof/vendor/vl53l5cx/vl53l5cx_api.h:122:#define VL53L5CX_POWER_MODE_SLEEP		((uint8_t) 0U)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:123:#define VL53L5CX_POWER_MODE_WAKEUP		((uint8_t) 1U)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:126: * @brief Macro VL53L5CX_STATUS_OK indicates that VL53L5 sensor has no error.
+tof/vendor/vl53l5cx/vl53l5cx_api.h:127: * Macro VL53L5CX_STATUS_ERROR indicates that something is wrong (value,
+tof/vendor/vl53l5cx/vl53l5cx_api.h:128: * I2C access, ...). Macro VL53L5CX_MCU_ERROR is used to indicate a MCU issue.
+tof/vendor/vl53l5cx/vl53l5cx_api.h:131:#define VL53L5CX_STATUS_OK			((uint8_t) 0U)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:132:#define VL53L5CX_STATUS_TIMEOUT_ERROR		((uint8_t) 1U)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:133:#define VL53L5CX_MCU_ERROR			((uint8_t) 66U)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:134:#define VL53L5CX_STATUS_INVALID_PARAM		((uint8_t) 127U)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:135:#define VL53L5CX_STATUS_ERROR			((uint8_t) 255U)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:141:#if VL53L5CX_NB_TARGET_PER_ZONE == 1
+tof/vendor/vl53l5cx/vl53l5cx_api.h:143:#define VL53L5CX_START_BH			((uint32_t)0x0000000DU)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:144:#define VL53L5CX_METADATA_BH			((uint32_t)0x54B400C0U)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:145:#define VL53L5CX_COMMONDATA_BH			((uint32_t)0x54C00040U)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:146:#define VL53L5CX_AMBIENT_RATE_BH		((uint32_t)0x54D00104U)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:147:#define VL53L5CX_SPAD_COUNT_BH			((uint32_t)0x55D00404U)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:148:#define VL53L5CX_NB_TARGET_DETECTED_BH	        ((uint32_t)0xCF7C0401U)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:149:#define VL53L5CX_SIGNAL_RATE_BH			((uint32_t)0xCFBC0404U)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:150:#define VL53L5CX_RANGE_SIGMA_MM_BH		((uint32_t)0xD2BC0402U)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:151:#define VL53L5CX_DISTANCE_BH			((uint32_t)0xD33C0402U)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:152:#define VL53L5CX_REFLECTANCE_BH			((uint32_t)0xD43C0401U)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:153:#define VL53L5CX_TARGET_STATUS_BH		((uint32_t)0xD47C0401U)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:154:#define VL53L5CX_MOTION_DETECT_BH		((uint32_t)0xCC5008C0U)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:156:#define VL53L5CX_METADATA_IDX			((uint16_t)0x54B4U)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:157:#define VL53L5CX_SPAD_COUNT_IDX			((uint16_t)0x55D0U)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:158:#define VL53L5CX_AMBIENT_RATE_IDX		((uint16_t)0x54D0U)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:159:#define VL53L5CX_NB_TARGET_DETECTED_IDX		((uint16_t)0xCF7CU)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:160:#define VL53L5CX_SIGNAL_RATE_IDX		((uint16_t)0xCFBCU)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:161:#define VL53L5CX_RANGE_SIGMA_MM_IDX		((uint16_t)0xD2BCU)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:162:#define VL53L5CX_DISTANCE_IDX			((uint16_t)0xD33CU)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:163:#define VL53L5CX_REFLECTANCE_EST_PC_IDX		((uint16_t)0xD43CU)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:164:#define VL53L5CX_TARGET_STATUS_IDX		((uint16_t)0xD47CU)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:165:#define VL53L5CX_MOTION_DETEC_IDX		((uint16_t)0xCC50U)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:168:#define VL53L5CX_START_BH			((uint32_t)0x0000000DU)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:169:#define VL53L5CX_METADATA_BH			((uint32_t)0x54B400C0U)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:170:#define VL53L5CX_COMMONDATA_BH			((uint32_t)0x54C00040U)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:171:#define VL53L5CX_AMBIENT_RATE_BH		((uint32_t)0x54D00104U)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:172:#define VL53L5CX_NB_TARGET_DETECTED_BH		((uint32_t)0x57D00401U)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:173:#define VL53L5CX_SPAD_COUNT_BH			((uint32_t)0x55D00404U)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:174:#define VL53L5CX_SIGNAL_RATE_BH			((uint32_t)0x58900404U)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:175:#define VL53L5CX_RANGE_SIGMA_MM_BH		((uint32_t)0x64900402U)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:176:#define VL53L5CX_DISTANCE_BH			((uint32_t)0x66900402U)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:177:#define VL53L5CX_REFLECTANCE_BH			((uint32_t)0x6A900401U)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:178:#define VL53L5CX_TARGET_STATUS_BH		((uint32_t)0x6B900401U)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:179:#define VL53L5CX_MOTION_DETECT_BH		((uint32_t)0xCC5008C0U)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:181:#define VL53L5CX_METADATA_IDX			((uint16_t)0x54B4U)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:182:#define VL53L5CX_SPAD_COUNT_IDX			((uint16_t)0x55D0U)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:183:#define VL53L5CX_AMBIENT_RATE_IDX		((uint16_t)0x54D0U)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:184:#define VL53L5CX_NB_TARGET_DETECTED_IDX		((uint16_t)0x57D0U)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:185:#define VL53L5CX_SIGNAL_RATE_IDX		((uint16_t)0x5890U)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:186:#define VL53L5CX_RANGE_SIGMA_MM_IDX		((uint16_t)0x6490U)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:187:#define VL53L5CX_DISTANCE_IDX			((uint16_t)0x6690U)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:188:#define VL53L5CX_REFLECTANCE_EST_PC_IDX		((uint16_t)0x6A90U)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:189:#define VL53L5CX_TARGET_STATUS_IDX		((uint16_t)0x6B90U)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:190:#define VL53L5CX_MOTION_DETEC_IDX		((uint16_t)0xCC50U)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:198:#define VL53L5CX_NVM_DATA_SIZE			((uint16_t)492U)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:199:#define VL53L5CX_CONFIGURATION_SIZE		((uint16_t)972U)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:200:#define VL53L5CX_OFFSET_BUFFER_SIZE		((uint16_t)488U)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:201:#define VL53L5CX_XTALK_BUFFER_SIZE		((uint16_t)776U)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:203:#define VL53L5CX_DCI_ZONE_CONFIG		((uint16_t)0x5450U)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:204:#define VL53L5CX_DCI_FREQ_HZ			((uint16_t)0x5458U)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:205:#define VL53L5CX_DCI_INT_TIME			((uint16_t)0x545CU)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:206:#define VL53L5CX_DCI_FW_NB_TARGET		((uint16_t)0x5478)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:207:#define VL53L5CX_DCI_RANGING_MODE		((uint16_t)0xAD30U)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:208:#define VL53L5CX_DCI_DSS_CONFIG			((uint16_t)0xAD38U)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:209:#define VL53L5CX_DCI_TARGET_ORDER		((uint16_t)0xAE64U)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:210:#define VL53L5CX_DCI_SHARPENER			((uint16_t)0xAED8U)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:211:#define VL53L5CX_DCI_MOTION_DETECTOR_CFG	((uint16_t)0xBFACU)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:212:#define VL53L5CX_DCI_SINGLE_RANGE		((uint16_t)0xCD5CU)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:213:#define VL53L5CX_DCI_OUTPUT_CONFIG		((uint16_t)0xCD60U)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:214:#define VL53L5CX_DCI_OUTPUT_ENABLES		((uint16_t)0xCD68U)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:215:#define VL53L5CX_DCI_OUTPUT_LIST		((uint16_t)0xCD78U)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:216:#define VL53L5CX_DCI_PIPE_CONTROL		((uint16_t)0xCF78U)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:218:#define VL53L5CX_UI_CMD_STATUS			((uint16_t)0x2C00U)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:219:#define VL53L5CX_UI_CMD_START			((uint16_t)0x2C04U)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:220:#define VL53L5CX_UI_CMD_END			((uint16_t)0x2FFFU)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:226:#ifndef VL53L5CX_DISABLE_AMBIENT_PER_SPAD
+tof/vendor/vl53l5cx/vl53l5cx_api.h:232:#ifndef VL53L5CX_DISABLE_NB_SPADS_ENABLED
+tof/vendor/vl53l5cx/vl53l5cx_api.h:238:#ifndef VL53L5CX_DISABLE_NB_TARGET_DETECTED
+tof/vendor/vl53l5cx/vl53l5cx_api.h:244:#ifndef VL53L5CX_DISABLE_SIGNAL_PER_SPAD
+tof/vendor/vl53l5cx/vl53l5cx_api.h:245:#define L5CX_SPS_SIZE ((256U * VL53L5CX_NB_TARGET_PER_ZONE) + 4U)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:24:* Alternatively, the VL53L5CX Ultra Lite Driver may be distributed under the
+tof/vendor/vl53l5cx/vl53l5cx_api.h:250:#ifndef VL53L5CX_DISABLE_RANGE_SIGMA_MM
+tof/vendor/vl53l5cx/vl53l5cx_api.h:251:#define L5CX_SIGR_SIZE ((128U * VL53L5CX_NB_TARGET_PER_ZONE) + 4U)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:256:#ifndef VL53L5CX_DISABLE_DISTANCE_MM
+tof/vendor/vl53l5cx/vl53l5cx_api.h:257:#define L5CX_DIST_SIZE ((128U * VL53L5CX_NB_TARGET_PER_ZONE) + 4U)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:262:#ifndef VL53L5CX_DISABLE_REFLECTANCE_PERCENT
+tof/vendor/vl53l5cx/vl53l5cx_api.h:263:#define L5CX_RFLEST_SIZE ((64U *VL53L5CX_NB_TARGET_PER_ZONE) + 4U)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:268:#ifndef VL53L5CX_DISABLE_TARGET_STATUS
+tof/vendor/vl53l5cx/vl53l5cx_api.h:269:#define L5CX_STA_SIZE ((64U  *VL53L5CX_NB_TARGET_PER_ZONE) + 4U)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:274:#ifndef VL53L5CX_DISABLE_MOTION_INDICATOR
+tof/vendor/vl53l5cx/vl53l5cx_api.h:281: * @brief Macro VL53L5CX_MAX_RESULTS_SIZE indicates the maximum size used by
+tof/vendor/vl53l5cx/vl53l5cx_api.h:282: * output through I2C. Value 40 corresponds to headers + meta-data + common-data
+tof/vendor/vl53l5cx/vl53l5cx_api.h:286:#define VL53L5CX_MAX_RESULTS_SIZE ( 40U \
+tof/vendor/vl53l5cx/vl53l5cx_api.h:292: * @brief Macro VL53L5CX_TEMPORARY_BUFFER_SIZE can be used to know the size of
+tof/vendor/vl53l5cx/vl53l5cx_api.h:297:#if VL53L5CX_MAX_RESULTS_SIZE < 1024U
+tof/vendor/vl53l5cx/vl53l5cx_api.h:298:#define VL53L5CX_TEMPORARY_BUFFER_SIZE ((uint32_t) 1024U)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:300:#define VL53L5CX_TEMPORARY_BUFFER_SIZE ((uint32_t) VL53L5CX_MAX_RESULTS_SIZE)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:305: * @brief Structure VL53L5CX_Configuration contains the sensor configuration.
+tof/vendor/vl53l5cx/vl53l5cx_api.h:312:	VL53L5CX_Platform	platform;
+tof/vendor/vl53l5cx/vl53l5cx_api.h:315:	/* Size of data read though I2C */
+tof/vendor/vl53l5cx/vl53l5cx_api.h:322:	uint8_t		        offset_data[VL53L5CX_OFFSET_BUFFER_SIZE];
+tof/vendor/vl53l5cx/vl53l5cx_api.h:324:	uint8_t		        xtalk_data[VL53L5CX_XTALK_BUFFER_SIZE];
+tof/vendor/vl53l5cx/vl53l5cx_api.h:326:	 uint8_t	        temp_buffer[VL53L5CX_TEMPORARY_BUFFER_SIZE];
+tof/vendor/vl53l5cx/vl53l5cx_api.h:327:} VL53L5CX_Configuration;
+tof/vendor/vl53l5cx/vl53l5cx_api.h:331: * @brief Structure VL53L5CX_ResultsData contains the ranging results of
+tof/vendor/vl53l5cx/vl53l5cx_api.h:332: * VL53L5CX. If user wants more than 1 target per zone, the results can be split
+tof/vendor/vl53l5cx/vl53l5cx_api.h:347:#ifndef VL53L5CX_DISABLE_AMBIENT_PER_SPAD
+tof/vendor/vl53l5cx/vl53l5cx_api.h:348:	uint32_t ambient_per_spad[VL53L5CX_RESOLUTION_8X8];
+tof/vendor/vl53l5cx/vl53l5cx_api.h:352:#ifndef VL53L5CX_DISABLE_NB_TARGET_DETECTED
+tof/vendor/vl53l5cx/vl53l5cx_api.h:353:	uint8_t nb_target_detected[VL53L5CX_RESOLUTION_8X8];
+tof/vendor/vl53l5cx/vl53l5cx_api.h:357:#ifndef VL53L5CX_DISABLE_NB_SPADS_ENABLED
+tof/vendor/vl53l5cx/vl53l5cx_api.h:358:	uint32_t nb_spads_enabled[VL53L5CX_RESOLUTION_8X8];
+tof/vendor/vl53l5cx/vl53l5cx_api.h:362:#ifndef VL53L5CX_DISABLE_SIGNAL_PER_SPAD
+tof/vendor/vl53l5cx/vl53l5cx_api.h:363:	uint32_t signal_per_spad[(VL53L5CX_RESOLUTION_8X8
+tof/vendor/vl53l5cx/vl53l5cx_api.h:364:					*VL53L5CX_NB_TARGET_PER_ZONE)];
+tof/vendor/vl53l5cx/vl53l5cx_api.h:368:#ifndef VL53L5CX_DISABLE_RANGE_SIGMA_MM
+tof/vendor/vl53l5cx/vl53l5cx_api.h:369:	uint16_t range_sigma_mm[(VL53L5CX_RESOLUTION_8X8
+tof/vendor/vl53l5cx/vl53l5cx_api.h:370:					*VL53L5CX_NB_TARGET_PER_ZONE)];
+tof/vendor/vl53l5cx/vl53l5cx_api.h:374:#ifndef VL53L5CX_DISABLE_DISTANCE_MM
+tof/vendor/vl53l5cx/vl53l5cx_api.h:375:	int16_t distance_mm[(VL53L5CX_RESOLUTION_8X8
+tof/vendor/vl53l5cx/vl53l5cx_api.h:376:					*VL53L5CX_NB_TARGET_PER_ZONE)];
+tof/vendor/vl53l5cx/vl53l5cx_api.h:380:#ifndef VL53L5CX_DISABLE_REFLECTANCE_PERCENT
+tof/vendor/vl53l5cx/vl53l5cx_api.h:381:	uint8_t reflectance[(VL53L5CX_RESOLUTION_8X8
+tof/vendor/vl53l5cx/vl53l5cx_api.h:382:					*VL53L5CX_NB_TARGET_PER_ZONE)];
+tof/vendor/vl53l5cx/vl53l5cx_api.h:386:#ifndef VL53L5CX_DISABLE_TARGET_STATUS
+tof/vendor/vl53l5cx/vl53l5cx_api.h:387:	uint8_t target_status[(VL53L5CX_RESOLUTION_8X8
+tof/vendor/vl53l5cx/vl53l5cx_api.h:388:					*VL53L5CX_NB_TARGET_PER_ZONE)];
+tof/vendor/vl53l5cx/vl53l5cx_api.h:392:#ifndef VL53L5CX_DISABLE_MOTION_INDICATOR
+tof/vendor/vl53l5cx/vl53l5cx_api.h:405:} VL53L5CX_ResultsData;
+tof/vendor/vl53l5cx/vl53l5cx_api.h:417:uint8_t vl53l5cx_is_alive(
+tof/vendor/vl53l5cx/vl53l5cx_api.h:418:		VL53L5CX_Configuration		*p_dev,
+tof/vendor/vl53l5cx/vl53l5cx_api.h:423: * be called after a power on, to load the firmware into the VL53L5CX. It takes
+tof/vendor/vl53l5cx/vl53l5cx_api.h:425: * @param (VL53L5CX_Configuration) *p_dev : VL53L5CX configuration structure.
+tof/vendor/vl53l5cx/vl53l5cx_api.h:429:uint8_t vl53l5cx_init(
+tof/vendor/vl53l5cx/vl53l5cx_api.h:430:		VL53L5CX_Configuration		*p_dev);
+tof/vendor/vl53l5cx/vl53l5cx_api.h:433: * @brief This function is used to change the I2C address of the sensor. If
+tof/vendor/vl53l5cx/vl53l5cx_api.h:434: * multiple VL53L5 sensors are connected to the same I2C line, all other LPn
+tof/vendor/vl53l5cx/vl53l5cx_api.h:436: * @param (VL53L5CX_Configuration) *p_dev : VL53L5CX configuration structure.
+tof/vendor/vl53l5cx/vl53l5cx_api.h:437: * @param (uint16_t) i2c_address : New I2C address.
+tof/vendor/vl53l5cx/vl53l5cx_api.h:441:uint8_t vl53l5cx_set_i2c_address(
+tof/vendor/vl53l5cx/vl53l5cx_api.h:442:		VL53L5CX_Configuration		*p_dev,
+tof/vendor/vl53l5cx/vl53l5cx_api.h:443:		uint16_t			i2c_address);
+tof/vendor/vl53l5cx/vl53l5cx_api.h:447: * @param (VL53L5CX_Configuration) *p_dev : VL53L5CX configuration structure.
+tof/vendor/vl53l5cx/vl53l5cx_api.h:450: * (VL53L5CX_POWER_MODE_SLEEP), or 1 if sensor is in standard mode
+tof/vendor/vl53l5cx/vl53l5cx_api.h:451: * (VL53L5CX_POWER_MODE_WAKEUP).
+tof/vendor/vl53l5cx/vl53l5cx_api.h:455:uint8_t vl53l5cx_get_power_mode(
+tof/vendor/vl53l5cx/vl53l5cx_api.h:456:		VL53L5CX_Configuration		*p_dev,
+tof/vendor/vl53l5cx/vl53l5cx_api.h:462: * VL53L5CX_POWER_MODE_SLEEP can be used to enable the low power mode. When user
+tof/vendor/vl53l5cx/vl53l5cx_api.h:463: * want to restart the sensor, he can use macro VL53L5CX_POWER_MODE_WAKEUP.
+tof/vendor/vl53l5cx/vl53l5cx_api.h:465: * @param (VL53L5CX_Configuration) *p_dev : VL53L5CX configuration structure.
+tof/vendor/vl53l5cx/vl53l5cx_api.h:466: * @param (uint8_t) power_mode : Selected power mode (VL53L5CX_POWER_MODE_SLEEP
+tof/vendor/vl53l5cx/vl53l5cx_api.h:467: * or VL53L5CX_POWER_MODE_WAKEUP)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:472:uint8_t vl53l5cx_set_power_mode(
+tof/vendor/vl53l5cx/vl53l5cx_api.h:473:		VL53L5CX_Configuration		*p_dev,
+tof/vendor/vl53l5cx/vl53l5cx_api.h:479: * @param (VL53L5CX_Configuration) *p_dev : VL53L5CX configuration structure.
+tof/vendor/vl53l5cx/vl53l5cx_api.h:483:uint8_t vl53l5cx_start_ranging(
+tof/vendor/vl53l5cx/vl53l5cx_api.h:484:		VL53L5CX_Configuration		*p_dev);
+tof/vendor/vl53l5cx/vl53l5cx_api.h:488: * sensor streams, after calling vl53l5cx_start_ranging().
+tof/vendor/vl53l5cx/vl53l5cx_api.h:489: * @param (VL53L5CX_Configuration) *p_dev : VL53L5CX configuration structure.
+tof/vendor/vl53l5cx/vl53l5cx_api.h:493:uint8_t vl53l5cx_stop_ranging(
+tof/vendor/vl53l5cx/vl53l5cx_api.h:494:		VL53L5CX_Configuration		*p_dev);
+tof/vendor/vl53l5cx/vl53l5cx_api.h:497: * @brief This function checks if a new data is ready by polling I2C. If a new
+tof/vendor/vl53l5cx/vl53l5cx_api.h:499: * @param (VL53L5CX_Configuration) *p_dev : VL53L5CX configuration structure.
+tof/vendor/vl53l5cx/vl53l5cx_api.h:4:* This file is part of the VL53L5CX Ultra Lite Driver and is dual licensed,
+tof/vendor/vl53l5cx/vl53l5cx_api.h:502: * @return (uint8_t) status : 0 if I2C reading is OK
+tof/vendor/vl53l5cx/vl53l5cx_api.h:505:uint8_t vl53l5cx_check_data_ready(
+tof/vendor/vl53l5cx/vl53l5cx_api.h:506:		VL53L5CX_Configuration		*p_dev,
+tof/vendor/vl53l5cx/vl53l5cx_api.h:512: * @param (VL53L5CX_Configuration) *p_dev : VL53L5CX configuration structure.
+tof/vendor/vl53l5cx/vl53l5cx_api.h:513: * @param (VL53L5CX_ResultsData) *p_results : VL53L5 results structure.
+tof/vendor/vl53l5cx/vl53l5cx_api.h:517:uint8_t vl53l5cx_get_ranging_data(
+tof/vendor/vl53l5cx/vl53l5cx_api.h:518:		VL53L5CX_Configuration		*p_dev,
+tof/vendor/vl53l5cx/vl53l5cx_api.h:519:		VL53L5CX_ResultsData		*p_results);
+tof/vendor/vl53l5cx/vl53l5cx_api.h:523: * @param (VL53L5CX_Configuration) *p_dev : VL53L5CX configuration structure.
+tof/vendor/vl53l5cx/vl53l5cx_api.h:529:uint8_t vl53l5cx_get_resolution(
+tof/vendor/vl53l5cx/vl53l5cx_api.h:530:		VL53L5CX_Configuration		*p_dev,
+tof/vendor/vl53l5cx/vl53l5cx_api.h:535: * @param (VL53L5CX_Configuration) *p_dev : VL53L5CX configuration structure.
+tof/vendor/vl53l5cx/vl53l5cx_api.h:536: * @param (uint8_t) resolution : Use macro VL53L5CX_RESOLUTION_4X4 or
+tof/vendor/vl53l5cx/vl53l5cx_api.h:537: * VL53L5CX_RESOLUTION_8X8 to set the resolution.
+tof/vendor/vl53l5cx/vl53l5cx_api.h:541:uint8_t vl53l5cx_set_resolution(
+tof/vendor/vl53l5cx/vl53l5cx_api.h:542:		VL53L5CX_Configuration		 *p_dev,
+tof/vendor/vl53l5cx/vl53l5cx_api.h:548: * @param (VL53L5CX_Configuration) *p_dev : VL53L5CX configuration structure.
+tof/vendor/vl53l5cx/vl53l5cx_api.h:553:uint8_t vl53l5cx_get_ranging_frequency_hz(
+tof/vendor/vl53l5cx/vl53l5cx_api.h:554:		VL53L5CX_Configuration		*p_dev,
+tof/vendor/vl53l5cx/vl53l5cx_api.h:561: * @param (VL53L5CX_Configuration) *p_dev : VL53L5CX configuration structure.
+tof/vendor/vl53l5cx/vl53l5cx_api.h:569:uint8_t vl53l5cx_set_ranging_frequency_hz(
+tof/vendor/vl53l5cx/vl53l5cx_api.h:570:		VL53L5CX_Configuration		*p_dev,
+tof/vendor/vl53l5cx/vl53l5cx_api.h:575: * @param (VL53L5CX_Configuration) *p_dev : VL53L5CX configuration structure.
+tof/vendor/vl53l5cx/vl53l5cx_api.h:580:uint8_t vl53l5cx_get_integration_time_ms(
+tof/vendor/vl53l5cx/vl53l5cx_api.h:581:		VL53L5CX_Configuration		*p_dev,
+tof/vendor/vl53l5cx/vl53l5cx_api.h:588: * @param (VL53L5CX_Configuration) *p_dev : VL53L5CX configuration structure.
+tof/vendor/vl53l5cx/vl53l5cx_api.h:595:uint8_t vl53l5cx_set_integration_time_ms(
+tof/vendor/vl53l5cx/vl53l5cx_api.h:596:		VL53L5CX_Configuration		*p_dev,
+tof/vendor/vl53l5cx/vl53l5cx_api.h:602: * @param (VL53L5CX_Configuration) *p_dev : VL53L5CX configuration structure.
+tof/vendor/vl53l5cx/vl53l5cx_api.h:607:uint8_t vl53l5cx_get_sharpener_percent(
+tof/vendor/vl53l5cx/vl53l5cx_api.h:608:		VL53L5CX_Configuration		*p_dev,
+tof/vendor/vl53l5cx/vl53l5cx_api.h:615: * @param (VL53L5CX_Configuration) *p_dev : VL53L5CX configuration structure.
+tof/vendor/vl53l5cx/vl53l5cx_api.h:620:uint8_t vl53l5cx_set_sharpener_percent(
+tof/vendor/vl53l5cx/vl53l5cx_api.h:621:		VL53L5CX_Configuration		*p_dev,
+tof/vendor/vl53l5cx/vl53l5cx_api.h:626: * @param (VL53L5CX_Configuration) *p_dev : VL53L5CX configuration structure.
+tof/vendor/vl53l5cx/vl53l5cx_api.h:631:uint8_t vl53l5cx_get_target_order(
+tof/vendor/vl53l5cx/vl53l5cx_api.h:632:		VL53L5CX_Configuration		*p_dev,
+tof/vendor/vl53l5cx/vl53l5cx_api.h:637: * VL53L5CX_TARGET_ORDER_STRONGEST and VL53L5CX_TARGET_ORDER_CLOSEST to define
+tof/vendor/vl53l5cx/vl53l5cx_api.h:63:#ifndef VL53L5CX_API_H_
+tof/vendor/vl53l5cx/vl53l5cx_api.h:640: * @param (VL53L5CX_Configuration) *p_dev : VL53L5CX configuration structure.
+tof/vendor/vl53l5cx/vl53l5cx_api.h:646:uint8_t vl53l5cx_set_target_order(
+tof/vendor/vl53l5cx/vl53l5cx_api.h:647:		VL53L5CX_Configuration		*p_dev,
+tof/vendor/vl53l5cx/vl53l5cx_api.h:64:#define VL53L5CX_API_H_
+tof/vendor/vl53l5cx/vl53l5cx_api.h:654: * @param (VL53L5CX_Configuration) *p_dev : VL53L5CX configuration structure.
+tof/vendor/vl53l5cx/vl53l5cx_api.h:659:uint8_t vl53l5cx_get_ranging_mode(
+tof/vendor/vl53l5cx/vl53l5cx_api.h:660:		VL53L5CX_Configuration		*p_dev,
+tof/vendor/vl53l5cx/vl53l5cx_api.h:667: * @param (VL53L5CX_Configuration) *p_dev : VL53L5CX configuration structure.
+tof/vendor/vl53l5cx/vl53l5cx_api.h:668: * @param (uint8_t) ranging_mode : Use macros VL53L5CX_RANGING_MODE_CONTINUOUS,
+tof/vendor/vl53l5cx/vl53l5cx_api.h:669: * VL53L5CX_RANGING_MODE_CONTINUOUS.
+tof/vendor/vl53l5cx/vl53l5cx_api.h:673:uint8_t vl53l5cx_set_ranging_mode(
+tof/vendor/vl53l5cx/vl53l5cx_api.h:674:		VL53L5CX_Configuration		*p_dev,
+tof/vendor/vl53l5cx/vl53l5cx_api.h:680: * @param (VL53L5CX_Configuration) *p_dev : VL53L5CX configuration structure.
+tof/vendor/vl53l5cx/vl53l5cx_api.h:690:uint8_t vl53l5cx_dci_read_data(
+tof/vendor/vl53l5cx/vl53l5cx_api.h:691:		VL53L5CX_Configuration		*p_dev,
+tof/vendor/vl53l5cx/vl53l5cx_api.h:699: * @param (VL53L5CX_Configuration) *p_dev : VL53L5CX configuration structure.
+tof/vendor/vl53l5cx/vl53l5cx_api.h:709:uint8_t vl53l5cx_dci_write_data(
+tof/vendor/vl53l5cx/vl53l5cx_api.h:710:		VL53L5CX_Configuration		*p_dev,
+tof/vendor/vl53l5cx/vl53l5cx_api.h:718: * @param (VL53L5CX_Configuration) *p_dev : VL53L5CX configuration structure.
+tof/vendor/vl53l5cx/vl53l5cx_api.h:731:uint8_t vl53l5cx_dci_replace_data(
+tof/vendor/vl53l5cx/vl53l5cx_api.h:732:		VL53L5CX_Configuration		*p_dev,
+tof/vendor/vl53l5cx/vl53l5cx_api.h:740:#endif //VL53L5CX_API_H_
+tof/vendor/vl53l5cx/vl53l5cx_api.h:78:#define VL53L5CX_API_REVISION			"VL53L5CX_1.3.0"
+tof/vendor/vl53l5cx/vl53l5cx_api.h:81: * @brief Default I2C address of VL53L5CX sensor. Can be changed using function
+tof/vendor/vl53l5cx/vl53l5cx_api.h:82: * vl53l5cx_set_i2c_address() function is called.
+tof/vendor/vl53l5cx/vl53l5cx_api.h:85:#define VL53L5CX_DEFAULT_I2C_ADDRESS	        ((uint16_t)0x52)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:88: * @brief Macro VL53L5CX_RESOLUTION_4X4 or VL53L5CX_RESOLUTION_8X8 allows
+tof/vendor/vl53l5cx/vl53l5cx_api.h:90: * vl53l5cx_set_resolution().
+tof/vendor/vl53l5cx/vl53l5cx_api.h:93:#define VL53L5CX_RESOLUTION_4X4			((uint8_t) 16U)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:94:#define VL53L5CX_RESOLUTION_8X8			((uint8_t) 64U)
+tof/vendor/vl53l5cx/vl53l5cx_api.h:98: * @brief Macro VL53L5CX_TARGET_ORDER_STRONGEST or VL53L5CX_TARGET_ORDER_CLOSEST
+tof/vendor/vl53l5cx/vl53l5cx_buffers.h:21594: * @brief This buffer contains the VL53L5CX default configuration.
+tof/vendor/vl53l5cx/vl53l5cx_buffers.h:21597:const uint8_t VL53L5CX_DEFAULT_CONFIGURATION[] = {
+tof/vendor/vl53l5cx/vl53l5cx_buffers.h:21624:	0x04, 0x01, 0x08, VL53L5CX_FW_NBTAR_RANGING,
+tof/vendor/vl53l5cx/vl53l5cx_buffers.h:21844: * @brief This buffer contains the VL53L5CX default Xtalk data.
+tof/vendor/vl53l5cx/vl53l5cx_buffers.h:21847:const uint8_t VL53L5CX_DEFAULT_XTALK[] = {
+tof/vendor/vl53l5cx/vl53l5cx_buffers.h:22048:const uint8_t VL53L5CX_GET_NVM_CMD[] = {
+tof/vendor/vl53l5cx/vl53l5cx_buffers.h:22061:#endif /* VL53L5CX_BUFFERS_H_ */
+tof/vendor/vl53l5cx/vl53l5cx_buffers.h:25:* Alternatively, the VL53L5CX Ultra Lite Driver may be distributed under the
+tof/vendor/vl53l5cx/vl53l5cx_buffers.h:5:* This file is part of the VL53L5CX Ultra Lite Driver and is dual licensed,
+tof/vendor/vl53l5cx/vl53l5cx_buffers.h:65:#ifndef VL53L5CX_BUFFERS_H_
+tof/vendor/vl53l5cx/vl53l5cx_buffers.h:66:#define VL53L5CX_BUFFERS_H_
+tof/vendor/vl53l5cx/vl53l5cx_buffers.h:74:#if VL53L5CX_NB_TARGET_PER_ZONE == 1
+tof/vendor/vl53l5cx/vl53l5cx_buffers.h:75:#define VL53L5CX_FW_NBTAR_RANGING	2
+tof/vendor/vl53l5cx/vl53l5cx_buffers.h:77:#define VL53L5CX_FW_NBTAR_RANGING	VL53L5CX_NB_TARGET_PER_ZONE
+tof/vendor/vl53l5cx/vl53l5cx_buffers.h:81: * @brief This buffer contains the VL53L5CX firmware (MM1.2)
+tof/vendor/vl53l5cx/vl53l5cx_buffers.h:84:const uint8_t VL53L5CX_FIRMWARE[] = {
+tof/vendor/vl53l8cx/platform.h:22:    /* 8-bit I2C address (7-bit << 1), the format the ULD expects. */
+tof/vendor/vl53l8cx/platform.h:24:    /* Open file descriptor on /dev/i2c-N. */
+tof/vendor/vl53l8cx/platform.h:26:} VL53L8CX_Platform;
+tof/vendor/vl53l8cx/platform.h:28:#define VL53L8CX_NB_TARGET_PER_ZONE 1U
+tof/vendor/vl53l8cx/platform.h:2: * Linux i2c-dev platform layer for the ST VL53L8CX ULD — microduck.
+tof/vendor/vl53l8cx/platform.h:37:#define VL53L8CX_DISABLE_AMBIENT_PER_SPAD
+tof/vendor/vl53l8cx/platform.h:38:#define VL53L8CX_DISABLE_NB_SPADS_ENABLED
+tof/vendor/vl53l8cx/platform.h:39:#define VL53L8CX_DISABLE_NB_TARGET_DETECTED
+tof/vendor/vl53l8cx/platform.h:40:#define VL53L8CX_DISABLE_SIGNAL_PER_SPAD
+tof/vendor/vl53l8cx/platform.h:41:#define VL53L8CX_DISABLE_RANGE_SIGMA_MM
+tof/vendor/vl53l8cx/platform.h:42:/* VL53L8CX_DISABLE_DISTANCE_MM      — kept */
+tof/vendor/vl53l8cx/platform.h:43:#define VL53L8CX_DISABLE_REFLECTANCE_PERCENT
+tof/vendor/vl53l8cx/platform.h:44:/* VL53L8CX_DISABLE_TARGET_STATUS   — kept */
+tof/vendor/vl53l8cx/platform.h:45:#define VL53L8CX_DISABLE_MOTION_INDICATOR
+tof/vendor/vl53l8cx/platform.h:47:uint8_t RdByte(VL53L8CX_Platform *p_platform, uint16_t RegisterAdress,
+tof/vendor/vl53l8cx/platform.h:49:uint8_t WrByte(VL53L8CX_Platform *p_platform, uint16_t RegisterAdress,
+tof/vendor/vl53l8cx/platform.h:51:uint8_t RdMulti(VL53L8CX_Platform *p_platform, uint16_t RegisterAdress,
+tof/vendor/vl53l8cx/platform.h:53:uint8_t WrMulti(VL53L8CX_Platform *p_platform, uint16_t RegisterAdress,
+tof/vendor/vl53l8cx/platform.h:56:uint8_t WaitMs(VL53L8CX_Platform *p_platform, uint32_t TimeMs);
+tof/vendor/vl53l8cx/platform.h:5: * Talks to /dev/i2c-N via I2C_RDWR ioctls (../platform.c, shared with the
+tof/vendor/vl53l8cx/platform.h:6: * VL53L5CX generation); used by shim.c, which exposes the flat API
+tof/vendor/vl53l8cx/shim.c:11: * VL53L8CX_STATUS_OK — except `vl8_is_alive` and `vl8_data_ready`, which
+tof/vendor/vl53l8cx/shim.c:25:#include "vl53l8cx_api.h"
+tof/vendor/vl53l8cx/shim.c:27:static VL53L8CX_Configuration dev;
+tof/vendor/vl53l8cx/shim.c:28:static VL53L8CX_ResultsData results;
+tof/vendor/vl53l8cx/shim.c:2: * Flat C API over the VL53L8CX ULD, for `tof`'s Rust wrapper.
+tof/vendor/vl53l8cx/shim.c:46:/* 1 = a live VL53L8CX answers at the configured address. */
+tof/vendor/vl53l8cx/shim.c:50:    if (vl53l8cx_is_alive(&dev, &alive)) return 0;
+tof/vendor/vl53l8cx/shim.c:57:    return (int)vl53l8cx_init(&dev);
+tof/vendor/vl53l8cx/shim.c:5: * point: `VL53L8CX_Configuration` embeds the platform struct, the firmware
+tof/vendor/vl53l8cx/shim.c:62:    return (int)vl53l8cx_set_i2c_address(&dev, (uint16_t)(new_addr_7bit << 1));
+tof/vendor/vl53l8cx/shim.c:67:    uint8_t s = vl53l8cx_set_resolution(&dev, VL53L8CX_RESOLUTION_8X8);
+tof/vendor/vl53l8cx/shim.c:69:    s = vl53l8cx_set_ranging_frequency_hz(&dev, freq_hz);
+tof/vendor/vl53l8cx/shim.c:71:    return (int)vl53l8cx_start_ranging(&dev);
+tof/vendor/vl53l8cx/shim.c:76:    return (int)vl53l8cx_stop_ranging(&dev);
+tof/vendor/vl53l8cx/shim.c:83:    if (vl53l8cx_check_data_ready(&dev, &ready)) return -1;
+tof/vendor/vl53l8cx/shim.c:90:    uint8_t s = vl53l8cx_get_ranging_data(&dev, &results);
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1004:uint8_t vl53l8cx_set_ranging_frequency_hz(
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1005:		VL53L8CX_Configuration		*p_dev,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1008:	uint8_t status = VL53L8CX_STATUS_OK;
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1010:	status |= vl53l8cx_dci_replace_data(p_dev, p_dev->temp_buffer,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1011:					VL53L8CX_DCI_FREQ_HZ, 4,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1017:uint8_t vl53l8cx_get_integration_time_ms(
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1018:		VL53L8CX_Configuration		*p_dev,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1021:	uint8_t status = VL53L8CX_STATUS_OK;
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1023:	status |= vl53l8cx_dci_read_data(p_dev, (uint8_t*)p_dev->temp_buffer,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1024:			VL53L8CX_DCI_INT_TIME, 20);
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1032:uint8_t vl53l8cx_set_integration_time_ms(
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1033:		VL53L8CX_Configuration		*p_dev,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1036:	uint8_t status = VL53L8CX_STATUS_OK;
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1043:		status |= VL53L8CX_STATUS_INVALID_PARAM;
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1048:		status |= vl53l8cx_dci_replace_data(p_dev, p_dev->temp_buffer,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1049:				VL53L8CX_DCI_INT_TIME, 20,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1056:uint8_t vl53l8cx_get_sharpener_percent(
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1057:		VL53L8CX_Configuration		*p_dev,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1060:	uint8_t status = VL53L8CX_STATUS_OK;
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1062:	status |= vl53l8cx_dci_read_data(p_dev,p_dev->temp_buffer,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1063:			VL53L8CX_DCI_SHARPENER, 16);
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1071:uint8_t vl53l8cx_set_sharpener_percent(
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1072:		VL53L8CX_Configuration		*p_dev,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1075:	uint8_t status = VL53L8CX_STATUS_OK;
+tof/vendor/vl53l8cx/vl53l8cx_api.c:107:               p_dev->offset_data, VL53L8CX_OFFSET_BUFFER_SIZE);
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1080:		status |= VL53L8CX_STATUS_INVALID_PARAM;
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1085:		status |= vl53l8cx_dci_replace_data(p_dev, p_dev->temp_buffer,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1086:				VL53L8CX_DCI_SHARPENER, 16,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1093:uint8_t vl53l8cx_get_target_order(
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1094:		VL53L8CX_Configuration		*p_dev,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1097:	uint8_t status = VL53L8CX_STATUS_OK;
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1099:	status |= vl53l8cx_dci_read_data(p_dev, (uint8_t*)p_dev->temp_buffer,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1100:			VL53L8CX_DCI_TARGET_ORDER, 4);
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1106:uint8_t vl53l8cx_set_target_order(
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1107:		VL53L8CX_Configuration		*p_dev,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:110:	if(resolution == (uint8_t)VL53L8CX_RESOLUTION_4X4){
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1110:	uint8_t status = VL53L8CX_STATUS_OK;
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1112:	if((target_order == (uint8_t)VL53L8CX_TARGET_ORDER_CLOSEST)
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1113:		|| (target_order == (uint8_t)VL53L8CX_TARGET_ORDER_STRONGEST))
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1115:		status |= vl53l8cx_dci_replace_data(p_dev, p_dev->temp_buffer,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1116:				VL53L8CX_DCI_TARGET_ORDER, 4,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1120:		status |= VL53L8CX_STATUS_INVALID_PARAM;
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1126:uint8_t vl53l8cx_get_ranging_mode(
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1127:		VL53L8CX_Configuration		*p_dev,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:112:		SwapBuffer(p_dev->temp_buffer, VL53L8CX_OFFSET_BUFFER_SIZE);
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1130:	uint8_t status = VL53L8CX_STATUS_OK;
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1132:	status |= vl53l8cx_dci_read_data(p_dev, p_dev->temp_buffer,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1133:			VL53L8CX_DCI_RANGING_MODE, 8);
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1137:		*p_ranging_mode = VL53L8CX_RANGING_MODE_CONTINUOUS;
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1141:		*p_ranging_mode = VL53L8CX_RANGING_MODE_AUTONOMOUS;
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1147:uint8_t vl53l8cx_set_ranging_mode(
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1148:		VL53L8CX_Configuration		*p_dev,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1151:	uint8_t status = VL53L8CX_STATUS_OK;
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1154:	status |= vl53l8cx_dci_read_data(p_dev, p_dev->temp_buffer,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1155:			VL53L8CX_DCI_RANGING_MODE, 8);
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1159:		case VL53L8CX_RANGING_MODE_CONTINUOUS:
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1165:		case VL53L8CX_RANGING_MODE_AUTONOMOUS:
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1172:			status = VL53L8CX_STATUS_INVALID_PARAM;
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1176:	status |= vl53l8cx_dci_write_data(p_dev, p_dev->temp_buffer,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1177:			VL53L8CX_DCI_RANGING_MODE, (uint16_t)8);
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1179:	status |= vl53l8cx_dci_write_data(p_dev, (uint8_t*)&single_range,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1180:			VL53L8CX_DCI_SINGLE_RANGE,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1186:uint8_t vl53l8cx_get_external_sync_pin_enable(
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1187:		VL53L8CX_Configuration		*p_dev,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1190:	uint8_t status = VL53L8CX_STATUS_OK;
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1192:	status |= vl53l8cx_dci_read_data(p_dev, p_dev->temp_buffer,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1193:			VL53L8CX_DCI_SYNC_PIN, 4);
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1208:uint8_t vl53l8cx_set_external_sync_pin_enable(
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1209:		VL53L8CX_Configuration		*p_dev,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1212:	uint8_t status = VL53L8CX_STATUS_OK;
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1215:	status |= vl53l8cx_dci_read_data(p_dev, p_dev->temp_buffer,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1216:			VL53L8CX_DCI_SYNC_PIN, 4);
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1231:	status |= vl53l8cx_dci_write_data(p_dev, p_dev->temp_buffer,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1232:			VL53L8CX_DCI_SYNC_PIN, 4);
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1237:uint8_t vl53l8cx_get_VHV_repeat_count(
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1238:		VL53L8CX_Configuration *p_dev,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1241:	uint8_t status = VL53L8CX_STATUS_OK;
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1242:	status |= vl53l8cx_dci_read_data(p_dev, (uint8_t*)p_dev->temp_buffer,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1243:			VL53L8CX_DCI_VHV_CONFIG, 16);
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1253:uint8_t vl53l8cx_set_VHV_repeat_count(
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1254:		VL53L8CX_Configuration *p_dev,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1257:	uint8_t status = VL53L8CX_STATUS_OK;
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1258:	status |= vl53l8cx_dci_replace_data(p_dev, p_dev->temp_buffer,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1259:			VL53L8CX_DCI_VHV_CONFIG, 16, (uint8_t*)&repeat_count, 4, 0x4);
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1263:uint8_t vl53l8cx_dci_read_data(
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1264:		VL53L8CX_Configuration		*p_dev,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1270:	uint8_t status = VL53L8CX_STATUS_OK;
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1277:	if((data_size + (uint16_t)12)>(uint16_t)VL53L8CX_TEMPORARY_BUFFER_SIZE)
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1279:		status |= VL53L8CX_STATUS_ERROR;
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1290:			(VL53L8CX_UI_CMD_END-(uint16_t)11),cmd, sizeof(cmd));
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1291:		status |= _vl53l8cx_poll_for_answer(p_dev, 4, 1,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1292:			VL53L8CX_UI_CMD_STATUS,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1296:		status |= RdMulti(&(p_dev->platform), VL53L8CX_UI_CMD_START,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1309:uint8_t vl53l8cx_dci_write_data(
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1310:		VL53L8CX_Configuration		*p_dev,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1315:	uint8_t status = VL53L8CX_STATUS_OK;
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1323:	uint16_t address = (uint16_t)VL53L8CX_UI_CMD_END -
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1328:           > (uint16_t)VL53L8CX_TEMPORARY_BUFFER_SIZE)
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1330:		status |= VL53L8CX_STATUS_ERROR;
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1355:		status |= _vl53l8cx_poll_for_answer(p_dev, 4, 1,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1356:			VL53L8CX_UI_CMD_STATUS, 0xff, 0x03);
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1364:uint8_t vl53l8cx_dci_replace_data(
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1365:		VL53L8CX_Configuration		*p_dev,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1373:	uint8_t status = VL53L8CX_STATUS_OK;
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1375:	status |= vl53l8cx_dci_read_data(p_dev, data, index, data_size);
+tof/vendor/vl53l8cx/vl53l8cx_api.c:1377:	status |= vl53l8cx_dci_write_data(p_dev, data, index, data_size);
+tof/vendor/vl53l8cx/vl53l8cx_api.c:142:            SwapBuffer(p_dev->temp_buffer, VL53L8CX_OFFSET_BUFFER_SIZE);
+tof/vendor/vl53l8cx/vl53l8cx_api.c:145:	for(k = 0; k < (VL53L8CX_OFFSET_BUFFER_SIZE - (uint16_t)4); k++)
+tof/vendor/vl53l8cx/vl53l8cx_api.c:152:		VL53L8CX_OFFSET_BUFFER_SIZE);
+tof/vendor/vl53l8cx/vl53l8cx_api.c:153:	status |=_vl53l8cx_poll_for_answer(p_dev, 4, 1,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:154:		VL53L8CX_UI_CMD_STATUS, 0xff, 0x03);
+tof/vendor/vl53l8cx/vl53l8cx_api.c:15:#include "vl53l8cx_api.h"
+tof/vendor/vl53l8cx/vl53l8cx_api.c:164:static uint8_t _vl53l8cx_send_xtalk_data(
+tof/vendor/vl53l8cx/vl53l8cx_api.c:165:		VL53L8CX_Configuration		*p_dev,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:168:	uint8_t status = VL53L8CX_STATUS_OK;
+tof/vendor/vl53l8cx/vl53l8cx_api.c:16:#include "vl53l8cx_buffers.h"
+tof/vendor/vl53l8cx/vl53l8cx_api.c:176:		VL53L8CX_XTALK_BUFFER_SIZE);
+tof/vendor/vl53l8cx/vl53l8cx_api.c:179:	if(resolution == (uint8_t)VL53L8CX_RESOLUTION_4X4)
+tof/vendor/vl53l8cx/vl53l8cx_api.c:186:		SwapBuffer(p_dev->temp_buffer, VL53L8CX_XTALK_BUFFER_SIZE);
+tof/vendor/vl53l8cx/vl53l8cx_api.c:204:	    SwapBuffer(p_dev->temp_buffer, VL53L8CX_XTALK_BUFFER_SIZE);
+tof/vendor/vl53l8cx/vl53l8cx_api.c:20: * to wait for an answer from VL53L8CX sensor.
+tof/vendor/vl53l8cx/vl53l8cx_api.c:212:			p_dev->temp_buffer, VL53L8CX_XTALK_BUFFER_SIZE);
+tof/vendor/vl53l8cx/vl53l8cx_api.c:213:	status |=_vl53l8cx_poll_for_answer(p_dev, 4, 1,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:214:			VL53L8CX_UI_CMD_STATUS, 0xff, 0x03);
+tof/vendor/vl53l8cx/vl53l8cx_api.c:219:uint8_t vl53l8cx_is_alive(
+tof/vendor/vl53l8cx/vl53l8cx_api.c:220:		VL53L8CX_Configuration		*p_dev,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:223:	uint8_t status = VL53L8CX_STATUS_OK;
+tof/vendor/vl53l8cx/vl53l8cx_api.c:23:static uint8_t _vl53l8cx_poll_for_answer(
+tof/vendor/vl53l8cx/vl53l8cx_api.c:243:uint8_t vl53l8cx_init(
+tof/vendor/vl53l8cx/vl53l8cx_api.c:244:		VL53L8CX_Configuration		*p_dev)
+tof/vendor/vl53l8cx/vl53l8cx_api.c:246:	uint8_t tmp, status = VL53L8CX_STATUS_OK;
+tof/vendor/vl53l8cx/vl53l8cx_api.c:247:	uint8_t pipe_ctrl[] = {VL53L8CX_NB_TARGET_PER_ZONE, 0x00, 0x01, 0x00};
+tof/vendor/vl53l8cx/vl53l8cx_api.c:24:		VL53L8CX_Configuration	*p_dev,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:251:	p_dev->default_xtalk = (uint8_t*)VL53L8CX_DEFAULT_XTALK;
+tof/vendor/vl53l8cx/vl53l8cx_api.c:252:	p_dev->default_configuration = (uint8_t*)VL53L8CX_DEFAULT_CONFIGURATION;
+tof/vendor/vl53l8cx/vl53l8cx_api.c:280:	status |= _vl53l8cx_poll_for_answer(p_dev, 1, 0, 0x06, 0xff, 1);
+tof/vendor/vl53l8cx/vl53l8cx_api.c:291:	status |= _vl53l8cx_poll_for_answer(p_dev, 1, 0, 0x21, 0xFF, 0x4);
+tof/vendor/vl53l8cx/vl53l8cx_api.c:31:	uint8_t status = VL53L8CX_STATUS_OK;
+tof/vendor/vl53l8cx/vl53l8cx_api.c:323:	/* Download FW into VL53L8CX */
+tof/vendor/vl53l8cx/vl53l8cx_api.c:326:		(uint8_t*)&VL53L8CX_FIRMWARE[0],0x8000);
+tof/vendor/vl53l8cx/vl53l8cx_api.c:329:		(uint8_t*)&VL53L8CX_FIRMWARE[0x8000],0x8000);
+tof/vendor/vl53l8cx/vl53l8cx_api.c:332:		(uint8_t*)&VL53L8CX_FIRMWARE[0x10000],0x5000);
+tof/vendor/vl53l8cx/vl53l8cx_api.c:355:	status |= _vl53l8cx_poll_for_mcu_boot(p_dev);
+tof/vendor/vl53l8cx/vl53l8cx_api.c:369:		status |= VL53L8CX_STATUS_FW_CHECKSUM_FAIL;
+tof/vendor/vl53l8cx/vl53l8cx_api.c:374:		(uint8_t*)VL53L8CX_GET_NVM_CMD, sizeof(VL53L8CX_GET_NVM_CMD));
+tof/vendor/vl53l8cx/vl53l8cx_api.c:375:	status |= _vl53l8cx_poll_for_answer(p_dev, 4, 0,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:376:		VL53L8CX_UI_CMD_STATUS, 0xff, 2);
+tof/vendor/vl53l8cx/vl53l8cx_api.c:377:	status |= RdMulti(&(p_dev->platform), VL53L8CX_UI_CMD_START,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:378:		p_dev->temp_buffer, VL53L8CX_NVM_DATA_SIZE);
+tof/vendor/vl53l8cx/vl53l8cx_api.c:380:		VL53L8CX_OFFSET_BUFFER_SIZE);
+tof/vendor/vl53l8cx/vl53l8cx_api.c:381:	status |= _vl53l8cx_send_offset_data(p_dev, VL53L8CX_RESOLUTION_4X4);
+tof/vendor/vl53l8cx/vl53l8cx_api.c:384:	(void)memcpy(p_dev->xtalk_data, (uint8_t*)VL53L8CX_DEFAULT_XTALK,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:385:		VL53L8CX_XTALK_BUFFER_SIZE);
+tof/vendor/vl53l8cx/vl53l8cx_api.c:386:	status |= _vl53l8cx_send_xtalk_data(p_dev, VL53L8CX_RESOLUTION_4X4);
+tof/vendor/vl53l8cx/vl53l8cx_api.c:388:	/* Send default configuration to VL53L8CX firmware */
+tof/vendor/vl53l8cx/vl53l8cx_api.c:391:		sizeof(VL53L8CX_DEFAULT_CONFIGURATION));
+tof/vendor/vl53l8cx/vl53l8cx_api.c:392:	status |= _vl53l8cx_poll_for_answer(p_dev, 4, 1,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:393:		VL53L8CX_UI_CMD_STATUS, 0xff, 0x03);
+tof/vendor/vl53l8cx/vl53l8cx_api.c:395:	status |= vl53l8cx_dci_write_data(p_dev, (uint8_t*)&pipe_ctrl,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:396:		VL53L8CX_DCI_PIPE_CONTROL, (uint16_t)sizeof(pipe_ctrl));
+tof/vendor/vl53l8cx/vl53l8cx_api.c:397:#if VL53L8CX_NB_TARGET_PER_ZONE != 1
+tof/vendor/vl53l8cx/vl53l8cx_api.c:398:	tmp = VL53L8CX_NB_TARGET_PER_ZONE;
+tof/vendor/vl53l8cx/vl53l8cx_api.c:399:	status |= vl53l8cx_dci_replace_data(p_dev, p_dev->temp_buffer,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:400:		VL53L8CX_DCI_FW_NB_TARGET, 16,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:404:	status |= vl53l8cx_dci_write_data(p_dev, (uint8_t*)&single_range,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:405:			VL53L8CX_DCI_SINGLE_RANGE,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:412:uint8_t vl53l8cx_set_i2c_address(
+tof/vendor/vl53l8cx/vl53l8cx_api.c:413:		VL53L8CX_Configuration		*p_dev,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:414:		uint16_t		        i2c_address)
+tof/vendor/vl53l8cx/vl53l8cx_api.c:416:	uint8_t status = VL53L8CX_STATUS_OK;
+tof/vendor/vl53l8cx/vl53l8cx_api.c:419:	status |= WrByte(&(p_dev->platform), 0x4, (uint8_t)(i2c_address >> 1));
+tof/vendor/vl53l8cx/vl53l8cx_api.c:41:			status |= (uint8_t)VL53L8CX_STATUS_TIMEOUT_ERROR;
+tof/vendor/vl53l8cx/vl53l8cx_api.c:420:	p_dev->platform.address = i2c_address;
+tof/vendor/vl53l8cx/vl53l8cx_api.c:426:uint8_t vl53l8cx_get_power_mode(
+tof/vendor/vl53l8cx/vl53l8cx_api.c:427:		VL53L8CX_Configuration		*p_dev,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:430:	uint8_t tmp, status = VL53L8CX_STATUS_OK;
+tof/vendor/vl53l8cx/vl53l8cx_api.c:438:			*p_power_mode = VL53L8CX_POWER_MODE_WAKEUP;
+tof/vendor/vl53l8cx/vl53l8cx_api.c:444:				*p_power_mode = VL53L8CX_POWER_MODE_DEEP_SLEEP;
+tof/vendor/vl53l8cx/vl53l8cx_api.c:448:				*p_power_mode = VL53L8CX_POWER_MODE_SLEEP;
+tof/vendor/vl53l8cx/vl53l8cx_api.c:454:			status = VL53L8CX_STATUS_ERROR;
+tof/vendor/vl53l8cx/vl53l8cx_api.c:463:uint8_t vl53l8cx_set_power_mode(
+tof/vendor/vl53l8cx/vl53l8cx_api.c:464:		VL53L8CX_Configuration		*p_dev,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:467:	uint8_t current_power_mode, stored_mode, status = VL53L8CX_STATUS_OK;
+tof/vendor/vl53l8cx/vl53l8cx_api.c:469:	status |= vl53l8cx_get_power_mode(p_dev, &current_power_mode);
+tof/vendor/vl53l8cx/vl53l8cx_api.c:46:			status |= VL53L8CX_MCU_ERROR;
+tof/vendor/vl53l8cx/vl53l8cx_api.c:474:		case VL53L8CX_POWER_MODE_WAKEUP:
+tof/vendor/vl53l8cx/vl53l8cx_api.c:482:			status |= _vl53l8cx_poll_for_answer(
+tof/vendor/vl53l8cx/vl53l8cx_api.c:486:				status |= vl53l8cx_init(p_dev);
+tof/vendor/vl53l8cx/vl53l8cx_api.c:490:		case VL53L8CX_POWER_MODE_SLEEP:
+tof/vendor/vl53l8cx/vl53l8cx_api.c:493:			status |= _vl53l8cx_poll_for_answer(
+tof/vendor/vl53l8cx/vl53l8cx_api.c:497:		case VL53L8CX_POWER_MODE_DEEP_SLEEP:
+tof/vendor/vl53l8cx/vl53l8cx_api.c:500:			status |= _vl53l8cx_poll_for_answer(
+tof/vendor/vl53l8cx/vl53l8cx_api.c:506:			status = VL53L8CX_STATUS_ERROR;
+tof/vendor/vl53l8cx/vl53l8cx_api.c:515:uint8_t vl53l8cx_start_ranging(
+tof/vendor/vl53l8cx/vl53l8cx_api.c:516:		VL53L8CX_Configuration		*p_dev)
+tof/vendor/vl53l8cx/vl53l8cx_api.c:518:	uint8_t resolution, status = VL53L8CX_STATUS_OK;
+tof/vendor/vl53l8cx/vl53l8cx_api.c:526:	status |= vl53l8cx_get_resolution(p_dev, &resolution);
+tof/vendor/vl53l8cx/vl53l8cx_api.c:538:	uint32_t output[] ={VL53L8CX_START_BH,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:539:		VL53L8CX_METADATA_BH,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:540:		VL53L8CX_COMMONDATA_BH,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:541:		VL53L8CX_AMBIENT_RATE_BH,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:542:		VL53L8CX_SPAD_COUNT_BH,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:543:		VL53L8CX_NB_TARGET_DETECTED_BH,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:544:		VL53L8CX_SIGNAL_RATE_BH,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:545:		VL53L8CX_RANGE_SIGMA_MM_BH,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:546:		VL53L8CX_DISTANCE_BH,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:547:		VL53L8CX_REFLECTANCE_BH,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:548:		VL53L8CX_TARGET_STATUS_BH,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:549:		VL53L8CX_MOTION_DETECT_BH};
+tof/vendor/vl53l8cx/vl53l8cx_api.c:552:#ifndef VL53L8CX_DISABLE_AMBIENT_PER_SPAD
+tof/vendor/vl53l8cx/vl53l8cx_api.c:555:#ifndef VL53L8CX_DISABLE_NB_SPADS_ENABLED
+tof/vendor/vl53l8cx/vl53l8cx_api.c:558:#ifndef VL53L8CX_DISABLE_NB_TARGET_DETECTED
+tof/vendor/vl53l8cx/vl53l8cx_api.c:561:#ifndef VL53L8CX_DISABLE_SIGNAL_PER_SPAD
+tof/vendor/vl53l8cx/vl53l8cx_api.c:564:#ifndef VL53L8CX_DISABLE_RANGE_SIGMA_MM
+tof/vendor/vl53l8cx/vl53l8cx_api.c:567:#ifndef VL53L8CX_DISABLE_DISTANCE_MM
+tof/vendor/vl53l8cx/vl53l8cx_api.c:570:#ifndef VL53L8CX_DISABLE_REFLECTANCE_PERCENT
+tof/vendor/vl53l8cx/vl53l8cx_api.c:573:#ifndef VL53L8CX_DISABLE_TARGET_STATUS
+tof/vendor/vl53l8cx/vl53l8cx_api.c:576:#ifndef VL53L8CX_DISABLE_MOTION_INDICATOR
+tof/vendor/vl53l8cx/vl53l8cx_api.c:602:                                  * (uint16_t)VL53L8CX_NB_TARGET_PER_ZONE);
+tof/vendor/vl53l8cx/vl53l8cx_api.c:614:	status |= vl53l8cx_dci_write_data(p_dev,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:615:			(uint8_t*)&(output), VL53L8CX_DCI_OUTPUT_LIST,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:621:	status |= vl53l8cx_dci_write_data(p_dev,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:622:			(uint8_t*)&(header_config), VL53L8CX_DCI_OUTPUT_CONFIG,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:625:	status |= vl53l8cx_dci_write_data(p_dev,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:626:			(uint8_t*)&(output_bh_enable), VL53L8CX_DCI_OUTPUT_ENABLES,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:62:static uint8_t _vl53l8cx_poll_for_mcu_boot(
+tof/vendor/vl53l8cx/vl53l8cx_api.c:635:	status |= WrMulti(&(p_dev->platform), VL53L8CX_UI_CMD_END -
+tof/vendor/vl53l8cx/vl53l8cx_api.c:637:	status |= _vl53l8cx_poll_for_answer(p_dev, 4, 1,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:638:			VL53L8CX_UI_CMD_STATUS, 0xff, 0x03);
+tof/vendor/vl53l8cx/vl53l8cx_api.c:63:              VL53L8CX_Configuration      *p_dev)
+tof/vendor/vl53l8cx/vl53l8cx_api.c:641:	status |= vl53l8cx_dci_read_data(p_dev,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:646:		status |= VL53L8CX_STATUS_ERROR;
+tof/vendor/vl53l8cx/vl53l8cx_api.c:650:	status |= vl53l8cx_dci_read_data(p_dev,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:654:		status |= VL53L8CX_STATUS_LASER_SAFETY;
+tof/vendor/vl53l8cx/vl53l8cx_api.c:65:   uint8_t go2_status0, go2_status1, status = VL53L8CX_STATUS_OK;
+tof/vendor/vl53l8cx/vl53l8cx_api.c:660:uint8_t vl53l8cx_stop_ranging(
+tof/vendor/vl53l8cx/vl53l8cx_api.c:661:		VL53L8CX_Configuration		*p_dev)
+tof/vendor/vl53l8cx/vl53l8cx_api.c:663:	uint8_t tmp = 0, status = VL53L8CX_STATUS_OK;
+tof/vendor/vl53l8cx/vl53l8cx_api.c:714:uint8_t vl53l8cx_check_data_ready(
+tof/vendor/vl53l8cx/vl53l8cx_api.c:715:		VL53L8CX_Configuration		*p_dev,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:718:	uint8_t status = VL53L8CX_STATUS_OK;
+tof/vendor/vl53l8cx/vl53l8cx_api.c:745:uint8_t vl53l8cx_get_ranging_data(
+tof/vendor/vl53l8cx/vl53l8cx_api.c:746:		VL53L8CX_Configuration		*p_dev,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:747:		VL53L8CX_ResultsData		*p_results)
+tof/vendor/vl53l8cx/vl53l8cx_api.c:749:	uint8_t status = VL53L8CX_STATUS_OK;
+tof/vendor/vl53l8cx/vl53l8cx_api.c:74:            	status |= VL53L8CX_STATUS_OK;
+tof/vendor/vl53l8cx/vl53l8cx_api.c:774:			case VL53L8CX_METADATA_IDX:
+tof/vendor/vl53l8cx/vl53l8cx_api.c:779:#ifndef VL53L8CX_DISABLE_AMBIENT_PER_SPAD
+tof/vendor/vl53l8cx/vl53l8cx_api.c:780:			case VL53L8CX_AMBIENT_RATE_IDX:
+tof/vendor/vl53l8cx/vl53l8cx_api.c:785:#ifndef VL53L8CX_DISABLE_NB_SPADS_ENABLED
+tof/vendor/vl53l8cx/vl53l8cx_api.c:786:			case VL53L8CX_SPAD_COUNT_IDX:
+tof/vendor/vl53l8cx/vl53l8cx_api.c:791:#ifndef VL53L8CX_DISABLE_NB_TARGET_DETECTED
+tof/vendor/vl53l8cx/vl53l8cx_api.c:792:			case VL53L8CX_NB_TARGET_DETECTED_IDX:
+tof/vendor/vl53l8cx/vl53l8cx_api.c:797:#ifndef VL53L8CX_DISABLE_SIGNAL_PER_SPAD
+tof/vendor/vl53l8cx/vl53l8cx_api.c:798:			case VL53L8CX_SIGNAL_RATE_IDX:
+tof/vendor/vl53l8cx/vl53l8cx_api.c:803:#ifndef VL53L8CX_DISABLE_RANGE_SIGMA_MM
+tof/vendor/vl53l8cx/vl53l8cx_api.c:804:			case VL53L8CX_RANGE_SIGMA_MM_IDX:
+tof/vendor/vl53l8cx/vl53l8cx_api.c:809:#ifndef VL53L8CX_DISABLE_DISTANCE_MM
+tof/vendor/vl53l8cx/vl53l8cx_api.c:810:			case VL53L8CX_DISTANCE_IDX:
+tof/vendor/vl53l8cx/vl53l8cx_api.c:815:#ifndef VL53L8CX_DISABLE_REFLECTANCE_PERCENT
+tof/vendor/vl53l8cx/vl53l8cx_api.c:816:			case VL53L8CX_REFLECTANCE_EST_PC_IDX:
+tof/vendor/vl53l8cx/vl53l8cx_api.c:821:#ifndef VL53L8CX_DISABLE_TARGET_STATUS
+tof/vendor/vl53l8cx/vl53l8cx_api.c:822:			case VL53L8CX_TARGET_STATUS_IDX:
+tof/vendor/vl53l8cx/vl53l8cx_api.c:827:#ifndef VL53L8CX_DISABLE_MOTION_INDICATOR
+tof/vendor/vl53l8cx/vl53l8cx_api.c:828:			case VL53L8CX_MOTION_DETEC_IDX:
+tof/vendor/vl53l8cx/vl53l8cx_api.c:839:#ifndef VL53L8CX_USE_RAW_FORMAT
+tof/vendor/vl53l8cx/vl53l8cx_api.c:842:#ifndef VL53L8CX_DISABLE_AMBIENT_PER_SPAD
+tof/vendor/vl53l8cx/vl53l8cx_api.c:843:	for(i = 0; i < (uint32_t)VL53L8CX_RESOLUTION_8X8; i++)
+tof/vendor/vl53l8cx/vl53l8cx_api.c:849:	for(i = 0; i < (uint32_t)(VL53L8CX_RESOLUTION_8X8
+tof/vendor/vl53l8cx/vl53l8cx_api.c:850:			*VL53L8CX_NB_TARGET_PER_ZONE); i++)
+tof/vendor/vl53l8cx/vl53l8cx_api.c:852:#ifndef VL53L8CX_DISABLE_DISTANCE_MM
+tof/vendor/vl53l8cx/vl53l8cx_api.c:855:#ifndef VL53L8CX_DISABLE_REFLECTANCE_PERCENT
+tof/vendor/vl53l8cx/vl53l8cx_api.c:858:#ifndef VL53L8CX_DISABLE_RANGE_SIGMA_MM
+tof/vendor/vl53l8cx/vl53l8cx_api.c:861:#ifndef VL53L8CX_DISABLE_SIGNAL_PER_SPAD
+tof/vendor/vl53l8cx/vl53l8cx_api.c:867:#ifndef VL53L8CX_DISABLE_NB_TARGET_DETECTED
+tof/vendor/vl53l8cx/vl53l8cx_api.c:868:	for(i = 0; i < (uint32_t)VL53L8CX_RESOLUTION_8X8; i++)
+tof/vendor/vl53l8cx/vl53l8cx_api.c:872:				VL53L8CX_NB_TARGET_PER_ZONE; j++)
+tof/vendor/vl53l8cx/vl53l8cx_api.c:874:#ifndef VL53L8CX_DISABLE_TARGET_STATUS
+tof/vendor/vl53l8cx/vl53l8cx_api.c:876:				[((uint32_t)VL53L8CX_NB_TARGET_PER_ZONE
+tof/vendor/vl53l8cx/vl53l8cx_api.c:884:#ifndef VL53L8CX_DISABLE_MOTION_INDICATOR
+tof/vendor/vl53l8cx/vl53l8cx_api.c:905:		status |= VL53L8CX_STATUS_CORRUPTED_FRAME;
+tof/vendor/vl53l8cx/vl53l8cx_api.c:911:uint8_t vl53l8cx_get_resolution(
+tof/vendor/vl53l8cx/vl53l8cx_api.c:912:		VL53L8CX_Configuration		*p_dev,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:915:	uint8_t status = VL53L8CX_STATUS_OK;
+tof/vendor/vl53l8cx/vl53l8cx_api.c:917:	status |= vl53l8cx_dci_read_data(p_dev, p_dev->temp_buffer,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:918:			VL53L8CX_DCI_ZONE_CONFIG, 8);
+tof/vendor/vl53l8cx/vl53l8cx_api.c:926:uint8_t vl53l8cx_set_resolution(
+tof/vendor/vl53l8cx/vl53l8cx_api.c:927:		VL53L8CX_Configuration 		 *p_dev,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:930:	uint8_t status = VL53L8CX_STATUS_OK;
+tof/vendor/vl53l8cx/vl53l8cx_api.c:933:		case VL53L8CX_RESOLUTION_4X4:
+tof/vendor/vl53l8cx/vl53l8cx_api.c:934:			status |= vl53l8cx_dci_read_data(p_dev,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:936:					VL53L8CX_DCI_DSS_CONFIG, 16);
+tof/vendor/vl53l8cx/vl53l8cx_api.c:940:			status |= vl53l8cx_dci_write_data(p_dev,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:942:					VL53L8CX_DCI_DSS_CONFIG, 16);
+tof/vendor/vl53l8cx/vl53l8cx_api.c:944:			status |= vl53l8cx_dci_read_data(p_dev,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:946:					VL53L8CX_DCI_ZONE_CONFIG, 8);
+tof/vendor/vl53l8cx/vl53l8cx_api.c:94:static uint8_t _vl53l8cx_send_offset_data(
+tof/vendor/vl53l8cx/vl53l8cx_api.c:951:			status |= vl53l8cx_dci_write_data(p_dev,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:953:					VL53L8CX_DCI_ZONE_CONFIG, 8);
+tof/vendor/vl53l8cx/vl53l8cx_api.c:956:		case VL53L8CX_RESOLUTION_8X8:
+tof/vendor/vl53l8cx/vl53l8cx_api.c:957:			status |= vl53l8cx_dci_read_data(p_dev,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:959:					VL53L8CX_DCI_DSS_CONFIG, 16);
+tof/vendor/vl53l8cx/vl53l8cx_api.c:95:		VL53L8CX_Configuration		*p_dev,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:963:			status |= vl53l8cx_dci_write_data(p_dev,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:965:					VL53L8CX_DCI_DSS_CONFIG, 16);
+tof/vendor/vl53l8cx/vl53l8cx_api.c:967:			status |= vl53l8cx_dci_read_data(p_dev,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:969:					VL53L8CX_DCI_ZONE_CONFIG, 8);
+tof/vendor/vl53l8cx/vl53l8cx_api.c:974:			status |= vl53l8cx_dci_write_data(p_dev,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:976:					VL53L8CX_DCI_ZONE_CONFIG, 8);
+tof/vendor/vl53l8cx/vl53l8cx_api.c:981:			status = VL53L8CX_STATUS_INVALID_PARAM;
+tof/vendor/vl53l8cx/vl53l8cx_api.c:985:	status |= _vl53l8cx_send_offset_data(p_dev, resolution);
+tof/vendor/vl53l8cx/vl53l8cx_api.c:986:	status |= _vl53l8cx_send_xtalk_data(p_dev, resolution);
+tof/vendor/vl53l8cx/vl53l8cx_api.c:98:	uint8_t status = VL53L8CX_STATUS_OK;
+tof/vendor/vl53l8cx/vl53l8cx_api.c:991:uint8_t vl53l8cx_get_ranging_frequency_hz(
+tof/vendor/vl53l8cx/vl53l8cx_api.c:992:		VL53L8CX_Configuration		*p_dev,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:995:	uint8_t status = VL53L8CX_STATUS_OK;
+tof/vendor/vl53l8cx/vl53l8cx_api.c:997:	status |= vl53l8cx_dci_read_data(p_dev, (uint8_t*)p_dev->temp_buffer,
+tof/vendor/vl53l8cx/vl53l8cx_api.c:998:			VL53L8CX_DCI_FREQ_HZ, 4);
+tof/vendor/vl53l8cx/vl53l8cx_api.h:101:#if VL53L8CX_NB_TARGET_PER_ZONE == 1
+tof/vendor/vl53l8cx/vl53l8cx_api.h:103:#define VL53L8CX_START_BH				((uint32_t)0x0000000DU)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:104:#define VL53L8CX_METADATA_BH			((uint32_t)0x54B400C0U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:105:#define VL53L8CX_COMMONDATA_BH			((uint32_t)0x54C00040U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:106:#define VL53L8CX_AMBIENT_RATE_BH		((uint32_t)0x54D00104U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:107:#define VL53L8CX_SPAD_COUNT_BH			((uint32_t)0x55D00404U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:108:#define VL53L8CX_NB_TARGET_DETECTED_BH	((uint32_t)0xDB840401U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:109:#define VL53L8CX_SIGNAL_RATE_BH			((uint32_t)0xDBC40404U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:110:#define VL53L8CX_RANGE_SIGMA_MM_BH		((uint32_t)0xDEC40402U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:111:#define VL53L8CX_DISTANCE_BH			((uint32_t)0xDF440402U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:112:#define VL53L8CX_REFLECTANCE_BH			((uint32_t)0xE0440401U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:113:#define VL53L8CX_TARGET_STATUS_BH		((uint32_t)0xE0840401U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:114:#define VL53L8CX_MOTION_DETECT_BH		((uint32_t)0xD85808C0U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:116:#define VL53L8CX_METADATA_IDX			((uint16_t)0x54B4U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:117:#define VL53L8CX_SPAD_COUNT_IDX			((uint16_t)0x55D0U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:118:#define VL53L8CX_AMBIENT_RATE_IDX		((uint16_t)0x54D0U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:119:#define VL53L8CX_NB_TARGET_DETECTED_IDX	((uint16_t)0xDB84U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:120:#define VL53L8CX_SIGNAL_RATE_IDX		((uint16_t)0xDBC4U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:121:#define VL53L8CX_RANGE_SIGMA_MM_IDX		((uint16_t)0xDEC4U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:122:#define VL53L8CX_DISTANCE_IDX			((uint16_t)0xDF44U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:123:#define VL53L8CX_REFLECTANCE_EST_PC_IDX	((uint16_t)0xE044U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:124:#define VL53L8CX_TARGET_STATUS_IDX		((uint16_t)0xE084U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:125:#define VL53L8CX_MOTION_DETEC_IDX		((uint16_t)0xD858U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:128:#define VL53L8CX_START_BH				((uint32_t)0x0000000DU)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:129:#define VL53L8CX_METADATA_BH			((uint32_t)0x54B400C0U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:130:#define VL53L8CX_COMMONDATA_BH			((uint32_t)0x54C00040U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:131:#define VL53L8CX_AMBIENT_RATE_BH		((uint32_t)0x54D00104U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:132:#define VL53L8CX_NB_TARGET_DETECTED_BH	((uint32_t)0x57D00401U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:133:#define VL53L8CX_SPAD_COUNT_BH			((uint32_t)0x55D00404U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:134:#define VL53L8CX_SIGNAL_RATE_BH			((uint32_t)0x58900404U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:135:#define VL53L8CX_RANGE_SIGMA_MM_BH		((uint32_t)0x64900402U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:136:#define VL53L8CX_DISTANCE_BH			((uint32_t)0x66900402U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:137:#define VL53L8CX_REFLECTANCE_BH			((uint32_t)0x6A900401U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:138:#define VL53L8CX_TARGET_STATUS_BH		((uint32_t)0x6B900401U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:139:#define VL53L8CX_MOTION_DETECT_BH		((uint32_t)0xCC5008C0U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:13:#ifndef VL53L8CX_API_H_
+tof/vendor/vl53l8cx/vl53l8cx_api.h:141:#define VL53L8CX_METADATA_IDX			((uint16_t)0x54B4U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:142:#define VL53L8CX_SPAD_COUNT_IDX			((uint16_t)0x55D0U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:143:#define VL53L8CX_AMBIENT_RATE_IDX		((uint16_t)0x54D0U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:144:#define VL53L8CX_NB_TARGET_DETECTED_IDX	((uint16_t)0x57D0U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:145:#define VL53L8CX_SIGNAL_RATE_IDX		((uint16_t)0x5890U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:146:#define VL53L8CX_RANGE_SIGMA_MM_IDX		((uint16_t)0x6490U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:147:#define VL53L8CX_DISTANCE_IDX			((uint16_t)0x6690U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:148:#define VL53L8CX_REFLECTANCE_EST_PC_IDX	((uint16_t)0x6A90U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:149:#define VL53L8CX_TARGET_STATUS_IDX		((uint16_t)0x6B90U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:14:#define VL53L8CX_API_H_
+tof/vendor/vl53l8cx/vl53l8cx_api.h:150:#define VL53L8CX_MOTION_DETEC_IDX		((uint16_t)0xCC50U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:158:#define VL53L8CX_NVM_DATA_SIZE			((uint16_t)492U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:159:#define VL53L8CX_CONFIGURATION_SIZE		((uint16_t)972U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:160:#define VL53L8CX_OFFSET_BUFFER_SIZE		((uint16_t)488U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:161:#define VL53L8CX_XTALK_BUFFER_SIZE		((uint16_t)776U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:163:#define VL53L8CX_DCI_ZONE_CONFIG		((uint16_t)0x5450U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:164:#define VL53L8CX_DCI_FREQ_HZ			((uint16_t)0x5458U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:165:#define VL53L8CX_DCI_INT_TIME			((uint16_t)0x545CU)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:166:#define VL53L8CX_DCI_FW_NB_TARGET		((uint16_t)0x5478)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:167:#define VL53L8CX_DCI_RANGING_MODE		((uint16_t)0xAD30U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:168:#define VL53L8CX_DCI_DSS_CONFIG			((uint16_t)0xAD38U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:169:#define VL53L8CX_DCI_VHV_CONFIG			((uint16_t)0xAD60U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:170:#define VL53L8CX_DCI_TARGET_ORDER		((uint16_t)0xAE64U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:171:#define VL53L8CX_DCI_SHARPENER			((uint16_t)0xAED8U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:172:#define VL53L8CX_DCI_INTERNAL_CP		((uint16_t)0xB39CU)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:173:#define VL53L8CX_DCI_SYNC_PIN			((uint16_t)0xB5F0U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:174:#define VL53L8CX_DCI_MOTION_DETECTOR_CFG ((uint16_t)0xBFACU)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:175:#define VL53L8CX_DCI_SINGLE_RANGE		((uint16_t)0xD964U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:176:#define VL53L8CX_DCI_OUTPUT_CONFIG		((uint16_t)0xD968U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:177:#define VL53L8CX_DCI_OUTPUT_ENABLES		((uint16_t)0xD970U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:178:#define VL53L8CX_DCI_OUTPUT_LIST		((uint16_t)0xD980U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:179:#define VL53L8CX_DCI_PIPE_CONTROL		((uint16_t)0xDB80U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:181:#define VL53L8CX_UI_CMD_STATUS			((uint16_t)0x2C00U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:182:#define VL53L8CX_UI_CMD_START			((uint16_t)0x2C04U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:183:#define VL53L8CX_UI_CMD_END				((uint16_t)0x2FFFU)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:189:#ifndef VL53L8CX_DISABLE_AMBIENT_PER_SPAD
+tof/vendor/vl53l8cx/vl53l8cx_api.h:195:#ifndef VL53L8CX_DISABLE_NB_SPADS_ENABLED
+tof/vendor/vl53l8cx/vl53l8cx_api.h:201:#ifndef VL53L8CX_DISABLE_NB_TARGET_DETECTED
+tof/vendor/vl53l8cx/vl53l8cx_api.h:207:#ifndef VL53L8CX_DISABLE_SIGNAL_PER_SPAD
+tof/vendor/vl53l8cx/vl53l8cx_api.h:208:#define L5CX_SPS_SIZE ((256U * VL53L8CX_NB_TARGET_PER_ZONE) + 4U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:213:#ifndef VL53L8CX_DISABLE_RANGE_SIGMA_MM
+tof/vendor/vl53l8cx/vl53l8cx_api.h:214:#define L5CX_SIGR_SIZE ((128U * VL53L8CX_NB_TARGET_PER_ZONE) + 4U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:219:#ifndef VL53L8CX_DISABLE_DISTANCE_MM
+tof/vendor/vl53l8cx/vl53l8cx_api.h:220:#define L5CX_DIST_SIZE ((128U * VL53L8CX_NB_TARGET_PER_ZONE) + 4U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:225:#ifndef VL53L8CX_DISABLE_REFLECTANCE_PERCENT
+tof/vendor/vl53l8cx/vl53l8cx_api.h:226:#define L5CX_RFLEST_SIZE ((64U *VL53L8CX_NB_TARGET_PER_ZONE) + 4U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:231:#ifndef VL53L8CX_DISABLE_TARGET_STATUS
+tof/vendor/vl53l8cx/vl53l8cx_api.h:232:#define L5CX_STA_SIZE ((64U  *VL53L8CX_NB_TARGET_PER_ZONE) + 4U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:237:#ifndef VL53L8CX_DISABLE_MOTION_INDICATOR
+tof/vendor/vl53l8cx/vl53l8cx_api.h:244: * @brief Macro VL53L8CX_MAX_RESULTS_SIZE indicates the maximum size used by
+tof/vendor/vl53l8cx/vl53l8cx_api.h:245: * output through I2C. Value 40 corresponds to headers + meta-data + common-data
+tof/vendor/vl53l8cx/vl53l8cx_api.h:249:#define VL53L8CX_MAX_RESULTS_SIZE ( 40U \
+tof/vendor/vl53l8cx/vl53l8cx_api.h:255: * @brief Macro VL53L8CX_TEMPORARY_BUFFER_SIZE can be used to know the size of
+tof/vendor/vl53l8cx/vl53l8cx_api.h:260:#if VL53L8CX_MAX_RESULTS_SIZE < 1024U
+tof/vendor/vl53l8cx/vl53l8cx_api.h:261:#define VL53L8CX_TEMPORARY_BUFFER_SIZE ((uint32_t) 1024U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:263:#define VL53L8CX_TEMPORARY_BUFFER_SIZE ((uint32_t) VL53L8CX_MAX_RESULTS_SIZE)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:268: * @brief Structure VL53L8CX_Configuration contains the sensor configuration.
+tof/vendor/vl53l8cx/vl53l8cx_api.h:275:	VL53L8CX_Platform	platform;
+tof/vendor/vl53l8cx/vl53l8cx_api.h:278:	/* Size of data read though I2C */
+tof/vendor/vl53l8cx/vl53l8cx_api.h:285:	uint8_t		        offset_data[VL53L8CX_OFFSET_BUFFER_SIZE];
+tof/vendor/vl53l8cx/vl53l8cx_api.h:287:	uint8_t		        xtalk_data[VL53L8CX_XTALK_BUFFER_SIZE];
+tof/vendor/vl53l8cx/vl53l8cx_api.h:289:	uint8_t		        temp_buffer[VL53L8CX_TEMPORARY_BUFFER_SIZE];
+tof/vendor/vl53l8cx/vl53l8cx_api.h:28:#define VL53L8CX_API_REVISION			"VL53L8CX_1.2.1"
+tof/vendor/vl53l8cx/vl53l8cx_api.h:292:} VL53L8CX_Configuration;
+tof/vendor/vl53l8cx/vl53l8cx_api.h:296: * @brief Structure VL53L8CX_ResultsData contains the ranging results of
+tof/vendor/vl53l8cx/vl53l8cx_api.h:297: * VL53L8CX. If user wants more than 1 target per zone, the results can be split
+tof/vendor/vl53l8cx/vl53l8cx_api.h:312:#ifndef VL53L8CX_DISABLE_AMBIENT_PER_SPAD
+tof/vendor/vl53l8cx/vl53l8cx_api.h:313:	uint32_t ambient_per_spad[VL53L8CX_RESOLUTION_8X8];
+tof/vendor/vl53l8cx/vl53l8cx_api.h:317:#ifndef VL53L8CX_DISABLE_NB_TARGET_DETECTED
+tof/vendor/vl53l8cx/vl53l8cx_api.h:318:	uint8_t nb_target_detected[VL53L8CX_RESOLUTION_8X8];
+tof/vendor/vl53l8cx/vl53l8cx_api.h:31: * @brief Default I2C address of VL53L8CX sensor. Can be changed using function
+tof/vendor/vl53l8cx/vl53l8cx_api.h:322:#ifndef VL53L8CX_DISABLE_NB_SPADS_ENABLED
+tof/vendor/vl53l8cx/vl53l8cx_api.h:323:	uint32_t nb_spads_enabled[VL53L8CX_RESOLUTION_8X8];
+tof/vendor/vl53l8cx/vl53l8cx_api.h:327:#ifndef VL53L8CX_DISABLE_SIGNAL_PER_SPAD
+tof/vendor/vl53l8cx/vl53l8cx_api.h:328:	uint32_t signal_per_spad[(VL53L8CX_RESOLUTION_8X8
+tof/vendor/vl53l8cx/vl53l8cx_api.h:329:					*VL53L8CX_NB_TARGET_PER_ZONE)];
+tof/vendor/vl53l8cx/vl53l8cx_api.h:32: * vl53l8cx_set_i2c_address() function is called.
+tof/vendor/vl53l8cx/vl53l8cx_api.h:333:#ifndef VL53L8CX_DISABLE_RANGE_SIGMA_MM
+tof/vendor/vl53l8cx/vl53l8cx_api.h:334:	uint16_t range_sigma_mm[(VL53L8CX_RESOLUTION_8X8
+tof/vendor/vl53l8cx/vl53l8cx_api.h:335:					*VL53L8CX_NB_TARGET_PER_ZONE)];
+tof/vendor/vl53l8cx/vl53l8cx_api.h:339:#ifndef VL53L8CX_DISABLE_DISTANCE_MM
+tof/vendor/vl53l8cx/vl53l8cx_api.h:340:	int16_t distance_mm[(VL53L8CX_RESOLUTION_8X8
+tof/vendor/vl53l8cx/vl53l8cx_api.h:341:					*VL53L8CX_NB_TARGET_PER_ZONE)];
+tof/vendor/vl53l8cx/vl53l8cx_api.h:345:#ifndef VL53L8CX_DISABLE_REFLECTANCE_PERCENT
+tof/vendor/vl53l8cx/vl53l8cx_api.h:346:	uint8_t reflectance[(VL53L8CX_RESOLUTION_8X8
+tof/vendor/vl53l8cx/vl53l8cx_api.h:347:					*VL53L8CX_NB_TARGET_PER_ZONE)];
+tof/vendor/vl53l8cx/vl53l8cx_api.h:351:#ifndef VL53L8CX_DISABLE_TARGET_STATUS
+tof/vendor/vl53l8cx/vl53l8cx_api.h:352:	uint8_t target_status[(VL53L8CX_RESOLUTION_8X8
+tof/vendor/vl53l8cx/vl53l8cx_api.h:353:					*VL53L8CX_NB_TARGET_PER_ZONE)];
+tof/vendor/vl53l8cx/vl53l8cx_api.h:357:#ifndef VL53L8CX_DISABLE_MOTION_INDICATOR
+tof/vendor/vl53l8cx/vl53l8cx_api.h:35:#define VL53L8CX_DEFAULT_I2C_ADDRESS	        ((uint16_t)0x52)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:370:} VL53L8CX_ResultsData;
+tof/vendor/vl53l8cx/vl53l8cx_api.h:382:uint8_t vl53l8cx_is_alive(
+tof/vendor/vl53l8cx/vl53l8cx_api.h:383:		VL53L8CX_Configuration		*p_dev,
+tof/vendor/vl53l8cx/vl53l8cx_api.h:388: * be called after a power on, to load the firmware into the VL53L8CX. It takes
+tof/vendor/vl53l8cx/vl53l8cx_api.h:38: * @brief Macro VL53L8CX_RESOLUTION_4X4 or VL53L8CX_RESOLUTION_8X8 allows
+tof/vendor/vl53l8cx/vl53l8cx_api.h:390: * @param (VL53L8CX_Configuration) *p_dev : VL53L8CX configuration structure.
+tof/vendor/vl53l8cx/vl53l8cx_api.h:394:uint8_t vl53l8cx_init(
+tof/vendor/vl53l8cx/vl53l8cx_api.h:395:		VL53L8CX_Configuration		*p_dev);
+tof/vendor/vl53l8cx/vl53l8cx_api.h:398: * @brief This function is used to change the I2C address of the sensor. If
+tof/vendor/vl53l8cx/vl53l8cx_api.h:399: * multiple VL53L5 sensors are connected to the same I2C line, all other LPn
+tof/vendor/vl53l8cx/vl53l8cx_api.h:401: * @param (VL53L8CX_Configuration) *p_dev : VL53L8CX configuration structure.
+tof/vendor/vl53l8cx/vl53l8cx_api.h:402: * @param (uint16_t) i2c_address : New I2C address.
+tof/vendor/vl53l8cx/vl53l8cx_api.h:406:uint8_t vl53l8cx_set_i2c_address(
+tof/vendor/vl53l8cx/vl53l8cx_api.h:407:		VL53L8CX_Configuration		*p_dev,
+tof/vendor/vl53l8cx/vl53l8cx_api.h:408:		uint16_t			i2c_address);
+tof/vendor/vl53l8cx/vl53l8cx_api.h:40: * vl53l8cx_set_resolution().
+tof/vendor/vl53l8cx/vl53l8cx_api.h:412: * @param (VL53L8CX_Configuration) *p_dev : VL53L8CX configuration structure.
+tof/vendor/vl53l8cx/vl53l8cx_api.h:415: * (VL53L8CX_POWER_MODE_SLEEP), or 1 if sensor is in standard mode
+tof/vendor/vl53l8cx/vl53l8cx_api.h:416: * (VL53L8CX_POWER_MODE_WAKEUP).
+tof/vendor/vl53l8cx/vl53l8cx_api.h:420:uint8_t vl53l8cx_get_power_mode(
+tof/vendor/vl53l8cx/vl53l8cx_api.h:421:		VL53L8CX_Configuration		*p_dev,
+tof/vendor/vl53l8cx/vl53l8cx_api.h:427: * VL53L8CX_POWER_MODE_SLEEP can be used to enable the low power mode. When user
+tof/vendor/vl53l8cx/vl53l8cx_api.h:428: * want to restart the sensor, he can use macro VL53L8CX_POWER_MODE_WAKEUP.
+tof/vendor/vl53l8cx/vl53l8cx_api.h:430: * @param (VL53L8CX_Configuration) *p_dev : VL53L8CX configuration structure.
+tof/vendor/vl53l8cx/vl53l8cx_api.h:431: * @param (uint8_t) power_mode : Selected power mode (VL53L8CX_POWER_MODE_SLEEP
+tof/vendor/vl53l8cx/vl53l8cx_api.h:432: * or VL53L8CX_POWER_MODE_WAKEUP)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:437:uint8_t vl53l8cx_set_power_mode(
+tof/vendor/vl53l8cx/vl53l8cx_api.h:438:		VL53L8CX_Configuration		*p_dev,
+tof/vendor/vl53l8cx/vl53l8cx_api.h:43:#define VL53L8CX_RESOLUTION_4X4			((uint8_t) 16U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:444: * @param (VL53L8CX_Configuration) *p_dev : VL53L8CX configuration structure.
+tof/vendor/vl53l8cx/vl53l8cx_api.h:448:uint8_t vl53l8cx_start_ranging(
+tof/vendor/vl53l8cx/vl53l8cx_api.h:449:		VL53L8CX_Configuration		*p_dev);
+tof/vendor/vl53l8cx/vl53l8cx_api.h:44:#define VL53L8CX_RESOLUTION_8X8			((uint8_t) 64U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:453: * sensor streams, after calling vl53l8cx_start_ranging().
+tof/vendor/vl53l8cx/vl53l8cx_api.h:454: * @param (VL53L8CX_Configuration) *p_dev : VL53L8CX configuration structure.
+tof/vendor/vl53l8cx/vl53l8cx_api.h:458:uint8_t vl53l8cx_stop_ranging(
+tof/vendor/vl53l8cx/vl53l8cx_api.h:459:		VL53L8CX_Configuration		*p_dev);
+tof/vendor/vl53l8cx/vl53l8cx_api.h:462: * @brief This function checks if a new data is ready by polling I2C. If a new
+tof/vendor/vl53l8cx/vl53l8cx_api.h:464: * @param (VL53L8CX_Configuration) *p_dev : VL53L8CX configuration structure.
+tof/vendor/vl53l8cx/vl53l8cx_api.h:467: * @return (uint8_t) status : 0 if I2C reading is OK
+tof/vendor/vl53l8cx/vl53l8cx_api.h:470:uint8_t vl53l8cx_check_data_ready(
+tof/vendor/vl53l8cx/vl53l8cx_api.h:471:		VL53L8CX_Configuration		*p_dev,
+tof/vendor/vl53l8cx/vl53l8cx_api.h:477: * @param (VL53L8CX_Configuration) *p_dev : VL53L8CX configuration structure.
+tof/vendor/vl53l8cx/vl53l8cx_api.h:478: * @param (VL53L8CX_ResultsData) *p_results : VL53L5 results structure.
+tof/vendor/vl53l8cx/vl53l8cx_api.h:482:uint8_t vl53l8cx_get_ranging_data(
+tof/vendor/vl53l8cx/vl53l8cx_api.h:483:		VL53L8CX_Configuration		*p_dev,
+tof/vendor/vl53l8cx/vl53l8cx_api.h:484:		VL53L8CX_ResultsData		*p_results);
+tof/vendor/vl53l8cx/vl53l8cx_api.h:488: * @param (VL53L8CX_Configuration) *p_dev : VL53L8CX configuration structure.
+tof/vendor/vl53l8cx/vl53l8cx_api.h:48: * @brief Macro VL53L8CX_TARGET_ORDER_STRONGEST or VL53L8CX_TARGET_ORDER_CLOSEST
+tof/vendor/vl53l8cx/vl53l8cx_api.h:494:uint8_t vl53l8cx_get_resolution(
+tof/vendor/vl53l8cx/vl53l8cx_api.h:495:		VL53L8CX_Configuration		*p_dev,
+tof/vendor/vl53l8cx/vl53l8cx_api.h:500: * @param (VL53L8CX_Configuration) *p_dev : VL53L8CX configuration structure.
+tof/vendor/vl53l8cx/vl53l8cx_api.h:501: * @param (uint8_t) resolution : Use macro VL53L8CX_RESOLUTION_4X4 or
+tof/vendor/vl53l8cx/vl53l8cx_api.h:502: * VL53L8CX_RESOLUTION_8X8 to set the resolution.
+tof/vendor/vl53l8cx/vl53l8cx_api.h:506:uint8_t vl53l8cx_set_resolution(
+tof/vendor/vl53l8cx/vl53l8cx_api.h:507:		VL53L8CX_Configuration		 *p_dev,
+tof/vendor/vl53l8cx/vl53l8cx_api.h:513: * @param (VL53L8CX_Configuration) *p_dev : VL53L8CX configuration structure.
+tof/vendor/vl53l8cx/vl53l8cx_api.h:518:uint8_t vl53l8cx_get_ranging_frequency_hz(
+tof/vendor/vl53l8cx/vl53l8cx_api.h:519:		VL53L8CX_Configuration		*p_dev,
+tof/vendor/vl53l8cx/vl53l8cx_api.h:526: * @param (VL53L8CX_Configuration) *p_dev : VL53L8CX configuration structure.
+tof/vendor/vl53l8cx/vl53l8cx_api.h:52:#define VL53L8CX_TARGET_ORDER_CLOSEST		((uint8_t) 1U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:534:uint8_t vl53l8cx_set_ranging_frequency_hz(
+tof/vendor/vl53l8cx/vl53l8cx_api.h:535:		VL53L8CX_Configuration		*p_dev,
+tof/vendor/vl53l8cx/vl53l8cx_api.h:53:#define VL53L8CX_TARGET_ORDER_STRONGEST		((uint8_t) 2U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:540: * @param (VL53L8CX_Configuration) *p_dev : VL53L8CX configuration structure.
+tof/vendor/vl53l8cx/vl53l8cx_api.h:545:uint8_t vl53l8cx_get_integration_time_ms(
+tof/vendor/vl53l8cx/vl53l8cx_api.h:546:		VL53L8CX_Configuration		*p_dev,
+tof/vendor/vl53l8cx/vl53l8cx_api.h:553: * @param (VL53L8CX_Configuration) *p_dev : VL53L8CX configuration structure.
+tof/vendor/vl53l8cx/vl53l8cx_api.h:560:uint8_t vl53l8cx_set_integration_time_ms(
+tof/vendor/vl53l8cx/vl53l8cx_api.h:561:		VL53L8CX_Configuration		*p_dev,
+tof/vendor/vl53l8cx/vl53l8cx_api.h:567: * @param (VL53L8CX_Configuration) *p_dev : VL53L8CX configuration structure.
+tof/vendor/vl53l8cx/vl53l8cx_api.h:56: * @brief Macro VL53L8CX_RANGING_MODE_CONTINUOUS and
+tof/vendor/vl53l8cx/vl53l8cx_api.h:572:uint8_t vl53l8cx_get_sharpener_percent(
+tof/vendor/vl53l8cx/vl53l8cx_api.h:573:		VL53L8CX_Configuration		*p_dev,
+tof/vendor/vl53l8cx/vl53l8cx_api.h:57: * VL53L8CX_RANGING_MODE_AUTONOMOUS are used to change the ranging mode.
+tof/vendor/vl53l8cx/vl53l8cx_api.h:580: * @param (VL53L8CX_Configuration) *p_dev : VL53L8CX configuration structure.
+tof/vendor/vl53l8cx/vl53l8cx_api.h:585:uint8_t vl53l8cx_set_sharpener_percent(
+tof/vendor/vl53l8cx/vl53l8cx_api.h:586:		VL53L8CX_Configuration		*p_dev,
+tof/vendor/vl53l8cx/vl53l8cx_api.h:591: * @param (VL53L8CX_Configuration) *p_dev : VL53L8CX configuration structure.
+tof/vendor/vl53l8cx/vl53l8cx_api.h:596:uint8_t vl53l8cx_get_target_order(
+tof/vendor/vl53l8cx/vl53l8cx_api.h:597:		VL53L8CX_Configuration		*p_dev,
+tof/vendor/vl53l8cx/vl53l8cx_api.h:602: * VL53L8CX_TARGET_ORDER_STRONGEST and VL53L8CX_TARGET_ORDER_CLOSEST to define
+tof/vendor/vl53l8cx/vl53l8cx_api.h:605: * @param (VL53L8CX_Configuration) *p_dev : VL53L8CX configuration structure.
+tof/vendor/vl53l8cx/vl53l8cx_api.h:611:uint8_t vl53l8cx_set_target_order(
+tof/vendor/vl53l8cx/vl53l8cx_api.h:612:		VL53L8CX_Configuration		*p_dev,
+tof/vendor/vl53l8cx/vl53l8cx_api.h:619: * @param (VL53L8CX_Configuration) *p_dev : VL53L8CX configuration structure.
+tof/vendor/vl53l8cx/vl53l8cx_api.h:624:uint8_t vl53l8cx_get_ranging_mode(
+tof/vendor/vl53l8cx/vl53l8cx_api.h:625:		VL53L8CX_Configuration		*p_dev,
+tof/vendor/vl53l8cx/vl53l8cx_api.h:62:#define VL53L8CX_RANGING_MODE_CONTINUOUS	((uint8_t) 1U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:632: * @param (VL53L8CX_Configuration) *p_dev : VL53L8CX configuration structure.
+tof/vendor/vl53l8cx/vl53l8cx_api.h:633: * @param (uint8_t) ranging_mode : Use macros VL53L8CX_RANGING_MODE_CONTINUOUS,
+tof/vendor/vl53l8cx/vl53l8cx_api.h:634: * VL53L8CX_RANGING_MODE_CONTINUOUS.
+tof/vendor/vl53l8cx/vl53l8cx_api.h:638:uint8_t vl53l8cx_set_ranging_mode(
+tof/vendor/vl53l8cx/vl53l8cx_api.h:639:		VL53L8CX_Configuration		*p_dev,
+tof/vendor/vl53l8cx/vl53l8cx_api.h:63:#define VL53L8CX_RANGING_MODE_AUTONOMOUS	((uint8_t) 3U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:647: * @param (VL53L8CX_Configuration) *p_dev : VL53L8CX configuration structure.
+tof/vendor/vl53l8cx/vl53l8cx_api.h:652:uint8_t vl53l8cx_get_external_sync_pin_enable(
+tof/vendor/vl53l8cx/vl53l8cx_api.h:653:		VL53L8CX_Configuration		*p_dev,
+tof/vendor/vl53l8cx/vl53l8cx_api.h:662: * @param (VL53L8CX_Configuration) *p_dev : VL53L8CX configuration structure.
+tof/vendor/vl53l8cx/vl53l8cx_api.h:667:uint8_t vl53l8cx_set_external_sync_pin_enable(
+tof/vendor/vl53l8cx/vl53l8cx_api.h:668:		VL53L8CX_Configuration		*p_dev,
+tof/vendor/vl53l8cx/vl53l8cx_api.h:66: * @brief The default power mode is VL53L8CX_POWER_MODE_WAKEUP. User can choose two
+tof/vendor/vl53l8cx/vl53l8cx_api.h:674: * @param (VL53L8CX_Configuration) *p_dev : VL53L8CX configuration structure.
+tof/vendor/vl53l8cx/vl53l8cx_api.h:678:uint8_t vl53l8cx_get_VHV_repeat_count(
+tof/vendor/vl53l8cx/vl53l8cx_api.h:679:		VL53L8CX_Configuration *p_dev,
+tof/vendor/vl53l8cx/vl53l8cx_api.h:687: * @param (VL53L8CX_Configuration) *p_dev : VL53L8CX configuration structure.
+tof/vendor/vl53l8cx/vl53l8cx_api.h:691:uint8_t vl53l8cx_set_VHV_repeat_count(
+tof/vendor/vl53l8cx/vl53l8cx_api.h:692:		VL53L8CX_Configuration *p_dev,
+tof/vendor/vl53l8cx/vl53l8cx_api.h:698: * @param (VL53L8CX_Configuration) *p_dev : VL53L8CX configuration structure.
+tof/vendor/vl53l8cx/vl53l8cx_api.h:69: * - VL53L8CX_POWER_MODE_SLEEP: This mode retains the firmware and the configuration. It
+tof/vendor/vl53l8cx/vl53l8cx_api.h:708:uint8_t vl53l8cx_dci_read_data(
+tof/vendor/vl53l8cx/vl53l8cx_api.h:709:		VL53L8CX_Configuration		*p_dev,
+tof/vendor/vl53l8cx/vl53l8cx_api.h:717: * @param (VL53L8CX_Configuration) *p_dev : VL53L8CX configuration structure.
+tof/vendor/vl53l8cx/vl53l8cx_api.h:71: * - VL53L8CX_POWER_MODE_DEEP_SLEEP: This mode clears all memory, by consequence the firmware,
+tof/vendor/vl53l8cx/vl53l8cx_api.h:727:uint8_t vl53l8cx_dci_write_data(
+tof/vendor/vl53l8cx/vl53l8cx_api.h:728:		VL53L8CX_Configuration		*p_dev,
+tof/vendor/vl53l8cx/vl53l8cx_api.h:736: * @param (VL53L8CX_Configuration) *p_dev : VL53L8CX configuration structure.
+tof/vendor/vl53l8cx/vl53l8cx_api.h:749:uint8_t vl53l8cx_dci_replace_data(
+tof/vendor/vl53l8cx/vl53l8cx_api.h:74: * Both modes can be changed using function vl53l8cx_set_power_mode().
+tof/vendor/vl53l8cx/vl53l8cx_api.h:750:		VL53L8CX_Configuration		*p_dev,
+tof/vendor/vl53l8cx/vl53l8cx_api.h:758:#endif //VL53L8CX_API_H_
+tof/vendor/vl53l8cx/vl53l8cx_api.h:77:#define VL53L8CX_POWER_MODE_SLEEP		((uint8_t) 0U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:78:#define VL53L8CX_POWER_MODE_WAKEUP		((uint8_t) 1U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:79:#define VL53L8CX_POWER_MODE_DEEP_SLEEP	((uint8_t) 2U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:82: * @brief Macro VL53L8CX_STATUS_OK indicates that VL53L5 sensor has no error.
+tof/vendor/vl53l8cx/vl53l8cx_api.h:83: * Macro VL53L8CX_STATUS_ERROR indicates that something is wrong (value,
+tof/vendor/vl53l8cx/vl53l8cx_api.h:84: * I2C access, ...). Macro VL53L8CX_MCU_ERROR is used to indicate a MCU issue.
+tof/vendor/vl53l8cx/vl53l8cx_api.h:87:#define VL53L8CX_STATUS_OK					((uint8_t) 0U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:88:#define VL53L8CX_STATUS_TIMEOUT_ERROR		((uint8_t) 1U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:89:#define VL53L8CX_STATUS_CORRUPTED_FRAME		((uint8_t) 2U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:90:#define VL53L8CX_STATUS_LASER_SAFETY		((uint8_t) 3U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:91:#define VL53L8CX_STATUS_XTALK_FAILED		((uint8_t) 4U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:92:#define VL53L8CX_STATUS_FW_CHECKSUM_FAIL	((uint8_t) 5U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:93:#define VL53L8CX_MCU_ERROR					((uint8_t) 66U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:94:#define VL53L8CX_STATUS_INVALID_PARAM		((uint8_t) 127U)
+tof/vendor/vl53l8cx/vl53l8cx_api.h:95:#define VL53L8CX_STATUS_ERROR				((uint8_t) 255U)
+tof/vendor/vl53l8cx/vl53l8cx_buffers.h:15:#ifndef VL53L8CX_BUFFERS_H_
+tof/vendor/vl53l8cx/vl53l8cx_buffers.h:16:#define VL53L8CX_BUFFERS_H_
+tof/vendor/vl53l8cx/vl53l8cx_buffers.h:21543: * @brief This buffer contains the VL53L8CX default configuration.
+tof/vendor/vl53l8cx/vl53l8cx_buffers.h:21546:const uint8_t VL53L8CX_DEFAULT_CONFIGURATION[] = {
+tof/vendor/vl53l8cx/vl53l8cx_buffers.h:21573:	0x04, 0x01, 0x08, VL53L8CX_FW_NBTAR_RANGING,
+tof/vendor/vl53l8cx/vl53l8cx_buffers.h:21793: * @brief This buffer contains the VL53L8CX default Xtalk data.
+tof/vendor/vl53l8cx/vl53l8cx_buffers.h:21796:const uint8_t VL53L8CX_DEFAULT_XTALK[] = {
+tof/vendor/vl53l8cx/vl53l8cx_buffers.h:21997:const uint8_t VL53L8CX_GET_NVM_CMD[] = {
+tof/vendor/vl53l8cx/vl53l8cx_buffers.h:22010:#endif /* VL53L8CX_BUFFERS_H_ */
+tof/vendor/vl53l8cx/vl53l8cx_buffers.h:24:#if VL53L8CX_NB_TARGET_PER_ZONE == 1
+tof/vendor/vl53l8cx/vl53l8cx_buffers.h:25:#define VL53L8CX_FW_NBTAR_RANGING	2
+tof/vendor/vl53l8cx/vl53l8cx_buffers.h:27:#define VL53L8CX_FW_NBTAR_RANGING	VL53L8CX_NB_TARGET_PER_ZONE
+tof/vendor/vl53l8cx/vl53l8cx_buffers.h:31: * @brief This buffer contains the VL53L8CX firmware (MM1.7)
+tof/vendor/vl53l8cx/vl53l8cx_buffers.h:33:const uint8_t VL53L8CX_FIRMWARE[] = {
+updater/src/engine.rs:1191:    /// restart on command, on a robot which is otherwise back where it was — not, despite what this
+updater/src/engine.rs:663:        //    fetch is HTTPS, and on a board with no battery-backed RTC it fails
+updater/src/ipc.rs:529:            // `BUSY` back at once is what lets it say so. Blocking instead produced a spinner
+updater/src/preflight.rs:26:    /// A board with no battery-backed RTC boots with a wrong clock, and HTTPS
+updater/src/preflight.rs:91:/// A board with no battery-backed RTC boots at the epoch (or at its image's build
+updater/systemd/updaterd.service:19:# Target: Radxa Zero 3 (aarch64) running Armbian 26.2.x with the Debian 13 (Trixie)
+updater/tests/install.rs:198:fn lands_a_first_release_despite_a_production_config() {
+updater/tests/ipc.rs:746:/// eMMC and restarting `robotd` each time, forever, on battery. Nothing in the cycle
+updater/updater.example.toml:144:# 30s is a guess until M4 measures a real boot on the Radxa. Too short reverts a healthy

@@ -1,0 +1,121 @@
+{
+ "$parts_folder": 1,
+ "kind": "chip",
+ "$from": "chips.json",
+ "record": {
+  "part": "XL330-M288-T",
+  "part_note": "NOT A CHIP - a complete DYNAMIXEL smart actuator (cored DC motor + 288.4:1 plastic gearbox + ARM Cortex-M0+ controller + AS5601 12-bit magnetic encoder + half-duplex TTL bus transceiver, on one 3-pin lead). In a chip record because the current budget reads this file, the same way ce-parts/MG996R does. The Microduck carries 15 of these (IDs 10-14, 20-24, 30-34) on one bus with imu_to_dxl at ID 200.",
+  "manufacturer": "ROBOTIS Co., Ltd.",
+  "description": "DYNAMIXEL XL330-M288-T. Source E1 = the ROBOTIS e-Manual product page (Specifications, Control Table, Connector Information, Communication Circuit, Drawings, Certifications); E2 = the same content on docs.robotis.com; D1 = the 'XL,XC-330.pdf' dimension drawing linked from E1 §Drawings; D2 = 'XL330,XC330 Moment of Inertia.pdf' linked from E1 §Moment of Inertia; S1 = the vendor's own XL,XC-330.stp body. All fetched 2026-09-02, all in PROVENANCE.json.",
+  "fetched": true,
+  "datasheet_url": "https://emanual.robotis.com/docs/en/dxl/x/xl330-m288/",
+  "datasheet_rev": "ROBOTIS e-Manual page 'XL330-M288-T', https://emanual.robotis.com/docs/en/dxl/x/xl330-m288/, fetched 2026-09-02 (HTTP 200, 359049 bytes, sha256 in PROVENANCE.json). The page carries no revision number of its own; its source is docs/en/dxl/x/xl330-m288.md in github.com/ROBOTIS-GIT/emanual, whose last commit touching that file (GitHub API, read 2026-09-02) is 91f72d1ddd3f86d94d74b35ab037f7ec8c8c4dbe dated 2026-01-27T01:08:03Z, message 'Modify X335'. The page banner reads verbatim: 'ROBOTIS e-Manual has moved. The e-Manual has been integrated into ROBOTIS Docs. ... This e-Manual website will be removed in July.' The successor page https://docs.robotis.com/docs/dxl/model_reference/x_series/xl_series/xl330-m288/ was fetched the same day and its Specifications table reads identically (see docs/DATASHEET.md for the ONE place the two vendor pages disagree: the Shutdown(63) bit table).",
+  "package": "E1 §Specifications, verbatim: 'Dimensions (W x H x D) | 20.0 x 34.0 x 26.0 [mm]' and 'Weight | 18 [g]'. D1 (sheet 'X330', dated 28-May-20, stamped '[FOR REFERENCE ONLY]', 'Unit mm', 'Nonescale', A4): body 23 deep x 20 wide x 34 tall; horn boss 3 thick, dia 16, horn axis 9.5 below the top face; mounting holes 16 apart across the width and 30 apart along the height; horn face '4-dia1.6 HOLE DP3.0(Max.) P.C.D dia12 Using M2 Tapping Screw'; '[X330 IDLER]' variant 29 overall = 23 + 3 + 3 with the same 4-hole PCD 12 pattern on the idler side; Detail A: dia2 through, 3.5 deep at dia1.6; Detail B: dia1.6, 4.5 deep. The vendor's 26.0 D is body 23 + one 3 mm horn; Pollen's mesh (cad/part.py) is the 29 mm idler variant - the two agree once the idler disc is counted.",
+  "used_by": [],
+  "used_by_kind": "module",
+  "rails": [],
+  "absolute_max": "NOT PUBLISHED as an absolute-maximum table. The only voltage ceilings the vendor states are operating figures: E1 §Specifications 'Input Voltage | 3.7 ~ 6.0 [V] (Recommended : 5.0 [V])', and the firmware's own supervisory limit, E1 §Control Table 'Max Voltage Limit(32) ... Range 31 ~ 70 ... Unit 0.1 [V]' with the description verbatim 'About 0.1 [V] | 31 ~ 70 | 3.1 ~ 7.0 [V]' - i.e. the controller cannot even be TOLD to accept more than 7.0 V. Operating temperature: '-5 ~ +70 [degC]'.",
+  "supplies": [
+   {
+    "name": "VDD (pin 2 of the 3-pin TTL connector)",
+    "rail": null,
+    "v_min": 3.7,
+    "v_typ": 5.0,
+    "v_max": 6.0,
+    "cite": "E1 §Specifications, row verbatim: 'Input Voltage | 3.7 ~ 6.0 [V] (Recommended : 5.0 [V])'. v_typ = 5.0 is the vendor's stated 'Recommended', not a characterisation point. NAMED CONFLICT WITH THE DESIGN, not with another source: Pollen's runtime maps the pack 6.6-8.2 V through this servo's own Present Input Voltage(144) (docs/ELECTRONICS-AND-SOFTWARE.md §3.4), 0.6-2.2 V above this v_max; and robotd writes Shutdown(63) = 52 = 0b00110100 where the vendor default is 53 = 0b00110101 - the one bit cleared is Bit 0 'Input Voltage Error', the fault that E1 says fires when Present Input Voltage(144) leaves the Min/Max Voltage Limit window (max 7.0 V). That is consistent with the servos seeing the raw pack and is recorded as an OBSERVATION on Pollen's code, not as a vendor figure. Whether a production Microduck runs stock XL330s over their rating stays CANNOT DETERMINE (a meter on servo VDD settles it)."
+   }
+  ],
+  "current_mA": {
+   "rail": "5V",
+   "rail_basis": "No Atech document attributes anything (rails []). '5V' is the vendor's 'Recommended : 5.0 [V]' operating point and the voltage at which the middle stall row is stated. On the Microduck the servo VDD rail is the pack via the HAT (docs/ELECTRONICS-AND-SOFTWARE.md §9), whose voltage lies OUTSIDE this band - see supplies[0].cite.",
+   "typical": null,
+   "typical_basis": "NOT PUBLISHED. E1 §Specifications gives no running or no-load current - only 'Standby Current | 17 [mA]' (recorded under idle) and the three stall rows (under stall). A typical running draw for a walking-gait duty cycle does not exist in any vendor document fetched; it would have to be measured on the bus (Present Current(126)).",
+   "peak": null,
+   "peak_basis": "NOT PUBLISHED as a peak. The controller's ceiling is E1 §Control Table 'Current Limit(38) | RW | 1,750 | 0 ~ 1,750 | 1 [mA]' - the maximum the firmware will command, not a measured peak; the vendor stall rows top out at 1.74 A at 6.0 V. Kept out of `peak` so no budget sums a limit as a draw.",
+   "sleep": null,
+   "sleep_basis": "NO SUCH MODE in E1. Torque Enable(64) = 0 leaves the controller awake on the bus; the powered-idle figure is under idle.",
+   "idle": 17,
+   "idle_basis": "E1 §Specifications, verbatim: 'Standby Current | 17 [mA]'. No test voltage is stated for it.",
+   "stall": 1470,
+   "stall_basis": "E1 §Specifications 'Stall Torque' row, verbatim, all three lines: '0.42 [N.m] (at 3.7 [V], 1.11 [A], 0.378 [Nm/A])', '0.52 [N.m] (at 5.0 [V], 1.47 [A], 0.354 [Nm/A])', '0.60 [N.m] (at 6.0 [V], 1.74 [A], 0.345 [Nm/A])'. 1470 mA is the 5.0 V row; the 6.0 V row is 1740 mA. Above 6.0 V no vendor figure exists.",
+   "stall_by_voltage_mA": {
+    "3.7": 1110,
+    "5.0": 1470,
+    "6.0": 1740
+   },
+   "excludes": null,
+   "caveats": [
+    "Fifteen of these share one bus and one pack; a rail budget that takes 15 x stall = 22 A at 5 V is a real number the vendor rows support, and no vendor document says what the Microduck's pack or HAT path can deliver.",
+    "E1 §Current Limit(38), verbatim: 'XL330 series measures curret at its input power source unlike other DYNAMIXE-X series supporting a current control.' - Present Current(126) is input current, not phase current.",
+    "No current figure carries a temperature; operating temperature is -5 ~ +70 degC (E1 §Specifications) and Temperature Limit(31) defaults to 70."
+   ],
+   "cite": "E1 §Specifications (rows 'Stall Torque', 'Standby Current') and §Control Table of EEPROM Area (row 38). URL in datasheet_url; fetch in PROVENANCE.json."
+  },
+  "logic": {
+   "vih_min": null,
+   "vil_max": null,
+   "three_v3_tolerant": true,
+   "derived": false,
+   "cite": "E1 §Specifications, verbatim: 'Physical Connection | TTL Multidrop Bus (3.3V Logic, 5V Compatible)' / 'TTL Half Duplex Asynchronous Serial Communication (8bit, 1stop, No Parity)'; and the note under the XL Series table: 'Though the XL330 series has a 3.3 V TTL logic level, the XL330 is tolerant of 5V TTL logic level communications.' No VIH/VIL voltage is printed anywhere on E1, E2 or D1, so both thresholds are null. three_v3_tolerant is the vendor's word '3.3V Logic'."
+  },
+  "interface": "UART half-duplex TTL, DYNAMIXEL Protocol 2.0",
+  "interface_max_hz": 4000000,
+  "interface_cite": "E1 §Specifications 'Baud Rate | 9,600 [bps] ~ 4 [Mbps]'; §Baud Rate(8) table verbatim: '6 | 4M [bps] | 0.000 [%]', '5 | 3M [bps]', '4 | 2M [bps]', '3 | 1M [bps] | 0.000 [%]', '2 | 115,200 [bps] | 0.0064 [%]', '1(Default) | 57,600 [bps] | 0.0016 [%]', '0 | 9,600 [bps]'. Pollen's robotd writes baud_rate = 3 (= 1 Mbps) and Protocol Type(13) defaults to 2 ('Protocol Type | RW | 2 | 2 ~ 22').",
+  "i2c_address": null,
+  "bus_id": "E1 §Control Table 'ID | RW | 1 | 0 ~ 252'; §Specifications 'ID | 253 ID (0 ~ 252)'; §ID(7): '254(0xFE) is occupied as a broadcast ID'. Microduck IDs 10-14, 20-24, 30-34 (model.rs).",
+  "controller": {
+   "mcu": "E1 §Specifications verbatim: 'MCU | ARM CORTEX-M0+ (64 [MHz], 32Bit)'",
+   "position_sensor": "verbatim: 'Position Sensor | Contactless absolute encoder (12Bit, 360 [deg]) Maker : ams(www.ams.com), Part No : AS5601'",
+   "motor": "verbatim: 'Motor | Cored'",
+   "resolution": "verbatim: 'Resolution | 4096 [pulse/rev]'",
+   "gear_ratio": "verbatim: 'Gear Ratio | 288.4 : 1'",
+   "no_load_speed": "verbatim: '76 [rev/min] (at 3.7 [V])', '103 [rev/min] (at 5.0 [V])', '123 [rev/min] (at 6.0 [V])'",
+   "materials": "verbatim: 'Case Material | Engineering Plastic', 'Gear Material | Engineering Plastic'",
+   "model_number": "E1 §Control Table of EEPROM Area row verbatim: '0 | 2 | Model Number | R | 1,200 | - | -'",
+   "operating_modes": "verbatim: 'Current Control Mode / Velocity Control Mode / Position Control Mode (0 ~ 360 [deg]) / Extended Position Control Mode (Multi-turn) / Current-based Position Control Mode / PWM Control Mode (Voltage Control Mode)'"
+  },
+  "control_table_used_by_robotd": {
+   "$about": "The registers Pollen's duck-control touches (bus.rs:24-44, model.rs:82-94), each row copied verbatim from E1 §Control Table as 'Address | Size(Byte) | Data Name | Access | Initial Value | Range | Unit'. EEPROM rows are 'maintained even when the device is powered off'; RAM rows are 'reset to initial values when the power is reset'.",
+   "8": "EEPROM: '8 | 1 | Baud Rate | RW | 1 | 0 ~ 6 | -' ; robotd writes 3 = 1M bps",
+   "9": "EEPROM: '9 | 1 | Return Delay Time | RW | 250 | 0 ~ 254 | 2 [usec]' ; §Return Delay Time(9) verbatim: 'Default value 250(500[usec])', 'Maximum value: 508[usec]' ; robotd writes 0",
+   "62": "EEPROM: '62 | 1 | PWM Slope | RW | 140 | 1 ~ 255 | 1.977 [mV/msec]' ; §PWM Slope(62) verbatim: 'The PWM duty will be linearly interpolated with a set slope by PWM Slope(62) and be forwarded to the motor's inverter.' Its own unit table says '1.977 [mV/msec] | 0 ~ 255' - the table row says 1 ~ 255, the description 0 ~ 255: an internal disagreement on E1, recorded not resolved ; robotd writes 255",
+   "63": "EEPROM: '63 | 1 | Shutdown | RW | 53 | - | -' ; bit table on E1: 'Bit 5 | Overload Error(default)', 'Bit 4 | Electrical Shock Error(default)', 'Bit 3 | - | -', 'Bit 2 | Overheating Error(default)', 'Bit 1 | - | Unused, Always 0', 'Bit 0 | Input Voltage Error (default) | Detects that input voltage exceeds the configured operating voltage'. E2 (docs.robotis.com) instead prints 'Bit 3 | Motor Encoder Error | Detects malfunction of the motor encoder' and 'Bit 0 | Input Voltage Error' without '(default)' - the two vendor pages disagree on Bit 3; both give the initial value 53 ; robotd writes 52 (Bit 0 cleared)",
+   "84,82,80": "RAM: '84 | 2 | Position P Gain | RW | 400 | 0 ~ 16,383 | -', '82 | 2 | Position I Gain | RW | 0 | 0 ~ 16,383 | -', '80 | 2 | Position D Gain | RW | 0 | 0 ~ 16,383 | -' ; §Position PID Gain: 'KPP = KPP(TBL) / 128', 'KPI = KPI(TBL) / 65,536', 'KPD = KPD(TBL) / 16' ; robotd writes P 200 (=KPP 1.5625), I 0, D 0. NOTE: the vendor initial value of D is 0, so a power cycle restores D = 0 on the vendor's word, not a non-zero 'factory D' - docs/ELECTRONICS-AND-SOFTWARE.md §3.3 should be re-read against this row",
+   "124": "RAM: '124 | 2 | Present PWM | R | - | - | -'",
+   "126": "RAM: '126 | 2 | Present Current | R | - | - | 1 [mA]'",
+   "128": "RAM: '128 | 4 | Present Velocity | R | - | - | 0.229 [rev/min]' (bus.rs RAD_PER_SEC_PER_COUNT = 0.229 * 2pi/60 agrees)",
+   "132": "RAM: '132 | 4 | Present Position | R | - | - | 1 [pulse]' ; 4096 pulse/rev",
+   "136,140": "RAM: '136 | 4 | Velocity Trajectory | R | - | - | 0.229 [rev/min]', '140 | 4 | Position Trajectory | R | - | - | 1 [pulse]' - the 8-byte gap robotd skips",
+   "144": "RAM: '144 | 2 | Present Input Voltage | R | - | - | 0.1 [V]' ; §Present Input Voltage(144): 'indicates present voltage that is being supplied'",
+   "146": "RAM: '146 | 1 | Present Temperature | R | - | - | 1 [degC]'",
+   "13": "EEPROM: '13 | 1 | Protocol Type | RW | 2 | 2 ~ 22 | -'",
+   "32,34": "EEPROM: '32 | 2 | Max Voltage Limit | RW | 70 | 31 ~ 70 | 0.1 [V]', '34 | 2 | Min Voltage Limit | RW | 35 | 31 ~ 70 | 0.1 [V]'",
+   "38": "EEPROM: '38 | 2 | Current Limit | RW | 1,750 | 0 ~ 1,750 | 1 [mA]'",
+   "31": "EEPROM: '31 | 1 | Temperature Limit | RW | 70 | 0 ~ 100 | 1 [degC]'",
+   "64": "RAM: '64 | 1 | Torque Enable | RW | 0 | 0 ~ 1 | -' ; 'Data in the EEPROM Area can only be written when the value of Torque Enable(64) is cleared to 0'"
+  },
+  "connector": {
+   "pinout": "E1 §Connector Information, verbatim: 'Pinout | 1 GND 2 VDD 3 DATA'",
+   "housing": "verbatim: 'Housing | JST EHR-03'",
+   "pcb_header": "verbatim: 'PCB Header | JST B3B-EH-A'",
+   "crimp": "verbatim: 'Crimp Terminal | JST SEH-001T-P0.6'",
+   "wire": "verbatim: 'Wire Gauge for DYNAMIXEL | 21 AWG'",
+   "shelf_ref": "part:conn-jst-eh-2.5mm (workshop shelf; JST eEH.pdf already fetched there) - refs.json",
+   "x3p": "The name 'X3P' (ROBOTIS 'Robot Cable-X3P') does NOT appear on E1, E2 or D1; the fetched vendor pages name the connector only by its JST part numbers. Whether Pollen's harness uses ROBOTIS X3P cables or its own EH-crimped leads: CANNOT DETERMINE."
+  },
+  "communication_circuit": "E1 §Communication Circuit, verbatim: 'To control the DYNAMIXEL actuators, the main controller needs to convert its UART signals to the half duplex type. The recommended circuit diagram for this is shown below.' The diagram (docs/fetched/3v3_ttl_circuit.png, read 2026-09-02) titled 'TTL Communication Circuit' shows a 74LVC2G241 / NC7WZ241 dual buffer: RXD from Y1 (pin 6) with A1 (pin 2) on the bus Data line; TXD into A2 (pin 5), Y2 (pin 3) onto Data; TX_Enable drives /OE1 (pin 1) and OE2 (pin 7), 10 kOhm pull-down on TX_Enable, 10 kOhm pull-ups to 3.3V on RXD and on Data; VCC pin 8 = 3.3V with 0.1uF; connector 'DYNAMIXEL Connector' 1 GND, 2 VDD (DXL_PWR with a bulk + 0.1uF), 3 Data. This is the reference layout a Robot HAT bus port must name in layout_provenance. Pollen's code drives no TX_Enable GPIO (docs/ELECTRONICS-AND-SOFTWARE.md §3.1), so the HAT cannot be exactly this circuit - what it is stays CANNOT DETERMINE.",
+  "certifications": "E1 §Certifications, verbatim: 'FCC Note: This equipment has been tested and found to comply with the limits for a Class A digital device, pursuant to part 15 of the FCC Rules.' No CE / KC / RoHS statement is on the page ('Please inquire us for information regarding unlisted certifications').",
+  "mass_properties": "D2 'The moment of inertia (reference only)', row XL330-M288, verbatim: Weight 18.0 g; Center of gravity (mm) X -2.9100243e-01, Y -9.2403727e+00, Z -1.3121748e+01; Inertia tensor (g*mm2) Ixx 2.5555250e+03, Ixy -2.0247808e+01, Ixz -1.1076849e+01, Iyy 1.2711372e+03, Iyz -2.2979973e+02, Izz 2.2712629e+03; 'Release Date Feb. 2023'. Frame of that CoG is the vendor's STEP frame (S1), not Pollen's mesh frame - mech/mech.py must transform before use.",
+  "unknowns": [
+   "Running / no-load current at any voltage: not published (only standby 17 mA and the three stall rows).",
+   "VIH / VIL of the DATA line: not published; only '3.3V Logic, 5V Compatible'.",
+   "Absolute maximum supply: not published; the firmware refuses a Max Voltage Limit above 7.0 V and the operating band ends at 6.0 V. The Microduck's 6.6-8.2 V pack sits above both - whether production servos are stock parts on the raw pack is CANNOT DETERMINE (meter on servo VDD).",
+   "Sub-variant on the shipped robot: M288 vs M077 is never named in Pollen's files ('xl330' only); this record is the M288 page. The M077 page shares every row except Gear Ratio, Stall Torque and No Load Speed.",
+   "Bulk capacitance the vendor expects on DXL_PWR: the circuit drawing shows a polarised capacitor with no value.",
+   "Whether the harness uses ROBOTIS X3P cables: the name is not on any fetched vendor page.",
+   "Shutdown(63) Bit 3: E1 says '-', E2 says 'Motor Encoder Error'. Which firmware version added it is not stated on either page.",
+   "PWM Slope(62) range: 1 ~ 255 (table) vs 0 ~ 255 (description) on the same page.",
+   "Drawing D1 is stamped '[FOR REFERENCE ONLY]' and dated 28-May-20; the e-Manual page has no revision. A production servo should be measured against D1 before any bracket is cut."
+  ]
+ }
+}

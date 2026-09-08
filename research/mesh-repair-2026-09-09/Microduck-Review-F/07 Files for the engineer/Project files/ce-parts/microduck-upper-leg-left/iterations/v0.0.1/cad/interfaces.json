@@ -1,0 +1,75 @@
+{
+  "$triad": 1,
+  "kind": "interfaces",
+  "record": {
+    "slug": "microduck-upper-leg-left",
+    "frame": "Pollen's mesh frame for upper_leg_left.stl: X = cup depth (open face 42.5, plate inner face 69.5, back face 70.5), Y = width -13.47..34.19, Z = length -12.2..48.8. Servo axes A0 = (y 0, z 0) hip pitch and A1 = (y 22, z 35.777) knee, both along +x. Kept so the MJCF geom pos (0,0,-42.5) quat (0.5,-0.5,-0.5,-0.5) places it directly.",
+    "units": "mm",
+    "interfaces": [
+      {
+        "name": "hip_pitch_axle",
+        "frame": {"origin_mm": [70.5, 0.0, 0.0], "z_axis": [1, 0, 0], "x_axis": [0, 0, 1]},
+        "accepts": ["connection:threaded-m2"],
+        "role": "axle_screw",
+        "what": "On the outside of the back plate at the hip-pitch axis: Ø5.37 counterbore 2.5 deep (x 70.5 -> 68.0) over a Ø2.4->2.8 through hole (a slight cone, 3.3 long) through the Ø4.42 boss on the inside. The screw that pins the servo's rear axle/idler to the housing seats here. M2 vs M2.5 is CANNOT DETERMINE from a 2.4-2.8 mm hole in a decimated mesh; the community reads the whole robot as an M2 system.",
+        "source": "MEASURED off Pollen's mesh 2026-09-01: cecad.meshfeatures hole Ø5.371 at (69.25, 0, 0) length 2.5; cecad.meshslice ray probe A (r 1.1 empty, r 1.2-1.4 material 64.7->65.7/67.6/68.0, r 2.7 -> 69.5, r 2.8 -> 70.5)"
+      },
+      {
+        "name": "knee_axle",
+        "frame": {"origin_mm": [70.5, 22.0, 35.777], "z_axis": [1, 0, 0], "x_axis": [0, 0, 1]},
+        "accepts": ["connection:threaded-m2"],
+        "role": "axle_screw",
+        "what": "Identical to hip_pitch_axle, at the knee axis 42.000 mm away: Ø5.37 x 2.5 counterbore, Ø2.4->2.8 through.",
+        "source": "MEASURED off Pollen's mesh 2026-09-01: cecad.meshfeatures hole Ø5.371 at (69.25, 22, 35.777); meshslice probe A ('hip +y' column) identical to A0 at every radius"
+      },
+      {
+        "name": "hip_pitch_servo_seat",
+        "frame": {"origin_mm": [64.7, 0.0, 0.0], "z_axis": [-1, 0, 0], "x_axis": [0, 0, 1]},
+        "accepts": ["connection:threaded-m2"],
+        "role": "servo_rear_seat",
+        "what": "Inside the cup at the hip-pitch axis: a stepped boss standing 4.8 mm off the plate's inner face — Ø7.27 from x 69.5 to 67.0, then Ø4.42 from 67.0 to 64.7 — with the axle hole through its centre. The Ø4.42 step is what enters the XL330's rear; the screw named at hip_pitch_axle passes through it. Which XL330 rear feature it engages is CANNOT DETERMINE without a servo in hand.",
+        "source": "MEASURED off Pollen's mesh 2026-09-01: cecad.meshfeatures bosses Ø7.268 at x 68.25 (length 2.5) and Ø4.417 at x 65.85 (length 2.3); meshslice probe A (r 2.1 -> 64.7..68.0, r 2.3-2.6 -> 67.0..68.0, r 3.5 -> 67.0..70.5, r 3.7 -> 69.5..70.5)"
+      },
+      {
+        "name": "knee_servo_seat",
+        "frame": {"origin_mm": [64.7, 22.0, 35.777], "z_axis": [-1, 0, 0], "x_axis": [0, 0, 1]},
+        "accepts": ["connection:threaded-m2"],
+        "role": "servo_rear_seat",
+        "what": "Identical to hip_pitch_servo_seat at the knee axis.",
+        "source": "MEASURED off Pollen's mesh 2026-09-01: same features at (x, 22, 35.777)"
+      },
+      {
+        "name": "pin_1",
+        "frame": {"origin_mm": [64.5, -0.5, 43.777], "z_axis": [-1, 0, 0], "x_axis": [0, 0, 1]},
+        "accepts": ["connection:threaded-m2"],
+        "role": "locating_pin",
+        "what": "Ø1.6->1.8 x 2.0 pin (x 64.5..66.5) on a '+' boss (hub Ø1.9, arms 0.8 wide x 2.9 long, x 66.5..69.5) standing on the plate's inner face. 1.6 mm is the minor diameter of an M2 thread: the pin locates the knee XL330's rear M2 hole; the rigidity plate's Ø2.2 hole sits on the same (y, z) 21 mm away at x 43. The pin is solid (centre ray: material 64.5..70.46, no hole).",
+        "source": "MEASURED off Pollen's mesh 2026-09-01: meshslice probes B/H/M (pin r 0.8 -> 64.59, r 0.85 -> 65.55, r 0.9 -> 66.5; arm half-width 0.35..0.4, arm end 2.9..2.95)"
+      },
+      {
+        "name": "pin_2",
+        "frame": {"origin_mm": [64.5, -0.5, 27.777], "z_axis": [-1, 0, 0], "x_axis": [0, 0, 1]},
+        "accepts": ["connection:threaded-m2"],
+        "role": "locating_pin",
+        "what": "As pin_1; full four-arm cross. With pin_1 it is 16.0 mm apart along z, both 22.5 mm from the knee axis along -y: the knee servo's rear hole pair.",
+        "source": "MEASURED off Pollen's mesh 2026-09-01: meshslice probe H/M at (-0.5, 27.777)"
+      },
+      {
+        "name": "pin_3",
+        "frame": {"origin_mm": [64.5, -8.0, 22.5], "z_axis": [-1, 0, 0], "x_axis": [0, 0, 1]},
+        "accepts": ["connection:threaded-m2"],
+        "role": "locating_pin",
+        "what": "As pin_1; three arms (-y, +z, -z). With pin_4 it is 16.0 mm apart along y, both 22.5 mm from the hip-pitch axis along +z: the hip-pitch servo's rear hole pair.",
+        "source": "MEASURED off Pollen's mesh 2026-09-01: meshslice probe H at (-8, 22.5): +y arm absent (d 1.0 -> 68.4), -y arm to 2.8"
+      },
+      {
+        "name": "pin_4",
+        "frame": {"origin_mm": [64.5, 8.0, 22.5], "z_axis": [-1, 0, 0], "x_axis": [0, 0, 1]},
+        "accepts": ["connection:threaded-m2"],
+        "role": "locating_pin",
+        "what": "As pin_3, mirrored: three arms (+y, +z, -z).",
+        "source": "MEASURED off Pollen's mesh 2026-09-01: meshslice probe H at (8, 22.5): -y arm absent, +y arm to 2.8"
+      }
+    ]
+  }
+}

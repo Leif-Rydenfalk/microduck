@@ -1,0 +1,1271 @@
+#!/usr/bin/env python3
+"""gen_sourcing.py - build SOURCING.html and RFQ.html from spec/sourcing.json.
+
+Lane E deliverable (GOAL.md). Neither page is ever hand-edited: this script owns
+both. The cost roll-up follows spec/sourcing.json's own `rules` block:
+
+  * A price enters a total only if a human-readable vendor page carried it and
+    the fetch date is recorded. A price nobody read is CANNOT DETERMINE.
+  * No FX rate was fetched, so nothing is converted. Only USD offers enter the
+    USD subtotal; EUR/GBP/NZD/AUD/INR lines are reported unconverted beside it.
+  * An unknown is NEVER summed as zero. The roll-up publishes the readable
+    subtotal and the CANNOT DETERMINE list as two separate numbers.
+  * For N robots the order quantity of a line is qty_per_robot x N; the unit
+    price used is the vendor's largest published tier <= that quantity. A
+    vendor with no tier table keeps its @1 price at every quantity, as a
+    CEILING.
+    A quantity_rule instead credits verified selected-offer bundles and rounds
+    the remaining pieces to complete packs over the whole batch.
+
+Run:  python3 tools/gen_sourcing.py       (stdlib only; no FreeCAD needed)
+"""
+import json, os, html, datetime, math
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+REPO = os.path.dirname(HERE)
+DATA = json.load(open(os.path.join(REPO, "spec", "sourcing.json")))
+ROBOT_COUNTS = [1, 100, 1000]
+
+E = lambda s: html.escape(str(s))
+
+
+def clip(text, n):
+    """Truncate on a word boundary so a table cell never ends mid-word."""
+    text = str(text)
+    if len(text) <= n:
+        return text
+    cut = text[:n].rsplit(" ", 1)[0]
+    return (cut or text[:n]) + "\u2026"
+
+
+def qty_txt(v):
+    """Order quantity as a person writes it: integers with separators, and a
+    fractional kilogram stays fractional rather than becoming 1.5e+04."""
+    return f"{v:,.0f}" if abs(v - round(v)) < 1e-9 else f"{v:,.4f}".rstrip("0").rstrip(".")
+
+
+# ---------------------------------------------------------------- pricing ---
+def tier_price(offer, order_qty):
+    """Unit price at `order_qty` pieces from one offer's own tier table.
+    Returns (unit_price, tier_qty, moq_exceeds_need) or (None, None, None)."""
+    tiers = offer.get("tiers") or []
+    if not tiers:
+        return None, None, None
+    tiers = sorted(tiers, key=lambda t: t[0])
+    moq = offer.get("moq") or tiers[0][0]
+    if order_qty < moq:
+        return tiers[0][1], tiers[0][0], True
+    pick = tiers[0]
+    for q, p in tiers:
+        if q <= order_qty:
+            pick = (q, p)
+    return pick[1], pick[0], False
+
+
+def usable(offer):
+    return (offer.get("confidence") == "read"
+            and not offer.get("excluded_from_rollup")
+            and offer.get("compatibility_status") != "rejected"
+            and (offer.get("tiers") or []))
+
+
+def purchase_quantity(line, n_robots, lines=None, offer=None):
+    """Net whole-order packs, credited only from the selected offer's evidence."""
+    if n_robots <= 0:
+        raise ValueError("robot count must be positive")
+    rule = line.get("quantity_rule")
+    if not rule:
+        return {"order_quantity": line["qty_per_robot"] * n_robots}
+    if rule["kind"] == "whole_offer_package":
+        package = (offer or {}).get("package") or {}
+        if (package.get("confidence") != "read" or not package.get("fetched")
+                or package.get("url") != (offer or {}).get("url")):
+            return None  # An unverified package cannot satisfy this contract.
+        contents = package.get("contents", {})
+        required = {k: v * n_robots for k, v in rule["required_per_robot"].items()}
+        if any(contents.get(k, 0) <= 0 for k, v in required.items() if v > 0):
+            return None
+        packs = max((math.ceil(v / contents[k]) for k, v in required.items() if v > 0), default=0)
+        received = {k: v * packs for k, v in contents.items()}
+        detail = (f'{n_robots:g} robots; policy: {rule["policy"]}. Required {required}; '
+                  f'{packs:g} whole {package.get("unit", "packages")} to purchase, providing {received}. '
+                  f'Package price and contents basis: {package["url"]}, read {package["fetched"]}. '
+                  'Retail/tier extension only; no order or batch availability claim.')
+        return {"order_quantity": packs, "required_items": required,
+                "received_items": received, "quantity_basis": detail,
+                "order_unit": package.get("unit", "packages")}
+    if rule["kind"] != "net_of_selected_offer_bundle":
+        raise ValueError("unknown quantity rule")
+    lines = DATA["lines"] if lines is None else lines
+    source = next(x for x in lines if x["id"] == rule["source_line"])
+    selected = line_cost(source, n_robots, lines)
+    offer = next((o for o in source["offers"]
+                  if selected and o["url"] == selected["url"]), {})
+    verified = [i for i in offer.get("included_items", [])
+                if i["item_key"] == rule["item_key"] and i.get("confidence") == "read"
+                and i.get("fetched") and i.get("url") == offer.get("url")]
+    if len(verified) > 1:
+        raise ValueError("duplicate bundle evidence for " + rule["item_key"])
+    included = (verified[0]["qty_per_unit"] * selected["order_quantity"]
+                if verified else 0)
+    required = rule["required_pieces_per_robot"] * n_robots
+    shortfall = max(0, required - included)
+    packs = math.ceil(shortfall / rule["pieces_per_order_unit"])
+    evidence = (f'{offer["vendor"]}, {verified[0]["url"]}, read {verified[0]["fetched"]}'
+                if verified else "no verified bundle on selected source offer; zero credit")
+    detail = (f'{n_robots:g} robots: {required:g} leads required - {included:g} verified bundled '
+              f'= {shortfall:g} extra leads; {packs:g} ten-packs to purchase across the whole batch. '
+              f'Bundle basis: {evidence}. Quantities are a sourcing calculation, not an order.')
+    return {"order_quantity": packs, "required_pieces": required,
+            "included_pieces": included, "shortfall_pieces": shortfall,
+            "quantity_basis": detail}
+
+
+def line_cost(line, n_robots, lines=None):
+    """Cheapest READ USD offer for one line at N robots.
+    Returns dict or None when nothing is readable in USD."""
+    qpr = line.get("qty_per_robot")
+    if not qpr:                                   # None or 0
+        return None
+    if line.get("excluded_from_rollup"):
+        return None
+
+    if line.get("kit"):                            # offers are components
+        total, parts, ceiling, moqflag = 0.0, [], False, False
+        for k in line["kit"]:
+            off = line["offers"][k["offer"]]
+            if off.get("currency") != "USD" or not usable(off):
+                return None
+            need = k["qty_per_robot"] * n_robots
+            up, tq, mo = tier_price(off, need)
+            if up is None:
+                return None
+            total += up * k["qty_per_robot"]
+            ceiling |= bool(off.get("no_tiers"))
+            moqflag |= bool(mo)
+            parts.append(f'{k["what"]} x{k["qty_per_robot"]} @ ${up:.5f}')
+        return {"vendor": "DigiKey (kit)", "unit": None, "per_robot": total,
+                "tier_qty": None, "ceiling": ceiling, "moq_exceeds": moqflag,
+                "detail": " + ".join(parts), "range_high": False,
+                "caveat": None, "stock": None, "page_kind": None, "url": None}
+
+    best = None
+    for off in line["offers"]:
+        if off.get("currency") != "USD" or not usable(off):
+            continue
+        quantity = purchase_quantity(line, n_robots, lines, off)
+        if quantity is None:
+            continue
+        need = quantity["order_quantity"]
+        up, tq, mo = tier_price(off, need)
+        if up is None:
+            continue
+        order = (max(need, off.get("moq") or 0) if need else 0) if line.get("quantity_rule") else need
+        cand = {"vendor": off["vendor"], "unit": up, "per_robot": up * order / n_robots,
+                "tier_qty": tq, "ceiling": bool(off.get("no_tiers")),
+                "moq_exceeds": bool(mo) if need else False, "detail": off.get("sku") or "",
+                "range_high": bool(off.get("price_is_range_high")),
+                "caveat": off.get("rollup_caveat"), "stock": off.get("stock"),
+                "page_kind": off.get("page_kind"), "url": off["url"],
+                **quantity, "order_quantity": order}
+        if line.get("quantity_rule") and order != need:
+            cand["quantity_basis"] += f' Vendor MOQ raises purchase from {need:g} to {order:g} packs.'
+            if "received_items" in cand:
+                cand["received_items"] = {k: v * order for k, v in off["package"]["contents"].items()}
+                cand["quantity_basis"] += f' Actual package contents received: {cand["received_items"]}.'
+        if best is None or cand["per_robot"] < best["per_robot"]:
+            best = cand
+    return best
+
+
+def native_lines():
+    """Lines with NO readable USD price but a readable price in another
+    currency. Reported unconverted; never added to anything."""
+    out = []
+    for ln in DATA["lines"]:
+        qpr = ln.get("qty_per_robot")
+        if not qpr or ln.get("excluded_from_rollup"):
+            continue
+        if line_cost(ln, 1):
+            continue
+        for off in ln["offers"]:
+            if off.get("currency") == "USD" or not usable(off):
+                continue
+            row = {}
+            for n in ROBOT_COUNTS:
+                up, tq, mo = tier_price(off, qpr * n)
+                row[n] = (up * qpr) if up is not None else None
+            if row[1] is not None:
+                out.append((ln, off, row))
+                break
+    return out
+
+
+READ = {}      # id -> {n: costdict}
+for ln in DATA["lines"]:
+    READ[ln["id"]] = {n: line_cost(ln, n) for n in ROBOT_COUNTS}
+
+SUBTOTAL = {n: sum(READ[l["id"]][n]["per_robot"]
+                   for l in DATA["lines"] if READ[l["id"]][n]) for n in ROBOT_COUNTS}
+PRICED = [l for l in DATA["lines"] if READ[l["id"]][1]]
+# A price being readable does not make the line buyable. Split the roll-up by
+# the verdict this document itself gives the line, so that money coming from a
+# line graded FAIL or CANNOT DETERMINE is never inside the headline number.
+PRICED_OK = [l for l in PRICED if l["verdict"] == "PASS"]
+PRICED_QUAL = [l for l in PRICED if l["verdict"] != "PASS"]
+SUB_OK = {n: sum(READ[l["id"]][n]["per_robot"] for l in PRICED_OK) for n in ROBOT_COUNTS}
+SUB_QUAL = {n: sum(READ[l["id"]][n]["per_robot"] for l in PRICED_QUAL) for n in ROBOT_COUNTS}
+QUAL_PCT = (100.0 * SUB_QUAL[1] / SUBTOTAL[1]) if SUBTOTAL[1] else 0.0
+
+# --------------------------------------------------- numbers inside the RFQ --
+# The RFQ letters are the only artifact in this lane meant to LEAVE the machine,
+# and until 2026-09-03 two of their numbers were typed prose in spec/sourcing.json
+# rather than derived here. Both were false. The ROBOTIS letter said the servos
+# are "75 % of the readable bought cost" (B1 is 61.0540 % of the readable total
+# at one robot and 65.6094 % of the PASS subtotal; even B1 + B2 reach only
+# 73.4306 %) and "the only line that does not move between 1 and 1 000 robots"
+# (nine of the nineteen priced lines are flat across that range). A hand-typed
+# number beside a computed one drifts; these are now {{tokens}} resolved from the
+# same roll-up the tables are drawn from, and an unresolved token refuses to
+# publish.
+FLAT_LINES = [l["id"] for l in PRICED
+              if abs(READ[l["id"]][1]["per_robot"]
+                     - READ[l["id"]][1000]["per_robot"]) < 1e-9]
+
+
+def _pct(x, of):
+    return f"{100.0 * x / of:.4f} %" if of else "CANNOT DETERMINE"
+
+
+def _share(lid):
+    c1, ck = READ[lid][1], READ[lid][1000]
+    if not c1 or not ck:
+        return {}
+    return {
+        f"{lid.lower()}_per_robot_usd": f"${c1['per_robot']:,.4f}",
+        f"{lid.lower()}_share_of_readable_at_1": _pct(c1["per_robot"], SUBTOTAL[1]),
+        f"{lid.lower()}_share_of_readable_at_1000": _pct(ck["per_robot"], SUBTOTAL[1000]),
+        f"{lid.lower()}_share_of_pass_at_1": _pct(c1["per_robot"], SUB_OK[1]),
+        f"{lid.lower()}_share_of_pass_at_1000": _pct(ck["per_robot"], SUB_OK[1000]),
+    }
+
+
+DERIVED = {
+    "b1_quote_quantities": " / ".join(qty_txt(READ["B1"][n]["order_quantity"]) for n in ROBOT_COUNTS),
+    "n_priced_lines": str(len(PRICED)),
+    "n_flat_priced_lines": str(len(FLAT_LINES)),
+    "flat_priced_lines": ", ".join(FLAT_LINES),
+    "readable_subtotal_at_1": f"${SUBTOTAL[1]:,.4f}",
+    "pass_subtotal_at_1": f"${SUB_OK[1]:,.4f}",
+    "pass_subtotal_at_1000": f"${SUB_OK[1000]:,.4f}",
+}
+for _lid in ("B1", "B2"):
+    DERIVED.update(_share(_lid))
+DERIVED["b1_b2_share_of_readable_at_1"] = _pct(
+    sum(READ[i][1]["per_robot"] for i in ("B1", "B2") if READ[i][1]), SUBTOTAL[1])
+
+import re as _re
+_TOKEN = _re.compile(r"\{\{([a-z0-9_]+)\}\}")
+
+
+def fill(text):
+    """Resolve {{token}} in RFQ prose against the measured roll-up. An unknown
+    token is a refusal to publish, never a silently-left brace."""
+    missing = []
+
+    def sub(m):
+        k = m.group(1)
+        if k not in DERIVED:
+            missing.append(k)
+            return m.group(0)
+        return DERIVED[k]
+
+    out = _TOKEN.sub(sub, text)
+    if missing:
+        raise SystemExit("REFUSING TO PUBLISH - RFQ prose names a number this "
+                         "generator does not compute: " + ", ".join(sorted(set(missing))))
+    return out
+
+
+NATIVE = native_lines()
+NATIVE_IDS = {ln["id"] for ln, _, _ in NATIVE}
+UNKNOWN = [l for l in DATA["lines"]
+           if not READ[l["id"]][1] and l["id"] not in NATIVE_IDS
+           and not l.get("excluded_from_rollup")]
+REFERENCE = [l for l in DATA["lines"] if l.get("qty_per_robot") == 0
+             or l.get("excluded_from_rollup")]
+UNKNOWN = [l for l in UNKNOWN if l not in REFERENCE]
+
+# Two-label suffixes seen on this lane's vendor pages. Not a public-suffix
+# list: a host whose suffix is not listed keeps its last two labels, which is
+# the conservative answer (it can only MERGE two shops, never split one).
+MULTI_SUFFIX = {
+    "co.uk", "org.uk", "ac.uk", "co.nz", "com.au", "net.au", "co.in", "co.jp",
+    "com.cn", "com.br", "com.mx", "co.za", "com.sg", "com.hk", "com.tw",
+}
+
+
+def reg_domain(url):
+    """The registered domain a URL belongs to - the thing a buyer would call
+    'a shop'. This is what counts as a distributor, NOT the vendor name string:
+    'DigiKey', 'DigiKey (cut tape)' and 'DigiKey (cut tape / Digi-Reel)' are
+    three names and one shop, and counting names let one shop priced three ways
+    look like three distributors. Measured defect, 2026-09-03."""
+    host = url.split("//", 1)[-1].split("/", 1)[0].split("?", 1)[0]
+    host = host.split("@")[-1].split(":")[0].lower().rstrip(".")
+    if host.startswith("www."):
+        host = host[4:]
+    parts = [p for p in host.split(".") if p]
+    if len(parts) <= 2:
+        return ".".join(parts)
+    if ".".join(parts[-2:]) in MULTI_SUFFIX:
+        return ".".join(parts[-3:])
+    return ".".join(parts[-2:])
+
+
+def offer_has_price(o):
+    """Does this offer carry a PRICE - a number at a stated quantity?
+
+    A page can be read and still give no price for our part. JLCPCB's own home
+    page prints 'From $2.00 / 5 pcs' with no size condition attached; PCBWay's
+    prints '$5.00 10 pcs 1-2 layer'. Both were read, both are floors for
+    somebody else's board, and neither is a price for a 65.000 x 30.000 mm
+    board. Such an offer is recorded with `tiers: []` and must never count
+    toward the two-distributor bar."""
+    return bool(o.get("tiers"))
+
+
+def read_domains(line):
+    """Every registered domain whose page was READ on this line, priced or not."""
+    return {reg_domain(o["url"]) for o in line["offers"]
+            if o.get("confidence") == "read"}
+
+
+def priced_domains(line):
+    """Registered domains that gave a PRICE. This - not read_domains - is what
+    the >= 2-distributor bar counts.
+
+    MEASURED DEFECT, 2026-09-03: until this change the bar counted
+    read_domains(), which does not require the offer to carry a price, and the
+    companion price test was an any() over the whole line, so one priced shop
+    beside one price-less shop passed. Proved by emptying `tiers` on B10's
+    first read offer: the generator still printed '19 PASS lines, each with
+    >=2 distinct read distributors and a read price', exited 0, and rendered
+    '2 distinct distributor(s) with a price read' for a line where exactly one
+    distributor had a price. Re-broken the same way after this fix and it goes
+    red naming B10."""
+    return {reg_domain(o["url"]) for o in line["offers"]
+            if o.get("confidence") == "read" and offer_has_price(o)
+            and o.get("compatibility_status") != "rejected"}
+
+
+def n_read(line):
+    """DISTINCT distributors with a price read on a page, counted as REGISTERED
+    DOMAINS. Counting offers would let one shop priced four ways look like four
+    distributors; counting vendor NAME STRINGS - what this did until
+    2026-09-03 - let the same shop entered under two spellings do it too; and
+    counting READ pages instead of PRICED ones - what it did until later the
+    same day - let a page that carried no price count as a distributor."""
+    return len(priced_domains(line))
+
+
+def n_read_unpriced(line):
+    """Domains read on this line that gave no price. Rendered beside n_read so
+    the label states what it counted and what it refused to count."""
+    return len(read_domains(line) - priced_domains(line))
+
+
+ALL_DOMAINS = sorted({d for l in DATA["lines"] for d in priced_domains(l)})
+ALL_READ_DOMAINS = sorted({d for l in DATA["lines"] for d in read_domains(l)})
+ALL_UNPRICED_DOMAINS = sorted(set(ALL_READ_DOMAINS) - set(ALL_DOMAINS))
+ALL_VENDOR_NAMES = sorted({o["vendor"] for l in DATA["lines"] for o in l["offers"]
+                           if o.get("confidence") == "read" and offer_has_price(o)
+            and o.get("compatibility_status") != "rejected"})
+
+VERDICTS = {"PASS": 0, "FAIL": 0, "CANNOT DETERMINE": 0}
+for l in DATA["lines"]:
+    VERDICTS[l["verdict"]] = VERDICTS.get(l["verdict"], 0) + 1
+
+def selfcheck():
+    """The verdict in the data must agree with what the data actually holds.
+    A PASS with fewer than two distinct distributors THAT EACH GAVE A PRICE, or
+    a PASS whose line has no price at any of the three quantities, is a defect
+    in the DATA and this refuses to publish it. Broken on purpose twice: a PASS
+    forced onto B13 (no offers), and `tiers` emptied on one of B10's two read
+    offers. Both go red naming the line."""
+    bad = []
+    for l in DATA["lines"]:
+        if l["verdict"] != "PASS":
+            continue
+        if n_read(l) < 2:
+            bad.append(f'{l["id"]}: PASS with {n_read(l)} distinct distributor(s) '
+                       f'that gave a price '
+                       f'({len(read_domains(l))} domain(s) read in total: '
+                       f'{", ".join(sorted(read_domains(l))) or "none"})')
+        # Every line the page publishes lands in exactly one of four buckets:
+        # the USD roll-up, the native-currency table, its own basket table, or
+        # the reference/excluded list. A PASS that falls through into UNKNOWN -
+        # the list of lines with no price at all - is a verdict the page then
+        # contradicts three sections later. (Not the same test as the one
+        # above: that one counts distributors, this one counts what gets
+        # printed. B18a is EUR-only, R2 is a qty-0 reference line and C1 is
+        # excluded as an alternative to B2 - all three carry read prices and
+        # none of them reaches the USD subtotal.)
+        if l in UNKNOWN:
+            bad.append(f'{l["id"]}: PASS, but the page publishes no price for it '
+                       f'anywhere - it lands in the unpriced list')
+    # A price read off a listing / search page is not a durable citation: the
+    # listing reflows and the number is gone. Three of them were found on
+    # 2026-09-03 (B4 Neewer, B7 The Pi Hut, B11 VXB); all three were replaced
+    # with the product page and re-read. This refuses to let a fourth in.
+    for l in DATA["lines"]:
+        for o in l["offers"]:
+            if o.get("confidence") == "read" and o.get("page_kind") == "listing":
+                bad.append(f'{l["id"]}: price read off a listing page - {o["url"]}')
+    if bad:
+        raise SystemExit("REFUSING TO PUBLISH - verdicts disagree with the data:\n  "
+                         + "\n  ".join(bad))
+    return len([l for l in DATA["lines"] if l["verdict"] == "PASS"])
+
+
+def unknown_sentence():
+    """The unpriced lines, named from the data. A hand-typed list beside a
+    computed len(UNKNOWN) drifts: until 2026-09-03 this sentence named the
+    camera ribbon, which is line B8 and IS priced, and omitted the LED, the
+    gamepad and the USB-C cable. There is nothing to keep in step now."""
+    names = [f'{l["id"]} {clip(l["item"], 52)}' for l in UNKNOWN]
+    if not names:
+        return "none"
+    if len(names) == 1:
+        return names[0]
+    return ", ".join(names[:-1]) + " and " + names[-1]
+
+
+UNKNOWN_SENTENCE = unknown_sentence()
+
+CHIP = {"PASS": "pass", "FAIL": "rail", "CANNOT DETERMINE": "cd"}
+GEN = datetime.date.today().isoformat()
+
+
+# -------------------------------------------------------------- SOURCING ----
+def offer_rows(line):
+    rows = []
+    for off in line["offers"]:
+        tiers = off.get("tiers") or []
+        if tiers:
+            ts = ", ".join(f"{q:,}+ {off['currency']} {p:g}" for q, p in sorted(tiers))
+        else:
+            ts = "<span class='cdtxt'>no price read</span>"
+        flags = []
+        if off.get("field_observations"):
+            flags.append("Observation dates by field: " + E(
+                "; ".join(f"{k}: {v}" for k, v in off["field_observations"].items())))
+        if off.get("package"):
+            pack = off["package"]
+            flags.append("Price unit: " + E(pack.get("unit", "package")) + "; contents "
+                         + E(pack["contents"]) + "; evidence read " + E(pack["fetched"]))
+        if off.get("no_tiers"):
+            flags.append("no tier table published &mdash; @1 is a ceiling")
+        if off.get("price_is_range_high"):
+            flags.append("vendor states a RANGE; the HIGH end is recorded")
+        if off.get("excluded_from_rollup"):
+            flags.append("excluded from the roll-up: " + off["excluded_from_rollup"])
+        if off.get("page_kind") == "family-table":
+            flags.append("the URL is the vendor&#39;s family price table, not a per-size "
+                         "product page &mdash; the size and its price are printed on it, "
+                         "but there is no page for this size alone")
+        if off.get("page_kind") == "listing":
+            flags.append("the URL is a listing / search page, NOT a product page")
+        if off.get("rollup_caveat"):
+            flags.append("carried into Table&nbsp;1 with this caveat: " + off["rollup_caveat"])
+        conf = "read" if off.get("confidence") == "read" else "NOT READ"
+        dom = reg_domain(off["url"])
+        rows.append(f"""<tr>
+  <td>{E(off['vendor'])}<br><span class="sub2"><a href="{E(off['url'])}">{E(off.get('sku') or off['url'][:58])}</a></span></td>
+  <td class="n">{ts}</td>
+  <td class="n">{E(off.get('moq') if off.get('moq') is not None else '&mdash;')}</td>
+  <td>{E(off.get('lead_time') or '&mdash;')}</td>
+  <td>{E(off.get('stock') or '&mdash;')}</td>
+  <td><span class="chip {'pass' if conf=='read' else 'cd'}">{conf}</span> {E(off.get('fetched') or '')}
+      <div class="sub2">{"rejected compatibility; not counted as distributor" if off.get("compatibility_status") == "rejected" else "counts as distributor"} <code>{E(dom)}</code></div>
+      {'<div class="sub2">' + E(off['note']) + '</div>' if off.get('note') else ''}
+      {''.join('<div class="flag">' + f + '</div>' for f in flags)}</td>
+</tr>""")
+    if not rows:
+        rows.append('<tr><td colspan="6" class="cdtxt">No offer with a price read on any page.</td></tr>')
+    return "\n".join(rows)
+
+
+def alt_rows(line):
+    if not line.get("alternates"):
+        return ""
+    r = []
+    for a in line["alternates"]:
+        u = f'<a href="{E(a["url"])}">{E(a["vendor"] or "source")}</a>' if a.get("url") else E(a.get("vendor") or "&mdash;")
+        r.append(f"""<tr><td><code>{E(a['mpn'])}</code></td><td>{E(a['why_equivalent'])}</td>
+        <td>{u}<div class="sub2">{E(a.get('price_note') or '')}</div></td></tr>""")
+    return f"""<div class="tablewrap"><table class="alt">
+<thead><tr><th>Alternate</th><th>Why it is (or is not) equivalent</th><th>Where / price</th></tr></thead>
+<tbody>{''.join(r)}</tbody></table></div>"""
+
+
+def basket_block(line):
+    """A line whose sizes are priced individually and cannot share one unit
+    price. Rendered in its own currency, outside every subtotal."""
+    b = line.get("basket")
+    if not b:
+        return ""
+    rows, tot = [], 0.0
+    for r in b["rows"]:
+        tot += r["qty"] * r["unit"]
+        rows.append(f'<tr><td>{E(r["what"])}</td><td class="n">{r["qty"]:g}</td>'
+                    f'<td class="n">{b["currency"]} {r["unit"]:.4f}</td>'
+                    f'<td class="n">{b["currency"]} {r["qty"]*r["unit"]:.4f}</td></tr>')
+    for m in b.get("missing", []):
+        rows.append(f'<tr><td>{E(m["what"])}</td><td class="n">{m["qty"]:g}</td>'
+                    f'<td class="cdtxt">CANNOT DETERMINE</td>'
+                    f'<td class="cdtxt">{E(m["why"])}</td></tr>')
+    return f"""<p class="lab">Priced size by size &mdash; {E(b['currency'])}, outside every subtotal</p>
+<div class="tablewrap"><table class="data">
+<thead><tr><th>Size</th><th>Qty/robot</th><th>Unit</th><th>Per robot</th></tr></thead>
+<tbody>{''.join(rows)}
+<tr class="totalrow"><td>FLOOR for the priced sizes only</td><td class="n"></td><td class="n"></td>
+<td class="n">{E(b['currency'])} {tot:.4f}</td></tr></tbody></table></div>
+<p class="note">{E(b['note'])}</p>"""
+
+
+def unpriced_txt(line):
+    """The other half of the count: pages read on this line that gave no price.
+    Stated so the label is a statement of what was counted, not a claim the
+    reader has to take on trust."""
+    k = n_read_unpriced(line)
+    if not k:
+        return ""
+    doms = ", ".join(sorted(read_domains(line) - priced_domains(line)))
+    return (f' &middot; {k} further domain(s) read without an eligible price for this part'
+            f' ({doms})')
+
+
+def line_block(line):
+    q = line.get("qty_per_robot")
+    qtxt = ("<span class='cdtxt'>CANNOT DETERMINE</span>" if q is None
+            else ("0 <span class='sub2'>(reference line &mdash; arrives inside another purchase)</span>"
+                  if q == 0 else f"{q:g} {E(line.get('qty_unit') or '')}"))
+    if line.get("quantity_rule"):
+        qtxt = ("batch-dependent; legacy standalone ceiling " + qtxt
+                if line["quantity_rule"]["kind"] == "net_of_selected_offer_bundle"
+                else "whole packages; requirements per robot " + E(line["quantity_rule"]["required_per_robot"]))
+        qtxt += "<br>" + "<br>".join(E(READ[line['id']][n]['quantity_basis']) for n in ROBOT_COUNTS)
+    unk = "".join(f"<li>{E(u)}</li>" for u in line.get("unknowns", []))
+    blk = "".join(f'<li><a href="{E(b["url"])}">{E(b["url"][:88])}</a> &mdash; {E(b["reason"])}</li>'
+                  for b in line.get("blocked", []))
+    ce = f' &middot; <code>{E(line["ce_part"])}</code>' if line.get("ce_part") else ""
+    vw = f'<p class="verdict {"warn" if line["verdict"]!="PASS" else ""}"><b>{E(line["verdict"])}</b> &mdash; {E(line["verdict_why"])}</p>' if line.get("verdict_why") else ""
+    mn = f'<p class="note">{E(line["mpn_note"])}</p>' if line.get("mpn_note") else ""
+    return f"""
+<h3 id="line-{E(line['id'])}"><span class="lid">{E(line['id'])}</span> {E(line['item'])}
+  <span class="chip {CHIP.get(line['verdict'],'cd')}">{E(line['verdict'])}</span></h3>
+<p class="meta">Qty per robot {qtxt} &middot; basis: {E(line['qty_basis'])}{ce}</p>
+<p class="meta">MPN <code>{E(line['mpn'])}</code> &middot; <i>{E(line['mpn_status'])}</i>
+  &middot; {n_read(line)} distinct distributor(s) that gave a price{unpriced_txt(line)}</p>
+{mn}{vw}
+<div class="tablewrap"><table class="data offers">
+<thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
+<th>Lead time (as printed)</th><th>Stock, on this offer&#39;s own fetch date</th><th>Read?</th></tr></thead>
+<tbody>{offer_rows(line)}</tbody></table></div>
+{basket_block(line)}
+{alt_rows(line)}
+{'<p class="lab">Open on this line</p><ul class="tight">' + unk + '</ul>' if unk else ''}
+{'<p class="lab">Pages that refused a price</p><ul class="tight small">' + blk + '</ul>' if blk else ''}
+"""
+
+
+DEAD_STOCK = ("sold out", "out of stock", "0 in stock", "unavailable", "backorder")
+
+
+def rollup_rows(lines):
+    out = []
+    for l in sorted(lines, key=lambda x: -READ[x["id"]][1]["per_robot"]):
+        c = {n: READ[l["id"]][n] for n in ROBOT_COUNTS}
+        marks = []
+        if c[1]["ceiling"]:
+            marks.append("ceiling &mdash; vendor publishes no tier table")
+        if c[1]["moq_exceeds"]:
+            marks.append("MOQ &gt; need")
+        if c[1]["range_high"]:
+            marks.append("range high end")
+        if c[1].get("page_kind") == "family-table":
+            marks.append("price read off the vendor&#39;s family price table, "
+                         "not a per-size product page")
+        st = (c[1].get("stock") or "")
+        if any(k in st.lower() for k in DEAD_STOCK):
+            marks.append(f"stock on the fetch date: {E(st)}")
+        if c[1].get("caveat"):
+            marks.append(E(c[1]["caveat"]))
+        if l.get("quantity_rule", {}).get("kind") == "net_of_selected_offer_bundle":
+            marks.extend(f"@{n}: {c[n]['required_pieces']:g} - {c[n]['included_pieces']:g} = "
+                         f"{c[n]['shortfall_pieces']:g} leads; {c[n]['order_quantity']:g} packs"
+                         for n in ROBOT_COUNTS)
+            marks.append(f'<a href="#line-{E(l["id"])}">Verified bundle source/date and calculation below</a>')
+        if l.get("quantity_rule", {}).get("kind") == "whole_offer_package":
+            marks.extend(E(c[n]["quantity_basis"]) for n in ROBOT_COUNTS)
+        quantity_text = ("batch-dependent" if l.get("quantity_rule") else f"{l['qty_per_robot']:g}")
+        chip = f'<span class="chip {CHIP.get(l["verdict"], "cd")}">{E(l["verdict"])}</span>'
+        out.append(f"""<tr><td><a href="#line-{E(l['id'])}">{E(l['id'])}</a> {E(clip(l['item'], 62))}</td>
+<td>{chip}</td>
+<td class="{'sub2' if l.get('quantity_rule') else 'n'}">{quantity_text}</td><td>{E(c[1]['vendor'])}</td>
+<td class="n">${c[1]['per_robot']:,.4f}</td><td class="n">${c[100]['per_robot']:,.4f}</td>
+<td class="n">${c[1000]['per_robot']:,.4f}</td>
+<td class="sub2">{'; '.join(marks) if marks else '&mdash;'}</td></tr>""")
+    return "\n".join(out)
+
+
+def native_rows():
+    out = []
+    for ln, off, row in NATIVE:
+        out.append(f"""<tr><td><a href="#line-{E(ln['id'])}">{E(ln['id'])}</a> {E(clip(ln['item'], 62))}</td>
+<td class="n">{ln['qty_per_robot']:g}</td><td>{E(off['vendor'])}</td><td class="n">{E(off['currency'])}</td>
+<td class="n">{row[1]:,.4f}</td><td class="n">{row[100]:,.4f}</td><td class="n">{row[1000]:,.4f}</td></tr>""")
+    return "\n".join(out)
+
+
+def unknown_rows():
+    out = []
+    for l in UNKNOWN:
+        why = l.get("verdict_why") or (l["unknowns"][0] if l.get("unknowns") else "")
+        out.append(f"""<tr><td><a href="#line-{E(l['id'])}">{E(l['id'])}</a> {E(clip(l['item'], 62))}</td>
+<td class="n">{'&mdash;' if l.get('qty_per_robot') is None else f"{l['qty_per_robot']:g}"}</td>
+<td>{E(why)}</td></tr>""")
+    return "\n".join(out)
+
+
+HEAD = """<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="tools/doc.css">
+<style>
+  .lid{font-family:var(--mono);font-size:.72em;color:var(--accent);border:1px solid var(--hair);
+       padding:1px 6px;margin-right:8px;vertical-align:2px}
+  h3{margin:30px 0 4px}
+  .meta{font-family:var(--sans);font-size:12.5px;color:var(--ink-2);margin:2px 0}
+  .sub2{font-family:var(--sans);font-size:11.5px;color:var(--ink-2);line-height:1.4}
+  .flag{font-family:var(--sans);font-size:11.5px;color:var(--partial);margin-top:3px}
+  .cdtxt{color:var(--partial);font-family:var(--sans);font-size:12px;font-weight:600}
+  .note{font-size:13.5px;color:var(--ink-2);max-width:46em;margin:6px 0}
+  .verdict{border-left:3px solid var(--ready);padding:2px 0 2px 16px;margin:10px 0;font-size:14.5px;max-width:48em}
+  .verdict b{color:var(--ready)}
+  .verdict.warn{border-left-color:var(--partial)} .verdict.warn b{color:var(--partial)}
+  .lab{font-family:var(--sans);font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+       color:var(--ink-2);margin:14px 0 2px}
+  ul.tight{margin:2px 0 6px;padding-left:20px} ul.tight li{font-size:13.5px;margin:3px 0}
+  ul.small li{font-size:12px;font-family:var(--sans);color:var(--ink-2)}
+  table.alt{table-layout:fixed}
+  table.alt td,table.alt th{overflow-wrap:anywhere;white-space:normal}
+  table.alt th:nth-child(1),table.alt td:nth-child(1){width:29%}
+  table.alt th:nth-child(2),table.alt td:nth-child(2){width:46%}
+  table.alt th:nth-child(3),table.alt td:nth-child(3){width:25%}
+  table.offers{table-layout:fixed}
+  table.offers th:nth-child(1),table.offers td:nth-child(1){width:16%}
+  table.offers th:nth-child(2),table.offers td:nth-child(2){width:21%;font-family:var(--mono);font-size:11px;white-space:normal;word-break:break-word}
+  table.offers th:nth-child(3),table.offers td:nth-child(3){width:6%}
+  table.offers th:nth-child(4),table.offers td:nth-child(4){width:17%;font-size:12.5px}
+  table.offers th:nth-child(5),table.offers td:nth-child(5){width:14%;font-size:12.5px}
+  table.offers th:nth-child(6),table.offers td:nth-child(6){width:26%}
+  table.offers td{word-break:break-word}
+  table.offers th{white-space:normal}
+  table.rollup{table-layout:fixed}
+  table.rollup td.n{font-size:11.5px}
+  table.rollup th{white-space:normal;vertical-align:bottom}
+  table.rollup td{overflow-wrap:break-word}
+  table.rollup td .chip{font-size:9.5px;letter-spacing:.02em;white-space:normal;display:inline-block}
+  table.rollup th:nth-child(1),table.rollup td:nth-child(1){width:16%}
+  table.rollup th:nth-child(2),table.rollup td:nth-child(2){width:9%}
+  table.rollup th:nth-child(3),table.rollup td:nth-child(3){width:10%}
+  table.rollup th:nth-child(4),table.rollup td:nth-child(4){width:14%;font-size:12px}
+  table.rollup th:nth-child(5),table.rollup td:nth-child(5){width:11%}
+  table.rollup th:nth-child(6),table.rollup td:nth-child(6){width:11%}
+  table.rollup th:nth-child(7),table.rollup td:nth-child(7){width:11%}
+  table.rollup th:nth-child(8),table.rollup td:nth-child(8){width:18%;overflow-wrap:anywhere}
+  tr.grouprow td{background:var(--head);font-family:var(--sans);font-size:12px;
+       color:var(--ink-2);padding-top:9px;padding-bottom:9px}
+  .totalrow td{border-top:1.5px solid var(--rule);font-weight:700}
+  .warnbox{border:1.5px solid var(--no);padding:14px 18px;margin:18px 0}
+  .warnbox h3{margin:0 0 6px;font-family:var(--sans);font-size:13px;letter-spacing:.06em;
+       text-transform:uppercase;color:var(--no)}
+  .rfq{border:1px solid var(--rule);padding:22px 26px;margin:26px 0;background:var(--paper)}
+  .rfq h3{margin:0 0 2px;font-size:18px}
+  .ph{background:var(--head);border:1px dashed var(--partial);padding:1px 6px;
+      font-family:var(--mono);font-size:12px;color:var(--partial)}
+  .rfq pre{white-space:pre-wrap;font-family:var(--serif);font-size:14px;line-height:1.55;margin:10px 0}
+</style>"""
+
+
+SOURCING = f"""<!doctype html>
+<html lang="en"><head>{HEAD}
+<title>Microduck Sourcing</title></head>
+<body><div class="wrap">
+<p class="backlink"><a href="RELEASE.html">&larr; Release dossier</a> &middot; <a href="RFQ.html">Requests for quotation &rarr;</a></p>
+
+<header class="hero">
+  <p class="eyebrow">Microduck reverse-engineering &middot; procurement</p>
+  <h1>Sourcing: every bought line, with the vendor page it was read from</h1>
+  <p class="sub">One record per purchased line of the bill of materials: at least two real
+  distributors wherever two exist, the unit price at the vendor's own tiers, MOQ, lead time,
+  and an alternate with the reason it is or is not equivalent. Nothing here is estimated.
+  A price nobody read is <b>CANNOT DETERMINE</b>, printed with the URL that refused it.</p>
+  <div class="rev">
+    <span>MD-SRC-001 &middot; Rev {DATA['revision']}</span><span>generated {GEN}</span>
+    <span>pages fetched {', '.join(DATA['fetch_dates'])}</span>
+    <span>source: <code>spec/sourcing.json</code> &rarr; <code>tools/gen_sourcing.py</code></span>
+  </div>
+</header>
+
+<div class="statbar">
+  <div class="stat"><b>{len(DATA['lines'])}</b><span>bought lines</span></div>
+  <div class="stat"><b>{VERDICTS.get('PASS',0)}</b><span>PASS &mdash; two or more shops read</span></div>
+  <div class="stat"><b>{VERDICTS.get('CANNOT DETERMINE',0)}</b><span>CANNOT DETERMINE</span></div>
+  <div class="stat"><b>{VERDICTS.get('FAIL',0)}</b><span>FAIL &mdash; unbuyable as specified</span></div>
+  <div class="stat"><b>${SUB_OK[1]:,.4f}</b><span>USD / robot @1, lines graded PASS</span></div>
+  <div class="stat"><b>${SUB_QUAL[1]:,.4f}</b><span>readable, but from lines graded FAIL / CD</span></div>
+  <div class="stat"><b>{len(UNKNOWN)}</b><span>lines with no price at all</span></div>
+  <div class="stat"><b>{len(ALL_DOMAINS)}</b><span>distinct distributors that gave a price (registered domains)</span></div>
+  <div class="stat"><b>{sum(len(l.get("blocked", [])) for l in DATA["lines"])}</b><span>pages that refused a price</span></div>
+</div>
+
+<nav class="toc">
+  <a href="#rules">1 How to read this</a><a href="#rollup">2 Cost roll-up</a>
+  <a href="#unknown">3 What has no price</a><a href="#lines">4 Every line</a>
+  <a href="#method">5 Method &amp; retry list</a>
+</nav>
+
+<section id="rules"><h2><span class="n">1</span> How to read this</h2>
+<p class="lede">Five rules decide every number on this page. They are stored beside the data in
+<code>spec/sourcing.json</code>, not in this prose, so the generator and the reader cannot drift apart.</p>
+<div class="grid2">
+  <div class="card"><h3>A price is a reading</h3><p>{E(DATA['rules']['price_basis'])}</p></div>
+  <div class="card"><h3>Quantity model</h3><p>{E(DATA['rules']['quantity_model'])}</p></div>
+  <div class="card"><h3>No currency is converted</h3><p>{E(DATA['rules']['currency'])}</p></div>
+  <div class="card"><h3>An unknown is never zero</h3><p>{E(DATA['rules']['readable_vs_unknown'])}</p></div>
+  <div class="card"><h3>The three verdicts</h3><p>{E(DATA['rules']['verdict'])}</p></div>
+  <div class="card"><h3>The page refuses to publish a verdict it cannot support</h3>
+  <p>Before either page is written, <code>selfcheck()</code> re-derives every PASS from the data: two or
+  more <i>distinct</i> distributors with a price read, and a price at every quantity. It caught four
+  wrong verdicts on the first run (B12, B19a, C1, C2 &mdash; three of them one shop counted twice) and
+  refused to write. Broken on purpose afterwards by forcing PASS onto B13, which has no offers at all:
+  it went red naming the line and wrote nothing.</p>
+  <p><b>It counted the wrong thing until 2026-09-03.</b> &ldquo;Distinct&rdquo; meant distinct vendor
+  <i>name strings</i>, so the defect the check exists to catch could walk straight past it: one shop
+  entered under two names is two names and one shop. Demonstrated by rewriting B11&#39;s second offer to
+  a second listing on <code>bearingsdirect.com</code> &mdash; the old generator published B11 as PASS with
+  &ldquo;2 distinct distributor(s)&rdquo; and exited 0. It now counts <b>registered domains</b>, and the
+  same mutation makes it exit 1 with <code>B11: PASS with 1 distinct read distributor(s)</code>, having
+  written nothing. A second guard was added at the same time: a price read off a listing or search page
+  rather than a product page refuses to publish, because a listing reflows and the number is gone.
+  {VERDICTS.get('PASS',0)} PASS lines survive both.</p></div>
+  <div class="card"><h3>Nothing was sent</h3><p>No supplier was contacted, no order was placed and no
+  money was spent producing this document. <a href="RFQ.html">RFQ.html</a> is written and ready; sending it
+  is a human decision.</p></div>
+</div></section>
+
+<section id="rollup"><h2><span class="n">2</span> Cost roll-up</h2>
+<p class="lede">Per robot, at 1, 100 and 1&nbsp;000 robots. Each line takes the cheapest distributor
+whose price was <i>read</i>, at the tier the order quantity reaches. <b>ceiling</b> marks a vendor
+with no tier table, whose &#64;1 price is carried forward unchanged; <b>MOQ&nbsp;&gt;&nbsp;need</b> marks
+a vendor whose minimum exceeds what one robot needs.</p>
+
+<p class="lab">Table 1. USD lines with a read price &mdash; cost per robot</p>
+<div class="tablewrap"><table class="data rollup">
+<thead><tr><th>Line</th><th>Verdict</th><th>Qty /<br>robot</th><th>Cheapest<br>read vendor</th>
+<th>@ 1<br>robot</th><th>@ 100<br>robots</th><th>@ 1 000<br>robots</th><th>Flags</th></tr></thead>
+<tbody>
+{rollup_rows(PRICED_OK)}
+<tr class="totalrow"><td>SUBTOTAL &mdash; {len(PRICED_OK)} lines graded PASS</td><td></td><td class="n"></td><td></td>
+<td class="n">${SUB_OK[1]:,.4f}</td><td class="n">${SUB_OK[100]:,.4f}</td>
+<td class="n">${SUB_OK[1000]:,.4f}</td><td></td></tr>
+<tr class="grouprow"><td colspan="8">Priced, but this document does not grade the line buyable
+&mdash; the flag on each row says why. These {len(PRICED_QUAL)} lines are shown because their prices were read,
+and are kept OUT of the subtotal above.</td></tr>
+{rollup_rows(PRICED_QUAL)}
+<tr class="totalrow"><td>SUBTOTAL &mdash; {len(PRICED_QUAL)} lines graded FAIL or CANNOT DETERMINE</td><td></td><td class="n"></td><td></td>
+<td class="n">${SUB_QUAL[1]:,.4f}</td><td class="n">${SUB_QUAL[100]:,.4f}</td>
+<td class="n">${SUB_QUAL[1000]:,.4f}</td><td></td></tr>
+<tr class="totalrow"><td>EVERY READABLE USD LINE &mdash; {len(PRICED)} lines</td><td></td><td class="n"></td><td></td>
+<td class="n">${SUBTOTAL[1]:,.4f}</td><td class="n">${SUBTOTAL[100]:,.4f}</td>
+<td class="n">${SUBTOTAL[1000]:,.4f}</td><td></td></tr>
+</tbody></table></div>
+
+<p class="note"><b>Why the table has three totals and not one.</b> A price being readable does not make the
+line buyable. {len(PRICED_QUAL)} of the {len(PRICED)} priced lines are graded FAIL or CANNOT DETERMINE by
+this same document &mdash; <b>${SUB_QUAL[1]:,.4f} of the ${SUBTOTAL[1]:,.4f} readable at one robot,
+{QUAL_PCT:,.2f}&nbsp;% of it</b> &mdash; and until 2026-09-03 that money sat inside a single headline
+subtotal with nothing in the row to say so. It is now split out, and the flag on every such row carries the
+reason from the line&#39;s own record: the wrong SKU, sold out on the fetch date, a part that does not fit
+the cavity, or an unfixed specification.</p>
+
+<p class="note"><b>Two things this table does on purpose.</b> A line whose need is smaller than the
+vendor's minimum &mdash; 0.2183&nbsp;kg of a 1&nbsp;kg filament spool, 60 of a 100-piece insert pack, 11
+of a 1&nbsp;000-piece bearing lot &mdash; is <i>prorated</i>: the per-robot figure is the unit price times the
+per-robot quantity, so the remainder of the pack is charged to the next robot rather than to this one.
+At a build of exactly one robot you pay the whole pack, and the <b>MOQ&nbsp;&gt;&nbsp;need</b> flag is
+where that is said. And the cheapest read vendor is chosen per line and per quantity independently, so a
+line can change supplier between quantity columns. Explicit whole-package rules take precedence over
+proration: B4 buys complete kits to provide one dual charger per robot; B9 counts carrier packages.
+Rejected interface or geometry offers cannot be selected. Nothing is blended.</p>
+
+<p class="lab">Table 2. Lines readable only in another currency &mdash; NOT converted, NOT added</p>
+<div class="tablewrap"><table class="data">
+<thead><tr><th>Line</th><th>Qty/robot</th><th>Vendor</th><th>Cur</th>
+<th>@ 1</th><th>@ 100</th><th>@ 1 000</th></tr></thead>
+<tbody>{native_rows() or '<tr><td colspan="7">none</td></tr>'}</tbody></table></div>
+
+<p class="lab">Table 3. The second subtotal &mdash; what the readable subtotal does NOT contain</p>
+<div class="tablewrap"><table class="data">
+<thead><tr><th>Line</th><th>Qty/robot</th><th>Why it carries no price</th></tr></thead>
+<tbody>{unknown_rows()}
+<tr class="totalrow"><td>CANNOT DETERMINE SUBTOTAL &mdash; {len(UNKNOWN)} lines</td><td class="n"></td>
+<td>Not a number. These lines are unpriced, and summing them as zero would state that they are free.</td></tr>
+</tbody></table></div>
+
+<p class="verdict warn"><b>Read this before quoting a unit cost.</b>
+The subtotal of the lines graded PASS is <b>${SUB_OK[1]:,.4f}</b> at one robot and <b>${SUB_OK[1000]:,.4f}</b> at a
+thousand &mdash; it moves by ${SUB_OK[1]-SUB_OK[1000]:,.4f} across a factor of a thousand in volume,
+because the servos are the majority of it and ROBOTIS publishes no tier at any quantity. A further
+${SUB_QUAL[1]:,.4f} at one robot is readable but comes from {len(PRICED_QUAL)} line(s) this document grades FAIL
+or CANNOT DETERMINE, and is kept separate. The subtotal excludes {len(UNKNOWN)} unpriced lines
+&mdash; {UNKNOWN_SENTENCE} &mdash; and every non-USD line in Table&nbsp;2. It is a floor, not a cost.</p>
+</section>
+
+<section id="unknown"><h2><span class="n">3</span> What has no price, and what would settle it</h2>
+<p class="lede">Each of these is a work item with a named next step, not a shrug.</p>
+<ul class="tight">
+{''.join('<li><b>' + E(l['id']) + ' ' + E(l['item']) + '</b> &mdash; ' + E((l.get('verdict_why') or '')) + ' ' + ' '.join(E(u) for u in l.get('unknowns', [])) + '</li>' for l in UNKNOWN)}
+</ul>
+</section>
+
+<section id="lines"><h2><span class="n">4</span> Every line, in full</h2>
+<p class="lede">Distributors, tier tables as the vendor prints them, MOQ, lead time, stock on the fetch
+date, alternates with the equivalence argument, the open questions, and every page that refused.</p>
+{''.join(line_block(l) for l in DATA['lines'])}
+</section>
+
+<section id="method"><h2><span class="n">5</span> Method, and the pages that must be retried</h2>
+<p>Every figure above was read from a vendor page fetched on {', '.join(DATA['fetch_dates'])}, or from
+a page a prior lane fetched the same day and cited in <code>docs/production/components.md</code>. Where a
+page answered 403, 402, 500, a closed socket or a body with no price, that URL is printed on its own
+line so the next attempt starts where this one stopped &mdash; a browser session reads most of them.</p>
+<p class="lab">Every blocked URL on this page, collected</p>
+<ul class="tight small">
+{''.join('<li><b>' + E(l['id']) + '</b> <a href="' + E(b['url']) + '">' + E(b['url'][:96]) + '</a> &mdash; ' + E(b['reason']) + '</li>' for l in DATA['lines'] for b in l.get('blocked', []))}
+</ul>
+<p class="lab">What counts as a distributor</p>
+<p class="note">{len(ALL_DOMAINS)} distinct distributors <b>gave a price</b>, counted as <b>registered
+domains</b>. They are entered in the data under {len(ALL_VENDOR_NAMES)} vendor name strings, because the
+same shop is named differently where the packaging differs &mdash; DigiKey appears as <code>DigiKey</code>,
+<code>DigiKey (cut tape)</code> and <code>DigiKey (cut tape / Digi-Reel)</code>, and Neewer, ROBOTIS US,
+Pollen Robotics and UCTRONICS under two names each. Until 2026-09-03 this page counted the 41 names and
+called them 41 distributors. The priced domains, in full:</p>
+<p class="note"><code>{', '.join(E(d) for d in ALL_DOMAINS)}</code></p>
+<p class="note">A further {len(ALL_UNPRICED_DOMAINS)} domain(s) were read and gave <b>no price for our
+part</b>, and are counted nowhere: {', '.join('<code>' + E(d) + '</code>' for d in ALL_UNPRICED_DOMAINS) or '&mdash;'}.
+The two-distributor bar counts priced domains only. It did not until 2026-09-03: the bar counted every
+domain read, and the price test beside it was an <code>any()</code> over the whole line, so one priced shop
+beside one price-less shop passed. The hole was measured by emptying <code>tiers</code> on one of B10's
+two read offers and watching the generator publish anyway; the guard is now
+<code>priced_domains()</code> and the same mutation makes it exit red naming B10.</p>
+<p class="note">Regenerate with <code>python3 tools/gen_sourcing.py</code>. The data is
+<code>spec/sourcing.json</code>; this page, <a href="RFQ.html">RFQ.html</a> and
+<a href="out/release/bom.csv"><code>out/release/bom.csv</code></a> are all outputs and are never edited by
+hand. <code>bom.csv</code> became an output on 2026-09-03: it had been hand-written by an earlier
+workflow and had drifted on four lines &mdash; it still read CANNOT DETERMINE for the NFC reader (B14) and
+the camera ribbon (B8), both of which are PASS here, and priced the ToF and the camera at vendors this
+roll-up had since beaten. Two bills of materials that disagree is one too many.</p>
+</section>
+
+<footer class="foot">
+  <span>Every price traces to a vendor URL and a fetch date &middot; {GEN}</span>
+</footer>
+</div></body></html>"""
+
+
+# ------------------------------------------------------------------- RFQ ----
+def rfq_line_table(supplier):
+    rows = []
+    for lid in supplier["lines"]:
+        l = next(x for x in DATA["lines"] if x["id"] == lid)
+        q = l.get("qty_per_robot")
+        per = "CANNOT DETERMINE" if q is None else f"{q:g} {l.get('qty_unit') or ''}"
+        tiers = "&mdash;" if q in (None, 0) else " / ".join(qty_txt(q * n) for n in ROBOT_COUNTS)
+        if l.get("quantity_rule", {}).get("kind") == "whole_offer_package":
+            per = l["quantity_rule"]["policy"]
+            tiers = " / ".join(qty_txt(READ[lid][n]["order_quantity"]) for n in ROBOT_COUNTS)
+            tiers += " whole packages of selected offer; supplier must confirm contents"
+        elif l.get("quantity_rule"):
+            per = "batch-dependent packs; selected B1 bundle only"
+            tiers = " / ".join(qty_txt(READ[lid][n]["order_quantity"]) for n in ROBOT_COUNTS)
+            tiers += " packs; re-evaluate if B1 offer/kit contents change"
+        rows.append(f"""<tr><td><code>{E(l['id'])}</code></td><td>{E(l['item'])}</td>
+<td><code>{E(l['mpn'])}</code></td><td class="{'sub2' if l.get('quantity_rule') else 'n'}">{E(per)}</td><td class="{'sub2' if l.get('quantity_rule') else 'n'}">{tiers}</td></tr>""")
+    return "\n".join(rows)
+
+
+def rfq_block(s):
+    l_specs = "".join(
+        f'<p class="lab">{E(lid)} &mdash; specification</p><p class="note">'
+        + E(fill(next(x for x in DATA["lines"] if x["id"] == lid)["rfq_spec"])) + "</p>"
+        for lid in s["lines"])
+    also = "".join(f"<li>{E(fill(a))}</li>" for a in s.get("also_ask", []))
+    contacts = ", ".join(E(c) for c in (s.get("contacts") or [])) or "&mdash;"
+    return f"""
+<div class="rfq" id="rfq-{E(s['key'])}">
+<h3>Request for quotation &mdash; {E(s['name'])}</h3>
+<p class="meta">Covers lines {', '.join(E(x) for x in s['lines'])} &middot; known contact points: {contacts}
+{'<br>' + E(s['address']) if s.get('address') else ''}</p>
+
+<pre>To:      <span class="ph">[supplier contact name]</span>, {E(s['name'])}
+From:    <span class="ph">[your name]</span>, <span class="ph">[your company]</span>
+         <span class="ph">[email]</span> &middot; <span class="ph">[phone]</span> &middot; <span class="ph">[shipping address]</span>
+Date:    <span class="ph">[date of sending]</span>
+Subject: Request for quotation &mdash; Microduck bipedal robot, lines {', '.join(E(x) for x in s['lines'])}
+
+Dear <span class="ph">[contact]</span>,
+
+We are pricing a production run of a small bipedal robot and would like a written
+quotation for the parts listed below. Quantities are given per robot and at build
+volumes of 1, 100 and 1 000 robots. Please quote each quantity separately, in your
+own currency, and state for every line: unit price, minimum order quantity, lead
+time from receipt of order, packaging, and the incoterm your price assumes.
+
+Where a part number below is marked as unresolved, we are asking you to tell us
+which part you would supply, not to guess what we meant.
+</pre>
+
+<p class="lab">Lines and quantities</p>
+<div class="tablewrap"><table class="data">
+<thead><tr><th>Line</th><th>Item</th><th>Part number as we have it</th>
+<th>Per robot</th><th>Order qty at 1 / 100 / 1 000 robots</th></tr></thead>
+<tbody>{rfq_line_table(s)}</tbody></table></div>
+
+{l_specs}
+
+<p class="lab">The question that matters most on this quotation</p>
+<p class="note">{E(fill(s['ask']))}</p>
+
+{'<p class="lab">Also please answer</p><ul class="tight">' + also + '</ul>' if also else ''}
+
+<pre>Target lead time: <span class="ph">[state your need, e.g. 6 weeks for the pilot build]</span>
+Target first delivery date: <span class="ph">[date]</span>
+Quotation validity requested: 90 days.
+
+Please also confirm whether you are the authorised channel for these parts, and
+state date codes or batch provenance where the line is a semiconductor.
+
+Kind regards,
+<span class="ph">[your name]</span>
+<span class="ph">[your title, company]</span>
+</pre>
+</div>"""
+
+
+RFQ = f"""<!doctype html>
+<html lang="en"><head>{HEAD}
+<title>Microduck RFQ Pack</title></head>
+<body><div class="wrap">
+<p class="backlink"><a href="RELEASE.html">&larr; Release dossier</a> &middot; <a href="SOURCING.html">&larr; Sourcing evidence</a></p>
+
+<header class="hero">
+  <p class="eyebrow">Microduck reverse-engineering &middot; procurement</p>
+  <h1>Requests for quotation, ready to send</h1>
+  <p class="sub">One request per supplier, each covering the lines that supplier can actually quote,
+  with the specification, the quantity tiers, and the specific question that closes an open
+  <b>CANNOT DETERMINE</b> in <a href="SOURCING.html">SOURCING.html</a>. Your contact details are the
+  only thing missing: everything marked <span class="ph">[like this]</span> is a placeholder for a
+  person to fill in.</p>
+  <div class="rev">
+    <span>MD-RFQ-001 &middot; Rev {DATA['revision']}</span><span>generated {GEN}</span>
+    <span>{len(DATA['rfq_suppliers'])} suppliers</span>
+    <span>source: <code>spec/sourcing.json</code></span>
+  </div>
+</header>
+
+<div class="warnbox">
+  <h3>Nothing here has been sent</h3>
+  <p>No supplier was contacted, no enquiry was submitted and no money was spent producing this
+  document. These are drafts on a page. Sending them &mdash; and disclosing what the robot is, which
+  several of these questions do &mdash; is a decision for a person, not for the tool that wrote them.
+  Fill in the placeholders, read each one, then send.</p>
+</div>
+
+<nav class="toc">
+{''.join(f'<a href="#rfq-{E(s["key"])}">{E(s["name"].split("(")[0].strip()[:26])}</a>' for s in DATA['rfq_suppliers'])}
+</nav>
+
+<section id="idx"><h2><span class="n">1</span> Which request answers which open question</h2>
+<p class="lede">Each request exists because a specific number could not be read from a public page.
+The right-hand column is what the reply is expected to close.</p>
+<div class="tablewrap"><table class="data">
+<thead><tr><th>Supplier</th><th>Lines</th><th>What the reply settles</th></tr></thead>
+<tbody>
+{''.join(f'<tr><td><a href="#rfq-{E(s["key"])}">{E(s["name"])}</a></td><td><code>{", ".join(E(x) for x in s["lines"])}</code></td><td>{E(clip(fill(s["ask"]), 260))}</td></tr>' for s in DATA['rfq_suppliers'])}
+</tbody></table></div>
+</section>
+
+<section id="reqs"><h2><span class="n">2</span> The requests</h2>
+{''.join(rfq_block(s) for s in DATA['rfq_suppliers'])}
+</section>
+
+<footer class="foot">
+  <span>Drafts only &mdash; nothing sent, nothing ordered &middot; {GEN}</span>
+</footer>
+</div></body></html>"""
+
+
+def bom_csv():
+    """out/release/bom.csv, regenerated from the same data as the pages.
+
+    It was hand-written by an earlier workflow and had drifted: on 2026-09-03 it
+    still read CANNOT DETERMINE for the NFC reader (B14, PASS at $5.3997) and
+    for the camera ribbon (B8, PASS at $3.9500), and priced the ToF at Pololu's
+    $24.95 and the camera at $23.99 where the roll-up had found $22.70 and
+    $15.90. Two BOMs that disagree on four lines is one BOM too many."""
+    import csv, io
+    buf = io.StringIO()
+    w = csv.writer(buf, lineterminator="\n")
+    w.writerow(["line_id", "section", "item", "qty_per_robot", "qty_unit", "verdict",
+                "unit_price", "currency", "per_robot_cost", "price_basis",
+                "vendor", "source_url", "fetched", "note"])
+    native = {ln["id"]: (off, row) for ln, off, row in NATIVE}
+    for l in DATA["lines"]:
+        c = READ[l["id"]][1]
+        q = l.get("qty_per_robot")
+        qtxt = "CANNOT DETERMINE" if q is None else f"{q:g}"
+        if l.get("quantity_rule") and c:
+            qtxt = qty_txt(c["order_quantity"])
+        if c:
+            o = next((x for x in l["offers"] if x["url"] == c.get("url")), None)
+            unit = "see kit detail" if c["unit"] is None else f'{c["unit"]:.5f}'
+            basis = (f'cheapest READ USD offer at the tier a 1-robot order reaches'
+                     + (f' (tier {c["tier_qty"]}+)' if c.get("tier_qty") else ''))
+            if c.get("ceiling"):
+                basis += "; vendor publishes no tier table, so @1 is a CEILING"
+            if c.get("detail"):
+                basis += "; " + c["detail"]
+            if c.get("quantity_basis"):
+                basis += "; " + c["quantity_basis"]
+            if c.get("caveat"):
+                basis += "; " + c["caveat"]
+            if l["verdict"] != "PASS":
+                basis += (f'; THIS LINE IS GRADED {l["verdict"]} - the price is readable, '
+                          f'the line is not graded buyable')
+            row = [unit, "USD", f'{c["per_robot"]:.4f}', basis, c["vendor"],
+                   (o or {}).get("url", ""), (o or {}).get("fetched", "")]
+        elif l["id"] in native:
+            o, r = native[l["id"]]
+            row = [f'{r[1] / q:.5f}', o["currency"], f'{r[1]:.4f}',
+                   "no USD price was read; the vendor's own currency at the tier a "
+                   "1-robot order reaches, NOT converted (no FX rate was fetched)",
+                   o["vendor"], o["url"], o.get("fetched", "")]
+        elif l in REFERENCE:
+            why = (l.get("excluded_from_rollup") or
+                   "reference line: qty per robot is 0 - the part arrives fitted "
+                   "inside another purchase and is never ordered separately")
+            row = ["NOT ORDERED", "", "NOT ORDERED",
+                   "deliberately outside every subtotal: " + why, "", "", ""]
+        else:
+            row = ["CANNOT DETERMINE", "", "CANNOT DETERMINE",
+                   (l.get("verdict_why") or (l["unknowns"][0] if l.get("unknowns") else
+                                             "no price was read on any page")),
+                   "", "", ""]
+        w.writerow([l["id"], l["category"], l["item"], qtxt, (c.get("order_unit") if c else None) or l.get("qty_unit") or "",
+                    l["verdict"]] + row + [l.get("mpn_note") or l.get("mpn_status") or ""])
+    p = os.path.join(REPO, "out", "release", "bom.csv")
+    os.makedirs(os.path.dirname(p), exist_ok=True)
+    open(p, "w").write(buf.getvalue())
+    return p, len(DATA["lines"])
+
+
+# ------------------------------------------------ the dossier's own numbers --
+# RELEASE.html is the master dossier. It is hand-written, but three of its
+# regions are SOURCING numbers, and a hand-typed number beside a generated one
+# drifts. Measured 2026-09-03, all four in one document at once:
+#   §1 readiness row  "35 distinct distributors" (37 domains gave a price),
+#                     "8 lines carry no price at all" (5), "$40.7700 ... three
+#                     lines" ($81.0808 from six), "Ten ... requests for
+#                     quotation" (thirteen).
+#   §2 abridged table "75% of parts cost" against the servos (57.1318 % of the
+#                     readable total at one robot), "3 custom PCBs - CANNOT
+#                     DETERMINE - no design files published" when all three fab
+#                     packages are committed in this repository, and four
+#                     vendor/price pairs superseded by cheaper read offers.
+#   §2 closing line   "Readable bought cost is $472-481 per robot at every
+#                     quantity 1-1000" against $627.4964 / $603.7893.
+#   §3.5 files list   "every bought line with two or more real distributors"
+#                     when 19 of 32 meet that bar - and §1 of the same document
+#                     said 19. The dossier stated both.
+# This generator now owns those regions, between HTML markers. A missing marker
+# is a refusal to publish, never a silent skip.
+RELEASE = os.path.join(REPO, "RELEASE.html")
+
+
+def release_regions():
+    rfq_n = len(DATA["rfq_suppliers"])
+    blocked_n = sum(len(l.get("blocked", [])) for l in DATA["lines"])
+    qual = sorted(PRICED_QUAL, key=lambda l: -READ[l["id"]][1]["per_robot"])
+    qual_txt = "; ".join(
+        f'{E(l["id"])} {E(clip(l["item"], 46))} ${READ[l["id"]][1]["per_robot"]:.4f} '
+        f'[{E(l["verdict"])}]' for l in qual)
+    unpriced_txt2 = ", ".join(f'{E(l["id"])} {E(clip(l["item"], 40))}' for l in UNKNOWN)
+
+    readiness = (
+        f'<tr><td>BOM &amp; sourcing</td><td><span class="st partial">Partial</span></td>'
+        f'<td>{len(DATA["lines"])} bought lines, each with the distributor page its price was '
+        f'read from and the fetch date (<a href="SOURCING.html">SOURCING</a>, generated from '
+        f'<code>spec/sourcing.json</code>); <b>{len(ALL_DOMAINS)} distinct distributors gave a '
+        f'price</b>, counted as registered domains and entered in the data under '
+        f'{len(ALL_VENDOR_NAMES)} vendor name strings, because the same shop is named differently '
+        f'where the packaging differs. A further {len(ALL_UNPRICED_DOMAINS)} domain(s) were read '
+        f'and gave no price for our part ({", ".join("<code>" + E(d) + "</code>" for d in ALL_UNPRICED_DOMAINS) or "&mdash;"}) '
+        f'and are counted nowhere. <b>{VERDICTS["PASS"]} of {len(DATA["lines"])} lines</b> rest on '
+        f'two or more distinct shops that each gave a price; {VERDICTS["FAIL"]} are graded FAIL and '
+        f'{VERDICTS["CANNOT DETERMINE"]} CANNOT DETERMINE. {rfq_n} ready-to-send requests for '
+        f'quotation (<a href="RFQ.html">RFQ</a>) &mdash; <b>none of which has been sent</b>. '
+        f'<a href="out/release/bom.csv">out/release/bom.csv</a> is generated from the same data by '
+        f'<code>tools/gen_sourcing.py</code>, so the two cannot disagree again. This cell is '
+        f'generated: the script rewrites it between markers in this file.</td>'
+        f'<td>The subtotal of lines graded PASS is <b>${SUB_OK[1]:,.4f}</b> per robot at 1 and '
+        f'<b>${SUB_OK[1000]:,.4f}</b> at 1&nbsp;000. A further ${SUB_QUAL[1]:,.4f} at one robot '
+        f'({QUAL_PCT:.2f}&nbsp;% of the readable total) is readable but comes from {len(qual)} lines '
+        f'this document grades FAIL or CANNOT DETERMINE &mdash; {qual_txt} &mdash; and is reported '
+        f'separately, never inside the headline. Both are a FLOOR: {len(UNKNOWN)} lines carry no '
+        f'price at all ({unpriced_txt2}) and are never summed as zero. {blocked_n} vendor pages '
+        f'refused a price and are listed for retry.</td></tr>')
+
+    rows = []
+    big = sorted(PRICED, key=lambda l: -READ[l["id"]][1]["per_robot"])
+    TOP = 10
+    for l in big[:TOP]:
+        c1, ck = READ[l["id"]][1], READ[l["id"]][1000]
+        q = l.get("qty_per_robot")
+        if l.get("quantity_rule"):
+            q = c1["order_quantity"]
+        quantity_label = qty_txt(q)
+        if l.get("quantity_rule"):
+            quantity_label += " packs @1; batch-dependent (see SOURCING)"
+        unit = f'${c1["unit"]:,.4f}' if c1.get("unit") is not None else "kit"
+        rows.append(
+            f'<tr><td>{E(clip(l["item"], 62))}</td><td class="{"sub2" if l.get("quantity_rule") else "n"}">{quantity_label}</td>'
+            f'<td class="n">{unit}</td><td class="n">${c1["per_robot"]:,.4f}</td>'
+            f'<td class="n">${ck["per_robot"]:,.4f}</td><td>{E(clip(c1["vendor"], 34))}</td>'
+            f'<td>{E(l["verdict"])}</td></tr>')
+    rest = big[TOP:]
+    if rest:
+        r1 = sum(READ[l["id"]][1]["per_robot"] for l in rest)
+        rk = sum(READ[l["id"]][1000]["per_robot"] for l in rest)
+        rows.append(
+            f'<tr><td><i>{len(rest)} further priced lines</i> ({", ".join(E(l["id"]) for l in rest)})</td>'
+            f'<td class="n">&mdash;</td><td class="n">&mdash;</td>'
+            f'<td class="n">${r1:,.4f}</td><td class="n">${rk:,.4f}</td>'
+            f'<td>see <a href="SOURCING.html">SOURCING</a></td><td>&mdash;</td></tr>')
+    for ln, off, row in NATIVE:
+        rows.append(
+            f'<tr><td>{E(clip(ln["item"], 62))}</td>'
+            f'<td class="n">{qty_txt(ln["qty_per_robot"])}</td>'
+            f'<td class="n">{E(off["currency"])}&nbsp;{row[1] / ln["qty_per_robot"]:,.4f}</td>'
+            f'<td class="n">{E(off["currency"])}&nbsp;{row[1]:,.4f}</td>'
+            f'<td class="n">{E(off["currency"])}&nbsp;{row[1000]:,.4f}</td>'
+            f'<td>{E(clip(off["vendor"], 34))}</td><td>{E(ln["verdict"])} &mdash; not converted</td></tr>')
+    for l in UNKNOWN:
+        rows.append(
+            f'<tr><td>{E(clip(l["item"], 62))}</td>'
+            f'<td class="n">{qty_txt(l["qty_per_robot"]) if l.get("qty_per_robot") else "CANNOT&nbsp;DET."}</td>'
+            f'<td class="n">CANNOT&nbsp;DET.</td><td class="n">CANNOT&nbsp;DET.</td>'
+            f'<td class="n">CANNOT&nbsp;DET.</td><td>&mdash;</td>'
+            f'<td>{E(l["verdict"])}</td></tr>')
+    rows.append(
+        f'<tr><td><b>Readable subtotal per robot</b> ({len(PRICED)} priced lines, USD only, '
+        f'nothing converted)</td><td class="n">&mdash;</td><td class="n">&mdash;</td>'
+        f'<td class="n"><b>${SUBTOTAL[1]:,.4f}</b></td><td class="n"><b>${SUBTOTAL[1000]:,.4f}</b></td>'
+        f'<td>&mdash;</td><td>&mdash;</td></tr>')
+    rows.append(
+        f'<tr><td>&nbsp;&nbsp;of which graded PASS</td><td class="n">&mdash;</td>'
+        f'<td class="n">&mdash;</td><td class="n">${SUB_OK[1]:,.4f}</td>'
+        f'<td class="n">${SUB_OK[1000]:,.4f}</td><td>&mdash;</td><td>&mdash;</td></tr>')
+
+    bom = (
+        '<thead><tr><th>Item</th><th class="n">Qty</th><th class="n">Unit @1</th>'
+        '<th class="n">Per robot @1</th><th class="n">Per robot @1000</th>'
+        '<th>Cheapest read page</th><th>Grade</th></tr></thead><tbody>'
+        + "".join(rows) + '</tbody>')
+
+    closing = (
+        f'<p>Readable bought cost is <b>${SUBTOTAL[1]:,.4f} per robot at one robot and '
+        f'${SUBTOTAL[1000]:,.4f} at 1&nbsp;000</b>, of which ${SUB_OK[1]:,.4f} / '
+        f'${SUB_OK[1000]:,.4f} comes from lines graded PASS. Both are already above Pollen&rsquo;s '
+        f'$399 retail before labour, and both are a FLOOR: {len(UNKNOWN)} lines carry no price at '
+        f'all and are never summed as zero. The largest single line is the servos at '
+        f'${READ["B1"][1]["per_robot"]:,.4f} per robot, '
+        f'{100.0 * READ["B1"][1]["per_robot"] / SUBTOTAL[1]:.4f}&nbsp;% of the readable total at one '
+        f'robot and {100.0 * READ["B1"][1]["per_robot"] / SUB_OK[1]:.4f}&nbsp;% of the PASS '
+        f'subtotal, so the volume question turns on one ROBOTIS OEM quote (&sect;7). '
+        f'This paragraph and the table above it are generated by <code>tools/gen_sourcing.py</code>.</p>')
+
+    files = (
+        f'<li><span class="ft">source</span><a href="SOURCING.html">SOURCING.html</a> &middot; '
+        f'<a href="RFQ.html">RFQ.html</a> &mdash; every bought line with its distributors, tier '
+        f'prices, MOQ, lead time and alternates. <b>{VERDICTS["PASS"]} of {len(DATA["lines"])} lines '
+        f'carry two or more distinct distributors that each gave a price</b>; the other '
+        f'{len(DATA["lines"]) - VERDICTS["PASS"]} do not, and each states why and what would settle '
+        f'it. Plus the {rfq_n} requests for quotation that close what is still unpriced (nothing '
+        f'sent).</li>')
+
+    return {"readiness": readiness, "bom": bom, "closing": closing, "files": files}
+
+
+def patch_release():
+    """Rewrite the sourcing regions of RELEASE.html between markers.
+
+    Refuses on a missing marker rather than skipping it: a region this script
+    is supposed to own but silently does not is exactly the drift it exists to
+    stop. Returns the number of regions rewritten."""
+    if not os.path.exists(RELEASE):
+        raise SystemExit("REFUSING - RELEASE.html is missing")
+    s = open(RELEASE).read()
+    n = 0
+    for name, body in release_regions().items():
+        a = f"<!-- gen_sourcing:{name}:start -->"
+        b = f"<!-- gen_sourcing:{name}:end -->"
+        i, j = s.find(a), s.find(b)
+        if i < 0 or j < 0 or j < i:
+            raise SystemExit(f"REFUSING TO PUBLISH - RELEASE.html has no "
+                             f"{name} region marked with {a} ... {b}")
+        s = s[:i + len(a)] + "\n" + body + "\n" + s[j:]
+        n += 1
+    open(RELEASE, "w").write(s)
+    return n
+
+
+def main():
+    ok = selfcheck()
+    print(f"selfcheck: {ok} PASS lines, each with >=2 distinct registered domains "
+          f"that GAVE A PRICE, and a published price in one of the four buckets")
+    print(f"distinct distributors: {len(ALL_DOMAINS)} registered domains gave a price, "
+          f"entered under {len(ALL_VENDOR_NAMES)} vendor name strings; "
+          f"{len(ALL_UNPRICED_DOMAINS)} further domain(s) read without an eligible price: "
+          f"{', '.join(ALL_UNPRICED_DOMAINS) or 'none'}")
+    k = patch_release()
+    print(f"patched {RELEASE}  {k} generated regions")
+    for name, doc in (("SOURCING.html", SOURCING), ("RFQ.html", RFQ)):
+        p = os.path.join(REPO, name)
+        open(p, "w").write(doc)
+        print(f"wrote {p}  {len(doc):,} bytes")
+    print(f"readable USD subtotal/robot: @1 ${SUBTOTAL[1]:,.4f}  "
+          f"@100 ${SUBTOTAL[100]:,.4f}  @1000 ${SUBTOTAL[1000]:,.4f}")
+    print(f"  of which graded PASS  @1 ${SUB_OK[1]:,.4f}  @100 ${SUB_OK[100]:,.4f}  @1000 ${SUB_OK[1000]:,.4f}")
+    print(f"  of which graded FAIL/CD @1 ${SUB_QUAL[1]:,.4f}  ({QUAL_PCT:.2f} % of the readable total)")
+    print(f"priced lines {len(PRICED)}  native-currency-only {len(NATIVE)}  "
+          f"no price {len(UNKNOWN)}  reference/excluded {len(REFERENCE)}")
+    p, n = bom_csv()
+    print(f"wrote {p}  {n} lines")
+
+
+if __name__ == "__main__":
+    main()

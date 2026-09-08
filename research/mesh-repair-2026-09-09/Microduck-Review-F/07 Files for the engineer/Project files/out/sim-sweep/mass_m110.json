@@ -1,0 +1,653 @@
+{
+ "cell": "mass_m110",
+ "family": "mass",
+ "note": "every body mass and inertia x 1.10",
+ "inputs": {
+  "name": "mass_m110",
+  "family": "mass",
+  "policy": "walking",
+  "robot": "ours",
+  "seconds": 12.0,
+  "vx": 0.25,
+  "vy": 0.0,
+  "wz": 0.0,
+  "warmup": 0.5,
+  "start": "STAND",
+  "mass_scale": 1.1,
+  "friction": null,
+  "slope_deg": 0.0,
+  "slope_dir": null,
+  "push_N": 0.0,
+  "push_dir": [
+   0.0,
+   1.0,
+   0.0
+  ],
+  "push_at": 6.0,
+  "push_dur": 0.2,
+  "sit_at": 1.0,
+  "stand_at": 4.5,
+  "note": "every body mass and inertia x 1.10"
+ },
+ "model": {
+  "robot_file": "sim/microduck_ours.xml",
+  "scene_file": "out/sim-sweep/scene_mass_m110.xml",
+  "policy_file": "sim/policies/BEST_alpha_walking.onnx",
+  "action_scale": 1.0,
+  "control_hz": 50.0,
+  "timestep_s": 0.005,
+  "decimation": 4,
+  "control_steps": 600,
+  "torque_grf_record_hz": 200.0,
+  "torque_grf_frames": 2401,
+  "push_frames_applied": 0,
+  "collision_scope": {
+   "candidate_geom_pairs": 4,
+   "excluded_body_pairs": [],
+   "bodies_that_can_self_collide": [
+    "ankle_left",
+    "ankle_right",
+    "leg",
+    "leg_2",
+    "trunk_base"
+   ],
+   "bodies_total": 15,
+   "geoms_that_can_contact_the_floor": [
+    "left_foot_collision",
+    "right_foot_collision"
+   ],
+   "statement": "In THIS compiled model 5 of the 15 robot bodies can take part in a self-contact at all (4 candidate geom pairs), and 2 geom(s) can touch the floor. A self-collision count answers only that question. Full census: sim/collision_model.py -> out/sim-evidence/collision-model-census.json."
+  },
+  "total_mass_kg": 0.810967,
+  "floor_friction_slide": 1.0,
+  "foot_friction_slide": [
+   1.0,
+   1.0
+  ],
+  "gravity_m_s2": [
+   0.0,
+   0.0,
+   -9.81
+  ],
+  "gravity_magnitude_m_s2": 9.81
+ },
+ "outputs": {
+  "fell": false,
+  "fell_by_height": false,
+  "fell_by_tilt": false,
+  "first_fall_s": null,
+  "fell_outside_commanded_ground_window": false,
+  "fall_rule": "trunk z < 0.06 m or |roll|,|pitch| > 60 deg",
+  "walked_m": 1.2894,
+  "walked_x_m": 1.28343,
+  "walked_y_m": -0.12398,
+  "mean_speed_m_s": 0.11199,
+  "path_length_m": 1.8251,
+  "net_yaw_drift_deg": -6.068,
+  "max_abs_yaw_drift_deg": 11.905,
+  "yaw_drift_deg_per_m_of_path": -3.3248,
+  "path_tracking_ratio_UNSIGNED": 0.6348,
+  "path_tracking_ratio_note": "mean_path_speed_m_s divided by the commanded vx. UNSIGNED and therefore DIRECTION-BLIND: a robot carried backwards down a slope scores HIGH on it. Do not read it as tracking. Read commanded_direction_tracking_ratio instead. It is kept only because path length is the honest answer to 'how far did the feet travel'. The walking policy also has a stand-still band below ~0.25 m/s (out/sim/vx_sweep.json), so it is meaningless there as well.",
+  "forward_progress_m": 1.33119,
+  "forward_progress_note": "each step of the ground track projected onto the robot's OWN instantaneous heading and summed, over the commanded window. NEGATIVE means the robot ended up behind where it started in its own forward direction.",
+  "backward_path_m": 0.00015,
+  "mean_forward_speed_m_s": 0.11576,
+  "commanded_direction_tracking_ratio": 0.463,
+  "displacement_along_initial_heading_m": 1.28343,
+  "downhill_progress_m": null,
+  "uphill_progress_m": null,
+  "fraction_of_displacement_along_the_fall_line": null,
+  "slope_direction_note": null,
+  "mean_path_speed_m_s": 0.1587,
+  "path_vs_displacement": "walked_m is the straight-line displacement of the trunk; path_length_m is the integrated ground track. A large gap means the robot curved.",
+  "trunk_z_m": {
+   "start": 0.12,
+   "min": 0.11337,
+   "max": 0.12088,
+   "end": 0.11895
+  },
+  "max_tilt_deg": 4.33,
+  "end_tilt_deg": 2.909,
+  "max_joint_torque_Nm": 0.46989,
+  "max_joint_torque_joint": "left_knee",
+  "sum_abs_torque_peak_Nm": 1.68956,
+  "grf_peak_N": {
+   "left_foot": 25.4966,
+   "right_foot": 24.6388,
+   "both_feet_sum_peak": 28.7598
+  },
+  "grf_vertical_peak_N": {
+   "left_foot": 25.2686,
+   "right_foot": 24.4374,
+   "both_feet_sum_peak": 28.4807,
+   "both_feet_sum_peak_at_s": 0.03,
+   "both_feet_sum_peak_is_inside_valid_window": true,
+   "single_foot_max": 25.2686,
+   "$caveat": "over the WHOLE record. If both_feet_sum_peak_is_inside_valid_window is false this number is post-fall and non-physical; use grf_vertical_peak_PREFALL_N."
+  },
+  "grf_vertical_percentiles_N": {
+   "both_feet_sum_p50": 7.0125,
+   "both_feet_sum_p95": 14.0681,
+   "both_feet_sum_p99": 23.3619,
+   "single_foot_p99": 23.0119,
+   "single_foot_max": 25.2686
+  },
+  "physically_valid_window": {
+   "$what": "the PREFIX of the physics record that is both before the first fall and free of any geom centre below the floor plane z = 0. Only numbers from this window are design loads; sim/microduck_ours.xml gives only the two soles a floor-colliding contype (sim/collision_model.py, out/sim-evidence/collision-model-census.json), so after a fall the body passes THROUGH the floor and the contact solver reports reactions no physical robot can see.",
+   "frames_total": 2401,
+   "frames_valid": 2401,
+   "valid_fraction": 1.0,
+   "valid_until_s": 12.0,
+   "first_fall_s": null,
+   "first_UNCOMMANDED_fall_s": null,
+   "$window_rule": "the window closes at the first UNCOMMANDED fall or the first geom centre below the floor, whichever comes first. Uncommanded means the fall rule with the commanded ground window removed \u2014 the sit-stand and stand-from-FOLD cells put the trunk on the floor on purpose and that is not a fall.",
+   "frames_with_a_geom_centre_below_the_floor": 0,
+   "fraction_of_frames_below_the_floor": 0.0,
+   "first_frame_below_the_floor_s": null,
+   "min_geom_centre_z_m": 0.00411,
+   "min_geom_centre_z_at_start_m": 0.00859,
+   "min_trunk_z_m": 0.11336
+  },
+  "grf_vertical_peak_PREFALL_N": {
+   "both_feet_sum_peak": 28.4807,
+   "both_feet_sum_peak_at_s": 0.03,
+   "single_foot_max": 25.2686,
+   "left_foot": 25.2686,
+   "right_foot": 24.4374,
+   "$what": "the same measurement restricted to physically_valid_window. THIS is the design load."
+  },
+  "max_joint_torque_PREFALL_Nm": 0.46989,
+  "weight_N": 7.9556,
+  "self_collisions": {
+   "max": 0,
+   "frames": 0,
+   "mean": 0.0,
+   "max_excluding_rest_pose_overlap": 0,
+   "frames_excluding_rest_pose_overlap": 0,
+   "contact_points_by_pair_summed_over_control_frames": {},
+   "pairs_already_overlapping_in_the_rest_pose": {},
+   "pairs_first_touching_during_the_motion": [],
+   "$counting": "a mesh-mesh contact produces several contact points, so the per-pair figures are CONTACT POINTS summed over the 50 Hz control frames, not frames. max/frames are contact counts per frame.",
+   "candidate_geom_pairs_in_this_model": 4,
+   "$scope": "In THIS compiled model 5 of the 15 robot bodies can take part in a self-contact at all (4 candidate geom pairs), and 2 geom(s) can touch the floor. A self-collision count answers only that question. Full census: sim/collision_model.py -> out/sim-evidence/collision-model-census.json."
+  },
+  "contacts": {
+   "mean": 1.84,
+   "max": 6,
+   "floor_contact_points_by_geom_summed_over_control_frames": {
+    "ankle_right/right_foot_collision": 578,
+    "ankle_left/left_foot_collision": 528
+   },
+   "$floor": "which geoms actually touched the ground, measured. In microduck_ours.xml only the two soles CAN; a variant that lets more geoms touch the floor is a different foot and therefore a different gait, and this list is how you see that."
+  },
+  "joints_beyond_limit": [],
+  "joints_within_1deg_of_limit": [],
+  "joints_saturating_mjcf_forcerange": [],
+  "per_joint": {
+   "left_hip_yaw": {
+    "peak_abs_torque_Nm": 0.08393,
+    "peak_at_s": 1.065,
+    "peak_is_inside_valid_window": true,
+    "prefall_peak_abs_torque_Nm": 0.08393,
+    "prefall_peak_at_s": 1.065,
+    "peak_signed_torque_Nm": 0.08393,
+    "p95_abs_torque_Nm": 0.06419,
+    "p99_abs_torque_Nm": 0.07445,
+    "rms_torque_Nm": 0.03649,
+    "mean_abs_torque_Nm": 0.03133,
+    "frames_at_forcerange_limit": 0,
+    "mjcf_forcerange_Nm": [
+     -0.96,
+     0.96
+    ],
+    "peak_abs_speed_rad_s": 0.9199,
+    "peak_abs_speed_rpm_output": 8.784,
+    "range_rad": [
+     -0.43633,
+     0.5236
+    ],
+    "range_deg": [
+     -25.0,
+     30.0
+    ],
+    "q_min_deg": -8.355,
+    "q_max_deg": 0.326,
+    "range_utilisation_pct": 15.78,
+    "frames_within_1deg_of_limit": 0,
+    "frames_beyond_limit": 0,
+    "max_overshoot_beyond_limit_deg": 0.0
+   },
+   "left_hip_roll": {
+    "peak_abs_torque_Nm": 0.18926,
+    "peak_at_s": 1.105,
+    "peak_is_inside_valid_window": true,
+    "prefall_peak_abs_torque_Nm": 0.18926,
+    "prefall_peak_at_s": 1.105,
+    "peak_signed_torque_Nm": -0.18926,
+    "p95_abs_torque_Nm": 0.15131,
+    "p99_abs_torque_Nm": 0.16892,
+    "rms_torque_Nm": 0.08925,
+    "mean_abs_torque_Nm": 0.07762,
+    "frames_at_forcerange_limit": 0,
+    "mjcf_forcerange_Nm": [
+     -0.96,
+     0.96
+    ],
+    "peak_abs_speed_rad_s": 1.757,
+    "peak_abs_speed_rpm_output": 16.778,
+    "range_rad": [
+     -0.38397,
+     0.38397
+    ],
+    "range_deg": [
+     -22.0,
+     22.0
+    ],
+    "q_min_deg": -7.564,
+    "q_max_deg": 2.946,
+    "range_utilisation_pct": 23.89,
+    "frames_within_1deg_of_limit": 0,
+    "frames_beyond_limit": 0,
+    "max_overshoot_beyond_limit_deg": 0.0
+   },
+   "left_hip_pitch": {
+    "peak_abs_torque_Nm": 0.18236,
+    "peak_at_s": 7.865,
+    "peak_is_inside_valid_window": true,
+    "prefall_peak_abs_torque_Nm": 0.18236,
+    "prefall_peak_at_s": 7.865,
+    "peak_signed_torque_Nm": 0.18236,
+    "p95_abs_torque_Nm": 0.16362,
+    "p99_abs_torque_Nm": 0.17412,
+    "rms_torque_Nm": 0.09058,
+    "mean_abs_torque_Nm": 0.0737,
+    "frames_at_forcerange_limit": 0,
+    "mjcf_forcerange_Nm": [
+     -0.96,
+     0.96
+    ],
+    "peak_abs_speed_rad_s": 2.7108,
+    "peak_abs_speed_rpm_output": 25.886,
+    "range_rad": [
+     -1.5708,
+     1.5708
+    ],
+    "range_deg": [
+     -90.0,
+     90.0
+    ],
+    "q_min_deg": -27.888,
+    "q_max_deg": -11.123,
+    "range_utilisation_pct": 9.31,
+    "frames_within_1deg_of_limit": 0,
+    "frames_beyond_limit": 0,
+    "max_overshoot_beyond_limit_deg": 0.0
+   },
+   "left_knee": {
+    "peak_abs_torque_Nm": 0.46989,
+    "peak_at_s": 0.965,
+    "peak_is_inside_valid_window": true,
+    "prefall_peak_abs_torque_Nm": 0.46989,
+    "prefall_peak_at_s": 0.965,
+    "peak_signed_torque_Nm": -0.46989,
+    "p95_abs_torque_Nm": 0.37995,
+    "p99_abs_torque_Nm": 0.40756,
+    "rms_torque_Nm": 0.25101,
+    "mean_abs_torque_Nm": 0.22808,
+    "frames_at_forcerange_limit": 0,
+    "mjcf_forcerange_Nm": [
+     -0.96,
+     0.96
+    ],
+    "peak_abs_speed_rad_s": 5.6483,
+    "peak_abs_speed_rpm_output": 53.937,
+    "range_rad": [
+     -1.5708,
+     1.5708
+    ],
+    "range_deg": [
+     -90.0,
+     90.0
+    ],
+    "q_min_deg": -14.04,
+    "q_max_deg": 22.102,
+    "range_utilisation_pct": 20.08,
+    "frames_within_1deg_of_limit": 0,
+    "frames_beyond_limit": 0,
+    "max_overshoot_beyond_limit_deg": 0.0
+   },
+   "left_ankle": {
+    "peak_abs_torque_Nm": 0.20662,
+    "peak_at_s": 1.09,
+    "peak_is_inside_valid_window": true,
+    "prefall_peak_abs_torque_Nm": 0.20662,
+    "prefall_peak_at_s": 1.09,
+    "peak_signed_torque_Nm": 0.20662,
+    "p95_abs_torque_Nm": 0.1784,
+    "p99_abs_torque_Nm": 0.19171,
+    "rms_torque_Nm": 0.11111,
+    "mean_abs_torque_Nm": 0.1004,
+    "frames_at_forcerange_limit": 0,
+    "mjcf_forcerange_Nm": [
+     -0.96,
+     0.96
+    ],
+    "peak_abs_speed_rad_s": 3.283,
+    "peak_abs_speed_rpm_output": 31.35,
+    "range_rad": [
+     -1.5708,
+     1.5708
+    ],
+    "range_deg": [
+     -90.0,
+     90.0
+    ],
+    "q_min_deg": 8.09,
+    "q_max_deg": 27.956,
+    "range_utilisation_pct": 11.04,
+    "frames_within_1deg_of_limit": 0,
+    "frames_beyond_limit": 0,
+    "max_overshoot_beyond_limit_deg": 0.0
+   },
+   "neck_pitch": {
+    "peak_abs_torque_Nm": 0.09284,
+    "peak_at_s": 0.965,
+    "peak_is_inside_valid_window": true,
+    "prefall_peak_abs_torque_Nm": 0.09284,
+    "prefall_peak_at_s": 0.965,
+    "peak_signed_torque_Nm": 0.09284,
+    "p95_abs_torque_Nm": 0.0579,
+    "p99_abs_torque_Nm": 0.06509,
+    "rms_torque_Nm": 0.03082,
+    "mean_abs_torque_Nm": 0.02459,
+    "frames_at_forcerange_limit": 0,
+    "mjcf_forcerange_Nm": [
+     -0.96,
+     0.96
+    ],
+    "peak_abs_speed_rad_s": 0.7909,
+    "peak_abs_speed_rpm_output": 7.553,
+    "range_rad": [
+     -1.5708,
+     1.0472
+    ],
+    "range_deg": [
+     -90.0,
+     60.0
+    ],
+    "q_min_deg": 11.789,
+    "q_max_deg": 20.0,
+    "range_utilisation_pct": 5.47,
+    "frames_within_1deg_of_limit": 0,
+    "frames_beyond_limit": 0,
+    "max_overshoot_beyond_limit_deg": 0.0
+   },
+   "head_pitch": {
+    "peak_abs_torque_Nm": 0.07598,
+    "peak_at_s": 1.275,
+    "peak_is_inside_valid_window": true,
+    "prefall_peak_abs_torque_Nm": 0.07598,
+    "prefall_peak_at_s": 1.275,
+    "peak_signed_torque_Nm": -0.07598,
+    "p95_abs_torque_Nm": 0.0638,
+    "p99_abs_torque_Nm": 0.06998,
+    "rms_torque_Nm": 0.04181,
+    "mean_abs_torque_Nm": 0.03879,
+    "frames_at_forcerange_limit": 0,
+    "mjcf_forcerange_Nm": [
+     -0.96,
+     0.96
+    ],
+    "peak_abs_speed_rad_s": 0.3093,
+    "peak_abs_speed_rpm_output": 2.954,
+    "range_rad": [
+     -1.5708,
+     1.5708
+    ],
+    "range_deg": [
+     -90.0,
+     90.0
+    ],
+    "q_min_deg": 19.998,
+    "q_max_deg": 25.015,
+    "range_utilisation_pct": 2.79,
+    "frames_within_1deg_of_limit": 0,
+    "frames_beyond_limit": 0,
+    "max_overshoot_beyond_limit_deg": 0.0
+   },
+   "head_yaw": {
+    "peak_abs_torque_Nm": 0.15458,
+    "peak_at_s": 1.385,
+    "peak_is_inside_valid_window": true,
+    "prefall_peak_abs_torque_Nm": 0.15458,
+    "prefall_peak_at_s": 1.385,
+    "peak_signed_torque_Nm": -0.15458,
+    "p95_abs_torque_Nm": 0.13237,
+    "p99_abs_torque_Nm": 0.1433,
+    "rms_torque_Nm": 0.07301,
+    "mean_abs_torque_Nm": 0.06242,
+    "frames_at_forcerange_limit": 0,
+    "mjcf_forcerange_Nm": [
+     -0.96,
+     0.96
+    ],
+    "peak_abs_speed_rad_s": 1.6781,
+    "peak_abs_speed_rpm_output": 16.025,
+    "range_rad": [
+     -2.96706,
+     2.96706
+    ],
+    "range_deg": [
+     -170.0,
+     170.0
+    ],
+    "q_min_deg": -3.825,
+    "q_max_deg": 7.422,
+    "range_utilisation_pct": 3.31,
+    "frames_within_1deg_of_limit": 0,
+    "frames_beyond_limit": 0,
+    "max_overshoot_beyond_limit_deg": 0.0
+   },
+   "head_roll": {
+    "peak_abs_torque_Nm": 0.08334,
+    "peak_at_s": 5.025,
+    "peak_is_inside_valid_window": true,
+    "prefall_peak_abs_torque_Nm": 0.08334,
+    "prefall_peak_at_s": 5.025,
+    "peak_signed_torque_Nm": -0.08334,
+    "p95_abs_torque_Nm": 0.07366,
+    "p99_abs_torque_Nm": 0.08048,
+    "rms_torque_Nm": 0.03966,
+    "mean_abs_torque_Nm": 0.03444,
+    "frames_at_forcerange_limit": 0,
+    "mjcf_forcerange_Nm": [
+     -0.96,
+     0.96
+    ],
+    "peak_abs_speed_rad_s": 1.0061,
+    "peak_abs_speed_rpm_output": 9.607,
+    "range_rad": [
+     -0.43633,
+     0.43633
+    ],
+    "range_deg": [
+     -25.0,
+     25.0
+    ],
+    "q_min_deg": -5.279,
+    "q_max_deg": 0.611,
+    "range_utilisation_pct": 11.78,
+    "frames_within_1deg_of_limit": 0,
+    "frames_beyond_limit": 0,
+    "max_overshoot_beyond_limit_deg": 0.0
+   },
+   "right_hip_yaw": {
+    "peak_abs_torque_Nm": 0.06916,
+    "peak_at_s": 1.11,
+    "peak_is_inside_valid_window": true,
+    "prefall_peak_abs_torque_Nm": 0.06916,
+    "prefall_peak_at_s": 1.11,
+    "peak_signed_torque_Nm": 0.06916,
+    "p95_abs_torque_Nm": 0.04194,
+    "p99_abs_torque_Nm": 0.04688,
+    "rms_torque_Nm": 0.0241,
+    "mean_abs_torque_Nm": 0.0203,
+    "frames_at_forcerange_limit": 0,
+    "mjcf_forcerange_Nm": [
+     -0.96,
+     0.96
+    ],
+    "peak_abs_speed_rad_s": 0.5939,
+    "peak_abs_speed_rpm_output": 5.672,
+    "range_rad": [
+     -0.5236,
+     0.43633
+    ],
+    "range_deg": [
+     -30.0,
+     25.0
+    ],
+    "q_min_deg": 0.0,
+    "q_max_deg": 6.263,
+    "range_utilisation_pct": 11.39,
+    "frames_within_1deg_of_limit": 0,
+    "frames_beyond_limit": 0,
+    "max_overshoot_beyond_limit_deg": 0.0
+   },
+   "right_hip_roll": {
+    "peak_abs_torque_Nm": 0.19536,
+    "peak_at_s": 1.085,
+    "peak_is_inside_valid_window": true,
+    "prefall_peak_abs_torque_Nm": 0.19536,
+    "prefall_peak_at_s": 1.085,
+    "peak_signed_torque_Nm": 0.19536,
+    "p95_abs_torque_Nm": 0.14283,
+    "p99_abs_torque_Nm": 0.15401,
+    "rms_torque_Nm": 0.0776,
+    "mean_abs_torque_Nm": 0.06569,
+    "frames_at_forcerange_limit": 0,
+    "mjcf_forcerange_Nm": [
+     -0.96,
+     0.96
+    ],
+    "peak_abs_speed_rad_s": 1.6571,
+    "peak_abs_speed_rpm_output": 15.824,
+    "range_rad": [
+     -0.38397,
+     0.38397
+    ],
+    "range_deg": [
+     -22.0,
+     22.0
+    ],
+    "q_min_deg": 0.08,
+    "q_max_deg": 7.781,
+    "range_utilisation_pct": 17.5,
+    "frames_within_1deg_of_limit": 0,
+    "frames_beyond_limit": 0,
+    "max_overshoot_beyond_limit_deg": 0.0
+   },
+   "right_hip_pitch": {
+    "peak_abs_torque_Nm": 0.24346,
+    "peak_at_s": 6.245,
+    "peak_is_inside_valid_window": true,
+    "prefall_peak_abs_torque_Nm": 0.24346,
+    "prefall_peak_at_s": 6.245,
+    "peak_signed_torque_Nm": 0.24346,
+    "p95_abs_torque_Nm": 0.21712,
+    "p99_abs_torque_Nm": 0.23538,
+    "rms_torque_Nm": 0.10592,
+    "mean_abs_torque_Nm": 0.08477,
+    "frames_at_forcerange_limit": 0,
+    "mjcf_forcerange_Nm": [
+     -0.96,
+     0.96
+    ],
+    "peak_abs_speed_rad_s": 3.4647,
+    "peak_abs_speed_rpm_output": 33.085,
+    "range_rad": [
+     -1.5708,
+     1.5708
+    ],
+    "range_deg": [
+     -90.0,
+     90.0
+    ],
+    "q_min_deg": 10.551,
+    "q_max_deg": 27.589,
+    "range_utilisation_pct": 9.47,
+    "frames_within_1deg_of_limit": 0,
+    "frames_beyond_limit": 0,
+    "max_overshoot_beyond_limit_deg": 0.0
+   },
+   "right_knee": {
+    "peak_abs_torque_Nm": 0.43922,
+    "peak_at_s": 1.085,
+    "peak_is_inside_valid_window": true,
+    "prefall_peak_abs_torque_Nm": 0.43922,
+    "prefall_peak_at_s": 1.085,
+    "peak_signed_torque_Nm": 0.43922,
+    "p95_abs_torque_Nm": 0.36226,
+    "p99_abs_torque_Nm": 0.38905,
+    "rms_torque_Nm": 0.21244,
+    "mean_abs_torque_Nm": 0.19382,
+    "frames_at_forcerange_limit": 0,
+    "mjcf_forcerange_Nm": [
+     -0.96,
+     0.96
+    ],
+    "peak_abs_speed_rad_s": 5.1207,
+    "peak_abs_speed_rpm_output": 48.899,
+    "range_rad": [
+     -1.5708,
+     1.5708
+    ],
+    "range_deg": [
+     -90.0,
+     90.0
+    ],
+    "q_min_deg": -20.119,
+    "q_max_deg": 8.934,
+    "range_utilisation_pct": 16.14,
+    "frames_within_1deg_of_limit": 0,
+    "frames_beyond_limit": 0,
+    "max_overshoot_beyond_limit_deg": 0.0
+   },
+   "right_ankle": {
+    "peak_abs_torque_Nm": 0.2013,
+    "peak_at_s": 1.325,
+    "peak_is_inside_valid_window": true,
+    "prefall_peak_abs_torque_Nm": 0.2013,
+    "prefall_peak_at_s": 1.325,
+    "peak_signed_torque_Nm": -0.2013,
+    "p95_abs_torque_Nm": 0.15682,
+    "p99_abs_torque_Nm": 0.16562,
+    "rms_torque_Nm": 0.09389,
+    "mean_abs_torque_Nm": 0.08326,
+    "frames_at_forcerange_limit": 0,
+    "mjcf_forcerange_Nm": [
+     -0.96,
+     0.96
+    ],
+    "peak_abs_speed_rad_s": 2.2137,
+    "peak_abs_speed_rpm_output": 21.139,
+    "range_rad": [
+     -1.5708,
+     1.5708
+    ],
+    "range_deg": [
+     -90.0,
+     90.0
+    ],
+    "q_min_deg": -28.071,
+    "q_max_deg": -12.111,
+    "range_utilisation_pct": 8.87,
+    "frames_within_1deg_of_limit": 0,
+    "frames_beyond_limit": 0,
+    "max_overshoot_beyond_limit_deg": 0.0
+   }
+  },
+  "nan": false,
+  "wall_seconds": 1.878
+ }
+}

@@ -1,0 +1,105 @@
+{
+  "$parts_folder": 2,
+  "kind": "sourcing",
+  "record": {
+    "slug": "bearing-15x10x3",
+    "verdict": "PASS",
+    "offers": [
+      {
+        "vendor": "bearingsdirect.com",
+        "mpn": "MR6700",
+        "url": "https://bearingsdirect.com/6700-ball-bearing-10x15x3-open-mr6700/",
+        "confidence": "verified",
+        "retrieved": "2026-09-02",
+        "price": {
+          "currency": "USD",
+          "unit": 4.86,
+          "moq": 1,
+          "break": null
+        },
+        "stock": null,
+        "packaging": null,
+        "matched_on": [
+          "page dimensions verbatim: inner 10 mm, outer 15 mm, width 3 mm — exactly the mesh's meshfeatures reading (bore D10.0, boss D15.0, bbox z 0..3)",
+          "interchange designations on the page: 'MR6700, 61700J1, 61700R, 6700E, 6700'",
+          "price $4.86 USD"
+        ],
+        "note": "CORRECTED 2026-09-08: open 6700 / 61700 catalog candidates are 10 x 15 x 3 mm. SMB 6700ZZ and ZEN 61700-2Z are 10 x 15 x 4 mm; ABF lists FAG 61700-2Z-HLC at 4 mm too. The former claim that 61700-2Z is a shielded 3 mm alternative was wrong. Reject these 4 mm variants for the 3 mm reference envelope. Mesh dimensions do not establish the original installed bearing identity. Sources and hashes: research/bearing-sourcing-2026-09-08/audit.json."
+      },
+      {
+        "vendor": "VXB (US)",
+        "mpn": "6700 Open (VXB SKU \"6700 Open\", UPC 00193019072509)",
+        "url": "https://vxb.com/products/6700-ball-bearing-10mm-x-15mm-x-3mm-single-row-ope",
+        "confidence": "verified",
+        "retrieved": "2026-09-03",
+        "price": {
+          "currency": "USD",
+          "unit": 7.77,
+          "moq": 1,
+          "break": [
+            {
+              "qty": 10,
+              "unit": 6.993
+            },
+            {
+              "qty": 20,
+              "unit": 6.216
+            },
+            {
+              "qty": 100,
+              "unit": 5.439
+            }
+          ]
+        },
+        "stock": "not stated as a number",
+        "packaging": null,
+        "matched_on": [
+          "vendor page identifies it as \"6700 Open (VXB SKU \"6700 Open\", UPC 00193019072509)\"",
+          "price USD 7.77 at 1+ read on the page",
+          "PRODUCT PAGE, read 2026-09-03 by curl and parsed out of the page text (the 2026-09-02 reading was https://vxb.com/search?q=MR6700, a search-results page, and it carried $9.99 for a listing whose product page no longer resolves - https://vxb.com/products/mr6700-radial-ball-bearing-bore-dia-10mm-od-15mm-width-3mm returns 404). Page text verbatim: 'Regular price $7.77 Sale price $10.00 you save $2.23', 'SKU: 6700 Open', '10mm ID - 15mm OD - 3mm Wide - Open Type', chrome steel, dynamic 0.85 kN / static 0.44 kN, quantity 1 bearing. Tier schedule verbatim: 'Buy 10 You save 10%', 'Buy 20 You save 20%', 'Wholesale Buy Wholesale 100+ You save 30%', 'OEM Buy 1,000+ Only for Manufacturers (Lead Time is 30-60 Days)'. The tier unit prices recorded here are those percentages applied to the read $7.77: 6.9930 / 6.2160 / 5.4390. The 1,000+ OEM tier prints NO price, so it is CANNOT DETERMINE and this line's 1,000-robot column falls back to the 100+ tier."
+        ],
+        "note": "from spec/sourcing.json line B11 (Ball bearing 15 x 10 x 3 mm)."
+      }
+    ],
+    "uncertainties": [
+      "Original manufacturer, closure, material, clearance, tolerance and lubricant: CANNOT DETERMINE from published mesh. Mesh bore/OD/width are 10 x 15 x 3 mm; actual-unit measurement and markings must settle installed identity. A catalog source match is not proof of the original part.",
+      "Pollen's own BOM entry was not readable (Google Sheet export blocked to the fetcher).",
+      "6700ZZ / 61700-2Z / FAG 61700-2Z-HLC catalog width is 4 mm: rejected for the 3 mm reference envelope. Earlier 3 mm shielded-alternative assertion corrected 2026-09-08; historical dated prices remain observations, not new offers.",
+      "VXB's 1,000+ tier is 'OEM ... Only for Manufacturers' with no price printed, so the 3,000-piece quantity a 1,000-robot build needs is priced at VXB's 100+ tier here, as a ceiling. Bearings Direct is cheaper at every quantity read, so this does not move the roll-up. What settles it: a VXB OEM quote.",
+      "Offers tagged \"from spec/sourcing.json line B11\" were merged in by tools/sync_shelf_sourcing.py; the pages behind them were fetched 2026-09-02 and 2026-09-03, and each offer carries its own date. SOURCING.html is the full record including the pages that refused a price."
+    ],
+    "conditional_candidates": [
+      {
+        "mpn": "6700 open (10 x 15 x 3 mm)",
+        "why_equivalent": "Dimensional/type candidate only; original manufacturer, closure, lubricant, clearance and grade unknown. SMB states it is an authorized EZO distributor. Request full offered MPN and configuration.",
+        "vendor": "SMB Bearings (UK)",
+        "url": "https://www.smbbearings.com/products/thin-section-bearings.html",
+        "price_note": "Catalog read 2026-09-08; price, MOQ and stock unknown; RFQ only, excluded from cost selection."
+      },
+      {
+        "mpn": "61700 open (10 x 15 x 3 mm)",
+        "why_equivalent": "Dimensional/type candidate only; original identity unconfirmed. C3 clearance and stainless variants are separate configurations, not assumed equivalent.",
+        "vendor": "ZEN Bearings manufacturer",
+        "url": "https://www.zen.biz/thin-section-bearings",
+        "price_note": "Catalog read 2026-09-08; price, MOQ and stock unknown; RFQ only, excluded from cost selection."
+      }
+    ],
+    "rejected_candidates": [
+      {
+        "mpn": "6700-ZZ (10 x 15 x 4, shielded)",
+        "why_equivalent": "REJECTED for the 3 mm reference envelope: this shielded variant is 4 mm wide. Historical offer retained for provenance only; excluded from priced offers and best-cost selection. Original installed width/closure must be measured before considering any different envelope.",
+        "vendor": "FastEddy Bearings (US)",
+        "url": "https://www.fasteddybearings.com/10x15x4-metal-shielded-bearing-6700-zz/",
+        "price_note": "Historical observation only (2026-09-02): $1.25, backorder 7-10 days; not reverified by the 2026-09-08 width correction."
+      },
+      {
+        "mpn": "61700-2Z / FAG 61700-2Z-HLC (10 x 15 x 4 mm)",
+        "why_equivalent": "REJECTED for 3 mm envelope. Corrects the former false 3 mm shielded-alternative claim. ZEN manufacturer table and ABF FAG listing specify 4 mm; no priced substitute added.",
+        "vendor": "ZEN manufacturer catalog; FAG distributor corroboration in audit",
+        "url": "https://www.zen.biz/thin-section-bearings",
+        "price_note": "No quote; dimensional evidence reviewed 2026-09-08."
+      }
+    ],
+    "identity_status": "Original installed bearing unidentified; PASS sourcing verdict concerns dated priced dimensional candidates only."
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "observed_at": "2026-09-08T22:39:05.965624+08:00",
+  "source": "out/open/cannot-determine-harvest.json",
+  "source_sha256_before": "a6fd00d26bb2f521b3e663b10412347a8c19a152b1bbb97355366d861006950a",
+  "reason": "Preserve historical text; replace operational closure instructions contradicted by current power/identity holds. No underlying requirement is closed.",
+  "rows": [
+    {
+      "index": 0,
+      "record": {
+        "what": "What a real Microduck walks in 8.0 s at a commanded vx 0.25 m/s",
+        "why": "No real-robot walk figure exists in this repository or in any Pollen document. Our MuJoCo run of Pollen's own alpha_walking.onnx on Pollen's own physics measured 0.7925 m (stock-mesh and swapped-mesh trajectories bit-identical), but the sim already under-tracks its own command (0.1053 m/s achieved against 0.25 commanded) with position actuators standing in for the BAM model the policy was trained with",
+        "what_settles_it": "WK-02 and WK-03 on the first five built units. Replace the 75 % fraction with the measured mean minus three standard deviations and regenerate. Best-supported option today: keep 0.594 m and label the fraction a decision, which the document does; the alternative it beat was quoting 0.7925 m as the gate, which would fail every real robot for a reason that is not a defect"
+      }
+    },
+    {
+      "index": 1,
+      "record": {
+        "what": "Whether the XL330 servos see the raw 6.6-8.4 V pack, above their published 3.7-6.0 V band",
+        "why": "Pollen's runtime maps the pack 6.6-8.2 V through the servos' own Present Input Voltage(144) (model.rs:99-113) and writes Shutdown(63)=52, clearing exactly the Input Voltage Error bit \u2014 both consistent with stock servos on the raw pack. But the firmware's Max Voltage Limit(32) cannot be set above 7.0 V, and ROBOTIS publishes no absolute maximum. Code cannot settle it",
+        "what_settles_it": "TEST-PLAN EB-04: a meter on pin 2 of the servo bus at four points, at 8.20 V and 6.60 V supply. Both outcomes are stated in the gate; if SERVO_V is inside 3.7-6.0 V, docs/ELECTRONICS-AND-SOFTWARE.md 3.4 must be corrected"
+      }
+    },
+    {
+      "index": 2,
+      "record": {
+        "what": "What a Microduck draws, walking",
+        "why": "ROBOTIS publishes no running or no-load current at any voltage for the XL330-M288-T \u2014 only Standby 17 mA and stall 1.11/1.47/1.74 A at 3.7/5.0/6.0 V, and above 6.0 V no stall figure at all. No measured figure exists for the assembled robot, so every rail budget in the repo (including the 1 A-per-moving-servo basis behind wiring/CABLES.md's voltage-drop model) rests on an assumption",
+        "what_settles_it": "TEST-PLAN EB-07: pack current and per-servo Present Current(126) in three states (torque off / home held / walking 8 s), gated on Current Limit(38) = 1750 mA so the per-servo half needs no clamp"
+      }
+    },
+    {
+      "index": 3,
+      "record": {
+        "what": "Whether any joint's servo-positive direction is inverted relative to the MJCF joint sign",
+        "why": "The home-count column of \u00a74.1 is computed as 2048 + rad x 4096/(2pi) from DEFAULT_POSITION. That mapping assumes servo-positive equals joint-positive with no inversion, and no published source gives a per-joint inversion table \u2014 Pollen's code never needs one because the robots were built with a known convention",
+        "what_settles_it": "SV-05 on the first unit: a joint that lands the same distance the wrong side of 2048 is an inversion, not a calibration error. The measured table becomes a column of \u00a74.1 and the document is regenerated"
+      }
+    },
+    {
+      "index": 18,
+      "record": {
+        "what": "Which of the two bodies a joint joins physically carries the servo housing, and which carries the horn",
+        "why": "A joint declared inside MJCF body C joins C to its parent P. The kinematic file says which two bodies a joint joins and says nothing about which side the actuator case is bolted to. The old hand-typed column asserted one of the two per row and was measurably inconsistent (9 parent, 5 child), so it has been replaced by both measured bodies rather than a better guess. The mouth (ID 34) is not in the MJCF at all.",
+        "what_settles_it": "spec/mesh-placements.json read against the xl330 body geometry \u2014 the housing is the body whose frame the servo case is fixed in, the horn is the body that rotates with the output; lane B's per-joint drawings settle it visually; and SV-02's jig has to know it anyway, because the mechanical zero is measured against whichever body the horn indexes to. Written into the document's open-questions table (\u00a713, against SV-02) with exactly this text."
+      }
+    },
+    {
+      "index": 79,
+      "record": {
+        "what": "What a real Microduck walks in 8 s at vx 0.25, and therefore whether the 0.594 m gate is right",
+        "why": "No real-robot walk distance exists in this repository or in any Pollen material. 0.594 m is 75 % of our simulated 0.7925 m and the 75 % is a decision, not a measurement.",
+        "what_settles_it": "WK-02 and WK-03 on the first five built units; replace the fraction with the measured mean minus three standard deviations and regenerate."
+      }
+    },
+    {
+      "index": 80,
+      "record": {
+        "what": "Whether the XL330 servos are fed the raw 2S pack above their 6.0 V rating",
+        "why": "Pollen's runtime maps 6.6-8.2 V read through the servos' own Present Input Voltage(144) and clears Shutdown bit 0 (Input Voltage Error), which is consistent with battery-direct VDD \u2014 but that is an inference from code, and the vendor band is 3.7-6.0 V with Max Voltage Limit(32) refusing above 7.0 V.",
+        "what_settles_it": "EB-04: a meter on pin 2 of the servo bus with the pack fitted. Either outcome is informative and one of them requires docs/ELECTRONICS-AND-SOFTWARE.md 3.4 to be corrected."
+      }
+    },
+    {
+      "index": 81,
+      "record": {
+        "what": "What an assembled Microduck draws while walking",
+        "why": "No vendor figure exists between standby 17 mA and stall 1.47 A per servo; Radxa publishes a 5 V/2 A supply requirement and no consumption. Our runtime study sweeps compute 1-5 W because of it, and our model disagrees with Pollen's published ~1 h by about a factor of two.",
+        "what_settles_it": "EB-07 for three instantaneous states, EN-01 for a whole pack with compute-and-sensor watts taken by difference against Present Current(126) summed off the bus."
+      }
+    }
+  ]
+}

@@ -1,0 +1,871 @@
+<!DOCTYPE html><html lang="en"><head><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta charset="UTF-8"><meta name="viewport" content="user-scalable=yes, width=device-width, initial-scale=1, maximum-scale=5"><meta name="theme-color" content="#1976d2"><meta name="msapplication-TileColor" content="#1976d2"><meta name="msapplication-TileImage" content="/_assets/favicons/mstile-150x150.png"><title>XY Hole / Contour compensation | Bambu Lab Wiki</title><meta name="description" content="Learn how XY Hole Contour Compensation in Bambu Studio improve dimensional accuracy. This guide explains when to use them, how to calibrate each step by step, and common limitations to achieve reliable part fit."><meta property="og:title" content="XY Hole / Contour compensation"><meta property="og:type" content="website"><meta property="og:description" content="Learn how XY Hole Contour Compensation in Bambu Studio improve dimensional accuracy. This guide explains when to use them, how to calibrate each step by step, and common limitations to achieve reliable part fit."><meta property="og:image"><meta property="og:url" content="https://wiki.bambulab.com/en/software/bambu-studio/xy-hole-contour-compensation"><meta property="og:site_name" content="Bambu Lab Wiki"><link rel="apple-touch-icon" sizes="180x180" href="/_assets/favicons/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="192x192" href="/_assets/favicons/android-chrome-192x192.png"><link rel="icon" type="image/png" sizes="32x32" href="/_assets/favicons/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/_assets/favicons/favicon-16x16.png"><link rel="mask-icon" href="/_assets/favicons/safari-pinned-tab.svg" color="#1976d2"><link rel="manifest" href="/_assets/manifest.json"><script>var siteConfig = {"title":"Bambu Lab Wiki","theme":"default","darkMode":false,"tocPosition":"left","lang":"en","rtl":false,"company":"Bambu Lab","contentLicense":"alr","footerOverride":"","logoUrl":"/admin/home/logo-large.png"}
+var siteLangs = [{"code":"ar","name":"العربية"},{"code":"cs","name":"čeština"},{"code":"de","name":"Deutsch"},{"code":"el","name":"ελληνικά"},{"code":"en","name":"English"},{"code":"es","name":"español"},{"code":"fr","name":"français"},{"code":"hu","name":"magyar"},{"code":"it","name":"italiano"},{"code":"ja","name":"日本語 (にほんご)"},{"code":"ko","name":"한국어"},{"code":"nl","name":"Nederlands"},{"code":"pl","name":"język polski"},{"code":"pt-br","name":"português"},{"code":"ro","name":"limba română"},{"code":"ru","name":"русский язык"},{"code":"sv","name":"Svenska"},{"code":"th","name":"ไทย"},{"code":"tr","name":"Türkçe"},{"code":"vi","name":"Tiếng Việt"},{"code":"zh","name":"中文 (Zhōngwén)"}]
+</script><link type="text/css" rel="stylesheet" href="/_assets/css/app.766a556e9dcc61b7fcd5.css"><script type="text/javascript" src="/_assets/js/runtime.js?1716156900"></script><script type="text/javascript" src="/_assets/js/app.js?1716156900"></script><!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-M94TJN6C');</script>
+<!-- End Google Tag Manager -->
+<style type="text/css">@import url(https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@100;200;300;400;500;600;700&display=swap);:lang(ar),[lang=ar],html[dir=rtl]{font-family:'IBM Plex Sans Arabic',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif!important}html[dir=rtl] .contents,html[dir=rtl] .v-application{font-family:'IBM Plex Sans Arabic',sans-serif!important}.caption{word-break:break-word}.row.page-header-section.no-gutters.align-content-center{height:auto!important;min-height:90px}blockquote:before{content:""!important}blockquote{border-top:6px solid #1976d2!important;border-left:0!important;padding:1rem!important}blockquote p{padding:0!important;line-height:26px!important}blockquote p li{font-style:normal!important}i{font-style:normal!important}a.v-list-item--link[href='https://wiki.bambulab.com/en/makerworld'] .v-list-item__avatar i::before{content:url('https://wiki.bambulab.com/makerworld/makerworld.svg')!important}a.v-list-item--link[href='https://wiki.bambulab.com/zh/makerworld'] .v-list-item__avatar i::before{content:url('https://wiki.bambulab.com/makerworld/makerworld.svg')!important}a.v-list-item--link[href='https://wiki.bambulab.com/en/cyberbrick'] .v-list-item__avatar i::before{content:url('https://wiki.bambulab.com/cyberbrick/cb_logo.svg')!important;width:24px!important;height:24px}a.v-list-item--link[href='https://wiki.bambulab.com/zh/cyberbrick'] .v-list-item__avatar i::before{content:url('https://wiki.bambulab.com/cyberbrick/cb_logo.svg')!important;width:24px!important;height:24px}.video-responsive{max-width:720px}.video-responsive-inner{position:relative;padding-bottom:56.25%}.video-responsive-inner iframe,.video-responsive-inner video{position:absolute;width:100%;height:100%;left:0;top:0}div.contents img{cursor:pointer}.mermaid>svg{height:auto}.mermaid{visibility:hidden}.mermaid[data-processed=true]{visibility:visible}header.nav-header .layout>div a[href='/login']{display:none}header.nav-header .layout>div:nth-child(3) hr{display:none}</style><!-- ============================================================
+     首页语言自动跳转（独立模块，与其它脚本隔离，勿与其它代码合并）
+     ------------------------------------------------------------
+     背景：访问根路径 / 时，Wiki.js 服务端会 302 到默认语言首页 /en/home。
+     本脚本在落到 /en/home 后，按用户意图决定是否再跳到其语言首页。
+     属于二次跳转（/ -> /en/home -> /<lang>/home），是纯前端方案的固有代价。
+
+     意图来源（cookie `wiki_lang`，由 body 脚本在用户点击语言菜单时写入，
+     含点选 English 时写 en）：
+       - cookie 是非 en 语言 -> 跳到该语言首页（用户明确选过它）；
+       - cookie 是 en        -> 留在英文首页（用户明确选过英文）；
+       - 没有 cookie（新用户，从没选过）-> 按浏览器语言跳一次（不写 cookie，
+         待用户主动选语言后才“锁定”）。
+     纯由 cookie 驱动，无需 sessionStorage：选了什么就一直是什么，直到再次选择。
+
+     维护：SUPPORTED 需与 body 中 LANGUAGES 的 locale 码保持一致；新增语言两处都要加。
+     ============================================================ -->
+  <script type="text/javascript">
+  (function () {
+    var DEFAULT_LOCALE = 'en';
+    var HOME = 'home';
+    // 与 body 的 LANGUAGES locale 码保持一致（新增语言两处都要改）
+    var SUPPORTED = ['en','zh','pt-br','de','es','fr','it','nl','ja','ko','ru','tr','pl','cs','hu','ro','sv','el'];
+    var COOKIE = 'wiki_lang';
+
+    function getCookie(name) {
+      var m = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));
+      return m ? decodeURIComponent(m[1]) : null;
+    }
+
+    // 仅在「默认语言首页 /en/home」上考虑自动跳转，不影响其它页面。
+    var seg = location.pathname.split('/').filter(Boolean); // ['en','home'] 等
+    var firstSeg = (seg[0] || '').toLowerCase();
+    var isDefaultHome = (firstSeg === DEFAULT_LOCALE && (seg[1] || '') === HOME && seg.length === 2);
+    if (!isDefaultHome) return;
+
+    var cookieLang = getCookie(COOKIE);
+    if (cookieLang && SUPPORTED.indexOf(cookieLang) >= 0) {
+      // 用户有明确选择：非 en 则跳过去，en 则留下。
+      if (cookieLang !== DEFAULT_LOCALE) {
+        location.replace('/' + cookieLang + '/' + HOME + location.search + location.hash);
+      }
+      return;
+    }
+
+    // 没有有效 cookie（新用户）：按浏览器语言跳一次，但不写 cookie。
+    function pickByBrowser() {
+      var langs = navigator.languages || [navigator.language || ''];
+      for (var i = 0; i < langs.length; i++) {
+        var l = (langs[i] || '').toLowerCase();
+        if (SUPPORTED.indexOf(l) >= 0) return l;        // 如 pt-br 直接命中
+        var base = l.split('-')[0];
+        if (SUPPORTED.indexOf(base) >= 0) return base;  // 如 zh-cn -> zh
+      }
+      return null;
+    }
+    var target = pickByBrowser();
+    if (!target || target === DEFAULT_LOCALE) return;   // 无匹配或就是英文 -> 留下
+    location.replace('/' + target + '/' + HOME + location.search + location.hash);
+  })();
+  </script>
+
+  <link  href="https://public-cdn.bblmw.com/wiki/viewer/viewer.min.css" rel="stylesheet">
+  <script src="https://public-cdn.bblmw.com/wiki/viewer/viewer.min.js"></script>
+  <link href="https://artalk.bambulab.com/dist/Artalk.css?v=5" rel="stylesheet" />
+  <script src="https://artalk.bambulab.com/dist/Artalk.js?v=5"></script>
+
+  <script type="text/javascript" defer>
+
+  function GetQueryString(sGet, name) {
+      var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
+      var r = sGet.match(reg);
+      if(r != null) {
+          return unescape(r[2]);
+      } else {
+          return null;
+      }
+  }
+
+  function getUrlQuery(name) {
+      let reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
+      let r = window.location.search.substr(1).match(reg);
+      if (r != null) {
+          return decodeURIComponent(r[2]);
+      };
+
+      return null;
+  }
+
+
+  function parseUrl(url) {
+      if(url.startsWith('//')) {
+          url = location.protocol + url;
+      }
+      return new window.URL(url);
+  }
+
+  function removeUrlParam(param, url = window.location.href) {
+      let obj = parseUrl(url);
+      obj.searchParams.delete(param);
+      return obj.href;
+  }
+
+  function SetMaskIconColor() {
+      document.querySelector('link[rel="mask-icon"]').setAttribute('color', '#00AE42');
+  }
+
+  function HandleVideoHtml() {
+      // const rxYoutube = /^.*(?:(?:youtu\.be\/|v\/|vi\/|u\/\w\/|embed\/)|(?:(?:watch)?\?v(?:i)?=|\&v(?:i)?=))([^#\&\?]*).*/
+      // the old regex will match https://www.copyright.gov/registration
+      const rxYoutube = /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/
+      const rxVimeo = /^.*(vimeo\.com\/)((channels\/[A-z]+\/)|(groups\/[A-z]+\/videos\/))?([0-9]+)/
+
+      document.querySelectorAll('.contents oembed, .contents a').forEach(elm => {
+          const url = elm.hasAttribute('url') ? elm.getAttribute('url') : elm.getAttribute('href')
+          if (url == null)
+              return;
+
+          let newElmHtml = null
+          let nWen = url.indexOf('?');
+          let GetParam = '';
+          let BiliMatch = false;
+          let BiliVID = '';
+          if(nWen >= 0) {
+              GetParam = url.substr(nWen + 1);
+              //alert(GetParam);
+              let sSrc = GetQueryString(GetParam, 'src');
+              let sV = GetQueryString(GetParam, 'v');
+              if(sSrc != null && sV != null && sSrc == 'bilibili') {
+                  BiliMatch = true;
+                  BiliVID = sV;
+              }
+          }
+          const ytMatch = url.match(rxYoutube)
+          const vmMatch = !ytMatch && url.match(rxVimeo)
+          if(BiliMatch) {
+              newElmHtml = '<iframe src="https://player.bilibili.com/player.html?p=1&autoplay=0&bvid=' + BiliVID + '" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true" width="100%" height="100%"> </iframe>';
+          } else if(ytMatch) {
+              newElmHtml = `<iframe id="ytplayer" type="text/html" width="640" height="360" src="https://www.youtube.com/embed/${ytMatch[1]}" frameborder="0" allowfullscreen></iframe>`
+          } else if(vmMatch) {
+              newElmHtml = `<iframe id="vmplayer" type="text/html" width="640" height="360" src="https://player.vimeo.com/video/${vmMatch[5]}" frameborder="0" allowfullscreen></iframe>`
+          } else if(url.endsWith('.mp4')) {
+              newElmHtml = `<video controls autostart="0" name="media" width="640" height="360"><source src="${url}" type="video/mp4"></video>`
+          } else {
+              return
+          }
+
+          const container = document.createElement('div')
+          container.classList.add('video-responsive')
+
+          const inner = document.createElement('div')
+          inner.classList.add('video-responsive-inner')
+
+          inner. insertAdjacentHTML('beforeend', newElmHtml)
+          container.append(inner)
+
+          elm.replaceWith(container)
+      })
+  }
+
+  function HandleSearchPage() {
+      const search = getUrlQuery('search')
+      if(search) {
+          const isAPP = window.innerWidth < 960
+          console.log("isAPP: " + isAPP)
+          const headerInner = document.querySelector("header.nav-header.v-sheet.theme--dark.v-toolbar.v-toolbar--flat.v-app-bar.v-app-bar--clipped.v-app-bar--fixed.black")
+          const input = headerInner.__vue__.$parent
+          console.log(input)
+          if(input) {
+              if(isAPP) {
+                  input.searchIsShown = true
+              }
+              input.search = search
+              const target = document.querySelector('.v-application--wrap')
+              const observe = new MutationObserver(function(mutations, observe) {
+                  mutations.forEach((mutation) => {
+                      const nodes = Array.from(mutation.addedNodes)
+                      if(nodes.length > 0) {
+                          nodes.forEach((node) => {
+                              if(node.nodeType === 1) {
+                                  if(node.classList.contains('search-results')) {
+                                      const btn = document.querySelector('.search-results div.text-xs-center .mx-2.v-btn')
+                                      if(btn) {
+                                          console.log(btn)
+                                          btn.onclick = function() {
+                                              const url = removeUrlParam('search')
+                                              window.location.href = url
+                                          }
+                                      }
+                                  }
+                              }
+                          })
+                      }
+                  })
+              });
+              observe.observe(target, {
+                  childList: true
+              });
+          }
+      }
+  }
+
+  function HandleViewerJS()
+  {
+    const imageContent = document.querySelector('div.contents')
+    if (imageContent) {
+      const gallery = new Viewer(imageContent,{title:false})
+      imageContent.querySelectorAll('img').forEach((item, index) => {
+        item.addEventListener('click', () => {
+          gallery.view(index)
+        })
+      })
+    }
+  }
+
+  const LangMap = {
+    en: 'en',
+    zh: 'zh-CN'
+  }
+
+  const i18n = {
+    [LangMap.en]: {
+      Comments: "Comments"
+    },
+    [LangMap.zh]: {
+      Comments: "评论"
+    }
+  }
+
+  function InitArtalk() {
+    // 获取class为contents的div元素
+    const contentsDiv = document.querySelector('div.contents');
+
+    const pathnameSplit = location.pathname.split('/')
+    const lang = LangMap[pathnameSplit[1]] || 'en'
+
+    // 检查元素是否存在，避免报错
+    if (contentsDiv) {
+      // 在目标元素后面插入新的div
+      contentsDiv.insertAdjacentHTML('afterend',
+  `<div id="discussion" class="comments-container">
+    <div class="comments-header">
+      <i aria-hidden="true" class="v-icon notranslate mr-2 mdi mdi-comment-text-outline theme--dark"></i>
+      <span>${i18n[lang].Comments}</span>
+    </div>
+    <div class="comments-main">
+      <div>
+        <div id="artalk-container"></div>
+      </div>
+    </div>
+  </div>`);
+    } else {
+      console.warn('未找到class为contents的div元素');
+    }
+
+    window.artalk = Artalk.init({
+      el:        '#artalk-container',
+      pageTitle: '',         // 页面标题 (留空自动获取)
+      server:    'https://artalk.bambulab.com',
+      site:      'bambulab wiki',
+      locale:    lang,
+    })
+  }
+
+  window.boot.register('vue', () => {
+
+      // window.onload = () => {
+      //    SetMaskIconColor();
+      //       HandleVideoHtml();
+      //      HandleSearchPage();
+      //}
+
+      window.addEventListener('load', () => {
+          SetMaskIconColor();
+           HandleVideoHtml();
+          HandleSearchPage();
+          HandleViewerJS();
+          InitArtalk();
+      })
+  })
+
+  </script>
+
+
+  <style id="miniwiki">
+    .miniwiki .nav-header,
+    .miniwiki .v-navigation-drawer,
+    .miniwiki .page-header-section,
+    .miniwiki .page-header-headings,
+    .miniwiki main.v-main .v-main__wrap > hr,
+    .miniwiki .page-edit-shortcuts,
+    .miniwiki .v-application--wrap > button,
+    .miniwiki .comments-container,
+    .miniwiki main.v-main .v-main__wrap > header, /* breadcrumbs */
+    .miniwiki main.v-main .layout > div.page-col-sd, /* sidebar */
+
+    .miniwiki .v-footer {
+      display: none;
+    }
+
+    .miniwiki main.v-main .layout > div.page-col-content {
+      max-width: 100% !important;
+      flex-grow: 1 !important;
+    }
+
+    .miniwiki main.v-main .layout {
+      margin: 0 !important;
+    }
+
+    .miniwiki .v-main,
+    .miniwiki .v-main__wrap > .container,
+    .miniwiki main.v-main .layout > div.page-col-content {
+      padding: 0 !important;
+    }
+  </style>
+
+  <script id="miniwiki">
+    (function() {
+      const isApp = /bbl-app/i.test(navigator.userAgent)
+      const isMiniwiki = /miniwiki/.test(location.href)
+
+      if (!isApp || !isMiniwiki) {
+        return
+      }
+
+      document.documentElement.classList.add('miniwiki')
+
+    })()
+  </script>
+<script>
+  (function() {
+    var origFetch = window.fetch;
+    window.fetch = function(url, opts) {
+      if (opts && opts.body && typeof opts.body === 'string' && opts.body.includes('search')) {
+        try {
+          var payload = JSON.parse(opts.body);
+          var list = Array.isArray(payload) ? payload : [payload];
+          var modified = false;
+          list.forEach(function(body) {
+            if (body.query && body.query.includes('pages') && body.query.includes('search(query:')) {
+              // 当前内容语言以 URL 路径首段为准（/zh/xxx -> zh），与站内其它逻辑一致。
+              // 不用 document.documentElement.lang：它反映的是界面语言（可能一直是 en），
+              // 还可能被 Chrome 网页翻译等改动，导致搜索 locale 恒为 en。
+              var seg = location.pathname.split('/').filter(Boolean);
+              var locale = (seg[0] || 'en').toLowerCase();
+              body.query = body.query
+                .replace('($query: String!)', '($query: String!, $locale: String)')
+                .replace(/search\(query:\s*\$query\)/, 'search(query: $query, locale: $locale)');
+              body.variables = body.variables || {};
+              body.variables.locale = locale;
+              modified = true;
+            }
+          });
+          if (modified) {
+            opts.body = JSON.stringify(Array.isArray(payload) ? list : list[0]);
+          }
+        } catch(e) {}
+      }
+      return origFetch.call(this, url, opts);
+    };
+  })();
+  </script>
+</head><body><!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M94TJN6C"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+<div id="root"><page locale="en" path="software/bambu-studio/xy-hole-contour-compensation" title="XY Hole / Contour compensation" description="Learn how XY Hole Contour Compensation in Bambu Studio improve dimensional accuracy. This guide explains when to use them, how to calibrate each step by step, and common limitations to achieve reliable part fit." :tags="[]" created-at="2023-08-31T06:55:49.201Z" updated-at="2026-05-08T04:07:33.149Z" author-name="Danna" :author-id="191" editor="markdown" :is-published="true" toc="W3sidGl0bGUiOiJIb3cgRG8gWW91IEtub3cgSWYgWW91IE5lZWQgSXQ/IiwiYW5jaG9yIjoiI2hvdy1kby15b3Uta25vdy1pZi15b3UtbmVlZC1pdCIsImNoaWxkcmVuIjpbXX0seyJ0aXRsZSI6IldoYXQgaXMgWFkgSG9sZSBhbmQgQ29udG91ciBDb21wZW5zYXRpb24/IiwiYW5jaG9yIjoiI3doYXQtaXMteHktaG9sZS1hbmQtY29udG91ci1jb21wZW5zYXRpb24iLCJjaGlsZHJlbiI6W119LHsidGl0bGUiOiJXaGVuIHRvIHVzZT8iLCJhbmNob3IiOiIjd2hlbi10by11c2UiLCJjaGlsZHJlbiI6W119LHsidGl0bGUiOiJSZWxhdGVkIGlzc3VlcyB3aXRoIHNpbWlsYXIgc3ltcHRvbXMiLCJhbmNob3IiOiIjcmVsYXRlZC1pc3N1ZXMtd2l0aC1zaW1pbGFyLXN5bXB0b21zIiwiY2hpbGRyZW4iOltdfSx7InRpdGxlIjoiSG93IHRvIENhbGlicmF0ZSBYWSBIb2xlIENvbXBlbnNhdGlvbiIsImFuY2hvciI6IiNob3ctdG8tY2FsaWJyYXRlLXh5LWhvbGUtY29tcGVuc2F0aW9uIiwiY2hpbGRyZW4iOlt7InRpdGxlIjoiU3RlcCAxLiBQcmludCBhIFRlc3QgTW9kZWwiLCJhbmNob3IiOiIjc3RlcC0xLXByaW50LWEtdGVzdC1tb2RlbCIsImNoaWxkcmVuIjpbXX0seyJ0aXRsZSI6IlN0ZXAgMi4gVGVzdCB0aGUgSG9sZXMiLCJhbmNob3IiOiIjc3RlcC0yLXRlc3QtdGhlLWhvbGVzIiwiY2hpbGRyZW4iOltdfSx7InRpdGxlIjoiU3RlcCAzLiBBcHBseSB0aGUgU2V0dGluZyBpbiBCYW1idSBTdHVkaW8iLCJhbmNob3IiOiIjc3RlcC0zLWFwcGx5LXRoZS1zZXR0aW5nLWluLWJhbWJ1LXN0dWRpbyIsImNoaWxkcmVuIjpbXX0seyJ0aXRsZSI6IlN0ZXAgNC4gVmFsaWRhdGUiLCJhbmNob3IiOiIjc3RlcC00LXZhbGlkYXRlIiwiY2hpbGRyZW4iOltdfSx7InRpdGxlIjoiU3RlcCA1LiBJdGVyYXRlIGlmIG5lZWRlZCIsImFuY2hvciI6IiNzdGVwLTUtaXRlcmF0ZS1pZi1uZWVkZWQiLCJjaGlsZHJlbiI6W119XX0seyJ0aXRsZSI6IkhvdyB0byBDYWxpYnJhdGUgWFkgQ29udG91ciBDb21wZW5zYXRpb24iLCJhbmNob3IiOiIjaG93LXRvLWNhbGlicmF0ZS14eS1jb250b3VyLWNvbXBlbnNhdGlvbiIsImNoaWxkcmVuIjpbeyJ0aXRsZSI6IlN0ZXAgMS4gUHJpbnQgYSBUZXN0IE1vZGVsIiwiYW5jaG9yIjoiI3N0ZXAtMS1wcmludC1hLXRlc3QtbW9kZWwtMSIsImNoaWxkcmVuIjpbXX0seyJ0aXRsZSI6IlN0ZXAgMi4gVGVzdCB0aGUgRml0dGluZyBpbiBhIEJhbWJ1IExhYiBTcG9vbCIsImFuY2hvciI6IiNzdGVwLTItdGVzdC10aGUtZml0dGluZy1pbi1hLWJhbWJ1LWxhYi1zcG9vbCIsImNoaWxkcmVuIjpbXX0seyJ0aXRsZSI6IlN0ZXAgMy4gSXRlcmF0ZSB0aGUgRml0dGluZyIsImFuY2hvciI6IiNzdGVwLTMtaXRlcmF0ZS10aGUtZml0dGluZyIsImNoaWxkcmVuIjpbXX0seyJ0aXRsZSI6IlN0ZXAgNC4gU2F2ZSB0aGUgcHJvZmlsZSIsImFuY2hvciI6IiNzdGVwLTQtc2F2ZS10aGUtcHJvZmlsZSIsImNoaWxkcmVuIjpbXX1dfSx7InRpdGxlIjoiTGltaXRhdGlvbnMiLCJhbmNob3IiOiIjbGltaXRhdGlvbnMiLCJjaGlsZHJlbiI6W119LHsidGl0bGUiOiJFbmQgTm90ZXMiLCJhbmNob3IiOiIjZW5kLW5vdGVzIiwiY2hpbGRyZW4iOltdfV0=" :page-id="980" sidebar="W3siaSI6InNkaS0xIiwiayI6ImxpbmsiLCJsIjoiSG9tZSIsImMiOiJtZGktaG9tZSIsInkiOiJwYWdlIiwidCI6Ii9lbi9ob21lIn0seyJpIjoic2RpLTIiLCJrIjoibGluayIsImwiOiJIMiBTZXJpZXMiLCJjIjoibWRpLWFscGhhLWgtYm94LW91dGxpbmUiLCJ5IjoiZXh0ZXJuYWwiLCJ0IjoiaHR0cHM6Ly93aWtpLmJhbWJ1bGFiLmNvbS9lbi9oMiJ9LHsiaSI6InNkaS0zIiwiayI6ImxpbmsiLCJsIjoiWCBTZXJpZXMiLCJjIjoibWRpLWFscGhhLXgtYm94LW91dGxpbmUiLCJ5IjoiZXh0ZXJuYWwiLCJ0IjoiaHR0cHM6Ly93aWtpLmJhbWJ1bGFiLmNvbS9lbi94LXNlcmllcyJ9LHsiaSI6InNkaS00IiwiayI6ImxpbmsiLCJsIjoiUCBTZXJpZXMiLCJjIjoibWRpLWFscGhhLXAtYm94LW91dGxpbmUiLCJ5IjoiZXh0ZXJuYWwiLCJ0IjoiaHR0cHM6Ly93aWtpLmJhbWJ1bGFiLmNvbS9lbi9wLXNlcmllcyJ9LHsiaSI6InNkaS01IiwiayI6ImxpbmsiLCJsIjoiQSBTZXJpZXMiLCJjIjoibWRpLWFscGhhLWEtYm94LW91dGxpbmUiLCJ5IjoiZXh0ZXJuYWwiLCJ0IjoiaHR0cHM6Ly93aWtpLmJhbWJ1bGFiLmNvbS9lbi9hLXNlcmllcyJ9LHsiaSI6InNkaS02IiwiayI6ImxpbmsiLCJsIjoiQU1TIiwiYyI6Im1kaS1ob21lLWZsb29yLWEiLCJ5IjoiZXh0ZXJuYWwiLCJ0IjoiaHR0cHM6Ly93aWtpLmJhbWJ1bGFiLmNvbS9lbi9hbXMtc2VyaWVzIn0seyJpIjoic2RpLTciLCJrIjoibGluayIsImwiOiJITVMiLCJjIjoibWRpLXRleHQtYm94LXNlYXJjaC1vdXRsaW5lIiwieSI6ImV4dGVybmFsIiwidCI6Imh0dHBzOi8vd2lraS5iYW1idWxhYi5jb20vZW4vaG1zL2hvbWUifSx7ImkiOiJzZGktOCIsImsiOiJsaW5rIiwibCI6IlNvZnR3YXJlICYgQVBQIiwiYyI6Im1kaS10ZWxldmlzaW9uLWd1aWRlIiwieSI6ImV4dGVybmFsIiwidCI6Imh0dHBzOi8vd2lraS5iYW1idWxhYi5jb20vZW4vc29mdHdhcmUifSx7ImkiOiJzZGktOSIsImsiOiJsaW5rIiwibCI6IkZpbGFtZW50cyBHdWlkZSIsImMiOiJtZGktcHJpbnRlci0zZC1ub3p6bGUiLCJ5IjoiZXh0ZXJuYWwiLCJ0IjoiaHR0cHM6Ly93aWtpLmJhbWJ1bGFiLmNvbS9lbi9maWxhbWVudC1hY2MifSx7ImkiOiJzZGktMTAiLCJrIjoibGluayIsImwiOiJBY2Nlc3NvcmllcyAmIENvbnN1bWFibGVzIiwiYyI6Im1kaS10b29scyIsInkiOiJleHRlcm5hbCIsInQiOiJodHRwczovL3dpa2kuYmFtYnVsYWIuY29tL2VuL2ZpbGFtZW50LWFjYy9hY2MifSx7ImkiOiJzZGktMTEiLCJrIjoibGluayIsImwiOiJMYXNlciAmIEN1dHRpbmciLCJjIjoibWRpLWxhc2VyLXBvaW50ZXIiLCJ5IjoiZXh0ZXJuYWwiLCJ0IjoiaHR0cHM6Ly93aWtpLmJhbWJ1bGFiLmNvbS9lbi9sYXNlci1jdXR0aW5nLW1vZHVsZSJ9LHsiaSI6InNkaS0xMiIsImsiOiJsaW5rIiwibCI6Ik1ha2VyV29ybGQiLCJjIjoibWRpLWN1YmUtc2NhbiIsInkiOiJleHRlcm5hbCIsInQiOiJodHRwczovL3dpa2kuYmFtYnVsYWIuY29tL2VuL21ha2Vyd29ybGQifSx7ImkiOiJzZGktMTMiLCJrIjoibGluayIsImwiOiJDeWJlckJyaWNrIiwiYyI6Im1kaS1jaGV2cm9uLXJpZ2h0IiwieSI6ImV4dGVybmFsIiwidCI6Imh0dHBzOi8vd2lraS5iYW1idWxhYi5jb20vZW4vY3liZXJicmljayJ9LHsiaSI6InNkaS0xNCIsImsiOiJoZWFkZXIiLCJsIjoiR2VuZXJhbCIsImMiOm51bGwsInkiOm51bGwsInQiOm51bGx9LHsiaSI6InNkaS0xNSIsImsiOiJsaW5rIiwibCI6Iktub3dsZWRnZSBTaGFyaW5nIiwiYyI6Im1kaS1mb3J1bSIsInkiOiJwYWdlIiwidCI6Ii9lbi9rbm93bGVkZ2Utc2hhcmluZyJ9LHsiaSI6InNkaS0xNiIsImsiOiJsaW5rIiwibCI6Ikdsb3NzYXJ5IiwiYyI6Im1kaS10YWJsZS1vZi1jb250ZW50cyIsInkiOiJwYWdlIiwidCI6Ii9lbi9nbG9zc2FyeSJ9LHsiaSI6InNkaS0xNyIsImsiOiJsaW5rIiwibCI6Ildpa2kgVXBkYXRlcyIsImMiOiJtZGktbmV3LWJveCIsInkiOiJleHRlcm5hbCIsInQiOiJodHRwczovL3dpa2kuYmFtYnVsYWIuY29tL2VuL25ldy1hbmQtdXBkYXRlcyJ9LHsiaSI6InNkaS0xOCIsImsiOiJsaW5rIiwibCI6IkZBUSIsImMiOiJtZGktZnJlcXVlbnRseS1hc2tlZC1xdWVzdGlvbnMiLCJ5IjoicGFnZSIsInQiOiIvZW4vZmFxIn0seyJpIjoic2RpLTE5IiwiayI6ImxpbmsiLCJsIjoiQWJvdXQgVXMiLCJjIjoibWRpLWluZm9ybWF0aW9uLW91dGxpbmUiLCJ5IjoicGFnZSIsInQiOiIvZW4vYWJvdXQtdXMifSx7ImkiOiJzZGktMjAiLCJrIjoiZGl2aWRlciIsImwiOm51bGwsImMiOm51bGwsInkiOm51bGwsInQiOm51bGx9LHsiaSI6InNkaS0yMSIsImsiOiJsaW5rIiwibCI6IkNvbW11bml0eSBDb250cmlidXRpb25zIiwiYyI6Im1kaS13aWtpcGVkaWEiLCJ5IjoiZXh0ZXJuYWxibGFuayIsInQiOiJodHRwczovL3dpa2kuYmFtYnVsYWIuY29tL2VuL2NvbnRyaWJ1dGlvbi1ndWlkZSJ9XQ==" nav-mode="STATIC" effective-permissions="eyJjb21tZW50cyI6eyJyZWFkIjpmYWxzZSwid3JpdGUiOmZhbHNlLCJtYW5hZ2UiOmZhbHNlfSwiaGlzdG9yeSI6eyJyZWFkIjpmYWxzZX0sInNvdXJjZSI6eyJyZWFkIjpmYWxzZX0sInBhZ2VzIjp7InJlYWQiOnRydWUsIndyaXRlIjpmYWxzZSwibWFuYWdlIjpmYWxzZSwiZGVsZXRlIjpmYWxzZSwic2NyaXB0IjpmYWxzZSwic3R5bGUiOmZhbHNlfSwic3lzdGVtIjp7Im1hbmFnZSI6ZmFsc2V9fQ==" edit-shortcuts="eyJlZGl0RmFiIjp0cnVlLCJlZGl0TWVudUJhciI6dHJ1ZSwiZWRpdE1lbnVCdG4iOmZhbHNlLCJlZGl0TWVudUV4dGVybmFsQnRuIjpmYWxzZSwiZWRpdE1lbnVFeHRlcm5hbFVybCI6Imh0dHBzOi8vZ2l0aHViLmNvbS9vcmcvcmVwby9ibG9iL21haW4ve2ZpbGVuYW1lfSIsImVkaXRNZW51RXh0ZXJuYWxJY29uIjoibWRpLWdpdGh1YiIsImVkaXRNZW51RXh0ZXJuYWxOYW1lIjoiR2l0SHViIn0=" filename="en/software/bambu-studio/xy-hole-contour-compensation.md"><template slot="contents"><div><h2 id="how-do-you-know-if-you-need-it" class="toc-header"><a class="toc-anchor" href="#how-do-you-know-if-you-need-it">¶</a> How Do You Know If You Need It?</h2>
+<p>You may need XY compensation if:</p>
+<ul>
+<li>Screws or bolts do not fit into printed holes.</li>
+<li>Pins or shafts feel too tight.</li>
+<li>Assembled parts require sanding or force to fit.</li>
+<li>Measured hole diameters are smaller than the designed values.</li>
+</ul>
+<p><strong>This can lead to frustration, let's explore how to improve part precision!</strong><br>
+<img src="/software/bambu-studio/xy-hole-contour-compensation/screw_doesnt_fit.gif" alt="screw_doesnt_fit.gif" width="600"></p>
+<br>
+<h2 id="what-is-xy-hole-and-contour-compensation" class="toc-header"><a class="toc-anchor" href="#what-is-xy-hole-and-contour-compensation">¶</a> What is XY Hole and Contour Compensation?</h2>
+<p><strong>XY compensation</strong> is a feature in Bambu Studio that helps correct part dimensions.</p>
+<p>It has two separate settings, both are used to improve fit and dimensional accuracy:</p>
+<ul>
+<li>
+<p><strong>XY Hole Compensation</strong><br>
+Adjusts the size of holes (closed, hollow areas) in each layer.<br>
+It only affects holes and does not change the outer size of the model.</p>
+</li>
+<li>
+<p><strong>XY Contour Compensation</strong><br>
+Adjusts the outer contour of the model.<br>
+It increases or decreases the overall XY size while keeping hole sizes unchanged.</p>
+</li>
+</ul>
+<p><img src="/software/bambu-studio/xy-hole-contour-compensation/hole_vs_contour_wiki.jpg" alt="hole_vs_contour_wiki.jpg" width="600"></p>
+<br>
+<h2 id="when-to-use" class="toc-header"><a class="toc-anchor" href="#when-to-use">¶</a> When to use?</h2>
+<p>Use XY Hole Compensation and XY Contour Compensation when a model requires accurate fitting with other components, such as screws, pins, magnets, or other printed parts. These settings allow you to fine-tune dimensions to achieve proper and reliable fits.</p>
+<br>
+<h2 id="related-issues-with-similar-symptoms" class="toc-header"><a class="toc-anchor" href="#related-issues-with-similar-symptoms">¶</a> Related issues with similar symptoms</h2>
+<p>Other factors can affect model dimensional accuracy. Check and correct these issues before adjusting XY Hole Compensation or XY Contour Compensation.</p>
+<ul>
+<li><a href="/en/knowledge-sharing/3d-prints-shrinkage" class="is-internal-link is-valid-page">Material shrinkage</a>, filament contracts as it cools. This can make holes smaller.</li>
+<li><a href="/en/software/bambu-studio/parameter/elephant-foot" class="is-internal-link is-valid-page">Elephant’s foot</a> from excessive first-layer squish on the Build Plate.</li>
+<li><a href="/en/filament-acc/filament/dry-filament" class="is-internal-link is-valid-page">Moist filament</a> causing inconsistent extrusion.</li>
+<li><a href="/en/software/bambu-studio/calibration_pa" class="is-internal-link is-valid-page">Flow dynamics</a> not properly tuned.</li>
+<li>Hole diameters close to the Nozzle size, holes below 1 mm can be challenging to tune.</li>
+<li>Lack of chamfers or lead-in features on holes.</li>
+<li><a href="/en/software/bambu-studio/Seam" class="is-internal-link is-valid-page">Seam</a>, this feature can affect hole precision.</li>
+</ul>
+<br>
+<h2 id="how-to-calibrate-xy-hole-compensation" class="toc-header"><a class="toc-anchor" href="#how-to-calibrate-xy-hole-compensation">¶</a> How to Calibrate XY Hole Compensation</h2>
+<h3 id="step-1-print-a-test-model" class="toc-header"><a class="toc-anchor" href="#step-1-print-a-test-model">¶</a> Step 1. Print a Test Model</h3>
+<p>Use a calibration model with multiple known hole sizes.<br>
+There are hundreds of test models on Makerworld. Most require calipers to measure and correct.<br>
+<a href="https://makerworld.com/en/models/2172726-xy-hole-compensation-without-calipers#profileId-2356775" class="is-external-link">This model by Lebadjuras uses a known metric screw size</a>, which are standard across the world to test the hole sizes. You can use an M3, M4, M5 or M6, depending on what you may have available.</p>
+<blockquote>
+<p>ℹ️ <strong>Note:</strong> Print the model using the same <strong>Process profile and Filament you plan to use for your final part</strong>.<br>
+This calibration is <strong>specific to each filament</strong> and should be repeated when changing materials.</p>
+</blockquote>
+<ul>
+<li><a href="https://makerworld.com/en/models/2172726-xy-hole-compensation-without-calipers#profileId-2356775" class="is-external-link">Open the model</a> in Bambu Studio (1) and print it, using your desired filament and print profile.</li>
+</ul>
+<p><img src="/software/bambu-studio/xy-hole-contour-compensation/makerworld_xy_hole_wiki.jpg" alt="makerworld_xy_hole_wiki.jpg" width="800"><br>
+<br></p>
+<p>In this example, an <strong>M6 screw is used</strong>. Larger screws produce more accurate calibration results, so using an M6 screw is recommended.<br>
+<br></p>
+<blockquote>
+<p>ℹ️ <strong>Note:</strong> An M6 screw has a nominal size of 6.0 mm, but the actual diameter is usually smaller due to manufacturing tolerances.<br>
+Most M6 screws follow the ISO 6g standard, which intentionally makes the thread slightly smaller to ensure easy assembly. In practice, the diameter is typically around 5.9 mm.<br>
+<img src="/software/bambu-studio/xy-hole-contour-compensation/m6_screw_diameter.png" alt="m6_screw_diameter.png" width="400"></p>
+</blockquote>
+<p><strong>Set XY Hole Compensation to 0 mm</strong>, and print the model.<br>
+Notice that the M6 hole measures 5.9 mm, which matches the screw diameter. The screw should fit very tightly.</p>
+<p><img src="/software/bambu-studio/xy-hole-contour-compensation/true_diameters_m6.png" alt="true_diameters_m6.png" width="1000"><br>
+<br></p>
+<h3 id="step-2-test-the-holes" class="toc-header"><a class="toc-anchor" href="#step-2-test-the-holes">¶</a> Step 2. Test the Holes</h3>
+<p>Using your available screw size, test which hole fits the screw snugly. It shouldn't have any wobble.</p>
+<p><img src="/software/bambu-studio/xy-hole-contour-compensation/noxyhole_compensation.gif" alt="noxyhole_compensation.gif" width="800"></p>
+<p>After checking which hole fits ensures a precise fit, register the number. <strong>In this case, + 0.15</strong>.</p>
+<!-- 
+> **If you have a set of Calipers**, you can just measure the M6 hole. In this case the original measurment was 5.66 mm which means the hole is 0.24 mm undersized. After inserting half of that value in Bambu Studio, the hole is now 0.04 Oversized.
+> This is great, **it is impossible to reach a perfect precision** as both machine tolerances and reading tolerances impact the final dimensions.
+> ![xy_hole_compensation_real_world.png](/software/bambu-studio/xy-hole-contour-compensation/xy_hole_compensation_real_world.png =800x)
+-->
+<br>
+<h3 id="step-3-apply-the-setting-in-bambu-studio" class="toc-header"><a class="toc-anchor" href="#step-3-apply-the-setting-in-bambu-studio">¶</a> Step 3. Apply the Setting in Bambu Studio</h3>
+<p>Go to <strong>Process</strong> ⏩ <strong>Quality</strong> ⏩ <strong>Precision</strong></p>
+<p>Enter the registered value in <strong>XY Hole Compensation</strong></p>
+<p>The hole diameter will increase by twice the compensation value, as shown in the image below.</p>
+<p><img src="/software/bambu-studio/xy-hole-contour-compensation/xy_hole_compensation.png" alt="xy_hole_compensation.png" width="1000"></p>
+<p>Click the <strong>Save icon</strong> (1) and rename the <strong>Process Profile</strong> for easy reference (2).<br>
+Then click <strong>OK</strong> (3).</p>
+<p>This saved profile can be reused as your custom <strong>precision fit profile</strong>.</p>
+<p><img src="/software/bambu-studio/xy-hole-contour-compensation/save_the_profile_wiki.jpg" alt="save_the_profile_wiki.jpg" width="800"><br>
+<br></p>
+<h3 id="step-4-validate" class="toc-header"><a class="toc-anchor" href="#step-4-validate">¶</a> Step 4. Validate</h3>
+<p>Reprint with the <strong>modified print process and test again</strong>.<br>
+This time the screw should fit the correct Metric size (M3, M4, M5 or M6).</p>
+<p><img src="/software/bambu-studio/xy-hole-contour-compensation/afterocmpensation.gif" alt="afterocmpensation.gif" width="800"><br>
+<br></p>
+<h3 id="step-5-iterate-if-needed" class="toc-header"><a class="toc-anchor" href="#step-5-iterate-if-needed">¶</a> Step 5. Iterate if needed</h3>
+<p>If for some reason the screw doesn't fit the correct Metric size hole, identify what hole it fits in. Add the new hole value to the previously registered value in Bambu Studio.</p>
+<blockquote>
+<p><strong>For example,</strong> in Step 3 you set XY Hole Compensation to 0.2 mm. After printing the calibration model again, the screw fits correctly in the +0.1 mm hole. In this case, add the values together:</p>
+<ul>
+<li><strong>0.2 mm + 0.1 mm = 0.3 mm</strong></li>
+<li><strong>Set XY Hole Compensation to 0.3 mm.</strong></li>
+</ul>
+<p>Repeat this process as needed until the desired fit is achieved.<br>
+If all holes become noticeably too large at any point, restart the calibration process and return to <strong>Step 1</strong>.<br>
+<br></p>
+</blockquote>
+<h2 id="how-to-calibrate-xy-contour-compensation" class="toc-header"><a class="toc-anchor" href="#how-to-calibrate-xy-contour-compensation">¶</a> How to Calibrate XY Contour Compensation</h2>
+<h3 id="step-1-print-a-test-model-1" class="toc-header"><a class="toc-anchor" href="#step-1-print-a-test-model-1">¶</a> Step 1. Print a Test Model</h3>
+<p>Use a <a href="https://makerworld.com/en/models/2172676-xy-contour-calibration-without-calipers#profileId-2356707" class="is-external-link">calibration model with multiple known outer sizes</a>. There are hundreds of test models on Makerworld. Most require calipers to measure and correct.</p>
+<p>This <a href="https://makerworld.com/en/models/2172676-xy-contour-calibration-without-calipers#profileId-2356707" class="is-external-link">model by Lebadjuras uses a known reference size</a> that is available to most users: an <strong>original Bambu Lab Reusable Spool</strong>.<br>
+For accurate calibration, an original Bambu Lab Reusable Spool must be used.</p>
+<p>⚠️ <em>3D printed spools are not suitable, as their dimensions may vary and affect the results!</em> ⚠️️️</p>
+<p><img src="/software/bambu-studio/xy-hole-contour-compensation/makerworld_xy_contour_wiki.jpg" alt="makerworld_xy_contour_wiki.jpg" width="800"><br>
+<br></p>
+<h3 id="step-2-test-the-fitting-in-a-bambu-lab-spool" class="toc-header"><a class="toc-anchor" href="#step-2-test-the-fitting-in-a-bambu-lab-spool">¶</a> Step 2. Test the Fitting in a Bambu Lab Spool</h3>
+<p>After the model has been printed, try to fit it inside the middle of the Bambu Lab Spool.</p>
+<p><img src="/software/bambu-studio/xy-hole-contour-compensation/spool_side_wiki.jpg" alt="spool_side_wiki.jpg" width="800"></p>
+<p>It should fit tightly, without any play. It should also hold in place and not fall inside the spool center hole:<br>
+<img src="/software/bambu-studio/xy-hole-contour-compensation/perfectfit_wiki.jpg" alt="perfectfit_wiki.jpg" width="800"></p>
+<p>Below you can find two examples of poor fittings:<br>
+<img src="/software/bambu-studio/xy-hole-contour-compensation/fit_check.png" alt="fit_check.png" width="800"></p>
+<blockquote>
+<p>If you have a set of <strong>calipers</strong>, this job is much quicker:</p>
+<ul>
+<li>Measure the part diameter and register the measured value.</li>
+<li>Subtract ( <strong>55 - [Measured value]</strong> ), then divide by 2 , the resulting value should be inserted into the XY Contour Compensation.</li>
+</ul>
+<p><img src="/software/bambu-studio/xy-hole-contour-compensation/caliper_measurment_.jpg" alt="caliper_measurment_.jpg" width="800"></p>
+<ul>
+<li>Skip to <strong>Step 4</strong>.</li>
+</ul>
+</blockquote>
+<p>If you <strong>don't have a set of calipers</strong>, don't worry, follow the next Step.<br>
+<br></p>
+<h3 id="step-3-iterate-the-fitting" class="toc-header"><a class="toc-anchor" href="#step-3-iterate-the-fitting">¶</a> Step 3. Iterate the Fitting</h3>
+<p>Without an accurate measuring tool, we will have to iterate the XY Contour value and reprint the part until we achieve the desired fit.</p>
+<ul>
+<li>If <strong>the part is too loose in the spool center</strong>, you will need to increase the value, try increments of <strong>0.1 mm</strong> until the right fit is achieved.</li>
+<li>If <strong>the part doesn't fit in the spool center</strong>, you will need to decrease the value, try increments of <strong>-0.1 mm</strong> until the right fit is achieved.</li>
+</ul>
+<p><img src="/software/bambu-studio/xy-hole-contour-compensation/iteration_wiki.jpg" alt="iteration_wiki.jpg" width="500"></p>
+<br>
+<h3 id="step-4-save-the-profile" class="toc-header"><a class="toc-anchor" href="#step-4-save-the-profile">¶</a> Step 4. Save the profile</h3>
+<p>Once the desired fit is achieved. Click the <strong>Save icon</strong> (1) and rename the <strong>Process Profile</strong> for easy reference (2).<br>
+Then click <strong>OK</strong> (3).</p>
+<p>This saved profile can be reused as your custom <strong>precision fit profile</strong>.</p>
+<p><img src="/software/bambu-studio/xy-hole-contour-compensation/save_process_wiki.jpg" alt="save_process_wiki.jpg" width="800"><br>
+<br></p>
+<h2 id="limitations" class="toc-header"><a class="toc-anchor" href="#limitations">¶</a> Limitations</h2>
+<p>X-Y Hole Compensation only applies to closed paths. If the model has openings on its sides, resulting in unclosed paths within a single layer, the X-Y Hole Compensation function cannot be used.</p>
+<p>Take the model in the image below as an example. It has several holes on its side, which cause some intermediate layers to be unclosed. Therefore, these layers do not have holes (as seen in layer 74 in the right image) and will not be affected by X-Y Hole Compensation. Only X-Y Contour Compensation can be applied to them.</p>
+<p><img src="https://wiki.bambulab.com/software/bambu-studio/xy-hole-contour-compensation/%E4%BB%85%E6%9C%89%E5%A4%96%E8%BD%AE%E5%BB%93%E6%97%A0%E5%AD%94.png" alt="" width="800"></p>
+<p>If <strong>X-Y Hole Compensation</strong> is applied to a model with unclosed paths, noticeable layer separation will occur at the hole locations.</p>
+<p><img src="/software/bambu-studio/ksr-fdm-test/real_model_wiki.jpg" alt="real_model_wiki.jpg" width="800"><br>
+<br></p>
+<h2 id="end-notes" class="toc-header"><a class="toc-anchor" href="#end-notes">¶</a> <strong>End Notes</strong></h2>
+<blockquote>
+<p>We hope the detailed guide provided has been helpful and informative. </p>
+<p>If this guide does not solve your problem, please submit a <a href="https://bambulab.com/en/my/support/tickets/create?from=5" target="_blank" class="is-external-link">technical ticket</a>, we will answer your questions and provide assistance. </p>
+<p>If you have any suggestions or feedback on this Wiki, please leave a message in the comment area. Thank you for your support and attention!</p>
+</blockquote>
+</div></template><template slot="comments"><div><comments></comments></div></template></page></div><script>
+  (function(){
+    // disable in studio and handy
+    if (/(bbl-slicer|bbl-suite|bbl-app)/i.test(navigator.userAgent)) {
+      return
+    }
+    var timer = setInterval(() => {
+      var footer = document.querySelector('.v-footer > div');
+      if (!footer) {
+        return;
+      }
+      clearInterval(timer);
+      setupTrustArc(footer);
+    }, 1000)
+
+    function setupTrustArc(container) {
+      // <link rel="stylesheet" type="text/css" href="//trustarc.bambulab.com/css/banner-styles.css">
+      var link = document.createElement("link");
+      link.rel = "stylesheet";
+      link.type = "text/css";
+      link.href = "//trustarc.bambulab.com/css/banner-styles.css";
+      document.head.appendChild(link);
+
+      // <span id="teconsent"></span>
+      var btn = document.createElement('span');
+      btn.id = 'teconsent';
+      btn.style = 'margin-left: 10px';
+      container.appendChild(btn);
+
+      // <div id="consent-banner"></div>
+      var banner = document.createElement('div');
+      banner.id = 'consent-banner';
+      container.appendChild(banner);
+
+
+      var l = location.pathname.split('/').filter(Boolean)[0] || "en"
+      if (l === "zh") l = "zh_hans";
+
+      var t = document.createElement('script');
+      t.src = 'https://consent.trustarc.com/v2/notice/uizsmj?pcookie&locale=' + l;
+      t.async = true;
+      container.appendChild(t);
+    }
+
+  })()
+
+</script>
+
+
+<script type="text/javascript">
+  //The following is related to minority languages
+  (function() {
+    /* ===== Styles(no need to modify)===== */
+    var style = document.createElement('style');
+    style.textContent = `
+        .translation-notice {
+          display: flex;
+          align-items: flex-start;
+          margin-top: 24px;
+          padding: 12px 16px;
+          background-color: #e8f4fd;
+          border: 1px solid #b8dff5;
+          border-left: 4px solid #4aa3df;
+          border-radius: 4px;
+          color: #2c6fa0;
+          font-size: 14px;
+          line-height: 1.6;
+        }
+        .translation-notice-icon {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          min-width: 20px;
+          width: 20px;
+          height: 20px;
+          margin-right: 12px;
+          margin-top: 2px;
+          background-color: #4aa3df;
+          color: #ffffff;
+          border-radius: 50%;
+          font-size: 12px;
+          font-weight: bold;
+          flex-shrink: 0;
+        }
+        .translation-notice-text {
+          flex: 1;
+          word-wrap: break-word;
+        }
+        .translation-notice-text a {
+          color: #2c6fa0;
+          text-decoration: underline;
+          white-space: nowrap;
+        }
+        .translation-notice-text a:hover { color: #1a4d73; }
+        .locale-ai-badge {
+          display: inline-block;
+          margin-left: 6px;
+          padding: 1px 5px;
+          background-color: #4aa3df;
+          color: #ffffff;
+          font-size: 10px;
+          font-weight: bold;
+          border-radius: 3px;
+          vertical-align: middle;
+          line-height: 1.4;
+        }
+        /* 语言选择按钮上显示当前语言简称 + 箭头，提升可发现性
+           （不少用户不知道右上角地球图标能点开切换语言）。 */
+        .locale-btn-label {
+          display: inline-flex;
+          align-items: center;
+          margin-left: 4px;
+          font-size: 13px;
+          font-weight: 600;
+          line-height: 1;
+          text-transform: uppercase;
+          letter-spacing: .3px;
+        }
+        .locale-btn-label .mdi { font-size: 18px; line-height: 1; }
+        /* 图标按钮本是圆形固定宽度，加了文字后放宽为自适应 */
+        .v-btn--icon.has-locale-label {
+          width: auto !important;
+          min-width: 44px;
+          padding: 0 8px !important;
+        }
+      `;
+    document.head.appendChild(style);
+
+    var email = '<a href="mailto:wiki@bambulab.com">wiki@bambulab.com</a>';
+    var icon = '<span class="translation-notice-icon">ℹ</span>';
+    function notice(text) {
+      return '<div class="translation-notice">' + icon +
+        '<span class="translation-notice-text">' + text + '</span></div>';
+    }
+
+    /* ============================================================
+     *  CONFIGURATION — to add/edit a language, edit ONLY this list.
+     *  Each entry keeps everything for one language together.
+     *  Array order = menu display order (left to right).
+     *
+     *  Fields per language:
+     *    code   : locale code (matches document lang / data-locale)
+     *    name   : the language's NATIVE name as shown in the menu
+     *             (lowercase; used to detect the language from menu text)
+     *    ai     : true  = AI-translated language (shows "AI" badge +
+     *                     disclaimer, controlled by `paths`)
+     *             false = native/source language (no badge, no disclaimer)
+     *    paths  : (AI languages only) where to SHOW this language:
+     *               null     -> show on all pages (translation complete)
+     *               []       -> hidden everywhere (translation incomplete)
+     *               ['p1']   -> show only under /<locale>/p1/
+     *    footer : (AI languages only) disclaimer text in that language.
+     *             Wrap with notice(...). Configure even while hidden so it
+     *             takes effect immediately once `paths` is enabled.
+     *
+     *  注意：SUPPORTED 列表也存在于 head 的首页语言跳转脚本里，
+     *  新增/删除语言时两处都要同步。
+     * ============================================================ */
+    var LANGUAGES = [
+      { code: 'en',    name: 'english',    ai: false },
+      { code: 'zh',    name: '中文',        ai: false },
+      { code: 'pt-br', name: 'português',  ai: true, paths: null,
+        footer: notice('Este conteúdo foi traduzido por IA e pode conter pequenas imprecisões ou problemas de redação. Caso note algum problema, entre em contato conosco pelo ' + email + ' e faremos a correção o mais rápido possível.') },
+      { code: 'de',    name: 'deutsch',    ai: true, paths: null,
+        footer: notice('Dieser Inhalt wurde durch KI übersetzt und kann kleinere Ungenauigkeiten oder Formulierungsprobleme enthalten. Sollten Ihnen Auffälligkeiten auffallen, kontaktieren Sie uns bitte unter ' + email + ', damit wir sie schnellstmöglich korrigieren können.') },
+      { code: 'es',    name: 'español',    ai: true, paths: null,
+        footer: notice('Este contenido ha sido traducido por IA y puede contener pequeñas imprecisiones o problemas de redacción. Si detecta algún problema, póngase en contacto con nosotros en ' + email + ' y lo corregiremos lo antes posible.') },
+      { code: 'fr',    name: 'français',   ai: true, paths: null,
+        footer: notice('Ce contenu a été traduit par IA et peut contenir de légères imprécisions ou des problèmes de formulation. Si vous remarquez un problème, veuillez nous contacter à ' + email + ' et nous le corrigerons dans les plus brefs délais.') },
+      { code: 'it',    name: 'italiano',   ai: true, paths: null,
+        footer: notice('Questo contenuto è stato tradotto dall\'IA e potrebbe contenere piccole imprecisioni o problemi di formulazione. Se notate qualche problema, contattateci all\'indirizzo ' + email + ' e provvederemo a correggerlo il prima possibile.') },
+      { code: 'nl',    name: 'nederlands', ai: true, paths: null,
+        footer: notice('Deze inhoud is door AI vertaald en kan kleine onnauwkeurigheden of formuleringsproblemen bevatten. Mocht u iets opmerken, neem dan contact met ons op via ' + email + ', zodat we dit zo snel mogelijk kunnen corrigeren.') },
+      { code: 'ja',    name: '日本語',      ai: true, paths: null,
+        footer: notice('このコンテンツはAIによって翻訳されており、軽微な不正確さや表現上の問題が含まれる可能性があります。お気づきの点がございましたら、' + email + 'までご連絡ください。できるだけ早く修正いたします。') },
+      { code: 'ko',    name: '한국어',      ai: true, paths: null,
+        footer: notice('이 콘텐츠는 AI에 의해 번역되었으며 사소한 부정확함이나 표현상의 문제가 포함될 수 있습니다. 문제를 발견하시면 ' + email + '로 연락해 주시기 바랍니다. 최대한 빨리 수정하겠습니다.') },
+      { code: 'ru',    name: 'русский',    ai: true, paths: null,
+        footer: notice('Этот контент был переведён с помощью ИИ и может содержать незначительные неточности или стилистические проблемы. Если вы заметили какие-либо ошибки, пожалуйста, свяжитесь с нами по адресу ' + email + ', и мы исправим их как можно скорее.') },
+      { code: 'tr',    name: 'türkçe',     ai: true, paths: null,
+        footer: notice('Bu içerik yapay zeka tarafından çevrilmiştir ve küçük yanlışlıklar veya ifade sorunları içerebilir. Herhangi bir sorun fark ederseniz, lütfen ' + email + ' adresinden bizimle iletişime geçin; en kısa sürede düzelteceğiz.') },
+      { code: 'pl',    name: 'polski',     ai: true, paths: null,
+        footer: notice('Ta treść została przetłumaczona przez AI i może zawierać drobne nieścisłości lub błędy językowe. Jeśli zauważysz jakiekolwiek problemy, skontaktuj się z nami pod adresem ' + email + ', a poprawimy je tak szybko, jak to możliwe.') },
+      { code: 'cs',    name: 'čeština',    ai: true, paths: null,
+        footer: notice('Tento obsah byl přeložen pomocí AI a může obsahovat drobné nepřesnosti nebo jazykové nedostatky. Pokud narazíte na jakékoli problémy, kontaktujte nás na adrese ' + email + ' a co nejdříve je opravíme.') },
+      { code: 'hu',    name: 'magyar',     ai: true, paths: null,
+        footer: notice('Ez a tartalom mesterséges intelligencia segítségével készült fordítás, ezért kisebb pontatlanságokat vagy nyelvi hibákat tartalmazhat. Ha bármilyen problémát észlel, kérjük, lépjen kapcsolatba velünk a következő címen: ' + email + ', és a lehető leghamarabb javítjuk.') },
+      { code: 'ro',    name: 'română',     ai: true, paths: null,
+        footer: notice('Acest conținut a fost tradus cu ajutorul inteligenței artificiale și poate conține mici inadvertențe sau formulări imperfecte. Dacă observați orice problemă, vă rugăm să ne contactați la adresa ' + email + ', iar noi o vom corecta cât mai curând posibil.') },
+      { code: 'sv',    name: 'svenska',     ai: true, paths: null,
+        footer: notice('Detta innehåll har översatts med hjälp av AI och kan innehålla mindre felaktigheter eller språkliga brister. Om du upptäcker några problem, kontakta oss på ' + email + ', så rättar vi dem så snart som möjligt.') },
+      { code: 'el',    name: 'ελληνικά',    ai: true, paths: null,
+        footer: notice('Αυτό το περιεχόμενο μεταφράστηκε με τη βοήθεια τεχνητής νοημοσύνης και ενδέχεται να περιέχει μικρές ανακρίβειες ή γλωσσικές ατέλειες. Εάν εντοπίσετε οποιοδήποτε πρόβλημα, επικοινωνήστε μαζί μας στη διεύθυνση ' + email + ' και θα το διορθώσουμε το συντομότερο δυνατό.') },
+      { code: 'th',    name: 'ไทย',          ai: true, paths: null,
+        footer: notice('เนื้อหานี้ได้รับการแปลด้วยความช่วยเหลือของ AI และอาจมีข้อผิดพลาดเล็กน้อยหรือข้อบกพร่องทางภาษา หากคุณพบปัญหาใด ๆ โปรดติดต่อเราที่ ' + email + ' และเราจะแก้ไขโดยเร็วที่สุด') },
+      { code: 'vi',    name: 'tiếng Việt',   ai: true, paths: null,
+        footer: notice('Nội dung này được dịch với sự hỗ trợ của AI và có thể chứa một số điểm chưa chính xác hoặc hạn chế nhỏ về ngôn ngữ. Nếu bạn phát hiện bất kỳ vấn đề nào, vui lòng liên hệ với chúng tôi qua địa chỉ ' + email + ' và chúng tôi sẽ khắc phục sớm nhất có thể.') },
+      { code: 'ar',    name: 'العربية',    ai: true, paths: null,
+        footer: notice('تمت ترجمة هذا المحتوى باستخدام الذكاء الاصطناعي، وقد يحتوي على بعض الأخطاء البسيطة أو الصياغات غير الدقيقة. إذا لاحظت أي مشكلة، يُرجى التواصل معنا عبر ' + email + ' وسنعمل على تصحيحها في أقرب وقت ممكن.') },
+    ];
+
+    /* ==========   Main logic below, no need to modify  ================ */
+
+    /* Derive the lookup structures the logic uses from the single LANGUAGES list. */
+    var aiLocales = LANGUAGES.filter(function(l) { return l.ai; }).map(function(l) { return l.code; });
+    var localeOrder = LANGUAGES.map(function(l) { return l.code; });
+    var aiEnabledPaths = {};
+    var footers = {};
+    var localeNameMap = {};
+    LANGUAGES.forEach(function(l) {
+      localeNameMap[l.name] = l.code;
+      if (l.ai) {
+        aiEnabledPaths[l.code] = (l.paths === undefined) ? [] : l.paths;
+        if (l.footer) footers[l.code] = l.footer;
+      }
+    });
+    var locale = (document.documentElement.lang || '').toLowerCase();
+    var sortedNames = Object.keys(localeNameMap).sort(function(a, b) {
+      return b.length - a.length;
+    });
+    function detectLocale(text) {
+      var t = (text || '').toLowerCase().trim();
+      for (var i = 0; i < sortedNames.length; i++) {
+        if (t.indexOf(sortedNames[i].toLowerCase()) !== -1) {
+          return localeNameMap[sortedNames[i]];
+        }
+      }
+      return '';
+    }
+    function cleanBrackets(el) {
+      if (!el) return;
+      var walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null, false);
+      var nodes = [], n;
+      while (n = walker.nextNode()) nodes.push(n);
+      nodes.forEach(function(n) {
+        var c = n.textContent.replace(/\s*[（(][^）)]*[）)]\s*/g, '').trim();
+        if (n.textContent !== c) n.textContent = c;
+      });
+    }
+    function isAiEnabledPathFor(targetLocale) {
+      var rule = aiEnabledPaths[targetLocale];
+      if (rule === null || rule === undefined) return true;
+      var seg = window.location.pathname.split('/').filter(Boolean);
+      if (seg.length < 2) return false;
+      return rule.indexOf(seg[1].toLowerCase()) !== -1;
+    }
+    // 当前页面语言：优先取 URL 首段（与 head 跳转脚本、搜索 locale 口径一致，
+    // 不受 Chrome 网页翻译篡改 documentElement.lang 的影响），回退到 lang 属性。
+    function currentLocaleCode() {
+      var seg = window.location.pathname.split('/').filter(Boolean);
+      var fromPath = (seg[0] || '').toLowerCase();
+      if (localeOrder.indexOf(fromPath) !== -1) return fromPath;
+      return locale;  // 回退：document.documentElement.lang
+    }
+    // 在语言选择按钮（含 .mdi-web 地球图标的那个 v-btn）内，图标之后追加当前语言
+    // 简称 + 向右箭头，让“这里能切换语言”更直观。SPA 会重渲染按钮，故每次都检查。
+    function decorateLocaleButton() {
+      var webIcon = document.querySelector('header .mdi-web, .v-toolbar .mdi-web');
+      if (!webIcon) return;
+      var btn = webIcon.closest('button.v-btn');
+      if (!btn || btn.querySelector('.locale-btn-label')) return;
+      var code = currentLocaleCode();
+      if (!code) return;
+      var label = document.createElement('span');
+      label.className = 'locale-btn-label notranslate';
+      label.setAttribute('translate', 'no');
+      // 简称用 locale code 大写（与菜单里蓝色 chip 一致，如 pt-br -> PT-BR）
+      label.appendChild(document.createTextNode(code.toUpperCase()));
+      var chevron = document.createElement('i');
+      chevron.className = 'v-icon notranslate mdi mdi-chevron-right';
+      chevron.setAttribute('aria-hidden', 'true');
+      label.appendChild(chevron);
+      btn.appendChild(label);
+      btn.classList.add('has-locale-label');
+    }
+    // 记住用户主动选择的语言：点击某语言菜单项时写 cookie（含点 English 写 en）。
+    // head 中的首页自动跳转逻辑据此 cookie 决定跳向哪个语言。
+    function rememberLangChoice(code) {
+      if (!code) return;
+      document.cookie = 'wiki_lang=' + encodeURIComponent(code) +
+        '; path=/; max-age=31536000; samesite=lax';
+    }
+    var observer = new MutationObserver(function() {
+      decorateLocaleButton();
+      if (aiLocales.indexOf(locale) !== -1 && isAiEnabledPathFor(locale)) {
+        var content = document.querySelector('.contents');
+        if (content && footers[locale] && !content.querySelector('.translation-notice')) {
+          content.insertAdjacentHTML('beforeend', footers[locale]);
+        }
+      }
+      var items = document.querySelectorAll('.v-menu__content .v-list-item, .locale-selector .v-list-item');
+      if (items.length === 0) return;
+      items.forEach(function(item) {
+        var titleEl = item.querySelector('.v-list-item__title') || item;
+        if (!item.querySelector('.locale-ai-badge')) {
+          var code = detectLocale(item.textContent);
+          if (code) {
+            item.setAttribute('data-locale', code);
+            if (aiLocales.indexOf(code) !== -1) {
+              var badge = document.createElement('span');
+              badge.className = 'locale-ai-badge';
+              badge.textContent = 'AI';
+              titleEl.appendChild(badge);
+            }
+          }
+        }
+        // 用户点击语言项时记住其选择（每项只绑一次）
+        if (!item.hasAttribute('data-lang-click-bound')) {
+          item.setAttribute('data-lang-click-bound', '1');
+          item.addEventListener('click', function() {
+            rememberLangChoice(this.getAttribute('data-locale'));
+          });
+        }
+        cleanBrackets(titleEl);
+        var code = item.getAttribute('data-locale');
+        if (code && aiLocales.indexOf(code) !== -1) {
+          item.style.display = isAiEnabledPathFor(code) ? '' : 'none';
+        }
+      });
+      var container = items[0].parentElement;
+      if (!container.hasAttribute('data-sorted')) {
+        var all = container.querySelectorAll('.v-list-item[data-locale]');
+        if (all.length > 0) {
+          Array.from(all).sort(function(a, b) {
+            var ai = localeOrder.indexOf(a.getAttribute('data-locale'));
+            var bi = localeOrder.indexOf(b.getAttribute('data-locale'));
+            return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
+          }).forEach(function(el) { container.appendChild(el); });
+          container.setAttribute('data-sorted', 'true');
+        }
+      }
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+  })();
+</script>
+</body></html>

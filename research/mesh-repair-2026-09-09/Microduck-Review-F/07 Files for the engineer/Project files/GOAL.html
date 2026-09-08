@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Microduck — Goal</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* doc.css — the shared academic style for every document in this repo.
+   Link it, do not copy it.
+
+   THE FONT LINK: the axis is `opsz`, NOT `opt_sz`. Measured 2026-09-03 (lane T
+   fix pass), headless Chrome, document.fonts:
+
+     family=Source+Serif+4:opt_sz,wght@...   ->  HTTP 400, 0 @font-face rules
+                                                 declared, {} families
+     family=Source+Serif+4:opsz,wght@...     ->  HTTP 200, 42 @font-face rules,
+                                                 {Source Serif 4: 18,
+                                                  Source Sans 3: 14,
+                                                  IBM Plex Mono: 10}
+
+   One malformed axis name 400s the WHOLE css2 request, so it did not merely
+   drop the serif — it dropped Source Sans 3 and IBM Plex Mono with it, and
+   every one of the 21 documents that carried the typo silently fell back to
+   Georgia / system sans / Menlo with no error anywhere. Nothing on the page
+   says it happened; the only way to see it is to count faces. If you edit the
+   link, re-run that count before you commit.
+   (document.fonts.check() is not the test: it returns true for a family with
+   no faces at all. Count document.fonts.size.) */
+  :root{
+    --paper:#ffffff;--card:#fbfaf7;--ink:#1a1a1a;--ink-2:#565656;--ink2:#565656;
+    --line:#d7d3ca;--hair:#d7d3ca;--rule:#1a1a1a;--accent:#243b53;--wire:#243b53;--wire-ink:#243b53;
+    --ready:#1c6b3c;--pass-ink:#1c6b3c;--partial:#8a5a00;--cd:#8a5a00;--cd-ink:#8a5a00;--no:#9a2b1e;--rail:#9a2b1e;
+    --mint:#1c6b3c;--yellow:#8a5a00;--yellow-ink:#8a5a00;--graphite:#333;--figbg:#fbfaf7;
+    --pass-bg:transparent;--cd-bg:transparent;--chip-bg:transparent;--chip:transparent;--mono-bg:#fbfaf7;--head:#f2efe8;
+    --serif:"Source Serif 4",Georgia,"Times New Roman",serif;
+    --sans:"Source Sans 3",-apple-system,"Segoe UI",sans-serif;
+    --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  }
+  *{box-sizing:border-box}
+  body{background:var(--paper);color:var(--ink);margin:0;font-family:var(--serif);font-size:16px;line-height:1.55}
+  .wrap{max-width:920px;margin:0 auto;padding:0 40px 110px}
+  a{color:var(--accent);text-decoration:none;border-bottom:1px solid rgba(36,59,83,.28)}
+  a:hover{border-bottom-color:var(--accent)}
+  h1,h2,h3{font-family:var(--serif);font-weight:700;line-height:1.15;text-wrap:balance;color:var(--ink)}
+  code,.mono{font-family:var(--mono);font-size:.86em}
+  .eyebrow{font-family:var(--sans);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-2)}
+  /* masthead (header.top / header.hero) */
+  header.top,header.hero{display:block;padding:46px 0 14px;border-bottom:2.5px solid var(--rule);border-top:none}
+  header.top h1,header.hero h1{font-size:40px;letter-spacing:-.01em;font-weight:700}
+  header.top .sub,header.hero .sub{font-size:15.5px;color:var(--ink-2);margin-top:8px;max-width:40em}
+  header.hero .hero-img,.hero-img{background:#fff;border:1px solid var(--hair);border-radius:0}
+  .rev{margin-top:14px;font-family:var(--mono);font-size:11.5px;color:var(--ink-2);display:flex;flex-wrap:wrap;gap:6px 22px}
+  /* stat bar → clean inline figures */
+  .statbar{display:flex;flex-wrap:wrap;gap:0;border-bottom:1px solid var(--hair);margin:6px 0}
+  .stat{padding:14px 26px 14px 0;margin-right:24px}
+  .stat b{display:block;font-family:var(--serif);font-weight:700;font-size:22px;font-variant-numeric:tabular-nums}
+  .stat span{font-family:var(--sans);font-size:12px;color:var(--ink-2)}
+  /* toc */
+  nav.toc{position:static;background:none;border:none;border-bottom:1px solid var(--hair);display:flex;flex-wrap:wrap;gap:0 20px;padding:10px 0;font-family:var(--sans)}
+  nav.toc a{color:var(--ink);border:none;font-size:12.5px;letter-spacing:.02em;padding:4px 0;text-transform:none}
+  nav.toc a:hover{color:var(--accent)}
+  /* sections */
+  section{margin-top:36px;padding-top:0}
+  section>h2{font-size:22px;padding-bottom:6px;border-bottom:1px solid var(--hair);margin:0 0 12px;font-weight:700}
+  section>h2 .n,section>h2 .sec-no{font-family:var(--mono);font-weight:600;color:var(--accent);font-size:18px;padding-right:12px}
+  .lede{color:var(--ink-2);max-width:40em;margin:2px 0 14px}
+  h3{font-size:16.5px;margin:20px 0 6px}
+  /* cards → framed notes */
+  .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+  .card{background:var(--card);border:1px solid var(--hair);border-radius:0;padding:15px 18px}
+  .card h3{font-size:14px;margin:0 0 6px;font-family:var(--sans);font-weight:600}
+  .card p{font-size:13.5px;margin:0}
+  /* tables — booktabs */
+  .tablewrap,.tw{overflow-x:auto;border:none;border-radius:0;background:none;margin:12px 0}
+  table{border-collapse:collapse;width:100%;font-size:13.5px;font-variant-numeric:tabular-nums}
+  th{font-family:var(--sans);font-weight:600;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-2);text-align:left;padding:7px 12px 6px;border-bottom:1px solid var(--rule);border-top:1.5px solid var(--rule);white-space:nowrap}
+  td{padding:6px 12px;border-bottom:1px solid var(--hair);vertical-align:top}
+  tr:last-child td{border-bottom:1.5px solid var(--rule)}
+  td.num,td.n{text-align:right;font-family:var(--mono);white-space:nowrap}
+  /* chips → plain status words, no fill */
+  .chip{display:inline;font-family:var(--sans);font-weight:600;font-size:11.5px;letter-spacing:.03em;text-transform:uppercase;padding:0;border-radius:0;background:none;border:none;white-space:nowrap}
+  .chip.pass{color:var(--ready)} .chip.cd{color:var(--partial)} .chip.buy{color:var(--ink-2)} .chip.rail{color:var(--no);border:none}
+  /* figures */
+  figure{margin:16px 0;border:1px solid var(--hair);background:var(--figbg);border-radius:0;padding:10px;overflow:hidden}
+  figure img{display:block;width:100%;border:1px solid var(--hair);background:#fff}
+  figcaption{font-family:var(--sans);font-size:12.5px;color:var(--ink-2);padding:8px 2px 2px;border:none}
+  /* diagram / wiring embed */
+  .diagram{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:18px;align-items:start}
+  .dia{background:#fff;border:1px solid var(--hair);border-radius:0;padding:12px;overflow-x:auto}
+  .wirebox{border:1px solid var(--hair);border-radius:0;background:#fff;overflow:auto;max-height:720px;padding:10px}
+  .wirebox svg{width:100%;height:auto;display:block}
+  /* notes / callouts */
+  .note{border-left:2px solid var(--accent);background:var(--figbg);padding:10px 15px;border-radius:0;font-size:14px;margin:12px 0}
+  .mono-block{font-family:var(--mono);font-size:12.5px;background:var(--figbg);border:1px solid var(--hair);border-radius:0;padding:12px 15px;overflow-x:auto;line-height:1.6}
+  /* steps */
+  .steps{display:grid;gap:8px}
+  .step{display:grid;grid-template-columns:40px 1fr;gap:12px;background:var(--figbg);border:1px solid var(--hair);border-radius:0;padding:12px 15px}
+  .step::before{font-family:var(--mono);font-weight:600;font-size:18px;color:var(--accent);text-align:right}
+  .step b{display:block} .step span{color:var(--ink-2);font-size:13px}
+  footer{margin-top:48px;padding-top:14px;border-top:2.5px solid var(--rule);font-family:var(--sans);font-size:12px;color:var(--ink-2);display:flex;flex-wrap:wrap;gap:6px 26px}
+  @media(max-width:680px){.wrap{padding:0 22px 70px}.diagram,.grid2{grid-template-columns:1fr}}
+  .backlink{font-family:var(--sans);font-size:12.5px;margin:16px 0 0}
+  .backlink a{border:none}
+  .wrap>h2:first-of-type,.wrap>h1:first-child{margin-top:8px}
+  h2{font-size:24px;margin:30px 0 10px;padding-bottom:5px;border-bottom:1px solid var(--hair)}
+  h3{font-size:18px;margin:22px 0 6px}
+  h4{font-size:15px;font-family:var(--sans);font-weight:600;margin:16px 0 4px}
+  p{max-width:42em;margin:0 0 11px}
+  ul,ol{max-width:42em;margin:8px 0;padding-left:24px}
+  li{margin:3px 0}
+  pre.code{font-family:var(--mono);font-size:12.5px;background:var(--figbg);border:1px solid var(--hair);padding:12px 15px;overflow-x:auto;line-height:1.55;white-space:pre}
+  blockquote{border-left:2px solid var(--accent);background:var(--figbg);margin:12px 0;padding:9px 16px;color:var(--ink);font-style:italic;max-width:42em}
+  hr{border:none;border-top:1px solid var(--hair);margin:22px 0}
+  strong{font-weight:700}
+  table.data td{max-width:none}
+  /* compact: a wide evidence table that must still fit the 920px sheet in print/PDF,
+     where .tablewrap's horizontal scroll does not exist. Added 2026-09-03 (lane F2). */
+  table.data.compact{font-size:11.5px}
+  table.data.compact th{padding:5px 6px;font-size:9.5px;letter-spacing:.03em;white-space:normal}
+  table.data.compact td{padding:4px 6px}
+  table.data.compact td code{font-size:.94em;word-break:break-all}
+  table.data.compact .chip{font-size:10px}
+
+
+  table.data.compact td{overflow-wrap:anywhere}
+  table.data.compact th{overflow-wrap:break-word}
+  table.data.compact td a,table.data.compact td code{word-break:break-all}
+</style>
+</head>
+<body>
+<div class="wrap"><p class="backlink"><a href="RELEASE.html">← Release dossier</a></p>
+<h2>GOAL — Microduck, night of 2026-09-02 (Leif: &quot;write a good goal … i will give to a claude instance to work on this all night&quot;)</h2>
+<p>Leif, 2026-09-02, verbatim on top of this goal: <em>&quot;use opus 5 for workflows youre the orcehstrator which use fable 5.1 but to save tokens use opus 5 for workflows.&quot;</em> and <em>&quot;be token efficent and use opus for as much as possible&quot;</em></p>
+<pre class="code">GOAL — Microduck: drive to a physically manufacturable product, verified end to end.
+
+REPO: /Users/leifrydenfalk/dev/ce-workshop/ce-designs/microduck  (own git repo + triad root)
+WORKSHOP: /Users/leifrydenfalk/dev/ce-workshop  (read its CLAUDE.md + TRIAD.md first)
+RUN CAD/SIM AS: ce-cad/bin/cad &lt;script.py&gt;   (FreeCAD python 3.11; system python3 has no numpy/PIL)
+export CE_TRIAD_ROOT=&quot;$REPO:$WORKSHOP&quot;
+
+YOU RUN THIS PROJECT. Do not stop to ask permission. Do not hand work back. If something is
+undetermined, that is YOUR work item — resolve it by measuring, reading, or researching.
+Escalate to the human ONLY for a genuine product preference or spending money.
+
+HOUSE RULES (non-negotiable)
+- MEASURE, never assert. Every number carries a source: a file:line, a datasheet page, a
+  distributor URL, or a measurement you just took.
+- Three verdicts: PASS / FAIL / CANNOT DETERMINE. A missing value stays missing — never a
+  plausible default. Never loosen a check to make it pass.
+- Full engineering precision. Do not round to 1-2 dp. Dimensions in mm to 3-4 dp, and state
+  the tolerance basis. Units mm / g / degrees / volts.
+- LOOK at every artifact you produce (render it, screenshot it, Read the image back). A file
+  that exists is not a file that is correct.
+- Everything is a document in the repo. HTML, not Markdown, in the shared academic style
+  (link tools/doc.css). Regenerate documents from data with a script in tools/ — never
+  hand-maintain a table that a generator could own.
+
+WORKFLOWS: use them aggressively for every lane. Pass {model: &#x27;opus&#x27;} on every agent() call.
+Spend tokens freely. Prefer pipeline() over barriers. Adversarially verify findings.
+
+STATE AS OF HANDOFF
+- COMPARISON.html — our CAD beside real product photos at 8 matched camera angles + measured
+  dimension table for all 47 meshes. 9 parametric rebuilds, 9/9 dimensional PASS, worst-axis
+  deviation 0.7193 mm. Generated by tools/gen_comparison.py from out/verify/mech_dims.json.
+- Renders: sim/compare_render.py (MuJoCo studio) and sim/assembly_steps_mj.py (assembly steps).
+- Stress FEA (out/stress/report.json): shin SF 7.51, ankle SF 2.02, hip-bracket SF 6.42 PASS
+  at 20 N design load. upper-leg = CANNOT DETERMINE (connector-name bug in
+  sim/stress_evidence.py) — FIX IT.
+- Electronics/sourcing workflow may still be running or have landed; check /workflows and
+  the transcript dir before re-running.
+- RELEASE.html is the master dossier. It must end up containing everything.
+
+CRITICAL OPEN FINDINGS (from COMPARISON.html §5) — close these
+1. SIM HEAD ≠ PRODUCT HEAD. top_head_shell is 91.751 x 122.688 x 46.339 mm, far longer
+   front-to-back than the compact domed head in every product photo, and the eye bezel is
+   missing. Tooling cut from this mesh is WRONG. Re-model the head from the product
+   photographs (photogrammetry / silhouette fitting against images/store/*), grade it, and
+   replace it. This is the single biggest geometric blocker.
+2. Battery mesh is np_f970 (38.600 x 20.600 x 70.800 mm) but docs say NP-F550 class.
+   Determine the real cell, then re-check the power_support cavity against it.
+3. Compute placeholder mesh is a Pi Zero 2 W; documented host is Radxa Zero 3W. Same
+   65 x 30 mm envelope, different connectors/mounting. Verify against the real board.
+4. Two ankle revisions ship (ankle_left Y=36.500 vs ankle_l_v1 Y=46.500). Determine which
+   is current.
+5. Drawing generator has two measured defects: it merges coaxial holes into a phantom
+   counterbore, and the wall-thickness note reports a section scan rather than the true
+   minimum. Fix the generator, then regenerate every sheet.
+6. Three custom PCBs (Robot HAT, imu_to_dxl, banana contact board) have no published design.
+   They must be schematic-captured, laid out, and quoted before anything is fabricable.
+
+LANES TO COMPLETE (workflow each; produce a document for each)
+A. HEAD RECONSTRUCTION — close finding 1. Deliver a graded head model + before/after
+   photo-match evidence.
+B. MECHANICAL DRAWINGS — fix the generator, regenerate all sheets with ISO views from every
+   angle, full dimensions including radii, hole tables, sections, tolerances, surface finish,
+   and a reference photo on each sheet. Deliver out/drawings/INDEX.html.
+C. ELECTRONICS VERIFICATION — every component: exact MPN, package, physical dimensions,
+   pinout, voltage, current draw, mass. Every value cited. Deliver ELECTRONICS-DATASHEET.html.
+D. CUSTOM PCB DESIGN — schematic + layout + Gerbers + BOM for the three boards, or a
+   fully-specified statement of work with real fab quotes if design is out of scope.
+   Deliver electronics/robot-hat/, and a PCB-PACKAGE.html.
+E. SOURCING &amp; RFQ — every bought line: &gt;=2 real distributors, unit price at 1/100/1000, MOQ,
+   lead time, alternates. Deliver SOURCING.html and a ready-to-send RFQ.html the human can
+   email to suppliers. DO NOT contact anyone yourself.
+F. SIMULATION EVIDENCE — run far more: FEA on every structural part (fix the upper-leg case),
+   drop/impact, fatigue on the ankle (lowest SF at 2.02), thermal on the servos and the
+   compute, battery runtime, gait robustness sweeps, and tolerance stack-up on every joint.
+   Deliver SIMULATION.html with every run&#x27;s inputs, outputs and verdict.
+G. MANUFACTURING PLAYBOOK — the document the team executes: process selection per part
+   (print vs mould) with break-even quantities, DFM review of every part, print profiles,
+   assembly line steps with jigs and torque specs, QA test plan with pass/fail gates,
+   packaging. Deliver MANUFACTURING-PLAYBOOK.html.
+H. TEST &amp; VALIDATION PLAN — how we prove a built unit works: electrical bring-up, servo ID
+   and calibration, sensor checks, walk acceptance test. Deliver TEST-PLAN.html.
+I. TOOLING (ce-workshop, not just ce-cad) — every capability you needed and had to hand-roll
+   becomes a real tool in the appropriate repo, with docs. Make this whole loop easy to repeat
+   for the next product.
+
+FINAL INTEGRATION
+RELEASE.html must link and summarise every document above, carry the honest readiness matrix
+with what still blocks factory, and open cleanly. Screenshot it and Read it back before you
+call it done. Commit continuously with clear messages. Record entries in ce-changelog.
+
+DEFINITION OF DONE
+A competent shop could take this repo and build a working Microduck: every part has a
+dimensioned drawing or a print file, every bought item has a supplier and a price, every
+custom board has a design or a quoted SOW, the assembly and test procedures are written, and
+every claim in the repo is either measured, cited, or explicitly marked CANNOT DETERMINE.</pre>
+<h3>HANDOVER CORRECTIONS — read before acting on the findings above (added 2026-09-02 21:25 by the orchestrator, from the previous session&#x27;s handover)</h3>
+<ol><li><strong>Finding 1 (head) is CANNOT DETERMINE, not confirmed.</strong> <code>tools/head_analysis.py</code> → <code>out/verify/head_analysis.json</code> measured scale-free silhouette ratios: head length / robot height agrees to 3.76 % (product 0.4233, ours 0.4392) — the head is NOT markedly longer. The aspect ratio differs +69 % (1.206 vs 2.042) but the reference photo has the beak OPEN and the head TILTED, which inflates apparent head height. Verdict CANNOT DETERMINE (commit 960943a, COMPARISON.html §5). <strong>Lane A must first SETTLE it</strong>: photogrammetric scaling against the XL330-M288-T visible in the same frame (body face 20.000 × 34.000 mm, ROBOTIS drawing cited), then measure the head shell in mm against the mesh&#x27;s 91.751 × 122.688 × 46.339 mm, posing jaw_soft open to match the photo (the jaw is NOT an actuated joint in the published model). Re-model the head ONLY if the measured deviation exceeds the 1.0 mm p95 / 1.5 mm bbox rule of docs/REBUILD-PROTOCOL.md; otherwise the deliverable is the measurement and the eye-bezel question.</li><li><strong>Electronics component verification already ran</strong> (previous session, 14 Opus agents, each component: MPN, package, dims, pinout, voltage, ≥2 distributors with price at 1/100/1000, MOQ, lead time, cited). Results: <code>out/verify/electronics_verify.json</code> (canonical, commit 1fe090a; <code>out/handover/elec-verify-wf_969f3a4c.json</code> is the same journal copied earlier). Its five design-changing findings are in <code>workflows/RUNNING.md</code>. Lanes C, D, E and every verify/fix stage: CONSUME it (merge into electronics/elec-spec.json and spec/sourcing.json, re-check citations), do not redo it.</li><li>**A manufacturing workflow (DFM / process / assembly+jigs / QA / sourcing ×3 / synth) died with the previous session and was RELAUNCHED by the orchestrator from <code>workflows/manufacturing.js</code> (5 DFM groups + process + assembly + QA + 3 sourcing + synth, Opus). Its results land in <code>out/handover/manufacturing.json</code> when it returns. Lane G and its fix stage: check that file and merge rather than duplicate.</li><li><strong>Detached FEA is running</strong>: <code>sim/stress_matrix.py</code> → <code>out/stress/matrix.json</code> + <code>matrix.log</code> (buffered; read the file). 4 structural parts × 3 load cases (standing 20 N / landing 60 N / lateral 15 N) in PLA with a gmsh mesh-size fallback [None, 2.0, 1.5, 1.2, 1.0, 0.8], then mesh convergence on the governing case, then a material sweep PLA/PETG/ABS/NYLON/ASA. The upper-leg gmsh failure is a MESHER SIZE issue — the solid is valid, closed, 462 faces. Lane F: consume matrix.json, do not restart it, do not run a second copy.</li><li><strong>Unit trap</strong>: Pollen&#x27;s reference assets are in METRES (×1000); our rebuilds are native mm. <code>sim/mech_dims.py</code> handles it. Do not repeat that mistake.</li><li><strong>Renders</strong>: <code>sim/compare_render.py</code> (MuJoCo studio; camera front=az180, profile-left=az270, profile-right=az90, ¾ front-left=az225, ¾ back-right=az45; joint zooms need distance ≥ 0.16 m or the near plane clips to a blank white frame). <code>sim/assembly_steps_mj.py</code> for cumulative assembly frames. Every render of ours sits beside the real photo (Leif&#x27;s rule).</li><li><code>INDEX.html</code> (tools/gen_index.py) is the repo front door; it stats every entry before writing. Regenerate it after adding a document.</li><li><strong>LANE OWNERSHIP (Leif, 2026-09-02: &quot;be highly parallel. use fable 5.1 for difficult tasks&quot;).</strong> Read <code>out/handover/LANE-OWNERSHIP.json</code> before starting. If your lane letter is listed under <code>owned_elsewhere</code> and you are an agent of workflow wf_b277547c-936, do NOT do the work: return immediately as that file instructs. Lanes A, F, H run in a parallel workflow.</li></ol>
+<h3>STANDING ORDERS ADDED 2026-09-03 — Leif, verbatim. These bind every agent and every workflow.</h3>
+<blockquote>lots of details like joints and screws and bolts are mising from our cad<br>everything muyst be there. all everything including ball joints and it must<br>match exactly this is your job and the job of your agents tell them they have<br>more freedom to explore and create their own tools and whatever they need this<br>is their machine</blockquote>
+<blockquote>make more detailed everything tell agents and workflows to do this divide the<br>work prioperly were making this for real a lot more detail and attention to<br>details.</blockquote>
+<blockquote>the wiring should b e in our cad designs add it proeprly do even more details<br>and poses and even more detailed joint pictures and comparrisons</blockquote>
+<p><strong>What this means in practice, and it is not negotiable:</strong></p>
+<ol><li><strong>EVERY PHYSICAL THING IS IN THE CAD.</strong> Screws, nuts, heat-set inserts, washers, ball joints/ball studs, bearings, cables, connectors, adhesive joints, the lot. MEASURED 2026-09-03: <code>ce-assemblies/microduck/current/bom.json</code> holds <strong>38 rows and ZERO fastener rows</strong> — because the assembly was seeded from Pollen&#x27;s MJCF, which carries only visual and collision geometry. Yet <code>SPEC.md:75-76</code> reads the robot as an <strong>M2 system: Ø2.2000 clearance ×77, Ø4.4000 counterbore ×28, Ø1.6000 tap ×20, Ø2.7000/2.8000 ×20</strong>. Those 145 holes each imply a fastener that is not in our model. Find every one by MEASURING the geometry, put it in the assembly through a connection (never a literal transform), and let the BOM and the drawings carry it.</li><li><strong>IT MUST MATCH EXACTLY.</strong> Where our model and the reference disagree, the disagreement is measured and reported, never smoothed. A part nobody measured is CANNOT DETERMINE with what settles it.</li><li><strong>THE AGENTS OWN THIS MACHINE.</strong> Leif: <em>&quot;they have more freedom to explore and create their own tools and whatever they need this is their machine&quot;</em>. So: write the tool you wish existed rather than working around its absence (PROTOCOLS.md P11 — a capability a core app lacks is part of your task, and a one-off script that dies with the session is the defect). Promote anything reusable into <code>ce-cad</code>, <code>ce-struct</code>, <code>ce-wire</code> or <code>bin/</code> with its docs and its self-test. Explore: read the reference, take a measurement nobody asked for, follow the thing that looks wrong.</li><li><strong>DIVIDE THE WORK PROPERLY.</strong> Every lane states what it OWNS (paths) before it starts; two agents never write one file; a lane too big for one agent is split by artifact, not by adjective.</li><li><strong>MORE DETAIL, EVERYWHERE.</strong> More poses, more joint pictures, more sections, more comparisons against the real photographs, more dimensions on every sheet. Depth is the deliverable.</li></ol>
+<h3>STANDING ORDERS ADDED 2026-09-03 LATE — Leif, verbatim. Four more, all binding.</h3>
+<blockquote>Give the microduck these researches to injest and utilize and do research on:<br>https://makerworld.com/en/models/3250889-microduck-robotic-duck-structural-parts-simulation<br>https://github.com/pollen-robotics/microduck_rl/tree/develop/src/mjlab_microduck/robot/microduck/assets<br>and an new image covering the components of the microduck internals. the cad<br>and 3d printable files and stuff should be in these resourches tell it to dive<br>deeply into it</blockquote>
+<blockquote>We have a Chinese guy working on this project and we will work together with<br>all the resources and manufacturing and factories and research on this. We<br>have a factory and 10 engineers to put on this. So just send the documents of<br>what needs to be done. Give it this verbatim.</blockquote>
+<blockquote>it should not run simiulation just once it should iterate and simulate,<br>design, fix, simulate, design, fix, simulate, design fix until it matches<br>exactly the real airtag based on all the research all night never stop it<br>should set its own goal so it never stops. we need this to be a real product.<br>same as with the microduck two real world products and real world results.</blockquote>
+<blockquote>I like the halo dock browser more but the styling of themicroduck more with<br>the white. redesign the microduck repository / document browser to have this<br>same clean sideview i like it a lot. tell the workflows working on this</blockquote>
+<p><strong>What binds every agent from here:</strong></p>
+<ol><li><strong>THE AUDIENCE IS NOW A FACTORY AND TEN ENGINEERS.</strong> Not us. A stranger who watched no measurement being taken must be able to build from the paper. Say per artifact whether it is READY TO BUILD FROM or NOT YET, and put what is not ready at the FRONT, not the back.</li><li><strong>CONVERGE, DO NOT DELIVER ONCE.</strong> &quot;matches exactly&quot; is a MEASURED SCALAR THAT SHRINKS. Every iteration picks the largest delta, changes the design, re-runs the tool that measures it, and records the number before and after. An iteration that makes something worse is a finding: record it and revert. Never loosen a check to make a delta look smaller. The convergence table (<code>CONVERGENCE.html</code>, generated from data) is the project&#x27;s scoreboard. Measured deltas open as of 2026-09-03 23:xx: <strong>28 drawing sheets 0 PASS / 28 FAIL</strong> on our own <code>bin/sheetcheck</code>; <strong>bom.json 38 rows, ZERO fasteners</strong> against a 145-hole M2 census; <strong>139 CANNOT DETERMINE items</strong> open; the head shell front-to-back geometry vs the product photographs.</li><li><strong>NEVER STOP; SET THE NEXT GOAL YOURSELF.</strong> When a lane lands, start the next on the largest remaining delta without being asked.</li><li><strong>DIVE DEEPLY INTO NEW SOURCES.</strong> Archive the primary page into the repo, pin the commit SHA for anything from a git branch, record the licence and attribution, and diff new geometry mesh-by-mesh against <code>reference/</code>.</li></ol>
+<h3>THE STANDING ORDER — Leif, 2026-09-04, verbatim. This is the finish line.</h3>
+<blockquote>continue with everything when the limits reset. try to be more token efficent.<br>continue with the work until youre 100% done and we have production ready<br>airtag clone and production ready microduck clone. open all of hte results for<br>me to look through and commit and push everything as you go with documents<br>detailing what we need to do.</blockquote>
+<p><strong>100 % DONE means the convergence scoreboard has no open red row:</strong> every drawing sheet at 100 % dimension coverage against A4, the fastener census reconciled into the assembly, the head settled against the photographs, and all 139 CANNOT DETERMINE items either closed or explicitly deferred to a named physical measurement on a real sample. Nothing else counts as done.</p>
+<p><strong>COMMIT AND PUSH AS YOU GO.</strong> <code>tools/commit-lane.sh</code> then <code>git push origin main</code> after each meaningful commit — not at the end. Three interruptions on 2026-09-03 destroyed unsaved work; only pushed work is safe.</p>
+<p><strong>KEEP THE &quot;WHAT WE NEED TO DO&quot; DOCUMENTS CURRENT.</strong> FACTORY-PACK.html, WORK-BREAKDOWN.html and FACTORY-QUESTIONS.html are living documents: any lane result that closes or opens a work item updates them in the same commit. A stale work breakdown is worse than none.</p>
+<p><strong>LEIF LOOKS AT RESULTS IN THE BROWSER</strong> — <code>tools/docs_server.py</code> on http://localhost:8842. Anything you produce must be reachable and readable there.</p>
+<p><strong>EVERY AGENT RUNS ON OPUS 5 — SUPERSEDES THE EARLIER FABLE NOTE.</strong> Leif, 2026-09-04, verbatim: <em>&quot;all workflows and eveyrhing must use opus 5 this is highest priority change because fable 5.1 consumes like a monster&quot;</em> and <em>&quot;Do this first. first thing you do is this change to change verything to use opus 5&quot;</em>. Subagents DO NOT inherit the parent&#x27;s model — an <code>agent()</code> or Agent call with no <code>model</code> falls back to the harness default, which is Fable. So every <code>agent()</code> call in every workflow script and every Agent tool call passes <code>{model: &#x27;opus&#x27;}</code> explicitly. Measured 2026-09-04 across 50 live agent transcripts: 797 turns on Fable vs 472 on Opus, despite both orchestrator sessions running Opus. Any earlier note in this file about running lanes on Fable is void.</p>
+<p><strong>BE TOKEN EFFICIENT.</strong> Do not re-read what is already known, do not re-derive a settled fact, keep prompts tight. Depth of measurement, not depth of prose.</p>
+</div>
+</body>
+</html>

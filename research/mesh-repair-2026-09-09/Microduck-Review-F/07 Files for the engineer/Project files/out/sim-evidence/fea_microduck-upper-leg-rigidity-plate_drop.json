@@ -1,0 +1,190 @@
+{
+ "study": "fea_microduck-upper-leg-rigidity-plate_drop",
+ "part": "part:microduck-upper-leg-rigidity-plate",
+ "mjcf_mesh": "upper_leg_rigidity_plate",
+ "case": "drop",
+ "generated": "2026-09-02T23:17:24",
+ "script": "sim/stress_all.py",
+ "inputs": {
+  "force_N_part_frame": [
+   -46.67,
+   -90.35177,
+   -40.75523
+  ],
+  "force_magnitude_N": 109.4988,
+  "force_source": "out/sim-evidence/loads_mujoco.json :: drops[drop_foot_rollm10_default_contact_dt5ms].part_frames_at_peak.upper_leg_rigidity_plate.force_from_body_upper_leg_left (t 0.230 s)",
+  "fixed": [
+   "screw_3",
+   "screw_4"
+  ],
+  "load": [
+   "screw_2",
+   "screw_1"
+  ],
+  "require_sf": 2.0,
+  "mesh_size_requested_mm": null,
+  "why": "bounding: 100 % of the thigh's drop-peak force through the 1 mm plate",
+  "connectors_added": [],
+  "connectors_hardened": [
+   "screw_3: 1.100 mm off the skin -> kind bore, spec d2.200 (wall at r 1.100)",
+   "screw_4: 1.100 mm off the skin -> kind bore, spec d2.200 (wall at r 1.100)",
+   "screw_2: 1.100 mm off the skin -> kind bore, spec d2.200 (wall at r 1.100)",
+   "screw_1: 1.100 mm off the skin -> kind bore, spec d2.200 (wall at r 1.100)"
+  ],
+  "connectors_available": [
+   "hip_pitch_window",
+   "knee_window",
+   "screw_1",
+   "screw_2",
+   "screw_3",
+   "screw_4"
+  ],
+  "material_props": {
+   "table": "ce-cad/cecad/fits.py MATERIALS['PLA']",
+   "yield_mpa": 50,
+   "youngs_gpa": 3.5,
+   "density": 1.24,
+   "tier": "class (no datasheet behind the row; the table's own comment says every polymer 'yield' is an ultimate)"
+  },
+  "tds": {
+   "file": "research/tds/prusament-pla-tds-2021-10-en.pdf",
+   "what": "Prusament PLA TDS v1.1 (16-02-2022), 3D-printed specimens, horizontal print direction",
+   "yield_mpa": 51.0,
+   "yield_tol": 3.0,
+   "modulus_gpa": 2.3,
+   "interlayer_mpa": 17.0,
+   "interlayer_tol": 3.0,
+   "method": "ISO 527-1 (tensile), interlayer adhesion Prusa Polymers method",
+   "sha256": "68c8298b9329a7b0e5f8d35cf4cb0172708184f7d4f95491643163e4f140b1b7"
+  }
+ },
+ "material": "PLA",
+ "mesh_attempts": [
+  {
+   "size": 0.8,
+   "ok": true,
+   "strategy": {
+    "strategy": "raw",
+    "size": 0.8,
+    "nodes": 33271,
+    "elements": 16225,
+    "eltype": "C3D10",
+    "gmsh_extra": []
+   }
+  }
+ ],
+ "outputs": {
+  "verdict_cecad": "FAIL",
+  "sf": 0.13582828525069893,
+  "max_von_mises_mpa": 368.11183994346067,
+  "max_displacement_mm": 20.541167901029993,
+  "yield_mpa_used": 50,
+  "mesh": {
+   "strategy": "raw",
+   "size": 0.8,
+   "nodes": 33271,
+   "elements": 16225,
+   "eltype": "C3D10",
+   "gmsh_extra": []
+  },
+  "assumptions": [
+   "held patch at 'screw_3': 94 node(s) over 38 boundary face(s), 6.8 mm^2 of skin (axial wall r=1.10 mm), reaching 1.49 mm from the connector",
+   "held patch at 'screw_4': 94 node(s) over 38 boundary face(s), 6.8 mm^2 of skin (axial wall r=1.10 mm), reaching 1.49 mm from the connector",
+   "loaded patch at 'screw_2': 94 node(s) over 38 boundary face(s), 6.8 mm^2 of skin (axial wall r=1.10 mm), reaching 1.49 mm from the connector",
+   "loaded patch at 'screw_1': 94 node(s) over 38 boundary face(s), 6.8 mm^2 of skin (axial wall r=1.10 mm), reaching 1.49 mm from the connector",
+   "HELD AT 2 PLACES (screw_3, screw_4) \u2014 all of them rigid. A real bolt or pin is not rigid, so this under-states the deflection and concentrates stress at the patch edges",
+   "the total force is shared across 2 load patches (screw_2, screw_1) BY FACE AREA \u2014 not by any statics this module did"
+  ],
+  "notes": [
+   "nu = 0.36 [class] for PLA",
+   "PLA strength is the ALONG-LAYER printed figure; across layers the part is weaker than this check says, and orientation is not modelled",
+   "peak stress is the max NODAL von Mises \u2014 at a sharp re-entrant corner it rises with mesh refinement, so a borderline SF wants a fillet, not a finer argument",
+   "SF ~0.14 (APPROXIMATE, EITHER) \u2014 safety factor >= 2 asks for a measurement and this value is APPROXIMATE \u2014 SF = yield / peak von Mises, where the peak is CalculiX's solve on this mesh and the yield is fits.MATERIALS['PLA'].yield_mpa = 50 MPa \u2014 a handbook/datasheet class figure carrying no tier and no coupon pulled from this material on this process. An estimate on either side of a comparison proves nothing, so the gate stays OPEN. It closes when: a tensile coupon of this material, made by this process in this orientation, pulled to yield, plus a mesh convergence study on the peak",
+   "tier=class ACCEPTED BY THE CALLER (accept_class=True): the verdict below rests on a typical figure for the material class, not on the thing you will buy or the filament on the spool.",
+   "max deflection 20.5412 mm was MEASURED and not judged \u2014 the case states no max_deflection_mm, so nothing here says whether that is acceptable"
+  ],
+  "failure_load_N_linear": 14.873,
+  "sf_vs_tds_yield": 0.1385,
+  "tds_yield_mpa": 51.0,
+  "sf_vs_tds_interlayer_across_layers": 0.0462,
+  "grading": {
+   "rule": "SF = min(table, TDS) >= 2; plate if t/mid <= 0.15; linear regime valid while d <= t/2 (plate) and d <= L/10 (all); outside the regime a converged NLGEOM re-solve (sim/fea_nlgeom.py) carries the verdict when it exists; a declared parallel load share (sim/load_share.py) turns FAIL into CANNOT DETERMINE with the bound printed",
+   "sf_table": 0.13582828525069893,
+   "sf_tds": 0.1385,
+   "sf_linear_governing": 0.135828,
+   "basis": "table",
+   "regime": {
+    "bbox_sorted_mm": [
+     1.0,
+     44.9992,
+     58.0596
+    ],
+    "plate": true,
+    "d_over_t": 20.5412,
+    "d_over_L": 0.3538,
+    "linear_regime_valid": false,
+    "rule": "plate if t/mid <= 0.15; valid while d/t <= 0.5 (plate) and d/L <= 0.1"
+   },
+   "load_share": {
+    "kind": "parallel: closes the thigh housing (part:microduck-upper-leg-left) across its whole span; four screws each end",
+    "share_applied": 1.0,
+    "why_unmeasured": "the plate-vs-housing stiffness ratio was never solved (the housing does not mesh: fea_meshability_microduck-upper-leg-left.json)",
+    "what_settles_it": "a housing that meshes plus a two-body (plate + housing, bolted) solve in cecad.stress / ce-struct, or a printed thigh loaded to the walk peak on a bench with the plate strain-gauged"
+   },
+   "nonlinear_study": "out/sim-evidence/fea_nlgeom_microduck-upper-leg-rigidity-plate_drop.json",
+   "nonlinear": {
+    "max_von_mises_mpa": 818.7192346516294,
+    "max_displacement_mm": 21.35405568008335,
+    "sf_table": 0.061070997093741586,
+    "sf_tds": 0.06229241703561642,
+    "sf_governing": 0.061071,
+    "ratio_vm_nonlinear_over_linear": 2.2241045948899085,
+    "increments": 12,
+    "verdict": "FAIL"
+   },
+   "sf_used": 0.061071,
+   "model": "nonlinear",
+   "verdict": "CANNOT DETERMINE"
+  }
+ },
+ "verdict": "CANNOT DETERMINE",
+ "why": "SF 0.061 (nonlinear governing, nonlinear model) on |F| 109.4988 N: peak von Mises 368.112 MPa vs table yield 50 MPa (SF 0.136) and TDS yield 51 MPa (SF 0.139); the case requires 2; delta 20.5412 mm is OUTSIDE the small-deflection regime (plate: d/t 20.541, d/L 0.3538) so the linear peak is a bound, not a prediction; geometrically nonlinear re-solve (sim/fea_nlgeom.py, 12 increments): peak 818.719 MPa (2.224x the linear), delta 21.3541 mm, SF 0.061 \u2014 the verdict is taken on it; BOUND, not a verdict: this study applies 100 % of a force the part carries in parallel: closes the thigh housing (part:microduck-upper-leg-left) across its whole span; four screws each end; the share is unmeasured (the plate-vs-housing stiffness ratio was never solved (the housing does not mesh: fea_meshability_microduck-upper-leg-left.json)). A PASS at 100 % would have been a PASS; a FAIL at 100 % proves only that the bound is not enough. What settles it: a housing that meshes plus a two-body (plate + housing, bolted) solve in cecad.stress / ce-struct, or a printed thigh loaded to the walk peak on a bench with the plate strain-gauged",
+ "artifacts": [
+  "out/sim-evidence/fea/microduck-upper-leg-rigidity-plate_drop",
+  "out/sim-evidence/fea/microduck-upper-leg-rigidity-plate_drop.png",
+  "out/sim-evidence/fea/microduck-upper-leg-rigidity-plate_drop/report.json"
+ ],
+ "looked_at": [
+  {
+   "image": "out/sim-evidence/fea/microduck-upper-leg-rigidity-plate_drop.png",
+   "facts": {
+    "bytes": 114408,
+    "size": [
+     1240,
+     840
+    ],
+    "distinct_colors": 8734,
+    "foreground_frac": 0.1201
+   },
+   "caption_verdict": "CANNOT DETERMINE",
+   "check": "peak von Mises recomputed from the .frd agrees with the report to 0.5 % (cecad.feaimage); caption verdict = study verdict"
+  }
+ ],
+ "seconds": 129.8,
+ "rejudged_from": [
+  {
+   "verdict": "FAIL",
+   "why": "peak 368.1 MPa leaves SF 0.14 against 50 MPa yield; the case requires 2"
+  },
+  {
+   "verdict": "CANNOT DETERMINE",
+   "why": "bounding case: 100 % of the thigh force through the 1 mm plate gives SF 0.136 (< 2), but the plate shares that load with the housing it closes and its share is unmeasured; a housing that meshes (see fea_meshability) plus a two-body solve settles it",
+   "generator": "sim/fea_rejudge.py 2026-09-03"
+  },
+  {
+   "verdict": "CANNOT DETERMINE",
+   "why": "SF 0.136 (table, linear model) on |F| 109.4988 N: peak von Mises 368.112 MPa vs table yield 50 MPa (SF 0.136) and TDS yield 51 MPa (SF 0.139); the case requires 2; delta 20.5412 mm is OUTSIDE the small-deflection regime (plate: d/t 20.541, d/L 0.3538) so the linear peak is a bound, not a prediction; no nonlinear re-solve on disk yet \u2014 graded on the linear bound; BOUND, not a verdict: this study applies 100 % of a force the part carries in parallel: closes the thigh housing (part:microduck-upper-leg-left) across its whole span; four screws each end; the share is unmeasured (the plate-vs-housing stiffness ratio was never solved (the housing does not mesh: fea_meshability_microduck-upper-leg-left.json)). A PASS at 100 % would have been a PASS; a FAIL at 100 % proves only that the bound is not enough. What settles it: a housing that meshes plus a two-body (plate + housing, bolted) solve in cecad.stress / ce-struct, or a printed thigh loaded to the walk peak on a bench with the plate strain-gauged",
+   "generator": "sim/fea_rejudge.py 2026-09-03"
+  }
+ ]
+}
