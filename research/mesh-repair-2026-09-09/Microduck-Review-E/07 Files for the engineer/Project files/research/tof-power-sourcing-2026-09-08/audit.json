@@ -1,0 +1,423 @@
+{
+  "revision": "MD-TOF-POWER-20260908-A",
+  "date": "2026-09-08",
+  "status": "Research only. Original module, pack and charger identities unconfirmed. No purchase, contact, operation or physical changes.",
+  "contract": {
+    "tof": "Pinned Pollen runtime supports both L5CX and L8CX; majority L5 per source comment, not per-unit identity. Four-pin J5: GND, 3V3, SDA, SCL. 0x29 is 7-bit; 0x52 is the shifted 8-bit address in supplier tables. Local ToF site is a pose, not a measured module envelope. No module mounting/clearance PASS possible from it.",
+    "battery": "Reference np_f970 mesh is 38.6 x 20.6 x 70.8 mm. Product calls pack removable NP-F550, 2600 mAh. Similar outer dimensions do not establish contact geometry, latch, polarity, current rating or original identity. Runtime 6.6/8.2 V mapping is an indication algorithm, not pack protection or charger cutoff specification.",
+    "charger": "docs/BOM.md B5 requires one dual charger; spec/sourcing.json folds charger share into B4 with no separate B5. Whether one charger per robot or shared charging is intended must be explicit."
+  },
+  "tof": [
+    {
+      "code": "Pololu 3419",
+      "url": "https://www.pololu.com/product/3419",
+      "status": "Conditional integration candidate, not original or direct STEMMA replacement",
+      "body_mm": [
+        13,
+        23,
+        3
+      ],
+      "interface": "2.54 mm headers, no Qwiic socket; regulators and level shifters, VIN 3.2–5.5 V. Default SPI requires board configuration for I2C. Manufacturer flags bus load sensitivity. Mounting/optical window fit unknown.",
+      "current": "Manufacturer 100 mA typical / 150 mA peak, configuration dependent.",
+      "prices_usd_1_100_1000": [
+        24.95,
+        19.43,
+        19.43
+      ],
+      "price_scope": "1000 extension uses published 100+ tier; not a volume quote or supply commitment.",
+      "stock": 366,
+      "stock_source": "https://www.pololu.com/product/3419/supply-outlook",
+      "stock_scope": "Supply page dated 8 September 2026: 366 finished, components for at least 100 more within a few days. 1000 not covered.",
+      "second_route": "Manufacturer lists RobotShop as distributor carrying 3419: https://www.pololu.com/distributors/0J61 ; no current reseller price or availability verified."
+    },
+    {
+      "code": "SparkFun SEN-19013 /19013",
+      "url": "https://www.sparkfun.com/sparkfun-qwiic-mini-tof-imager-vl53l5cx.html",
+      "status": "Conditional L5 carrier; original unknown, lifecycle conflict between manufacturer and distributor",
+      "body_mm": [
+        25.4,
+        12.7,
+        null
+      ],
+      "hole_pitch_mm": 20.32,
+      "geometry_source": "https://cdn.sparkfun.com/assets/1/1/8/5/1/19013-Qwiic-ToF-Imager_-VL53L5CX-Mini_BoardDimensions.png",
+      "interface": "Two vertical Qwiic sockets. Schematic v10 dated 2022-01-25: 3V3 directly to AVDD/IOVDD; no regulator or level shifter; R4/R5=2.2k pull-ups. Pin 1 GND, 2 VCC, 3 SDA, 4 SCL. Suitable voltage architecture for L5, not evidence of L8 interchangeability. Board height/socket clearance unknown.",
+      "schematic_source": "https://cdn.sparkfun.com/assets/7/b/6/0/9/19013-Qwiic-ToF-Imager_-VL53L5CX-Mini_Schematic.pdf",
+      "prices_usd_1_100_1000": [
+        25.95,
+        22.06,
+        22.06
+      ],
+      "price_scope": "1000 extension of 100+ tier, larger-volume quote requested by supplier; numeric stock not verified.",
+      "second_route": "https://www.digikey.com/en/products/detail/sparkfun-electronics/19013/15992044",
+      "second_route_status": "DigiKey 1568-19013-ND currently labels 19013 obsolete/no longer manufactured; no active second supply claim. Direct fetch returned HTTP 403; web product page read."
+    },
+    {
+      "code": "ST VL53L5CX-SATEL",
+      "url": "https://www.st.com/resource/en/data_brief/vl53l5cx-satel.pdf",
+      "status": "Two breakout boards per package, not one; evaluation-board connector architecture differs from J5",
+      "interface": "DB4506 Rev 1: whole board regulator 5-to-3.3 V; two 9-pin connectors. Detachable mini PCB intended for 3.3 V with flying wires. No verified installed fit or direct Qwiic connection.",
+      "routes": [
+        "https://www.digikey.com/en/products/detail/stmicroelectronics/VL53L5CX-SATEL/14552430",
+        "https://estore.st.com/en/products/evaluation-tools/product-evaluation-tools/imaging-evaluation-tools/time-of-flight-evaluation-tools/vl53l5cx-satel.html"
+      ],
+      "prices": null,
+      "price_scope": "Existing September 2 DigiKey USD 22.70 is historical only. No refreshed quote; package quantity must be corrected before comparison."
+    }
+  ],
+  "battery_charger": [
+    {
+      "code": "KIT-BB-NPF550#3",
+      "url": "https://www.nextbatteries.com/products/sony-np-f550-battery-2-pack-2600mah-l-series-dual-charger",
+      "set_price": 49.9,
+      "currency": "USD",
+      "set_contents": {
+        "batteries": 2,
+        "dual_chargers": 1
+      },
+      "available_boolean": true,
+      "numeric_stock": null,
+      "scope": "Availability flag is not numeric stock/leadtime. No volume price breaks. Retail extensions exclude unknown freight/tax.",
+      "batch_scenarios": [
+        {
+          "robots": 1,
+          "purpose": "one_pack_per_robot_shared_chargers",
+          "whole_sets": 1,
+          "packs_received": 2,
+          "chargers_received": 1,
+          "retail_extension": 49.9
+        },
+        {
+          "robots": 1,
+          "purpose": "one_charger_per_robot",
+          "whole_sets": 1,
+          "packs_received": 2,
+          "chargers_received": 1,
+          "retail_extension": 49.9
+        },
+        {
+          "robots": 100,
+          "purpose": "one_pack_per_robot_shared_chargers",
+          "whole_sets": 50,
+          "packs_received": 100,
+          "chargers_received": 50,
+          "retail_extension": 2495.0
+        },
+        {
+          "robots": 100,
+          "purpose": "one_charger_per_robot",
+          "whole_sets": 100,
+          "packs_received": 200,
+          "chargers_received": 100,
+          "retail_extension": 4990.0
+        },
+        {
+          "robots": 1000,
+          "purpose": "one_pack_per_robot_shared_chargers",
+          "whole_sets": 500,
+          "packs_received": 1000,
+          "chargers_received": 500,
+          "retail_extension": 24950.0
+        },
+        {
+          "robots": 1000,
+          "purpose": "one_charger_per_robot",
+          "whole_sets": 1000,
+          "packs_received": 2000,
+          "chargers_received": 1000,
+          "retail_extension": 49900.0
+        }
+      ],
+      "ratings": "Packs 7.2 V / 2600 mAh. EU plug/car adapter included. Pack continuous current, protection thresholds, dimensions/contact drawing and charger electrical limits not published in captured description."
+    },
+    {
+      "code": "66600244",
+      "url": "https://neewer.com/products/batteries-chargers-66600244",
+      "set_price": 49.99,
+      "currency": "USD",
+      "set_contents": {
+        "batteries": 2,
+        "dual_chargers": 1
+      },
+      "available_boolean": true,
+      "numeric_stock": null,
+      "scope": "Availability flag is not numeric stock/leadtime. No volume price breaks. Retail extensions exclude unknown freight/tax.",
+      "batch_scenarios": [
+        {
+          "robots": 1,
+          "purpose": "one_pack_per_robot_shared_chargers",
+          "whole_sets": 1,
+          "packs_received": 2,
+          "chargers_received": 1,
+          "retail_extension": 49.99
+        },
+        {
+          "robots": 1,
+          "purpose": "one_charger_per_robot",
+          "whole_sets": 1,
+          "packs_received": 2,
+          "chargers_received": 1,
+          "retail_extension": 49.99
+        },
+        {
+          "robots": 100,
+          "purpose": "one_pack_per_robot_shared_chargers",
+          "whole_sets": 50,
+          "packs_received": 100,
+          "chargers_received": 50,
+          "retail_extension": 2499.5
+        },
+        {
+          "robots": 100,
+          "purpose": "one_charger_per_robot",
+          "whole_sets": 100,
+          "packs_received": 200,
+          "chargers_received": 100,
+          "retail_extension": 4999.0
+        },
+        {
+          "robots": 1000,
+          "purpose": "one_pack_per_robot_shared_chargers",
+          "whole_sets": 500,
+          "packs_received": 1000,
+          "chargers_received": 500,
+          "retail_extension": 24995.0
+        },
+        {
+          "robots": 1000,
+          "purpose": "one_charger_per_robot",
+          "whole_sets": 1000,
+          "packs_received": 2000,
+          "chargers_received": 1000,
+          "retail_extension": 49990.0
+        }
+      ],
+      "ratings": "Packs 7.4 V / 2600 mAh. USB dual charger+cable, no wall adapter listed. Input 5 V / 2.1 A; output CH1 8.4 V / 0.6 A / 5 W. CH2/simultaneous total not explicit. Broad protection claims, no numeric pack continuous current/trip thresholds/contact drawing."
+    },
+    {
+      "code": "Charger Pack / variant 58538260398454",
+      "url": "https://store.pollen-robotics.com/products/charger-pack",
+      "set_price": 33.0,
+      "currency": "EUR",
+      "set_contents": {
+        "batteries": 2,
+        "dual_chargers": 1
+      },
+      "available_boolean": true,
+      "numeric_stock": null,
+      "scope": "Availability flag is not numeric stock/leadtime. No volume price breaks. Retail extensions exclude unknown freight/tax.",
+      "batch_scenarios": [
+        {
+          "robots": 1,
+          "purpose": "one_pack_per_robot_shared_chargers",
+          "whole_sets": 1,
+          "packs_received": 2,
+          "chargers_received": 1,
+          "retail_extension": 33.0
+        },
+        {
+          "robots": 1,
+          "purpose": "one_charger_per_robot",
+          "whole_sets": 1,
+          "packs_received": 2,
+          "chargers_received": 1,
+          "retail_extension": 33.0
+        },
+        {
+          "robots": 100,
+          "purpose": "one_pack_per_robot_shared_chargers",
+          "whole_sets": 50,
+          "packs_received": 100,
+          "chargers_received": 50,
+          "retail_extension": 1650.0
+        },
+        {
+          "robots": 100,
+          "purpose": "one_charger_per_robot",
+          "whole_sets": 100,
+          "packs_received": 200,
+          "chargers_received": 100,
+          "retail_extension": 3300.0
+        },
+        {
+          "robots": 1000,
+          "purpose": "one_pack_per_robot_shared_chargers",
+          "whole_sets": 500,
+          "packs_received": 1000,
+          "chargers_received": 500,
+          "retail_extension": 16500.0
+        },
+        {
+          "robots": 1000,
+          "purpose": "one_charger_per_robot",
+          "whole_sets": 1000,
+          "packs_received": 2000,
+          "chargers_received": 1000,
+          "retail_extension": 33000.0
+        }
+      ],
+      "ratings": "Official product route, not a confirmed original-part drawing: two batteries + dual charger. Pack maker/capacity/current, charger input/output and delivery timing absent from this page. EUR default storefront; no conversion to USD asserted."
+    }
+  ],
+  "rating_evidence": [
+    {
+      "code": "Duracell DR5",
+      "url": "https://www.duracellcharge.info/en/product/replacement-sony-np-f330-np-f550-battery/",
+      "facts": "70 × 38 × 20 mm, 99 g, 7.2 V / 2600 mAh / 18.7 Wh. Geometry/capacity reference only; no continuous-current, protection thresholds, contact drawing or current price found."
+    },
+    {
+      "code": "Deity NP-F550",
+      "url": "https://deitymic.com/products/np-f550/",
+      "facts": "7.4 V / 3350 mAh / 24.79 Wh, LG 18650 cells, overcharge and short-circuit protection claimed. Manufacturer PDF explicitly includes low-power-drain non-light NP-F devices. No continuous-discharge rating in captured sheet; do not use capacity/brand as robot-load approval. Different capacity, no original claim. Product page advertises 39 USD; live shop stock not verified."
+    },
+    {
+      "code": "Kinefinity GripBAT 2S A941-203-01",
+      "url": "https://kinefinity.com/store/gripbat-2s-26wh",
+      "facts": "70 × 38 × 20 mm, 104 g, 7.4 V / 3500 mAh; manufacturer explicitly rates continuous 5 A / 40 W, operating0–40 °C, lists voltage/current/temperature protection. Current page says DISCONTINUED and OUT OF STOCK. Useful rating evidence only, not a sourceable solution or proof 5 A meets robot demand."
+    }
+  ],
+  "corrections_for_review": [
+    "B4 PASS sourcing verdict is not original identity, continuous-current or contact-fit PASS. Preserve that distinction in rendering.",
+    "B4 current unit prices divide indivisible two-pack sets: a single prototype requires a whole 49.90 USD NextBatteries or 49.99 USD Neewer set. One charger per robot requires N sets unless separately sourced, producing 2N packs; ceil(N/2) sets meets pack count but not one-charger-per-robot count.",
+    "B9 bare optical LGA packages require a designed PCB/power/interface/optical placement. Moving them to the HAT is a design change, not automatically the correct part at 100 robots or a 1:1 substitute.",
+    "B9 ST SATEL set contains two boards. Do not compare package price directly against one carrier. Their header/flying-wire interface is not the existing Qwiic harness.",
+    "Generic requirement for regulation/level shifting on every L5 carrier is too broad; SparkFun schematic demonstrates direct 3.3 V L5. Pollen runtime compatibility does not prove identical carrier circuitry."
+  ],
+  "rfq_fields": [
+    "Original pack/charger/ToF markings, revision photographs and dimensioned drawings; ToF height, mounting, optical axis/window and connector exit",
+    "Pack contact/latch drawings and polarity, cell maker/model, rated continuous and pulse current with temperature/time limits, protection trip/recovery thresholds and required certification records",
+    "Measured robot load profile required to compare ratings; no conclusion from capacity or aggregate servo count alone",
+    "Charger input connector/protocol and adapter inclusion, both-channel current under simultaneous charge, voltage tolerance/termination, temperature/protection limits and exact controller identity",
+    "Quote one prototype then 100/1000 robots with explicit battery and charger quantities, stock date, MOQ, lead time, freight/tax to confirmed destination; no commitment"
+  ],
+  "web_manifest": [
+    {
+      "id": "pololu",
+      "url": "https://www.pololu.com/product/3419",
+      "fetched": "2026-09-08",
+      "file": "pololu.html",
+      "sha256": "4512a9616af18725174afdd7307ab1c00489590f1fe194c7d0c82f166e6efc81"
+    },
+    {
+      "id": "sparkfun",
+      "url": "https://www.sparkfun.com/sparkfun-qwiic-mini-tof-imager-vl53l5cx.html",
+      "fetched": "2026-09-08",
+      "file": "sparkfun.html",
+      "sha256": "f88f48b919b3f6cd6d89bb791dfe285fdb23732893ddb421bc99931978efdc87"
+    },
+    {
+      "id": "neewer",
+      "url": "https://neewer.com/products/batteries-chargers-66600244.js",
+      "fetched": "2026-09-08",
+      "file": "neewer.json",
+      "sha256": "22e2efce172ab165b8a1ca214edad850714db9e6777ea6b87e282f9749f430b5"
+    },
+    {
+      "id": "next",
+      "url": "https://www.nextbatteries.com/products/sony-np-f550-battery-2-pack-2600mah-l-series-dual-charger.js",
+      "fetched": "2026-09-08",
+      "file": "next.json",
+      "sha256": "ba712b98da033a280da0c54c28e28fc3e9431e603da4779cc83dba9fbe75ffe7"
+    },
+    {
+      "id": "pollen",
+      "url": "https://store.pollen-robotics.com/products/charger-pack.js",
+      "fetched": "2026-09-08",
+      "file": "pollen.json",
+      "sha256": "be4689ddc44949fa164258bddd65f52b82a0f7b35bfad1854d92cf773469aa97"
+    },
+    {
+      "id": "deity",
+      "url": "https://deitymic.com/products/np-f550/",
+      "fetched": "2026-09-08",
+      "file": "deity.html",
+      "sha256": "6b1d1b7bbc4be35c4436fd7f74cbbe5513f2288a734b82bb498b393faed38d5a"
+    },
+    {
+      "id": "duracell",
+      "url": "https://www.duracellcharge.info/en/product/replacement-sony-np-f330-np-f550-battery/",
+      "fetched": "2026-09-08",
+      "file": "duracell.html",
+      "sha256": "929b57cba52ffe106a8511cc974aa3b15a4b5052ad6664a5dd436e845bfbfd0f"
+    },
+    {
+      "id": "sparkfun-dimensions",
+      "url": "https://cdn.sparkfun.com/assets/1/1/8/5/1/19013-Qwiic-ToF-Imager_-VL53L5CX-Mini_BoardDimensions.png",
+      "fetched": "2026-09-08",
+      "file": "sparkfun-dimensions.png",
+      "sha256": "8d8cce4303a0d1eb2be2e14e195de739a8cf9f222cc24fe0921093dc4e9b6996"
+    },
+    {
+      "id": "sparkfun-schematic",
+      "url": "https://cdn.sparkfun.com/assets/7/b/6/0/9/19013-Qwiic-ToF-Imager_-VL53L5CX-Mini_Schematic.pdf",
+      "fetched": "2026-09-08",
+      "file": "sparkfun-schematic.pdf",
+      "sha256": "dff5402f4ec6c55897fcb5c8adb74a07e5e12742ac0fe429caff79a049bcddd8"
+    },
+    {
+      "id": "st-satel",
+      "url": "https://www.st.com/resource/en/data_brief/vl53l5cx-satel.pdf",
+      "fetched": "2026-09-08",
+      "file": "st-satel.pdf",
+      "sha256": "6c801f0660a7d15ccdc1caa37b5a3e51e1dfa3661dcec4eca3e0d55f3390a21a"
+    },
+    {
+      "id": "kinefinity",
+      "url": "https://kinefinity.com/store/gripbat-2s-26wh",
+      "fetched": "2026-09-08",
+      "file": "kinefinity.html",
+      "sha256": "2f546ddd577a2181bf1e13a834adb18d7b23f63abffc5218ba9e1d0c6f7d79bc"
+    },
+    {
+      "id": "sparkfun-digikey",
+      "url": "https://www.digikey.com/en/products/detail/sparkfun-electronics/19013/15992044",
+      "fetched": "2026-09-08",
+      "error": "HTTP Error 403: Forbidden"
+    },
+    {
+      "id": "pololu-supply",
+      "url": "https://www.pololu.com/product/3419/supply-outlook",
+      "fetched": "2026-09-08",
+      "file": "pololu-supply.html",
+      "sha256": "38bdd98f09caf33146dbff0969582d16d52e5ecdf2a23891de024cd16321cbfd"
+    }
+  ],
+  "local_evidence": [
+    {
+      "path": "spec/sourcing.json",
+      "sha256": "4b11e091a0028f44abca81167127a0c7687429a0b94f5db959ef5240470fcd4a"
+    },
+    {
+      "path": "docs/BOM.md",
+      "sha256": "5ac37ca118e6a3ecd60e1572cdc76825e493178611e2ae64bd07d34d9f057824"
+    },
+    {
+      "path": "ce-parts/microduck-tof-module/component.json",
+      "sha256": "2072523f25358c1bdf5d14ada5a58283627348822125da46d225b6ce99683f8e"
+    },
+    {
+      "path": "ce-parts/microduck-tof-module/electrical.part.json",
+      "sha256": "3fdc37281eb97f6860a63df8d1012e7571524a241e72004972f302de344caa85"
+    },
+    {
+      "path": "ce-parts/np-f550/component.json",
+      "sha256": "d5d2a81aa0a883518f1366ea6fdf6853b245865d73d76cf01c8bf795d3de64d8"
+    },
+    {
+      "path": "ce-parts/np-f550/docs/np-f550.md",
+      "sha256": "09ae55da185a86d0e55b8df96a3e356e167fc90998a70e9946b9cd9a8a937731"
+    },
+    {
+      "path": "ce-parts/np-f550/docs/deity-np-f550-3350mah-datasheet.pdf",
+      "sha256": "7ecf43ea887dc3dd102c5f4199edae9f3347f142ddddb9523edd609fc1bee1c5"
+    },
+    {
+      "path": "out/open/identity-sourcing.json",
+      "sha256": "abbb170e9c7d7fe0512144a77e2fda2deb62c48e12ee1909695ed359b19cf4e6"
+    },
+    {
+      "path": "out/verify/mech_dims.json",
+      "sha256": "572a8457d4e7f5d5d4b6f32cd840196b2b04b9e00a063dc09ac228d9fda7e439"
+    }
+  ]
+}

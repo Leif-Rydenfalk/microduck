@@ -1,0 +1,50 @@
+{
+ "$parts_folder": 2,
+ "$triad": 1,
+ "kind": "component",
+ "record": {
+  "slug": "xl330-m288-t",
+  "title": "ROBOTIS DYNAMIXEL XL330-M288-T - 18 g smart servo, 288.4:1, TTL multidrop bus, Protocol 2.0",
+  "origin": "vendor",
+  "origin_why": "Every electrical, register, connector and dimensional figure in this folder was read off ROBOTIS's own pages and files, fetched 2026-09-02 and hashed in PROVENANCE.json: the e-Manual product page (E1), its docs.robotis.com successor (E2), the 'XL,XC-330.pdf' drawing (D1), the moment-of-inertia sheet (D2) and the vendor STEP body (S1). No published standard defines this actuator, so `standard` is wrong; nobody here has put an instrument on one, so `measured` is wrong. The GEOMETRY has a different origin and says so: cad/part.py was measured off Pollen's published mesh (see its docstring) and is graded against it in evidence/refcheck; the vendor's own STEP now sits in iterations/v0.0.1/geometry/ with its provenance.",
+  "vendor": "ROBOTIS Co., Ltd.",
+  "sector": "actuator",
+  "subsector": "servo",
+  "lifecycle": "unknown",
+  "lifecycle_why": "No fetched vendor page states a lifecycle. The e-Manual banner says the manual site itself is being retired in favour of docs.robotis.com, which is about the documentation, not the part. robotis.us listed it InStock at $27.49 on 2026-09-02 (sourcing.json), which is availability, not lifecycle.",
+  "verdict": "CANNOT DETERMINE",
+  "why": "Manufacturer specifications are sourced; installed original servo identity and power topology remain unverified. Public HAT and pinned runtime conflict with the standard 3.7\u20136.0 V rating: retain the 15 SERVO_V failures and power-test holds. Runtime constants/comments are source evidence, not production measurements. Current interfaces exist, but reference-mesh anchors do not prove original mating geometry. The current simplified CAD has a 6 mm face pilot versus the vendor drawing 3 mm maximum; a separately verified correction candidate has not yet replaced the shelf iteration.",
+  "iteration": "v0.0.1",
+  "voltage_band_verdict": {
+   "verdict": "FAIL for the modeled standard XL330 supply compatibility; CANNOT DETERMINE installed original identity and actual production rail",
+   "manufacturer_rating_V": [
+    3.7,
+    6.0
+   ],
+   "source_observations": "Pinned runtime reads Present Input Voltage(144), uses 6.6\u20138.2 V battery thresholds and writes Shutdown(63)=52, clearing bit 0. Public HAT connects motor power to +BATT. These are documented code/PCB facts, not measured production-unit behavior.",
+   "sources": [
+    "research/servo-power-audit-2026-09-08/AUDIT.md",
+    "docs/ELECTRONICS-AND-SOFTWARE.md",
+    "spec/servo-capture-contract.json"
+   ],
+   "operational_disposition": "Retain existing electrical test holds. Do not use robotd as a read-only identity tool: startup writes registers. Obtain offline identity evidence and establish the actual rail before powered acceptance tests.",
+   "remaining_unknowns": [
+    "Original servo model, revision and any OEM specification",
+    "Original PCB revision and measured servo rail",
+    "Original screw schedule and physical seating"
+   ],
+   "superseded_record": "research/xl330-geometry-revision-2026-09-08/component-superseded.json",
+   "superseded_sha256": "3a770f8ab731d512550a47c708bce4997021c7ff9bb7d3d2374bcf129c875143",
+   "correction_date": "2026-09-08",
+   "correction_why": "Withdraw source comments as physical proof, unqualified extrapolated thermal/current claims, and unsupported powered-test/regulator prescriptions. A regulator would change recreation fidelity and does not resolve original identity."
+  },
+  "mechanical_source_correction": {
+   "status": "CANNOT DETERMINE full fidelity; specific model discrepancies confirmed",
+   "report": "research/xl330-geometry-revision-2026-09-08/README.md",
+   "published_iteration_unchanged": true,
+   "manufacturer_face_hole_max_depth_mm": 3.0,
+   "manufacturer_face_screw_description": "M2 Tapping Screw",
+   "candidate_step_cylindrical_depth_mm": 2.9
+  }
+ }
+}

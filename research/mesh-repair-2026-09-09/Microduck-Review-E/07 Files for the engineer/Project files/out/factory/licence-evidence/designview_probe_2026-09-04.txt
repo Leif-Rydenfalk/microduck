@@ -1,0 +1,26 @@
+# DESIGN-RIGHT SEARCH ATTEMPT — DesignView (tmdsview-web), 2026-09-04T09:07:36Z
+# Purpose: close the design half of Q-C. RESULT: NOT CLOSED. Recorded so the next
+# attempt does not repeat it, and so nobody mistakes the one endpoint that answers
+# for a design search: it is a proxy to the TRADEMARK service.
+
+GET  https://www.tmdn.org/tmdsview-web/                        -> 200 (SPA shell)
+POST https://www.tmdn.org/tmdsview-web/rest/api/design/search   -> 405 Not Allowed (nginx/1.30.4)
+POST https://www.tmdn.org/tmdsview-web/api/designs              -> 405 Not Allowed (nginx/1.30.4)
+POST https://www.tmdn.org/tmdsview-web/rest/api/designs/search  -> 405 Not Allowed (nginx/1.30.4)
+GET  https://www.tmdn.org/tmdsview-web/rest/api/design/search?basicSearch=microduck -> 200 but the body is the SPA HTML shell, not JSON
+GET  https://www.tmdn.org/tmdsview-web/api/designs?basicSearch=microduck            -> 200 but the body is the SPA HTML shell, not JSON
+GET  https://www.tmdn.org/tmdsview-web/index.3444bca5.js        -> 200, 6210 bytes, contains NO /api or /rest path (loader stub, not the app bundle)
+
+POST https://www.tmdn.org/tmdsview-web/api/search/results       -> 200 JSON
+  DO NOT READ THIS AS A DESIGN SEARCH. Control run with basicSearch="reachy" returns
+  47 records under the key "tradeMarks", with markImageURI values pointing at
+  https://www.tmdn.org/tmview/api/trademark/thumbnail/... — i.e. this path is served by
+  the TMview TRADEMARK backend. A design result would be keyed "designs".
+
+SIDE EFFECT, USED: the canonical TMview path https://www.tmdn.org/tmview/api/search/results
+  answered 403 'Request Rejected' (F5/ASM WAF page, support ID 5467687766780479252) from this
+  Mac tonight, while /tmdsview-web/api/search/results served the same API with 200. The
+  trademark re-measurement in F15/F18 was taken through that working path.
+
+STILL UNSEARCHED, and named in Q-C: EUIPO eSearch registered Community designs,
+CNIPA 外观设计, USPTO design patents, and DesignView itself through a real browser session.

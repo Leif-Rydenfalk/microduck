@@ -1,0 +1,66 @@
+{
+ "$parts_folder": 1,
+ "kind": "chip",
+ "record": {
+  "part": "vl53l5cx",
+  "part_note": "ST VL53L5CX 8x8 multizone ToF — one of the two sensor generations Pollen's tofd supports (research/raw/tof_src_main.rs:83-85; docs/ELECTRONICS-AND-SOFTWARE.md §6), on the HAT's 'Stemma J5' at 7-bit 0x29. Everything here was read off datasheet.pdf IN THIS FOLDER, fetched 2026-09-02 from st.com. THE WORKSHOP SHELF ALREADY HOLDS THIS DIE as part:VL53L5C (ce-parts/VL53L5C, DS13754 Rev 12 via a Farnell mirror); that folder has no component.json and `bin/triad check` FAILs it, so this design carries its own record against the newer Rev 13 rather than referencing a failing folder. Rev 13's own history (p.37) lists no electrical-table value change since Rev 12 — see unknowns.",
+  "manufacturer": "STMicroelectronics",
+  "description": "p.1 verbatim: 'Time-of-Flight 8x8 multizone ranging sensor with wide field of view'. Features: 'Multizone ranging output with either 4x4 or 8x8 separate zones', 'Up to 400 cm ranging', '60 Hz frame rate capability'.",
+  "fetched": true,
+  "datasheet_url": "https://www.st.com/resource/en/datasheet/vl53l5cx.pdf",
+  "datasheet_rev": "Footer verbatim: 'DS13754 - Rev 13 - September 2024' (p.1) and 'DS13754 - Rev 13' on every page; 40 pages. HTTP 200, 2582429 bytes, fetched 2026-09-02 from ST's own server (the same URL the workshop's VL53L5C record says timed out for it on 2026-08-18).",
+  "identity_vs_fitted": "Pollen's code supports VL53L5CX AND VL53L8CX and the press kit says the LiDAR is 'still being finalised' — WHICH GENERATION SHIPS IS CANNOT DETERMINE (open question 6). This record is for the L5CX; part:vl53l8cx is the other. The breakout board carrying either is also CANNOT DETERMINE.",
+  "package": "Table 1 p.4: 'Package | Optical LGA16'; 'Size | 6.4 x 3.0 x 1.5 mm'.",
+  "used_by": [
+   "microduck-robot-hat-pcb"
+  ],
+  "absolute_max": "Table 11. Absolute maximum ratings, p.17, verbatim: 'AVDD, IOVDD | -0.5 | — | 3.6 | V'; 'SCL, SDA, LPn, INT, and I2C_RST | -0.5 | — | 3.6 | V'.",
+  "supplies": [
+   {
+    "name": "AVDD",
+    "rail": null,
+    "v_min": 3.0,
+    "v_typ": 3.3,
+    "v_max": 3.6,
+    "cite": "Table 12. Recommended operating conditions, p.17: 'AVDD supply(1) | 3.3 V configuration | 3.0 | 3.3 | 3.6'; also '2.8 V configuration | 2.5 | 2.8 | 3.3'. Footnote 1: 'AVDD is independent of IOVDD'."
+   },
+   {
+    "name": "IOVDD",
+    "rail": null,
+    "v_min": 3.0,
+    "v_typ": 3.3,
+    "v_max": 3.6,
+    "cite": "Table 12 p.17: 'IOVDD supply | 3.3 V configuration | 3.0 | 3.3 | 3.6'; also '1.8 V configuration | 1.62 | 1.8 | 1.98' and '2.8 V configuration | 2.5 | 2.8 | 3.3'. Table 1 p.4: 'IOVDD: 1.8 or 2.8 V or 3.3 V'. A 3.3 V IOVDD IS a supported configuration — unlike the L8CX (see part:vl53l8cx)."
+   }
+  ],
+  "current_mA": {
+   "rail": null,
+   "typical": 95,
+   "typical_basis": "DERIVED SUM: 45 mA AVDD + 50 mA IOVDD. Table 14. Current consumption, p.18, verbatim: 'Active ranging | 45 | 50 | 50 | 80 | mA' (AVDD Typ | AVDD Max | IOVDD Typ | IOVDD Max). Cross-check Table 15 p.18: 'Continuous mode (4x4 mode or 8x8 mode) | 216 | 266 | 313 | mW' for 2V8/1V8, 2V8/2V8, 3V3/3V3 — 313 mW / 3.3 V = 94.8 mA.",
+   "peak": 150,
+   "peak_basis": "DERIVED WORST CASE: (50+10) + (80+10). p.18 verbatim: 'IOVDD peak current is the average value +10 mA.' 'AVDD peak current is the average current +10 mA.'",
+   "sleep": 0.0451,
+   "sleep_basis": "DERIVED SUM: Table 14 'LP idle | 45 | 300 | 0.1 | 1 | μA'.",
+   "cite": "Table 14 p.18. Preamble verbatim: 'Typical values quoted are for nominal voltage, process, and temperature (23°C).' 'Maximum values are quoted for worst case conditions (process, voltage, and temperature) unless stated otherwise (70°C).'"
+  },
+  "logic": {
+   "vih_min": null,
+   "vil_max": null,
+   "three_v3_tolerant": true,
+   "derived": true,
+   "cite": "3.3 V IOVDD configuration exists (Table 12 p.17) and every digital pin's abs max is 3.6 V (Table 11 p.17); the I²C threshold tables were not re-transcribed here — the workshop's part:VL53L5C record carries them (Rev 12 Table 16: VIH min 1.13 V printed)."
+  },
+  "interface": "I2C",
+  "interface_max_hz": 1000000,
+  "i2c_address": "Table 1 p.4: 'I2C interface | I2C: 400 kHz to 1 MHz serial bus, address: 0x52'. 0x52 is the 8-BIT form as ST prints it; 7-bit 0x29 (what tofd uses, tof_src_main.rs:80-87) is ARITHMETIC 0x52 >> 1.",
+  "fov": "Table 2. FoV angles, p.4: 'Detection volume | 45° | 45° | 65°' (Horizontal | Vertical | Diagonal); 'Collector exclusion zone | 55.5° | 61° | 82°'. Note: measured 'with an 8x8 resolution and 14% sharpener (default value), in continuous mode at 15 Hz'. Pollen's kinematics/src/tof.rs uses 45° × 45° — matches.",
+  "ranging": "Table 1 p.4: 'Ranging | 2 to 400 cm per zone'; 'Sample rate | Up to 60 Hz'.",
+  "laser": "§9 Laser safety, p.30, verbatim: 'Class 1 laser safety limits under all reasonably foreseeable conditions including single faults in compliance with IEC 60825-1:2014.' Also '21 CFR 1040.10 and 1040.11, except for conformance with IEC 60825-1:2014 as described in the laser notice'.",
+  "unknowns": [
+   "Which generation ships (L5CX vs L8CX) and which breakout — CANNOT DETERMINE (docs/ELECTRONICS-AND-SOFTWARE.md open question 6).",
+   "DERIVED, NOT PRINTED: typical/peak/sleep currents are AVDD+IOVDD sums; the 7-bit address 0x29.",
+   "Rev 12 → Rev 13 (Table 27 p.37, verbatim): '26-Sep-2024 | 13 | Added Section 5: Thermal characteristics, including AMR with maximum at 125°C. Table 12. Recommended operating conditions: Removed ambient temperature data. Table 14. Current consumption and Table 15. Example of typical power consumption in continuous mode: Modified notes. Renamed Section 10: Packing and labeling. …' — no voltage or current VALUE changed; the workshop's Rev 12 record remains consistent with this one.",
+   "No inrush figure anywhere in DS13754."
+  ]
+ }
+}

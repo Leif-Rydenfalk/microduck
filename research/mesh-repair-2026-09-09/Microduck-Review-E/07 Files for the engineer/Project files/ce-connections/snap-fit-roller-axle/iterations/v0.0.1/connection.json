@@ -1,0 +1,71 @@
+{
+  "$triad": 1,
+  "kind": "connection",
+  "record": {
+    "slug": "snap-fit-roller-axle",
+    "title": "Two barbed cantilever fingers over a 36.5000 mm plate \u2014 the foot's snap onto the ankle (it is not a roller mount)",
+    "joins": {
+      "a": "the foot's barbed finger pair (part:microduck-foot-left / -right, interface 'roller_slot'): two cantilevers running along x 45.0000..55.0000 (10.0000 mm) at y ~0.5 and ~36.5, topped at z -12.3419, with a 33.47 deg lead-in narrowing the gap 36.0890 -> 34.7000 mm over 1.0500 mm of rise, a 34.7000 mm barb land 0.6000 mm tall (z -14.0000..-13.4000), barbs 1.0000 mm proud per side, and a 36.7000 mm pocket below",
+      "b": "the ankle's wide plate (part:microduck-ankle-left / -right, interface 'foot_snap_plate'): y 0.1632..36.6632 = 36.5000 mm across at z -15.5000..-15.0000, stepping down to 33.7000 mm above z -14.5000. It sits in the 36.7000 mm pocket at 0.1000 mm per side with the barbs 0.9000 mm over its shoulder."
+    },
+    "dof_left": [],
+    "dof_left_why": "Once the plate is past the barbs nothing is free: the 36.7000 mm pocket takes the 36.5000 mm plate at 0.1000 mm per side in y, the 10.0000 mm finger run and the ankle-block pair take x and both in-plane rotations, and the barbs close the last translation upward. Before it is past, tz is entirely free \u2014 that is the assembly move, and it is stated in joint.axes_cannot_determine rather than hidden inside 'locked'.",
+    "detachable": true,
+    "detachable_why": "Detachable by deflecting each finger 0.9000 mm outward \u2014 measured, not estimated: (36.5000 - 34.7000) / 2. It is a cantilever snap, so it is designed to come apart; how hard that is is the number nobody has (see the ledger).",
+    "standard": null,
+    "standard_why": "Cantilever snap-fit design has published GUIDANCE (the BASF/Bayer snap-fit handbooks, permissible strain per material) but no standard that grades a joint PASS or FAIL. Applying the guidance needs the printed PLA's strain limit at this layer orientation, which is in no file here, so compat.py grades the measured geometry and refuses the force by name rather than borrowing a handbook's authority for a number it cannot support.",
+    "adds_parts": [],
+    "adds_parts_why": "A snap-fit consumes nothing: the retaining feature IS the part. Both bodies are BOM rows already.",
+    "verdict": "PASS",
+    "why": "THE SNAP IS MEASURED ON BOTH SIDES AND THE BODY IT CAPTURES IS IDENTIFIED BY MEASUREMENT. Fingers (foot_left.stl, cecad.meshfeatures.intervals): two cantilevers running along x, spanning exactly x 45.0000..55.0000 at both y 0.0 and y 37.0 and at z -12.5/-12.6/-13.0; top z -12.3419 (the foot's own bbox maximum). Their inner gap as a function of height is monotonic in three regimes: a LEAD-IN 36.0890 (z -12.3500) -> 35.4590 (-12.8000) -> 34.7000 (-13.4000), i.e. 0.6945 mm per side over 1.0500 mm of rise, a 33.47 deg half-angle; a BARB LAND of 34.7000 mm held from z -13.4000 to -14.0000 (0.6000 mm tall); and a POCKET of 36.7000 mm from z -14.5000 down. The barbs therefore stand 1.0000 mm proud per side, which is exactly what part:microduck-foot-left's own row recorded. Plate (ankle_left.stl, same instrument): at x 50 the ankle spans y 0.1632..36.6632 = 36.5000 mm at z -15.0000 and -15.5000, and narrows to 1.5630..35.2630 = 33.7000 mm at z -14.5000 and above. So the plate sits in the 36.7000 mm pocket at 0.1000 mm PER SIDE, clears the 34.7000 mm barb land by 0.5000 mm per side where it is narrow, and needs 0.9000 mm of deflection per finger to pass it where it is wide. ONE MEASURED CORRECTION is recorded rather than smoothed: the foot's row called this the clip-on ROLLER's slot, and no roller is placed here in anything Pollen ships -- roller_blade, tire and rim occur in exactly one of the four MJCF files, robot_allcollisions_rollers.xml, which contains no foot or sole geom at all and swaps the ankle for ankle_l_v1/ankle_r_v1 (whose vertical \u00d82.2/\u00d83.5 at x 50.1090, y -5.5000 matches roller_blade's own \u00d81.6 pilot at the same point, where ankle_left's is at 50.0000, 4.5020). What stays CANNOT DETERMINE is the SNAP FORCE, and the reason is named: the deflection (0.9000 mm) and the finger section are measurable, the printed PLA's modulus and strain limit at this layer orientation are in no file here, and no cantilever formula is offered in their place.",
+    "joint": {
+      "$joint": 1,
+      "default_state": "snapped home: the ankle's 36.5000 mm plate in the 36.7000 mm pocket with both barbs over its shoulder",
+      "axes": {
+        "tx": "locked",
+        "ty": "locked",
+        "tz": "locked",
+        "rx": "locked",
+        "ry": "locked",
+        "rz": "locked"
+      },
+      "axes_cannot_determine": {
+        "tz": "locked ONLY once the plate is past the barb land. During assembly this axis is the free one -- it IS the assembly move -- and the transition costs 0.9000 mm of deflection per finger. 'locked' describes the assembled state, not the joint's whole life."
+      },
+      "limits": {},
+      "one_way": "no. The lead-in (33.47 deg half-angle) and the barb underside are both tapered by the same step, so it comes apart the way it goes together -- it is a detachable snap, not a ratchet.",
+      "intermittent": false,
+      "engagement": {
+        "finger_run_mm": 10.0,
+        "finger_x_span_mm": [
+          45.0,
+          55.0
+        ],
+        "barb_land_gap_mm": 34.7,
+        "barb_land_height_mm": 0.6,
+        "barb_proud_per_side_mm": 1.0,
+        "pocket_gap_mm": 36.7,
+        "plate_width_mm": 36.5,
+        "clearance_per_side_mm": 0.1,
+        "deflection_per_finger_mm": 0.9,
+        "overhang_per_side_mm": 0.9
+      },
+      "couples": [],
+      "holds_by": "form",
+      "removable": true,
+      "transmits": [
+        "axial",
+        "shear"
+      ],
+      "driven": false,
+      "rating": {
+        "deflection_per_finger_mm": 0.9,
+        "overhang_per_side_mm": 0.9,
+        "insertion_N": null,
+        "retention_N": null,
+        "force_why": "MISSING. Deflection and section are measured; the printed PLA's modulus and permissible strain at this layer orientation are not in any file here, and a cantilever formula fed a guessed modulus would be a number with no source."
+      },
+      "why": "holds_by form: two barbs 1.0000 mm proud standing over a 0.9000 mm shoulder. transmits axial AND shear: this is the joint that stops the foot lifting off, which connection:snap-fit-ankle-blocks explicitly does not do (its pockets are open in z). Together with the single M2 on connection:threaded-m2 that makes three features on one part pair, each doing a different job: the blocks index, the snap retains, the screw secures."
+    }
+  }
+}

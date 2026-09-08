@@ -1,0 +1,116 @@
+{
+  "$parts_folder": 1,
+  "kind": "chip",
+  "record": {
+    "part": "mcp73213",
+    "part_note": "Everything below was read off datasheet.pdf IN THIS FOLDER — Microchip DS20002190D, fetched 2026-09-02, sha256 43950b6737187b371c3a60932f495c6feb3cc98774bd283d9d1fbe584d045e4a (PROVENANCE.json) — via `pdftotext -layout`; quotes are that extraction with whitespace collapsed and tools/datasheet-quotes-check.py re-finds each in the PDF. The MCP73213 EVALUATION-BOARD guide DS51849A is NOT this document and nothing was taken from it.",
+    "manufacturer": "Microchip Technology Inc.",
+    "description": "Linear CC/CV charger for TWO series Li-ion / Li-polymer cells with integrated pass transistor, current sense, reverse-discharge protection and a 13 V input over-voltage cut-off; charge current set by one resistor on PROG (130 mA to 1.1 A); regulation voltage fixed per suffix (8.20 / 8.40 / 8.70 / 8.80 V). p.1 title verbatim: 'MCP73213 Dual-Cell Li-Ion/Li-Polymer Battery Charge Management Controller with Input Overvoltage Protection'.",
+    "description_quote": "MCP73213 Dual-Cell Li-Ion/Li-Polymer Battery Charge Management Controller with Input Overvoltage Protection",
+    "fetched": true,
+    "datasheet_url": "https://ww1.microchip.com/downloads/aemDocuments/documents/OTH/ProductDocuments/DataSheets/20002190D.pdf",
+    "datasheet_local": "datasheet.pdf",
+    "datasheet_fetched": "2026-09-02",
+    "datasheet_rev": "DS20002190D — every page footer prints '2009-2018 Microchip Technology Inc.' with 'DS20002190D-page N'; 34 pages; PDF Title 'MCP73213 Dual-Cell Li-Ion / Li-Polymer Battery Charge Management Controller with Input Overvoltage Protection', CreationDate 2018-01-11. HTTP 200, application/pdf, 788319 bytes, fetched 2026-09-02 with curl and a browser User-Agent from Microchip's own host. An older revision, DS22190A (22190a.pdf, 2009), was also fetched and discarded in favour of D.",
+    "datasheet_rev_quote": "DS20002190D-page 1",
+    "package": "DFN-10, 3 mm x 3 mm with exposed thermal pad — p.1 verbatim '• Packaging: DFN-10 (3 mm x 3 mm)'; pin figure header 'MCP73213 3x3 DFN *', '* Includes Exposed Thermal Pad (EP); see Table 3-1.'",
+    "package_quote": "• Packaging: DFN-10 (3 mm x 3 mm)",
+    "used_by": [],
+    "rails": [],
+    "rails_why": "the chip is powered from the charging INPUT (VDD, 4–16 V range), not from a logic rail.",
+    "absolute_max": "p.5 'Absolute Maximum Ratings†', verbatim: 'VDD......................................................................18.0V'; 'VPROG ...................................................................6.0V'; 'All Inputs and Outputs w.r.t. VSS .....-0.3 to (VDD+0.3)V'; 'Maximum Junction Temperature, TJ . Internally Limited'; 'Storage Temperature ........................ –65°C to +150°C'.",
+    "absolute_max_quotes": [
+      "All Inputs and Outputs w.r.t. VSS .....-0.3 to (VDD+0.3)V",
+      "Maximum Junction Temperature, TJ . Internally Limited"
+    ],
+    "abs_max_VDD_V": 18.0,
+    "abs_max_VDD_quote": "VDD......................................................................18.0V",
+    "supplies": [
+      {
+        "name": "VDD",
+        "rail": null,
+        "v_min": 4.2,
+        "v_typ": null,
+        "v_max": 13.0,
+        "cite": "p.5 DC CHARACTERISTICS 'Supply Input': 'Input Voltage Range VDD 4 — 16 V' and 'Operating Supply Voltage VDD 4.2 — 13 V'. The OPERATING window (4.2–13 V) is carried as v_min/v_max; the 4–16 V 'Input Voltage Range' is the survivable-input window and the OVP row 'OVP Start Threshold VOVP 12.8 13 13.2 V' is where charging stops. TYP cell is '—' — v_typ null by observation. A 5 V USB input clears the UVLO 'UVLO Start Threshold VSTART 4.10 4.15 4.25 V' but note: an 8.4 V regulation needs VDD ≥ VREG + headroom — the table header conditions all limits on 'VDD= [VREG(Typical) + 0.3V] to 12V', i.e. ≥ 8.7 V for the 8.40 V member. 5 V USB CANNOT charge a 2S pack through this linear part.",
+        "quote": "Operating Supply Voltage VDD 4.2 — 13 V"
+      }
+    ],
+    "input_voltage_range_quote": "Input Voltage Range VDD 4 — 16 V",
+    "ovp_quote": "OVP Start Threshold VOVP 12.8 13 13.2 V",
+    "uvlo_quote": "UVLO Start Threshold VSTART 4.10 4.15 4.25 V",
+    "current_mA": {
+      "rail": null,
+      "rail_basis": "drawn from the charging input VDD.",
+      "typical": 0.7,
+      "typical_basis": "p.5 'Supply Current ISS' row, CHARGING condition verbatim: '— 700 1500 μA Charging' — 700 µA typ is the chip's own quiescent draw while charging; it EXCLUDES the charge current delivered to the pack (up to 1.1 A, see charge_current).",
+      "peak": 1.5,
+      "peak_basis": "same row MAX 1500 µA — steady-state maximum quiescent, not a transient; the pack current is separate.",
+      "sleep": 0.004,
+      "sleep_basis": "same table, shutdown row verbatim: 'Supply Current ISS — 4 5.5 μA Shutdown (VDD ≤ VBAT – 150 mV)' — 4 µA typ.",
+      "excludes": "the charge current into VBAT (130 mA – 1.1 A by PROG), the STAT LED current",
+      "caveats": [
+        "Quiescent only. The input must ALSO supply IREG to the pack: at 1 A into 8.4 V from a 9 V input the pass element dissipates ~0.6 W in a 3x3 DFN — the sheet's thermal figure is 'Thermal Resistance, DFN-10LD JA — 62 — °C/W' (4-layer JC51-7 board), so the current a real board can sustain is a thermal question the sheet leaves to the layout."
+      ],
+      "cite": "p.5 DC CHARACTERISTICS, 'Supply Current ISS' rows; p.8 thermal table.",
+      "quote": "Supply Current ISS — 4 5.5 μA Shutdown (VDD ≤ VBAT – 150 mV)"
+    },
+    "charging_quote": "— 700 1500 μA Charging",
+    "charge_current": {
+      "IREG_range_mA": [130, 1100],
+      "quote": "Fast Charge Current IREG 130 — 1100 mA TA = –5°C to +55°C",
+      "prog_1k1_quote": "900 1000 1100 mA PROG = 1.1 k",
+      "cite": "p.6 DC CHARACTERISTICS 'Current Regulation (Fast Charge, Constant-Current Mode)': IREG 130–1100 mA; 'PROG = 10 k' gives 117/130/143 mA and 'PROG = 1.1 k' gives 900/1000/1100 mA. The kΩ symbol is dropped by the extraction ('1.1 k')."
+    },
+    "regulation_voltage": {
+      "options_V": [8.20, 8.40, 8.70, 8.80],
+      "quote": "Regulated Output Voltage VREG 8.15 8.20 8.25 V TA= –5°C to +55°C",
+      "option_8v4_quote": "Options 8.35 8.40 8.45 V VDD = [VREG(Typical)+1V]",
+      "ordering_quote": "MCP73213-A6S/MF 8.40V 13V 10% 32 Minimum 6 hr 10% 95% 71.5% Type 1",
+      "cite": "p.5 'Voltage Regulation (Constant Voltage Mode)' rows 8.15/8.20/8.25, 8.35/8.40/8.45, 8.65/8.70/8.75, 8.75/8.80/8.85 V; p.2 device table row 'MCP73213-A6S/MF 8.40V 13V ...' (columns: part, VREG, OVP, precondition threshold... as the p.2 header prints) and 'MCP73213-B6S/MF 8.20V ...'. FOR A 2 x 4.2 V CELL PACK THE MEMBER IS -A6S/MF (8.40 V); the -B6S/MF (8.20 V) member under-charges 4.2 V cells and suits 4.1 V chemistries. Which is right for the Microduck's pack depends on the pack's cell (part:np-f550 unknowns)."
+    },
+    "logic": {
+      "vih_min": null,
+      "vil_max": null,
+      "three_v3_tolerant": null,
+      "derived": false,
+      "cite": "STAT is an open-drain status OUTPUT and PROG is an analog programming pin; there is no logic input, so no VIH/VIL exists to transcribe."
+    },
+    "interface": "none",
+    "interface_max_hz": null,
+    "i2c_address": null,
+    "pinout": {
+      "$about": "Pad number -> signal, DFN-10 3x3, read off the p.1 'Package Types (Top View)' figure; the layout extraction interleaves the figure with the Features column, so each quoted fragment is one pin pair of that figure.",
+      "DFN-10-3x3": {
+        "1": "VDD",
+        "2": "VDD",
+        "3": "VBAT",
+        "4": "VBAT",
+        "5": "NC",
+        "6": "NC",
+        "7": "STAT",
+        "8": "VSS",
+        "9": "VSS",
+        "10": "PROG",
+        "EP": "exposed thermal pad (pad 11 in the figure)"
+      },
+      "quotes": [
+        "VDD 1 10 PROG",
+        "VDD 2 9 VSS",
+        "VBAT 3 11 8 VSS",
+        "VBAT 4 7 STAT",
+        "NC 5 6 NC"
+      ],
+      "cite": "datasheet.pdf p.1 'Package Types (Top View)', 'MCP73213 3x3 DFN *', '* Includes Exposed Thermal Pad (EP); see Table 3-1.'",
+      "verdict": "PASS"
+    },
+    "unknowns": [
+      "WHICH MEMBER (8.20 / 8.40 / 8.70 / 8.80 V) — depends on the pack's cell chemistry, which part:np-f550 cannot state.",
+      "The exposed pad's electrical potential (Table 3-1 not transcribed).",
+      "Charge-termination and timer details beyond 'Charge Termination ITERM/IREG 3.7 5 6.3 %' (p.6) and the p.2 '6 hr' timer column were not transcribed.",
+      "NO 5 V USB PATH: every limit is conditioned on VDD ≥ VREG + 0.3 V, so this linear part needs ≥ ~8.7 V in for an 8.40 V pack. The Microduck's USB-C is 5 V only with PD disabled (docs/ELECTRONICS-AND-SOFTWARE.md §9) — in-situ charging with this part would need a boost stage or a different topology (the LTC4002 switch-mode sheet saved under docs/ is a step-DOWN charger needing 8.9–22 V for its 8.4 V member, not a boost either).",
+      "WHETHER POLLEN'S PRODUCT CHARGES IN SITU AT ALL: CANNOT DETERMINE.",
+      "No physical part measured; no sourced offer; lifecycle not checked."
+    ]
+  }
+}

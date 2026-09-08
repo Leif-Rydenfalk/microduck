@@ -1,0 +1,616 @@
+"""Draw ONE microduck part to out/drawings/<slug>/, to the standard in
+docs/MANUFACTURING-REQUIREMENTS.md §A, and read the result back.
+
+    ce-cad/bin/cad tools/draw_part.py <slug> [--size=A0]
+    ce-cad/bin/cad tools/draw_part.py <slug> --layout=render-panels
+
+Two documents, and WHICH ONE a part gets is measured, not chosen:
+
+  * a PARAMETRIC part (its `cad/part.py` builds a solid) gets the shop
+    drawing — third-angle set, isometric reference, a shaded reference render,
+    every radius dimensioned, detail bubbles at a larger scale, hole table,
+    section with wall dimensions, print/DFM block, tolerance basis, title
+    block. `cecad.autosheet.auto_blueprint(manufacturing=True)`.
+  * a MESH-BACKED part (its builder is a `cecad.meshshelve` loader for a
+    vendor's published mesh) gets a PRINT SHEET — `cecad.printsheet` — because
+    §A.3 of the standard forbids a drawing off a decimated triangulation, and
+    the part still has to be made.
+
+Writes out/drawings/<slug>/result.json: TWO verdicts, every measurement, and
+what the sheet had to give up to read back clean.
+
+TWO VERDICTS, NEVER ONE. This file used to publish a bare `verdict`, and that
+key was read as "a machinist can cut this" when what it graded was "the part
+built and its sheet read back against the solid". Measured 2026-09-04: the 27
+shipped sheets read 25 PASS by that key and 27 FAIL by `ce-cad/bin/sheetcheck`,
+which grades the SHEET against MANUFACTURING-REQUIREMENTS A2+A3+A4. The two
+numbers never contradicted; they graded different subjects, and one label was
+carrying both. So:
+
+  build_verdict   did `cad/part.py` build a solid, did a sheet emit, and does
+                  every number on it read back off that solid (`verify_sheet`)?
+  sheet_verdict   the eight measured layout/nominal-dimension rules of A2+A3+A4,
+                  copied here from `cecad.sheetcheck.grade_sheet`, measured on
+                  the file this run just wrote.
+
+Neither PASS establishes complete drafting-contract coverage or manufacturing
+release. The render-panels route reports full_contract_verdict separately;
+the legacy route has not independently established that full-contract status.
+
+`verdict` is NOT written. A reader who wants one number must say which.
+"""
+import json
+import os
+import sys
+import time
+import traceback
+
+import FreeCAD
+
+ROOT = "/Users/leifrydenfalk/dev/ce-workshop/ce-designs/microduck"
+sys.path.insert(0, os.path.join(ROOT, "tools"))
+
+from cecad import triad, inspect                              # noqa: E402
+from cecad.autosheet import auto_blueprint                    # noqa: E402
+from cecad.sheets import verify_sheet                         # noqa: E402
+from cecad.printsheet import (print_sheet, verify_print_sheet,  # noqa: E402
+                              _NO_FILE)
+
+from drawing_facts import (TOLERANCE_DFM, VENDOR_DFM, classify,  # noqa: E402
+                           part_record, is_bought, GENERAL_TOLERANCE,
+                           mesh_geometry_of, design_radii)
+
+
+#: printed into every result.json so a reader who opens one file, with no
+#: context, cannot mistake one subject for the other.
+VERDICT_NOTE = (
+    "build_verdict grades THE PART AND ITS READ-BACK (cad/part.py built a "
+    "solid, a sheet emitted, and every number on the sheet re-measured off "
+    "that solid). sheet_verdict grades THE SHEET against "
+    "docs/MANUFACTURING-REQUIREMENTS.md A2+A3+A4 via ce-cad/bin/sheetcheck "
+    "(line_ratio, coverage, empty_rect, font, iso, renders, curve_density, "
+    "dim_coverage). These eight measured gates do not establish complete "
+    "drawing-contract coverage or manufacturing acceptance. A separately "
+    "audited full_contract_verdict and qualified source/production evidence "
+    "are required for those claims. There is deliberately no bare 'verdict' key.")
+
+
+def grade_the_sheet(svg, slug, outdir):
+    """The SHEET verdict, from the instrument that grades sheets.
+
+    Not a second opinion written here: `cecad.sheetcheck.grade_sheet` is the
+    same code `ce-cad/bin/sheetcheck` runs, called on the file this run just
+    wrote, so result.json and the sweep table cannot drift apart. A failure
+    inside the grader is a CANNOT DETERMINE naming the failure — never an
+    absent key that a reader fills in with the build verdict.
+    """
+    try:
+        from cecad import sheetcheck                          # noqa: PLC0415
+        png = os.path.join(outdir, slug + "-sheet.png")
+        g = sheetcheck.grade_sheet(svg, png_path=png if os.path.exists(png)
+                                   else None, slug=slug, use_kernel=True,
+                                   refresh=True)
+        return {
+            "sheet_verdict": g["verdict"],
+            "sheet_verdict_why": g["checks"].get("dim_coverage", {}).get(
+                "why", "")[:200],
+            "sheet_rules": g.get("rules"),
+            "sheet_sections": g.get("sections"),
+            "sheet_measurements": {
+                "line_ratio": g.get("line_ratio"),
+                "occupancy_pct": g.get("occupancy_pct"),
+                "largest_empty_rect_pct": (g.get("largest_empty_rect") or {})
+                    .get("pct_of_frame"),
+                "font_min_mm": g.get("font_min_mm"),
+                "iso_count": g.get("iso_count"),
+                "shaded_render_count": g.get("shaded_render_count"),
+                "colour_and_shadow_render_count": g.get(
+                    "colour_and_shadow_render_count"),
+                "density_cells_over": (g.get("line_density") or {})
+                    .get("over_cells"),
+                "features_enumerated": g.get("features_enumerated"),
+                "features_dimensioned": g.get("features_dimensioned"),
+                "dim_coverage_pct": g.get("dim_coverage_pct"),
+            },
+            "sheet_failing_rules": [k for k, v in (g.get("rules") or {}).items()
+                                    if v != "PASS"],
+        }
+    except Exception as e:                                    # noqa: BLE001
+        return {"sheet_verdict": "CANNOT DETERMINE",
+                "sheet_verdict_why":
+                    "cecad.sheetcheck.grade_sheet raised %s: %s; what settles "
+                    "it: ce-cad/bin/sheetcheck %s"
+                    % (type(e).__name__, e, outdir),
+                "sheet_rules": None}
+
+
+def export_stl(part, outdir, slug):
+    """Write <outdir>/<slug>.stl off the LOADED SOLID and read it back.
+
+    A print sheet that names no file is a CANNOT DETERMINE with a next step,
+    and for a mesh-backed vendor part that next step is finding the vendor's
+    mesh. For a part routed here because its own outline cannot be dimensioned
+    (`drawing_facts._seam_forest`) there is nothing to find: the geometry is
+    the solid in memory. Writing it is the next step, so it is taken.
+    """
+    import Mesh
+    path = os.path.join(outdir, slug + ".stl")
+    shape = getattr(part, "shape", None) or getattr(part, "Shape", None)
+    m = Mesh.Mesh()
+    m.addFacets(shape.tessellate(0.02))
+    m.write(path)
+    n = m.CountFacets
+    if n < 4 or os.path.getsize(path) < 200:
+        raise RuntimeError("STL export of %s produced %d facets / %d bytes"
+                           % (slug, n, os.path.getsize(path)))
+    return path
+
+
+#: A3 RULE 2's ANGLES — "4 isometric corners (front-left, front-right,
+#: rear-left, rear-right), top-down and bottom-up". Four of the six carry the
+#: word ISOMETRIC in their caption, which is what makes them count as
+#: isometric VIEWS to `cecad.sheetcheck` as well as renders; the last two are
+#: the top-down and bottom-up A3 rule 2 names, tipped 22 degrees off the pole
+#: so the surface still catches the light — a dead-flat plan view of a plate
+#: is one luminance and carries no form at all, which is exactly what A5.2's
+#: shadow half refuses.
+#:
+#: SHADOW DIRECTION IS CONSISTENT SHEET TO SHEET BY CONSTRUCTION: the light
+#: rig is `cecad.render.LIGHT_RIG`, a module constant, and every tile of
+#: every part is shaded by it. Nothing here chooses a light.
+MOSAIC_VIEWS = (
+    ("ISOMETRIC 1 — FRONT-LEFT", (26.0, -52.0)),
+    ("ISOMETRIC 2 — FRONT-RIGHT", (26.0, -128.0)),
+    ("ISOMETRIC 3 — REAR-RIGHT", (26.0, 128.0)),
+    ("ISOMETRIC 4 — REAR-LEFT", (26.0, 52.0)),
+    ("TOP-DOWN RENDER", (68.0, -90.0)),
+    ("BOTTOM-UP RENDER", (-68.0, -90.0)),
+)
+
+
+def render_mosaic_tiles(part, slug, outdir, size="A1"):
+    """The six shaded colour renders A3 rule 1 asks for, read back one by one.
+
+    Each is rendered at the pixel aspect of the cell it will be letterboxed
+    into (`cecad.sheets.mosaic_cell_sizes`), because a render shot at the
+    wrong aspect pays for the mismatch in white paper — the defect A3 rule 4
+    measures. `verify_png` refuses a blank, a near-blank or a truncated file,
+    so a tile that failed to draw stops the sheet instead of printing as an
+    empty box on a manufacturing drawing.
+
+    Returns [(path, caption), ...] and the measured facts per tile.
+    """
+    from cecad.render import render
+    from cecad.imgcheck import verify_png
+    from cecad.sheets import mosaic_cell_sizes
+    os.makedirs(outdir, exist_ok=True)
+    sizes = mosaic_cell_sizes(size, n=len(MOSAIC_VIEWS))
+    tiles, facts = [], []
+    for i, ((cap, cam), (w, h)) in enumerate(zip(MOSAIC_VIEWS, sizes), 1):
+        png = os.path.join(outdir, "%s-render%d.png" % (slug, i))
+        # WHITE PAPER BEHIND THE PART, not the renderer's grey gradient.
+        # A5.2 measures colour and shadow over the image's NON-WHITE pixels,
+        # and a grey backdrop is non-white: MEASURED on
+        # part:microduck-banana-pcb-locker, the gradient diluted the chroma
+        # of three of the six tiles to 2.89-4.90 % against the 5 % floor and
+        # lifted their 5th-percentile luminance to 0.90 of the median against
+        # a 0.70 ceiling, so three real shaded colour renders scored as
+        # neither coloured nor shadowed. On white the measurement sees the
+        # PART. It is also what a drawing sheet wants behind a view.
+        # SHADED, LIT, AND WITH THE SOLID'S OWN FEATURE EDGES DRAWN.
+        # `edges=True` on a PBR render draws the BRep edges — the silhouette
+        # and the true feature edges, never facet boundaries — which is the
+        # standard shaded-with-edges CAD presentation and the one a machinist
+        # reads a bore, a pocket mouth and a fillet run-out off.
+        #
+        # It is also what carries A5.2's shadow half on a FLAT part.
+        # MEASURED on part:microduck-banana-pcb-locker, a thin plate: from
+        # every isometric corner the top face is over half the visible
+        # pixels, so the 5th-percentile ink luminance and the median both
+        # land on it (p05 = p50 = 80.9, ratio 1.000) and the render scores
+        # unshadowed however hard it is lit — dropping the environment to
+        # 0.15 moved both numbers together and the ratio not at all. With the
+        # edges drawn: colour 91.0 %, 185 luminances, p05/p50 = 0.378.
+        # A TRUE CAST SHADOW is the other half of Leif's line and it needs a
+        # ground plane in `cecad/render.py`, which this lane does not own.
+        render(part, png, view=cam, W=w, H=h, ss=2, mode="pbr", bg=1.0,
+               edges=True, verbose=False)
+        f = verify_png(png, what="mosaic tile %d (%s)" % (i, cap))
+        tiles.append((png, "%s — %d x %d px, RENDERED OFF THIS SOLID"
+                      % (cap, f["size"][0], f["size"][1])))
+        facts.append({"caption": cap, "png": png, "px": list(f["size"]),
+                      "camera_elev_azim": list(cam),
+                      "distinct_colors": f.get("distinct_colors"),
+                      "ink_frac": round(float(f.get("ink_frac", 0.0)), 5)})
+    return tiles, facts
+
+
+def feature_schedule_for(part, slug):
+    """THE A4 SCHEDULE — the same census the grader's denominator comes from.
+
+    `cecad.sheetcheck.enumerate_features` is the enumeration
+    `ce-cad/bin/sheetcheck` measures dim_coverage against. Printing a
+    schedule built from any OTHER list would be a sheet that dimensions
+    features nobody grades while the graded ones stay missing, so it is
+    imported and called here rather than re-derived. Its refusals travel with
+    it: A4 requires each to be printed on the sheet's own face.
+    """
+    from cecad import sheetcheck                              # noqa: PLC0415
+    shape = getattr(part, "shape", None) or getattr(part, "Shape", None)
+    feats, cds, meta = sheetcheck.enumerate_features(shape)
+    return {"features": feats, "cannot_determine": cds,
+            "tolerance": GENERAL_TOLERANCE,
+            "note": ("CENSUS cecad.sheetcheck.enumerate_features v%d — "
+                     "%d ROW(S), %d CANNOT DETERMINE, LISTED BELOW"
+                     % (sheetcheck.CENSUS_VERSION, len(feats), len(cds))),
+            "meta": meta}
+
+
+def render_reference(part, slug, outdir):
+    """A shaded raster of the part, for the sheet's reference box.
+
+    ISO2 on purpose: `reference_iso()` already draws the vector isometric from
+    the standard iso camera, so a raster from the SAME angle would say nothing
+    the line drawing does not. From the other rear quarter it shows the face
+    the orthographic set hides.
+    """
+    from cecad.render import render
+    from cecad.imgcheck import verify_png
+    os.makedirs(outdir, exist_ok=True)
+    png = os.path.join(outdir, "%s-ref.png" % slug)
+    render(part, png, view="iso2", W=900, H=680, ss=2, mode="pbr",
+           verbose=False)
+    facts = verify_png(png, what="sheet reference render")
+    return png, facts
+
+
+def shoot_sheet(svg_path, out_png):
+    """Photograph the FINISHED SVG in headless Chrome and read the picture
+    back.
+
+    LOOK AT EVERY ARTIFACT. A sheet that verifies is a sheet whose numbers
+    agree with the solid; it is not yet a sheet anybody has seen. This renders
+    the file on disk — not the Sheet object that wrote it — and
+    `imgcheck.verify_png` refuses a blank, a caption-only canvas or a
+    truncated capture, so the thumbnail on the index is evidence rather than
+    decoration.
+
+    1400 x 990 is the ISO aspect (all A-series sheets are 1:sqrt(2)), so the
+    picture is the whole sheet at its own proportions with no letterboxing.
+    """
+    from cecad.vision import screenshot_url
+    from cecad.imgcheck import verify_png
+    # THE WHOLE SHEET, NOT THE TOP-LEFT CORNER OF IT. Chrome lays an SVG out
+    # at its own physical size — an A1 sheet is 841 mm, about 3180 CSS px —
+    # so a 1400 px viewport photographs a CROP and the picture looks like a
+    # drawing while showing a quarter of one (measured on
+    # `microduck-trunk-base`'s A1 sheet: the capture held the title line and
+    # two holes). Wrapping it in one line of HTML at `width:100vw` scales the
+    # whole sheet into the frame, at the sheet's own aspect.
+    holder = os.path.splitext(out_png)[0] + "-view.html"
+    with open(holder, "w", encoding="utf-8") as fh:
+        fh.write('<!doctype html><meta charset="utf-8">'
+                 '<style>html,body{margin:0;padding:0;background:#fff}'
+                 'img{display:block;width:100vw;height:auto}</style>'
+                 '<img src="%s">' % os.path.basename(svg_path))
+    screenshot_url("file://" + os.path.abspath(holder), out_png,
+                   width=1400, height=990, verify=False)
+    return out_png, verify_png(out_png, what="sheet thumbnail", min_ink=0.004)
+
+
+def _shoot(svg_path, stem):
+    """(thumbnail path, measured facts) — or (None, the reason it failed).
+
+    A thumbnail is a convenience and must never cost a sheet its verdict, so a
+    failure here is recorded with its reason instead of raised.
+    """
+    try:
+        png, facts = shoot_sheet(svg_path, stem + "-sheet.png")
+        return png, {"size": list(facts["size"]),
+                     # imgcheck calls it `ink_frac`; reading `ink` recorded
+                     # 0.0 for every sheet, which is the one value a thumbnail
+                     # must never be able to claim by accident.
+                     "ink_frac": round(float(facts.get("ink_frac", 0.0)), 5),
+                     "max_stroke": round(float(facts.get("max_stroke", 0.0)), 4),
+                     "distinct_colors": facts.get("distinct_colors")}
+    except Exception as e:                                    # noqa: BLE001
+        return None, {"error": "%s: %s" % (type(e).__name__, e)}
+
+
+def draw(slug, size=None):
+    outdir = os.path.join(ROOT, "out", "drawings", slug)
+    stem = os.path.join(outdir, slug)
+    os.makedirs(outdir, exist_ok=True)
+    t0 = time.time()
+    out = {"slug": slug, "kind": None,
+           "build_verdict": "CANNOT DETERMINE",
+           "sheet_verdict": "CANNOT DETERMINE",
+           "sheet_verdict_why": "no sheet has been graded yet",
+           "verdict_note": VERDICT_NOTE,
+           "generated": time.strftime("%Y-%m-%d %H:%M:%S")}
+
+    rec = part_record(slug)
+    out["origin"] = rec.get("origin")
+    out["record_verdict"] = rec.get("verdict")
+    out["title"] = rec.get("title")
+    out["material_record"] = rec.get("material")
+    out["process_record"] = rec.get("process")
+
+    doc = FreeCAD.newDocument("draw_" + slug.replace("-", "_"))
+    try:
+        part = triad.load(doc, "part:" + slug)
+    except Exception as e:                                    # noqa: BLE001
+        out.update(build_verdict="CANNOT DETERMINE",
+                   sheet_verdict="CANNOT DETERMINE",
+                   sheet_verdict_why="no sheet was written, so there is "
+                                     "nothing for sheetcheck to grade",
+                   why="part:%s does not build: %s: %s"
+                       % (slug, type(e).__name__, e),
+                   traceback=traceback.format_exc()[-1200:])
+        json.dump(out, open(os.path.join(outdir, "result.json"), "w"), indent=1)
+        print("DRAW " + json.dumps(out), flush=True)
+        return out
+
+    shape = getattr(part, "shape", None) or getattr(part, "Shape", None)
+    bb = inspect.bbox_of(part)
+    out["bbox_mm"] = [round(float(v), 4) for v in bb]
+    out["solids"] = len(getattr(shape, "Solids", []) or [])
+    out["faces"] = len(getattr(shape, "Faces", []) or [])
+    kind, why = classify(slug, part)
+    out["kind"], out["kind_why"] = kind, why
+    out["bought"] = bool(is_bought(slug))
+
+    # WHAT THE BUILDER NAMES AGAINST WHAT THE SOLID CARRIES. A reader who
+    # opens ce-parts/microduck-sole-left/current/cad/part.py finds "heel arc
+    # R7.2, toe arc R6.9, side fillets R7.9" and finds none of the three on
+    # the sheet, and the only honest reading of that gap is that the drawing
+    # dropped them. It did not: `cecad.inspect.arc_radii` measures ZERO arcs
+    # in the R0.2..R60 band on that solid, because its blends are a loft
+    # through a measured station table and exist as sampled points, not as
+    # circular edges. Both facts go in the record, and onto the sheet.
+    out["design_radii_named_in_builder"] = design_radii(slug)
+    try:
+        out["arc_radii_on_solid"] = sorted(
+            {round(float(o.r), 3) for o in inspect.arc_radii(part)})
+    except Exception as e:                                    # noqa: BLE001
+        out["arc_radii_on_solid"] = "CANNOT DETERMINE (%s)" % e
+    radii_gap = None
+    named = out["design_radii_named_in_builder"]
+    onsolid = out["arc_radii_on_solid"]
+    if named and isinstance(onsolid, list):
+        missing = [r for r in named
+                   if not any(abs(r - v) <= 0.011 for v in onsolid)]
+        if missing:
+            # STATED IN mm, NOT IN R NOTATION. `verify_sheet` checks every
+            # `R<n.nn>` printed on a sheet against the solid's own arcs, and
+            # these are exactly the radii the solid has NOT got — writing
+            # them as "R7.20" would fail the sheet on the note that explains
+            # why they are absent.
+            # SHORT, AND ONLY WHAT IS MEASURED. The first version of this
+            # note ran to 430 characters and explained the gap as "design
+            # blends of a lofted surface, sampled station to station" — true
+            # of microduck-sole-left, where the finding was made, and an
+            # unmeasured assertion about every other part. MEASURED
+            # 2026-09-03: on microduck-hip-bracket it cost the sheet its
+            # verdict, running the notes column down into the title block at
+            # A1 and 77.92 mm past the frame at A2, across 21 attempts. The
+            # fact goes on the paper in one line; the reasoning lives in this
+            # result.json and on out/drawings/INDEX.html, which is where a
+            # reader who wants it is.
+            radii_gap = (
+                "RADII NAMED IN cad/part.py THAT ARE NOT CIRCULAR EDGES ON "
+                "THIS SOLID: %s. cecad.inspect.arc_radii measures %d ARC(S) "
+                "HERE AND EVERY ONE IS DIMENSIONED ABOVE. NO DIMENSION IS "
+                "MISSING: A LEADER NEEDS AN EDGE. THE GEOMETRY FILE CARRIES "
+                "THE SURFACE."
+                % (", ".join("%.2f mm" % r for r in missing), len(onsolid)))
+    out["design_radii_gap"] = radii_gap
+
+    # HOW MANY ORTHOGRAPHIC VIEWS THE PART EARNS, and why — on the record and
+    # on the paper. §A asks for a third-angle set; §A.2 orders the opposite
+    # for a thin part ("a 2 mm rib seen on its end is a black band that means
+    # nothing"). `cecad.autosheet.choose_views` already decides this off the
+    # bounding box, and until now it decided silently, so a sheet with two
+    # orthographic views looked like a sheet that had lost one. MEASURED
+    # 2026-09-03: 6 of 15 sheets carried two, every one of them a plate or a
+    # rod, and nothing on any of them said so.
+    from cecad.autosheet import choose_views                  # noqa: PLC0415
+    try:
+        chosen, primary = choose_views(part)
+        ex, ey, ez = [float(v) for v in bb]
+        thin = min(ex, ey, ez) / max(ex, ey, ez, 1e-9)
+        out["views_chosen"] = list(chosen)
+        out["views_primary"] = primary
+        views_note = (
+            "ORTHOGRAPHIC VIEWS: %d (%s) — cecad.autosheet.choose_views ON "
+            "THE %.3f x %.3f x %.3f mm BBOX, THIN/LONG %.4f. %s"
+            % (len(chosen), ", ".join(chosen).upper(), ex, ey, ez, thin,
+               ("A THIRD VIEW WOULD BE THIS PART EDGE-ON, WHICH A.2 ORDERS "
+                "SUPPRESSED; THE SECTION AND THE ISOMETRIC CARRY IT."
+                if len(chosen) < 3 else
+                "THE FULL THIRD-ANGLE SET IS DRAWN.")))
+        out["views_note"] = views_note
+    except Exception as e:                                    # noqa: BLE001
+        out["views_chosen"] = "CANNOT DETERMINE (%s: %s)" % (
+            type(e).__name__, e)
+        views_note = None
+
+    if kind == "print-sheet":
+        stl = mesh_geometry_of(slug)
+        if stl is None:
+            # NOTHING TO PRINT IS NOT AN ANSWER WHEN THE SOLID IS RIGHT HERE.
+            # A part routed to a print sheet by `_seam_forest` is a
+            # PARAMETRIC solid we own — there is no vendor mesh to find, and
+            # the file the shop needs is one we can write. Exported from the
+            # loaded shape, at a deflection stated on the sheet, so the STL
+            # and the solid are the same geometry.
+            stl = export_stl(part, outdir, slug)
+            out["stl_exported_from"] = "the loaded solid"
+        r = print_sheet(part, stem, stl=stl, size="A3",
+                        source="ce-parts/%s/current/cad/part.py" % slug,
+                        material=rec.get("material"),
+                        why=" ".join(x for x in
+                                     ["Origin: %s. %s" % (rec.get("origin"),
+                                                          why), radii_gap]
+                                     if x))
+        ok, checks = verify_print_sheet(r, part, verbose=False)
+        out["thumbnail"], out["thumbnail_facts"] = _shoot(r["svg"], stem)
+        out.update({k: v for k, v in r.items() if k != "notes"})
+        out["verified"] = bool(ok)
+        out["checks"] = [{"name": n, "ok": o, "detail": str(d)[:200]}
+                         for n, o, d in checks]
+        # A PRINT SHEET WITH NOTHING TO PRINT IS NOT A WRONG SHEET. Every
+        # number on it is measured off the loaded shape and reads back clean;
+        # what is missing is the one thing the sheet is FOR — the file. That
+        # is a CANNOT DETERMINE with a named next step, not a FAIL, and the
+        # distinction is the difference between "fix the drawing" and "find
+        # the mesh". Any OTHER failing check still fails the sheet.
+        bad = [n for n, o, _ in checks if not o]
+        if bad and bad == [_NO_FILE]:
+            out["build_verdict"] = "CANNOT DETERMINE"
+            out["why"] = ("the print sheet reads back clean but names no file "
+                          "to print; what settles it is the GEOMETRY path in "
+                          "ce-parts/%s/current/cad/part.py or an STL exported "
+                          "from the loaded shape" % slug)
+        else:
+            out["build_verdict"] = "PASS" if ok else "FAIL"
+    else:
+        png, pfacts = render_reference(part, slug, outdir)
+        out["reference_render"] = png
+        out["reference_render_px"] = list(pfacts["size"])
+        tiles, tfacts = render_mosaic_tiles(part, slug, outdir)
+        out["mosaic_renders"] = tfacts
+        try:
+            sched = feature_schedule_for(part, slug)
+        except Exception as e:                                # noqa: BLE001
+            sched = None
+            out["feature_schedule_error"] = (
+                "cecad.sheetcheck.enumerate_features raised %s: %s — the "
+                "sheet carries no A4 schedule and dim_coverage will read the "
+                "shortfall" % (type(e).__name__, e))
+        out["schedule_features"] = None if sched is None else len(
+            sched["features"])
+        out["schedule_cannot_determine"] = None if sched is None else len(
+            sched["cannot_determine"])
+        # The tolerance basis is a PROGRAMME fact, not a part fact — see
+        # tools/drawing_facts.py, where every clause carries its source.
+        bp = getattr(part, "blueprint", None)
+        if bp is not None and getattr(bp, "meta", None) is not None:
+            bp.meta["general_tolerance"] = GENERAL_TOLERANCE
+        r = auto_blueprint(
+            part, stem, manufacturing=True, size=size,
+            source="ce-parts/%s/current/cad/part.py" % slug,
+            mosaic=tiles, schedule=sched,
+            reference_image=None,
+            reference_caption="REFERENCE RENDER (ISO2) — rendered off this "
+                              "solid, %d x %d px" % tuple(pfacts["size"]),
+            dfm_extra=((TOLERANCE_DFM + VENDOR_DFM if out["bought"]
+                        else TOLERANCE_DFM)
+                       + ((radii_gap,) if radii_gap else ())
+                       + ((views_note,) if views_note else ())))
+        sh = r["sheet"]
+        ok2 = verify_sheet(sh, r["svg"], part, verbose=False)
+        out.update({
+            "dxf": r["dxf"], "svg": r["svg"], "pdf": r["pdf"],
+            "size": r["size"], "scale": "%d:%d" % tuple(r["scale"]),
+            "views": r["views"], "details": r.get("details", []),
+            "details_dropped": r.get("details_dropped", []),
+            "dfm": r.get("dfm", []), "density": r.get("density"),
+            "verified": bool(r["verified"]), "verify_sheet": bool(ok2),
+            "attempts": len(r["attempts"]),
+            "attempt_log": [{k: a.get(k) for k in
+                             ("size", "scale", "section", "dim", "holes",
+                              "details", "sec_rank", "verified", "reason")}
+                            for a in r["attempts"]],
+            "hidden_lines": r.get("hidden_lines"),
+            "mosaic_tiles": r.get("mosaic_tiles"),
+            "schedule_rows": r.get("schedule_rows"),
+            "schedule_cannot_determine_rows": r.get(
+                "schedule_cannot_determine"),
+            "last_reason": r["attempts"][-1].get("reason", ""),
+            "gave_up": {k: r["attempts"][-1].get(k)
+                        for k in ("section", "dim", "holes", "details")},
+            "warnings": list(sh.warnings),
+        })
+        hs = inspect.holes(part)
+        out["holes"] = len(hs)
+        out["hole_diameters"] = sorted({round(h.d, 3) for h in hs})
+        out["counterbores"] = sum(1 for h in hs if h.kind == "counterbore")
+        out["slots"] = len(inspect.slots(part))
+        out["grooves"] = len(inspect.grooves(part))
+        try:
+            out["radii"] = sorted({round(o.r, 3)
+                                   for o in inspect.arc_radii(part)})[:40]
+        except Exception as e:                                # noqa: BLE001
+            out["radii"] = "CANNOT DETERMINE (%s)" % e
+        tw = inspect.thinnest_wall_detail(part)
+        out["thinnest_wall_mm"] = tw.get("mm")
+        out["thinnest_wall_where"] = tw.get("where")
+        out["thinnest_wall_step_mm"] = tw.get("step_mm")
+        out["thumbnail"], out["thumbnail_facts"] = _shoot(r["svg"], stem)
+        out["build_verdict"] = "PASS" if (r["verified"] and ok2) else "FAIL"
+
+    # THE SHEET VERDICT, on the file just written, from sheetcheck itself.
+    svg_written = out.get("svg")
+    if svg_written and os.path.exists(svg_written):
+        out.update(grade_the_sheet(svg_written, slug, outdir))
+    else:
+        out["sheet_verdict"] = "CANNOT DETERMINE"
+        out["sheet_verdict_why"] = (
+            "no SVG on disk for this part, so no sheet could be graded")
+
+    out["seconds"] = round(time.time() - t0, 1)
+    json.dump(out, open(os.path.join(outdir, "result.json"), "w"), indent=1)
+    print("DRAW " + json.dumps(out), flush=True)
+    return out
+
+
+def main():
+    """Every slug on the command line, in ONE kernel.
+
+    One FreeCAD boot instead of N (0.45 s each), and — the reason that matters
+    — `cecad.measured`'s content-addressed caches and the render cache stay
+    warm across parts, so a part redrawn at three paper sizes measures its
+    thinnest wall once.
+    """
+    slugs = [a for a in sys.argv[1:] if not a.startswith("-")]
+    sizes = [a.split("=", 1)[1] for a in sys.argv[1:] if a.startswith("--size=")]
+    size = sizes[-1] if sizes else None
+    layouts = [a.split('=', 1)[1] for a in sys.argv[1:] if a.startswith('--layout=')]
+    layout = layouts[-1] if layouts else 'auto'
+    if layout not in ('auto', 'render-panels','render-details'):
+        raise ValueError('Unknown drawing layout: ' + layout)
+    if size is not None and size not in ("A4", "A3", "A2", "A1", "A0"):
+        raise ValueError("Unknown drawing paper size: " + size)
+    done = []
+    for slug in slugs:
+        try:
+            if layout == 'render-details':
+                if size not in (None,'A0'):
+                    raise ValueError('render-details currently requires A0')
+                from rendered_details import draw_details
+                done.append(draw_details(slug))
+            elif layout == 'render-panels':
+                if size not in (None, 'A0'):
+                    raise ValueError('render-panels currently requires A0')
+                from rendered_drawing import draw_rendered
+                done.append(draw_rendered(slug))
+            else:
+                done.append(draw(slug, size=size))
+        except Exception as e:                                # noqa: BLE001
+            print("DRAW-CRASH %s %s: %s\n%s"
+                  % (slug, type(e).__name__, e,
+                     traceback.format_exc()[-1500:]), flush=True)
+        for d in list(FreeCAD.listDocuments()):
+            try:
+                FreeCAD.closeDocument(d)
+            except Exception:                                 # noqa: BLE001
+                pass
+    nb = sum(1 for d in done if d and d.get("build_verdict") == "PASS")
+    ns = sum(1 for d in done if d and d.get("sheet_verdict") == "PASS")
+    print("DRAW-SUMMARY build %d/%d PASS · SHEET %d/%d PASS (sheetcheck, "
+          "A2+A3+A4) over %d requested"
+          % (nb, len(done), ns, len(done), len(slugs)), flush=True)
+
+
+main()

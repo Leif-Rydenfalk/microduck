@@ -1,0 +1,675 @@
+#!/Applications/FreeCAD.app/Contents/Resources/bin/python
+"""gait_sweep.py — MuJoCo gait-robustness sweep for the Microduck (lane F2).
+
+Drives OUR model (sim/microduck_ours.xml, sim/microduck_ours_allcollisions.xml)
+with Pollen's published ONNX policies through a matrix of perturbations and
+records, per cell: fell / did not fall, walked distance, mean speed, the peak
+actuator torque PER JOINT, joint-range utilisation vs the MJCF limits, the peak
+per-foot ground-reaction force, and the self-collision count.
+
+Everything is measured off the simulation state — nothing is asserted.
+
+THREE THINGS THIS FILE IS CAREFUL ABOUT (added 2026-09-02 after the F2 skeptic
+pass; each was a measured defect in the first version):
+
+  PRE-FALL vs POST-FALL.  sim/microduck_ours.xml gives only the two soles a
+  floor-colliding contype, so once the robot tips the body passes THROUGH the
+  floor plane and the contact solver produces reaction forces that no physical
+  robot could ever see. Every torque and every ground-reaction figure is
+  therefore recorded TWICE: over the whole record, and over the PRE-FALL record
+  only (physics frames strictly before first_fall_s, and with no geom centre
+  below z = 0). Only the pre-fall numbers are a design load. The count of
+  frames with a geom centre below the floor is reported per cell so the reader
+  can see how much of the record is non-physical.
+
+  DIRECTION.  path_length_m is an UNSIGNED integrated ground track, so a robot
+  sliding backwards down a slope scores well on it. Every cell therefore also
+  carries forward_progress_m — the ground displacement projected onto the
+  robot's own instantaneous heading, summed, which is negative when the robot
+  goes backwards — and, on a slope, uphill_progress_m and the fraction of the
+  displacement that lies along the fall line.
+
+  WHAT CAN COLLIDE.  the self-collision count is only as big as the model's
+  collision mask allows. Each cell records how many geom pairs the compiled
+  model even makes candidates (sim/collision_model.py), so a zero can never be
+  read as more than it is.
+
+Perturbations, and exactly how each is applied to the model:
+  mass_scale   model.body_mass *= s and model.body_inertia *= s (rigid-body
+               scaling of every body; the geometry and the actuator are
+               untouched).
+  friction     model.geom_friction[:,0] set on the floor AND on both
+               *_foot_collision geoms. MuJoCo mixes a contact pair's friction
+               elementwise-max, so both sides must be set or the higher wins.
+  slope_deg    the FLOOR STAYS FLAT and GRAVITY IS ROTATED, which is the same
+               mechanics in the plane's frame: G = g*(sin(th)*dhat - cos(th)*zhat)
+               with dhat the horizontal DOWNHILL direction. up: dhat=(-1,0,0)
+               (the robot walks +x, so +x is uphill). down: dhat=(+1,0,0).
+               side_left: dhat=(0,+1,0). side_right: dhat=(0,-1,0).
+  push_N       data.xfrc_applied[trunk_base, 0:3] = F for push_dur seconds
+               starting at push_at, in the WORLD frame.
+
+Run:  /Applications/FreeCAD.app/Contents/Resources/bin/python sim/gait_sweep.py --all
+"""
+import argparse
+import json
+import math
+import os
+import sys
+import time
+
+import numpy as np
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import common  # noqa: E402
+from common import CTRL_DT, DECIMATION, DEFAULT_POSE, JOINT_NAMES, NUM_JOINTS  # noqa: E402
+from run_policy import FALL_TILT_DEG, FALL_Z, POLICY_FILES, Policy, Runner, schedule  # noqa: E402
+
+ROOT = common.ROOT
+OUT = os.path.join(ROOT, "out", "sim-sweep")
+G = 9.81
+SLOPE_DOWNHILL = {"up": (-1.0, 0.0), "down": (1.0, 0.0), "side_left": (0.0, 1.0), "side_right": (0.0, -1.0)}
+
+
+class Cfg:
+    """One sweep cell. Only the fields a cell actually varies are ever set."""
+
+    def __init__(self, name, family, policy="walking", robot="ours", seconds=12.0, vx=0.25, vy=0.0, wz=0.0,
+                 warmup=0.5, start="STAND", mass_scale=1.0, friction=None, slope_deg=0.0, slope_dir=None,
+                 push_N=0.0, push_dir=(0.0, 1.0, 0.0), push_at=6.0, push_dur=0.2,
+                 sit_at=1.0, stand_at=4.5, save_traj=False, note=""):
+        self.__dict__.update(locals())
+        del self.__dict__["self"]
+
+    def as_inputs(self):
+        d = dict(self.__dict__)
+        d.pop("save_traj")
+        return d
+
+
+def apply_model_mods(model, cfg, floor_gid, foot_gids):
+    """Mutate the compiled model in place. Returns the measured state after mutation."""
+    rec = {}
+    if cfg.mass_scale != 1.0:
+        model.body_mass[:] = model.body_mass * cfg.mass_scale
+        model.body_inertia[:] = model.body_inertia * cfg.mass_scale
+    rec["total_mass_kg"] = round(float(model.body_mass.sum()), 6)
+    if cfg.friction is not None:
+        for gid in [floor_gid] + list(foot_gids):
+            model.geom_friction[gid, 0] = cfg.friction
+    rec["floor_friction_slide"] = round(float(model.geom_friction[floor_gid, 0]), 4)
+    rec["foot_friction_slide"] = [round(float(model.geom_friction[g, 0]), 4) for g in foot_gids]
+    if cfg.slope_deg:
+        dx, dy = SLOPE_DOWNHILL[cfg.slope_dir]
+        th = math.radians(cfg.slope_deg)
+        model.opt.gravity[:] = [G * math.sin(th) * dx, G * math.sin(th) * dy, -G * math.cos(th)]
+    rec["gravity_m_s2"] = [round(float(v), 6) for v in model.opt.gravity]
+    rec["gravity_magnitude_m_s2"] = round(float(np.linalg.norm(model.opt.gravity)), 6)
+    return rec
+
+
+def collision_scope_of(model, floor_gid):
+    """MEASURE, on the COMPILED model, which geom pairs the collision mask even makes
+    candidates. A self-collision count is only as big as this number allows, so every
+    cell carries it and no zero can be read as more than it is.
+
+    MuJoCo's filter: a pair is checked iff (contype1 & conaffinity2) ||
+    (contype2 & conaffinity1), the geoms are in different bodies, and — flag
+    filterparent, enabled by default — the bodies are not a parent/child pair."""
+    import mujoco
+    ng = model.ngeom
+    par = model.body_parentid
+    ct, ca, bid = model.geom_contype, model.geom_conaffinity, model.geom_bodyid
+    pairs = 0
+    bodies = set()
+    excluded = set()
+    for e in range(int(model.nexclude)):
+        sig = int(model.exclude_signature[e])
+        excluded.add(tuple(sorted(((sig >> 16) & 0xFFFF, sig & 0xFFFF))))
+    for i in range(ng):
+        if i == floor_gid:
+            continue
+        for j in range(i + 1, ng):
+            if j == floor_gid:
+                continue
+            bi, bj = int(bid[i]), int(bid[j])
+            if bi == bj or par[bi] == bj or par[bj] == bi:
+                continue
+            if tuple(sorted((bi, bj))) in excluded:
+                continue
+            if (int(ct[i]) & int(ca[j])) or (int(ct[j]) & int(ca[i])):
+                pairs += 1
+                bodies.add(mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_BODY, bi))
+                bodies.add(mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_BODY, bj))
+    nbod = sum(1 for i in range(model.nbody)
+               if mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_BODY, i) not in (None, "world"))
+    floorable = [mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_GEOM, i) or "#%d" % i
+                 for i in range(ng) if i != floor_gid
+                 and ((int(ct[i]) & int(ca[floor_gid])) or (int(ct[floor_gid]) & int(ca[i])))]
+    return {
+        "candidate_geom_pairs": pairs,
+        "excluded_body_pairs": sorted("%s <-> %s" % (mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_BODY, a),
+                                                     mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_BODY, b))
+                                      for a, b in excluded),
+        "bodies_that_can_self_collide": sorted(b for b in bodies if b),
+        "bodies_total": nbod,
+        "geoms_that_can_contact_the_floor": sorted(floorable),
+        "statement": "In THIS compiled model %d of the %d robot bodies can take part in a self-contact at all "
+                     "(%d candidate geom pairs), and %d geom(s) can touch the floor. A self-collision count "
+                     "answers only that question. Full census: sim/collision_model.py -> "
+                     "out/sim-evidence/collision-model-census.json."
+                     % (len(bodies), nbod, pairs, len(floorable)),
+    }
+
+
+def run_cell(cfg, out_dir=OUT):
+    import mujoco
+    os.makedirs(out_dir, exist_ok=True)
+    scene = os.path.join(out_dir, "scene_%s.xml" % cfg.name)
+    model, scene_path = common.load_model(cfg.robot, scene)
+    data = mujoco.MjData(model)
+
+    floor_gid = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_GEOM, "floor")
+    foot_gids = [mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_GEOM, n)
+                 for n in ("left_foot_collision", "right_foot_collision")]
+    assert floor_gid >= 0 and all(g >= 0 for g in foot_gids), (floor_gid, foot_gids)
+    model_state = apply_model_mods(model, cfg, floor_gid, foot_gids)
+    collision_scope = collision_scope_of(model, floor_gid)
+    robot_geoms = np.array([g for g in range(model.ngeom) if g != floor_gid], int)
+
+    kid = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_KEY, cfg.start)
+    assert kid >= 0, cfg.start
+    mujoco.mj_resetDataKeyframe(model, data, kid)
+    mujoco.mj_forward(model, data)
+
+    pol = Policy(os.path.join(common.POLICY_DIR, POLICY_FILES[cfg.policy]))
+    rn = Runner(model, data)
+    trunk_bid = rn.trunk_id
+    n_steps = int(round(cfg.seconds / CTRL_DT))
+
+    args = argparse.Namespace(vx=cfg.vx, vy=cfg.vy, wz=cfg.wz, warmup=cfg.warmup,
+                              sit_at=cfg.sit_at, stand_at=cfg.stand_at)
+
+    T = n_steps + 1                          # 50 Hz control frames (pose, video, fall rule)
+    P = n_steps * DECIMATION + 1             # 200 Hz PHYSICS frames (torque, speed, GRF)
+    # torque/speed/GRF are recorded at EVERY physics step: sampling them only at the 50 Hz
+    # control frame misses the intra-step peak (measured 5.4 % low on left_knee in the
+    # reference cell against the 200 Hz record in sim/thermal_duty.py).
+    tau = np.zeros((P, NUM_JOINTS))          # actuator_force, N.m (gear 1 -> joint torque)
+    jq = np.zeros((P, NUM_JOINTS))
+    jv = np.zeros((P, NUM_JOINTS))
+    grf = np.zeros((P, 2))                   # per-foot |contact force| resultant, N
+    grf_z = np.zeros((P, 2))                 # per-foot world +z component, N
+    min_geom_z = np.zeros(P)                 # lowest geom CENTRE, m — negative = inside the floor
+    trunk_z_p = np.zeros(P)                  # trunk height at the physics rate
+    pvec = np.arange(P) * float(model.opt.timestep)
+    trunk_z = np.zeros(T)
+    tilt = np.zeros(T)
+    roll_a = np.zeros(T)
+    pitch_a = np.zeros(T)
+    cmd_hist = np.zeros((T, rn.cmd.shape[0]))
+    nself = np.zeros(T, int)
+    ncon = np.zeros(T, int)
+    tvec = np.arange(T) * CTRL_DT
+    qpos_hist = np.zeros((T, model.nq))
+    wrench = np.zeros(6)
+    self_pairs = {}
+    floor_pairs = {}
+    rest_pairs = set()
+    nself_new = np.zeros(T, int)
+
+    def foot_forces():
+        f = np.zeros(2)
+        fz = np.zeros(2)
+        for i in range(data.ncon):
+            c = data.contact[i]
+            for k, gid in enumerate(foot_gids):
+                if c.geom1 == gid or c.geom2 == gid:
+                    mujoco.mj_contactForce(model, data, i, wrench)
+                    frame = c.frame.reshape(3, 3)          # rows: normal, tangent1, tangent2
+                    fw = frame.T @ wrench[:3]
+                    sign = 1.0 if c.geom2 == gid else -1.0  # force on geom2 by convention
+                    f[k] += float(np.linalg.norm(wrench[:3]))
+                    fz[k] += float(sign * fw[2])
+        return f, fz
+
+    def snap_phys(k):
+        tau[k] = data.actuator_force
+        jq[k] = data.qpos[rn.qpos_idx]
+        jv[k] = data.qvel[rn.qvel_idx]
+        a, b = foot_forces()
+        grf[k], grf_z[k] = a, b
+        min_geom_z[k] = float(data.geom_xpos[robot_geoms, 2].min())   # floor geom excluded
+        trunk_z_p[k] = data.qpos[rn.root_qadr + 2]
+
+    def snap(i):
+        q = data.qpos[rn.root_qadr + 3:rn.root_qadr + 7]
+        r, p = common.quat_to_roll_pitch(q)
+        trunk_z[i] = data.qpos[rn.root_qadr + 2]
+        roll_a[i], pitch_a[i] = r, p
+        tilt[i] = math.degrees(max(abs(r), abs(p)))
+        cmd_hist[i] = rn.cmd
+        nself[i] = rn.self_contacts()
+        for ci in range(data.ncon):
+            c = data.contact[ci]
+            if c.geom1 == rn.floor_id or c.geom2 == rn.floor_id:
+                other = int(c.geom2 if c.geom1 == rn.floor_id else c.geom1)
+                gn = mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_GEOM, other) or "#%d" % other
+                bn = mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_BODY, int(model.geom_bodyid[other]))
+                fk = "%s/%s" % (bn, gn)
+                floor_pairs[fk] = floor_pairs.get(fk, 0) + 1
+                continue
+            g1 = mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_GEOM, int(c.geom1)) or "#%d" % c.geom1
+            g2 = mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_GEOM, int(c.geom2)) or "#%d" % c.geom2
+            b1 = mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_BODY, int(model.geom_bodyid[c.geom1]))
+            b2 = mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_BODY, int(model.geom_bodyid[c.geom2]))
+            key = " <-> ".join(sorted(["%s/%s" % (b1, g1), "%s/%s" % (b2, g2)]))
+            self_pairs[key] = self_pairs.get(key, 0) + 1
+            if key not in rest_pairs:
+                nself_new[i] += 1
+        ncon[i] = data.ncon
+        qpos_hist[i] = data.qpos
+
+    t0 = time.time()
+    start_xy = data.qpos[rn.root_qadr:rn.root_qadr + 2].copy()
+    snap(0)
+    snap_phys(0)
+    # geom pairs already interpenetrating in the REST pose are convex-hull overlap between
+    # neighbouring bodies, not a collision the motion caused. They are named, then excluded
+    # from the "did the robot hit itself" count.
+    rest_pairs = set(self_pairs)
+    rest_pair_counts = dict(self_pairs)
+    nself_new[0] = 0
+    push_frames = 0
+    for k in range(n_steps):
+        t = k * CTRL_DT
+        twist, sit = schedule(cfg.policy, t, args)
+        o = rn.obs(twist, sit)
+        a = pol(o)
+        rn.apply(a, pol.action_scale)
+        data.xfrc_applied[:] = 0.0
+        if cfg.push_N and cfg.push_at <= t < cfg.push_at + cfg.push_dur:
+            d = np.array(cfg.push_dir, float)
+            d = d / np.linalg.norm(d)
+            data.xfrc_applied[trunk_bid, 0:3] = cfg.push_N * d
+            push_frames += 1
+        for d_i in range(DECIMATION):
+            mujoco.mj_step(model, data)
+            snap_phys(k * DECIMATION + d_i + 1)
+        snap(k + 1)
+    wall = time.time() - t0
+
+    end_xy = qpos_hist[-1, rn.root_qadr:rn.root_qadr + 2]
+    disp = end_xy - start_xy
+    fell_z = trunk_z < FALL_Z
+    fell_tilt = tilt > FALL_TILT_DEG
+    fell = bool(np.any(fell_z | fell_tilt))
+    first_fall = float(tvec[np.argmax(fell_z | fell_tilt)]) if fell else None
+    excl = np.zeros(T, bool)
+    if cfg.policy == "sitstand":
+        excl = (tvec >= cfg.sit_at) & (tvec < cfg.stand_at + 1.5)
+    elif cfg.policy == "stand" and cfg.start != "STAND":
+        excl = tvec < 2.0
+    fell_outside = bool(np.any((fell_z & ~excl) | fell_tilt))
+
+    # ---- PHYSICALLY VALID WINDOW ------------------------------------------------
+    # microduck_ours.xml lets only the two soles touch the floor, so after a fall the
+    # body sinks through the floor plane and the solver reports reactions no physical
+    # robot can see. The valid window is the PREFIX of the record that is both before
+    # the first fall and free of any geom centre below z = 0.
+    below_floor = min_geom_z < 0.0
+    n_below = int(below_floor.sum())
+    first_below_s = float(pvec[int(np.argmax(below_floor))]) if n_below else None
+    # the sit-stand and stand-from-FOLD cells put the trunk on the floor BY COMMAND, so the raw
+    # height rule trips at once there; the validity window must use the fall rule with the
+    # commanded ground window removed, which is the same mask that fell_outside uses.
+    unc = (fell_z & ~excl) | fell_tilt
+    first_uncommanded_fall = float(tvec[int(np.argmax(unc))]) if bool(unc.any()) else None
+    prefall = np.ones(P, bool) if first_uncommanded_fall is None else (pvec < first_uncommanded_fall)
+    bad = below_floor | (~prefall)
+    cut = int(np.argmax(bad)) if bool(bad.any()) else P
+    valid = np.zeros(P, bool)
+    valid[:cut] = True
+    if not valid.any():                      # never happens in this matrix; guard, do not fake
+        valid[0] = True
+    vfrac = float(valid.sum()) / float(P)
+    grf_z_sum = grf_z.sum(axis=1)
+
+    lo = np.array([model.jnt_range[model.actuator_trnid[i, 0], 0] for i in range(model.nu)])
+    hi = np.array([model.jnt_range[model.actuator_trnid[i, 0], 1] for i in range(model.nu)])
+    frange = model.actuator_forcerange
+    margin = math.radians(1.0)
+
+    per_joint = {}
+    for i, jn in enumerate(JOINT_NAMES):
+        pk = float(np.abs(tau[:, i]).max())
+        pk_i = int(np.abs(tau[:, i]).argmax())
+        vpk_i = int(np.abs(np.where(valid, tau[:, i], 0.0)).argmax())
+        per_joint[jn] = {
+            "peak_abs_torque_Nm": round(pk, 5),
+            "peak_at_s": round(float(pvec[pk_i]), 3),
+            "peak_is_inside_valid_window": bool(valid[pk_i]),
+            "prefall_peak_abs_torque_Nm": round(float(np.abs(tau[vpk_i, i])), 5),
+            "prefall_peak_at_s": round(float(pvec[vpk_i]), 3),
+            "peak_signed_torque_Nm": round(float(tau[pk_i, i]), 5),
+            "p95_abs_torque_Nm": round(float(np.percentile(np.abs(tau[:, i]), 95)), 5),
+            "p99_abs_torque_Nm": round(float(np.percentile(np.abs(tau[:, i]), 99)), 5),
+            "rms_torque_Nm": round(float(np.sqrt(np.mean(tau[:, i] ** 2))), 5),
+            "mean_abs_torque_Nm": round(float(np.abs(tau[:, i]).mean()), 5),
+            "frames_at_forcerange_limit": int(np.sum(np.abs(tau[:, i]) >= 0.999 * frange[i, 1])),
+            "mjcf_forcerange_Nm": [round(float(frange[i, 0]), 4), round(float(frange[i, 1]), 4)],
+            "peak_abs_speed_rad_s": round(float(np.abs(jv[:, i]).max()), 4),
+            "peak_abs_speed_rpm_output": round(float(np.abs(jv[:, i]).max()) * 60.0 / (2 * math.pi), 3),
+            "range_rad": [round(float(lo[i]), 5), round(float(hi[i]), 5)],
+            "range_deg": [round(math.degrees(lo[i]), 3), round(math.degrees(hi[i]), 3)],
+            "q_min_deg": round(math.degrees(float(jq[:, i].min())), 3),
+            "q_max_deg": round(math.degrees(float(jq[:, i].max())), 3),
+            "range_utilisation_pct": round(float((jq[:, i].max() - jq[:, i].min()) / (hi[i] - lo[i]) * 100), 2),
+            "frames_within_1deg_of_limit": int(np.sum((jq[:, i] <= lo[i] + margin) | (jq[:, i] >= hi[i] - margin))),
+            "frames_beyond_limit": int(np.sum((jq[:, i] < lo[i]) | (jq[:, i] > hi[i]))),
+            "max_overshoot_beyond_limit_deg": round(math.degrees(float(max(
+                0.0, float(lo[i] - jq[:, i].min()), float(jq[:, i].max() - hi[i])))), 5),
+        }
+
+    cmd_mask = tvec >= (cfg.warmup if cfg.policy == "walking" else 0.0)
+    xy = qpos_hist[cmd_mask][:, rn.root_qadr:rn.root_qadr + 2]
+    tt = tvec[cmd_mask]
+    speed = float(np.linalg.norm(xy[-1] - xy[0]) / max(tt[-1] - tt[0], 1e-9)) if len(tt) > 1 else 0.0
+    path_len = float(np.linalg.norm(np.diff(xy, axis=0), axis=1).sum()) if len(tt) > 1 else 0.0
+    qw = qpos_hist[:, rn.root_qadr + 3]
+    qx = qpos_hist[:, rn.root_qadr + 4]
+    qy = qpos_hist[:, rn.root_qadr + 5]
+    qz = qpos_hist[:, rn.root_qadr + 6]
+    yaw = np.unwrap(np.arctan2(2 * (qw * qz + qx * qy), 1 - 2 * (qy ** 2 + qz ** 2)))
+    yaw_deg = np.degrees(yaw - yaw[0])
+    path_speed = path_len / max(tt[-1] - tt[0], 1e-9) if len(tt) > 1 else 0.0
+
+    # ---- DIRECTION -------------------------------------------------------------
+    # path_length_m is unsigned, so a robot sliding backwards scores well on it.
+    # forward_progress_m projects each step of the ground track onto the robot's OWN
+    # instantaneous heading and sums it, so going backwards subtracts.
+    yaw_w = yaw[cmd_mask]
+    dxy = np.diff(xy, axis=0) if len(tt) > 1 else np.zeros((0, 2))
+    head = np.stack([np.cos(yaw_w[:-1]), np.sin(yaw_w[:-1])], axis=1) if len(tt) > 1 else np.zeros((0, 2))
+    fwd_step = (dxy * head).sum(axis=1) if len(tt) > 1 else np.zeros(0)
+    dur = max(tt[-1] - tt[0], 1e-9) if len(tt) > 1 else 1e-9
+    forward_progress = float(fwd_step.sum())
+    backward_path = float(-fwd_step[fwd_step < 0].sum()) if fwd_step.size else 0.0
+    # downhill / along-initial are taken from the SAME window as walked_m / walked_x_m /
+    # walked_y_m — the whole record, start pose to end pose — so the columns of a table that
+    # shows them side by side are commensurable. forward_progress_m is over the commanded
+    # window instead, because before the warm-up there is no command to track.
+    head0 = np.array([math.cos(yaw[0]), math.sin(yaw[0])])
+    along_initial = float(disp @ head0)
+    if cfg.slope_deg and cfg.slope_dir:
+        dhat = np.array(SLOPE_DOWNHILL[cfg.slope_dir], float)
+        downhill = float(disp @ dhat)
+        nrm = float(np.linalg.norm(disp))
+        fall_line_frac = round(abs(downhill) / nrm, 5) if nrm > 1e-6 else None
+    else:
+        downhill = None
+        fall_line_frac = None
+
+    out = {
+        "cell": cfg.name, "family": cfg.family, "note": cfg.note,
+        "inputs": cfg.as_inputs(),
+        "model": {
+            "robot_file": os.path.relpath(common.robot_file(cfg.robot), ROOT),
+            "scene_file": os.path.relpath(scene_path, ROOT),
+            "policy_file": "sim/policies/" + POLICY_FILES[cfg.policy],
+            "action_scale": pol.action_scale,
+            "control_hz": round(1.0 / CTRL_DT, 1), "timestep_s": float(model.opt.timestep),
+            "decimation": DECIMATION, "control_steps": n_steps,
+            "torque_grf_record_hz": round(1.0 / float(model.opt.timestep), 1),
+            "torque_grf_frames": P,
+            "push_frames_applied": push_frames,
+            "collision_scope": collision_scope,
+            **model_state,
+        },
+        "outputs": {
+            "fell": fell, "fell_by_height": bool(np.any(fell_z)), "fell_by_tilt": bool(np.any(fell_tilt)),
+            "first_fall_s": first_fall,
+            "fell_outside_commanded_ground_window": fell_outside,
+            "fall_rule": "trunk z < %.2f m or |roll|,|pitch| > %.0f deg" % (FALL_Z, FALL_TILT_DEG),
+            "walked_m": round(float(np.linalg.norm(disp)), 5),
+            "walked_x_m": round(float(disp[0]), 5), "walked_y_m": round(float(disp[1]), 5),
+            "mean_speed_m_s": round(speed, 5),
+            "path_length_m": round(path_len, 5),
+            "net_yaw_drift_deg": round(float(yaw_deg[-1]), 3),
+            "max_abs_yaw_drift_deg": round(float(np.abs(yaw_deg).max()), 3),
+            "yaw_drift_deg_per_m_of_path": round(float(yaw_deg[-1] / path_len), 4) if path_len > 0.05 else None,
+            "path_tracking_ratio_UNSIGNED": round(path_speed / cfg.vx, 4) if (cfg.policy == "walking" and cfg.vx > 0)
+            else None,
+            "path_tracking_ratio_note": "mean_path_speed_m_s divided by the commanded vx. UNSIGNED and therefore "
+                                        "DIRECTION-BLIND: a robot carried backwards down a slope scores HIGH on "
+                                        "it. Do not read it as tracking. Read "
+                                        "commanded_direction_tracking_ratio instead. It is kept only because "
+                                        "path length is the honest answer to 'how far did the feet travel'. The "
+                                        "walking policy also has a stand-still band below ~0.25 m/s "
+                                        "(out/sim/vx_sweep.json), so it is meaningless there as well.",
+            "forward_progress_m": round(forward_progress, 5),
+            "forward_progress_note": "each step of the ground track projected onto the robot's OWN instantaneous "
+                                     "heading and summed, over the commanded window. NEGATIVE means the robot "
+                                     "ended up behind where it started in its own forward direction.",
+            "backward_path_m": round(backward_path, 5),
+            "mean_forward_speed_m_s": round(forward_progress / dur, 5),
+            "commanded_direction_tracking_ratio": round(forward_progress / dur / cfg.vx, 4)
+            if (cfg.policy == "walking" and cfg.vx > 0) else None,
+            "displacement_along_initial_heading_m": round(along_initial, 5),
+            "downhill_progress_m": round(downhill, 5) if downhill is not None else None,
+            "uphill_progress_m": round(-downhill, 5) if downhill is not None else None,
+            "fraction_of_displacement_along_the_fall_line": fall_line_frac,
+            "slope_direction_note": ("uphill is -downhill_dir; on this cell the downhill direction is %s, so a "
+                                     "POSITIVE downhill_progress_m means the robot ended below where it started."
+                                     % (cfg.slope_dir,)) if cfg.slope_deg else None,
+            "mean_path_speed_m_s": round(path_speed, 5),
+            "path_vs_displacement": "walked_m is the straight-line displacement of the trunk; path_length_m is "
+                                    "the integrated ground track. A large gap means the robot curved.",
+            "trunk_z_m": {"start": round(float(trunk_z[0]), 5), "min": round(float(trunk_z.min()), 5),
+                          "max": round(float(trunk_z.max()), 5), "end": round(float(trunk_z[-1]), 5)},
+            "max_tilt_deg": round(float(tilt.max()), 3), "end_tilt_deg": round(float(tilt[-1]), 3),
+            "max_joint_torque_Nm": round(float(np.abs(tau).max()), 5),
+            "max_joint_torque_joint": JOINT_NAMES[int(np.unravel_index(np.abs(tau).argmax(), tau.shape)[1])],
+            "sum_abs_torque_peak_Nm": round(float(np.abs(tau).sum(axis=1).max()), 5),
+            "grf_peak_N": {"left_foot": round(float(grf[:, 0].max()), 4),
+                           "right_foot": round(float(grf[:, 1].max()), 4),
+                           "both_feet_sum_peak": round(float(grf.sum(axis=1).max()), 4)},
+            "grf_vertical_peak_N": {"left_foot": round(float(grf_z[:, 0].max()), 4),
+                                    "right_foot": round(float(grf_z[:, 1].max()), 4),
+                                    "both_feet_sum_peak": round(float(grf_z.sum(axis=1).max()), 4),
+                                    "both_feet_sum_peak_at_s": round(float(pvec[int(grf_z.sum(axis=1).argmax())]), 4),
+                                    "both_feet_sum_peak_is_inside_valid_window":
+                                        bool(valid[int(grf_z.sum(axis=1).argmax())]),
+                                    "single_foot_max": round(float(np.maximum(grf_z[:, 0], grf_z[:, 1]).max()), 4),
+                                    "$caveat": "over the WHOLE record. If "
+                                               "both_feet_sum_peak_is_inside_valid_window is false this number "
+                                               "is post-fall and non-physical; use grf_vertical_peak_PREFALL_N."},
+            "grf_vertical_percentiles_N": {
+                "both_feet_sum_p50": round(float(np.percentile(grf_z.sum(axis=1), 50)), 4),
+                "both_feet_sum_p95": round(float(np.percentile(grf_z.sum(axis=1), 95)), 4),
+                "both_feet_sum_p99": round(float(np.percentile(grf_z.sum(axis=1), 99)), 4),
+                "single_foot_p99": round(float(np.percentile(np.maximum(grf_z[:, 0], grf_z[:, 1]), 99)), 4),
+                "single_foot_max": round(float(np.maximum(grf_z[:, 0], grf_z[:, 1]).max()), 4)},
+            "physically_valid_window": {
+                "$what": "the PREFIX of the physics record that is both before the first fall and free of any "
+                         "geom centre below the floor plane z = 0. Only numbers from this window are design "
+                         "loads; sim/microduck_ours.xml gives only the two soles a floor-colliding contype "
+                         "(sim/collision_model.py, out/sim-evidence/collision-model-census.json), so after a "
+                         "fall the body passes THROUGH the floor and the contact solver reports reactions no "
+                         "physical robot can see.",
+                "frames_total": P,
+                "frames_valid": int(valid.sum()),
+                "valid_fraction": round(vfrac, 5),
+                "valid_until_s": round(float(pvec[cut - 1]), 4) if cut > 0 else 0.0,
+                "first_fall_s": first_fall,
+                "first_UNCOMMANDED_fall_s": first_uncommanded_fall,
+                "$window_rule": "the window closes at the first UNCOMMANDED fall or the first geom centre "
+                                "below the floor, whichever comes first. Uncommanded means the fall rule with "
+                                "the commanded ground window removed — the sit-stand and stand-from-FOLD cells "
+                                "put the trunk on the floor on purpose and that is not a fall.",
+                "frames_with_a_geom_centre_below_the_floor": n_below,
+                "fraction_of_frames_below_the_floor": round(n_below / float(P), 5),
+                "first_frame_below_the_floor_s": first_below_s,
+                "min_geom_centre_z_m": round(float(min_geom_z.min()), 5),
+                "min_geom_centre_z_at_start_m": round(float(min_geom_z[0]), 5),
+                "min_trunk_z_m": round(float(trunk_z_p.min()), 5),
+            },
+            "grf_vertical_peak_PREFALL_N": {
+                "both_feet_sum_peak": round(float(np.where(valid, grf_z_sum, -np.inf).max()), 4),
+                "both_feet_sum_peak_at_s": round(float(pvec[int(np.where(valid, grf_z_sum, -np.inf).argmax())]), 4),
+                "single_foot_max": round(float(np.where(valid, np.maximum(grf_z[:, 0], grf_z[:, 1]),
+                                                        -np.inf).max()), 4),
+                "left_foot": round(float(np.where(valid, grf_z[:, 0], -np.inf).max()), 4),
+                "right_foot": round(float(np.where(valid, grf_z[:, 1], -np.inf).max()), 4),
+                "$what": "the same measurement restricted to physically_valid_window. THIS is the design load.",
+            },
+            "max_joint_torque_PREFALL_Nm": round(float(np.abs(np.where(valid[:, None], tau, 0.0)).max()), 5),
+            "weight_N": round(float(model.body_mass.sum() * np.linalg.norm(model.opt.gravity)), 4),
+            "self_collisions": {"max": int(nself.max()), "frames": int(np.sum(nself > 0)),
+                                "mean": round(float(nself.mean()), 4),
+                                "max_excluding_rest_pose_overlap": int(nself_new.max()),
+                                "frames_excluding_rest_pose_overlap": int(np.sum(nself_new > 0)),
+                                "contact_points_by_pair_summed_over_control_frames":
+                                    dict(sorted(self_pairs.items(), key=lambda kv: -kv[1])),
+                                "pairs_already_overlapping_in_the_rest_pose": dict(
+                                    sorted(rest_pair_counts.items(), key=lambda kv: -kv[1])),
+                                "pairs_first_touching_during_the_motion": sorted(
+                                    k for k in self_pairs if k not in rest_pairs),
+                                "$counting": "a mesh-mesh contact produces several contact points, so the "
+                                             "per-pair figures are CONTACT POINTS summed over the 50 Hz control "
+                                             "frames, not frames. max/frames are contact counts per frame.",
+                                "candidate_geom_pairs_in_this_model": collision_scope["candidate_geom_pairs"],
+                                "$scope": collision_scope["statement"]},
+            "contacts": {"mean": round(float(ncon.mean()), 3), "max": int(ncon.max()),
+                         "floor_contact_points_by_geom_summed_over_control_frames":
+                             dict(sorted(floor_pairs.items(), key=lambda kv: -kv[1])),
+                         "$floor": "which geoms actually touched the ground, measured. In "
+                                   "microduck_ours.xml only the two soles CAN; a variant that lets more "
+                                   "geoms touch the floor is a different foot and therefore a different "
+                                   "gait, and this list is how you see that."},
+            "joints_beyond_limit": [j for j, h in per_joint.items() if h["frames_beyond_limit"] > 0],
+            "joints_within_1deg_of_limit": [j for j, h in per_joint.items() if h["frames_within_1deg_of_limit"] > 0],
+            "joints_saturating_mjcf_forcerange": [j for j, h in per_joint.items()
+                                                  if h["frames_at_forcerange_limit"] > 0],
+            "per_joint": per_joint,
+            "nan": bool(np.any(~np.isfinite(qpos_hist))),
+            "wall_seconds": round(wall, 3),
+        },
+    }
+    json.dump(out, open(os.path.join(out_dir, cfg.name + ".json"), "w"), indent=1)
+    if cfg.save_traj:
+        np.savez_compressed(os.path.join(out_dir, cfg.name + "_traj.npz"), scene=scene_path, robot=cfg.robot,
+                            policy=cfg.policy, ctrl_dt=CTRL_DT, root_qadr=rn.root_qadr,
+                            time=tvec, phys_time=pvec, qpos=qpos_hist, qvel=np.zeros((T, model.nv)),
+                            ctrl=np.zeros((T, NUM_JOINTS)),
+                            action=np.zeros((T, NUM_JOINTS)), cmd=cmd_hist, tau=tau, jq=jq, jv=jv,
+                            grf=grf, grf_z=grf_z, trunk_z=trunk_z, roll=roll_a, pitch=pitch_a,
+                            ncon=ncon, nself=nself)
+        json.dump({"name": cfg.name, "policy": cfg.policy,
+                   "policy_file": "sim/policies/" + POLICY_FILES[cfg.policy],
+                   "robot": cfg.robot, "note": cfg.note,
+                   "$about": "the shim sim/render_video.py reads beside a _traj.npz; the full cell record is "
+                             + cfg.name + ".json"},
+                  open(os.path.join(out_dir, cfg.name + "_summary.json"), "w"), indent=1)
+    return out
+
+
+def matrix():
+    """The sweep matrix. Baselines first so gait-peaks.json can be written early."""
+    cells = []
+    cells.append(Cfg("base_walk_vx0.25", "baseline", vx=0.25, seconds=12.0, save_traj=True,
+                     note="the reference walk: our meshes, stock physics, browser-simulator VEL_FWD"))
+    for vx in (0.00, 0.05, 0.10, 0.15, 0.20, 0.30, 0.35, 0.40, 0.50, 0.60, 0.80):
+        cells.append(Cfg("vx_%.2f" % vx, "vx", vx=vx, seconds=12.0,
+                         save_traj=(abs(vx - 0.60) < 1e-9)))
+    for s, lbl in ((0.90, "m090"), (1.10, "m110")):
+        cells.append(Cfg("mass_%s" % lbl, "mass", mass_scale=s, seconds=12.0, save_traj=(s == 1.10),
+                         note="every body mass and inertia x %.2f" % s))
+    for mu in (0.40, 0.70, 1.00):
+        cells.append(Cfg("mu_%.2f" % mu, "friction", friction=mu, seconds=12.0,
+                         save_traj=(abs(mu - 0.40) < 1e-9),
+                         note="sliding friction on floor and both foot geoms"))
+    for d in ("up", "down", "side_left", "side_right"):
+        cells.append(Cfg("slope5_%s" % d, "slope", slope_deg=5.0, slope_dir=d, seconds=12.0,
+                         save_traj=(d == "up"), note="5 deg slope by rotated gravity, downhill %s" % d))
+    for f in (1.0, 2.0, 5.0):
+        cells.append(Cfg("push_%.0fN_lat" % f, "push", push_N=f, push_dir=(0, 1, 0), push_at=6.0,
+                         seconds=12.0, save_traj=(f == 5.0),
+                         note="+y lateral push on trunk_base, %.1f N for 0.2 s at t=6.0 s" % f))
+    cells.append(Cfg("push_5N_lat_neg", "push", push_N=5.0, push_dir=(0, -1, 0), push_at=6.0, seconds=12.0,
+                     note="-y lateral push, 5 N for 0.2 s"))
+    cells.append(Cfg("push_5N_fwd", "push", push_N=5.0, push_dir=(1, 0, 0), push_at=6.0, seconds=12.0,
+                     note="+x forward push, 5 N for 0.2 s"))
+    cells.append(Cfg("push_5N_back", "push", push_N=5.0, push_dir=(-1, 0, 0), push_at=6.0, seconds=12.0,
+                     note="-x backward push, 5 N for 0.2 s"))
+    # sit-stand family: all-collisions model, the one that actually puts the body on the floor
+    cells.append(Cfg("sitstand", "sitstand", policy="sitstand", robot="ours_allcollisions", seconds=10.0,
+                     save_traj=True, note="stand -> sit at 1.0 s -> stand at 4.5 s"))
+    cells.append(Cfg("sitstand_mu0.40", "sitstand", policy="sitstand", robot="ours_allcollisions",
+                     seconds=10.0, friction=0.40))
+    cells.append(Cfg("sitstand_m110", "sitstand", policy="sitstand", robot="ours_allcollisions",
+                     seconds=10.0, mass_scale=1.10))
+    cells.append(Cfg("stand_from_SIT", "sitstand", policy="stand", robot="ours_allcollisions",
+                     seconds=8.0, start="SIT"))
+    cells.append(Cfg("stand_from_FOLD", "sitstand", policy="stand", robot="ours_allcollisions",
+                     seconds=8.0, start="FOLD"))
+    cells.append(Cfg("stand_hold", "sitstand", policy="stand", robot="ours_allcollisions",
+                     seconds=8.0, start="STAND", save_traj=True))
+    # endurance: does the gait hold up over a long run, or drift/fail late?
+    cells.append(Cfg("endurance_60s_vx0.25", "endurance", vx=0.25, seconds=60.0,
+                     note="60 s of continuous walking at the reference command"))
+    cells.append(Cfg("endurance_60s_vx0.35", "endurance", vx=0.35, seconds=60.0,
+                     note="60 s of continuous walking at 0.35 m/s"))
+    cells.append(Cfg("endurance_60s_slope5_up", "endurance", vx=0.25, seconds=60.0, slope_deg=5.0,
+                     slope_dir="up", note="60 s uphill at 5 deg"))
+    # ---- self-collision census -------------------------------------------------
+    # MEASURED (sim/collision_model.py, out/sim-evidence/collision-model-census.json):
+    #   microduck_ours.xml              5 of 15 bodies can self-collide,  4 candidate geom pairs
+    #   microduck_ours_allcollisions.xml 8 of 15 bodies,                  40 candidate geom pairs
+    #   microduck_ours_selfcontact.xml  15 of 15 bodies,               2219 candidate geom pairs
+    # so only the third cell answers "did the robot touch itself"; the first two answer
+    # much smaller questions and say so in their own note.
+    cells.append(Cfg("walk_allcollisions", "selfcollision", robot="ours_allcollisions", vx=0.25, seconds=12.0,
+                     note="the walk on Pollen's robot_allcollisions.xml collision set, mesh-swapped. MEASURED: "
+                          "8 of 15 bodies carry a floor/self-collidable geom there (trunk_base, hip_l, leg, "
+                          "ankle_left, jaw_soft, hip_l_2, leg_2, ankle_right); yaw2roll, upper_leg_left, "
+                          "upper_leg_right, neck, neck_pitch, yaw_roll_motion and bearing_roll are visual-only "
+                          "and can contact nothing. It is NOT 'every body'."))
+    cells.append(Cfg("walk_selfcontact", "collision_census", robot="ours_selfcontact", vx=0.25, seconds=12.0,
+                     save_traj=True, note="THE self-collision census: every geom of all 15 bodies given contype/conaffinity 2 "
+                          "so it can touch any non-adjacent body, with floor contact left exactly as "
+                          "microduck_ours.xml (only the two soles). 2219 candidate geom pairs vs 4 in "
+                          "microduck_ours.xml. Generated by sim/collision_model.py."))
+    cells.append(Cfg("push_5N_lat_fullcontact", "collision_census", robot="ours_fullcontact", push_N=5.0, push_dir=(0, 1, 0),
+                     push_at=6.0, seconds=12.0, save_traj=True,
+                     note="the 5 N lateral push on the model where EVERY geom also collides with the floor, so "
+                          "the fall is resolved against the ground instead of the body passing through it. "
+                          "Generated by sim/collision_model.py."))
+    return cells
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--all", action="store_true")
+    ap.add_argument("--only", default=None, help="comma-separated cell names")
+    ap.add_argument("--out", default=OUT)
+    a = ap.parse_args()
+    cells = matrix()
+    if a.only:
+        want = set(a.only.split(","))
+        cells = [c for c in cells if c.name in want]
+    for c in cells:
+        r = run_cell(c, a.out)
+        o = r["outputs"]
+        print("%-26s %-13s fell=%-5s d=%7.4f fwd=%8.4f m  tau=%.4f/%.4f  GRFz=%6.2f/%6.2f N  self=%d  "
+              "valid=%.3f  %.1fs" % (
+                  c.name, c.family, o["fell"], o["walked_m"], o["forward_progress_m"],
+                  o["max_joint_torque_Nm"], o["max_joint_torque_PREFALL_Nm"],
+                  o["grf_vertical_peak_N"]["both_feet_sum_peak"],
+                  o["grf_vertical_peak_PREFALL_N"]["both_feet_sum_peak"],
+                  o["self_collisions"]["max"], o["physically_valid_window"]["valid_fraction"],
+                  o["wall_seconds"]))
+
+
+if __name__ == "__main__":
+    main()

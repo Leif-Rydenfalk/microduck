@@ -1,0 +1,515 @@
+{
+ "generated": "2026-09-02",
+ "tool": "cecad.stress \u2014 gmsh quadratic tets (C3D10) + CalculiX, linear elastic static",
+ "load_basis": "737 g robot -> 7.23 N weight; 3.6 N/leg standing; ~9.4 N slow-walk single-stance peak. standing=20 N (2x margin), landing=60 N (3x bodyweight one leg), lateral=15 N. Static first-order.",
+ "limits": "Linear elastic, isotropic \u2014 FDM parts are anisotropic and weaker across layers, so treat these as upper bounds unless the part is printed with the load in-plane. No fatigue, no creep, no impact dynamics.",
+ "cases": {
+  "standing": {
+   "force_N": [
+    0,
+    0,
+    -20.0
+   ],
+   "why": "2x over the 9.4 N slow-walk single-leg peak"
+  },
+  "landing": {
+   "force_N": [
+    0,
+    0,
+    -60.0
+   ],
+   "why": "3x bodyweight on one leg \u2014 step-off / drop"
+  },
+  "lateral": {
+   "force_N": [
+    0,
+    15.0,
+    0.0
+   ],
+   "why": "side load: balance recovery / knock-over"
+  }
+ },
+ "results": [
+  {
+   "part": "microduck-shin",
+   "case": "standing",
+   "material": "PLA",
+   "force_N": [
+    0,
+    0,
+    -20.0
+   ],
+   "why": "",
+   "mesh_size": null,
+   "connectors": [
+    "knee",
+    "ankle"
+   ],
+   "max_disp": 0.3720800785422914,
+   "max_vm": 6.657227197841081,
+   "part_name": "microduck-shin",
+   "sf": 7.510634459976798,
+   "verdict": "PASS",
+   "yield_mpa": 50,
+   "mesh_fallback": [
+    {
+     "size": null,
+     "verdict": "PASS",
+     "reason": ""
+    }
+   ]
+  },
+  {
+   "part": "microduck-shin",
+   "case": "landing",
+   "material": "PLA",
+   "force_N": [
+    0,
+    0,
+    -60.0
+   ],
+   "why": "",
+   "mesh_size": null,
+   "connectors": [
+    "knee",
+    "ankle"
+   ],
+   "max_disp": 1.1162372502334326,
+   "max_vm": 19.971738628278786,
+   "part_name": "microduck-shin",
+   "sf": 2.503537670436113,
+   "verdict": "PASS",
+   "yield_mpa": 50,
+   "mesh_fallback": [
+    {
+     "size": null,
+     "verdict": "PASS",
+     "reason": ""
+    }
+   ]
+  },
+  {
+   "part": "microduck-shin",
+   "case": "lateral",
+   "material": "PLA",
+   "force_N": [
+    0,
+    15.0,
+    0.0
+   ],
+   "why": "",
+   "mesh_size": null,
+   "connectors": [
+    "knee",
+    "ankle"
+   ],
+   "max_disp": 0.18607708163173928,
+   "max_vm": 10.820560599757135,
+   "part_name": "microduck-shin",
+   "sf": 4.62083267673971,
+   "verdict": "PASS",
+   "yield_mpa": 50,
+   "mesh_fallback": [
+    {
+     "size": null,
+     "verdict": "PASS",
+     "reason": ""
+    }
+   ]
+  },
+  {
+   "part": "microduck-upper-leg-left",
+   "case": "standing",
+   "material": "PLA",
+   "force_N": [
+    0,
+    0,
+    -20.0
+   ],
+   "why": "thigh: hip pitch axle down to the knee axle; 2x over the 9.4 N slow-walk single-leg peak",
+   "mesh_size": 0.8,
+   "connectors": [
+    "hip_pitch_axle",
+    "knee_axle",
+    "hip_pitch_servo_seat",
+    "knee_servo_seat",
+    "pin_1",
+    "pin_2",
+    "pin_3",
+    "pin_4"
+   ],
+   "verdict": "CANNOT DETERMINE",
+   "reason": "gmsh failed on microduck-upper-leg-left: Error   : Invalid boundary mesh (overlapping facets) on surface 350 surface 350\nWarning : No elements in volume 1\nWarning : Surface mesh: worst distortion = -4.52222 (avg = 0.995279, 56 elements with jac. < 0); worst gamma = 7.54881e-05\nWarning : Surface mesh: worst distortion = -4.52222 (avg = 0.995279, 56 elements with jac. < 0); worst gamma = 7.54881e-05",
+   "mesh_fallback": [
+    {
+     "size": null,
+     "verdict": "CANNOT DETERMINE",
+     "reason": "gmsh failed on microduck-upper-leg-left: Error   : Invalid boundary mesh (overlapping facets) on surface 350 surface 350"
+    },
+    {
+     "size": 2.0,
+     "verdict": "CANNOT DETERMINE",
+     "reason": "gmsh failed on microduck-upper-leg-left: Error   : Invalid boundary mesh (overlapping facets) on surface 350 surface 350"
+    },
+    {
+     "size": 1.5,
+     "verdict": "CANNOT DETERMINE",
+     "reason": "gmsh failed on microduck-upper-leg-left: Error   : Invalid boundary mesh (overlapping facets) on surface 350 surface 350"
+    },
+    {
+     "size": 1.2,
+     "verdict": "CANNOT DETERMINE",
+     "reason": "gmsh failed on microduck-upper-leg-left: Error   : Invalid boundary mesh (overlapping facets) on surface 350 surface 350"
+    },
+    {
+     "size": 1.0,
+     "verdict": "CANNOT DETERMINE",
+     "reason": "gmsh failed on microduck-upper-leg-left: Error   : Invalid boundary mesh (overlapping facets) on surface 350 surface 350"
+    },
+    {
+     "size": 0.8,
+     "verdict": "CANNOT DETERMINE",
+     "reason": "gmsh failed on microduck-upper-leg-left: Error   : Invalid boundary mesh (overlapping facets) on surface 350 surface 350"
+    }
+   ]
+  },
+  {
+   "part": "microduck-upper-leg-left",
+   "case": "landing",
+   "material": "PLA",
+   "force_N": [
+    0,
+    0,
+    -60.0
+   ],
+   "why": "thigh: hip pitch axle down to the knee axle; 3x bodyweight on one leg \u2014 step-off / drop",
+   "mesh_size": 0.8,
+   "connectors": [
+    "hip_pitch_axle",
+    "knee_axle",
+    "hip_pitch_servo_seat",
+    "knee_servo_seat",
+    "pin_1",
+    "pin_2",
+    "pin_3",
+    "pin_4"
+   ],
+   "verdict": "CANNOT DETERMINE",
+   "reason": "gmsh failed on microduck-upper-leg-left: Error   : Invalid boundary mesh (overlapping facets) on surface 350 surface 350\nWarning : No elements in volume 1\nWarning : Surface mesh: worst distortion = -4.52222 (avg = 0.995279, 56 elements with jac. < 0); worst gamma = 7.54881e-05\nWarning : Surface mesh: worst distortion = -4.52222 (avg = 0.995279, 56 elements with jac. < 0); worst gamma = 7.54881e-05",
+   "mesh_fallback": [
+    {
+     "size": null,
+     "verdict": "CANNOT DETERMINE",
+     "reason": "gmsh failed on microduck-upper-leg-left: Error   : Invalid boundary mesh (overlapping facets) on surface 350 surface 350"
+    },
+    {
+     "size": 2.0,
+     "verdict": "CANNOT DETERMINE",
+     "reason": "gmsh failed on microduck-upper-leg-left: Error   : Invalid boundary mesh (overlapping facets) on surface 350 surface 350"
+    },
+    {
+     "size": 1.5,
+     "verdict": "CANNOT DETERMINE",
+     "reason": "gmsh failed on microduck-upper-leg-left: Error   : Invalid boundary mesh (overlapping facets) on surface 350 surface 350"
+    },
+    {
+     "size": 1.2,
+     "verdict": "CANNOT DETERMINE",
+     "reason": "gmsh failed on microduck-upper-leg-left: Error   : Invalid boundary mesh (overlapping facets) on surface 350 surface 350"
+    },
+    {
+     "size": 1.0,
+     "verdict": "CANNOT DETERMINE",
+     "reason": "gmsh failed on microduck-upper-leg-left: Error   : Invalid boundary mesh (overlapping facets) on surface 350 surface 350"
+    },
+    {
+     "size": 0.8,
+     "verdict": "CANNOT DETERMINE",
+     "reason": "gmsh failed on microduck-upper-leg-left: Error   : Invalid boundary mesh (overlapping facets) on surface 350 surface 350"
+    }
+   ]
+  },
+  {
+   "part": "microduck-upper-leg-left",
+   "case": "lateral",
+   "material": "PLA",
+   "force_N": [
+    0,
+    15.0,
+    0.0
+   ],
+   "why": "thigh: hip pitch axle down to the knee axle; side load: balance recovery / knock-over",
+   "mesh_size": 0.8,
+   "connectors": [
+    "hip_pitch_axle",
+    "knee_axle",
+    "hip_pitch_servo_seat",
+    "knee_servo_seat",
+    "pin_1",
+    "pin_2",
+    "pin_3",
+    "pin_4"
+   ],
+   "verdict": "CANNOT DETERMINE",
+   "reason": "gmsh failed on microduck-upper-leg-left: Error   : Invalid boundary mesh (overlapping facets) on surface 350 surface 350\nWarning : No elements in volume 1\nWarning : Surface mesh: worst distortion = -4.52222 (avg = 0.995279, 56 elements with jac. < 0); worst gamma = 7.54881e-05\nWarning : Surface mesh: worst distortion = -4.52222 (avg = 0.995279, 56 elements with jac. < 0); worst gamma = 7.54881e-05",
+   "mesh_fallback": [
+    {
+     "size": null,
+     "verdict": "CANNOT DETERMINE",
+     "reason": "gmsh failed on microduck-upper-leg-left: Error   : Invalid boundary mesh (overlapping facets) on surface 350 surface 350"
+    },
+    {
+     "size": 2.0,
+     "verdict": "CANNOT DETERMINE",
+     "reason": "gmsh failed on microduck-upper-leg-left: Error   : Invalid boundary mesh (overlapping facets) on surface 350 surface 350"
+    },
+    {
+     "size": 1.5,
+     "verdict": "CANNOT DETERMINE",
+     "reason": "gmsh failed on microduck-upper-leg-left: Error   : Invalid boundary mesh (overlapping facets) on surface 350 surface 350"
+    },
+    {
+     "size": 1.2,
+     "verdict": "CANNOT DETERMINE",
+     "reason": "gmsh failed on microduck-upper-leg-left: Error   : Invalid boundary mesh (overlapping facets) on surface 350 surface 350"
+    },
+    {
+     "size": 1.0,
+     "verdict": "CANNOT DETERMINE",
+     "reason": "gmsh failed on microduck-upper-leg-left: Error   : Invalid boundary mesh (overlapping facets) on surface 350 surface 350"
+    },
+    {
+     "size": 0.8,
+     "verdict": "CANNOT DETERMINE",
+     "reason": "gmsh failed on microduck-upper-leg-left: Error   : Invalid boundary mesh (overlapping facets) on surface 350 surface 350"
+    }
+   ]
+  },
+  {
+   "part": "microduck-ankle-left",
+   "case": "standing",
+   "material": "PLA",
+   "force_N": [
+    0,
+    0,
+    -20.0
+   ],
+   "why": "",
+   "mesh_size": null,
+   "connectors": [
+    "bearing_seat",
+    "horn_face",
+    "foot_screw"
+   ],
+   "max_disp": 0.45205937829564397,
+   "max_vm": 24.739882401818324,
+   "part_name": "microduck-ankle-left",
+   "sf": 2.0210282000501794,
+   "verdict": "PASS",
+   "yield_mpa": 50,
+   "mesh_fallback": [
+    {
+     "size": null,
+     "verdict": "PASS",
+     "reason": ""
+    }
+   ]
+  },
+  {
+   "part": "microduck-ankle-left",
+   "case": "landing",
+   "material": "PLA",
+   "force_N": [
+    0,
+    0,
+    -60.0
+   ],
+   "why": "peak 74.2 MPa leaves SF 0.67 against 50 MPa yield; the case requires 2",
+   "mesh_size": null,
+   "connectors": [
+    "bearing_seat",
+    "horn_face",
+    "foot_screw"
+   ],
+   "max_disp": 1.3561785446532622,
+   "max_vm": 74.21970704784546,
+   "part_name": "microduck-ankle-left",
+   "sf": 0.673675523507088,
+   "verdict": "FAIL",
+   "yield_mpa": 50,
+   "mesh_fallback": [
+    {
+     "size": null,
+     "verdict": "FAIL",
+     "reason": ""
+    }
+   ]
+  },
+  {
+   "part": "microduck-ankle-left",
+   "case": "lateral",
+   "material": "PLA",
+   "force_N": [
+    0,
+    15.0,
+    0.0
+   ],
+   "why": "",
+   "mesh_size": null,
+   "connectors": [
+    "bearing_seat",
+    "horn_face",
+    "foot_screw"
+   ],
+   "max_disp": 0.13643912547826045,
+   "max_vm": 5.736092750043361,
+   "part_name": "microduck-ankle-left",
+   "sf": 8.71673492371999,
+   "verdict": "PASS",
+   "yield_mpa": 50,
+   "mesh_fallback": [
+    {
+     "size": null,
+     "verdict": "PASS",
+     "reason": ""
+    }
+   ]
+  },
+  {
+   "part": "microduck-hip-bracket",
+   "case": "standing",
+   "material": "PLA",
+   "force_N": [
+    0,
+    0,
+    -20.0
+   ],
+   "why": "",
+   "mesh_size": null,
+   "connectors": [
+    "roll_boss",
+    "pitch_boss"
+   ],
+   "max_disp": 0.19681803574712567,
+   "max_vm": 7.783626002410444,
+   "part_name": "microduck-hip-bracket",
+   "sf": 6.423741323711588,
+   "verdict": "PASS",
+   "yield_mpa": 50,
+   "mesh_fallback": [
+    {
+     "size": null,
+     "verdict": "PASS",
+     "reason": ""
+    }
+   ]
+  },
+  {
+   "part": "microduck-hip-bracket",
+   "case": "landing",
+   "material": "PLA",
+   "force_N": [
+    0,
+    0,
+    -60.0
+   ],
+   "why": "",
+   "mesh_size": null,
+   "connectors": [
+    "roll_boss",
+    "pitch_boss"
+   ],
+   "max_disp": 0.5903171146318515,
+   "max_vm": 23.369560242595497,
+   "part_name": "microduck-hip-bracket",
+   "sf": 2.13953533917448,
+   "verdict": "PASS",
+   "yield_mpa": 50,
+   "mesh_fallback": [
+    {
+     "size": null,
+     "verdict": "PASS",
+     "reason": ""
+    }
+   ]
+  },
+  {
+   "part": "microduck-hip-bracket",
+   "case": "lateral",
+   "material": "PLA",
+   "force_N": [
+    0,
+    15.0,
+    0.0
+   ],
+   "why": "",
+   "mesh_size": null,
+   "connectors": [
+    "roll_boss",
+    "pitch_boss"
+   ],
+   "max_disp": 0.15413867056610867,
+   "max_vm": 6.9353828066256735,
+   "part_name": "microduck-hip-bracket",
+   "sf": 7.209407381555467,
+   "verdict": "PASS",
+   "yield_mpa": 50,
+   "mesh_fallback": [
+    {
+     "size": null,
+     "verdict": "PASS",
+     "reason": ""
+    }
+   ]
+  }
+ ],
+ "governing": {
+  "part": "microduck-ankle-left",
+  "case": "landing",
+  "sf": 0.673675523507088
+ },
+ "mesh_convergence": [
+  {
+   "size": 2.0,
+   "sf": null,
+   "verdict": "CANNOT DETERMINE"
+  },
+  {
+   "size": 1.5,
+   "sf": null,
+   "verdict": "CANNOT DETERMINE"
+  },
+  {
+   "size": 1.0,
+   "sf": null,
+   "verdict": "CANNOT DETERMINE"
+  }
+ ],
+ "material_sweep": [
+  {
+   "material": "PLA",
+   "sf": 0.6736754873105594,
+   "verdict": "FAIL"
+  },
+  {
+   "material": "PETG",
+   "sf": 0.6478468555106284,
+   "verdict": "FAIL"
+  },
+  {
+   "material": "ABS",
+   "sf": 0.5336765166368181,
+   "verdict": "FAIL"
+  },
+  {
+   "material": "NYLON",
+   "sf": 0.9710805541470564,
+   "verdict": "FAIL"
+  },
+  {
+   "material": "ASA",
+   "sf": 0.5870455821989452,
+   "verdict": "FAIL"
+  }
+ ]
+}

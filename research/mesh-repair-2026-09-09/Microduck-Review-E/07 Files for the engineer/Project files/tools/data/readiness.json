@@ -1,0 +1,242 @@
+{
+ "$comment": "Judgement data for tools/gen_readiness.py -> out/factory/readiness.json + out/factory/readiness.html. Every NUMBER on the page is computed by the generator from out/factory/measure/*.json and the repo's own data files; this file holds only the things a measurement cannot produce: who owns each open parcel tonight, the bilingual labels, and the list of steps in the manual that assume knowledge not on the page (read as a stranger, 2026-09-03).",
+ "doc": {
+  "id": "MD-FACT-RDY-001",
+  "rev": "A",
+  "title": "Readiness audit",
+  "title_zh": "制造就绪度审核",
+  "sub": "Artifact by artifact: can a factory that has never seen this repository build from this file today? READY TO BUILD FROM or NOT YET, with the measurement behind each grade, and for every NOT YET, what is missing and whether an agent closes it tonight or a person must.",
+  "sub_zh": "逐个文件审核：一家从未见过本仓库的工厂，今天能否直接按此文件制造？每项给出“可直接制造”或“尚未就绪”，附测量依据；对每个“尚未就绪”项，说明缺什么、今晚由软件代理完成还是必须由人完成。"
+ },
+ "grades": {
+  "READY": {
+   "en": "READY TO BUILD FROM",
+   "zh": "可直接制造"
+  },
+  "NOT_YET": {
+   "en": "NOT YET",
+   "zh": "尚未就绪"
+  },
+  "CD": {
+   "en": "CANNOT DETERMINE",
+   "zh": "无法判定"
+  }
+ },
+ "closers": {
+  "agent_tonight": {
+   "en": "agent, tonight",
+   "zh": "软件代理，今晚"
+  },
+  "agent_later": {
+   "en": "agent, not in tonight's six workflows",
+   "zh": "软件代理，不在今晚六个工作流内"
+  },
+  "human": {
+   "en": "a person must",
+   "zh": "必须由人完成"
+  },
+  "factory": {
+   "en": "partner factory",
+   "zh": "合作工厂"
+  }
+ },
+ "in_flight": [
+  {
+   "id": "WF-SHEETS",
+   "en": "Drawing-sheet rebuild to the A2/A3/A4 standard; every sheet regenerated",
+   "zh": "按 A2/A3/A4 标准重建全部图纸",
+   "owns": "ce-cad/cecad/autosheet.py, ce-cad/cecad/sheets.py, out/drawings/"
+  },
+  {
+   "id": "WF-FASTENERS",
+   "en": "Fastener census and assembly (every screw, nut, insert, ball joint into the assembly through a connection)",
+   "zh": "紧固件普查并装入装配体（每颗螺钉、螺母、热熔嵌件、球头）",
+   "owns": "out/fasteners/, FASTENERS.html, ce-assemblies/microduck bom"
+  },
+  {
+   "id": "WF-UNKNOWNS",
+   "en": "139-unknown resolution, cross-document reconciliation, three adversarial critics",
+   "zh": "解决 139 项未定项、跨文档核对、三名对抗式审阅",
+   "owns": "out/open/"
+  },
+  {
+   "id": "WF-POSE",
+   "en": "Photo pose-match and wiring visibility in the renders",
+   "zh": "照片姿态匹配与渲染中的布线可见性",
+   "owns": "out/pose/, POSE-MATCH.html, out/wiring/"
+  },
+  {
+   "id": "WF-HARNESS",
+   "en": "Harness in CAD and a per-joint dossier",
+   "zh": "线束进入 CAD 与逐关节档案",
+   "owns": "out/harness/, out/joints/, HARNESS.html, JOINTS.html"
+  },
+  {
+   "id": "WF-SOURCES",
+   "en": "New-source ingestion (MakerWorld 3250889, microduck_rl develop) and the convergence scoreboard",
+   "zh": "新来源导入（MakerWorld 3250889、microduck_rl develop）与收敛记分板",
+   "owns": "out/sources/, out/converge/, CONVERGENCE.html, INTERNALS.html, SOURCES.html"
+  }
+ ],
+ "manual_assumptions": [
+  {
+   "step": "Fastener flag (preamble)",
+   "assumes": "Every M2 count is community hole-fitting and the page says so; no screw LENGTH is given for any hole, so the line cannot kit a screw bag from this page.",
+   "closer": "agent_tonight",
+   "by": "WF-FASTENERS"
+  },
+  {
+   "step": "Preamble: 'production may tap the plastic — CANNOT DETERMINE'",
+   "assumes": "Original screw profile/pitch and per-joint fastening method are unresolved. Nominal ISO geometry, TAP hardware and inserts are not interchangeable evidence; the reader must not choose a replacement and count it as original closure.",
+   "closer": "human",
+   "by": "Identify the original per-joint hardware, then verify matching engagement/torque; research/fastener-reconciliation-2026-09-08/AUDIT.md."
+  },
+  {
+   "step": "1.2 'bolt both XL330s hanging from trunk_base, horn axes through world (6, ±17.5, 115)'",
+   "assumes": "The world frame is the MJCF's; there is no datum on any drawing to measure (6, ±17.5, 115) from, and which of the servo's 4+8 holes are used is not stated.",
+   "closer": "agent_tonight",
+   "by": "WF-FASTENERS (hole-to-screw map) + WF-SHEETS (datums on the sheet)"
+  },
+  {
+   "step": "1.3 'use M2×6 into inserts'",
+   "assumes": "Insert part number, installation temperature and depth are not on the page (B18c names a candidate insert; no process).",
+   "closer": "human",
+   "by": "factory process engineer writes the insert procedure on the first parts"
+  },
+  {
+   "step": "1.4 banana contact PCB onto Ø3.9 pins",
+   "assumes": "Board polarity/orientation and which face meets the battery are not stated; the spring contact has no part number (P3).",
+   "closer": "human",
+   "by": "teardown of a real pack + contact-part selection"
+  },
+  {
+   "step": "2.3 'Fix yaw2roll to the hip-yaw servo horn (spline)'",
+   "assumes": "Which horn (ROBOTIS ships the XL330 with an idler and a horn), the horn screw count and the horn-zero index are only in PLAYBOOK §5.1/§5.3, not on this page.",
+   "closer": "agent_tonight",
+   "by": "WF-FASTENERS + manual regeneration"
+  },
+  {
+   "step": "2.4-2.5 'roll axis +x at world (22.5, ±17.5, 102.5)'",
+   "assumes": "Left/right handedness of the hip bracket and which face is the horn side are not illustrated.",
+   "closer": "agent_tonight",
+   "by": "WF-POSE (per-joint pictures) / WF-HARNESS per-joint dossier"
+  },
+  {
+   "step": "3.4 'Hang the upper leg on the hip bracket: horn side to the hip-pitch servo'",
+   "assumes": "No picture of the thigh's horn side; the servo cavity orientation is described in words only.",
+   "closer": "agent_tonight",
+   "by": "WF-HARNESS per-joint dossier"
+  },
+  {
+   "step": "3.7 'fit the TPU sole onto the foot'",
+   "assumes": "Press-fit vs adhesive is not stated; connection:press-fit-sole-foot exists but its interference is not on the page.",
+   "closer": "agent_later",
+   "by": "manual regeneration from the connection record"
+  },
+  {
+   "step": "4.3 'Bolt the ID-30 servo to the trunk'",
+   "assumes": "Which trunk part (trunk_base or power_support) and which holes are not named.",
+   "closer": "agent_tonight",
+   "by": "WF-FASTENERS"
+  },
+  {
+   "step": "5.6 'screw the M12 lens holder to the IMX219 board (3 × M2)'",
+   "assumes": "The holder is bought-or-printed CANNOT DETERMINE (PARTS row 27); lens thread-in depth / focus procedure absent.",
+   "closer": "human",
+   "by": "Identify the original camera board, holder, lens and attachment/focus settings; a compatible generic M12 holder alone does not establish 1:1 identity."
+  },
+  {
+   "step": "5.6 ToF, speaker, microphone mounting",
+   "assumes": "Original ToF/speaker mounting and part identities remain unresolved. The public HAT has onboard MEMS MK1 and optional external mic inputs; an external microphone and its mounting/cable are not established for the target.",
+   "closer": "human",
+   "by": "teardown of a shipped unit or Pollen's answer"
+  },
+  {
+   "step": "5.8 'Close the shells (… × M2)'",
+   "assumes": "Shell screw positions, the order of closing and whether the trunk shells attach to trunk_base or to each other are not stated.",
+   "closer": "agent_tonight",
+   "by": "WF-FASTENERS"
+  },
+  {
+   "step": "6 Wiring",
+   "assumes": "Physical cable cuts are unknown; historical modeled lengths use proxy endpoints. Connector exits, JST EH contact orientation, servo port allocation, retention and service loops need verification against the first physical loom.",
+   "closer": "agent_tonight",
+   "by": "Harness endpoint/route evidence plus the first measured physical loom"
+  },
+  {
+   "step": "7.2 'Scan the bus'",
+   "assumes": "Which tool, which software image to flash on the Radxa and how to install it are not on the page (TEST-PLAN names robotctl; MANUAL does not say where it comes from).",
+   "closer": "agent_later",
+   "by": "manual regeneration citing software/upstream.json + install steps"
+  },
+  {
+   "step": "Torque (footnote): 'snug + a quarter turn'",
+   "assumes": "No torque value for any of the three screw joints (PLAYBOOK §5.3 CANNOT DETERMINE).",
+   "closer": "human",
+   "by": "strip / pull-out coupon test on the production print profile"
+  },
+  {
+   "step": "Bearing seats (preamble)",
+   "assumes": "Interference at every printed bearing seat is not specified anywhere (PLAYBOOK open item 3); the seat is modelled at nominal.",
+   "closer": "human",
+   "by": "measure five printed seats per part on the production printer and set the interference"
+  },
+  {
+   "step": "All coordinates",
+   "assumes": "Every position is an MJCF body-frame number; the page never says which physical face is the frame origin, so nothing can be checked with a caliper.",
+   "closer": "agent_tonight",
+   "by": "WF-SHEETS (datums)"
+  },
+  {
+   "step": "1.5 / 7.1 'The NP-F550 slides into the cradle' ",
+   "assumes": "The pack is named NP-F550 in the text while the geometry the cradle was measured from is Pollen's np_f970 mesh (38.600 x 20.600 x 70.800 mm, COMPARISON.html finding 2 / GOAL.md); the page never states which physical cell fits power_support, so a stranger can buy the wrong pack.",
+   "closer": "human",
+   "by": "measure the cradle against a purchased NP-F550 and an NP-F970, or Pollen's answer (sourcing line B7)"
+  },
+  {
+   "step": "2.6 'Mirror for the right side'",
+   "assumes": "The page never says whether the right-hand parts are geometric mirrors, the same part reused, or distinct prints; bodies hip_l and hip_l_2 share a name stem while the print folder ships separate -left/-right STLs for some parts and one part for others.",
+   "closer": "agent_later",
+   "by": "manual regeneration from the assembly's own placements (mirror flag per placement)"
+  },
+  {
+   "step": "3 parts list 'microduck-upper-leg x1, microduck-ankle x1, microduck-foot x1'",
+   "assumes": "The names carry no -left/-right suffix, but out/print/stl ships microduck-upper-leg-left/-right, -ankle-left/-right, -foot-left/-right and -sole-left/-right; a kitting operator cannot pull the bag by filename from this page.",
+   "closer": "agent_later",
+   "by": "manual regeneration from out/print/slice.json slugs"
+  },
+  {
+   "step": "Every step",
+   "assumes": "No step has an in-process inspection or an acceptance criterion, so a station cannot pass or fail its own work before the unit moves on (the gates in TEST-PLAN.html all run after full assembly).",
+   "closer": "agent_later",
+   "by": "per-station gate written from the TEST-PLAN gates that could be pulled earlier"
+  },
+  {
+   "step": "Every step",
+   "assumes": "No tool list: the M2 screw HEAD type and driver size are never named (Phillips / hex / Torx), nor the arbor press or socket size for the bearing presses, nor whether a soldering iron is needed for inserts.",
+   "closer": "agent_tonight",
+   "by": "WF-FASTENERS names the head type with the screw; the press tooling is already printed (out/print jig-press-15/22 STLs) but is not referenced from the manual"
+  }
+ ],
+ "pcb_notes": {
+  "robot-hat": {
+   "design_status": "CORRECTED 2026-09-04 by a measurement taken in this repo tonight: Pollen DO publish a Robot HAT — github.com/pollen-robotics/elec_RPI_Robot_HAT, Apache-2.0, tree 23eab11927f95ceca0dfa35bf182caeb7db39ea0, with KiCad 9 source (elec_RPI_Robot_HAT.kicad_sch 961 620 B, .kicad_pcb 2 213 353 B) AND a complete production/ folder (Gerber zip 323 691 B, BOM, POS, SCH.pdf, STEP.zip). Apache-2.0 permits manufacture, modification and SALE. CORRECTED AGAIN 2026-09-04 22:5x, and this correction MATTERS: the published outline is 65.0000 x 30.9001 x 1.000 mm, not 65.0 x 48.5. MEASURED tonight by tools/reconcile.py directly off the Edge.Cuts layer of reference/pollen-elec-rpi-robot-hat/elec_RPI_Robot_HAT.kicad_pcb (4 gr_line + 4 gr_arc, 20 points), agreeing with out/pcb/hat/components.json board.outline_bbox_mm.size = [65.0, 30.9001] to 0.0000 mm. The 48.5 figure is the bbox of the Dwgs.User ANNOTATION layer (65.0000 x 48.6000), whose dimension witness lines hang 17.6999 mm below the copper — a bbox taken over the drawing layer rather than the board outline; out/open/identity-sourcing.json:52-53 still carries it and is owned by another lane. So Pollen's board is 0.9001 mm wider in y than our 65.0 x 30.0 reconstruction and 0.8751 mm wider than the 65.025 x 30.025 simulation mesh — NOT 18.5 mm. It is still NOT proven to be the board inside the retail unit (production revision unresolved: the mesh and the published board both carry four D2.7 mounting holes. Source-file audit 2026-09-08 reads the four drilled pads inside J4 on a 23 x 58 mm footprint-local pattern; there are no standalone MountingHole footprints, which does not mean no holes. See tools/reconcile.py and out/factory/reconcile.json robot_hat_outline.mounting, verified against research/official-hat-audit-2026-09-08.json) — that stays CANNOT DETERMINE and only a teardown settles it. The Gerbers in electronics/robot-hat/ are still OUR footprint-accurate reconstruction, and they still FAIL DRC.",
+   "closer": "human",
+   "what": "Identify the board revision installed in the original target before choosing fabrication data. The published Pollen HAT package is a source-backed public-family candidate, not proof of that identity. After identification, verify its exact mounting/connector geometry, BOM and manufacturing checks; adopting C1 or rerouting our reconstruction alone does not close 1:1 recreation. Sources: research/hat-pcba-rfq-2026-09-08/ and out/factory/reconcile.json."
+  },
+  "imu-to-dxl": {
+   "design_status": "No original bridge schematic, BOM, MCU/transceiver identity or firmware image was located in the official repositories/releases inspected on 2026-09-08. STM32G031F6P6 is a local reconstruction choice, not an identified original. Host protocol evidence alone does not identify the board.",
+   "closer": "human",
+   "what": "Obtain original board silkscreen/markings, MCU/transceiver identification and firmware/source provenance. See research/imu-contact-identity-2026-09-08/AUDIT.md. Routing/fabbing a compatible local replacement does not close original identity."
+  },
+  "banana-contact": {
+   "design_status": "The local reconstruction is drawn as a passive contact strip; that is not evidence of the original board circuit. Original revision, contact part numbers, pitch, plating, rating and circuit remain unresolved.",
+   "closer": "human",
+   "what": "Identify and measure the original contact board and pack interface; obtain its drawings/BOM or source-backed contact specifications. The banana_pcb_locker source is a mechanical locker, not a PCB identity. Local artwork completion or fabrication capability does not establish a 1:1 board. See research/imu-contact-identity-2026-09-08/AUDIT.md."
+  }
+ },
+ "licence": {
+  "en": "22 of the 30 print STLs are Pollen's simulation meshes, licensed CC BY-SA-NC (microduck_rl README §License: '3D model files are licensed under Creative Commons BY-SA-NC'). They may be printed for prototypes; they may NOT be sold. Only the 8 parametric rebuilds are ours. Pollen's public HAT family PCB, BOM and manufacturing files are archived; the installed target revision and original IMU/contact-board identities remain unresolved. The blanket PCB-publication statement formerly cited from SPEC.md:24 is obsolete.",
+  "zh": "30 个打印 STL 中有 22 个是 Pollen 的仿真网格，许可证为 CC BY-SA-NC（microduck_rl README §License）。可用于打印样机，不可用于销售。仅 8 个参数化重建件为我方自有。Pollen 已公开 HAT 系列 PCB、BOM 和制造文件；目标原机安装的版本以及原始 IMU/电池触点板身份仍未确定。此前引用 SPEC.md:24 的“PCB 未公开”概括已过时。"
+ }
+}

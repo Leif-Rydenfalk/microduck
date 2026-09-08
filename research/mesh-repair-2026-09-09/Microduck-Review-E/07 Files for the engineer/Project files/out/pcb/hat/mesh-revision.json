@@ -1,0 +1,25 @@
+{
+ "_generated": "lane internals-build2, 2026-09-04. Every number below was read off a file named in the row.",
+ "question": "Which revision of Pollen's RPI Robot HAT is the board in our CAD?",
+ "answer": "A PRE-RELEASE DEVELOPMENT REVISION THAT WAS NEVER PRODUCED — the layout as it stood at commit fbd885d, immediately before commit 96ffef3 whose message reads verbatim 'Just figure out the 40-pin GPIO conn. is inverted :-/' and 96a1b9a '[update] Positionning after flipping.' Every board Pollen has had made (A1 = c5f5583, 15 pcs; B1 = 4549a3e, 125 pcs; C1 = 13dba37/23eab11, 20 pcs) carries the OTHER layout.",
+ "verdict": "FAIL — our CAD's Robot HAT is not the board in the robot.",
+ "how_it_was_settled": [
+  "Pollen's simulation mesh reference/pollen-microduck-rl/assets/elec_rpi_robot_hat_pcb.stl was measured directly (pure-python STL read, bottom-face vertex ring clustering, 18856 triangles): outline bbox -3.520 .. 61.505 x -26.510 .. 3.515 x 0 .. 0.840 mm; fourteen 0.950 mm holes at x = 43.850 / 48.650 (four rows y -23.000, -20.500, -18.000, -15.500) and x = 53.500 / 58.300 (three rows y -17.450, -14.950, -12.450); one 1.000 mm hole at (31.200, -11.900); forty 1.020 mm holes on 2.540 pitch at y +/-1.270.",
+  "The same features were read out of four revisions of the official elec_RPI_Robot_HAT.kicad_pcb (git history fetched 2026-09-04).",
+  "fbd885d ('BU before changing the 40-pin GPIO'): outline -3.520 .. 61.505 x -26.510 .. 3.515 (65.025 x 30.025); 0.95 holes at x 43.850 / 48.650 (4-pin J3/J11) and 53.500 / 58.300 (3-pin J13/J14). IDENTICAL TO THE MESH to 0.001 mm on every one of those 18 numbers.",
+  "c5f5583 (release A1), 4549a3e (release B1), 13dba37 + 23eab11 (release C1): outline -3.495 .. 61.505 x -26.495 .. 4.405 (65.000 x 30.900); 0.95 holes at x -1.045 / 3.755 (3-pin J13/J14) and 8.605 / 13.405 (4-pin J11/J3).",
+  "The 4 x 2.700 mounting holes (0,0)(58,0)(0,-23)(58,-23), the 2 x 2.000 anchors (6.140,0)(51.860,0) and the 40 x 1.020 header holes are symmetric about the board's x centre and are IDENTICAL in every revision — which is why nothing in this repo caught it until the connector holes were compared."
+ ],
+ "what_this_breaks": [
+  "CABLE ROUTING. On the released board the Dynamixel 3-pin connectors (J13/J14 — the ones the XL330 bus actually plugs into) sit at the -x end, next to the Stemma ports; in our CAD they are at the +x end. Every harness length and every route that leaves the HAT in wiring/cables.json is mirrored end-for-end.",
+  "BOARD OUTLINE. Our part builds 65.025 x 30.025 (hole-centred rounded rectangle, R3.52). The released board is 65.000 x 30.900: the corner arcs are R3.500 centred on (0, +0.900), (58, +0.900), (0, -23.000), (58, -23.000), so the +Y edge stands 4.400 mm above the mount row, not 3.500. Clearance to the head shell on that edge is 0.885 mm smaller than our model says.",
+  "DRILL. The mesh's single 1.000 mm hole at (31.200, -11.900) does not exist on any released board; the released boards carry three 1.000 mm test-point holes at (29.700, -15.825), (33.300, -15.825) and (58.600, -18.600).",
+  "THICKNESS. Both the mesh and the STEP body are 0.840 mm because that is the substrate (0.770 dielectric + 2 x 0.035 inner copper). The finished 4-layer board is 1.000 mm (kicad_pcb '(thickness 1)', stackup sums exactly)."
+ ],
+ "action": "iterate part:microduck-robot-hat-pcb to the C1 geometry, and re-derive every HAT cable endpoint from the C1 connector positions.",
+ "sources": {
+  "mesh": "reference/pollen-microduck-rl/assets/elec_rpi_robot_hat_pcb.stl",
+  "official_repo": "reference/pollen-elec-rpi-robot-hat (Apache-2.0), history fetched 2026-09-04 from github.com/pollen-robotics/elec_RPI_Robot_HAT",
+  "commits": {"pre_flip": "fbd885d", "the_flip": "96ffef3 then 96a1b9a", "A1": "c5f5583", "B1": "4549a3e", "C1": "13dba37 (design) + 23eab11 (production files)"}
+ }
+}
