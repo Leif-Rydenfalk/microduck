@@ -1,4 +1,4 @@
-# Rest-pose interference census — 2026-09-09
+# Interference census — 2026-09-09 (rest pose and joint-range sweep)
 
 `tools/prove_fit.py rest` rerun on the current
 `ce-assemblies/microduck/current/placements.json` (134 rows: 70 Pollen meshes
@@ -108,8 +108,61 @@ So the opening in part 29 does not put the part into any shell, the jaw or the
 motor support at rest. The only overlap it has is the servo-seat overlap every
 servo-carrying part has. Range-of-motion is the sweep stage, below.
 
+## Joint-range sweep — added 02:55 CST
+
+`tools/prove_fit.py sweep` is now implemented: each of the 14 hinges is driven
+across its full MJCF range in 5° samples with every other joint at zero; only
+pairs with exactly one member distal to the joint are re-tested; a pair that is
+clear at zero and interferes at a sample is bisected to 0.5° for the angle at
+which the collision begins. `tools/fit_sweep_depth.py` then re-poses every
+such pair at the edge of the envelope the published policies actually use
+(walking + sit/stand joint extremes from `out/motion/legs.json`; head sine
+amplitude and slot-crosstalk peaks from `out/motion/head.json`) and measures
+penetration depth there. Results: `out/fit/sweep.json`, `out/fit/sweep-depth.json`.
+
+**A defect found and fixed on the way.** The first sweep rotated every part about
+the wrong centre: `prove_fit.py` built its zero pose from an all-zero qpos, which
+puts the free-joint root at the origin, while `placements.json` is composed with
+the trunk at z = 120 mm (the MJCF body pos, i.e. `qpos0`). At rest that cancels;
+under rotation every horizontal hinge anchor sat 118–122 mm from its bearing.
+`tools/fit_axis_check.py` measures this (`out/fit/axis-check.log`): after the
+fix every carrying bearing is 0.02 mm off its joint axis with 0.0° tilt. The
+wrong-centre sweep was discarded, not published.
+
+### What the corrected sweep finds
+
+54 clear-at-rest pairs start interfering somewhere in the ranges. Depth at the
+used-envelope edge, or at the range end when the collision only begins beyond
+the envelope:
+
+| joint | used envelope | first structure collision | depth | verdict |
+|---|---|---|---|---|
+| hip roll (both) | −8/+11°, −12/+8° | none in ±22° | — | clear |
+| hip pitch (both) | −46..0°, 0..32° | none in ±90° | — | clear |
+| neck pitch | ±37° | none in −90..60° | — | clear |
+| head yaw | ±148° | none in ±170° | — | clear |
+| hip yaw (both) | −9/+6°, −4/+13° | shin into battery from ±18.1° | 4.4 mm at ±25° | outside envelope; a single-joint pose the gait never reaches |
+| knee (both) | up to 75° / −80° | hip bracket into foot from 70.9° | 2.1 mm (L, 75°), 3.7 mm (R, −80°) | inside the sit/stand extreme, but only with hip pitch and ankle at zero; in the real squat all three move. Needs the sit/stand trajectory posed jointly. |
+| head pitch | ±88° (crosstalk peak) | head shells into trunk shells from −66°, power support from −71° | 1.1 / 2.75 mm at −88° | the MuJoCo hull probe in head.json already said self-contact beyond −54°; exact meshes say −66°. Inside the crosstalk envelope, outside the 42° sine amplitude. |
+| ankle right | −33..0° | ankle bracket into the shin servo from −0.3° | 2.5 mm at −33° | **asymmetric**: the mirrored motion on the left (0..46°) is clear. Rest census shows both shin servos seated identically, so suspect the right servo mesh's horn side or the ankle_right mesh, not the bracket. |
+| ankle left | 0..46° | (−side only) | 2.9 mm at −90° | outside envelope |
+| head roll | ±25° | part 29 × roll servo from −7.5° | closed-mesh check: 0.76 mm at −12.5°, 1.0 mm at −25° | within the servo-mesh overwidth (see reading 1); the bearings and shells stay clear |
+
+Screws: 6 nominal screws enter a body they are not driven into inside the
+envelope (all in the hip-yaw/knee/ankle groups); these are the withdrawn
+servo-face proposals and are not graded.
+
+### Caveats that bound these numbers
+
+- One joint at a time from the zero pose. Coupled poses (squat, walking stance)
+  are not swept; the knee finding in particular needs the recorded trajectories
+  posed jointly. The MuJoCo hull probe is the only coupled evidence so far.
+- Penetration is measured against Pollen's visual meshes including the 29 mm
+  servo mesh; a 1 mm depth against a servo is inside that uncertainty.
+- `yaw_roll_motion` pairs use the closed repaired mesh only where stated.
+
 ## Not done
 
-`sweep` (joint-range) and `access` (driver reach) stages are documented in the
-tool and not implemented; only the zero pose is measured. No physical part was
+`access` (driver reach) is documented in the tool and not implemented. The sweep
+is single-joint from zero; coupled trajectories are not posed. No physical part was
 measured. No placement, mesh or drawing was changed by this census.

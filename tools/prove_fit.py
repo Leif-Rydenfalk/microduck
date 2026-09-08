@@ -123,7 +123,15 @@ class Model:
         self.children = {n: [] for n in self.bname}
         for i in range(1, self.m.nbody):
             self.children[self.bname[self.m.body_parentid[i]]].append(self.bname[i])
-        self.zero = self.body_frames(np.zeros(self.m.nq))
+        # THE ZERO POSE IS qpos0, NOT ALL-ZEROS. The root is a free joint whose
+        # qpos0 carries the MJCF body pos (trunk at z 0.12 m); placements.json
+        # was composed in that frame. Driving hinges from an all-zero qpos put
+        # the root at the origin, so every hinge anchor sat 120 mm below the
+        # bearing it belongs to and the first sweep rotated parts about the
+        # wrong centres (measured 2026-09-09: hip-roll anchor 118 mm off its
+        # bearing; after this fix 0.0 mm). The rest census was unaffected
+        # because it never left the pose the local frames were built in.
+        self.zero = self.body_frames(self.qpos_for({}))
 
         # rows
         rec = json.load(open(os.path.join(
@@ -239,8 +247,7 @@ class Model:
         return out
 
     def qpos_for(self, angles_deg):
-        q = np.zeros(self.m.nq)
-        q[3] = 1.0                      # free-joint quaternion w
+        q = np.array(self.m.qpos0, float).copy()   # root pose from the MJCF
         for j in self.joints:
             if j["name"] in angles_deg:
                 q[j["qadr"]] = np.radians(angles_deg[j["name"]])
@@ -334,6 +341,102 @@ def main_rest(M):
       % (len(hits), len(cand), time.time() - t0))
 
 
+def main_sweep(M, step_deg=5.0, bisect_deg=0.5):
+    """Every hinge driven across its full MJCF range, one joint at a time with
+    every other joint at zero. Only pairs with exactly one member distal to
+    the joint change relative pose, so only those are re-tested. A pair that is
+    clear at zero and interferes at some sampled angle is bisected to
+    `bisect_deg` from the last clear sample, and the angle where the collision
+    BEGINS is reported. Pairs already interfering at zero (the rest census in
+    rest.json) are listed per joint as `already_at_rest` and not bisected:
+    their rest overlap is not a range finding. Triangle crossing and
+    vertex-inside are the tests here; no volume or depth is computed."""
+    t0 = time.time()
+    W0 = M.world(M.zero)
+    lo0, hi0 = boxes(W0)
+    rest_pairs = set()
+    for i in range(M.n):
+        for j in range(i + 1, M.n):
+            if np.all(hi0[i] >= lo0[j]) and np.all(hi0[j] >= lo0[i]):
+                if mf.measure_pair(W0[i], W0[j], volume=False, depth=False).get("interferes"):
+                    rest_pairs.add((i, j))
+    P("rest: %d interfering pairs (%.1f s)" % (len(rest_pairs), time.time() - t0))
+
+    def interferes_at(jn, ang, i, j):
+        Wf = M.world(M.body_frames(M.qpos_for({jn: ang})))
+        r = mf.measure_pair(Wf[i], Wf[j], volume=False, depth=False)
+        return bool(r.get("interferes")), r
+
+    joints_out = []
+    for jt in M.joints:
+        jn, (rlo, rhi) = jt["name"], jt["range_deg"]
+        D = M.distal(jn)
+        moved = [k for k in range(M.n) if M.body_of[k] in D]
+        fixed = [k for k in range(M.n) if M.body_of[k] not in D]
+        angles = sorted(set([0.0, rlo, rhi] + [a for a in np.arange(0, rhi, step_deg)]
+                            + [-a for a in np.arange(0, -rlo, step_deg)]))
+        angles = [a for a in angles if rlo - 1e-9 <= a <= rhi + 1e-9]
+        first_hit = {}      # pair -> (last clear angle, first hit angle, side)
+        already = sorted((M.label[a], M.label[b]) for (a, b) in rest_pairs
+                         if (M.body_of[a] in D) != (M.body_of[b] in D))
+        P("joint %s range %.1f..%.1f deg: %d moved rows x %d fixed rows, %d samples, %d pairs already interfering at rest"
+          % (jn, rlo, rhi, len(moved), len(fixed), len(angles), len(already)))
+        for side, seq in (("+", [a for a in angles if a > 0]),
+                          ("-", sorted([a for a in angles if a < 0], reverse=True))):
+            last_clear = 0.0
+            hit_pairs = set()
+            for ang in seq:
+                Wf = M.world(M.body_frames(M.qpos_for({jn: ang})))
+                lo, hi = boxes(Wf)
+                for i in moved:
+                    for j in fixed:
+                        a, b = (i, j) if i < j else (j, i)
+                        if (a, b) in rest_pairs or (a, b) in hit_pairs:
+                            continue
+                        if not (np.all(hi[i] >= lo[j]) and np.all(hi[j] >= lo[i])):
+                            continue
+                        r = mf.measure_pair(Wf[a], Wf[b], volume=False, depth=False)
+                        if r.get("interferes"):
+                            hit_pairs.add((a, b))
+                            # bisect between last_clear and ang
+                            c0, c1 = last_clear, ang
+                            while abs(c1 - c0) > bisect_deg:
+                                mid = 0.5 * (c0 + c1)
+                                ok, _ = interferes_at(jn, mid, a, b)
+                                if ok:
+                                    c1 = mid
+                                else:
+                                    c0 = mid
+                            first_hit[(a, b)] = {
+                                "a": M.label[a], "b": M.label[b],
+                                "class": pair_class(M, a, b),
+                                "side": side, "begins_deg": round(c1, 2),
+                                "last_clear_deg": round(c0, 2),
+                                "sample_deg": ang,
+                                "intersecting_tri_pairs": r.get("intersecting_tri_pairs"),
+                                "a_vertices_inside_b": r.get("a_vertices_inside_b"),
+                                "b_vertices_inside_a": r.get("b_vertices_inside_a")}
+                            P("  HIT %s %s x %s begins at %+.2f deg (clear at %+.2f)"
+                              % (jn, M.label[a], M.label[b], c1, c0))
+                last_clear = ang
+            P("  %s side done, %.1f s" % (side, time.time() - t0))
+        joints_out.append({"joint": jn, "body": jt["body"], "range_deg": [rlo, rhi],
+                           "samples_deg": angles, "moved_rows": len(moved),
+                           "fixed_rows": len(fixed),
+                           "already_at_rest": [{"a": a, "b": b} for a, b in already],
+                           "collisions_begin": sorted(first_hit.values(),
+                                                      key=lambda h: abs(h["begins_deg"]))})
+    res = {"$what": "every hinge across its full MJCF range, one at a time, others at zero; "
+                    "angle at which each clear-at-rest pair starts interfering",
+           "step_deg": step_deg, "bisect_deg": bisect_deg,
+           "rows": M.n, "rest_interfering_pairs": len(rest_pairs),
+           "joints": joints_out, "seconds": round(time.time() - t0, 1)}
+    json.dump(res, open(os.path.join(OUT, "sweep.json"), "w"), indent=1)
+    P("DONE sweep: %d joints, %d range collisions, %.1f s"
+      % (len(joints_out), sum(len(j["collisions_begin"]) for j in joints_out), time.time() - t0))
+
+
+
 if __name__ == "__main__":
     try:
         t0 = time.time()
@@ -343,6 +446,8 @@ if __name__ == "__main__":
           % (time.time() - t0, M.n, len(M.bname) - 1, len(M.joints)))
         if STAGE == "rest":
             main_rest(M)
+        elif STAGE == "sweep":
+            main_sweep(M)
         else:
             P("unknown stage")
     except Exception:

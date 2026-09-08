@@ -30,9 +30,15 @@ W = mf.transform_tris(T0, R, t).reshape(-1, 3, 3)
 R0, t0 = M.zero[M.body_of[i]]
 M.tris[i] = ((W.reshape(-1, 3) - t0) @ R0).reshape(-1, 3, 3)
 closed = mf.is_closed(M.tris[i])
-Wd = M.world(M.zero)
+# optional pose: POSE="head_roll=-25" measures the same pairs at that hinge angle
+pose = {}
+for kv in os.environ.get("POSE", "").split(","):
+    if "=" in kv:
+        k, v = kv.split("="); pose[k.strip()] = float(v)
+Wd = M.world(M.body_frames(M.qpos_for(pose))) if pose else M.world(M.zero)
 lo, hi = pf.boxes(Wd)
-out = {"$what": "rest-pose pairs of yaw_roll_motion re-measured with the closed repaired mesh",
+out = {"$what": "pairs of yaw_roll_motion re-measured with the closed repaired mesh at pose %s" % (pose or "rest"),
+       "pose_deg": pose,
        "mesh": os.path.relpath(FIX, REPO), "closed": bool(closed), "pairs": []}
 t1 = time.time()
 for j in range(M.n):
@@ -48,5 +54,6 @@ for j in range(M.n):
         M.label[i], M.label[j], res.get("interferes"), res.get("intersecting_tri_pairs"),
         (res.get("overlap_volume") or {}).get("mm3"), res.get("penetration")))
 out["seconds"] = round(time.time() - t1, 1)
-json.dump(out, open(os.path.join(pf.OUT, "yaw-roll-closed.json"), "w"), indent=1)
+name = "yaw-roll-closed" + ("-" + "-".join("%s%+g" % kv for kv in sorted(pose.items())) if pose else "") + ".json"
+json.dump(out, open(os.path.join(pf.OUT, name), "w"), indent=1)
 pf.P("DONE %d pairs" % len(out["pairs"]))
