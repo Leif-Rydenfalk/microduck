@@ -38,6 +38,7 @@ WHAT IT REFUSES:
     named CANNOT DETERMINE that says what would settle it. A guessed length is a
     wrong purchase order and, once rendered, a believed one.
 """
+import hashlib
 import collections
 import json
 import math
@@ -69,15 +70,62 @@ CHAIN_BREAK_MM = 20.0
 
 # Minimum thread engagement. This is a RULE, not a measurement of this robot,
 # and it is labelled as one everywhere it appears: 1.5 x nominal diameter is
-# the usual floor for a screw threading into a softer material (here PLA or the
-# XL330's own engineering-plastic case). The BOTTOMING limit beside it IS a
-# measurement — the pilot's own measured depth.
+# a generic floor for a screw threading into a softer material (e.g. PLA). XL330 face pilots explicitly
+# bypass this rule: manufacturer maximum 3 mm, minimum engagement unknown.
+# Mesh cylinder depth is geometric evidence, not physical thread approval.
 MIN_ENGAGE_D = 1.5
 
 # What each measured hole class DOES in a run.
 PASSES_THROUGH = {"clearance", "ambiguous"}   # the screw's shank passes
 HEAD_SEAT = {"counterbore", "insert"}         # the head (or an insert) seats
 TAKES_THREAD = {"pilot"}                      # the thread bites
+
+
+# Manufacturer X330 drawing (28-May-20), horn/idler callout:
+# 4-Ø1.6 HOLE DP3.0(Max.), PCDØ12, Using M2 Tapping Screw.
+XL330_FACE_MAX_MM = 3.0
+XL330_FEATURES_SHA256 = "98168dab06ba1b2513bc825db3cf4239e890b4242db73eb89c072e0a1fdf72bb"
+XL330_DRAWING = "ce-parts/xl330-m288-t/iterations/v0.0.1/docs/fetched/XL,XC-330.pdf"
+XL330_DRAWING_SHA256 = "948b707cb26a64501c03fc45b1a9557b69a554dd5d6934f02e8e6f86cf2b46c2"
+
+
+def restrict_xl330_face(run, pilot):
+    """Withdraw ISO length approval for the identified reference face pilots.
+
+    Indices 0..7 are the eight measured face pilots in the pinned mesh feature
+    record. Diameter alone does not identify an arbitrary hole or thread.
+    """
+    if not (pilot["mesh"] == "xl330" and pilot["cls"] == "pilot"
+            and pilot["index"] in range(8)
+            and pilot.get("d_mm") is not None
+            and abs(pilot["d_mm"] - 1.6) < 1e-6):
+        return run
+    legacy_keys = ("verdict", "kind", "stocked_length_mm",
+                   "stocked_lengths_in_window_mm", "length_window_mm",
+                   "engagement_available_mm", "length_why", "length_window_why")
+    run["historical_mesh_rule_proposal"] = {
+        "scope": "Withdrawn nominal ISO proposal from mesh depth and generic 1.5d rule; not approved hardware",
+        **{k: run.get(k) for k in legacy_keys}}
+    raw_depth = run["engagement_available_mm"]
+    max_bound = min(raw_depth, XL330_FACE_MAX_MM)
+    run.update(
+        verdict="CANNOT DETERMINE", kind="servo tapping screw identity and seating unverified",
+        mesh_pilot_depth_mm=raw_depth,
+        engagement_available_mm=None,
+        engagement_maximum_mm=max_bound, minimum_engagement_mm=None,
+        manufacturer_maximum_depth_mm=XL330_FACE_MAX_MM,
+        thread_requirement={"manufacturer_callout": "M2 Tapping Screw",
+                            "pitch_mm": None, "profile": None,
+                            "iso4762_equivalence": "CANNOT DETERMINE",
+                            "original_joint_identity": "CANNOT DETERMINE",
+                            "source": XL330_DRAWING, "sha256": XL330_DRAWING_SHA256},
+        length_window_mm=[None, round(run["grip_mm"] + max_bound, 4)],
+        length_window_why="Minimum engagement unknown; upper value is model grip plus the smaller of mesh span and manufacturer 3 mm maximum, conditional on unverified seating. Not a physical screw-length approval.",
+        stocked_length_mm=None, stocked_lengths_in_window_mm=[],
+        length_why="Withdrawn: sourced ISO4762 lengths do not establish the manufacturer's tapping screw identity, original head seating or minimum engagement. No replacement length selected.",
+        why="XL330 reference face pilot maps to manufacturer's M2 tapping callout with 3 mm maximum depth. Raw mesh span retained separately; physical seating and original screw remain unverified.",
+        settled_by="Exact original joint screw drawing/profile and length, confirmed servo/accessory identity and head seating/usable engagement; no direct metric-for-TAP substitution.")
+    return run
 
 
 def dot(a, b):
@@ -120,8 +168,17 @@ def canonical(a):
 
 
 def load():
-    with open(FEAT, encoding="utf-8") as f:
-        meshes = json.load(f)["meshes"]
+    # Fail before the main routine opens OUT: face indices0..7 are identities
+    # in this exact source snapshot, not a generic diameter classification.
+    with open(FEAT, "rb") as f:
+        feature_bytes = f.read()
+    if hashlib.sha256(feature_bytes).hexdigest() != XL330_FEATURES_SHA256:
+        raise ValueError("XL330 feature source hash changed; re-audit face mapping before generating runs")
+    with open(os.path.join(ROOT, XL330_DRAWING), "rb") as f:
+        drawing_bytes = f.read()
+    if hashlib.sha256(drawing_bytes).hexdigest() != XL330_DRAWING_SHA256:
+        raise ValueError("XL330 manufacturer drawing hash changed; re-audit depth/thread restriction")
+    meshes = json.loads(feature_bytes)["meshes"]
     with open(WORLD, encoding="utf-8") as f:
         w = json.load(f)
     return meshes, w
@@ -364,7 +421,7 @@ def classify(g):
         run["kind"] = "no sourced length inside the measured window"
         run["settled_by"] = ("a sourced offer inside [%.3f, %.3f] mm, or a re-measurement of "
                              "the grip / pilot depth that widens it" % (l_min, l_max))
-    return run
+    return restrict_xl330_face(run, pilot)
 
 
 def main():
@@ -395,7 +452,7 @@ def main():
             world_transform="p_w = R p + t ; a_w = R a ; s_w = s + t . a_w",
             length_window="min = grip + 1.5 d (a RULE, labelled as one); "
                           "max = grip + the pilot's own measured depth (a MEASUREMENT). "
-                          "Every sourced length inside the window is listed; the shortest is taken.",
+                          "For non-servo cases each sourced length inside the window is listed. XL330 face pilots instead retain raw mesh depth, enforce manufacturer 3 mm maximum, leave minimum unknown, and withdraw all sourced ISO-length approval.",
             stocked_lengths=STOCKED_MM),
         counts=dict(
             holes_in_world=len(holes),

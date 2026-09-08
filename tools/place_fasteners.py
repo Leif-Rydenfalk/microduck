@@ -411,7 +411,14 @@ def write_assembly(out):
 
 def main():
     dry = "--dry" in sys.argv
-    doc = json.load(open(RUNS, encoding="utf-8"))
+    with open(RUNS, encoding="utf-8") as source:
+        doc = json.load(source)
+    withdrawn = [r for r in doc['runs'] if r.get('historical_mesh_rule_proposal')]
+    if withdrawn:
+        raise ValueError(
+            'CANNOT DETERMINE: %d historical screw proposals were withdrawn. '
+            'Resolve their physical hardware and seating before replacing assembly '
+            'records; existing placement and assembly files were not changed.' % len(withdrawn))
     runs = [r for r in doc["runs"] if r["verdict"] == "PASS"]
     placed, refused = [], []
     seq = 0
@@ -454,16 +461,17 @@ def main():
                    "max_axis_error_deg": max([p["verify"]["axis_error_deg"]
                                               for p in placed] or [None])},
         "placed": placed, "refused": refused}
-    os.makedirs(os.path.dirname(OUT), exist_ok=True)
-    with open(OUT, "w", encoding="utf-8") as f:
-        json.dump(out, f, indent=1)
+    if not dry:
+        os.makedirs(os.path.dirname(OUT), exist_ok=True)
+        with open(OUT, "w", encoding="utf-8") as f:
+            json.dump(out, f, indent=1)
     print("runs offered      :", len(runs))
     print("placed            :", len(placed), dict(by_conn))
     print("refused           :", len(refused))
     print("by screw          :", dict(by_len))
     print("worst head error  :", out["counts"]["max_head_point_error_mm"], "mm")
     print("worst axis error  :", out["counts"]["max_axis_error_deg"], "deg")
-    print("wrote", OUT, "(dry run — assembly records untouched)" if dry else "")
+    print("dry run — no files written" if dry else "wrote " + OUT)
     if not dry:
         write_assembly(out)
         from gen_fastener_verify import generate

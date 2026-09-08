@@ -12,6 +12,12 @@ and M2 tapping screws. A corrected research candidate passes 100 finished-solid
 probes; the published shelf iteration remains unchanged pending integration.
 35 of 52 nominal servo-face screw penetrations exceed that limit in the existing
 placement model. This is not a physical measurement or a replacement screw list.
+The current run generator now withdraws all 52 servo ISO-length proposals.
+The 64-screw assembly remains a historical nominal placement; a rebuild refuses
+to silently remove withdrawn hardware. Twelve other generic nominal proposals
+remain, also without original physical thread acceptance. The
+[application check](../research/servo-fastener-restriction-2026-09-08/current-application.json)
+records the corrected run data and unchanged assembly hashes.
 
 ## Electronics: correction that changes the next task
 
