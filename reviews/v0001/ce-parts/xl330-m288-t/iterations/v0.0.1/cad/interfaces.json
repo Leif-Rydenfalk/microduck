@@ -1,0 +1,491 @@
+{
+  "$triad": 1,
+  "kind": "interfaces",
+  "record": {
+    "slug": "xl330-m288-t",
+    "interfaces": [
+      {
+        "name": "horn",
+        "frame": {
+          "origin_mm": [
+            14.5,
+            0.0,
+            0.0
+          ],
+          "z_axis": [
+            1,
+            0,
+            0
+          ],
+          "x_axis": [
+            0,
+            0,
+            1
+          ]
+        },
+        "accepts": [
+          "connection:spline-xl330-horn"
+        ],
+        "role": "horn_face",
+        "nominal_mm": 16.0,
+        "what": "the +x output disc: \u00d816.0000 x 3.0010 (centre x 13.0000, so the disc spans x 11.4990..14.5000 and its outer face IS the mesh's x maximum, 14.5000), carrying 4 x \u00d81.6000 x 6.0000 tapped holes at x 11.5000, (y, z) = (0, +6), (0, -6), (+6, 0), (-6, 0) \u2014 a \u00d812.0000 bolt circle. \u00d81.6 is cecad.fasteners' M2 tap drill. MEASURED ABSENCE, kept: the real servo's centre hub is NOT in this mesh \u2014 the axis probe reads solid material from x -14.5 to +14.5 \u2014 so the hub diameter is CANNOT DETERMINE here while every measured bracket on this robot carries a \u00d85-6 centre bore.",
+        "source": "MEASURED off Pollen's xl330.stl by cecad.meshfeatures.cylinders (least-squares cylinder fit per smooth patch; the fit residual and angular cover of every feature quoted here are in the artifact), frozen 2026-09-02 by tools/measure_mesh_features.py into out/laneT/features/xl330.json (lane T); the body frame is the MJCF geom placement of that mesh at zero pose, body 'trunk_base + 14 others', world pos [per placement] mm, quat (wxyz) [per placement], from ce-assemblies/microduck/current/placements.json"
+      },
+      {
+        "name": "idler",
+        "frame": {
+          "origin_mm": [
+            -14.5,
+            0.0,
+            0.0
+          ],
+          "z_axis": [
+            -1,
+            0,
+            0
+          ],
+          "x_axis": [
+            0,
+            0,
+            1
+          ]
+        },
+        "accepts": [
+          "connection:spline-xl330-horn"
+        ],
+        "role": "horn_face",
+        "nominal_mm": 16.0,
+        "what": "the -x disc, geometrically identical to 'horn': \u00d816.0000 x 3.0000 at centre x -13.0000 (spanning x -14.5000..-11.5000) with the same 4 x \u00d81.6000 x 6.0000 taps on a \u00d812.0000 bolt circle at x -11.5000. WHICH FACE IS DRIVEN IS NOT IN THE MESH: the two are mirror-identical, so 'horn' and 'idler' are an assembly choice, and every joint row that uses one says which it took.",
+        "source": "MEASURED off Pollen's xl330.stl by cecad.meshfeatures.cylinders (least-squares cylinder fit per smooth patch; the fit residual and angular cover of every feature quoted here are in the artifact), frozen 2026-09-02 by tools/measure_mesh_features.py into out/laneT/features/xl330.json (lane T); the body frame is the MJCF geom placement of that mesh at zero pose, body 'trunk_base + 14 others', world pos [per placement] mm, quat (wxyz) [per placement], from ce-assemblies/microduck/current/placements.json"
+      },
+      {
+        "name": "case_screws",
+        "frame": {
+          "origin_mm": [
+            -11.5,
+            0.0,
+            -7.5
+          ],
+          "z_axis": [
+            1,
+            0,
+            0
+          ],
+          "x_axis": [
+            0,
+            0,
+            1
+          ]
+        },
+        "accepts": [
+          "connection:threaded-m2"
+        ],
+        "role": "screw_pattern",
+        "what": "4 x \u00d82.0000 through-holes running the full 23.0000 mm across the case (axis x, centred at x 0.0000) at (y, z) = (+8, +7.5), (-8, +7.5), (+8, -22.5), (-8, -22.5) \u2014 a 16.0000 x 30.0000 mm rectangle. These are the case mounting holes every bracket on this robot bolts to. Case bbox 29.0000 x 20.0000 x 34.0000 mm.",
+        "source": "MEASURED off Pollen's xl330.stl by cecad.meshfeatures.cylinders (least-squares cylinder fit per smooth patch; the fit residual and angular cover of every feature quoted here are in the artifact), frozen 2026-09-02 by tools/measure_mesh_features.py into out/laneT/features/xl330.json (lane T); the body frame is the MJCF geom placement of that mesh at zero pose, body 'trunk_base + 14 others', world pos [per placement] mm, quat (wxyz) [per placement], from ce-assemblies/microduck/current/placements.json"
+      },
+      {
+        "name": "mesh_pilot_0",
+        "owned_by": "tools/gen_pilot_interfaces.py",
+        "role": "measured_mesh_pilot",
+        "frame": {
+          "origin_mm": [
+            -11.5,
+            0.0,
+            -6.0
+          ],
+          "z_axis": [
+            1.0,
+            -0.0,
+            -0.0
+          ],
+          "x_axis": [
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        "accepts": [],
+        "accepts_why": "Actual screw/thread and mating datum unresolved; retained nominal assembly connection is not compatibility evidence.",
+        "pilot_d_mm": 1.6,
+        "pilot_depth_mm": 6.0,
+        "extent_along_axis_mm": [
+          -14.5,
+          -8.5
+        ],
+        "verdict": "CANNOT DETERMINE",
+        "verdict_scope": "Reference mesh anchor measured; rebuilt CAD correspondence and original hardware compatibility unverified.",
+        "source": {
+          "path": "out/fasteners/features-by-mesh.json",
+          "sha256": "98168dab06ba1b2513bc825db3cf4239e890b4242db73eb89c072e0a1fdf72bb",
+          "mesh": "xl330",
+          "feature_index": 0,
+          "method": "cecad.meshfeatures.features: dihedral patch (35 deg) -> least-squares cylinder; ends by 24 axis-parallel probe rays (0.55/0.75/0.95 r x 8 angles, probe 0.15 mm); counterbore = coaxial relation",
+          "fit": {
+            "faces": 144,
+            "cover_deg": 355.0,
+            "residual_mm": 0.0
+          },
+          "declared_shelf_frame": "the mesh's own frame for xl330.stl: the output axis is x through (y 0, z 0); bbox x -14.5000..14.5000, y -10.0000..10.0000, z -24.5000..9.5000 (29.0000 x 20.0000 x 34.0000). Placed x15 in the MJCF \u2014 the servo count SPEC.md quotes."
+        },
+        "thread_identity": {
+          "verdict": "CANNOT DETERMINE",
+          "why": "Smooth mesh pilot cannot establish original screw profile/pitch or mating strength."
+        },
+        "what": "Local center and axis of the selected reference-mesh hole. This center is not a claimed screw seating datum; no rebuilt solid or physical unit was measured."
+      },
+      {
+        "name": "mesh_pilot_1",
+        "owned_by": "tools/gen_pilot_interfaces.py",
+        "role": "measured_mesh_pilot",
+        "frame": {
+          "origin_mm": [
+            -11.5,
+            6.0,
+            -0.0
+          ],
+          "z_axis": [
+            1.0,
+            0.0,
+            -0.0
+          ],
+          "x_axis": [
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        "accepts": [],
+        "accepts_why": "Actual screw/thread and mating datum unresolved; retained nominal assembly connection is not compatibility evidence.",
+        "pilot_d_mm": 1.6,
+        "pilot_depth_mm": 6.0,
+        "extent_along_axis_mm": [
+          -14.5,
+          -8.5
+        ],
+        "verdict": "CANNOT DETERMINE",
+        "verdict_scope": "Reference mesh anchor measured; rebuilt CAD correspondence and original hardware compatibility unverified.",
+        "source": {
+          "path": "out/fasteners/features-by-mesh.json",
+          "sha256": "98168dab06ba1b2513bc825db3cf4239e890b4242db73eb89c072e0a1fdf72bb",
+          "mesh": "xl330",
+          "feature_index": 1,
+          "method": "cecad.meshfeatures.features: dihedral patch (35 deg) -> least-squares cylinder; ends by 24 axis-parallel probe rays (0.55/0.75/0.95 r x 8 angles, probe 0.15 mm); counterbore = coaxial relation",
+          "fit": {
+            "faces": 144,
+            "cover_deg": 355.0,
+            "residual_mm": 0.0
+          },
+          "declared_shelf_frame": "the mesh's own frame for xl330.stl: the output axis is x through (y 0, z 0); bbox x -14.5000..14.5000, y -10.0000..10.0000, z -24.5000..9.5000 (29.0000 x 20.0000 x 34.0000). Placed x15 in the MJCF \u2014 the servo count SPEC.md quotes."
+        },
+        "thread_identity": {
+          "verdict": "CANNOT DETERMINE",
+          "why": "Smooth mesh pilot cannot establish original screw profile/pitch or mating strength."
+        },
+        "what": "Local center and axis of the selected reference-mesh hole. This center is not a claimed screw seating datum; no rebuilt solid or physical unit was measured."
+      },
+      {
+        "name": "mesh_pilot_2",
+        "owned_by": "tools/gen_pilot_interfaces.py",
+        "role": "measured_mesh_pilot",
+        "frame": {
+          "origin_mm": [
+            11.5,
+            0.0,
+            6.0
+          ],
+          "z_axis": [
+            1.0,
+            0.0,
+            -0.0
+          ],
+          "x_axis": [
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        "accepts": [],
+        "accepts_why": "Actual screw/thread and mating datum unresolved; retained nominal assembly connection is not compatibility evidence.",
+        "pilot_d_mm": 1.6,
+        "pilot_depth_mm": 6.0,
+        "extent_along_axis_mm": [
+          8.5,
+          14.5
+        ],
+        "verdict": "CANNOT DETERMINE",
+        "verdict_scope": "Reference mesh anchor measured; rebuilt CAD correspondence and original hardware compatibility unverified.",
+        "source": {
+          "path": "out/fasteners/features-by-mesh.json",
+          "sha256": "98168dab06ba1b2513bc825db3cf4239e890b4242db73eb89c072e0a1fdf72bb",
+          "mesh": "xl330",
+          "feature_index": 2,
+          "method": "cecad.meshfeatures.features: dihedral patch (35 deg) -> least-squares cylinder; ends by 24 axis-parallel probe rays (0.55/0.75/0.95 r x 8 angles, probe 0.15 mm); counterbore = coaxial relation",
+          "fit": {
+            "faces": 144,
+            "cover_deg": 355.0,
+            "residual_mm": 0.0
+          },
+          "declared_shelf_frame": "the mesh's own frame for xl330.stl: the output axis is x through (y 0, z 0); bbox x -14.5000..14.5000, y -10.0000..10.0000, z -24.5000..9.5000 (29.0000 x 20.0000 x 34.0000). Placed x15 in the MJCF \u2014 the servo count SPEC.md quotes."
+        },
+        "thread_identity": {
+          "verdict": "CANNOT DETERMINE",
+          "why": "Smooth mesh pilot cannot establish original screw profile/pitch or mating strength."
+        },
+        "what": "Local center and axis of the selected reference-mesh hole. This center is not a claimed screw seating datum; no rebuilt solid or physical unit was measured."
+      },
+      {
+        "name": "mesh_pilot_3",
+        "owned_by": "tools/gen_pilot_interfaces.py",
+        "role": "measured_mesh_pilot",
+        "frame": {
+          "origin_mm": [
+            11.5,
+            6.0,
+            -0.0
+          ],
+          "z_axis": [
+            1.0,
+            -0.0,
+            -0.0
+          ],
+          "x_axis": [
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        "accepts": [],
+        "accepts_why": "Actual screw/thread and mating datum unresolved; retained nominal assembly connection is not compatibility evidence.",
+        "pilot_d_mm": 1.6,
+        "pilot_depth_mm": 6.0,
+        "extent_along_axis_mm": [
+          8.5,
+          14.5
+        ],
+        "verdict": "CANNOT DETERMINE",
+        "verdict_scope": "Reference mesh anchor measured; rebuilt CAD correspondence and original hardware compatibility unverified.",
+        "source": {
+          "path": "out/fasteners/features-by-mesh.json",
+          "sha256": "98168dab06ba1b2513bc825db3cf4239e890b4242db73eb89c072e0a1fdf72bb",
+          "mesh": "xl330",
+          "feature_index": 3,
+          "method": "cecad.meshfeatures.features: dihedral patch (35 deg) -> least-squares cylinder; ends by 24 axis-parallel probe rays (0.55/0.75/0.95 r x 8 angles, probe 0.15 mm); counterbore = coaxial relation",
+          "fit": {
+            "faces": 144,
+            "cover_deg": 355.0,
+            "residual_mm": 0.0
+          },
+          "declared_shelf_frame": "the mesh's own frame for xl330.stl: the output axis is x through (y 0, z 0); bbox x -14.5000..14.5000, y -10.0000..10.0000, z -24.5000..9.5000 (29.0000 x 20.0000 x 34.0000). Placed x15 in the MJCF \u2014 the servo count SPEC.md quotes."
+        },
+        "thread_identity": {
+          "verdict": "CANNOT DETERMINE",
+          "why": "Smooth mesh pilot cannot establish original screw profile/pitch or mating strength."
+        },
+        "what": "Local center and axis of the selected reference-mesh hole. This center is not a claimed screw seating datum; no rebuilt solid or physical unit was measured."
+      },
+      {
+        "name": "mesh_pilot_4",
+        "owned_by": "tools/gen_pilot_interfaces.py",
+        "role": "measured_mesh_pilot",
+        "frame": {
+          "origin_mm": [
+            11.5,
+            -6.0,
+            0.0
+          ],
+          "z_axis": [
+            1.0,
+            -0.0,
+            -0.0
+          ],
+          "x_axis": [
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        "accepts": [],
+        "accepts_why": "Actual screw/thread and mating datum unresolved; retained nominal assembly connection is not compatibility evidence.",
+        "pilot_d_mm": 1.6,
+        "pilot_depth_mm": 6.0,
+        "extent_along_axis_mm": [
+          8.5,
+          14.5
+        ],
+        "verdict": "CANNOT DETERMINE",
+        "verdict_scope": "Reference mesh anchor measured; rebuilt CAD correspondence and original hardware compatibility unverified.",
+        "source": {
+          "path": "out/fasteners/features-by-mesh.json",
+          "sha256": "98168dab06ba1b2513bc825db3cf4239e890b4242db73eb89c072e0a1fdf72bb",
+          "mesh": "xl330",
+          "feature_index": 4,
+          "method": "cecad.meshfeatures.features: dihedral patch (35 deg) -> least-squares cylinder; ends by 24 axis-parallel probe rays (0.55/0.75/0.95 r x 8 angles, probe 0.15 mm); counterbore = coaxial relation",
+          "fit": {
+            "faces": 144,
+            "cover_deg": 355.0,
+            "residual_mm": 0.0
+          },
+          "declared_shelf_frame": "the mesh's own frame for xl330.stl: the output axis is x through (y 0, z 0); bbox x -14.5000..14.5000, y -10.0000..10.0000, z -24.5000..9.5000 (29.0000 x 20.0000 x 34.0000). Placed x15 in the MJCF \u2014 the servo count SPEC.md quotes."
+        },
+        "thread_identity": {
+          "verdict": "CANNOT DETERMINE",
+          "why": "Smooth mesh pilot cannot establish original screw profile/pitch or mating strength."
+        },
+        "what": "Local center and axis of the selected reference-mesh hole. This center is not a claimed screw seating datum; no rebuilt solid or physical unit was measured."
+      },
+      {
+        "name": "mesh_pilot_5",
+        "owned_by": "tools/gen_pilot_interfaces.py",
+        "role": "measured_mesh_pilot",
+        "frame": {
+          "origin_mm": [
+            -11.5,
+            -6.0,
+            -0.0
+          ],
+          "z_axis": [
+            1.0,
+            0.0,
+            -0.0
+          ],
+          "x_axis": [
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        "accepts": [],
+        "accepts_why": "Actual screw/thread and mating datum unresolved; retained nominal assembly connection is not compatibility evidence.",
+        "pilot_d_mm": 1.6,
+        "pilot_depth_mm": 6.0,
+        "extent_along_axis_mm": [
+          -14.5,
+          -8.5
+        ],
+        "verdict": "CANNOT DETERMINE",
+        "verdict_scope": "Reference mesh anchor measured; rebuilt CAD correspondence and original hardware compatibility unverified.",
+        "source": {
+          "path": "out/fasteners/features-by-mesh.json",
+          "sha256": "98168dab06ba1b2513bc825db3cf4239e890b4242db73eb89c072e0a1fdf72bb",
+          "mesh": "xl330",
+          "feature_index": 5,
+          "method": "cecad.meshfeatures.features: dihedral patch (35 deg) -> least-squares cylinder; ends by 24 axis-parallel probe rays (0.55/0.75/0.95 r x 8 angles, probe 0.15 mm); counterbore = coaxial relation",
+          "fit": {
+            "faces": 144,
+            "cover_deg": 355.0,
+            "residual_mm": 0.0
+          },
+          "declared_shelf_frame": "the mesh's own frame for xl330.stl: the output axis is x through (y 0, z 0); bbox x -14.5000..14.5000, y -10.0000..10.0000, z -24.5000..9.5000 (29.0000 x 20.0000 x 34.0000). Placed x15 in the MJCF \u2014 the servo count SPEC.md quotes."
+        },
+        "thread_identity": {
+          "verdict": "CANNOT DETERMINE",
+          "why": "Smooth mesh pilot cannot establish original screw profile/pitch or mating strength."
+        },
+        "what": "Local center and axis of the selected reference-mesh hole. This center is not a claimed screw seating datum; no rebuilt solid or physical unit was measured."
+      },
+      {
+        "name": "mesh_pilot_6",
+        "owned_by": "tools/gen_pilot_interfaces.py",
+        "role": "measured_mesh_pilot",
+        "frame": {
+          "origin_mm": [
+            -11.5,
+            0.0,
+            6.0
+          ],
+          "z_axis": [
+            1.0,
+            -0.0,
+            -0.0
+          ],
+          "x_axis": [
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        "accepts": [],
+        "accepts_why": "Actual screw/thread and mating datum unresolved; retained nominal assembly connection is not compatibility evidence.",
+        "pilot_d_mm": 1.6,
+        "pilot_depth_mm": 6.0,
+        "extent_along_axis_mm": [
+          -14.5,
+          -8.5
+        ],
+        "verdict": "CANNOT DETERMINE",
+        "verdict_scope": "Reference mesh anchor measured; rebuilt CAD correspondence and original hardware compatibility unverified.",
+        "source": {
+          "path": "out/fasteners/features-by-mesh.json",
+          "sha256": "98168dab06ba1b2513bc825db3cf4239e890b4242db73eb89c072e0a1fdf72bb",
+          "mesh": "xl330",
+          "feature_index": 6,
+          "method": "cecad.meshfeatures.features: dihedral patch (35 deg) -> least-squares cylinder; ends by 24 axis-parallel probe rays (0.55/0.75/0.95 r x 8 angles, probe 0.15 mm); counterbore = coaxial relation",
+          "fit": {
+            "faces": 144,
+            "cover_deg": 355.0,
+            "residual_mm": 0.0
+          },
+          "declared_shelf_frame": "the mesh's own frame for xl330.stl: the output axis is x through (y 0, z 0); bbox x -14.5000..14.5000, y -10.0000..10.0000, z -24.5000..9.5000 (29.0000 x 20.0000 x 34.0000). Placed x15 in the MJCF \u2014 the servo count SPEC.md quotes."
+        },
+        "thread_identity": {
+          "verdict": "CANNOT DETERMINE",
+          "why": "Smooth mesh pilot cannot establish original screw profile/pitch or mating strength."
+        },
+        "what": "Local center and axis of the selected reference-mesh hole. This center is not a claimed screw seating datum; no rebuilt solid or physical unit was measured."
+      },
+      {
+        "name": "mesh_pilot_7",
+        "owned_by": "tools/gen_pilot_interfaces.py",
+        "role": "measured_mesh_pilot",
+        "frame": {
+          "origin_mm": [
+            11.5,
+            0.0,
+            -6.0
+          ],
+          "z_axis": [
+            1.0,
+            0.0,
+            -0.0
+          ],
+          "x_axis": [
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        "accepts": [],
+        "accepts_why": "Actual screw/thread and mating datum unresolved; retained nominal assembly connection is not compatibility evidence.",
+        "pilot_d_mm": 1.6,
+        "pilot_depth_mm": 6.0,
+        "extent_along_axis_mm": [
+          8.5,
+          14.5
+        ],
+        "verdict": "CANNOT DETERMINE",
+        "verdict_scope": "Reference mesh anchor measured; rebuilt CAD correspondence and original hardware compatibility unverified.",
+        "source": {
+          "path": "out/fasteners/features-by-mesh.json",
+          "sha256": "98168dab06ba1b2513bc825db3cf4239e890b4242db73eb89c072e0a1fdf72bb",
+          "mesh": "xl330",
+          "feature_index": 7,
+          "method": "cecad.meshfeatures.features: dihedral patch (35 deg) -> least-squares cylinder; ends by 24 axis-parallel probe rays (0.55/0.75/0.95 r x 8 angles, probe 0.15 mm); counterbore = coaxial relation",
+          "fit": {
+            "faces": 144,
+            "cover_deg": 355.0,
+            "residual_mm": 0.0
+          },
+          "declared_shelf_frame": "the mesh's own frame for xl330.stl: the output axis is x through (y 0, z 0); bbox x -14.5000..14.5000, y -10.0000..10.0000, z -24.5000..9.5000 (29.0000 x 20.0000 x 34.0000). Placed x15 in the MJCF \u2014 the servo count SPEC.md quotes."
+        },
+        "thread_identity": {
+          "verdict": "CANNOT DETERMINE",
+          "why": "Smooth mesh pilot cannot establish original screw profile/pitch or mating strength."
+        },
+        "what": "Local center and axis of the selected reference-mesh hole. This center is not a claimed screw seating datum; no rebuilt solid or physical unit was measured."
+      }
+    ],
+    "frame": "the mesh's own frame for xl330.stl: the output axis is x through (y 0, z 0); bbox x -14.5000..14.5000, y -10.0000..10.0000, z -24.5000..9.5000 (29.0000 x 20.0000 x 34.0000). Placed x15 in the MJCF \u2014 the servo count SPEC.md quotes.",
+    "units": "mm"
+  }
+}
