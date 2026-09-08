@@ -18,6 +18,12 @@ to silently remove withdrawn hardware. Twelve other generic nominal proposals
 remain, also without original physical thread acceptance. The
 [application check](../research/servo-fastener-restriction-2026-09-08/current-application.json)
 records the corrected run data and unchanged assembly hashes.
+The [revision dependency audit](../research/xl330-interface-revision-review-2026-09-08/REPORT.html)
+also finds automatic ISO screw additions in the horn connection. A coordinated
+major part/connection revision must reverify 66 direct endpoints and inspect
+18 declared acceptors. Vendor solid sampling confirms center recesses absent
+from the simplified candidate; its 100 passing mounting-hole probes do not
+establish a complete external reproduction.
 
 ## Electronics: correction that changes the next task
 

@@ -43,6 +43,7 @@ SECTIONS = [
         ("research/servo-power-audit-2026-09-08/AUDIT.md", "Servo supply and shutdown evidence", "Pinned runtime behavior, manufacturer limits and the factory evidence procedure."),
         ("research/xl330-mechanical-source-2026-09-08/REPORT.html", "ROBOTIS mechanical sources", "Official drawing and STEP show M2 tapping pilots and a 3 mm maximum face-hole depth."),
         ("research/xl330-geometry-revision-2026-09-08/README.md", "Servo geometry correction candidate", "100 finished-solid probes pass; simplified exterior and original identity remain unresolved."),
+        ("research/xl330-interface-revision-review-2026-09-08/REPORT.html", "Servo major-revision dependencies", "66 direct endpoints and 18 declared acceptors; coordinated part/connection revision required, including removal of unsupported ISO additions."),
         ("research/servo-fastener-restriction-2026-09-08/REPORT.html", "Servo screw proposals withdrawn", "All 52 ISO-length proposals withdrawn; 35 historical modeled penetrations exceed 3 mm. Assembly preserved pending correct hardware."),
         ("research/servo-capture-tooling-2026-09-08/README.md", "Offline servo identity evidence", "Validates captured files without hardware I/O or physical acceptance claims; 14 regressions pass."),
         ("research/fastener-reconciliation-2026-09-08/AUDIT.md", "Fastener purchase gaps", "Per-line modeled sizes, missing purchase lines and unresolved metric versus TAP identity."),
