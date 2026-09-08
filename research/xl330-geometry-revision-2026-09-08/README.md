@@ -32,3 +32,18 @@ cylinders; `../xl330-mechanical-source-2026-09-08/REPORT.html` records the
 official download route and drawing interpretation. Historical sources and
 published geometry remain unchanged. Full assembly/interface revalidation is
 still required before promoting any corrected shelf iteration.
+
+The later `probe_vendor_center.py` run measured 192 points across the separate
+vendor solids. At local X ±14.49 mm, the axis and sampled radii up to 2.7 mm
+contain no solid material; deeper axis samples encounter distinct solids 9 and
+12. The simplified candidate fills this central region. This establishes an
+additional source-shape discrepancy beyond its corrected mounting pilots.
+Do not infer a protruding alignment hub or a finished bracket fit from a
+cylinder radius. The samples exclude the additional non-solid shells and do
+not classify a continuous recess or screw profile. Exact coordinates and
+containing solid indices are retained in `vendor-center-samples.json`.
+
+The [integration review](../xl330-interface-revision-review-2026-09-08/REPORT.html)
+maps 66 direct endpoints and 18 declared connection acceptors. A released
+correction requires a major part/connection revision because the existing
+connection also inserts unsupported ISO hardware and promises 6 mm depth.
