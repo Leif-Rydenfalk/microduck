@@ -124,7 +124,7 @@ def main():
     root, by_name, meshes, materials = parse(MJCF)
     mesh2part = json.load(open(MESH2PART))["map"]
     measured = json.load(open(JOINTS))["record"]["rows"]
-    by_joint = {r["params"]["joint"]: r for r in measured}
+    by_joint = {r["params"]["joint"]: r for r in measured if "joint" in r.get("params", {})}
 
     # ---- body list in MJCF tree order == MuJoCo qpos order -------------------
     bodies, jointrows, order = [], [], []

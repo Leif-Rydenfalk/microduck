@@ -4,3 +4,4 @@
 | iteration | date | why it exists |
 |---|---|---|
 | v0.0.1 | 2026-09-01 | created — nothing measured yet |
+| v0.1.0 | 2026-09-09 | Replace faceted circular construction profiles with analytic arcs so root fillets do not ripple or partially fail; preserve measured bosses, bores and plate interfaces. |

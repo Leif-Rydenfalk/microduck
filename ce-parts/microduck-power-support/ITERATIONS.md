@@ -4,3 +4,4 @@
 | iteration | date | why it exists |
 |---|---|---|
 | v0.0.1 | 2026-09-01 | created — nothing measured yet |
+| v0.1.0 | 2026-09-09 | Restore continuous latch grip-ridge roots: previous five cylinders floated 0.14 mm above tongue; independent reference-mesh rays show continuous material. |

@@ -4,3 +4,4 @@
 | iteration | date | why it exists |
 |---|---|---|
 | v0.0.1 | 2026-09-01 | rebuilt from Pollen's published mesh with cecad.meshslice + meshfeatures, graded by cad-refcheck against that mesh (see component.json why + evidence/ledger.jsonl) |
+| v0.1.0 | 2026-09-09 | Mirror repaired left thigh while retaining servo axes and mounting interfaces |
