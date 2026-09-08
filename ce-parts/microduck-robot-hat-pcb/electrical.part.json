@@ -5,7 +5,7 @@
   "slug": "microduck-robot-hat-pcb",
   "kind": "module",
   "chip": null,
-  "title": "Pollen RPI Robot HAT — the unpublished custom PCB on the Radxa's 40-pin header: battery in, 5 V to the Radxa, servo-bus power + half-duplex DATA out, TLV320AIC3104 codec, dormant BMI088, Stemma J5 for the ToF",
+  "title": "Pollen RPI Robot HAT — the public PCB family (installed revision unconfirmed) on the Radxa's 40-pin header: battery in, 5 V to the Radxa, servo-bus power + half-duplex DATA out, TLV320AIC3104 codec, dormant BMI088, Stemma J5 for the ToF",
   "attach": {
    "how": "direct"
   },
@@ -66,7 +66,7 @@
     "direction": "input",
     "bus": "I2S",
     "quote": "I2S3_SCLK_M0 pin 12 (GPIO3_A3)",
-    "cite": "part:radxa-zero-3w buses_the_microduck_uses.i2s3_m0 — M0 vs M1 mux CANNOT DETERMINE (both on the header)"
+    "cite": "Pinned public Pollen HAT commit 23eab11927f95ceca0dfa35bf182caeb7db39ea0: reference/pollen-elec-rpi-robot-hat/elec_RPI_Robot_HAT.kicad_pcb J4.12/35/38/40 -> U2.2/3/5/4, J4.13 NC, Y1.3 -> U2.1 MCLK (12 MHz). Exact installed Microduck board revision remains CANNOT DETERMINE. Radxa alternate-function names: part:radxa-zero-3w buses_the_microduck_uses.i2s3_m0."
    },
    {
     "need": "signal",
@@ -74,7 +74,7 @@
     "direction": "input",
     "bus": "I2S",
     "quote": "I2S3_LRCK_M0 pin 35 (GPIO3_A4)",
-    "cite": "part:radxa-zero-3w buses_the_microduck_uses.i2s3_m0"
+    "cite": "Pinned public Pollen HAT commit 23eab11927f95ceca0dfa35bf182caeb7db39ea0: reference/pollen-elec-rpi-robot-hat/elec_RPI_Robot_HAT.kicad_pcb J4.12/35/38/40 -> U2.2/3/5/4, J4.13 NC, Y1.3 -> U2.1 MCLK (12 MHz). Exact installed Microduck board revision remains CANNOT DETERMINE. Radxa alternate-function names: part:radxa-zero-3w buses_the_microduck_uses.i2s3_m0."
    },
    {
     "need": "signal",
@@ -82,7 +82,7 @@
     "direction": "input",
     "bus": "I2S",
     "quote": "I2S3_SDO_M0 pin 40 (GPIO3_A5)",
-    "cite": "part:radxa-zero-3w buses_the_microduck_uses.i2s3_m0 (SoC out -> codec DIN)"
+    "cite": "Pinned public Pollen HAT commit 23eab11927f95ceca0dfa35bf182caeb7db39ea0: reference/pollen-elec-rpi-robot-hat/elec_RPI_Robot_HAT.kicad_pcb J4.12/35/38/40 -> U2.2/3/5/4, J4.13 NC, Y1.3 -> U2.1 MCLK (12 MHz). Exact installed Microduck board revision remains CANNOT DETERMINE. Radxa alternate-function names: part:radxa-zero-3w buses_the_microduck_uses.i2s3_m0."
    },
    {
     "need": "signal",
@@ -90,15 +90,16 @@
     "direction": "output",
     "bus": "I2S",
     "quote": "I2S3_SDI_M0 pin 38 (GPIO3_A6)",
-    "cite": "part:radxa-zero-3w buses_the_microduck_uses.i2s3_m0 (codec DOUT -> SoC in)"
+    "cite": "Pinned public Pollen HAT commit 23eab11927f95ceca0dfa35bf182caeb7db39ea0: reference/pollen-elec-rpi-robot-hat/elec_RPI_Robot_HAT.kicad_pcb J4.12/35/38/40 -> U2.2/3/5/4, J4.13 NC, Y1.3 -> U2.1 MCLK (12 MHz). Exact installed Microduck board revision remains CANNOT DETERMINE. Radxa alternate-function names: part:radxa-zero-3w buses_the_microduck_uses.i2s3_m0."
    },
    {
-    "need": "signal",
-    "name": "MCLK",
+    "need": "supply",
+    "name": "V3V3_IN",
     "direction": "input",
-    "bus": "I2S",
-    "quote": "I2S3_MCLK_M0 pin 13 (GPIO3_A2)",
-    "cite": "part:radxa-zero-3w buses_the_microduck_uses.i2s3_m0 — 'a candidate origin for the overlay's 12 MHz fixed-clock (docs §7) — consistent, not proven'"
+    "quote": "J4.1 +3V3; J4.17 +3V3; U3.3 +3V3",
+    "cite": "Pinned public Pollen HAT 23eab11927f95ceca0dfa35bf182caeb7db39ea0: reference/pollen-elec-rpi-robot-hat/elec_RPI_Robot_HAT.kicad_pcb Public board-family model only; exact installed Microduck board revision remains unconfirmed.",
+    "current_from": null,
+    "current_from_basis": "Total board load and Radxa header capacity not established."
    }
   ],
   "provides": [
@@ -107,11 +108,11 @@
     "name": "V5_OUT",
     "direction": "output",
     "nominal_v": 5.0,
-    "nominal_v_basis": "5 V is what the Radxa's 40-pin pins 2/4 accept ([brief] §5.1); that the HAT makes it from VBAT is the path docs §9 infers ('battery → banana contact PCB → HAT → 40-pin (5 V to Radxa)').",
+    "nominal_v_basis": "Public PCB U9 AP63205 -> L4 -> U10 LM5050-1/Q2 SI2312CDS -> +5V -> J4.2/4. Nominal is the PCB +5V label.",
     "capacity_mA": null,
-    "capacity_basis": "the HAT's regulator is unpublished — CANNOT DETERMINE (docs §9 'regulators on the HAT: CANNOT DETERMINE').",
+    "capacity_basis": "Whole-board current capacity unverified; buck IC maximum is not a proven complete-board capacity.",
     "quote": "In-robot power comes from the battery via the HAT regardless",
-    "cite": "i2c3.dts:22"
+    "cite": "Pinned public Pollen HAT 23eab11927f95ceca0dfa35bf182caeb7db39ea0: reference/pollen-elec-rpi-robot-hat/elec_RPI_Robot_HAT.kicad_pcb Public board-family model only; exact installed Microduck board revision remains unconfirmed."
    },
    {
     "provision": "supply",
@@ -135,11 +136,11 @@
     "name": "J5_3V3",
     "direction": "output",
     "nominal_v": 3.3,
-    "nominal_v_basis": "the ToF's IOVDD/AVDD 3.3 V configuration (part:vl53l5cx supplies) on the HAT's 'Stemma J5' (i2c3.dts:10); whether J5's 3.3 V is the Radxa's pin-1 3.3 V passed through or a HAT regulator is CANNOT DETERMINE.",
+    "nominal_v_basis": "J5.2 is the same +3V3 net as J4.1/17, U2.7/18/24/25 and Y1.1/4; passed through from Radxa, not generated on HAT.",
     "capacity_mA": null,
-    "capacity_basis": "unpublished.",
+    "capacity_basis": "Radxa header supply and board path current capacity unverified.",
     "quote": "Stemma J5",
-    "cite": "research/raw/deploy_audio_i2c3-pihat.dts:10"
+    "cite": "Pinned public Pollen HAT 23eab11927f95ceca0dfa35bf182caeb7db39ea0: reference/pollen-elec-rpi-robot-hat/elec_RPI_Robot_HAT.kicad_pcb Public board-family model only; exact installed Microduck board revision remains unconfirmed."
    },
    {
     "provision": "audio_output",
@@ -169,12 +170,23 @@
     "capacity_basis": "not transcribed.",
     "quote": "15 | MICBIAS",
     "cite": "part:tlv320aic3104 pinout"
+   },
+   {
+    "provision": "supply",
+    "name": "V1V8_OUT",
+    "direction": "output",
+    "nominal_v": 1.8,
+    "nominal_v_basis": "PCB net label +1V8 at U3.2; U3 value XC6206P182MR. Nominal only; tolerance not established.",
+    "capacity_mA": null,
+    "capacity_basis": "No whole-board qualified limit derived from chip maximum.",
+    "quote": "U3.1 GND; U3.2 +1V8; U3.3 +3V3",
+    "cite": "Pinned public Pollen HAT 23eab11927f95ceca0dfa35bf182caeb7db39ea0: reference/pollen-elec-rpi-robot-hat/elec_RPI_Robot_HAT.kicad_pcb Public board-family model only; exact installed Microduck board revision remains unconfirmed."
    }
   ],
   "uncertainties": [
-   "The PCB is not published (docs §11 open question 4). Connector types on the HAT (servo header, J5, battery input, speaker/mic) are CANNOT DETERMINE; every position used by the wiring lane is the HAT mesh's placement origin.",
-   "Transceiver, regulators, fusing, NFC reader, REC LED: CANNOT DETERMINE (docs §12 items 4, 8, 11).",
-   "I2S3 mux M0 (pins 12/13/35/38/40) vs M1 (19/21/23/24): the dts pinctrl was not read — the M0 pins are the wiring lane's assertion, stated as one."
+   "Public PCB/BOM are available under reference/pollen-elec-rpi-robot-hat; installed-board revision and correspondence of reference mesh remain unverified.",
+   "Public board U9 AP63205 + U10 LM5050-1/Q2 make the 5V path; U3 XC6206P182MR makes +1V8 from Radxa +3V3. Complete board power budgets and installed hardware identity remain unverified.",
+   "Pinned public Pollen HAT commit 23eab11927f95ceca0dfa35bf182caeb7db39ea0: reference/pollen-elec-rpi-robot-hat/elec_RPI_Robot_HAT.kicad_pcb J4.12/35/38/40 -> U2.2/3/5/4, J4.13 NC, Y1.3 -> U2.1 MCLK (12 MHz). Exact installed Microduck board revision remains CANNOT DETERMINE."
   ],
   "note": "The one board every cable in the head lands on. Modelled as a part that NEEDS the Radxa's pins and the battery and PROVIDES the servo bus, the ToF's J5 rail, the Radxa's 5 V and the audio terminals — the regulator pattern in cecad.netlist.wire(): a provision named in the mapping joins the net as its source.",
   "written": "2026-09-02, wiring lane (GOAL.md rung 5). Every figure names the document it came from; a figure with no document is null and says so."

@@ -20,23 +20,23 @@ WHAT IS IN IT
   host      radxa-zero-3w (ce-parts/radxa-zero-3w/electrical.host.json — the
             Radxa product brief + wiki pinout, fetched 2026-09-02)
   segments  i2c3 (header pins 3/5), uart2 (pins 8/10), dxl (the one DATA
-            wire behind the HAT's transceiver), i2s3 (M0 pins, asserted),
+            wire behind the HAT's transceiver), i2s3 (public HAT M0 pins, installed revision unconfirmed),
             i2c2 + csi (the 22-pin MIPI CSI connector)
   parts     np-f550 pack -> HAT -> Radxa 5 V; HAT -> SERVO_V + DXL_DATA ->
             15 x xl330-m288-t (IDs 10-14, 20-24, 30-34) + imu_to_dxl (200);
             HAT I2C3: tlv320aic3104 @0x18, bmi088 @0x19/0x68, ToF @0x29 on
             Stemma J5; camera module on CSI (I2C2 @0x10); speaker, mic.
 
-WHAT IS CANNOT DETERMINE, BY NAME (the HAT schematic is not published)
+WHAT REMAINS UNRESOLVED IN THIS MODEL (public HAT sources now exist)
 
-  - the 5 V regulator on the HAT (V5_HAT: nominal stated, capacity null)
+  - the complete 5 V board capacity (public U9 AP63205 path known)
   - the servo-bus path (SERVO_V: raw pack or regulated — model.rs says the
     servos SEE 6.6-8.2 V, which is above the XL330's 3.7-6.0 V band)
   - the half-duplex transceiver (DXL_DATA: reference layout 74LVC2G241 per
     ROBOTIS, but robotd drives no TX-enable GPIO, so the HAT is not that)
-  - the codec's and BMI088's rails (HAT_3V3, HAT_1V8: no source on the shelf)
-  - the I2S3 pin mux (M0 vs M1, both on the header; the dts pinctrl was not
-    read), MCLK's origin, the mic input, the speaker amplifier
+  - the rail tolerances/current budgets (public topology known)
+  - the installed HAT revision, the mic input, the speaker amplifier;
+    public-board M0 and local Y1 MCLK are measured, not bench-verified
 
 THREE THINGS THIS FILE DOES THAT THE RECORDS ALONE CANNOT
 
@@ -199,7 +199,7 @@ SERVO_V_CITE = ("research/raw/duck-control_src_model.rs:109,113 — model.rs:103
 # §6.1.1 p.6 cross-checked with [wiki]); CSI pins from the [wiki] 22-pin table.
 PIN = {
     "SDA3": "hdr3", "SCL3": "hdr5", "TX2": "hdr8", "RX2": "hdr10",
-    "I2S_SCLK": "hdr12", "I2S_MCLK": "hdr13", "I2S_LRCK": "hdr35",
+    "I2S_SCLK": "hdr12", "I2S_LRCK": "hdr35",
     "I2S_SDI": "hdr38", "I2S_SDO": "hdr40",
     "CSI_SDA": "csi21", "CSI_SCL": "csi20", "CSI_CLK": "csi8/9",
     "CSI_D0": "csi2/3", "CSI_D1": "csi5/6", "CSI_PDN": "csi17",
@@ -319,17 +319,17 @@ def electrical_design(ids=None, gyro_addr="0x68", hat_keep_bus=False,
              ".communication_circuit — which robotd never drives).")
     d.declare_segment(
         "i2s3", bus="I2S", controller="host",
-        signals={"BCLK": PIN["I2S_SCLK"], "MCLK": PIN["I2S_MCLK"],
+        signals={"BCLK": PIN["I2S_SCLK"],
                  "WCLK": PIN["I2S_LRCK"], "DIN": PIN["I2S_SDO"],
                  "DOUT": PIN["I2S_SDI"]},
         note="i2s3_2ch, bit-clock and frame master on the SoC side "
              "(research/raw/deploy_audio_aic3104-i2c3.dts 'bitclock-master = "
              "<&pihat_cpu_dai>', 'frame-master = <&pihat_cpu_dai>', "
              "'system-clock-frequency = <12288000>'). Pins are the M0 mux "
-             "([brief]/[wiki]: SCLK 12, MCLK 13, LRCK 35, SDI 38, SDO 40) — THIS "
-             "FILE'S ASSERTION: the M1 mux (pins 19/21/23/24) is also on the "
-             "header and the dts pinctrl was not read (part:radxa-zero-3w "
-             "unknowns[3]). DIN = SoC SDO, DOUT = SoC SDI.")
+             "(SCLK 12, LRCK 35, SDI 38, SDO 40), measured on pinned public HAT "
+             "PCB J4 nets (commit 23eab11927f95ceca0dfa35bf182caeb7db39ea0). "
+             "J4.13 is NC; codec MCLK comes from local Y1.3, 12 MHz. "
+             "Installed board revision unconfirmed. DIN = SoC SDO, DOUT = SoC SDI.")
     d.declare_segment(
         "i2c2", bus="I2C", controller="host",
         signals={"SDA": PIN["CSI_SDA"], "SCL": PIN["CSI_SCL"]},
@@ -350,7 +350,8 @@ def electrical_design(ids=None, gyro_addr="0x68", hat_keep_bus=False,
                      note="[brief] §5.1 '5V Power from the GPIO PIN 2 & 4'; "
                           "the HAT makes it from the pack: i2c3.dts:22 'In-robot "
                           "power comes from the battery via the HAT regardless'. "
-                          "The HAT's regulator is CANNOT DETERMINE. The USB-C OTG "
+                          "Public HAT U9 AP63205/L4 feeds U10 LM5050-1 and Q2 to +5V; "
+                          "installed revision unconfirmed. The USB-C OTG "
                           "port is a second 5 V path when tethered (sch1.12 sheet "
                           "22) and is not on this netlist.")
 
@@ -366,28 +367,45 @@ def electrical_design(ids=None, gyro_addr="0x68", hat_keep_bus=False,
         "UART2_TX": "uart2/TX", "UART2_RX": "uart2/RX",
         "I2C3_SDA": "i2c3/SDA", "I2C3_SCL": "i2c3/SCL",
         "I2S3_SCLK": "i2s3/BCLK", "I2S3_LRCK": "i2s3/WCLK",
-        "I2S3_SDO": "i2s3/DIN", "I2S3_SDI": "i2s3/DOUT", "MCLK": "i2s3/MCLK",
+        "I2S3_SDO": "i2s3/DIN", "I2S3_SDI": "i2s3/DOUT",
         "V5_OUT": "V5_HAT", "SERVO_V": "SERVO_V", "DXL_DATA": "dxl/DATA",
-        "J5_3V3": "J5_3V3", "SPK+": "SPK_P", "SPK-": "SPK_N",
+        "J5_3V3": "HAT_3V3", "V3V3_IN": "HAT_3V3", "V1V8_OUT": "HAT_1V8", "SPK+": "SPK_P", "SPK-": "SPK_N",
         "MIC_IN": "MIC_IN", "MICBIAS": "MICBIAS"},
         label="hat",
-        note="Pollen RPI Robot HAT on the 40-pin header — PCB not published "
-             "(docs §12 item 4). Provisions V5_HAT and SERVO_V carry null "
+        note="Pollen RPI Robot HAT public-board model; exact installed revision "
+             "unconfirmed. Provisions V5_HAT and SERVO_V carry null "
              "capacities and SERVO_V a null nominal by the record's own "
              "statement; the transceiver behind DXL_DATA is CANNOT DETERMINE.")
+
+    # Exact placed public-board instance, not an inferred manufacturer identity.
+    y1_cite = ("reference/pollen-elec-rpi-robot-hat/production/"
+               "ASE01187-C1_elec_RPI_Robot_HAT_BOM.csv row Y1; "
+               "elec_RPI_Robot_HAT.kicad_pcb Y1 pads 1..4; "
+               "commit 23eab11927f95ceca0dfa35bf182caeb7db39ea0")
+    y1 = N.part("microduck-public-hat-y1")
+    _admit(d, y1)
+    d.wire(y1, {"GND": "GND", "VDD": "HAT_3V3", "TRISTATE": "HAT_3V3",
+                "OUT": "HAT:Y1_OUT"}, label="hat_y1", note=y1_cite)
 
     # -- the HAT's I2C3 devices -------------------------------------------
     d.wire("tlv320aic3104", {
         "GND": "GND", "AVDD": "HAT_3V3", "DVDD": "HAT_1V8", "IOVDD": "HAT_3V3",
         "SDA": "i2c3/SDA", "SCL": "i2c3/SCL",
-        "MCLK": "i2s3/MCLK", "BCLK": "i2s3/BCLK", "WCLK": "i2s3/WCLK",
+        "MCLK": "HAT:Y1_OUT", "BCLK": "i2s3/BCLK", "WCLK": "i2s3/WCLK",
         "DIN": "i2s3/DIN", "DOUT": "i2s3/DOUT"},
         label="codec",
         note="aic3104-i2c3.dts 'codec@18', 'reg = <0x18>', clocks = the 12 MHz "
-             "fixed-clock. HAT_3V3 / HAT_1V8 are the rails the codec's three "
-             "domains need; NOTHING on the shelf sources them — the HAT's "
-             "regulators are unpublished, so those two nets are expected to "
-             "come back CANNOT DETERMINE, by name.")
+             "fixed-clock: pinned public PCB Y1.3 -> U2.1, J4.13 NC. "
+             "HAT:Y1_OUT joins the modeled hat_y1.OUT provider to codec.MCLK. "
+             "Installed board revision unconfirmed. Public PCB codec U2.7/18/24/25 "
+             "connect to +3V3 from Radxa J4.1/17; U2.32 is +1V8 from U3.2 "
+             "(XC6206P182MR), whose U3.3 input is +3V3. "
+             "Board rail tolerances and aggregate current budgets remain unverified.")
+    d.external_supply("HAT_3V3", "Public PCB +3V3 comes from Radxa J4.1/17; "
+                      "same net as J5.2, codec AVDD/IOVDD and Y1.1/4. "
+                      "Host provision is absent from the bare host model; this is an "
+                      "explicit source-boundary assertion from pinned PCB connectivity, "
+                      "not a measured capacity. Installed revision unconfirmed.")
     accel, gyro = bmi088_views(N.part("bmi088"))
     if gyro_addr != "0x68":                       # --self-test only
         gyro = dataclasses.replace(gyro, requires=(dataclasses.replace(
@@ -397,14 +415,14 @@ def electrical_design(ids=None, gyro_addr="0x68", hat_keep_bus=False,
            label="bmi088",
            note="i2c3.dts:11 'dormant BMI088 0x19/0x68', 'unused but still "
                 "connected' (dts:31). Accelerometer target 0x19 and the "
-                "package's VDD/VDDIO — on HAT_3V3 by this file's assertion that "
-                "a 2.4-3.6 V part on a 3.3 V-I/O HAT sits on its 3.3 V; which "
-                "rail is CANNOT DETERMINE (chips[bmi088].unknowns[1]).")
+                "public PCB U11.7 VDDIO is +3V3; VDD pins 3/11 reach +3V3 "
+                "through R9 marked 0R. This DC-level model collapses that link; "
+                "its resistance/current rating and installed revision are unverified.")
     d.wire(gyro, {"SDA": "i2c3/SDA", "SCL": "i2c3/SCL"}, label="bmi088.gyro",
            note="The same package's gyroscope target, 0x68 — a second owner so "
                 "the duplicate-address rule sees both addresses (module "
                 "docstring, item 2).")
-    d.wire("microduck-tof-module", {"GND": "GND", "3V3": "J5_3V3",
+    d.wire("microduck-tof-module", {"GND": "GND", "3V3": "HAT_3V3",
                                     "SDA": "i2c3/SDA", "SCL": "i2c3/SCL"},
            label="tof",
            note="On the HAT's 'Stemma J5' (i2c3.dts:10); 0x29 factory default "
@@ -756,10 +774,27 @@ def check_against_wiring_lane(design, path=WIRING_NETS, verbose=False):
     return r
 
 
+def check_local_mclk(design, verbose=False):
+    """Do not turn removal of a wrong host wire into complete clock coverage."""
+    r = Report(design.name)
+    clocks = [n for n in design.nets()
+              if any(t.owner == "codec" and t.ref == "MCLK" for t in n.terminals)]
+    local = (len(clocks) == 1 and clocks[0].id == "HAT:Y1_OUT"
+             and any(t.owner == "hat_y1" and t.ref == "OUT" for t in clocks[0].terminals))
+    r.findings.append(Finding(
+        CD if local else FAIL, "audio/local-mclk", "codec.MCLK",
+        "Public PCB Y1.3 drives U2.1 at 12 MHz; J4.13 is NC. "
+        + ("Local provider hat_y1.OUT is connected to codec.MCLK. "
+           "Y1 operating limits/timing and installed board revision remain unverified."
+           if local else "Codec MCLK is not on the measured local HAT:Y1_OUT net."),
+        "J4.13; Y1.3; U2.1", "reference/pollen-elec-rpi-robot-hat/elec_RPI_Robot_HAT.kicad_pcb"))
+    return r
+
+
 def check_all(design, verbose=False):
     rep = design.check(verbose=False)
     for fn in (check_supply_bands, check_bus_ids, check_i2c3_vs_overlay,
-               check_against_wiring_lane):
+               check_against_wiring_lane, check_local_mclk):
         rep += fn(design, verbose=False)
     if verbose:
         rep.print(True, design._header() + "  + volts, dxl/ids, i2c3/overlay, "
@@ -832,10 +867,10 @@ def write_report(design, rep, path):
     for f in rep.undetermined:
         w(f"- **`{f.rule}` {f.where}** — {f.message.splitlines()[0]}")
     w("")
-    w("What settles the ones that matter: the Robot HAT schematic (regulators, "
-      "transceiver, rails, connectors) — Pollen publishing it or a teardown; a "
-      "meter on a servo's VDD pin for the 6.6-8.2 V question; the dts pinctrl "
-      "for the I2S3 mux; `i2cdetect -y 3` on a production HAT for the BMI088.")
+    w("What settles the ones that matter: match the installed board to the published "
+      "HAT PCB/schematic, establish board power budgets and component limits; a "
+      "meter on a servo's VDD pin for the 6.6-8.2 V question; installed-board "
+      "identification to apply the public HAT I2S/Y1 evidence; `i2cdetect -y 3` on a production HAT for the BMI088.")
     w("")
     w("## Nets")
     w("")

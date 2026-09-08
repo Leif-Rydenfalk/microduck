@@ -1,14 +1,15 @@
 {
  "$doc": "spec/sourcing.json - the sourcing DATA for the Microduck. Lane E (GOAL.md). One record per BOUGHT line. SOURCING.html and RFQ.html are generated from this file by tools/gen_sourcing.py; neither page is hand-maintained. Nothing here is estimated: a price is present only if it was READ on a vendor page (fetched date recorded) or read off a page a prior lane fetched and cited in docs/production/components.md. A price nobody read is null with the URL that was tried.",
- "revision": "C",
+ "revision": "D",
  "generated_for": "MD-SRC-001",
  "fetch_dates": [
   "2026-09-02",
-  "2026-09-03"
+  "2026-09-03",
+  "2026-09-08"
  ],
  "rules": {
   "price_basis": "unit price at the vendor's own published tier. tiers[] is [order_quantity_of_the_part, unit_price]. A vendor that publishes no tier table carries tiers [[1, price]] and no_tiers=true; its @1 price is then used at every quantity as a CEILING, never as a forecast.",
-  "quantity_model": "For N robots the order quantity of a line is qty_per_robot x N. The unit price used is the vendor's largest tier whose quantity is <= that order quantity. If the vendor's MOQ exceeds the order quantity the MOQ tier price is used and moq_exceeds_need is set.",
+  "quantity_model": "For N robots the order quantity of a line is qty_per_robot x N. The unit price used is the vendor's largest tier whose quantity is <= that order quantity. If the vendor's MOQ exceeds the order quantity the MOQ tier price is used and moq_exceeds_need is set. Exception: a quantity_rule subtracts only bundle contents verified for the actually selected source offer and rounds the remaining pieces to complete packs over the whole order; missing bundle evidence gives zero credit. A zero shortfall needs no purchase. Legacy qty_per_robot is not the computed net purchase quantity.",
   "currency": "Left exactly as the vendor states it. NO FX rate was fetched, so no conversion is performed anywhere. Only USD offers enter the USD roll-up; EUR / GBP / NZD / AUD / INR lines are reported beside it, unconverted.",
   "readable_vs_unknown": "The roll-up publishes TWO subtotals: the readable subtotal (lines with a read USD price) and the CANNOT DETERMINE list (lines with none). An unknown is NEVER summed as zero.",
   "verdict": "PASS = two or more DISTRIBUTORS as defined above (distinct registered domains that each gave a price), and a unit price determinable at 1 / 100 / 1000 robots. CANNOT DETERMINE = fewer than two such distributors, or none. FAIL = the line as specified cannot be bought as specified from anyone read - either the part does not exist in the maker's own catalogue (B3: the 1 GB / 32 GB Radxa ZERO 3W SKU Pollen names is absent from Radxa's own table), or EVERY distributor that gave a price publishes a process rule this line's own artwork measurably violates (P1 and P2: minimum copper track 0.1500 mm measured over 879 and 383 segments in the committed .kicad_pcb, against a published 6 mil = 0.1524 mm line/space floor at both OSH Park and AdvancedPCB - short by 0.0024 mm). This second clause was added 2026-09-03 when the custom-PCB lines were priced for the first time; before that the definition had no bucket for 'priced by two, buildable by neither' and the page would have had to call such a line PASS. A FAIL line's readable money is reported OUTSIDE the headline subtotal, never inside it and never as zero.",
@@ -44,9 +45,42 @@
      "moq": 1,
      "lead_time": "Lead Time: 10 days (XL-series list page https://en.robotis.com/shop_en/list.php?ca_id=202030); item page: 'normally ships out within 3 working days when in stock'",
      "stock": "not numerically stated",
-     "fetched": "2026-09-02",
+     "fetched": "2026-09-08",
      "confidence": "read",
-     "note": "ships from Korea. No tier table anywhere on the shop."
+     "note": "ships from Korea. No tier table anywhere on the shop. Price, SKU and package contents rechecked 2026-09-08. Lead time, MOQ and stock text remain observations of 2026-09-02, not refreshed availability. Retail package includes one X3P 180 mm lead, six PHS M2x6 TAP and ten PHS M2x8 TAP screws; only the verified lead is credited against B2.",
+     "field_observations": {
+      "price_and_sku": "2026-09-08",
+      "bundle_contents": "2026-09-08",
+      "lead_time": "2026-09-02",
+      "moq": "2026-09-02",
+      "stock": "2026-09-02"
+     },
+     "included_items": [
+      {
+       "item_key": "x3p-180mm-lead",
+       "qty_per_unit": 1,
+       "confidence": "read",
+       "fetched": "2026-09-08",
+       "url": "https://en.robotis.com/shop_en/item.php?it_id=902-0163-000",
+       "description": "One Robot Cable-X3P 180mm per retail servo package"
+      },
+      {
+       "item_key": "phs-m2x6-tap",
+       "qty_per_unit": 6,
+       "confidence": "read",
+       "fetched": "2026-09-08",
+       "url": "https://en.robotis.com/shop_en/item.php?it_id=902-0163-000",
+       "description": "PHS M2x6 TAP; not automatically equivalent to metric assembly screws"
+      },
+      {
+       "item_key": "phs-m2x8-tap",
+       "qty_per_unit": 10,
+       "confidence": "read",
+       "fetched": "2026-09-08",
+       "url": "https://en.robotis.com/shop_en/item.php?it_id=902-0163-000",
+       "description": "PHS M2x8 TAP; not automatically equivalent to metric assembly screws"
+      }
+     ]
     },
     {
      "vendor": "ROBOTIS US (robotis.us)",
@@ -136,7 +170,7 @@
    "category": "connector",
    "ce_part": null,
    "qty_per_robot": 2,
-   "qty_basis": "16 leads needed (15 servos daisy-chained + imu_to_dxl, wiring/CABLES.md rows 1-16) -> 2 packs of 10",
+   "qty_basis": "Legacy qty_per_robot=2 is the standalone one-robot ceiling, not the computed purchase quantity. Need 16 leads per robot (wiring/CABLES.md rows 1-16); subtract only verified leads bundled with the selected B1 offer, then round the remaining lead count up to ten-packs across the entire order. No bundle evidence means zero credit. Retail 15-servo bundles leave 1/100/1000 extra leads, purchased as 1/10/100 packs for 1/100/1000 robots; confirm cable routing/slack before use.",
    "mpn": "903-0251-000 (Robot Cable-X3P Convertible 180 mm, 10 pcs)",
    "mpn_status": "confirmed at vendor",
    "rfq_spec": "ROBOTIS Robot Cable-X3P (convertible), 180 mm, 10 pieces per pack. JST EH 3-pin (EHR-03 housing, SEH-001T-P0.6 crimp) at both ends. Our measured cut lengths are 20-165 mm (wiring/CABLES.md); 180 mm is the shortest priced bracket, so every lead is over-length and must be routed with the slack recorded per cable.",
@@ -193,7 +227,14 @@
    "unknowns": [
     "Per-link cable lengths as Pollen ships them: CANNOT DETERMINE (docs/BOM.md B2). Our lengths are route floors + slack, measured off spec/mesh-placements.json."
    ],
-   "blocked": []
+   "blocked": [],
+   "quantity_rule": {
+    "kind": "net_of_selected_offer_bundle",
+    "required_pieces_per_robot": 16,
+    "pieces_per_order_unit": 10,
+    "source_line": "B1",
+    "item_key": "x3p-180mm-lead"
+   }
   },
   {
    "id": "B3",
@@ -202,12 +243,12 @@
    "ce_part": "part:radxa-zero-3w",
    "qty_per_robot": 1,
    "qty_basis": "docs/BOM.md row B3; one compute board in the head (spec/mesh-placements.json)",
-   "mpn": "SKU as specified by Pollen (1 GB LPDDR4 / 32 GB eMMC) DOES NOT EXIST",
+   "mpn": "1 GB LPDDR4 / 32 GB eMMC configuration absent from published Radxa catalogue; OEM SKU CANNOT DETERMINE",
    "mpn_status": "FAIL - the specified configuration is absent from the maker's own SKU table",
-   "mpn_note": "Radxa's product brief RAD-DOC-0084 rev 1.10 §7 'Models and SKU' (https://dl.radxa.com/zero3/docs/hw/3w/radxa_zero_3w_product_brief.pdf) lists 1GB/none, 1GB/8GB, 2GB/none, 2GB/16GB, 4GB/none, 4GB/32GB, 8GB/none, 8GB/64GB. There is no 1 GB / 32 GB part. Pollen's press-kit figure is therefore either a custom Radxa build or a mis-statement of the 1 GB / 8 GB catalogue part (RS107-D1E8H1W15). What settles it: lsblk on a production unit, or Pollen naming the SKU.",
+   "mpn_note": "Radxa's product brief RAD-DOC-0084 rev 1.10 §7 'Models and SKU' (https://dl.radxa.com/zero3/docs/hw/3w/radxa_zero_3w_product_brief.pdf) lists 1GB/none, 1GB/8GB, 2GB/none, 2GB/16GB, 4GB/none, 4GB/32GB, 8GB/none, 8GB/64GB. No 1 GB / 32 GB configuration is listed in this published table; an OEM configuration remains unresolved. Pollen's press-kit figure could be a custom Radxa build or a mis-statement of the 1 GB / 8 GB catalogue part (RS107-D1E8H1W15). What settles it: lsblk on a production unit, or Pollen naming the SKU.",
    "rfq_spec": "Radxa ZERO 3W, RK3566 quad Cortex-A55, 40-pin GPIO header PRE-SOLDERED, 22-pin MIPI CSI 0.5 mm, Wi-Fi 6 / BT 5.4, 2x USB-C. Configuration required: 1 GB LPDDR4 with 32 GB eMMC if Radxa will build it (no such catalogue SKU); otherwise quote RS107-D1E8H1W15 (1 GB / 8 GB, header) and RS107-D4E32H1W15 (4 GB / 32 GB, header) so the eMMC question can be priced.",
    "verdict": "FAIL",
-   "verdict_why": "The line as specified is unbuyable: the 1 GB / 32 GB SKU is not in Radxa's catalogue, and every 1 GB variant read on 2026-09-02 was SOLD OUT at every distributor reached. Two distributors did render prices, so the failure is availability and specification - not readability.",
+   "verdict_why": "No source read offers the exact specified configuration: the 1 GB / 32 GB SKU is not in Radxa's catalogue, and every 1 GB variant read on 2026-09-02 was SOLD OUT at every distributor reached. Two distributors did render prices, so the failure is availability and specification - not readability.",
    "offers": [
     {
      "vendor": "ALLNET China",
@@ -3632,7 +3673,7 @@
     "B1",
     "B2"
    ],
-   "ask": "OEM / volume pricing for XL330-M288-T at 225, 1 500 and 15 000 units, and for Robot Cable-X3P 180 mm at 300 / 3 000 / 30 000 leads. ROBOTIS publishes no XL330 bulk pack and no tier table, so THIS QUOTE IS THE SINGLE LARGEST OPEN NUMBER IN THE WHOLE COST MODEL: at {{b1_per_robot_usd}} per robot the servos are {{b1_share_of_readable_at_1}} of the readable bought cost at one robot and {{b1_share_of_pass_at_1}} of the subtotal this document grades PASS ({{b1_share_of_readable_at_1000}} and {{b1_share_of_pass_at_1000}} respectively at 1 000 robots); with the bus leads of line B2 added the pair reach {{b1_b2_share_of_readable_at_1}}. B1 is one of {{n_flat_priced_lines}} of the {{n_priced_lines}} priced lines whose unit price does not move at all between 1 and 1 000 robots ({{flat_priced_lines}}) - it is the SIZE of this line, not its flatness, that makes the quotation decisive.",
+   "ask": "OEM / volume pricing for XL330-M288-T at {{b1_quote_quantities}} units, and quote Robot Cable-X3P 180 mm separately for the net batch quantities in the table below. Those quantities assume the verified retail servo bundle; if an OEM offer excludes cables, state that explicitly and quote the gross requirement instead. ROBOTIS publishes no XL330 bulk pack and no tier table, so THIS QUOTE IS THE SINGLE LARGEST OPEN NUMBER IN THE WHOLE COST MODEL: at {{b1_per_robot_usd}} per robot the servos are {{b1_share_of_readable_at_1}} of the readable bought cost at one robot and {{b1_share_of_pass_at_1}} of the subtotal this document grades PASS ({{b1_share_of_readable_at_1000}} and {{b1_share_of_pass_at_1000}} respectively at 1 000 robots); with the bus leads of line B2 added the pair reach {{b1_b2_share_of_readable_at_1}}. B1 is one of {{n_flat_priced_lines}} of the {{n_priced_lines}} priced lines whose unit price does not move at all between 1 and 1 000 robots ({{flat_priced_lines}}) - it is the SIZE of this line, not its flatness, that makes the quotation decisive.",
    "also_ask": [
     "Is the XL330-M288-T's published 3.7-6.0 V input band a hard limit, or is there an OEM variant rated to 8.4 V? Our pack is 6.6-8.2 V.",
     "Can leads be supplied at non-catalogue lengths (20, 35, 40, 50, 60, 65, 95, 120, 125, 165 mm)?"

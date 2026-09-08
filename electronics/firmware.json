@@ -3,13 +3,13 @@
   "$standards": [],
   "$chips": {
     "file": "cecad/data/chips.json",
-    "chips": 32
+    "chips": 33
   },
   "design": "microduck",
   "host": "radxa-zero-3w",
   "controller": "RK3566",
   "controller_cite": "[brief] \u00a73.1 p.3 (see host_note)",
-  "generated": "2026-09-02 02:19:29",
+  "generated": "2026-09-08 20:59:03",
   "verdict": "CANNOT DETERMINE",
   "status": "incomplete",
   "units": {
@@ -271,17 +271,17 @@
       }
     },
     {
-      "id": "i2s3",
+      "id": "HAT:Y1_OUT",
       "protocol": "I2S",
       "nets": [
+        "HAT:Y1_OUT",
         "i2s3/BCLK",
         "i2s3/DIN",
         "i2s3/DOUT",
-        "i2s3/MCLK",
         "i2s3/WCLK"
       ],
-      "degree": 15,
-      "scope": "bus",
+      "degree": 14,
+      "scope": "host",
       "scope_cite": "",
       "controller": {
         "owner": "host",
@@ -289,6 +289,16 @@
       },
       "controller_unknown": null,
       "signals": {
+        "OUT": {
+          "pin": "HAT:Y1_OUT",
+          "pin_raw": null,
+          "net": "HAT:Y1_OUT"
+        },
+        "MCLK": {
+          "pin": "HAT:Y1_OUT",
+          "pin_raw": null,
+          "net": "HAT:Y1_OUT"
+        },
         "BCLK": {
           "pin": "hdr12",
           "pin_raw": null,
@@ -318,11 +328,6 @@
           "pin": "hdr38",
           "pin_raw": null,
           "net": "i2s3/DOUT"
-        },
-        "MCLK": {
-          "pin": "hdr13",
-          "pin_raw": null,
-          "net": "i2s3/MCLK"
         },
         "WCLK": {
           "pin": "hdr35",
@@ -663,16 +668,6 @@
           "pin_raw": null
         },
         {
-          "ref": "MCLK",
-          "net": "i2s3/MCLK",
-          "kind": "signal",
-          "signal": "MCLK",
-          "bus": "I2S",
-          "direction": "input",
-          "pin": "hdr13",
-          "pin_raw": null
-        },
-        {
           "ref": "I2S3_LRCK",
           "net": "i2s3/WCLK",
           "kind": "signal",
@@ -713,8 +708,18 @@
           "pin_raw": null
         },
         {
-          "ref": "SERVO_V",
-          "net": "SERVO_V",
+          "ref": "V3V3_IN",
+          "net": "HAT_3V3",
+          "kind": "supply",
+          "signal": null,
+          "bus": null,
+          "direction": "input",
+          "pin": null,
+          "pin_raw": null
+        },
+        {
+          "ref": "J5_3V3",
+          "net": "HAT_3V3",
           "kind": "supply",
           "signal": null,
           "bus": null,
@@ -723,8 +728,8 @@
           "pin_raw": null
         },
         {
-          "ref": "J5_3V3",
-          "net": "J5_3V3",
+          "ref": "SERVO_V",
+          "net": "SERVO_V",
           "kind": "supply",
           "signal": null,
           "bus": null,
@@ -771,6 +776,16 @@
           "direction": "output",
           "pin": null,
           "pin_raw": null
+        },
+        {
+          "ref": "V1V8_OUT",
+          "net": "HAT_1V8",
+          "kind": "supply",
+          "signal": null,
+          "bus": null,
+          "direction": "output",
+          "pin": null,
+          "pin_raw": null
         }
       ],
       "supply": [
@@ -795,17 +810,17 @@
           }
         },
         {
-          "net": "SERVO_V",
+          "net": "HAT_3V3",
           "typical_mA": null,
           "peak_mA": null,
-          "cite": "parts[]",
+          "cite": "Pinned public Pollen HAT 23eab11927f95ceca0dfa35bf182caeb7db39ea0: reference/pollen-elec-rpi-robot-hat/elec_RPI_Robot_HAT.kicad_pcb Public board-family model only; exact installed Microduck board revision remains unconfirmed.",
           "unknown": {
-            "why": "no current reference is recorded for this need",
-            "cite": "parts[]"
+            "why": "Total board load and Radxa header capacity not established.",
+            "cite": "Pinned public Pollen HAT 23eab11927f95ceca0dfa35bf182caeb7db39ea0: reference/pollen-elec-rpi-robot-hat/elec_RPI_Robot_HAT.kicad_pcb Public board-family model only; exact installed Microduck board revision remains unconfirmed."
           }
         },
         {
-          "net": "J5_3V3",
+          "net": "SERVO_V",
           "typical_mA": null,
           "peak_mA": null,
           "cite": "parts[]",
@@ -823,11 +838,98 @@
             "why": "no current reference is recorded for this need",
             "cite": "parts[]"
           }
+        },
+        {
+          "net": "HAT_1V8",
+          "typical_mA": null,
+          "peak_mA": null,
+          "cite": "parts[]",
+          "unknown": {
+            "why": "no current reference is recorded for this need",
+            "cite": "parts[]"
+          }
         }
       ],
       "buses": [
         "I2S"
       ]
+    },
+    {
+      "label": "hat_y1",
+      "part": "microduck-public-hat-y1",
+      "kind": "discrete",
+      "chip": "OT3EL89CJI-111YLC-12M",
+      "attach": "direct",
+      "ports": [],
+      "segment": null,
+      "standard": null,
+      "terminals": [
+        {
+          "ref": "GND",
+          "net": "GND",
+          "kind": "ground",
+          "signal": "GND",
+          "bus": null,
+          "direction": null,
+          "pin": null,
+          "pin_raw": null,
+          "direction_unknown": {
+            "why": "no document states a direction for microduck-public-hat-y1 GND",
+            "cite": "parts[microduck-public-hat-y1].requires"
+          }
+        },
+        {
+          "ref": "VDD",
+          "net": "HAT_3V3",
+          "kind": "supply",
+          "signal": null,
+          "bus": null,
+          "direction": null,
+          "pin": null,
+          "pin_raw": null,
+          "direction_unknown": {
+            "why": "no document states a direction for microduck-public-hat-y1 VDD",
+            "cite": "parts[microduck-public-hat-y1].requires"
+          }
+        },
+        {
+          "ref": "TRISTATE",
+          "net": "HAT_3V3",
+          "kind": "signal",
+          "signal": "TRISTATE",
+          "bus": null,
+          "direction": "input",
+          "pin": null,
+          "pin_raw": null,
+          "pin_unknown": {
+            "why": "NOT STATED",
+            "cite": ""
+          }
+        },
+        {
+          "ref": "OUT",
+          "net": "HAT:Y1_OUT",
+          "kind": "signal",
+          "signal": "OUT",
+          "bus": null,
+          "direction": "output",
+          "pin": "HAT:Y1_OUT",
+          "pin_raw": null
+        }
+      ],
+      "supply": [
+        {
+          "net": "HAT_3V3",
+          "typical_mA": null,
+          "peak_mA": null,
+          "cite": "reference/pollen-elec-rpi-robot-hat/production/ASE01187-C1_elec_RPI_Robot_HAT_BOM.csv row Y1; elec_RPI_Robot_HAT.kicad_pcb Y1 pads 1..4; commit 23eab11927f95ceca0dfa35bf182caeb7db39ea0",
+          "unknown": {
+            "why": "no current reference is recorded for this need",
+            "cite": "reference/pollen-elec-rpi-robot-hat/production/ASE01187-C1_elec_RPI_Robot_HAT_BOM.csv row Y1; elec_RPI_Robot_HAT.kicad_pcb Y1 pads 1..4; commit 23eab11927f95ceca0dfa35bf182caeb7db39ea0"
+          }
+        }
+      ],
+      "buses": []
     },
     {
       "label": "codec",
@@ -877,16 +979,6 @@
           "bus": "I2S",
           "direction": "bidirectional",
           "pin": "hdr12",
-          "pin_raw": null
-        },
-        {
-          "ref": "MCLK",
-          "net": "i2s3/MCLK",
-          "kind": "signal",
-          "signal": "MCLK",
-          "bus": "I2S",
-          "direction": "bidirectional",
-          "pin": "hdr13",
           "pin_raw": null
         },
         {
@@ -947,6 +1039,16 @@
           "bus": null,
           "direction": "input",
           "pin": null,
+          "pin_raw": null
+        },
+        {
+          "ref": "MCLK",
+          "net": "HAT:Y1_OUT",
+          "kind": "signal",
+          "signal": "MCLK",
+          "bus": "I2S",
+          "direction": "bidirectional",
+          "pin": "HAT:Y1_OUT",
           "pin_raw": null
         }
       ],
@@ -1129,7 +1231,7 @@
         },
         {
           "ref": "3V3",
-          "net": "J5_3V3",
+          "net": "HAT_3V3",
           "kind": "supply",
           "signal": null,
           "bus": null,
@@ -1140,7 +1242,7 @@
       ],
       "supply": [
         {
-          "net": "J5_3V3",
+          "net": "HAT_3V3",
           "typical_mA": 95,
           "peak_mA": 150,
           "cite": "chips[vl53l5cx].current_mA",
@@ -2356,12 +2458,6 @@
       "owner": "host",
       "raw": null
     },
-    "hdr13": {
-      "net": "i2s3/MCLK",
-      "signal": "MCLK",
-      "owner": "host",
-      "raw": null
-    },
     "hdr35": {
       "net": "i2s3/WCLK",
       "signal": "WCLK",
@@ -2428,6 +2524,12 @@
       "owner": "hat",
       "raw": null
     },
+    "HAT:Y1_OUT": {
+      "net": "HAT:Y1_OUT",
+      "signal": "OUT",
+      "owner": "hat_y1",
+      "raw": null
+    },
     "csi17": {
       "net": "csi17",
       "signal": "PDN",
@@ -2463,7 +2565,7 @@
       "kind": "ground",
       "bus": null,
       "segment": null,
-      "degree": 24,
+      "degree": 25,
       "scope_cite": "[brief] \u00a76.1.1 p.6 GPIO table / header_40pin below (pins 6, 9, 14, 20, 25, 30, 34, 39 are GND on the 40-pin)",
       "terminals": [
         {
@@ -2476,6 +2578,10 @@
         },
         {
           "owner": "hat",
+          "ref": "GND"
+        },
+        {
+          "owner": "hat_y1",
           "ref": "GND"
         },
         {
@@ -2785,30 +2891,6 @@
       ]
     },
     {
-      "id": "i2s3/MCLK",
-      "name": "MCLK",
-      "scope": "bus",
-      "kind": "signal",
-      "bus": "I2S",
-      "segment": "i2s3",
-      "degree": 3,
-      "scope_cite": "",
-      "terminals": [
-        {
-          "owner": "host",
-          "ref": "MCLK"
-        },
-        {
-          "owner": "hat",
-          "ref": "MCLK"
-        },
-        {
-          "owner": "codec",
-          "ref": "MCLK"
-        }
-      ]
-    },
-    {
       "id": "i2s3/WCLK",
       "name": "WCLK",
       "scope": "bus",
@@ -3001,6 +3083,54 @@
       ]
     },
     {
+      "id": "HAT_3V3",
+      "name": "HAT_3V3",
+      "scope": "host",
+      "kind": "supply",
+      "bus": null,
+      "segment": null,
+      "degree": 9,
+      "scope_cite": "",
+      "terminals": [
+        {
+          "owner": "hat",
+          "ref": "V3V3_IN"
+        },
+        {
+          "owner": "hat",
+          "ref": "J5_3V3"
+        },
+        {
+          "owner": "hat_y1",
+          "ref": "VDD"
+        },
+        {
+          "owner": "hat_y1",
+          "ref": "TRISTATE"
+        },
+        {
+          "owner": "codec",
+          "ref": "AVDD"
+        },
+        {
+          "owner": "codec",
+          "ref": "IOVDD"
+        },
+        {
+          "owner": "bmi088",
+          "ref": "VDD"
+        },
+        {
+          "owner": "bmi088",
+          "ref": "VDDIO"
+        },
+        {
+          "owner": "tof",
+          "ref": "3V3"
+        }
+      ]
+    },
+    {
       "id": "SERVO_V",
       "name": "SERVO_V",
       "scope": "host",
@@ -3077,26 +3207,6 @@
         {
           "owner": "id14",
           "ref": "VDD"
-        }
-      ]
-    },
-    {
-      "id": "J5_3V3",
-      "name": "J5_3V3",
-      "scope": "host",
-      "kind": "supply",
-      "bus": null,
-      "segment": null,
-      "degree": 2,
-      "scope_cite": "",
-      "terminals": [
-        {
-          "owner": "hat",
-          "ref": "J5_3V3"
-        },
-        {
-          "owner": "tof",
-          "ref": "3V3"
         }
       ]
     },
@@ -3181,46 +3291,42 @@
       ]
     },
     {
-      "id": "HAT_3V3",
-      "name": "HAT_3V3",
-      "scope": "host",
-      "kind": "supply",
-      "bus": null,
-      "segment": null,
-      "degree": 4,
-      "scope_cite": "",
-      "terminals": [
-        {
-          "owner": "codec",
-          "ref": "AVDD"
-        },
-        {
-          "owner": "codec",
-          "ref": "IOVDD"
-        },
-        {
-          "owner": "bmi088",
-          "ref": "VDD"
-        },
-        {
-          "owner": "bmi088",
-          "ref": "VDDIO"
-        }
-      ]
-    },
-    {
       "id": "HAT_1V8",
       "name": "HAT_1V8",
       "scope": "host",
       "kind": "supply",
       "bus": null,
       "segment": null,
-      "degree": 1,
+      "degree": 2,
       "scope_cite": "",
       "terminals": [
         {
+          "owner": "hat",
+          "ref": "V1V8_OUT"
+        },
+        {
           "owner": "codec",
           "ref": "DVDD"
+        }
+      ]
+    },
+    {
+      "id": "HAT:Y1_OUT",
+      "name": "HAT:Y1_OUT",
+      "scope": "host",
+      "kind": "signal",
+      "bus": "I2S",
+      "segment": null,
+      "degree": 2,
+      "scope_cite": "",
+      "terminals": [
+        {
+          "owner": "hat_y1",
+          "ref": "OUT"
+        },
+        {
+          "owner": "codec",
+          "ref": "MCLK"
         }
       ]
     },
@@ -3263,12 +3369,14 @@
       "name": "HAT_1V8",
       "scope": "host",
       "nominal_v": null,
-      "sources": [],
+      "sources": [
+        "hat"
+      ],
       "sinks": [
         "codec"
       ],
       "undirected": [],
-      "verdict": "CANNOT DETERMINE",
+      "verdict": "PASS",
       "demand": {
         "typical_mA": null,
         "typical_mA_floor": 0,
@@ -3289,35 +3397,40 @@
           "why": "no document read here states a current limit for this net, for a port or for a connector, so the demand cannot be compared with anything",
           "cite": "hosts[radxa-zero-3w]"
         }
-      },
-      "why": "codec@direct draws HAT_1V8 \u2014 NOT ONE part in the catalogue has a HAT_1V8 terminal with direction 'output'. Not a pass and not a fail. Connect it yourself, and find out where it comes from before anything is powered up. That answer is not in this repository. To assert it: design.external_supply('HAT_1V8', \"<what you measured>\")",
-      "cite": "hosts[radxa-zero-3w].provides_basis"
+      }
     },
     {
       "net": "HAT_3V3",
       "name": "HAT_3V3",
       "scope": "host",
       "nominal_v": null,
-      "sources": [],
-      "sinks": [
-        "codec",
-        "bmi088"
+      "sources": [
+        "hat"
       ],
-      "undirected": [],
+      "sinks": [
+        "hat",
+        "hat_y1",
+        "codec",
+        "bmi088",
+        "tof"
+      ],
+      "undirected": [
+        "hat_y1"
+      ],
       "verdict": "CANNOT DETERMINE",
       "demand": {
         "typical_mA": null,
-        "typical_mA_floor": 5.15,
-        "typical_mA_floor_over": 1,
+        "typical_mA_floor": 100.15,
+        "typical_mA_floor_over": 2,
         "typical_mA_unknown": {
-          "why": "codec@direct has no sourced typical current, so the total is not known. The floor beside this key is what the rest add up to and is NOT the total; nothing here is drawing zero.",
+          "why": "hat_y1 has a HAT_3V3 terminal with no stated direction, so the SET of parts to sum over is not known \u2014 before any figure is looked up. hat@direct, hat_y1@direct, codec@direct have no sourced typical current, so the total is not known. The floor beside this key is what the rest add up to and is NOT the total; nothing here is drawing zero.",
           "cite": "chips[...].current_mA"
         },
         "peak_mA": null,
-        "peak_mA_floor": 0,
-        "peak_mA_floor_over": 0,
+        "peak_mA_floor": 150,
+        "peak_mA_floor_over": 1,
         "peak_mA_unknown": {
-          "why": "codec@direct, bmi088@direct have no sourced peak current, so the total is not known. There is no floor either \u2014 not 0 mA, not any number. NOTHING on this net has a sourced figure, so `_mA_floor` is 0 because it is a sum over an empty set, and `_mA_floor_over` is 0 to say so.",
+          "why": "hat_y1 has a HAT_3V3 terminal with no stated direction, so the SET of parts to sum over is not known \u2014 before any figure is looked up. hat@direct, hat_y1@direct, codec@direct, bmi088@direct have no sourced peak current, so the total is not known. The floor beside this key is what the rest add up to and is NOT the total; nothing here is drawing zero.",
           "cite": "chips[...].current_mA"
         },
         "capacity_mA": null,
@@ -3326,31 +3439,9 @@
           "cite": "hosts[radxa-zero-3w]"
         }
       },
-      "why": "codec@direct, bmi088@direct draw HAT_3V3 \u2014 NOT ONE part in the catalogue has a HAT_3V3 terminal with direction 'output'. Not a pass and not a fail. Connect it yourself, and find out where it comes from before anything is powered up. That answer is not in this repository. To assert it: design.external_supply('HAT_3V3', \"<what you measured>\")",
-      "cite": "hosts[radxa-zero-3w].provides_basis"
-    },
-    {
-      "net": "J5_3V3",
-      "name": "J5_3V3",
-      "scope": "host",
-      "nominal_v": null,
-      "sources": [
-        "hat"
-      ],
-      "sinks": [
-        "tof"
-      ],
-      "undirected": [],
-      "verdict": "PASS",
-      "demand": {
-        "typical_mA": 95,
-        "peak_mA": 150,
-        "capacity_mA": null,
-        "capacity_unknown": {
-          "why": "no document read here states a current limit for this net, for a port or for a connector, so the demand cannot be compared with anything",
-          "cite": "hosts[radxa-zero-3w]"
-        }
-      }
+      "why": "the HAT_3V3 terminal of 1 part(s) on HAT_3V3 has NO direction in the documents: hat_y1@direct So nobody can say whether they DRIVE this net or DRAW it. Both readings are open, and the two questions this rule answers \u2014 is the net fed, and is anything back-feeding it \u2014 are both unanswerable while that is true. documented sinks: hat, hat_y1, codec, bmi088, tof documented sources: hat external_supply() cannot close this: it states where a net comes from, not what else is driving it.",
+      "cite": "hosts[radxa-zero-3w].provides_basis",
+      "asserted_by_user": "Public PCB +3V3 comes from Radxa J4.1/17; same net as J5.2, codec AVDD/IOVDD and Y1.1/4. Host provision is absent from the bare host model; this is an explicit source-boundary assertion from pinned PCB connectivity, not a measured capacity. Installed revision unconfirmed."
     },
     {
       "net": "MICBIAS",
@@ -3566,17 +3657,29 @@
         "I2S3_LRCK": "i2s3/WCLK",
         "I2S3_SDO": "i2s3/DIN",
         "I2S3_SDI": "i2s3/DOUT",
-        "MCLK": "i2s3/MCLK",
         "V5_OUT": "V5_HAT",
         "SERVO_V": "SERVO_V",
         "DXL_DATA": "dxl/DATA",
-        "J5_3V3": "J5_3V3",
+        "J5_3V3": "HAT_3V3",
+        "V3V3_IN": "HAT_3V3",
+        "V1V8_OUT": "HAT_1V8",
         "SPK+": "SPK_P",
         "SPK-": "SPK_N",
         "MIC_IN": "MIC_IN",
         "MICBIAS": "MICBIAS"
       },
-      "asserted_by_user": "Pollen RPI Robot HAT on the 40-pin header \u2014 PCB not published (docs \u00a712 item 4). Provisions V5_HAT and SERVO_V carry null capacities and SERVO_V a null nominal by the record's own statement; the transceiver behind DXL_DATA is CANNOT DETERMINE."
+      "asserted_by_user": "Pollen RPI Robot HAT public-board model; exact installed revision unconfirmed. Provisions V5_HAT and SERVO_V carry null capacities and SERVO_V a null nominal by the record's own statement; the transceiver behind DXL_DATA is CANNOT DETERMINE."
+    },
+    {
+      "label": "hat_y1",
+      "part": "microduck-public-hat-y1",
+      "wires": {
+        "GND": "GND",
+        "VDD": "HAT_3V3",
+        "TRISTATE": "HAT_3V3",
+        "OUT": "HAT:Y1_OUT"
+      },
+      "asserted_by_user": "reference/pollen-elec-rpi-robot-hat/production/ASE01187-C1_elec_RPI_Robot_HAT_BOM.csv row Y1; elec_RPI_Robot_HAT.kicad_pcb Y1 pads 1..4; commit 23eab11927f95ceca0dfa35bf182caeb7db39ea0"
     },
     {
       "label": "codec",
@@ -3588,13 +3691,13 @@
         "IOVDD": "HAT_3V3",
         "SDA": "i2c3/SDA",
         "SCL": "i2c3/SCL",
-        "MCLK": "i2s3/MCLK",
+        "MCLK": "HAT:Y1_OUT",
         "BCLK": "i2s3/BCLK",
         "WCLK": "i2s3/WCLK",
         "DIN": "i2s3/DIN",
         "DOUT": "i2s3/DOUT"
       },
-      "asserted_by_user": "aic3104-i2c3.dts 'codec@18', 'reg = <0x18>', clocks = the 12 MHz fixed-clock. HAT_3V3 / HAT_1V8 are the rails the codec's three domains need; NOTHING on the shelf sources them \u2014 the HAT's regulators are unpublished, so those two nets are expected to come back CANNOT DETERMINE, by name."
+      "asserted_by_user": "aic3104-i2c3.dts 'codec@18', 'reg = <0x18>', clocks = the 12 MHz fixed-clock: pinned public PCB Y1.3 -> U2.1, J4.13 NC. HAT:Y1_OUT joins the modeled hat_y1.OUT provider to codec.MCLK. Installed board revision unconfirmed. Public PCB codec U2.7/18/24/25 connect to +3V3 from Radxa J4.1/17; U2.32 is +1V8 from U3.2 (XC6206P182MR), whose U3.3 input is +3V3. Board rail tolerances and aggregate current budgets remain unverified."
     },
     {
       "label": "bmi088",
@@ -3606,7 +3709,7 @@
         "SDA": "i2c3/SDA",
         "SCL": "i2c3/SCL"
       },
-      "asserted_by_user": "i2c3.dts:11 'dormant BMI088 0x19/0x68', 'unused but still connected' (dts:31). Accelerometer target 0x19 and the package's VDD/VDDIO \u2014 on HAT_3V3 by this file's assertion that a 2.4-3.6 V part on a 3.3 V-I/O HAT sits on its 3.3 V; which rail is CANNOT DETERMINE (chips[bmi088].unknowns[1])."
+      "asserted_by_user": "i2c3.dts:11 'dormant BMI088 0x19/0x68', 'unused but still connected' (dts:31). Accelerometer target 0x19 and the public PCB U11.7 VDDIO is +3V3; VDD pins 3/11 reach +3V3 through R9 marked 0R. This DC-level model collapses that link; its resistance/current rating and installed revision are unverified."
     },
     {
       "label": "bmi088.gyro",
@@ -3622,7 +3725,7 @@
       "part": "microduck-tof-module",
       "wires": {
         "GND": "GND",
-        "3V3": "J5_3V3",
+        "3V3": "HAT_3V3",
         "SDA": "i2c3/SDA",
         "SCL": "i2c3/SCL"
       },
@@ -3825,15 +3928,9 @@
   ],
   "undetermined": [
     {
-      "rule": "power/HAT_1V8",
-      "where": "system",
-      "why": "codec@direct draws HAT_1V8 \u2014 NOT ONE part in the catalogue has a HAT_1V8 terminal with direction 'output'. Not a pass and not a fail. Connect it yourself, and find out where it comes from before anything is powered up. That answer is not in this repository. To assert it: design.external_supply('HAT_1V8', \"<what you measured>\")",
-      "cite": "hosts[radxa-zero-3w].provides_basis"
-    },
-    {
       "rule": "power/HAT_3V3",
       "where": "system",
-      "why": "codec@direct, bmi088@direct draw HAT_3V3 \u2014 NOT ONE part in the catalogue has a HAT_3V3 terminal with direction 'output'. Not a pass and not a fail. Connect it yourself, and find out where it comes from before anything is powered up. That answer is not in this repository. To assert it: design.external_supply('HAT_3V3', \"<what you measured>\")",
+      "why": "the HAT_3V3 terminal of 1 part(s) on HAT_3V3 has NO direction in the documents: hat_y1@direct So nobody can say whether they DRIVE this net or DRAW it. Both readings are open, and the two questions this rule answers \u2014 is the net fed, and is anything back-feeding it \u2014 are both unanswerable while that is true. documented sinks: hat, hat_y1, codec, bmi088, tof documented sources: hat external_supply() cannot close this: it states where a net comes from, not what else is driving it.",
       "cite": "hosts[radxa-zero-3w].provides_basis"
     },
     {
@@ -3851,25 +3948,13 @@
     {
       "rule": "current/HAT_3V3",
       "where": "typical draw",
-      "why": "1 of 2 part(s) drawing HAT_3V3 have no sourced typical current: codec@direct tlv320aic3104 NOT SOURCED NOT A SINGLE NUMBER \u2014 the sheet gives per-mode rows, \u00a78.x 'CURRENT CONSUMPTION \u2013 DRVDD = AVDD = IOVDD = 3.3 V, DVDD = 1.8 V', p.12, verbatim: 'IDRVDD + IAVDD | Stereo DAC playback to lineout, fS = 48 ksps, I2S slave, no signal | 4.9' mA and 'IDVDD | 2.3' mA; 'IDRVDD + IAVDD | Stereo ADC record, fS = 48 ksps, I2S slave, AGC off, no signal | 4.31(6)' mA and 'IDVDD | 2.45(6)' mA; 'IDRVDD + IAVDD | Stereo DAC playback to stereo single-ended headphone, fS = 48 ksps, I2S slave, no signal | 6.7' mA. All 'no signal' \u2014 the sheet gives no figure for current INTO a speaker load, so speaker-drive current is CANNOT DETERMINE. sourced so far: bmi088@direct bmi088 5.15 mA That comes to 5.15 mA, which is a FLOOR and NOT the total. The missing parts are not drawing zero \u2014 nobody wrote down what they draw. Adding them in as 0 mA is how a budget passes a net that browns out on the bench. To close it: fetch the datasheet and add the part to cecad/data/chips.json, or measure it and record what you found.",
-      "cite": "chips[tlv320aic3104].current_mA.typical_basis"
+      "why": "1 part(s) here have a HAT_3V3 terminal with NO direction in the documents: hat_y1. Whether they draw this net at all is unanswered, so the set of parts to sum over is not known \u2014 before any figure is looked up. Nothing can be added.",
+      "cite": "hosts[radxa-zero-3w].provides_basis"
     },
     {
       "rule": "current/HAT_3V3",
       "where": "peak draw",
-      "why": "2 of 2 part(s) drawing HAT_3V3 have no sourced peak current: codec@direct tlv320aic3104 NOT SOURCED NOT TRANSCRIBED HERE. No peak figure was read out of the document this block cites (see `cite`) when this record was written, and none is asserted now (basis added 2026-09-02, wiring lane, so cecad.electrical's loader can read the shelf: a null with no reason is refused). Null means not looked up in this record \u2014 NOT zero. Re-read the sheet's current-consumption table to fill it. bmi088@direct bmi088 NOT SOURCED NOT TRANSCRIBED HERE. No peak figure was read out of the document this block cites (see `cite`) when this record was written, and none is asserted now (basis added 2026-09-02, wiring lane, so cecad.electrical's loader can read the shelf: a null with no reason is refused). Null means not looked up in this record \u2014 NOT zero. Re-read the sheet's current-consumption table to fill it. NOTHING drawing HAT_3V3 here has a sourced peak figure, so there is no floor either \u2014 not 0 mA, not any number. This net's demand is simply unknown. To close it: fetch the datasheet and add the part to cecad/data/chips.json, or measure it and record what you found.",
-      "cite": "chips[tlv320aic3104].current_mA.peak_basis"
-    },
-    {
-      "rule": "current/J5_3V3",
-      "where": "typical draw",
-      "why": "J5_3V3 typical demand is 95 mA, from all 1 part(s) drawing it: tof@direct vl53l5cx 95 mA THE DEMAND IS KNOWN. THE SUPPLY IS NOT. No document read here puts a NUMBER on a current limit for this net, for a port or for a connector, so there is nothing to compare 95 mA against and no headroom can be reported. This is a demand figure, not a pass.",
-      "cite": "hosts[radxa-zero-3w].provides_basis"
-    },
-    {
-      "rule": "current/J5_3V3",
-      "where": "peak draw",
-      "why": "J5_3V3 peak demand is 150 mA, from all 1 part(s) drawing it: tof@direct vl53l5cx 150 mA THE DEMAND IS KNOWN. THE SUPPLY IS NOT. No document read here puts a NUMBER on a current limit for this net, for a port or for a connector, so there is nothing to compare 150 mA against and no headroom can be reported. This is a demand figure, not a pass.",
+      "why": "1 part(s) here have a HAT_3V3 terminal with NO direction in the documents: hat_y1. Whether they draw this net at all is unanswered, so the set of parts to sum over is not known \u2014 before any figure is looked up. Nothing can be added.",
       "cite": "hosts[radxa-zero-3w].provides_basis"
     },
     {
@@ -3971,6 +4056,10 @@
   ],
   "asserted_by_user": [
     {
+      "net": "HAT_3V3",
+      "note": "Public PCB +3V3 comes from Radxa J4.1/17; same net as J5.2, codec AVDD/IOVDD and Y1.1/4. Host provision is absent from the bare host model; this is an explicit source-boundary assertion from pinned PCB connectivity, not a measured capacity. Installed revision unconfirmed."
+    },
+    {
       "net": "VCC_3V3_CSI",
       "note": "MIPI CSI pin 22 is the Radxa's own 3.3 V: [wiki] 22-pin table '22 VCC_3V3' (part:radxa-zero-3w buses_the_microduck_uses.mipi_csi). The host record states no supply provision, so this is asserted from the vendor table rather than routed by a record."
     },
@@ -3992,7 +4081,7 @@
     },
     {
       "segment": "i2s3",
-      "note": "i2s3_2ch, bit-clock and frame master on the SoC side (research/raw/deploy_audio_aic3104-i2c3.dts 'bitclock-master = <&pihat_cpu_dai>', 'frame-master = <&pihat_cpu_dai>', 'system-clock-frequency = <12288000>'). Pins are the M0 mux ([brief]/[wiki]: SCLK 12, MCLK 13, LRCK 35, SDI 38, SDO 40) \u2014 THIS FILE'S ASSERTION: the M1 mux (pins 19/21/23/24) is also on the header and the dts pinctrl was not read (part:radxa-zero-3w unknowns[3]). DIN = SoC SDO, DOUT = SoC SDI."
+      "note": "i2s3_2ch, bit-clock and frame master on the SoC side (research/raw/deploy_audio_aic3104-i2c3.dts 'bitclock-master = <&pihat_cpu_dai>', 'frame-master = <&pihat_cpu_dai>', 'system-clock-frequency = <12288000>'). Pins are the M0 mux (SCLK 12, LRCK 35, SDI 38, SDO 40), measured on pinned public HAT PCB J4 nets (commit 23eab11927f95ceca0dfa35bf182caeb7db39ea0). J4.13 is NC; codec MCLK comes from local Y1.3, 12 MHz. Installed board revision unconfirmed. DIN = SoC SDO, DOUT = SoC SDI."
     },
     {
       "segment": "uart2",
@@ -4004,15 +4093,19 @@
     },
     {
       "part": "hat",
-      "note": "Pollen RPI Robot HAT on the 40-pin header \u2014 PCB not published (docs \u00a712 item 4). Provisions V5_HAT and SERVO_V carry null capacities and SERVO_V a null nominal by the record's own statement; the transceiver behind DXL_DATA is CANNOT DETERMINE."
+      "note": "Pollen RPI Robot HAT public-board model; exact installed revision unconfirmed. Provisions V5_HAT and SERVO_V carry null capacities and SERVO_V a null nominal by the record's own statement; the transceiver behind DXL_DATA is CANNOT DETERMINE."
+    },
+    {
+      "part": "hat_y1",
+      "note": "reference/pollen-elec-rpi-robot-hat/production/ASE01187-C1_elec_RPI_Robot_HAT_BOM.csv row Y1; elec_RPI_Robot_HAT.kicad_pcb Y1 pads 1..4; commit 23eab11927f95ceca0dfa35bf182caeb7db39ea0"
     },
     {
       "part": "codec",
-      "note": "aic3104-i2c3.dts 'codec@18', 'reg = <0x18>', clocks = the 12 MHz fixed-clock. HAT_3V3 / HAT_1V8 are the rails the codec's three domains need; NOTHING on the shelf sources them \u2014 the HAT's regulators are unpublished, so those two nets are expected to come back CANNOT DETERMINE, by name."
+      "note": "aic3104-i2c3.dts 'codec@18', 'reg = <0x18>', clocks = the 12 MHz fixed-clock: pinned public PCB Y1.3 -> U2.1, J4.13 NC. HAT:Y1_OUT joins the modeled hat_y1.OUT provider to codec.MCLK. Installed board revision unconfirmed. Public PCB codec U2.7/18/24/25 connect to +3V3 from Radxa J4.1/17; U2.32 is +1V8 from U3.2 (XC6206P182MR), whose U3.3 input is +3V3. Board rail tolerances and aggregate current budgets remain unverified."
     },
     {
       "part": "bmi088",
-      "note": "i2c3.dts:11 'dormant BMI088 0x19/0x68', 'unused but still connected' (dts:31). Accelerometer target 0x19 and the package's VDD/VDDIO \u2014 on HAT_3V3 by this file's assertion that a 2.4-3.6 V part on a 3.3 V-I/O HAT sits on its 3.3 V; which rail is CANNOT DETERMINE (chips[bmi088].unknowns[1])."
+      "note": "i2c3.dts:11 'dormant BMI088 0x19/0x68', 'unused but still connected' (dts:31). Accelerometer target 0x19 and the public PCB U11.7 VDDIO is +3V3; VDD pins 3/11 reach +3V3 through R9 marked 0R. This DC-level model collapses that link; its resistance/current rating and installed revision are unverified."
     },
     {
       "part": "bmi088.gyro",
@@ -4102,19 +4195,35 @@
   "uncertainties": [
     {
       "cite": "parts[microduck-robot-hat-pcb].uncertainties[0]",
-      "text": "The PCB is not published (docs \u00a711 open question 4). Connector types on the HAT (servo header, J5, battery input, speaker/mic) are CANNOT DETERMINE; every position used by the wiring lane is the HAT mesh's placement origin."
+      "text": "Public PCB/BOM are available under reference/pollen-elec-rpi-robot-hat; installed-board revision and correspondence of reference mesh remain unverified."
     },
     {
       "cite": "parts[microduck-robot-hat-pcb].uncertainties[1]",
-      "text": "Transceiver, regulators, fusing, NFC reader, REC LED: CANNOT DETERMINE (docs \u00a712 items 4, 8, 11)."
+      "text": "Public board U9 AP63205 + U10 LM5050-1/Q2 make the 5V path; U3 XC6206P182MR makes +1V8 from Radxa +3V3. Complete board power budgets and installed hardware identity remain unverified."
     },
     {
       "cite": "parts[microduck-robot-hat-pcb].uncertainties[2]",
-      "text": "I2S3 mux M0 (pins 12/13/35/38/40) vs M1 (19/21/23/24): the dts pinctrl was not read \u2014 the M0 pins are the wiring lane's assertion, stated as one."
+      "text": "Pinned public Pollen HAT commit 23eab11927f95ceca0dfa35bf182caeb7db39ea0: reference/pollen-elec-rpi-robot-hat/elec_RPI_Robot_HAT.kicad_pcb J4.12/35/38/40 -> U2.2/3/5/4, J4.13 NC, Y1.3 -> U2.1 MCLK (12 MHz). Exact installed Microduck board revision remains CANNOT DETERMINE."
     },
     {
       "cite": "parts[microduck-robot-hat-pcb].uncertainties[3]",
       "text": "electronics/netlist.py wires I2C3_SDA/SCL and UART2_TX/RX with bus None: they are the HAT's header pass-throughs to the SoC, not addressed devices on the bus. The record's own bus words are kept in the record."
+    },
+    {
+      "cite": "parts[microduck-public-hat-y1].uncertainties[0]",
+      "text": "The installed production Microduck HAT revision and oscillator marking are not confirmed."
+    },
+    {
+      "cite": "parts[microduck-public-hat-y1].uncertainties[1]",
+      "text": "Both downloaded PDFs are YSO110TR family documents, with no revision/date or full OT3EL89CJI-111YLC-12M order code printed. Exact-code timing/current guarantees remain CANNOT DETERMINE; family values are recorded separately, not silently promoted."
+    },
+    {
+      "cite": "parts[microduck-public-hat-y1].uncertainties[2]",
+      "text": "PCB uses an Abracon-named library footprint whose solder pads differ from the YXC recommendation; assembly yield/fit needs DFM review, not an assumed pass."
+    },
+    {
+      "cite": "parts[microduck-public-hat-y1].uncertainties[3]",
+      "text": "Actual +3V3 rail tolerance, output loading, measured startup, jitter and running current on hardware remain unmeasured."
     },
     {
       "cite": "parts[tlv320aic3104].uncertainties[0]",

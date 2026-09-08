@@ -100,7 +100,7 @@ The rest of the HAT harness (all in the head, no hinge crossed):
 | `mic-hat` | HAT → mic | MIC, BIAS, GND (codec Mic3R, community) | **CANNOT DETERMINE** — no mesh, no site | CANNOT DETERMINE |
 | `csi-radxa-camera` | Radxa CSI → IMX219 board | 22-pin: CLK, D0, D1, I2C2, PDN, 3V3, GND | 13.3 / **15** | 22-pin 0.5 mm FFC at the Radxa; camera end CANNOT DETERMINE |
 | `bat-hat` | pack contacts → banana PCB → HAT | BAT+, BAT− | 213.5 / **340** | contacts and HAT input CANNOT DETERMINE |
-| `hat-radxa-40pin` | HAT ↔ Radxa | 5 V (2/4), GND, UART2 (8/10), I2C3 (3/5), I2S3 M0 (asserted) | **0** — board-to-board header | 2×20 0.1" |
+| `hat-radxa-40pin` | HAT ↔ Radxa | 5 V (2/4), GND, UART2 (8/10), I2C3 (3/5), I2S3 M0 12/35/38/40 (public PCB measured; installed revision unconfirmed) | **0** — board-to-board header | 2×20 0.1" |
 | `hat-dxl-port` | HAT → bus | SERVO_V, DXL_DATA, GND | not a separate cable: it *is* hop `dxl-hat-id34` (qty 0) | HAT end CANNOT DETERMINE |
 
 HAT, Radxa, speaker and battery endpoints are mesh **centroids** (bbox centre through the placement)
@@ -184,7 +184,7 @@ drop above is the `cecad.harness` call this lane made itself.
 ## 6. CANNOT DETERMINE — the list
 
 * HAT: transceiver, regulators, every connector (bus header, J5's 3.3 V source, battery input, speaker,
-  mic), I2S3 mux (M0 asserted), NFC, REC LED. Cable endpoints on it are the board centroid.
+  mic), installed-board identity (public PCB M0 measured), NFC, REC LED. Cable endpoints on it are the board centroid.
 * `imu_to_dxl` v2: connector count (the chain's branch depends on it), input band, board current.
 * Servo bus VDD: raw pack vs regulated (docs §3.4); running current per servo (1 A assumed).
 * ROBOTIS X3P stock lengths; whether Pollen uses X3P leads or its own EH crimps.
@@ -194,3 +194,13 @@ drop above is the `cecad.harness` call this lane made itself.
 * Speaker drive (codec output vs amplifier); speaker terminal side.
 * Battery contact layout (no vendor drawing) and the banana PCB's connector to the HAT.
 * Whether 15 A through one JST EH contact pair at the HAT port is within JST's rating (not read).
+
+## I2S correction — 2026-09-08
+
+Pinned public Pollen HAT commit 23eab11927f95ceca0dfa35bf182caeb7db39ea0: reference/pollen-elec-rpi-robot-hat/elec_RPI_Robot_HAT.kicad_pcb J4.12/35/38/40 -> U2.2/3/5/4, J4.13 NC, Y1.3 -> U2.1 MCLK (12 MHz). Exact installed Microduck board revision remains CANNOT DETERMINE.
+
+The old header-pin-13 MCLK assignment was removed from the cable, ce-wire source and electronics netlist. The codec net is now `HAT:Y1_OUT`; the detailed netlist models `hat_y1.OUT` from the pinned BOM (LCSC C7425459) and PCB pads, including +3V3 on VDD/Tri-State and GND. Y1 operating limits and timing, and the installed board revision, remain unverified. `out/elec/closure.json` is a historical snapshot: its findings that the cable still contains pin 13 and that the correction was not applied are superseded by this change and `tools/test_hat_i2s_wiring.py`. Its PCB connectivity observations remain independently reproducible.
+
+## Public HAT rail reconciliation — 2026-09-08
+
+The pinned PCB joins Radxa J4.1/17, J5.2, codec AVDD/IOVDD and Y1 supplies on +3V3. The models now join that rail and explicitly record the Radxa as the source boundary; the bare host schema does not provide a routed supply endpoint. U3 XC6206P182MR takes +3V3 on pad 3 and produces +1V8 on pad 2 for codec U2.32. U9 AP63205/L4 feeds the U10 LM5050-1/Q2 path to +5V and J4.2/4. Board current budgets, voltage tolerance and installed revision remain unverified; chip ratings are not substituted for complete-board limits. BMI088 VDD reaches +3V3 through R9 marked 0R, collapsed only for this DC topology model. SERVO_V retains its existing failures. `tools/test_hat_rail_topology.py` checks these pad nets and the derived model, including a deliberately broken supply connection.

@@ -10,14 +10,14 @@
  ],
  "id": "microduck",
  "title": "Microduck \u2014 the robot netlist (electronics/netlist.py)",
- "generated": "2026-09-02 02:19:29",
+ "generated": "2026-09-08 20:59:03",
  "host": "radxa-zero-3w",
  "host_power": {
   "map": {
    "5V": "V5_HAT",
    "GND": "GND"
   },
-  "note": "[brief] \u00a75.1 '5V Power from the GPIO PIN 2 & 4'; the HAT makes it from the pack: i2c3.dts:22 'In-robot power comes from the battery via the HAT regardless'. The HAT's regulator is CANNOT DETERMINE. The USB-C OTG port is a second 5 V path when tethered (sch1.12 sheet 22) and is not on this netlist."
+  "note": "[brief] \u00a75.1 '5V Power from the GPIO PIN 2 & 4'; the HAT makes it from the pack: i2c3.dts:22 'In-robot power comes from the battery via the HAT regardless'. Public HAT U9 AP63205/L4 feeds U10 LM5050-1 and Q2 to +5V; installed revision unconfirmed. The USB-C OTG port is a second 5 V path when tethered (sch1.12 sheet 22) and is not on this netlist."
  },
  "nodes": [
   {
@@ -84,20 +84,21 @@
     "I2S3_LRCK": "i2s3/WCLK",
     "I2S3_SDO": "i2s3/DIN",
     "I2S3_SDI": "i2s3/DOUT",
-    "MCLK": "i2s3/MCLK",
     "V5_OUT": "V5_HAT",
     "SERVO_V": "SERVO_V",
     "DXL_DATA": "dxl/DATA",
-    "J5_3V3": "J5_3V3",
+    "J5_3V3": "HAT_3V3",
+    "V3V3_IN": "HAT_3V3",
+    "V1V8_OUT": "HAT_1V8",
     "SPK+": "SPK_P",
     "SPK-": "SPK_N",
     "MIC_IN": "MIC_IN",
     "MICBIAS": "MICBIAS"
    },
-   "note": "Pollen RPI Robot HAT on the 40-pin header \u2014 PCB not published (docs \u00a712 item 4). Provisions V5_HAT and SERVO_V carry null capacities and SERVO_V a null nominal by the record's own statement; the transceiver behind DXL_DATA is CANNOT DETERMINE.",
+   "note": "Pollen RPI Robot HAT public-board model; exact installed revision unconfirmed. Provisions V5_HAT and SERVO_V carry null capacities and SERVO_V a null nominal by the record's own statement; the transceiver behind DXL_DATA is CANNOT DETERMINE.",
    "derived": {
-    "title": "Pollen RPI Robot HAT \u2014 the unpublished custom PCB on the Radxa's 40-pin header: battery in, 5 V to the Radxa, servo-bus power + half-duplex DATA out, TLV320AIC3104 codec, dormant BMI088, Stemma J5 for the ToF",
-    "function": "Pollen RPI Robot HAT \u2014 the unpublished custom PCB on the Radxa's 40-pin header: battery in, 5 V to the Radxa, servo-bus power + half-duplex DATA out, TLV320AIC3104 codec, dormant BMI088, Stemma J5 for the ToF",
+    "title": "Pollen RPI Robot HAT \u2014 the public PCB family (installed revision unconfirmed) on the Radxa's 40-pin header: battery in, 5 V to the Radxa, servo-bus power + half-duplex DATA out, TLV320AIC3104 codec, dormant BMI088, Stemma J5 for the ToF",
+    "function": "Pollen RPI Robot HAT \u2014 the public PCB family (installed revision unconfirmed) on the Radxa's 40-pin header: battery in, 5 V to the Radxa, servo-bus power + half-duplex DATA out, TLV320AIC3104 codec, dormant BMI088, Stemma J5 for the ToF",
     "part_kind": "module",
     "chip": null,
     "attach_how": "direct",
@@ -224,9 +225,9 @@
       "address": null
      },
      {
-      "name": "MCLK",
-      "kind": "signal",
-      "bus": "I2S",
+      "name": "V3V3_IN",
+      "kind": "supply",
+      "bus": null,
       "role": null,
       "signals": [],
       "direction": "input",
@@ -324,6 +325,17 @@
       "signals": {},
       "nominal_v": null,
       "capacity_mA": null
+     },
+     {
+      "name": "V1V8_OUT",
+      "kind": "supply",
+      "bus": null,
+      "role": null,
+      "count": 0,
+      "segment": null,
+      "signals": {},
+      "nominal_v": 1.8,
+      "capacity_mA": null
      }
     ],
     "wire_keys": [
@@ -337,7 +349,7 @@
      "I2S3_LRCK",
      "I2S3_SDO",
      "I2S3_SDI",
-     "MCLK",
+     "V3V3_IN",
      "V5_OUT",
      "SERVO_V",
      "DXL_DATA",
@@ -345,12 +357,97 @@
      "SPK+",
      "SPK-",
      "MIC_IN",
-     "MICBIAS"
+     "MICBIAS",
+     "V1V8_OUT"
     ],
     "uncertainties": [
-     "The PCB is not published (docs \u00a711 open question 4). Connector types on the HAT (servo header, J5, battery input, speaker/mic) are CANNOT DETERMINE; every position used by the wiring lane is the HAT mesh's placement origin.",
-     "Transceiver, regulators, fusing, NFC reader, REC LED: CANNOT DETERMINE (docs \u00a712 items 4, 8, 11).",
-     "I2S3 mux M0 (pins 12/13/35/38/40) vs M1 (19/21/23/24): the dts pinctrl was not read \u2014 the M0 pins are the wiring lane's assertion, stated as one."
+     "Public PCB/BOM are available under reference/pollen-elec-rpi-robot-hat; installed-board revision and correspondence of reference mesh remain unverified.",
+     "Public board U9 AP63205 + U10 LM5050-1/Q2 make the 5V path; U3 XC6206P182MR makes +1V8 from Radxa +3V3. Complete board power budgets and installed hardware identity remain unverified.",
+     "Pinned public Pollen HAT commit 23eab11927f95ceca0dfa35bf182caeb7db39ea0: reference/pollen-elec-rpi-robot-hat/elec_RPI_Robot_HAT.kicad_pcb J4.12/35/38/40 -> U2.2/3/5/4, J4.13 NC, Y1.3 -> U2.1 MCLK (12 MHz). Exact installed Microduck board revision remains CANNOT DETERMINE."
+    ],
+    "stub": false
+   }
+  },
+  {
+   "label": "hat_y1",
+   "part": "microduck-public-hat-y1",
+   "attach": "wire",
+   "map": {
+    "GND": "GND",
+    "VDD": "HAT_3V3",
+    "TRISTATE": "HAT_3V3",
+    "OUT": "HAT:Y1_OUT"
+   },
+   "note": "reference/pollen-elec-rpi-robot-hat/production/ASE01187-C1_elec_RPI_Robot_HAT_BOM.csv row Y1; elec_RPI_Robot_HAT.kicad_pcb Y1 pads 1..4; commit 23eab11927f95ceca0dfa35bf182caeb7db39ea0",
+   "derived": {
+    "title": "Public HAT Y1 \u2014 YXC OT3EL89CJI-111YLC-12M",
+    "function": "Public HAT Y1 \u2014 YXC OT3EL89CJI-111YLC-12M",
+    "part_kind": "discrete",
+    "chip": "OT3EL89CJI-111YLC-12M",
+    "attach_how": "direct",
+    "standard": null,
+    "inputs": [
+     {
+      "name": "GND",
+      "kind": "ground",
+      "bus": null,
+      "role": null,
+      "signals": [],
+      "direction": null,
+      "function": "",
+      "block": 0,
+      "rail": null,
+      "address": null
+     },
+     {
+      "name": "VDD",
+      "kind": "supply",
+      "bus": null,
+      "role": null,
+      "signals": [],
+      "direction": null,
+      "function": "",
+      "block": 0,
+      "rail": "+3V3",
+      "address": null
+     },
+     {
+      "name": "TRISTATE",
+      "kind": "signal",
+      "bus": null,
+      "role": null,
+      "signals": [],
+      "direction": "input",
+      "function": "",
+      "block": 0,
+      "rail": null,
+      "address": null
+     }
+    ],
+    "outputs": [
+     {
+      "name": "OUT",
+      "kind": "signal",
+      "bus": null,
+      "role": null,
+      "count": 0,
+      "segment": null,
+      "signals": {},
+      "nominal_v": null,
+      "capacity_mA": null
+     }
+    ],
+    "wire_keys": [
+     "GND",
+     "VDD",
+     "TRISTATE",
+     "OUT"
+    ],
+    "uncertainties": [
+     "The installed production Microduck HAT revision and oscillator marking are not confirmed.",
+     "Both downloaded PDFs are YSO110TR family documents, with no revision/date or full OT3EL89CJI-111YLC-12M order code printed. Exact-code timing/current guarantees remain CANNOT DETERMINE; family values are recorded separately, not silently promoted.",
+     "PCB uses an Abracon-named library footprint whose solder pads differ from the YXC recommendation; assembly yield/fit needs DFM review, not an assumed pass.",
+     "Actual +3V3 rail tolerance, output loading, measured startup, jitter and running current on hardware remain unmeasured."
     ],
     "stub": false
    }
@@ -366,13 +463,13 @@
     "IOVDD": "HAT_3V3",
     "SDA": "i2c3/SDA",
     "SCL": "i2c3/SCL",
-    "MCLK": "i2s3/MCLK",
+    "MCLK": "HAT:Y1_OUT",
     "BCLK": "i2s3/BCLK",
     "WCLK": "i2s3/WCLK",
     "DIN": "i2s3/DIN",
     "DOUT": "i2s3/DOUT"
    },
-   "note": "aic3104-i2c3.dts 'codec@18', 'reg = <0x18>', clocks = the 12 MHz fixed-clock. HAT_3V3 / HAT_1V8 are the rails the codec's three domains need; NOTHING on the shelf sources them \u2014 the HAT's regulators are unpublished, so those two nets are expected to come back CANNOT DETERMINE, by name.",
+   "note": "aic3104-i2c3.dts 'codec@18', 'reg = <0x18>', clocks = the 12 MHz fixed-clock: pinned public PCB Y1.3 -> U2.1, J4.13 NC. HAT:Y1_OUT joins the modeled hat_y1.OUT provider to codec.MCLK. Installed board revision unconfirmed. Public PCB codec U2.7/18/24/25 connect to +3V3 from Radxa J4.1/17; U2.32 is +1V8 from U3.2 (XC6206P182MR), whose U3.3 input is +3V3. Board rail tolerances and aggregate current budgets remain unverified.",
    "derived": {
     "title": "TLV320AIC3104 codec reflowed onto the Robot HAT: I2C control at 0x18 on I2C3, I2S3 audio, three supply domains the HAT feeds from rails nobody has published",
     "function": "TLV320AIC3104 codec reflowed onto the Robot HAT: I2C control at 0x18 on I2C3, I2S3 audio, three supply domains the HAT feeds from rails nobody has published",
@@ -533,7 +630,7 @@
     "SDA": "i2c3/SDA",
     "SCL": "i2c3/SCL"
    },
-   "note": "i2c3.dts:11 'dormant BMI088 0x19/0x68', 'unused but still connected' (dts:31). Accelerometer target 0x19 and the package's VDD/VDDIO \u2014 on HAT_3V3 by this file's assertion that a 2.4-3.6 V part on a 3.3 V-I/O HAT sits on its 3.3 V; which rail is CANNOT DETERMINE (chips[bmi088].unknowns[1]).",
+   "note": "i2c3.dts:11 'dormant BMI088 0x19/0x68', 'unused but still connected' (dts:31). Accelerometer target 0x19 and the public PCB U11.7 VDDIO is +3V3; VDD pins 3/11 reach +3V3 through R9 marked 0R. This DC-level model collapses that link; its resistance/current rating and installed revision are unverified.",
    "derived": {
     "title": "BMI088 on the Robot HAT \u2014 'dormant', 'unused but still connected' on I2C3 at 0x19 (accelerometer) and 0x68 (gyroscope); two I2C targets in one package",
     "function": "BMI088 on the Robot HAT \u2014 'dormant', 'unused but still connected' on I2C3 at 0x19 (accelerometer) and 0x68 (gyroscope); two I2C targets in one package",
@@ -735,7 +832,7 @@
    "attach": "wire",
    "map": {
     "GND": "GND",
-    "3V3": "J5_3V3",
+    "3V3": "HAT_3V3",
     "SDA": "i2c3/SDA",
     "SCL": "i2c3/SCL"
    },
@@ -2194,12 +2291,11 @@
    "controller": "host",
    "signals": {
     "BCLK": "hdr12",
-    "MCLK": "hdr13",
     "WCLK": "hdr35",
     "DIN": "hdr40",
     "DOUT": "hdr38"
    },
-   "note": "i2s3_2ch, bit-clock and frame master on the SoC side (research/raw/deploy_audio_aic3104-i2c3.dts 'bitclock-master = <&pihat_cpu_dai>', 'frame-master = <&pihat_cpu_dai>', 'system-clock-frequency = <12288000>'). Pins are the M0 mux ([brief]/[wiki]: SCLK 12, MCLK 13, LRCK 35, SDI 38, SDO 40) \u2014 THIS FILE'S ASSERTION: the M1 mux (pins 19/21/23/24) is also on the header and the dts pinctrl was not read (part:radxa-zero-3w unknowns[3]). DIN = SoC SDO, DOUT = SoC SDI.",
+   "note": "i2s3_2ch, bit-clock and frame master on the SoC side (research/raw/deploy_audio_aic3104-i2c3.dts 'bitclock-master = <&pihat_cpu_dai>', 'frame-master = <&pihat_cpu_dai>', 'system-clock-frequency = <12288000>'). Pins are the M0 mux (SCLK 12, LRCK 35, SDI 38, SDO 40), measured on pinned public HAT PCB J4 nets (commit 23eab11927f95ceca0dfa35bf182caeb7db39ea0). J4.13 is NC; codec MCLK comes from local Y1.3, 12 MHz. Installed board revision unconfirmed. DIN = SoC SDO, DOUT = SoC SDI.",
    "owner": "design",
    "id": "i2s3"
   },
@@ -2228,6 +2324,7 @@
   }
  ],
  "external": {
+  "HAT_3V3": "Public PCB +3V3 comes from Radxa J4.1/17; same net as J5.2, codec AVDD/IOVDD and Y1.1/4. Host provision is absent from the bare host model; this is an explicit source-boundary assertion from pinned PCB connectivity, not a measured capacity. Installed revision unconfirmed.",
   "VCC_3V3_CSI": "MIPI CSI pin 22 is the Radxa's own 3.3 V: [wiki] 22-pin table '22 VCC_3V3' (part:radxa-zero-3w buses_the_microduck_uses.mipi_csi). The host record states no supply provision, so this is asserted from the vendor table rather than routed by a record."
  },
  "order": [],
@@ -2282,7 +2379,7 @@
    "name": "GND",
    "scope": "host",
    "kind": "ground",
-   "degree": 24,
+   "degree": 25,
    "terminals": [
     {
      "owner": "host",
@@ -2316,6 +2413,17 @@
      "port": null,
      "pin": null,
      "direction": "input"
+    },
+    {
+     "owner": "hat_y1",
+     "owner_kind": "part",
+     "ref": "GND",
+     "signal": "GND",
+     "kind": "ground",
+     "bus": null,
+     "port": null,
+     "pin": null,
+     "direction": null
     },
     {
      "owner": "codec",
@@ -3012,48 +3120,6 @@
    ]
   },
   {
-   "id": "i2s3/MCLK",
-   "name": "MCLK",
-   "scope": "bus",
-   "kind": "signal",
-   "degree": 3,
-   "terminals": [
-    {
-     "owner": "host",
-     "owner_kind": "host",
-     "ref": "MCLK",
-     "signal": "MCLK",
-     "kind": "signal",
-     "bus": "I2S",
-     "port": null,
-     "pin": "hdr13",
-     "direction": null
-    },
-    {
-     "owner": "hat",
-     "owner_kind": "part",
-     "ref": "MCLK",
-     "signal": "MCLK",
-     "kind": "signal",
-     "bus": "I2S",
-     "port": null,
-     "pin": "hdr13",
-     "direction": "input"
-    },
-    {
-     "owner": "codec",
-     "owner_kind": "part",
-     "ref": "MCLK",
-     "signal": "MCLK",
-     "kind": "signal",
-     "bus": "I2S",
-     "port": null,
-     "pin": "hdr13",
-     "direction": "bidirectional"
-    }
-   ]
-  },
-  {
    "id": "i2s3/WCLK",
    "name": "WCLK",
    "scope": "bus",
@@ -3366,6 +3432,114 @@
    ]
   },
   {
+   "id": "HAT_3V3",
+   "name": "HAT_3V3",
+   "scope": "host",
+   "kind": "supply",
+   "degree": 9,
+   "terminals": [
+    {
+     "owner": "hat",
+     "owner_kind": "part",
+     "ref": "V3V3_IN",
+     "signal": null,
+     "kind": "supply",
+     "bus": null,
+     "port": null,
+     "pin": null,
+     "direction": "input"
+    },
+    {
+     "owner": "hat",
+     "owner_kind": "part",
+     "ref": "J5_3V3",
+     "signal": null,
+     "kind": "supply",
+     "bus": null,
+     "port": null,
+     "pin": null,
+     "direction": "output"
+    },
+    {
+     "owner": "hat_y1",
+     "owner_kind": "part",
+     "ref": "VDD",
+     "signal": null,
+     "kind": "supply",
+     "bus": null,
+     "port": null,
+     "pin": null,
+     "direction": null
+    },
+    {
+     "owner": "hat_y1",
+     "owner_kind": "part",
+     "ref": "TRISTATE",
+     "signal": "TRISTATE",
+     "kind": "signal",
+     "bus": null,
+     "port": null,
+     "pin": null,
+     "direction": "input"
+    },
+    {
+     "owner": "codec",
+     "owner_kind": "part",
+     "ref": "AVDD",
+     "signal": null,
+     "kind": "supply",
+     "bus": null,
+     "port": null,
+     "pin": null,
+     "direction": "input"
+    },
+    {
+     "owner": "codec",
+     "owner_kind": "part",
+     "ref": "IOVDD",
+     "signal": null,
+     "kind": "supply",
+     "bus": null,
+     "port": null,
+     "pin": null,
+     "direction": "input"
+    },
+    {
+     "owner": "bmi088",
+     "owner_kind": "part",
+     "ref": "VDD",
+     "signal": null,
+     "kind": "supply",
+     "bus": null,
+     "port": null,
+     "pin": null,
+     "direction": "input"
+    },
+    {
+     "owner": "bmi088",
+     "owner_kind": "part",
+     "ref": "VDDIO",
+     "signal": null,
+     "kind": "supply",
+     "bus": null,
+     "port": null,
+     "pin": null,
+     "direction": "input"
+    },
+    {
+     "owner": "tof",
+     "owner_kind": "part",
+     "ref": "3V3",
+     "signal": null,
+     "kind": "supply",
+     "bus": null,
+     "port": null,
+     "pin": null,
+     "direction": "input"
+    }
+   ]
+  },
+  {
    "id": "SERVO_V",
    "name": "SERVO_V",
    "scope": "host",
@@ -3562,37 +3736,6 @@
    ]
   },
   {
-   "id": "J5_3V3",
-   "name": "J5_3V3",
-   "scope": "host",
-   "kind": "supply",
-   "degree": 2,
-   "terminals": [
-    {
-     "owner": "hat",
-     "owner_kind": "part",
-     "ref": "J5_3V3",
-     "signal": null,
-     "kind": "supply",
-     "bus": null,
-     "port": null,
-     "pin": null,
-     "direction": "output"
-    },
-    {
-     "owner": "tof",
-     "owner_kind": "part",
-     "ref": "3V3",
-     "signal": null,
-     "kind": "supply",
-     "bus": null,
-     "port": null,
-     "pin": null,
-     "direction": "input"
-    }
-   ]
-  },
-  {
    "id": "SPK_P",
    "name": "SPK_P",
    "scope": "host",
@@ -3717,65 +3860,23 @@
    ]
   },
   {
-   "id": "HAT_3V3",
-   "name": "HAT_3V3",
-   "scope": "host",
-   "kind": "supply",
-   "degree": 4,
-   "terminals": [
-    {
-     "owner": "codec",
-     "owner_kind": "part",
-     "ref": "AVDD",
-     "signal": null,
-     "kind": "supply",
-     "bus": null,
-     "port": null,
-     "pin": null,
-     "direction": "input"
-    },
-    {
-     "owner": "codec",
-     "owner_kind": "part",
-     "ref": "IOVDD",
-     "signal": null,
-     "kind": "supply",
-     "bus": null,
-     "port": null,
-     "pin": null,
-     "direction": "input"
-    },
-    {
-     "owner": "bmi088",
-     "owner_kind": "part",
-     "ref": "VDD",
-     "signal": null,
-     "kind": "supply",
-     "bus": null,
-     "port": null,
-     "pin": null,
-     "direction": "input"
-    },
-    {
-     "owner": "bmi088",
-     "owner_kind": "part",
-     "ref": "VDDIO",
-     "signal": null,
-     "kind": "supply",
-     "bus": null,
-     "port": null,
-     "pin": null,
-     "direction": "input"
-    }
-   ]
-  },
-  {
    "id": "HAT_1V8",
    "name": "HAT_1V8",
    "scope": "host",
    "kind": "supply",
-   "degree": 1,
+   "degree": 2,
    "terminals": [
+    {
+     "owner": "hat",
+     "owner_kind": "part",
+     "ref": "V1V8_OUT",
+     "signal": null,
+     "kind": "supply",
+     "bus": null,
+     "port": null,
+     "pin": null,
+     "direction": "output"
+    },
     {
      "owner": "codec",
      "owner_kind": "part",
@@ -3786,6 +3887,37 @@
      "port": null,
      "pin": null,
      "direction": "input"
+    }
+   ]
+  },
+  {
+   "id": "HAT:Y1_OUT",
+   "name": "HAT:Y1_OUT",
+   "scope": "host",
+   "kind": "signal",
+   "degree": 2,
+   "terminals": [
+    {
+     "owner": "hat_y1",
+     "owner_kind": "part",
+     "ref": "OUT",
+     "signal": "OUT",
+     "kind": "signal",
+     "bus": null,
+     "port": null,
+     "pin": "HAT:Y1_OUT",
+     "direction": "output"
+    },
+    {
+     "owner": "codec",
+     "owner_kind": "part",
+     "ref": "MCLK",
+     "signal": "MCLK",
+     "kind": "signal",
+     "bus": "I2S",
+     "port": null,
+     "pin": "HAT:Y1_OUT",
+     "direction": "bidirectional"
     }
    ]
   },
@@ -3892,6 +4024,24 @@
    "standard": null,
    "ports": null,
    "chip": "MG996R",
+   "stub": false
+  },
+  {
+   "slug": "microduck-public-hat-y1",
+   "title": "Public HAT Y1 \u2014 YXC OT3EL89CJI-111YLC-12M",
+   "how": "direct",
+   "standard": null,
+   "ports": null,
+   "chip": "OT3EL89CJI-111YLC-12M",
+   "stub": false
+  },
+  {
+   "slug": "microduck-public-hat-y1",
+   "title": "Public HAT Y1 \u2014 YXC OT3EL89CJI-111YLC-12M",
+   "how": "direct",
+   "standard": null,
+   "ports": null,
+   "chip": "OT3EL89CJI-111YLC-12M",
    "stub": false
   },
   {
@@ -4107,6 +4257,15 @@
   {
    "verdict": "PASS",
    "rule": "span",
+   "where": "hat_y1@direct",
+   "message": "microduck-public-hat-y1 is attached directly to named host terminals; there is no port for a span to mismatch.\nA check that quietly does not run is indistinguishable from one that passed, so it says so.",
+   "quote": "",
+   "cite": "",
+   "asserted": ""
+  },
+  {
+   "verdict": "PASS",
+   "rule": "span",
    "where": "codec@direct",
    "message": "tlv320aic3104 is attached directly to named host terminals; there is no port for a span to mismatch.\nA check that quietly does not run is indistinguishable from one that passed, so it says so.",
    "quote": "",
@@ -4315,7 +4474,7 @@
    "verdict": "PASS",
    "rule": "gpio",
    "where": "board",
-   "message": "19 distinct controller pin identifier(s) across 28 net(s), no identifier on two nets, and every signal net in use resolves to one.",
+   "message": "19 distinct controller pin identifier(s) across 27 net(s), no identifier on two nets, and every signal net in use resolves to one.",
    "quote": "",
    "cite": "",
    "asserted": ""
@@ -4327,42 +4486,33 @@
    "message": "radxa-zero-3w's supply '5V' joins net 'V5_HAT' (supply, 2 terminal(s)).\nWhether that net is FED is the same net's power/V5_HAT finding, asked once, there.",
    "quote": "",
    "cite": "",
-   "asserted": "[brief] \u00a75.1 '5V Power from the GPIO PIN 2 & 4'; the HAT makes it from the pack: i2c3.dts:22 'In-robot power comes from the battery via the HAT regardless'. The HAT's regulator is CANNOT DETERMINE. The USB-C OTG port is a second 5 V path when tethered (sch1.12 sheet 22) and is not on this netlist."
+   "asserted": "[brief] \u00a75.1 '5V Power from the GPIO PIN 2 & 4'; the HAT makes it from the pack: i2c3.dts:22 'In-robot power comes from the battery via the HAT regardless'. Public HAT U9 AP63205/L4 feeds U10 LM5050-1 and Q2 to +5V; installed revision unconfirmed. The USB-C OTG port is a second 5 V path when tethered (sch1.12 sheet 22) and is not on this netlist."
   },
   {
    "verdict": "PASS",
    "rule": "host_power",
    "where": "radxa-zero-3w.GND",
-   "message": "radxa-zero-3w's ground 'GND' joins net 'GND' (ground, 24 terminal(s)).\nWhether that net is FED is the same net's power/GND finding, asked once, there.",
+   "message": "radxa-zero-3w's ground 'GND' joins net 'GND' (ground, 25 terminal(s)).\nWhether that net is FED is the same net's power/GND finding, asked once, there.",
    "quote": "",
    "cite": "",
-   "asserted": "[brief] \u00a75.1 '5V Power from the GPIO PIN 2 & 4'; the HAT makes it from the pack: i2c3.dts:22 'In-robot power comes from the battery via the HAT regardless'. The HAT's regulator is CANNOT DETERMINE. The USB-C OTG port is a second 5 V path when tethered (sch1.12 sheet 22) and is not on this netlist."
+   "asserted": "[brief] \u00a75.1 '5V Power from the GPIO PIN 2 & 4'; the HAT makes it from the pack: i2c3.dts:22 'In-robot power comes from the battery via the HAT regardless'. Public HAT U9 AP63205/L4 feeds U10 LM5050-1 and Q2 to +5V; installed revision unconfirmed. The USB-C OTG port is a second 5 V path when tethered (sch1.12 sheet 22) and is not on this netlist."
   },
   {
-   "verdict": "CANNOT DETERMINE",
+   "verdict": "PASS",
    "rule": "power/HAT_1V8",
    "where": "system",
-   "message": "codec@direct draws HAT_1V8 \u2014 NOT ONE part in the catalogue has a\nHAT_1V8 terminal with direction 'output'.\nNot a pass and not a fail. Connect it yourself, and find out where it comes from before\nanything is powered up. That answer is not in this repository.\nTo assert it:  design.external_supply('HAT_1V8', \"<what you measured>\")",
-   "quote": "A bare host: pin identifiers come from the DESIGN FILE through .wire() and .declare_segment(), recorded as the user's assertion \u2014 the esp32s3_raw arrangement. The header_40pin and buses_the_microduck_uses blocks below are the vendor's pin\u2192function table those identifiers are checked against by a reader, not by this loader.",
-   "cite": "hosts[radxa-zero-3w].provides_basis",
+   "message": "hat@direct sources HAT_1V8 (terminal V1V8_OUT); 1 part(s) draw it: codec.\nEvery other terminal on this net states a direction, so nothing else may be driving it.",
+   "quote": "",
+   "cite": "",
    "asserted": ""
   },
   {
    "verdict": "CANNOT DETERMINE",
    "rule": "power/HAT_3V3",
    "where": "system",
-   "message": "codec@direct, bmi088@direct draw HAT_3V3 \u2014 NOT ONE part in the catalogue has a\nHAT_3V3 terminal with direction 'output'.\nNot a pass and not a fail. Connect it yourself, and find out where it comes from before\nanything is powered up. That answer is not in this repository.\nTo assert it:  design.external_supply('HAT_3V3', \"<what you measured>\")",
+   "message": "the HAT_3V3 terminal of 1 part(s) on HAT_3V3 has NO direction in the documents:\n  hat_y1@direct\nSo nobody can say whether they DRIVE this net or DRAW it. Both readings are open,\nand the two questions this rule answers \u2014 is the net fed, and is anything back-feeding\nit \u2014 are both unanswerable while that is true.\n  documented sinks:   hat, hat_y1, codec, bmi088, tof\n  documented sources: hat\nexternal_supply() cannot close this: it states where a net comes from, not what else\nis driving it.",
    "quote": "A bare host: pin identifiers come from the DESIGN FILE through .wire() and .declare_segment(), recorded as the user's assertion \u2014 the esp32s3_raw arrangement. The header_40pin and buses_the_microduck_uses blocks below are the vendor's pin\u2192function table those identifiers are checked against by a reader, not by this loader.",
    "cite": "hosts[radxa-zero-3w].provides_basis",
-   "asserted": ""
-  },
-  {
-   "verdict": "PASS",
-   "rule": "power/J5_3V3",
-   "where": "system",
-   "message": "hat@direct sources J5_3V3 (terminal J5_3V3); 1 part(s) draw it: tof.\nEvery other terminal on this net states a direction, so nothing else may be driving it.",
-   "quote": "",
-   "cite": "",
    "asserted": ""
   },
   {
@@ -4432,34 +4582,16 @@
    "verdict": "CANNOT DETERMINE",
    "rule": "current/HAT_3V3",
    "where": "typical draw",
-   "message": "1 of 2 part(s) drawing HAT_3V3 have no sourced typical current:\n  codec@direct           tlv320aic3104  NOT SOURCED\n      NOT A SINGLE NUMBER \u2014 the sheet gives per-mode rows, \u00a78.x 'CURRENT\n      CONSUMPTION \u2013 DRVDD = AVDD = IOVDD = 3.3 V, DVDD = 1.8 V', p.12,\n      verbatim: 'IDRVDD + IAVDD | Stereo DAC playback to lineout, fS = 48\n      ksps, I2S slave, no signal | 4.9' mA and 'IDVDD | 2.3' mA; 'IDRVDD +\n      IAVDD | Stereo ADC record, fS = 48 ksps, I2S slave, AGC off, no signal\n      | 4.31(6)' mA and 'IDVDD | 2.45(6)' mA; 'IDRVDD + IAVDD | Stereo DAC\n      playback to stereo single-ended headphone, fS = 48 ksps, I2S slave, no\n      signal | 6.7' mA. All 'no signal' \u2014 the sheet gives no figure for\n      current INTO a speaker load, so speaker-drive current is CANNOT\n      DETERMINE.\nsourced so far:\n  bmi088@direct          bmi088              5.15 mA\nThat comes to 5.15 mA, which is a FLOOR and NOT the total. The missing parts\nare not drawing zero \u2014 nobody wrote down what they draw. Adding them in as 0 mA\nis how a budget passes a net that browns out on the bench.\nTo close it: fetch the datasheet and add the part to cecad/data/chips.json, or\nmeasure it and record what you found.",
-   "quote": "NOT A SINGLE NUMBER \u2014 the sheet gives per-mode rows, \u00a78.x 'CURRENT CONSUMPTION \u2013 DRVDD = AVDD = IOVDD = 3.3 V, DVDD = 1.8 V', p.12, verbatim: 'IDRVDD + IAVDD | Stereo DAC playback to lineout, fS = 48 ksps, I2S slave, no signal | 4.9' mA and 'IDVDD | 2.3' mA; 'IDRVDD + IAVDD | Stereo ADC record, fS = 48 ksps, I2S slave, AGC off, no signal | 4.31(6)' mA and 'IDVDD | 2.45(6)' mA; 'IDRVDD + IAVDD | Stereo DAC playback to stereo single-ended headphone, fS = 48 ksps, I2S slave, no signal | 6.7' mA. All 'no signal' \u2014 the sheet gives no figure for current INTO a speaker load, so speaker-drive current is CANNOT DETERMINE.",
-   "cite": "chips[tlv320aic3104].current_mA.typical_basis",
-   "asserted": ""
-  },
-  {
-   "verdict": "CANNOT DETERMINE",
-   "rule": "current/HAT_3V3",
-   "where": "peak draw",
-   "message": "2 of 2 part(s) drawing HAT_3V3 have no sourced peak current:\n  codec@direct           tlv320aic3104  NOT SOURCED\n      NOT TRANSCRIBED HERE. No peak figure was read out of the document this\n      block cites (see `cite`) when this record was written, and none is\n      asserted now (basis added 2026-09-02, wiring lane, so\n      cecad.electrical's loader can read the shelf: a null with no reason is\n      refused). Null means not looked up in this record \u2014 NOT zero. Re-read\n      the sheet's current-consumption table to fill it.\n  bmi088@direct          bmi088         NOT SOURCED\n      NOT TRANSCRIBED HERE. No peak figure was read out of the document this\n      block cites (see `cite`) when this record was written, and none is\n      asserted now (basis added 2026-09-02, wiring lane, so\n      cecad.electrical's loader can read the shelf: a null with no reason is\n      refused). Null means not looked up in this record \u2014 NOT zero. Re-read\n      the sheet's current-consumption table to fill it.\nNOTHING drawing HAT_3V3 here has a sourced peak figure, so there is no floor either \u2014\nnot 0 mA, not any number. This net's demand is simply unknown.\nTo close it: fetch the datasheet and add the part to cecad/data/chips.json, or\nmeasure it and record what you found.",
-   "quote": "NOT TRANSCRIBED HERE. No peak figure was read out of the document this block cites (see `cite`) when this record was written, and none is asserted now (basis added 2026-09-02, wiring lane, so cecad.electrical's loader can read the shelf: a null with no reason is refused). Null means not looked up in this record \u2014 NOT zero. Re-read the sheet's current-consumption table to fill it.",
-   "cite": "chips[tlv320aic3104].current_mA.peak_basis",
-   "asserted": ""
-  },
-  {
-   "verdict": "CANNOT DETERMINE",
-   "rule": "current/J5_3V3",
-   "where": "typical draw",
-   "message": "J5_3V3 typical demand is 95 mA, from all 1 part(s) drawing it:\n  tof@direct             vl53l5cx              95 mA\nTHE DEMAND IS KNOWN. THE SUPPLY IS NOT. No document read here puts a NUMBER on a\ncurrent limit for this net, for a port or for a connector, so there is nothing to\ncompare 95 mA against and no headroom can be reported. This is a demand figure,\nnot a pass.",
+   "message": "1 part(s) here have a HAT_3V3 terminal with NO direction in the documents: hat_y1.\nWhether they draw this net at all is unanswered, so the set of parts to sum over is\nnot known \u2014 before any figure is looked up. Nothing can be added.",
    "quote": "A bare host: pin identifiers come from the DESIGN FILE through .wire() and .declare_segment(), recorded as the user's assertion \u2014 the esp32s3_raw arrangement. The header_40pin and buses_the_microduck_uses blocks below are the vendor's pin\u2192function table those identifiers are checked against by a reader, not by this loader.",
    "cite": "hosts[radxa-zero-3w].provides_basis",
    "asserted": ""
   },
   {
    "verdict": "CANNOT DETERMINE",
-   "rule": "current/J5_3V3",
+   "rule": "current/HAT_3V3",
    "where": "peak draw",
-   "message": "J5_3V3 peak demand is 150 mA, from all 1 part(s) drawing it:\n  tof@direct             vl53l5cx             150 mA\nTHE DEMAND IS KNOWN. THE SUPPLY IS NOT. No document read here puts a NUMBER on a\ncurrent limit for this net, for a port or for a connector, so there is nothing to\ncompare 150 mA against and no headroom can be reported. This is a demand figure,\nnot a pass.",
+   "message": "1 part(s) here have a HAT_3V3 terminal with NO direction in the documents: hat_y1.\nWhether they draw this net at all is unanswered, so the set of parts to sum over is\nnot known \u2014 before any figure is looked up. Nothing can be added.",
    "quote": "A bare host: pin identifiers come from the DESIGN FILE through .wire() and .declare_segment(), recorded as the user's assertion \u2014 the esp32s3_raw arrangement. The header_40pin and buses_the_microduck_uses blocks below are the vendor's pin\u2192function table those identifiers are checked against by a reader, not by this loader.",
    "cite": "hosts[radxa-zero-3w].provides_basis",
    "asserted": ""
@@ -4640,6 +4772,15 @@
    "rule": "pin_directions",
    "where": "hat@direct",
    "message": "the documents record a direction and a bus for every signal terminal of microduck-robot-hat-pcb.\nWhether each was written down or inferred by the extraction is in that part's own\nuncertainties \u2014 see the note above.",
+   "quote": "",
+   "cite": "",
+   "asserted": ""
+  },
+  {
+   "verdict": "PASS",
+   "rule": "pin_directions",
+   "where": "hat_y1@direct",
+   "message": "the documents record a direction and a bus for every signal terminal of microduck-public-hat-y1.\nWhether each was written down or inferred by the extraction is in that part's own\nuncertainties \u2014 see the note above.",
    "quote": "",
    "cite": "",
    "asserted": ""
@@ -4908,12 +5049,12 @@
  ],
  "notes": [
   "nothing here reserves a terminal, and no port carries an alternate function.",
-  "nets carrying more than one device \u2014 a bus, not a collision:\n  MIC_IN degree 2 (hat, mic)\n  SPK_N degree 2 (hat, speaker)\n  SPK_P degree 2 (hat, speaker)\n  dxl/DATA degree 18 (hat, imu200, id20, id21, id22, id23, id24, id30, id31, id32, id33, id34, id10, id11, id12, id13, id14)\n  i2c3/SCL degree 6 (hat, codec, bmi088, bmi088.gyro, tof)\n  i2c3/SDA degree 6 (hat, codec, bmi088, bmi088.gyro, tof)\n  i2s3/BCLK degree 3 (hat, codec)\n  i2s3/DIN degree 3 (hat, codec)\n  i2s3/DOUT degree 3 (hat, codec)\n  i2s3/MCLK degree 3 (hat, codec)\n  i2s3/WCLK degree 3 (hat, codec)\nThe standard says these are shared, in as many words:\n  ",
+  "nets carrying more than one device \u2014 a bus, not a collision:\n  HAT:Y1_OUT degree 2 (hat_y1, codec)\n  MIC_IN degree 2 (hat, mic)\n  SPK_N degree 2 (hat, speaker)\n  SPK_P degree 2 (hat, speaker)\n  dxl/DATA degree 18 (hat, imu200, id20, id21, id22, id23, id24, id30, id31, id32, id33, id34, id10, id11, id12, id13, id14)\n  i2c3/SCL degree 6 (hat, codec, bmi088, bmi088.gyro, tof)\n  i2c3/SDA degree 6 (hat, codec, bmi088, bmi088.gyro, tof)\n  i2s3/BCLK degree 3 (hat, codec)\n  i2s3/DIN degree 3 (hat, codec)\n  i2s3/DOUT degree 3 (hat, codec)\n  i2s3/WCLK degree 3 (hat, codec)\nThe standard says these are shared, in as many words:\n  ",
   "host power: 2 of 2 stated host need(s) joined to a net.\nThe host is a SINK on each of them, so an unfed one is the ordinary unsourced-supply\nfinding in `power`, on the same net, from the same terminal.",
   "power: TOPOLOGY ONLY. This is who drives a net and who draws it. It\ncannot become a budget from this data, and none is implied. The DEMAND\nside comes from datasheets in cecad/data/chips.json and is check_current()'s\nquestion, not this one's.",
   "ground: GND.\nDirections on a return path are a modelling convention rather than a claim any\ndocument makes, so this rule does not judge them.",
   "current: the DEMAND side only, in mA, summed per NET over the parts\nattached here. Every figure comes from cecad/data/chips.json, read off\na manufacturer datasheet, and is attributed to a net because a part's\nown `current_from` points at it \u2014 never because a rail name matched. A\npart with no sourced figure makes its net's TOTAL undetermined; it is\nnever counted as zero, because a missing current is not a zero current\nand that is how a budget silently passes.",
   "peripheral demand in this system: CSI x1, GPIO x1, I2C x2, I2S x1, UART x1\nCounted per DISTINCT NET GROUP, not per part. Five devices daisy-chained on one\nsegment want ONE peripheral, not five, and the per-part count is simply the wrong\nnumber.\nThere is no wiring-level rule here to pass or fail, so this carries no verdict.",
-  "bus nets and their degree \u2014 reported, never scored:\n  csi/CLK                degree 2\n  csi/D0                 degree 2\n  csi/D1                 degree 2\n  dxl/DATA               degree 18\n  i2c2/SCL               degree 2\n  i2c2/SDA               degree 2\n  i2c3/SCL               degree 6\n  i2c3/SDA               degree 6\n  i2s3/BCLK              degree 3\n  i2s3/DIN               degree 3\n  i2s3/DOUT              degree 3\n  i2s3/MCLK              degree 3\n  i2s3/WCLK              degree 3\n  uart2/RX               degree 2\n  uart2/TX               degree 2\nNeither standard loaded here states pull-up ownership, value or a bus capacitance\nbudget (pullups: null, with a stated reason), so nothing can be judged. The count is\nexactly the fact somebody needs when a document says to adjust the pull-ups \"depending\non what is connected\"."
+  "bus nets and their degree \u2014 reported, never scored:\n  HAT:Y1_OUT             degree 2\n  csi/CLK                degree 2\n  csi/D0                 degree 2\n  csi/D1                 degree 2\n  dxl/DATA               degree 18\n  i2c2/SCL               degree 2\n  i2c2/SDA               degree 2\n  i2c3/SCL               degree 6\n  i2c3/SDA               degree 6\n  i2s3/BCLK              degree 3\n  i2s3/DIN               degree 3\n  i2s3/DOUT              degree 3\n  i2s3/WCLK              degree 3\n  uart2/RX               degree 2\n  uart2/TX               degree 2\nNeither standard loaded here states pull-up ownership, value or a bus capacitance\nbudget (pullups: null, with a stated reason), so nothing can be judged. The count is\nexactly the fact somebody needs when a document says to adjust the pull-ups \"depending\non what is connected\"."
  ]
 }

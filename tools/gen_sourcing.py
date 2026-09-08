@@ -14,10 +14,12 @@ both. The cost roll-up follows spec/sourcing.json's own `rules` block:
     price used is the vendor's largest published tier <= that quantity. A
     vendor with no tier table keeps its @1 price at every quantity, as a
     CEILING.
+    A quantity_rule instead credits verified selected-offer bundles and rounds
+    the remaining pieces to complete packs over the whole batch.
 
 Run:  python3 tools/gen_sourcing.py       (stdlib only; no FreeCAD needed)
 """
-import json, os, html, datetime
+import json, os, html, datetime, math
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
@@ -66,7 +68,41 @@ def usable(offer):
             and (offer.get("tiers") or []))
 
 
-def line_cost(line, n_robots):
+def purchase_quantity(line, n_robots, lines=None):
+    """Net whole-order packs, credited only from the selected offer's evidence."""
+    if n_robots <= 0:
+        raise ValueError("robot count must be positive")
+    rule = line.get("quantity_rule")
+    if not rule:
+        return {"order_quantity": line["qty_per_robot"] * n_robots}
+    if rule["kind"] != "net_of_selected_offer_bundle":
+        raise ValueError("unknown quantity rule")
+    lines = DATA["lines"] if lines is None else lines
+    source = next(x for x in lines if x["id"] == rule["source_line"])
+    selected = line_cost(source, n_robots, lines)
+    offer = next((o for o in source["offers"]
+                  if selected and o["url"] == selected["url"]), {})
+    verified = [i for i in offer.get("included_items", [])
+                if i["item_key"] == rule["item_key"] and i.get("confidence") == "read"
+                and i.get("fetched") and i.get("url") == offer.get("url")]
+    if len(verified) > 1:
+        raise ValueError("duplicate bundle evidence for " + rule["item_key"])
+    included = (verified[0]["qty_per_unit"] * selected["order_quantity"]
+                if verified else 0)
+    required = rule["required_pieces_per_robot"] * n_robots
+    shortfall = max(0, required - included)
+    packs = math.ceil(shortfall / rule["pieces_per_order_unit"])
+    evidence = (f'{offer["vendor"]}, {verified[0]["url"]}, read {verified[0]["fetched"]}'
+                if verified else "no verified bundle on selected source offer; zero credit")
+    detail = (f'{n_robots:g} robots: {required:g} leads required - {included:g} verified bundled '
+              f'= {shortfall:g} extra leads; {packs:g} ten-packs to purchase across the whole batch. '
+              f'Bundle basis: {evidence}. Quantities are a sourcing calculation, not an order.')
+    return {"order_quantity": packs, "required_pieces": required,
+            "included_pieces": included, "shortfall_pieces": shortfall,
+            "quantity_basis": detail}
+
+
+def line_cost(line, n_robots, lines=None):
     """Cheapest READ USD offer for one line at N robots.
     Returns dict or None when nothing is readable in USD."""
     qpr = line.get("qty_per_robot")
@@ -94,20 +130,25 @@ def line_cost(line, n_robots):
                 "detail": " + ".join(parts), "range_high": False,
                 "caveat": None, "stock": None, "page_kind": None, "url": None}
 
+    quantity = purchase_quantity(line, n_robots, lines)
     best = None
     for off in line["offers"]:
         if off.get("currency") != "USD" or not usable(off):
             continue
-        need = qpr * n_robots
+        need = quantity["order_quantity"]
         up, tq, mo = tier_price(off, need)
         if up is None:
             continue
-        cand = {"vendor": off["vendor"], "unit": up, "per_robot": up * qpr,
+        order = (max(need, off.get("moq") or 0) if need else 0) if line.get("quantity_rule") else need
+        cand = {"vendor": off["vendor"], "unit": up, "per_robot": up * order / n_robots,
                 "tier_qty": tq, "ceiling": bool(off.get("no_tiers")),
-                "moq_exceeds": bool(mo), "detail": off.get("sku") or "",
+                "moq_exceeds": bool(mo) if need else False, "detail": off.get("sku") or "",
                 "range_high": bool(off.get("price_is_range_high")),
                 "caveat": off.get("rollup_caveat"), "stock": off.get("stock"),
-                "page_kind": off.get("page_kind"), "url": off["url"]}
+                "page_kind": off.get("page_kind"), "url": off["url"],
+                **quantity, "order_quantity": order}
+        if line.get("quantity_rule") and order != need:
+            cand["quantity_basis"] += f' Vendor MOQ raises purchase from {need:g} to {order:g} packs.'
         if best is None or cand["per_robot"] < best["per_robot"]:
             best = cand
     return best
@@ -186,6 +227,7 @@ def _share(lid):
 
 
 DERIVED = {
+    "b1_quote_quantities": " / ".join(qty_txt(READ["B1"][n]["order_quantity"]) for n in ROBOT_COUNTS),
     "n_priced_lines": str(len(PRICED)),
     "n_flat_priced_lines": str(len(FLAT_LINES)),
     "flat_priced_lines": ", ".join(FLAT_LINES),
@@ -389,6 +431,9 @@ def offer_rows(line):
         else:
             ts = "<span class='cdtxt'>no price read</span>"
         flags = []
+        if off.get("field_observations"):
+            flags.append("Observation dates by field: " + E(
+                "; ".join(f"{k}: {v}" for k, v in off["field_observations"].items())))
         if off.get("no_tiers"):
             flags.append("no tier table published &mdash; @1 is a ceiling")
         if off.get("price_is_range_high"):
@@ -476,6 +521,9 @@ def line_block(line):
     qtxt = ("<span class='cdtxt'>CANNOT DETERMINE</span>" if q is None
             else ("0 <span class='sub2'>(reference line &mdash; arrives inside another purchase)</span>"
                   if q == 0 else f"{q:g} {E(line.get('qty_unit') or '')}"))
+    if line.get("quantity_rule"):
+        qtxt = "batch-dependent; legacy standalone ceiling " + qtxt
+        qtxt += "<br>" + "<br>".join(E(READ[line['id']][n]['quantity_basis']) for n in ROBOT_COUNTS)
     unk = "".join(f"<li>{E(u)}</li>" for u in line.get("unknowns", []))
     blk = "".join(f'<li><a href="{E(b["url"])}">{E(b["url"][:88])}</a> &mdash; {E(b["reason"])}</li>'
                   for b in line.get("blocked", []))
@@ -522,10 +570,16 @@ def rollup_rows(lines):
             marks.append(f"stock on the fetch date: {E(st)}")
         if c[1].get("caveat"):
             marks.append(E(c[1]["caveat"]))
+        if l.get("quantity_rule"):
+            marks.extend(f"@{n}: {c[n]['required_pieces']:g} - {c[n]['included_pieces']:g} = "
+                         f"{c[n]['shortfall_pieces']:g} leads; {c[n]['order_quantity']:g} packs"
+                         for n in ROBOT_COUNTS)
+            marks.append(f'<a href="#line-{E(l["id"])}">Verified bundle source/date and calculation below</a>')
+        quantity_text = ("batch-dependent" if l.get("quantity_rule") else f"{l['qty_per_robot']:g}")
         chip = f'<span class="chip {CHIP.get(l["verdict"], "cd")}">{E(l["verdict"])}</span>'
         out.append(f"""<tr><td><a href="#line-{E(l['id'])}">{E(l['id'])}</a> {E(clip(l['item'], 62))}</td>
 <td>{chip}</td>
-<td class="n">{l['qty_per_robot']:g}</td><td>{E(c[1]['vendor'])}</td>
+<td class="{'sub2' if l.get('quantity_rule') else 'n'}">{quantity_text}</td><td>{E(c[1]['vendor'])}</td>
 <td class="n">${c[1]['per_robot']:,.4f}</td><td class="n">${c[100]['per_robot']:,.4f}</td>
 <td class="n">${c[1000]['per_robot']:,.4f}</td>
 <td class="sub2">{'; '.join(marks) if marks else '&mdash;'}</td></tr>""")
@@ -806,8 +860,12 @@ def rfq_line_table(supplier):
         q = l.get("qty_per_robot")
         per = "CANNOT DETERMINE" if q is None else f"{q:g} {l.get('qty_unit') or ''}"
         tiers = "&mdash;" if q in (None, 0) else " / ".join(qty_txt(q * n) for n in ROBOT_COUNTS)
+        if l.get("quantity_rule"):
+            per = "batch-dependent packs; selected B1 bundle only"
+            tiers = " / ".join(qty_txt(READ[lid][n]["order_quantity"]) for n in ROBOT_COUNTS)
+            tiers += " packs; re-evaluate if B1 offer/kit contents change"
         rows.append(f"""<tr><td><code>{E(l['id'])}</code></td><td>{E(l['item'])}</td>
-<td><code>{E(l['mpn'])}</code></td><td class="n">{E(per)}</td><td class="n">{tiers}</td></tr>""")
+<td><code>{E(l['mpn'])}</code></td><td class="{'sub2' if l.get('quantity_rule') else 'n'}">{E(per)}</td><td class="{'sub2' if l.get('quantity_rule') else 'n'}">{tiers}</td></tr>""")
     return "\n".join(rows)
 
 
@@ -941,6 +999,8 @@ def bom_csv():
         c = READ[l["id"]][1]
         q = l.get("qty_per_robot")
         qtxt = "CANNOT DETERMINE" if q is None else f"{q:g}"
+        if l.get("quantity_rule") and c:
+            qtxt = qty_txt(c["order_quantity"])
         if c:
             o = next((x for x in l["offers"] if x["url"] == c.get("url")), None)
             unit = "see kit detail" if c["unit"] is None else f'{c["unit"]:.5f}'
@@ -950,6 +1010,8 @@ def bom_csv():
                 basis += "; vendor publishes no tier table, so @1 is a CEILING"
             if c.get("detail"):
                 basis += "; " + c["detail"]
+            if c.get("quantity_basis"):
+                basis += "; " + c["quantity_basis"]
             if c.get("caveat"):
                 basis += "; " + c["caveat"]
             if l["verdict"] != "PASS":
@@ -1044,9 +1106,14 @@ def release_regions():
     for l in big[:TOP]:
         c1, ck = READ[l["id"]][1], READ[l["id"]][1000]
         q = l.get("qty_per_robot")
+        if l.get("quantity_rule"):
+            q = c1["order_quantity"]
+        quantity_label = qty_txt(q)
+        if l.get("quantity_rule"):
+            quantity_label += " packs @1; batch-dependent (see SOURCING)"
         unit = f'${c1["unit"]:,.4f}' if c1.get("unit") is not None else "kit"
         rows.append(
-            f'<tr><td>{E(clip(l["item"], 62))}</td><td class="n">{qty_txt(q)}</td>'
+            f'<tr><td>{E(clip(l["item"], 62))}</td><td class="{"sub2" if l.get("quantity_rule") else "n"}">{quantity_label}</td>'
             f'<td class="n">{unit}</td><td class="n">${c1["per_robot"]:,.4f}</td>'
             f'<td class="n">${ck["per_robot"]:,.4f}</td><td>{E(clip(c1["vendor"], 34))}</td>'
             f'<td>{E(l["verdict"])}</td></tr>')

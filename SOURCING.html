@@ -70,8 +70,8 @@
   and an alternate with the reason it is or is not equivalent. Nothing here is estimated.
   A price nobody read is <b>CANNOT DETERMINE</b>, printed with the URL that refused it.</p>
   <div class="rev">
-    <span>MD-SRC-001 &middot; Rev C</span><span>generated 2026-09-03</span>
-    <span>pages fetched 2026-09-02, 2026-09-03</span>
+    <span>MD-SRC-001 &middot; Rev D</span><span>generated 2026-09-08</span>
+    <span>pages fetched 2026-09-02, 2026-09-03, 2026-09-08</span>
     <span>source: <code>spec/sourcing.json</code> &rarr; <code>tools/gen_sourcing.py</code></span>
   </div>
 </header>
@@ -81,7 +81,7 @@
   <div class="stat"><b>19</b><span>PASS &mdash; two or more shops read</span></div>
   <div class="stat"><b>10</b><span>CANNOT DETERMINE</span></div>
   <div class="stat"><b>3</b><span>FAIL &mdash; unbuyable as specified</span></div>
-  <div class="stat"><b>$546.4155</b><span>USD / robot @1, lines graded PASS</span></div>
+  <div class="stat"><b>$530.9155</b><span>USD / robot @1, lines graded PASS</span></div>
   <div class="stat"><b>$81.0808</b><span>readable, but from lines graded FAIL / CD</span></div>
   <div class="stat"><b>5</b><span>lines with no price at all</span></div>
   <div class="stat"><b>37</b><span>distinct distributors that gave a price (registered domains)</span></div>
@@ -99,7 +99,7 @@
 <code>spec/sourcing.json</code>, not in this prose, so the generator and the reader cannot drift apart.</p>
 <div class="grid2">
   <div class="card"><h3>A price is a reading</h3><p>unit price at the vendor&#x27;s own published tier. tiers[] is [order_quantity_of_the_part, unit_price]. A vendor that publishes no tier table carries tiers [[1, price]] and no_tiers=true; its @1 price is then used at every quantity as a CEILING, never as a forecast.</p></div>
-  <div class="card"><h3>Quantity model</h3><p>For N robots the order quantity of a line is qty_per_robot x N. The unit price used is the vendor&#x27;s largest tier whose quantity is &lt;= that order quantity. If the vendor&#x27;s MOQ exceeds the order quantity the MOQ tier price is used and moq_exceeds_need is set.</p></div>
+  <div class="card"><h3>Quantity model</h3><p>For N robots the order quantity of a line is qty_per_robot x N. The unit price used is the vendor&#x27;s largest tier whose quantity is &lt;= that order quantity. If the vendor&#x27;s MOQ exceeds the order quantity the MOQ tier price is used and moq_exceeds_need is set. Exception: a quantity_rule subtracts only bundle contents verified for the actually selected source offer and rounds the remaining pieces to complete packs over the whole order; missing bundle evidence gives zero credit. A zero shortfall needs no purchase. Legacy qty_per_robot is not the computed net purchase quantity.</p></div>
   <div class="card"><h3>No currency is converted</h3><p>Left exactly as the vendor states it. NO FX rate was fetched, so no conversion is performed anywhere. Only USD offers enter the USD roll-up; EUR / GBP / NZD / AUD / INR lines are reported beside it, unconverted.</p></div>
   <div class="card"><h3>An unknown is never zero</h3><p>The roll-up publishes TWO subtotals: the readable subtotal (lines with a read USD price) and the CANNOT DETERMINE list (lines with none). An unknown is NEVER summed as zero.</p></div>
   <div class="card"><h3>The three verdicts</h3><p>PASS = two or more DISTRIBUTORS as defined above (distinct registered domains that each gave a price), and a unit price determinable at 1 / 100 / 1000 robots. CANNOT DETERMINE = fewer than two such distributors, or none. FAIL = the line as specified cannot be bought as specified from anyone read - either the part does not exist in the maker&#x27;s own catalogue (B3: the 1 GB / 32 GB Radxa ZERO 3W SKU Pollen names is absent from Radxa&#x27;s own table), or EVERY distributor that gave a price publishes a process rule this line&#x27;s own artwork measurably violates (P1 and P2: minimum copper track 0.1500 mm measured over 879 and 383 segments in the committed .kicad_pcb, against a published 6 mil = 0.1524 mm line/space floor at both OSH Park and AdvancedPCB - short by 0.0024 mm). This second clause was added 2026-09-03 when the custom-PCB lines were priced for the first time; before that the definition had no bucket for &#x27;priced by two, buildable by neither&#x27; and the page would have had to call such a line PASS. A FAIL line&#x27;s readable money is reported OUTSIDE the headline subtotal, never inside it and never as zero.</p></div>
@@ -146,12 +146,6 @@ a vendor whose minimum exceeds what one robot needs.</p>
 <td class="n">$44.0000</td><td class="n">$44.0000</td>
 <td class="n">$44.0000</td>
 <td class="sub2">ceiling &mdash; vendor publishes no tier table; MOQ &gt; need; range high end</td></tr>
-<tr><td><a href="#line-B2">B2</a> Robot Cable-X3P 180 mm, 10-pack (Dynamixel bus leads)</td>
-<td><span class="chip pass">PASS</span></td>
-<td class="n">2</td><td>ROBOTIS International</td>
-<td class="n">$31.0000</td><td class="n">$31.0000</td>
-<td class="n">$31.0000</td>
-<td class="sub2">ceiling &mdash; vendor publishes no tier table</td></tr>
 <tr><td><a href="#line-B4">B4</a> NP-F550-form-factor 2S Li-ion pack, 7.2 V, 2600 mAh (+…</td>
 <td><span class="chip pass">PASS</span></td>
 <td class="n">1</td><td>NextBatteries</td>
@@ -170,6 +164,12 @@ a vendor whose minimum exceeds what one robot needs.</p>
 <td class="n">$15.9000</td><td class="n">$12.5000</td>
 <td class="n">$12.5000</td>
 <td class="sub2">&mdash;</td></tr>
+<tr><td><a href="#line-B2">B2</a> Robot Cable-X3P 180 mm, 10-pack (Dynamixel bus leads)</td>
+<td><span class="chip pass">PASS</span></td>
+<td class="sub2">batch-dependent</td><td>ROBOTIS International</td>
+<td class="n">$15.5000</td><td class="n">$1.5500</td>
+<td class="n">$1.5500</td>
+<td class="sub2">ceiling &mdash; vendor publishes no tier table; @1: 16 - 15 = 1 leads; 1 packs; @100: 1600 - 1500 = 100 leads; 10 packs; @1000: 16000 - 15000 = 1000 leads; 100 packs; <a href="#line-B2">Verified bundle source/date and calculation below</a></td></tr>
 <tr><td><a href="#line-B11">B11</a> Ball bearing 15 x 10 x 3 mm</td>
 <td><span class="chip pass">PASS</span></td>
 <td class="n">3</td><td>Bearings Direct (US)</td>
@@ -231,8 +231,8 @@ a vendor whose minimum exceeds what one robot needs.</p>
 <td class="n">$0.2285</td>
 <td class="sub2">&mdash;</td></tr>
 <tr class="totalrow"><td>SUBTOTAL &mdash; 16 lines graded PASS</td><td></td><td class="n"></td><td></td>
-<td class="n">$546.4155</td><td class="n">$531.5484</td>
-<td class="n">$530.4328</td><td></td></tr>
+<td class="n">$530.9155</td><td class="n">$502.0984</td>
+<td class="n">$500.9828</td><td></td></tr>
 <tr class="grouprow"><td colspan="8">Priced, but this document does not grade the line buyable
 &mdash; the flag on each row says why. These 6 lines are shown because their prices were read,
 and are kept OUT of the subtotal above.</td></tr>
@@ -276,14 +276,14 @@ and are kept OUT of the subtotal above.</td></tr>
 <td class="n">$81.0808</td><td class="n">$74.4565</td>
 <td class="n">$73.3565</td><td></td></tr>
 <tr class="totalrow"><td>EVERY READABLE USD LINE &mdash; 22 lines</td><td></td><td class="n"></td><td></td>
-<td class="n">$627.4964</td><td class="n">$606.0049</td>
-<td class="n">$603.7893</td><td></td></tr>
+<td class="n">$611.9964</td><td class="n">$576.5549</td>
+<td class="n">$574.3393</td><td></td></tr>
 </tbody></table></div>
 
 <p class="note"><b>Why the table has three totals and not one.</b> A price being readable does not make the
 line buyable. 6 of the 22 priced lines are graded FAIL or CANNOT DETERMINE by
-this same document &mdash; <b>$81.0808 of the $627.4964 readable at one robot,
-12.92&nbsp;% of it</b> &mdash; and until 2026-09-03 that money sat inside a single headline
+this same document &mdash; <b>$81.0808 of the $611.9964 readable at one robot,
+13.25&nbsp;% of it</b> &mdash; and until 2026-09-03 that money sat inside a single headline
 subtotal with nothing in the row to say so. It is now split out, and the flag on every such row carries the
 reason from the line&#39;s own record: the wrong SKU, sold out on the fetch date, a part that does not fit
 the cavity, or an unfixed specification.</p>
@@ -328,8 +328,8 @@ from Seeed's @1 to Seeed's 10+ tier. Nothing is blended.</p>
 </tbody></table></div>
 
 <p class="verdict warn"><b>Read this before quoting a unit cost.</b>
-The subtotal of the lines graded PASS is <b>$546.4155</b> at one robot and <b>$530.4328</b> at a
-thousand &mdash; it moves by $15.9827 across a factor of a thousand in volume,
+The subtotal of the lines graded PASS is <b>$530.9155</b> at one robot and <b>$500.9828</b> at a
+thousand &mdash; it moves by $29.9327 across a factor of a thousand in volume,
 because the servos are the majority of it and ROBOTIS publishes no tier at any quantity. A further
 $81.0808 at one robot is readable but comes from 6 line(s) this document grades FAIL
 or CANNOT DETERMINE, and is kept separate. The subtotal excludes 5 unpriced lines
@@ -362,10 +362,10 @@ date, alternates with the equivalence argument, the open questions, and every pa
   <td class="n">1</td>
   <td>Lead Time: 10 days (XL-series list page https://en.robotis.com/shop_en/list.php?ca_id=202030); item page: &#x27;normally ships out within 3 working days when in stock&#x27;</td>
   <td>not numerically stated</td>
-  <td><span class="chip pass">read</span> 2026-09-02
+  <td><span class="chip pass">read</span> 2026-09-08
       <div class="sub2">counts as distributor <code>robotis.com</code></div>
-      <div class="sub2">ships from Korea. No tier table anywhere on the shop.</div>
-      <div class="flag">no tier table published &mdash; @1 is a ceiling</div></td>
+      <div class="sub2">ships from Korea. No tier table anywhere on the shop. Price, SKU and package contents rechecked 2026-09-08. Lead time, MOQ and stock text remain observations of 2026-09-02, not refreshed availability. Retail package includes one X3P 180 mm lead, six PHS M2x6 TAP and ten PHS M2x8 TAP screws; only the verified lead is credited against B2.</div>
+      <div class="flag">Observation dates by field: price_and_sku: 2026-09-08; bundle_contents: 2026-09-08; lead_time: 2026-09-02; moq: 2026-09-02; stock: 2026-09-02</div><div class="flag">no tier table published &mdash; @1 is a ceiling</div></td>
 </tr>
 <tr>
   <td>ROBOTIS US (robotis.us)<br><span class="sub2"><a href="https://www.robotis.us/dynamixel-xl330-m288-t/">902-0163-000</a></span></td>
@@ -410,7 +410,7 @@ date, alternates with the equivalence argument, the open questions, and every pa
 
 <h3 id="line-B2"><span class="lid">B2</span> Robot Cable-X3P 180 mm, 10-pack (Dynamixel bus leads)
   <span class="chip pass">PASS</span></h3>
-<p class="meta">Qty per robot 2  &middot; basis: 16 leads needed (15 servos daisy-chained + imu_to_dxl, wiring/CABLES.md rows 1-16) -&gt; 2 packs of 10</p>
+<p class="meta">Qty per robot batch-dependent; legacy standalone ceiling 2 <br>1 robots: 16 leads required - 15 verified bundled = 1 extra leads; 1 ten-packs to purchase across the whole batch. Bundle basis: ROBOTIS International, https://en.robotis.com/shop_en/item.php?it_id=902-0163-000, read 2026-09-08. Quantities are a sourcing calculation, not an order.<br>100 robots: 1600 leads required - 1500 verified bundled = 100 extra leads; 10 ten-packs to purchase across the whole batch. Bundle basis: ROBOTIS International, https://en.robotis.com/shop_en/item.php?it_id=902-0163-000, read 2026-09-08. Quantities are a sourcing calculation, not an order.<br>1000 robots: 16000 leads required - 15000 verified bundled = 1000 extra leads; 100 ten-packs to purchase across the whole batch. Bundle basis: ROBOTIS International, https://en.robotis.com/shop_en/item.php?it_id=902-0163-000, read 2026-09-08. Quantities are a sourcing calculation, not an order. &middot; basis: Legacy qty_per_robot=2 is the standalone one-robot ceiling, not the computed purchase quantity. Need 16 leads per robot (wiring/CABLES.md rows 1-16); subtract only verified leads bundled with the selected B1 offer, then round the remaining lead count up to ten-packs across the entire order. No bundle evidence means zero credit. Retail 15-servo bundles leave 1/100/1000 extra leads, purchased as 1/10/100 packs for 1/100/1000 robots; confirm cable routing/slack before use.</p>
 <p class="meta">MPN <code>903-0251-000 (Robot Cable-X3P Convertible 180 mm, 10 pcs)</code> &middot; <i>confirmed at vendor</i>
   &middot; 2 distinct distributor(s) that gave a price</p>
 
@@ -450,9 +450,9 @@ date, alternates with the equivalence argument, the open questions, and every pa
 <h3 id="line-B3"><span class="lid">B3</span> Radxa ZERO 3W single-board computer
   <span class="chip rail">FAIL</span></h3>
 <p class="meta">Qty per robot 1  &middot; basis: docs/BOM.md row B3; one compute board in the head (spec/mesh-placements.json) &middot; <code>part:radxa-zero-3w</code></p>
-<p class="meta">MPN <code>SKU as specified by Pollen (1 GB LPDDR4 / 32 GB eMMC) DOES NOT EXIST</code> &middot; <i>FAIL - the specified configuration is absent from the maker&#x27;s own SKU table</i>
+<p class="meta">MPN <code>1 GB LPDDR4 / 32 GB eMMC configuration absent from published Radxa catalogue; OEM SKU CANNOT DETERMINE</code> &middot; <i>FAIL - the specified configuration is absent from the maker&#x27;s own SKU table</i>
   &middot; 5 distinct distributor(s) that gave a price</p>
-<p class="note">Radxa&#x27;s product brief RAD-DOC-0084 rev 1.10 §7 &#x27;Models and SKU&#x27; (https://dl.radxa.com/zero3/docs/hw/3w/radxa_zero_3w_product_brief.pdf) lists 1GB/none, 1GB/8GB, 2GB/none, 2GB/16GB, 4GB/none, 4GB/32GB, 8GB/none, 8GB/64GB. There is no 1 GB / 32 GB part. Pollen&#x27;s press-kit figure is therefore either a custom Radxa build or a mis-statement of the 1 GB / 8 GB catalogue part (RS107-D1E8H1W15). What settles it: lsblk on a production unit, or Pollen naming the SKU.</p><p class="verdict warn"><b>FAIL</b> &mdash; The line as specified is unbuyable: the 1 GB / 32 GB SKU is not in Radxa&#x27;s catalogue, and every 1 GB variant read on 2026-09-02 was SOLD OUT at every distributor reached. Two distributors did render prices, so the failure is availability and specification - not readability.</p>
+<p class="note">Radxa&#x27;s product brief RAD-DOC-0084 rev 1.10 §7 &#x27;Models and SKU&#x27; (https://dl.radxa.com/zero3/docs/hw/3w/radxa_zero_3w_product_brief.pdf) lists 1GB/none, 1GB/8GB, 2GB/none, 2GB/16GB, 4GB/none, 4GB/32GB, 8GB/none, 8GB/64GB. No 1 GB / 32 GB configuration is listed in this published table; an OEM configuration remains unresolved. Pollen&#x27;s press-kit figure could be a custom Radxa build or a mis-statement of the 1 GB / 8 GB catalogue part (RS107-D1E8H1W15). What settles it: lsblk on a production unit, or Pollen naming the SKU.</p><p class="verdict warn"><b>FAIL</b> &mdash; No source read offers the exact specified configuration: the 1 GB / 32 GB SKU is not in Radxa&#x27;s catalogue, and every 1 GB variant read on 2026-09-02 was SOLD OUT at every distributor reached. Two distributors did render prices, so the failure is availability and specification - not readability.</p>
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
 <th>Lead time (as printed)</th><th>Stock, on this offer&#39;s own fetch date</th><th>Read?</th></tr></thead>
@@ -1837,7 +1837,7 @@ date, alternates with the equivalence argument, the open questions, and every pa
 </section>
 
 <section id="method"><h2><span class="n">5</span> Method, and the pages that must be retried</h2>
-<p>Every figure above was read from a vendor page fetched on 2026-09-02, 2026-09-03, or from
+<p>Every figure above was read from a vendor page fetched on 2026-09-02, 2026-09-03, 2026-09-08, or from
 a page a prior lane fetched the same day and cited in <code>docs/production/components.md</code>. Where a
 page answered 403, 402, 500, a closed socket or a body with no price, that URL is printed on its own
 line so the next attempt starts where this one stopped &mdash; a browser session reads most of them.</p>
@@ -1870,6 +1870,6 @@ roll-up had since beaten. Two bills of materials that disagree is one too many.<
 </section>
 
 <footer class="foot">
-  <span>Every price traces to a vendor URL and a fetch date &middot; 2026-09-03</span>
+  <span>Every price traces to a vendor URL and a fetch date &middot; 2026-09-08</span>
 </footer>
 </div></body></html>

@@ -204,7 +204,7 @@
       "verdict": "PASS",
       "rule": "gpio",
       "where": "board",
-      "message": "19 distinct controller pin identifier(s) across 26 net(s), no identifier on two nets, and every signal net in use resolves to one.",
+      "message": "18 distinct controller pin identifier(s) across 26 net(s), no identifier on two nets, and every signal net in use resolves to one.",
       "quote": "",
       "cite": "",
       "asserted": ""
@@ -216,7 +216,7 @@
       "message": "radxa-zero-3w's supply '5V' joins net 'V5_HAT' (supply, 2 terminal(s)).\nWhether that net is FED is the same net's power/V5_HAT finding, asked once, there.",
       "quote": "",
       "cite": "",
-      "asserted": "5 V arrives on 40-pin pins 2/4 from the HAT ([brief] \u00a75.1; docs \u00a79 'battery \u2192 banana contact PCB \u2192 HAT \u2192 40-pin (5 V to Radxa)'); the HAT's regulator is CANNOT DETERMINE."
+      "asserted": "Public HAT +5V at J4.2/4: U9 AP63205/L4 -> U10 LM5050-1/Q2. Whole-board current capacity and installed revision unconfirmed."
     },
     {
       "verdict": "PASS",
@@ -225,16 +225,25 @@
       "message": "radxa-zero-3w's ground 'GND' joins net 'GND' (ground, 22 terminal(s)).\nWhether that net is FED is the same net's power/GND finding, asked once, there.",
       "quote": "",
       "cite": "",
-      "asserted": "5 V arrives on 40-pin pins 2/4 from the HAT ([brief] \u00a75.1; docs \u00a79 'battery \u2192 banana contact PCB \u2192 HAT \u2192 40-pin (5 V to Radxa)'); the HAT's regulator is CANNOT DETERMINE."
+      "asserted": "Public HAT +5V at J4.2/4: U9 AP63205/L4 -> U10 LM5050-1/Q2. Whole-board current capacity and installed revision unconfirmed."
+    },
+    {
+      "verdict": "PASS",
+      "rule": "power/HAT_1V8",
+      "where": "system",
+      "message": "nothing in this system draws HAT_1V8, and every terminal on it states a direction:\n  hat output",
+      "quote": "",
+      "cite": "",
+      "asserted": ""
     },
     {
       "verdict": "PASS",
       "rule": "power/J5_3V3",
       "where": "system",
-      "message": "hat@direct sources J5_3V3 (terminal J5_3V3); 1 part(s) draw it: tof.\nEvery other terminal on this net states a direction, so nothing else may be driving it.",
+      "message": "J5_3V3 is supplied from outside the documents, on your statement.\nDrawn by: hat, tof.\nEvery terminal on this net states a direction, so nothing here may also be driving it.",
       "quote": "",
       "cite": "",
-      "asserted": ""
+      "asserted": "Radxa 40-pin J4.1/17 supply the public HAT +3V3 net shared with J5.2. Pinned PCB Pinned public Pollen HAT 23eab11927f95ceca0dfa35bf182caeb7db39ea0: reference/pollen-elec-rpi-robot-hat/elec_RPI_Robot_HAT.kicad_pcb Public board-family model only; exact installed Microduck board revision remains unconfirmed. Capacity not established."
     },
     {
       "verdict": "PASS",
@@ -282,21 +291,39 @@
       "asserted": "VCC_3V3 on MIPI CSI pin 22 is the Radxa's own 3.3 V rail ([wiki] 22-pin table, part:radxa-zero-3w), i.e. the host sources it; a bare host cannot state a provision here, so it is asserted."
     },
     {
+      "verdict": "PASS",
+      "rule": "current/HAT_1V8",
+      "where": "typical draw",
+      "message": "nothing in this system is documented as drawing HAT_1V8, and every terminal on it\nstates a direction. Demand 0.0 mA \u2014 a computed total over an empty set, not a missing one.",
+      "quote": "",
+      "cite": "",
+      "asserted": ""
+    },
+    {
+      "verdict": "PASS",
+      "rule": "current/HAT_1V8",
+      "where": "peak draw",
+      "message": "nothing in this system is documented as drawing HAT_1V8, and every terminal on it\nstates a direction. Demand 0.0 mA \u2014 a computed total over an empty set, not a missing one.",
+      "quote": "",
+      "cite": "",
+      "asserted": ""
+    },
+    {
       "verdict": "CANNOT DETERMINE",
       "rule": "current/J5_3V3",
       "where": "typical draw",
-      "message": "J5_3V3 typical demand is 95 mA, from all 1 part(s) drawing it:\n  tof@direct             vl53l5cx              95 mA\nTHE DEMAND IS KNOWN. THE SUPPLY IS NOT. No document read here puts a NUMBER on a\ncurrent limit for this net, for a port or for a connector, so there is nothing to\ncompare 95 mA against and no headroom can be reported. This is a demand figure,\nnot a pass.",
-      "quote": "A bare host: pin identifiers come from the DESIGN FILE through .wire() and .declare_segment(), recorded as the user's assertion \u2014 the esp32s3_raw arrangement. The header_40pin and buses_the_microduck_uses blocks below are the vendor's pin\u2192function table those identifiers are checked against by a reader, not by this loader.",
-      "cite": "hosts[radxa-zero-3w].provides_basis",
+      "message": "1 of 2 part(s) drawing J5_3V3 have no sourced typical current:\n  hat@direct             (no chip named) NOT SOURCED\n      Total board load and Radxa header capacity not established.\nsourced so far:\n  tof@direct             vl53l5cx              95 mA\nThat comes to 95 mA, which is a FLOOR and NOT the total. The missing parts\nare not drawing zero \u2014 nobody wrote down what they draw. Adding them in as 0 mA\nis how a budget passes a net that browns out on the bench.\nTo close it: fetch the datasheet and add the part to cecad/data/chips.json, or\nmeasure it and record what you found.",
+      "quote": "Total board load and Radxa header capacity not established.",
+      "cite": "Pinned public Pollen HAT 23eab11927f95ceca0dfa35bf182caeb7db39ea0: reference/pollen-elec-rpi-robot-hat/elec_RPI_Robot_HAT.kicad_pcb Public board-family model only; exact installed Microduck board revision remains unconfirmed.",
       "asserted": ""
     },
     {
       "verdict": "CANNOT DETERMINE",
       "rule": "current/J5_3V3",
       "where": "peak draw",
-      "message": "J5_3V3 peak demand is 150 mA, from all 1 part(s) drawing it:\n  tof@direct             vl53l5cx             150 mA\nTHE DEMAND IS KNOWN. THE SUPPLY IS NOT. No document read here puts a NUMBER on a\ncurrent limit for this net, for a port or for a connector, so there is nothing to\ncompare 150 mA against and no headroom can be reported. This is a demand figure,\nnot a pass.",
-      "quote": "A bare host: pin identifiers come from the DESIGN FILE through .wire() and .declare_segment(), recorded as the user's assertion \u2014 the esp32s3_raw arrangement. The header_40pin and buses_the_microduck_uses blocks below are the vendor's pin\u2192function table those identifiers are checked against by a reader, not by this loader.",
-      "cite": "hosts[radxa-zero-3w].provides_basis",
+      "message": "1 of 2 part(s) drawing J5_3V3 have no sourced peak current:\n  hat@direct             (no chip named) NOT SOURCED\n      Total board load and Radxa header capacity not established.\nsourced so far:\n  tof@direct             vl53l5cx             150 mA\nThat comes to 150 mA, which is a FLOOR and NOT the total. The missing parts\nare not drawing zero \u2014 nobody wrote down what they draw. Adding them in as 0 mA\nis how a budget passes a net that browns out on the bench.\nTo close it: fetch the datasheet and add the part to cecad/data/chips.json, or\nmeasure it and record what you found.",
+      "quote": "Total board load and Radxa header capacity not established.",
+      "cite": "Pinned public Pollen HAT 23eab11927f95ceca0dfa35bf182caeb7db39ea0: reference/pollen-elec-rpi-robot-hat/elec_RPI_Robot_HAT.kicad_pcb Public board-family model only; exact installed Microduck board revision remains unconfirmed.",
       "asserted": ""
     },
     {
@@ -387,6 +414,24 @@
       "message": "1 of 1 part(s) drawing csi_J7_p22_VCC_3V3 have no sourced peak current:\n  camera@direct          imx219         NOT SOURCED\n      NOT TRANSCRIBED HERE. No peak figure was read out of the document this\n      block cites (see `cite`) when this record was written, and none is\n      asserted now (basis added 2026-09-02, wiring lane, so\n      cecad.electrical's loader can read the shelf: a null with no reason is\n      refused). Null means not looked up in this record \u2014 NOT zero. Re-read\n      the sheet's current-consumption table to fill it.\nNOTHING drawing csi_J7_p22_VCC_3V3 here has a sourced peak figure, so there is no floor either \u2014\nnot 0 mA, not any number. This net's demand is simply unknown.\nTo close it: fetch the datasheet and add the part to cecad/data/chips.json, or\nmeasure it and record what you found.",
       "quote": "NOT TRANSCRIBED HERE. No peak figure was read out of the document this block cites (see `cite`) when this record was written, and none is asserted now (basis added 2026-09-02, wiring lane, so cecad.electrical's loader can read the shelf: a null with no reason is refused). Null means not looked up in this record \u2014 NOT zero. Re-read the sheet's current-consumption table to fill it.",
       "cite": "chips[imx219].current_mA.peak_basis",
+      "asserted": ""
+    },
+    {
+      "verdict": "CANNOT DETERMINE",
+      "rule": "i2c",
+      "where": "hat@direct",
+      "message": "microduck-robot-hat-pcb declares a I2C endpoint and no address is recorded for it.\nYou cannot talk to a chip whose address nobody wrote down \u2014 and on a net this one\nshares with 1 other device(s), an unknown address also cannot be shown NOT to\ncollide.",
+      "quote": "an address is not recorded and no document states one",
+      "cite": "parts[].requires[].address",
+      "asserted": ""
+    },
+    {
+      "verdict": "PASS",
+      "rule": "i2c",
+      "where": "system",
+      "message": "2 device(s) declare a I2C address: camera (0x10), tof (0x29).\nThey sit in 2 net group(s) that cannot see each other: csi_J7_p20_I2C2_SCL_M1 (1 device(s)); hdr3_I2C3_SDA_M0 (2 device(s)).\nA duplicate address is a conflict only between devices on ONE net group, and no two\nof these share one.",
+      "quote": "",
+      "cite": "",
       "asserted": ""
     },
     {
@@ -656,7 +701,7 @@
   "counts": {
     "parts": 22,
     "nets": 26,
-    "findings": 71,
-    "not_pass": 18
+    "findings": 76,
+    "not_pass": 19
   }
 }
