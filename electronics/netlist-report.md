@@ -1,18 +1,18 @@
 # Microduck netlist — three-verdict report
 
-*Generated 2026-09-02 02:19 by `electronics/netlist.py` (GOAL.md rung 4). Host `radxa-zero-3w` (RK3566), 25 parts, 28 nets, 118 findings. Nothing here was measured on a robot; every figure is a quote from the file its cite names.*
+*Generated 2026-09-08 20:59 by `electronics/netlist.py` (GOAL.md rung 4). Host `radxa-zero-3w` (RK3566), 26 parts, 27 nets, 123 findings. Nothing here was measured on a robot; every figure is a quote from the file its cite names.*
 
 ## Verdict: **FAIL**
 
-75 PASS · 15 FAIL · 28 CANNOT DETERMINE. `bool(report)` is False on either of the last two — the conservative answer.
+82 PASS · 15 FAIL · 26 CANNOT DETERMINE. `bool(report)` is False on either of the last two — the conservative answer.
 
 | rule | PASS | FAIL | CANNOT DETERMINE |
 |---|---|---|---|
+| `audio/local-mclk` | 0 | 0 | 1 |
 | `cross/wiring` | 1 | 0 | 0 |
 | `csi` | 1 | 0 | 0 |
 | `current/HAT_1V8` | 0 | 0 | 2 |
 | `current/HAT_3V3` | 0 | 0 | 2 |
-| `current/J5_3V3` | 0 | 0 | 2 |
 | `current/MICBIAS` | 0 | 0 | 2 |
 | `current/SERVO_V` | 0 | 0 | 2 |
 | `current/V5_HAT` | 0 | 0 | 2 |
@@ -24,22 +24,20 @@
 | `i2c` | 3 | 0 | 0 |
 | `i2c3/overlay` | 1 | 0 | 0 |
 | `i2s` | 1 | 0 | 0 |
-| `pin_directions` | 25 | 0 | 0 |
-| `power/HAT_1V8` | 0 | 0 | 1 |
+| `pin_directions` | 26 | 0 | 0 |
+| `power/HAT_1V8` | 1 | 0 | 0 |
 | `power/HAT_3V3` | 0 | 0 | 1 |
-| `power/J5_3V3` | 1 | 0 | 0 |
 | `power/MICBIAS` | 1 | 0 | 0 |
 | `power/SERVO_V` | 1 | 0 | 0 |
 | `power/V5_HAT` | 1 | 0 | 0 |
 | `power/VBAT` | 1 | 0 | 0 |
 | `power/VCC_3V3_CSI` | 1 | 0 | 0 |
-| `span` | 25 | 0 | 0 |
+| `span` | 26 | 0 | 0 |
 | `uart` | 3 | 0 | 0 |
 | `vocabulary/need` | 0 | 0 | 3 |
 | `vocabulary/provision` | 0 | 0 | 3 |
-| `volts/HAT_1V8` | 0 | 0 | 1 |
-| `volts/HAT_3V3` | 0 | 0 | 1 |
-| `volts/J5_3V3` | 1 | 0 | 0 |
+| `volts/HAT_1V8` | 1 | 0 | 0 |
+| `volts/HAT_3V3` | 5 | 0 | 2 |
 | `volts/MICBIAS` | 0 | 0 | 1 |
 | `volts/SERVO_V` | 0 | 15 | 1 |
 | `volts/V5_HAT` | 1 | 0 | 0 |
@@ -56,14 +54,11 @@ The SERVO_V FAIL is the design AS PUBLISHED against the vendor band: model.rs re
 
 ## The CANNOT DETERMINEs — by name, with what settles each
 
-- **`power/HAT_1V8` system** — codec@direct draws HAT_1V8 — NOT ONE part in the catalogue has a
-- **`power/HAT_3V3` system** — codec@direct, bmi088@direct draw HAT_3V3 — NOT ONE part in the catalogue has a
+- **`power/HAT_3V3` system** — the HAT_3V3 terminal of 1 part(s) on HAT_3V3 has NO direction in the documents:
 - **`current/HAT_1V8` typical draw** — 1 of 1 part(s) drawing HAT_1V8 have no sourced typical current:
 - **`current/HAT_1V8` peak draw** — 1 of 1 part(s) drawing HAT_1V8 have no sourced peak current:
-- **`current/HAT_3V3` typical draw** — 1 of 2 part(s) drawing HAT_3V3 have no sourced typical current:
-- **`current/HAT_3V3` peak draw** — 2 of 2 part(s) drawing HAT_3V3 have no sourced peak current:
-- **`current/J5_3V3` typical draw** — J5_3V3 typical demand is 95 mA, from all 1 part(s) drawing it:
-- **`current/J5_3V3` peak draw** — J5_3V3 peak demand is 150 mA, from all 1 part(s) drawing it:
+- **`current/HAT_3V3` typical draw** — 1 part(s) here have a HAT_3V3 terminal with NO direction in the documents: hat_y1.
+- **`current/HAT_3V3` peak draw** — 1 part(s) here have a HAT_3V3 terminal with NO direction in the documents: hat_y1.
 - **`current/MICBIAS` typical draw** — 1 of 1 part(s) drawing MICBIAS have no sourced typical current:
 - **`current/MICBIAS` peak draw** — 1 of 1 part(s) drawing MICBIAS have no sourced peak current:
 - **`current/SERVO_V` typical draw** — 15 of 16 part(s) drawing SERVO_V have no sourced typical current:
@@ -80,18 +75,20 @@ The SERVO_V FAIL is the design AS PUBLISHED against the vendor band: model.rs re
 - **`vocabulary/need` speaker.SPK+** — microduck-speaker terminal 'SPK+' states need 'audio_output', which is not one of the four kinds
 - **`vocabulary/need` speaker.SPK-** — microduck-speaker terminal 'SPK-' states need 'audio_output', which is not one of the four kinds
 - **`vocabulary/need` mic.MIC** — microduck-mic terminal 'MIC' states need 'audio_input', which is not one of the four kinds
-- **`volts/HAT_1V8` source** — 1 sink(s) on HAT_1V8 and no stated voltage: no provision on this net states a nominal_v and the design declares no band.
-- **`volts/HAT_3V3` source** — 4 sink(s) on HAT_3V3 and no stated voltage: no provision on this net states a nominal_v and the design declares no band.
+- **`volts/HAT_3V3` hat.V3V3_IN** — HAT_3V3 is 3.3..3.3 V (hat (microduck-robot-hat-pcb) provision nominal_v); hat (microduck-robot-hat-pcb) states no v_min/v_max for V3V3_IN.
+- **`volts/HAT_3V3` hat_y1.TRISTATE** — HAT_3V3 is 3.3..3.3 V (hat (microduck-robot-hat-pcb) provision nominal_v); hat_y1 (microduck-public-hat-y1) states no v_min/v_max for TRISTATE.
 - **`volts/MICBIAS` source** — 1 sink(s) on MICBIAS and no stated voltage: no provision on this net states a nominal_v and the design declares no band.
 - **`volts/SERVO_V` imu200.VDD** — SERVO_V is 6.6..8.2 V (declared by the design); imu200 (microduck-imu-to-dxl) states no v_min/v_max for VDD.
+- **`audio/local-mclk` codec.MCLK** — Public PCB Y1.3 drives U2.1 at 12 MHz; J4.13 is NC. Local provider hat_y1.OUT is connected to codec.MCLK. Y1 operating limits/timing and installed board revision remain unverified.
 
-What settles the ones that matter: the Robot HAT schematic (regulators, transceiver, rails, connectors) — Pollen publishing it or a teardown; a meter on a servo's VDD pin for the 6.6-8.2 V question; the dts pinctrl for the I2S3 mux; `i2cdetect -y 3` on a production HAT for the BMI088.
+What settles the ones that matter: match the installed board to the published HAT PCB/schematic, establish board power budgets and component limits; a meter on a servo's VDD pin for the 6.6-8.2 V question; installed-board identification to apply the public HAT I2S/Y1 evidence; `i2cdetect -y 3` on a production HAT for the BMI088.
 
 ## Nets
 
 ```
   net         scope    kind    deg  terminals
-  GND         host     ground   24  host.GND, battery.BAT-, hat.GND, codec.GND, bmi088.GND, tof.GND, imu200.GND, id20.GND, id21.GND, id22.GND, id23.GND, id24.GND, id30.GND, id31.GND, id32.GND, id33.GND, id34.GND, id10.GND, id11.GND, id12.GND, id13.GND, id14.GND, camera.GND, mic.GND
+  GND         host     ground   25  host.GND, battery.BAT-, hat.GND, hat_y1.GND, codec.GND, bmi088.GND, tof.GND, imu200.GND, id20.GND, id21.GND, id22.GND, id23.GND, id24.GND, id30.GND, id31.GND, id32.GND, id33.GND, id34.GND, id10.GND, id11.GND, id12.GND, id13.GND, id14.GND, camera.GND, mic.GND
+  HAT:Y1_OUT  host     signal    2  hat_y1.OUT, codec.MCLK
   MIC_IN      host     signal    2  hat.MIC_IN, mic.MIC
   SPK_N       host     signal    2  hat.SPK-, speaker.SPK-
   SPK_P       host     signal    2  hat.SPK+, speaker.SPK+
@@ -107,13 +104,11 @@ What settles the ones that matter: the Robot HAT schematic (regulators, transcei
   i2s3/BCLK   bus      signal    3  host.BCLK, hat.I2S3_SCLK, codec.BCLK
   i2s3/DIN    bus      signal    3  host.DIN, hat.I2S3_SDO, codec.DIN
   i2s3/DOUT   bus      signal    3  host.DOUT, hat.I2S3_SDI, codec.DOUT
-  i2s3/MCLK   bus      signal    3  host.MCLK, hat.MCLK, codec.MCLK
   i2s3/WCLK   bus      signal    3  host.WCLK, hat.I2S3_LRCK, codec.WCLK
   uart2/RX    bus      signal    2  host.RX, hat.UART2_RX
   uart2/TX    bus      signal    2  host.TX, hat.UART2_TX
-  HAT_1V8     host     supply    1  codec.DVDD
-  HAT_3V3     host     supply    4  codec.AVDD, codec.IOVDD, bmi088.VDD, bmi088.VDDIO
-  J5_3V3      host     supply    2  hat.J5_3V3, tof.3V3
+  HAT_1V8     host     supply    2  hat.V1V8_OUT, codec.DVDD
+  HAT_3V3     host     supply    9  hat.V3V3_IN, hat.J5_3V3, hat_y1.VDD, hat_y1.TRISTATE, codec.AVDD, codec.IOVDD, bmi088.VDD, bmi088.VDDIO, tof.3V3
   MICBIAS     host     supply    2  hat.MICBIAS, mic.BIAS
   SERVO_V     host     supply   17  hat.SERVO_V, imu200.VDD, id20.VDD, id21.VDD, id22.VDD, id23.VDD, id24.VDD, id30.VDD, id31.VDD, id32.VDD, id33.VDD, id34.VDD, id10.VDD, id11.VDD, id12.VDD, id13.VDD, id14.VDD
   V5_HAT      host     supply    2  host.5V, hat.V5_OUT
@@ -127,9 +122,10 @@ What settles the ones that matter: the Robot HAT schematic (regulators, transcei
 
 === NET CHECK  microduck on radxa-zero-3w (RK3566) ===
   standards: none
-  25 part(s), 0 of 0 port(s) used, 28 nets
+  26 part(s), 0 of 0 port(s) used, 27 nets
   note  nothing here reserves a terminal, and no port carries an alternate function.
   note  nets carrying more than one device — a bus, not a collision:
+          HAT:Y1_OUT degree 2 (hat_y1, codec)
           MIC_IN degree 2 (hat, mic)
           SPK_N degree 2 (hat, speaker)
           SPK_P degree 2 (hat, speaker)
@@ -139,7 +135,6 @@ What settles the ones that matter: the Robot HAT schematic (regulators, transcei
           i2s3/BCLK degree 3 (hat, codec)
           i2s3/DIN degree 3 (hat, codec)
           i2s3/DOUT degree 3 (hat, codec)
-          i2s3/MCLK degree 3 (hat, codec)
           i2s3/WCLK degree 3 (hat, codec)
         The standard says these are shared, in as many words:
           
@@ -166,6 +161,7 @@ What settles the ones that matter: the Robot HAT schematic (regulators, transcei
         number.
         There is no wiring-level rule here to pass or fail, so this carries no verdict.
   note  bus nets and their degree — reported, never scored:
+          HAT:Y1_OUT             degree 2
           csi/CLK                degree 2
           csi/D0                 degree 2
           csi/D1                 degree 2
@@ -177,7 +173,6 @@ What settles the ones that matter: the Robot HAT schematic (regulators, transcei
           i2s3/BCLK              degree 3
           i2s3/DIN               degree 3
           i2s3/DOUT              degree 3
-          i2s3/MCLK              degree 3
           i2s3/WCLK              degree 3
           uart2/RX               degree 2
           uart2/TX               degree 2
@@ -190,6 +185,9 @@ What settles the ones that matter: the Robot HAT schematic (regulators, transcei
                       A check that quietly does not run is indistinguishable from one that passed, so it says so.
   [PASS]              span           hat@direct
                       microduck-robot-hat-pcb is attached directly to named host terminals; there is no port for a span to mismatch.
+                      A check that quietly does not run is indistinguishable from one that passed, so it says so.
+  [PASS]              span           hat_y1@direct
+                      microduck-public-hat-y1 is attached directly to named host terminals; there is no port for a span to mismatch.
                       A check that quietly does not run is indistinguishable from one that passed, so it says so.
   [PASS]              span           codec@direct
                       tlv320aic3104 is attached directly to named host terminals; there is no port for a span to mismatch.
@@ -261,42 +259,34 @@ What settles the ones that matter: the Robot HAT schematic (regulators, transcei
                       microduck-mic is attached directly to named host terminals; there is no port for a span to mismatch.
                       A check that quietly does not run is indistinguishable from one that passed, so it says so.
   [PASS]              gpio           board
-                      19 distinct controller pin identifier(s) across 28 net(s), no identifier on two nets, and every signal net in use resolves to one.
+                      19 distinct controller pin identifier(s) across 27 net(s), no identifier on two nets, and every signal net in use resolves to one.
   [ASSERTED]          host_power     radxa-zero-3w.5V
                       radxa-zero-3w's supply '5V' joins net 'V5_HAT' (supply, 2 terminal(s)).
                       Whether that net is FED is the same net's power/V5_HAT finding, asked once, there.
-                      you asserted: "[brief] §5.1 '5V Power from the GPIO PIN 2 & 4'; the HAT makes it from the pack: i2c3.dts:22 'In-robot power comes from the battery via the HAT regardless'. The HAT's regulator is CANNOT DETERMINE. The USB-C OTG port is a second 5 V path when tethered (sch1.12 sheet 22) and is not on this netlist."
+                      you asserted: "[brief] §5.1 '5V Power from the GPIO PIN 2 & 4'; the HAT makes it from the pack: i2c3.dts:22 'In-robot power comes from the battery via the HAT regardless'. Public HAT U9 AP63205/L4 feeds U10 LM5050-1 and Q2 to +5V; installed revision unconfirmed. The USB-C OTG port is a second 5 V path when tethered (sch1.12 sheet 22) and is not on this netlist."
   [ASSERTED]          host_power     radxa-zero-3w.GND
-                      radxa-zero-3w's ground 'GND' joins net 'GND' (ground, 24 terminal(s)).
+                      radxa-zero-3w's ground 'GND' joins net 'GND' (ground, 25 terminal(s)).
                       Whether that net is FED is the same net's power/GND finding, asked once, there.
-                      you asserted: "[brief] §5.1 '5V Power from the GPIO PIN 2 & 4'; the HAT makes it from the pack: i2c3.dts:22 'In-robot power comes from the battery via the HAT regardless'. The HAT's regulator is CANNOT DETERMINE. The USB-C OTG port is a second 5 V path when tethered (sch1.12 sheet 22) and is not on this netlist."
-  [CANNOT DETERMINE]  power/HAT_1V8  system
-                      codec@direct draws HAT_1V8 — NOT ONE part in the catalogue has a
-                      HAT_1V8 terminal with direction 'output'.
-                      Not a pass and not a fail. Connect it yourself, and find out where it comes from before
-                      anything is powered up. That answer is not in this repository.
-                      To assert it:  design.external_supply('HAT_1V8', "<what you measured>")
-                      standard: "A bare host: pin identifiers come from the DESIGN FILE through
-                      .wire() and .declare_segment(), recorded as the user's assertion — the
-                      esp32s3_raw arrangement. The header_40pin and buses_the_microduck_uses
-                      blocks below are the vendor's pin→function table those identifiers are
-                      checked against by a reader, not by this loader."
-                      (hosts[radxa-zero-3w].provides_basis)
-  [CANNOT DETERMINE]  power/HAT_3V3  system
-                      codec@direct, bmi088@direct draw HAT_3V3 — NOT ONE part in the catalogue has a
-                      HAT_3V3 terminal with direction 'output'.
-                      Not a pass and not a fail. Connect it yourself, and find out where it comes from before
-                      anything is powered up. That answer is not in this repository.
-                      To assert it:  design.external_supply('HAT_3V3', "<what you measured>")
-                      standard: "A bare host: pin identifiers come from the DESIGN FILE through
-                      .wire() and .declare_segment(), recorded as the user's assertion — the
-                      esp32s3_raw arrangement. The header_40pin and buses_the_microduck_uses
-                      blocks below are the vendor's pin→function table those identifiers are
-                      checked against by a reader, not by this loader."
-                      (hosts[radxa-zero-3w].provides_basis)
-  [PASS]              power/J5_3V3   system
-                      hat@direct sources J5_3V3 (terminal J5_3V3); 1 part(s) draw it: tof.
+                      you asserted: "[brief] §5.1 '5V Power from the GPIO PIN 2 & 4'; the HAT makes it from the pack: i2c3.dts:22 'In-robot power comes from the battery via the HAT regardless'. Public HAT U9 AP63205/L4 feeds U10 LM5050-1 and Q2 to +5V; installed revision unconfirmed. The USB-C OTG port is a second 5 V path when tethered (sch1.12 sheet 22) and is not on this netlist."
+  [PASS]              power/HAT_1V8  system
+                      hat@direct sources HAT_1V8 (terminal V1V8_OUT); 1 part(s) draw it: codec.
                       Every other terminal on this net states a direction, so nothing else may be driving it.
+  [CANNOT DETERMINE]  power/HAT_3V3  system
+                      the HAT_3V3 terminal of 1 part(s) on HAT_3V3 has NO direction in the documents:
+                        hat_y1@direct
+                      So nobody can say whether they DRIVE this net or DRAW it. Both readings are open,
+                      and the two questions this rule answers — is the net fed, and is anything back-feeding
+                      it — are both unanswerable while that is true.
+                        documented sinks:   hat, hat_y1, codec, bmi088, tof
+                        documented sources: hat
+                      external_supply() cannot close this: it states where a net comes from, not what else
+                      is driving it.
+                      standard: "A bare host: pin identifiers come from the DESIGN FILE through
+                      .wire() and .declare_segment(), recorded as the user's assertion — the
+                      esp32s3_raw arrangement. The header_40pin and buses_the_microduck_uses
+                      blocks below are the vendor's pin→function table those identifiers are
+                      checked against by a reader, not by this loader."
+                      (hosts[radxa-zero-3w].provides_basis)
   [PASS]              power/MICBIAS  system
                       hat@direct sources MICBIAS (terminal MICBIAS); 1 part(s) draw it: mic.
                       Every other terminal on this net states a direction, so nothing else may be driving it.
@@ -345,82 +335,19 @@ What settles the ones that matter: the Robot HAT schematic (regulators, transcei
                       record records no single typical; carried as null rather than picked."
                       (chips[tlv320aic3104].supplies[1].cite (§8.3 p.7; pin 32))
   [CANNOT DETERMINE]  current/HAT_3V3typical draw
-                      1 of 2 part(s) drawing HAT_3V3 have no sourced typical current:
-                        codec@direct           tlv320aic3104  NOT SOURCED
-                            NOT A SINGLE NUMBER — the sheet gives per-mode rows, §8.x 'CURRENT
-                            CONSUMPTION – DRVDD = AVDD = IOVDD = 3.3 V, DVDD = 1.8 V', p.12,
-                            verbatim: 'IDRVDD + IAVDD | Stereo DAC playback to lineout, fS = 48
-                            ksps, I2S slave, no signal | 4.9' mA and 'IDVDD | 2.3' mA; 'IDRVDD +
-                            IAVDD | Stereo ADC record, fS = 48 ksps, I2S slave, AGC off, no signal
-                            | 4.31(6)' mA and 'IDVDD | 2.45(6)' mA; 'IDRVDD + IAVDD | Stereo DAC
-                            playback to stereo single-ended headphone, fS = 48 ksps, I2S slave, no
-                            signal | 6.7' mA. All 'no signal' — the sheet gives no figure for
-                            current INTO a speaker load, so speaker-drive current is CANNOT
-                            DETERMINE.
-                      sourced so far:
-                        bmi088@direct          bmi088              5.15 mA
-                      That comes to 5.15 mA, which is a FLOOR and NOT the total. The missing parts
-                      are not drawing zero — nobody wrote down what they draw. Adding them in as 0 mA
-                      is how a budget passes a net that browns out on the bench.
-                      To close it: fetch the datasheet and add the part to cecad/data/chips.json, or
-                      measure it and record what you found.
-                      datasheet: "NOT A SINGLE NUMBER — the sheet gives per-mode rows, §8.x
-                      'CURRENT CONSUMPTION – DRVDD = AVDD = IOVDD = 3.3 V, DVDD = 1.8 V', p.12,
-                      verbatim: 'IDRVDD + IAVDD | Stereo DAC playback to lineout, fS = 48 ksps,
-                      I2S slave, no signal | 4.9' mA and 'IDVDD | 2.3' mA; 'IDRVDD + IAVDD |
-                      Stereo ADC record, fS = 48 ksps, I2S slave, AGC off, no signal | 4.31(6)' mA
-                      and 'IDVDD | 2.45(6)' mA; 'IDRVDD + IAVDD | Stereo DAC playback to stereo
-                      single-ended headphone, fS = 48 ksps, I2S slave, no signal | 6.7' mA. All
-                      'no signal' — the sheet gives no figure for current INTO a speaker load, so
-                      speaker-drive current is CANNOT DETERMINE."
-                      (chips[tlv320aic3104].current_mA.typical_basis)
-  [CANNOT DETERMINE]  current/HAT_3V3peak draw
-                      2 of 2 part(s) drawing HAT_3V3 have no sourced peak current:
-                        codec@direct           tlv320aic3104  NOT SOURCED
-                            NOT TRANSCRIBED HERE. No peak figure was read out of the document this
-                            block cites (see `cite`) when this record was written, and none is
-                            asserted now (basis added 2026-09-02, wiring lane, so
-                            cecad.electrical's loader can read the shelf: a null with no reason is
-                            refused). Null means not looked up in this record — NOT zero. Re-read
-                            the sheet's current-consumption table to fill it.
-                        bmi088@direct          bmi088         NOT SOURCED
-                            NOT TRANSCRIBED HERE. No peak figure was read out of the document this
-                            block cites (see `cite`) when this record was written, and none is
-                            asserted now (basis added 2026-09-02, wiring lane, so
-                            cecad.electrical's loader can read the shelf: a null with no reason is
-                            refused). Null means not looked up in this record — NOT zero. Re-read
-                            the sheet's current-consumption table to fill it.
-                      NOTHING drawing HAT_3V3 here has a sourced peak figure, so there is no floor either —
-                      not 0 mA, not any number. This net's demand is simply unknown.
-                      To close it: fetch the datasheet and add the part to cecad/data/chips.json, or
-                      measure it and record what you found.
-                      datasheet: "NOT TRANSCRIBED HERE. No peak figure was read out of the
-                      document this block cites (see `cite`) when this record was written, and
-                      none is asserted now (basis added 2026-09-02, wiring lane, so
-                      cecad.electrical's loader can read the shelf: a null with no reason is
-                      refused). Null means not looked up in this record — NOT zero. Re-read the
-                      sheet's current-consumption table to fill it."
-                      (chips[tlv320aic3104].current_mA.peak_basis)
-  [CANNOT DETERMINE]  current/J5_3V3 typical draw
-                      J5_3V3 typical demand is 95 mA, from all 1 part(s) drawing it:
-                        tof@direct             vl53l5cx              95 mA
-                      THE DEMAND IS KNOWN. THE SUPPLY IS NOT. No document read here puts a NUMBER on a
-                      current limit for this net, for a port or for a connector, so there is nothing to
-                      compare 95 mA against and no headroom can be reported. This is a demand figure,
-                      not a pass.
+                      1 part(s) here have a HAT_3V3 terminal with NO direction in the documents: hat_y1.
+                      Whether they draw this net at all is unanswered, so the set of parts to sum over is
+                      not known — before any figure is looked up. Nothing can be added.
                       standard: "A bare host: pin identifiers come from the DESIGN FILE through
                       .wire() and .declare_segment(), recorded as the user's assertion — the
                       esp32s3_raw arrangement. The header_40pin and buses_the_microduck_uses
                       blocks below are the vendor's pin→function table those identifiers are
                       checked against by a reader, not by this loader."
                       (hosts[radxa-zero-3w].provides_basis)
-  [CANNOT DETERMINE]  current/J5_3V3 peak draw
-                      J5_3V3 peak demand is 150 mA, from all 1 part(s) drawing it:
-                        tof@direct             vl53l5cx             150 mA
-                      THE DEMAND IS KNOWN. THE SUPPLY IS NOT. No document read here puts a NUMBER on a
-                      current limit for this net, for a port or for a connector, so there is nothing to
-                      compare 150 mA against and no headroom can be reported. This is a demand figure,
-                      not a pass.
+  [CANNOT DETERMINE]  current/HAT_3V3peak draw
+                      1 part(s) here have a HAT_3V3 terminal with NO direction in the documents: hat_y1.
+                      Whether they draw this net at all is unanswered, so the set of parts to sum over is
+                      not known — before any figure is looked up. Nothing can be added.
                       standard: "A bare host: pin identifiers come from the DESIGN FILE through
                       .wire() and .declare_segment(), recorded as the user's assertion — the
                       esp32s3_raw arrangement. The header_40pin and buses_the_microduck_uses
@@ -790,6 +717,10 @@ What settles the ones that matter: the Robot HAT schematic (regulators, transcei
                       the documents record a direction and a bus for every signal terminal of microduck-robot-hat-pcb.
                       Whether each was written down or inferred by the extraction is in that part's own
                       uncertainties — see the note above.
+  [PASS]              pin_directions hat_y1@direct
+                      the documents record a direction and a bus for every signal terminal of microduck-public-hat-y1.
+                      Whether each was written down or inferred by the extraction is in that part's own
+                      uncertainties — see the note above.
   [PASS]              pin_directions codec@direct
                       the documents record a direction and a bus for every signal terminal of tlv320aic3104.
                       Whether each was written down or inferred by the extraction is in that part's own
@@ -964,16 +895,26 @@ What settles the ones that matter: the Robot HAT schematic (regulators, transcei
                       standard: "mic on the head (pet_detect README); codec input Mic3R mono
                       [C-elec]"
                       (docs/ELECTRONICS-AND-SOFTWARE.md §7)
-  [CANNOT DETERMINE]  volts/HAT_1V8  source
-                      1 sink(s) on HAT_1V8 and no stated voltage: no provision on this net states a nominal_v and the design declares no band.
-                      standard: "nominal_v: null"
-                      (electronics/netlist.py declared / parts[].provides[].nominal_v_basis)
-  [CANNOT DETERMINE]  volts/HAT_3V3  source
-                      4 sink(s) on HAT_3V3 and no stated voltage: no provision on this net states a nominal_v and the design declares no band.
-                      standard: "nominal_v: null"
-                      (electronics/netlist.py declared / parts[].provides[].nominal_v_basis)
-  [PASS]              volts/J5_3V3   tof.3V3
-                      J5_3V3 is 3.3..3.3 V (hat (microduck-robot-hat-pcb) provision nominal_v); tof's 3V3 band is 3.0..3.6 V.
+  [PASS]              volts/HAT_1V8  codec.DVDD
+                      HAT_1V8 is 1.8..1.8 V (hat (microduck-robot-hat-pcb) provision nominal_v); codec's DVDD band is 1.525..1.95 V.
+  [CANNOT DETERMINE]  volts/HAT_3V3  hat.V3V3_IN
+                      HAT_3V3 is 3.3..3.3 V (hat (microduck-robot-hat-pcb) provision nominal_v); hat (microduck-robot-hat-pcb) states no v_min/v_max for V3V3_IN.
+                      standard: "J4.1 +3V3; J4.17 +3V3; U3.3 +3V3"
+                      (Pinned public Pollen HAT 23eab11927f95ceca0dfa35bf182caeb7db39ea0: reference/pollen-elec-rpi-robot-hat/elec_RPI_Robot_HAT.kicad_pcb Public board-family model only; exact installed Microduck board revision remains unconfirmed.)
+  [CANNOT DETERMINE]  volts/HAT_3V3  hat_y1.TRISTATE
+                      HAT_3V3 is 3.3..3.3 V (hat (microduck-robot-hat-pcb) provision nominal_v); hat_y1 (microduck-public-hat-y1) states no v_min/v_max for TRISTATE.
+                      standard: "Y1.1 Tri-State +3V3"
+                      (reference/pollen-elec-rpi-robot-hat/production/ASE01187-C1_elec_RPI_Robot_HAT_BOM.csv row Y1; elec_RPI_Robot_HAT.kicad_pcb Y1 pads 1..4; commit 23eab11927f95ceca0dfa35bf182caeb7db39ea0)
+  [PASS]              volts/HAT_3V3  codec.AVDD
+                      HAT_3V3 is 3.3..3.3 V (hat (microduck-robot-hat-pcb) provision nominal_v); codec's AVDD band is 2.7..3.6 V.
+  [PASS]              volts/HAT_3V3  codec.IOVDD
+                      HAT_3V3 is 3.3..3.3 V (hat (microduck-robot-hat-pcb) provision nominal_v); codec's IOVDD band is 1.1..3.6 V.
+  [PASS]              volts/HAT_3V3  bmi088.VDD
+                      HAT_3V3 is 3.3..3.3 V (hat (microduck-robot-hat-pcb) provision nominal_v); bmi088's VDD band is 2.4..3.6 V.
+  [PASS]              volts/HAT_3V3  bmi088.VDDIO
+                      HAT_3V3 is 3.3..3.3 V (hat (microduck-robot-hat-pcb) provision nominal_v); bmi088's VDDIO band is 1.2..3.6 V.
+  [PASS]              volts/HAT_3V3  tof.3V3
+                      HAT_3V3 is 3.3..3.3 V (hat (microduck-robot-hat-pcb) provision nominal_v); tof's 3V3 band is 3.0..3.6 V.
   [CANNOT DETERMINE]  volts/MICBIAS  source
                       1 sink(s) on MICBIAS and no stated voltage: no provision on this net states a nominal_v and the design declares no band.
                       standard: "the TLV320AIC3104 MICBIAS pin 15 (part:tlv320aic3104 pinout) —
@@ -1073,8 +1014,12 @@ What settles the ones that matter: the Robot HAT schematic (regulators, transcei
   [PASS]              i2c3/overlay   addresses
                       i2c3 carries ['0x18', '0x19', '0x29', '0x68'] = the overlay's ['0x18', '0x19', '0x29', '0x68']: research/raw/deploy_audio_aic3104-i2c3.dts 'codec@18' / 'reg = <0x18>'; research/raw/deploy_audio_i2c3-pihat.dts:11 'dormant BMI088 0x19/0x68'; research/raw/tof_src_main.rs:87 'ADDRESS_CANDIDATES: [u8; 2] = [0x29, 0x52]'
   [PASS]              cross/wiring   connectivity
-                      86 terminal(s) are in both designs (18 only here: bmi088.GND, bmi088.SCL, bmi088.SDA, bmi088.VDD, bmi088.VDDIO, bmi088.gyro.SCL, bmi088.gyro.SDA, codec.AVDD...); all 3655 pair(s) agree on same-net / different-net.
-=== ELECTRICAL CHECKS FAILED — 15 failed, 28 undetermined, 75 pass ===
+                      87 terminal(s) are in both designs (22 only here: bmi088.GND, bmi088.SCL, bmi088.SDA, bmi088.VDD, bmi088.VDDIO, bmi088.gyro.SCL, bmi088.gyro.SDA, codec.AVDD...); all 3741 pair(s) agree on same-net / different-net.
+  [CANNOT DETERMINE]  audio/local-mclkcodec.MCLK
+                      Public PCB Y1.3 drives U2.1 at 12 MHz; J4.13 is NC. Local provider hat_y1.OUT is connected to codec.MCLK. Y1 operating limits/timing and installed board revision remain unverified.
+                      standard: "J4.13; Y1.3; U2.1"
+                      (reference/pollen-elec-rpi-robot-hat/elec_RPI_Robot_HAT.kicad_pcb)
+=== ELECTRICAL CHECKS FAILED — 15 failed, 26 undetermined, 82 pass ===
 
 ```
 

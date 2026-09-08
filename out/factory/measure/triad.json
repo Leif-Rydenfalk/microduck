@@ -1,8 +1,8 @@
 {
   "$generated": "bin/triad check --json",
   "root": "/Users/leifrydenfalk/dev/ce-workshop/ce-designs/microduck",
-  "checked": 71,
-  "failing": 53,
+  "checked": 72,
+  "failing": 54,
   "measured_nothing": 0,
   "verdict": "FAIL",
   "results": [
@@ -459,25 +459,40 @@
       "folder": "ce-parts/microduck-eye-ring/iterations/v0.0.1",
       "measured": 8,
       "measurements": [
-        "component.json states its own verdict (CANNOT DETERMINE)",
+        "component.json states its own verdict (PASS)",
         "cad/part.py compiles and carries `def build(`",
         "mech/mech.py compiles and carries `def mech(`",
         "interface 'lens_bore' frame",
         "interface 'face_seat' frame",
         "2 declared ref(s) resolved",
-        "5 ledger row(s) parsed, artifacts + digests checked",
+        "8 ledger row(s) parsed, artifacts + digests checked",
         "trust.json tier recomputed from the ledger"
       ],
       "findings": [
         {
-          "verdict": "CANNOT DETERMINE",
-          "where": "ce-parts/microduck-eye-ring/component.json",
-          "why": "the folder grades ITSELF CANNOT DETERMINE here and no reader may grade it better (TRIAD.md, \"Coverage is part of the verdict\"). Its own words: GOAL.md finding 1 said the product's eye bezel is missing from the sim meshes; it is this mesh. Against the product photographs (out/head/head.json): front view eye OD / head width 0.3353 vs mesh 0.3226 (+1.16 mm implied on Ø30.000); profiles, scale-free, -0.02 ± 0.32 mm; verdict at the 1.5 mm rule CANNOT DETERMINE. bin/cad part:microduck-eye-ring (2026-09-02): PASS — Solid, valid, 1 shell, 984 fa"
+          "verdict": "FAIL",
+          "where": "ce-parts/microduck-eye-ring/iterations/v0.0.1/evidence/ledger.jsonl:1",
+          "why": "artifact geometry/noenoeil.stl does not exist"
+        },
+        {
+          "verdict": "FAIL",
+          "where": "ce-parts/microduck-eye-ring/iterations/v0.0.1/evidence/ledger.jsonl:2",
+          "why": "artifact geometry/noenoeil.stl does not exist"
         },
         {
           "verdict": "FAIL",
           "where": "ce-parts/microduck-eye-ring/iterations/v0.0.1/evidence/ledger.jsonl:5",
           "why": "sha256 of ../../../../out/head/head_width_verdict.json is 9bf2f4565248cdac, ledger says 485cc9fca0d829ee"
+        },
+        {
+          "verdict": "FAIL",
+          "where": "ce-parts/microduck-eye-ring/iterations/v0.0.1/evidence/ledger.jsonl:8",
+          "why": "artifact ../../../component.json does not exist"
+        },
+        {
+          "verdict": "FAIL",
+          "where": "ce-parts/microduck-eye-ring/iterations/v0.0.1/trust.json",
+          "why": "stale: says T2, the ledger computes T3 — run `triad trust part:microduck-eye-ring`"
         }
       ]
     },
@@ -900,6 +915,24 @@
           "verdict": "CANNOT DETERMINE",
           "where": "ce-parts/microduck-power-support/iterations/v0.0.1/evidence/ledger.jsonl:4",
           "why": "sha256 of ../../../../out/sim-evidence/fea_microduck-power-support_walk.json is bea711137e0b641e, this row says a2a9fd1b64a3a5f7 — SUPERSEDED: line 12 names the same artifact later and its hash is what is checked. This row records what the artifact was when it was measured."
+        }
+      ]
+    },
+    {
+      "ref": "part:microduck-public-hat-y1",
+      "verdict": "CANNOT DETERMINE",
+      "iteration": "v1.0.0",
+      "shape": "flat",
+      "folder": "ce-parts/microduck-public-hat-y1",
+      "measured": 1,
+      "measurements": [
+        "component.json states its own verdict (CANNOT DETERMINE)"
+      ],
+      "findings": [
+        {
+          "verdict": "CANNOT DETERMINE",
+          "where": "ce-parts/microduck-public-hat-y1/component.json",
+          "why": "the folder grades ITSELF CANNOT DETERMINE here and no reader may grade it better (TRIAD.md, \"Coverage is part of the verdict\"). Its own words: Public-board BOM Y1 identity resolved through its explicit LCSC C7425459 code to YXC OT3EL89CJI-111YLC-12M. This identifies the public BOM item, not a production Microduck specimen. One item is included in the HAT PCBA; no extra assembly purchase. Exact-code timing and solder-land conformance remain unresolved."
         }
       ]
     },

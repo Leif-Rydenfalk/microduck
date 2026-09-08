@@ -12,34 +12,25 @@ Inputs (nothing else is read):
                                                     centroid where its mesh origin is not
 
 What a length IS here, stated once:
-  A cable length is a ROUTE FLOOR: the straight line from connector A to
-  connector B, bent only through the origin of every hinge the cable crosses
-  (a polyline A -> hinge -> ... -> B). Because a hinge origin sits on its own
-  axis, that polyline is the same length in every pose of the joint, so it is
-  a floor over the whole range. A real loom is longer: it goes AROUND the
-  servo body and the bearing, not through the axis, and it carries a service
-  loop. Nothing here is that loom. A PASS on a floor is necessary, not
-  sufficient.
-
-  SLACK RULE (the only non-measured term, and it is stated, not hidden):
-  slack_mm = sum over crossed hinges of  span_rad x R_BYPASS, with
-  R_BYPASS = 10.0 mm = half the XL330's 20 mm width (part.py BODY_Y), i.e.
-  the cable is assumed to pass the axis at the servo's flank, so a full sweep
-  of the joint's range pays out an arc of that radius. cable_mm =
-  ceil5(floor + slack). ROBOTIS' stock cable lengths are not on any fetched
-  vendor page (part:xl330-m288-t connector.x3p), so no "nearest stock length"
-  is claimed.
+  Historical model numbers use a polyline through selected endpoint proxies
+  and crossed hinge origins, plus span_rad x 10 mm assumed slack, rounded up
+  to 5 mm. They are preserved as modeled_* values for conditional analysis.
+  They are not proven route floors: proxy points are not actual connector
+  exits, and routing through joint centers is not an obstacle-aware loom.
+  All physical wire cuts remain null until exact endpoints, socket allocation,
+  insertion depth, bend radius, obstacles and service slack are established.
 
 Where a device's connector is:
   XL330: two JST EH 3-pin sockets in pockets on the +/-y side faces, opening
   at y = +/-10 (mesh frame, part.py POCKET_*; the XL,XC-330.pdf side views
-  show them). The cable exit point used is the pocket centre on the side
+  show them). The proxy point used is the pocket centre on the side
   face: (6.85, +/-10.0, -9.0) mm in the mesh frame, transformed by the
   placement. The side (+y or -y) is chosen per hop as the one giving the
-  shorter floor — a servo has one socket on each flank and a chain uses
-  both.
-  HAT, Radxa, speaker, battery: connector positions are UNPUBLISHED (the
-  HAT's PCB is not public; the battery contact drawing does not exist). The
+  shorter polyline. This independently selected side is not a verified
+  ingress/egress socket allocation for a real chain.
+  HAT: public family PCB/pad coordinates are available, but the installed
+  revision and actual wire-exit coordinates are unresolved. Radxa, speaker
+  and battery endpoints are also not established in this model. The
   reference point is the mesh CENTROID (bbox centre through the placement),
   and every such row says "centroid" in `ref`. The mic has no mesh: null.
   IMU / ToF / camera: the MJCF sites (docs/ELECTRONICS-AND-SOFTWARE.md).
@@ -48,9 +39,8 @@ Voltage drop: cecad.harness.check_drop over a hand-built Harness per hop —
 the tool's own arithmetic (ASTM B258 diameter, IEC 60228 copper), with the
 bases stated in the call. cecad.harness.wire(asm, a, b) could not be used:
 it resolves ELECTRICAL connectors declared on the parts, and
-part:xl330-m288-t declares none (component.json: "cad/interfaces.json still
-declares no interfaces"). That is a tool gap (P11) named in README.md, not
-worked around by typing a length.
+the present model has no verified original connector-exit geometry.
+The manually assembled Route is conditional arithmetic, not a measured loom.
 """
 import json
 import math
@@ -99,6 +89,10 @@ def dist(a, b):
 
 def polyline(pts):
     return sum(dist(pts[i], pts[i + 1]) for i in range(len(pts) - 1))
+
+
+def shown(value, places=3):
+    return "CANNOT DETERMINE" if value is None else ("%.*f" % (places, value))
 
 
 def ceil5(x):
@@ -175,7 +169,7 @@ locker_row = next(i for i, r in enumerate(ROWS) if r["mesh"] == "banana_pcb_lock
 
 DEV["hat"] = {"kind": "board", "row": hat_row, "body": ROWS[hat_row]["body"],
               "pts": {"centroid": centroid_world(ROWS[hat_row])},
-              "ref": "HAT mesh centroid (bbox centre through the placement) — connector positions unpublished"}
+              "ref": "HAT mesh centroid proxy; public PCB pad centers exist in out/wiring/hat-connectors.json, but installed revision and wire exits are unresolved"}
 DEV["radxa"] = {"kind": "board", "row": radxa_row, "body": ROWS[radxa_row]["body"],
                 "pts": {"centroid": centroid_world(ROWS[radxa_row])},
                 "ref": "Radxa mesh centroid — the CSI connector's place on the 65x30 board is at one short edge (Radxa wiki) but not located here"}
@@ -202,6 +196,18 @@ DEV["tof"] = {"kind": "sensor", "row": None, "body": "jaw_soft", "pts": {"site":
 DEV["camera"] = {"kind": "sensor", "row": None, "body": "jaw_soft", "pts": {"site": (81.4, 0.0, 251.1)},
                  "ref": "MJCF head_camera site, world (docs §5)"}
 DEV["mic"] = {"kind": "transducer", "row": None, "body": None, "pts": {}, "ref": "no mesh, no site: CANNOT DETERMINE"}
+
+
+# None of these points is a measured wire exit on the original assembled unit.
+for name, device in DEV.items():
+    kind = ('socket_pocket_center_proxy' if device['kind'] == 'xl330' else
+            'device_site_proxy' if name in ('imu200','tof','camera') else
+            'inferred_contact_end_proxy' if name == 'battery' else
+            'unlocated' if name == 'mic' else 'mesh_centroid_proxy')
+    device['endpoint_evidence'] = {'kind': kind, 'verdict': 'CANNOT DETERMINE',
+        'scope': 'Reference model point; exact original wire exit/contact/insertion datum unverified.'}
+DEV['hat']['endpoint_evidence']['public_source'] = 'out/wiring/hat-connectors.json (public family footprint centers; target revision unresolved)'
+DEV['mic']['endpoint_evidence']['public_source'] = 'Pinned public HAT PCB MK1 onboard MEMS; J2/J9 optional external inputs, not evidence of fitted external cable.'
 
 
 # ---------------------------------------------------------------------------
@@ -276,7 +282,7 @@ for a, b, hinges, path in CHAIN:
         "connector": "JST EH 3-pin (EHR-03 housing, SEH-001T-P0.6 crimp) both ends — ROBOTIS' 'X3P' lead",
         "wire": "21 AWG (E1 'Wire Gauge for DYNAMIXEL | 21 AWG', part:xl330-m288-t connector.wire)",
         "qty": 1, "servos_downstream": n_down,
-        "how": "polyline from-point -> hinge origin(s) -> to-point; floor over the joints' full range; slack = span_rad x %.0f mm" % R_BYPASS_MM,
+        "how": "Historical proxy polyline through hinge origins; not a verified route floor; assumed slack = span_rad x %.0f mm" % R_BYPASS_MM,
     })
 
 # The HAT harness
@@ -300,17 +306,25 @@ def simple(cid, group, a, b, hinges, path, pins, conductors, connector, note):
 simple("tof-hat", "hat-harness", "hat", "tof", [], "same body jaw_soft",
        "GND, 3V3, SDA, SCL (I2C3, addr 0x29)", 4,
        "JST-SH 4-pin 1.0 mm (Stemma/Qwiic) at the HAT's J5; the ToF board's end CANNOT DETERMINE",
-       "HAT end is the board centroid (J5's place unpublished)")
+       "HAT centroid proxy; J5 public-family pad coordinates published, exact installed wire exit and ToF module unknown")
 simple("spk-hat", "hat-harness", "hat", "speaker", [], "same body jaw_soft",
-       "SPK+, SPK- (codec line/HP out, or an amplifier: CANNOT DETERMINE)", 2,
-       "representative 3525 speaker ships with a JST GH 1.25 mm 2-pin lead (part:microduck-speaker); HAT end CANNOT DETERMINE",
+       "Public HAT J1: differential SPK+/SPK- from PAM8406D U1 via FB2/FB3; original fitted speaker/termination unconfirmed", 2,
+       "Representative speaker lead is not original proof; public HAT J1 Wago terminal footprint, target termination unknown",
        "both ends are centroids")
-simple("mic-hat", "hat-harness", "hat", "mic", [], "head", "MIC, BIAS, GND (codec Mic3R, community)", 3,
-       "CANNOT DETERMINE", "the mic has no mesh and no site; length is null, not a guess")
+simple("mic-hat", "hat-harness", "hat", "mic", [], "head", "Optional external microphone path via public J2/J9; public board already has onboard MEMS MK1", 3,
+       "CANNOT DETERMINE", "External mic cable presence unverified. Public PCB has onboard MEMS MK1 and optional J2/J9 inputs; installed target audio path unresolved. No extra external lead established.")
 simple("csi-radxa-camera", "hat-harness", "radxa", "camera", [], "same body jaw_soft — the ribbon crosses NO joint",
        "22-pin MIPI CSI: 2 data lanes + clock (differential pairs), I2C2 SDA/SCL, CAMERAB_PDN_L, VCC_3V3, GND", 22,
        "22-pin 0.5 mm FFC at the Radxa (Radxa wiki); the camera-board end CANNOT DETERMINE (22-pin 0.5 mm or 15-pin 1.0 mm + adapter)",
        "Radxa end is the board centroid; the CSI connector sits at a short edge, up to ~32 mm from it either way")
+# Camera endpoints are centroid/site proxies, not connector exits. Preserve the
+# historical geometry observation separately; do not publish a manufacturable cut.
+camera_cable = cables[-1]
+assert camera_cable["id"] == "csi-radxa-camera"
+camera_cable["proxy_distance_mm"] = camera_cable["floor_mm"]
+camera_cable["historical_rounded_proxy_mm"] = camera_cable["cable_mm"]
+camera_cable.update(floor_mm=None, slack_mm=None, cable_mm=None,
+    how="CANNOT DETERMINE actual connector route/cut: historical13.3mm Radxa-centroid to camera-site distance rounded15mm is a proxy only. Measure connector exits, contact faces, insertion depths, bend radius and service slack on the exact module/host. Original ribbon unidentified.")
 simple("bat-hat", "power", "battery", "hat",
        ["neck_pitch", "head_pitch", "head_yaw", "head_roll"],
        "trunk_base -> neck -> neck_pitch -> yaw_roll_motion -> jaw_soft: the ONLY cable that crosses all four head/neck hinges",
@@ -319,15 +333,22 @@ simple("bat-hat", "power", "battery", "hat",
        "pack contact end -> four hinge origins -> HAT centroid; slack for 150 + 180 + 340 + 50 deg of joint range")
 cables.append({"id": "hat-radxa-40pin", "group": "power", "from": "hat", "to": "radxa", "path": "same body jaw_soft",
                "crosses": [], "floor_mm": 0.0, "slack_mm": 0.0, "cable_mm": 0,
-               "pins": "40-pin header: 5 V (pins 2/4), GND, UART2 (8/10), I2C3 (3/5), I2S3 (M0: 12/13/35/38/40 asserted)",
+               "pins": "40-pin header: 5 V (pins 2/4), GND, UART2 (8/10), I2C3 (3/5), I2S3 (M0: 12/35/38/40 measured on pinned public HAT; pin 13 NC; MCLK from local Y1 12 MHz; installed revision unconfirmed)",
                "conductors": 40, "connector": "2x20 0.1 in header, board-to-board — not a cable", "qty": 1,
-               "how": "HAT-to-Radxa board stack: 0 mm cable by construction (docs §2 'on the 40-pin header')"})
+               "how": "HAT-to-Radxa board stack: 0 mm cable by construction (docs §2 'on the 40-pin header'); I2S connectivity measured 2026-09-08 from reference/pollen-elec-rpi-robot-hat/elec_RPI_Robot_HAT.kicad_pcb, commit 23eab11927f95ceca0dfa35bf182caeb7db39ea0 (PROVENANCE.json): J4.12/35/38/40 to U2.2/3/5/4; J4.13 unconnected; Y1.3 to U2.1 MCLK. Public board-family evidence only; exact board revision fitted to the target Microduck remains CANNOT DETERMINE."})
 cables.append({"id": "hat-dxl-port", "group": "power", "from": "hat", "to": "id34", "path": "see dxl-hat-id34",
                "crosses": [], "floor_mm": None, "slack_mm": None, "cable_mm": None,
                "pins": "SERVO_V + DXL_DATA + GND leave the HAT on the first chain cable", "conductors": 3,
-               "connector": "the HAT's bus header: JST EH 3-pin assumed (the servo end is EH); HAT end CANNOT DETERMINE", "qty": 0,
+               "connector": "Public HAT J13/J14 3-pin DXL footprints; original chosen port, termination and revision unresolved", "qty": 0,
                "how": "not a separate cable — 'HAT -> bus power' IS the first hop dxl-hat-id34; qty 0 so it is not double-counted"})
 
+
+from route_confidence import qualify, drop_verdict
+for cable in cables:
+    qualify(cable, DEV)
+    if cable['id'] == 'mic-hat':
+        cable['presence_verdict'] = 'CANNOT DETERMINE'
+        cable['qty_scope'] = 'Historical modeled quantity only; external microphone lead is not established. Onboard MK1 is already part of the public HAT PCBA.'
 
 # ---------------------------------------------------------------------------
 # voltage drop on the servo bus — cecad.harness.check_drop, cascaded hop by hop
@@ -355,50 +376,68 @@ def harness_for(c, awg, mA):
                                             else "the brief's assumption ('use 22 AWG as ROBOTIS' cable'); the vendor page says 21")},
              {"circuit": "VDD-", "current_mA": mA, "awg": awg, "current_basis": I_BASIS, "awg_basis": "return leg, same wire"}]
     r = Route(a_path=c["from"], b_path=c["to"], a_pos_mm=tuple(c["from_xyz_mm"]), b_pos_mm=tuple(c["to_xyz_mm"]),
-              length_mm=float(c["cable_mm"]), leads=leads,
-              basis="cable_mm from cables.json = polyline floor through the crossed hinge origins + the stated slack; "
+              length_mm=float(c["modeled_cable_mm"]), leads=leads,
+              basis="CONDITIONAL modeled_cable_mm from proxy polyline and assumed slack; actual cut unknown; "
                     "a real loom with a service loop is longer")
     return Harness(name=c["id"], a_path=c["from"], b_path=c["to"], lead_map=[], rows=[], route=r,
                    report=Report("measured"))
 
 
-drop = {"basis": {"current": I_BASIS, "supply": SUPPLY, "min_v": MIN_BASIS, "formula": AWG_FORMULA_CITE,
-                  "length": "cable_mm (floor + slack), so the drop is over the full cable, not the floor alone"},
-        "runs": []}
-chain = [c for c in cables if c["group"] == "dynamixel-chain"]
-by_id = {c["id"]: c for c in chain}
-for awg in (21, 22):
-    for V0, vbasis in SUPPLY.items():
-        received = {"hat": V0}
-        rows = []
-        for c in chain:
-            mA = c["servos_downstream"] * I_PER_SERVO_MA
-            h = harness_for(c, awg, mA)
-            vin = received[c["from"]]
-            rep = check_drop(h, supply_v=vin,
-                             supply_basis=vbasis + ("" if c["from"] == "hat" else
-                                                    "; minus the upstream hops' drops, same formula"),
-                             min_v=MIN_V, min_v_basis=MIN_BASIS)
-            loop_ohm = 2 * awg_resistance_ohm_per_m(awg) * c["cable_mm"] / 1000.0
-            dv = mA / 1000.0 * loop_ohm
-            received[c["to"]] = vin - dv
-            f = rep.findings[0]
-            rows.append({"cable": c["id"], "servos_downstream": c["servos_downstream"], "I_A": mA / 1000.0,
-                         "cable_mm": c["cable_mm"], "loop_ohm": round(loop_ohm, 5), "drop_V": round(dv, 4),
-                         "v_in": round(vin, 4), "v_out": round(received[c["to"]], 4),
-                         "verdict": f.verdict, "message": f.message})
-        far = {k: v for k, v in received.items() if k in ("id24", "id14", "id30", "imu200")}
-        drop["runs"].append({"awg": awg, "supply_v": V0, "verdict":
-                             ("FAIL" if any(r["verdict"] == "FAIL" for r in rows) else
-                              "CANNOT DETERMINE" if any(r["verdict"] == "CANNOT DETERMINE" for r in rows) else "PASS"),
-                             "received_at_ends_V": {k: round(v, 4) for k, v in far.items()},
-                             "total_drop_to_ankle_V": round(V0 - min(received["id24"], received["id14"]), 4),
-                             "reads_empty_early_note": ("at %.1f V a far ankle servo reports %.3f V, i.e. %.0f mV below the "
-                                                        "6.6 V empty threshold that robotd reads FROM the servos (model.rs:99-128); "
-                                                        "the farthest device trips 'empty' first by that margin"
-                                                        % (V0, min(received["id24"], received["id14"]),
-                                                           (6.6 - min(received["id24"], received["id14"])) * 1000)) if V0 == 6.6 else "",
-                             "hops": rows})
+def calculate_drop(cables):
+    drop = {"basis": {"current": I_BASIS, "supply": SUPPLY, "min_v": MIN_BASIS, "formula": AWG_FORMULA_CITE,
+                      "length": "Historical modeled_cable_mm only; all actual routes/cuts unknown. Numeric results are conditional; uncertainty propagates downstream. Supply limits/conflict remain in research/servo-power-audit-2026-09-08/AUDIT.md."},
+            "runs": []}
+    chain = [c for c in cables if c["group"] == "dynamixel-chain"]
+    by_id = {c["id"]: c for c in chain}
+    for awg in (21, 22):
+        for V0, vbasis in SUPPLY.items():
+            received = {"hat": V0}
+            confidence = {"hat": "PASS"}
+            rows = []
+            for c in chain:
+                mA = c["servos_downstream"] * I_PER_SERVO_MA
+                vin = received[c["from"]]
+                modeled_length = c.get('modeled_cable_mm')
+                if modeled_length is None or vin is None:
+                    received[c['to']] = None
+                    confidence[c['to']] = drop_verdict('CANNOT DETERMINE', c['route_verdict'], confidence[c['from']])
+                    rows.append({'cable': c['id'], 'servos_downstream': c['servos_downstream'], 'I_A': mA/1000.,
+                        'cable_mm': None, 'modeled_cable_mm': modeled_length, 'loop_ohm': None, 'drop_V': None,
+                        'v_in': vin, 'v_out': None, 'verdict': confidence[c['to']], 'modeled_verdict': 'CANNOT DETERMINE',
+                        'route_verdict': c['route_verdict'], 'message': 'No modeled length or upstream voltage; cannot compute, no default zero length.'})
+                    continue
+                h = harness_for(c, awg, mA)
+                rep = check_drop(h, supply_v=vin,
+                                 supply_basis=vbasis + ("" if c["from"] == "hat" else
+                                                        "; minus the upstream hops' drops, same formula"),
+                                 min_v=MIN_V, min_v_basis=MIN_BASIS)
+                loop_ohm = 2 * awg_resistance_ohm_per_m(awg) * modeled_length / 1000.0
+                dv = mA / 1000.0 * loop_ohm
+                received[c["to"]] = vin - dv
+                f = rep.findings[0]
+                confidence[c["to"]] = drop_verdict(f.verdict, c["route_verdict"], confidence[c["from"]])
+                rows.append({"cable": c["id"], "servos_downstream": c["servos_downstream"], "I_A": mA / 1000.0,
+                             "cable_mm": None, "modeled_cable_mm": modeled_length, "loop_ohm": round(loop_ohm, 5), "drop_V": round(dv, 4),
+                             "v_in": round(vin, 4), "v_out": round(received[c["to"]], 4),
+                             "verdict": confidence[c["to"]], "modeled_verdict": f.verdict, "route_verdict": c["route_verdict"], "message": "Conditional model only; actual route unknown. " + f.message})
+            ankle = [received.get("id24"), received.get("id14")]
+            ankle_min = min(ankle) if all(v is not None for v in ankle) else None
+            far = {k: v for k, v in received.items() if k in ("id24", "id14", "id30", "imu200")}
+            drop["runs"].append({"awg": awg, "supply_v": V0, "verdict":
+                                 ("FAIL" if any(r["verdict"] == "FAIL" for r in rows) else
+                                  "CANNOT DETERMINE" if any(r["verdict"] == "CANNOT DETERMINE" for r in rows) else "PASS"),
+                                 "received_at_ends_V": {k: round(v, 4) if v is not None else None for k, v in far.items()},
+                                 "total_drop_to_ankle_V": round(V0 - ankle_min, 4) if ankle_min is not None else None,
+                                 "reads_empty_early_note": ("at %.1f V a far ankle servo reports %.3f V, i.e. %.0f mV below the "
+                                                            "6.6 V empty threshold that robotd reads FROM the servos (model.rs:99-128); "
+                                                            "the farthest device trips 'empty' first by that margin"
+                                                            % (V0, ankle_min,
+                                                               (6.6 - ankle_min) * 1000)) if V0 == 6.6 and ankle_min is not None else "",
+                                 "hops": rows})
+    return drop
+
+
+drop = calculate_drop(cables)
 
 
 # ---------------------------------------------------------------------------
@@ -414,9 +453,12 @@ out = {"$triad": 1, "kind": "cables", "generated_by": "wiring/measure.py",
                   "rule": __doc__.split("What a length IS here, stated once:")[1].split("Where a device's connector is:")[0].strip(),
                   "devices": {k: {"kind": v["kind"], "body": v["body"], "placements_row": v["row"],
                                   "points_mm": {n: [round(x, 2) for x in p] for n, p in v["pts"].items()},
-                                  "ref": v["ref"]} for k, v in DEV.items()},
+                                  "ref": v["ref"], "endpoint_evidence": v["endpoint_evidence"]} for k, v in DEV.items()},
                   "cables": cables,
-                  "cable_count": n_cables, "total_length_mm": total_mm,
+                  "cable_count": n_cables, "total_length_mm": None,
+                  "known_nonwire_length_mm": total_mm,
+                  "modeled_total_length_mm": sum(c.get("modeled_cable_mm") or 0 for c in cables if c["qty"]),
+                  "length_scope": "Actual cut lengths unknown; modeled total is historical arithmetic only, not a cutting list.",
                   "length_undetermined": undetermined}}
 json.dump(out, open(os.path.join(HERE, "cables.json"), "w"), indent=1)
 json.dump(drop, open(os.path.join(HERE, "drop.json"), "w"), indent=1)
@@ -425,7 +467,7 @@ json.dump(drop, open(os.path.join(HERE, "drop.json"), "w"), indent=1)
 L = []
 L.append("# CABLES — measured off placements.json, generated by wiring/measure.py\n")
 L.append("Do not edit: `python3 wiring/measure.py` rewrites this file, cables.json and drop.json. "
-         "Every length is a ROUTE FLOOR through the crossed hinge origins plus the stated slack "
+         "All wire cuts are CANNOT DETERMINE. Historical modeled numbers remain in JSON; proxy distances are not actual route floors. "
          "(rule in measure.py's docstring and cables.json `rule`).\n")
 L.append("| # | cable | from (point) | to (point) | crosses (span deg) | floor mm | slack mm | **cable mm** | pins | connector | qty |")
 L.append("|---|---|---|---|---|---|---|---|---|---|---|")
@@ -436,21 +478,21 @@ for i, c in enumerate(cables, 1):
     f = lambda v: "CANNOT DETERMINE" if v is None else ("%.1f" % v if isinstance(v, float) else str(v))
     L.append("| %d | `%s` | %s | %s | %s | %s | %s | **%s** | %s | %s | %d |"
              % (i, c["id"], fm, to, cr, f(c["floor_mm"]), f(c["slack_mm"]), f(c["cable_mm"]), c["pins"], c["connector"], c["qty"]))
-L.append("\n**%d cables, %d mm total over the %d with a length; undetermined: %s.**\n"
+L.append("\n**%d modeled connections, %d mm known nonwire contribution over %d numeric nonwire rows; total wire cut length CANNOT DETERMINE; undetermined: %s.**\n"
          % (n_cables, total_mm, n_cables - len(undetermined), ", ".join(undetermined) or "none"))
-L.append("## Servo-bus voltage drop — cecad.harness.check_drop, hop by hop\n")
+L.append("## Conditional modeled servo-bus voltage drop — actual routes unknown\n")
 L.append("Bases: " + I_BASIS + "; min_v " + MIN_BASIS + ".\n")
 for run in drop["runs"]:
     L.append("### AWG %d, %.1f V at the HAT — %s\n" % (run["awg"], run["supply_v"], run["verdict"]))
-    L.append("| cable | servos downstream | I A | cable mm | loop ohm | drop V | V in | V out | verdict |")
+    L.append("| cable | servos downstream | I A | modeled mm | loop ohm | drop V | V in | V out | verdict |")
     L.append("|---|---|---|---|---|---|---|---|---|")
     for r in run["hops"]:
-        L.append("| `%s` | %d | %.0f | %d | %.4f | %.4f | %.3f | %.3f | %s |"
-                 % (r["cable"], r["servos_downstream"], r["I_A"], r["cable_mm"], r["loop_ohm"], r["drop_V"], r["v_in"], r["v_out"], r["verdict"]))
-    L.append("\nreceived at the ends: %s; total drop HAT -> farthest ankle **%.3f V**. %s\n"
-             % (", ".join("%s %.3f V" % kv for kv in run["received_at_ends_V"].items()), run["total_drop_to_ankle_V"],
+        L.append("| `%s` | %d | %.0f | %s | %s | %s | %s | %s | %s |"
+                 % (r["cable"], r["servos_downstream"], r["I_A"], shown(r["modeled_cable_mm"], 0), shown(r["loop_ohm"], 4), shown(r["drop_V"], 4), shown(r["v_in"]), shown(r["v_out"]), r["verdict"]))
+    L.append("\nreceived at the ends: %s; total drop HAT -> farthest ankle **%s V**. %s\n"
+             % (", ".join("%s %s V" % (kv[0], shown(kv[1])) for kv in run["received_at_ends_V"].items()), shown(run["total_drop_to_ankle_V"]),
                 run["reads_empty_early_note"]))
 open(os.path.join(HERE, "CABLES.md"), "w").write("\n".join(L) + "\n")
-print("cables %d, total %d mm, undetermined %s" % (n_cables, total_mm, undetermined))
+print("modeled connections %d, known nonwire contribution %d mm; wire total unknown; undetermined %s" % (n_cables, total_mm, undetermined))
 for run in drop["runs"]:
-    print("drop AWG%d @ %.1f V: %s, to ankle %.3f V" % (run["awg"], run["supply_v"], run["verdict"], run["total_drop_to_ankle_V"]))
+    print("drop AWG%d @ %.1f V: %s, to ankle %s V" % (run["awg"], run["supply_v"], run["verdict"], shown(run["total_drop_to_ankle_V"])))

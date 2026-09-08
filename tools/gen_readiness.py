@@ -280,28 +280,30 @@ CAB = J("wiring/cables.json")["record"]
 cables = CAB["cables"]
 cd_rows = [c["id"] for c in cables if "CANNOT DETERMINE" in json.dumps(c)]
 tol_rows = [c for c in cables if any("tol" in k for k in c)]
-# COUNT THE ROWS, do not subtract. `record.length_undetermined` names only
-# mic-hat, but hat-dxl-port ALSO carries no length (it is qty 0), and
-# hat-radxa-40pin carries 0 mm because it is a stacking header and not a cable
-# anyone cuts. A cut list that says "22 lengths" when 20 can be cut is the
-# defect this audit exists to catch (found 2026-09-04 by re-deriving the count
-# from wiring/cables.json instead of trusting the summary field).
+# Count wire rows separately from the zero-length stacking header. Historical
+# modeled lengths are retained by the source but are not manufacturing cuts.
 _len_rows = [c for c in cables if c.get("cable_mm") is not None]
 _zero_rows = [c["id"] for c in _len_rows if not c["cable_mm"]]
 _nolen_rows = [c["id"] for c in cables if c.get("cable_mm") is None]
 _cuttable = [c for c in _len_rows if c["cable_mm"]]
-row("harness", "wiring", "Harness — %d cables" % len(cables), "NOT_YET",
-    "%d cable rows; %d carry a length in mm (total %s mm), of which %d is %s at 0.0000 mm — a board-to-board stacking header, nothing to cut — so %d lengths can actually be cut; %d carry no length at all (%s); %d rows with a tolerance field; %d rows carry a CANNOT DETERMINE (%s); lengths are route FLOORS + slack, rounded to 5 mm; wire 21 AWG; voltage drop PASS at AWG 21/22, 8.2 V and 6.6 V" % (
-        len(cables), len(_len_rows), CAB.get("total_length_mm"), len(_zero_rows), ", ".join(_zero_rows) or "none",
-        len(_cuttable), len(_nolen_rows), ", ".join(_nolen_rows), len(tol_rows), len(cd_rows), ", ".join(cd_rows)),
-    "wiring/cables.json (wiring/measure.py), wiring/CABLES.md rule paragraph",
-    "A table of nominal floors, no cut tolerance, no service-loop rule per joint, and 6 of 23 connector ends or lengths CANNOT DETERMINE (mic loom, HAT bus port, ToF/speaker/CSI/battery far ends). The factory cannot cut a loom to this table without a first physical unit.",
-    "agent_tonight", "WF-HARNESS routes the loom in CAD around the servo bodies; the cut tolerance still needs one built loom measured",
+_drop_runs = J("wiring/drop.json").get("runs", [])
+_drop_verdicts = sorted({r.get("verdict", "CANNOT DETERMINE") for r in _drop_runs})
+_total = CAB.get("total_length_mm")
+_total_text = "CANNOT DETERMINE" if _total is None else str(_total)
+row("harness", "wiring", "Harness — %d rows" % len(cables), "NOT_YET",
+    "%d modeled rows; %d numerical length rows, including %d zero-length non-cable rows (%s); %d manufacturing cut lengths; %d rows without a cut length. Physical total: %s. Historical modeled total: %s mm, not a cutting/purchasing total. Voltage-drop verdicts: %s; calculations retain endpoint uncertainty. %d rows carry CANNOT DETERMINE." % (
+        len(cables), len(_len_rows), len(_zero_rows), ", ".join(_zero_rows) or "none",
+        len(_cuttable), len(_nolen_rows), _total_text, CAB.get("modeled_total_length_mm"),
+        ", ".join(_drop_verdicts) or "CANNOT DETERMINE", len(cd_rows)),
+    "wiring/cables.json, wiring/drop.json (wiring/measure.py and route_confidence.py)",
+    "Original connector exits, servo-port allocation, wire routing, bend radii, service loops and cut tolerances remain unverified. An optional external microphone lead is not established by the public board's onboard microphone.",
+    "agent_tonight", "Refine source-backed connector routes, then measure a physical loom against the identified original hardware.",
     {"cables": len(cables), "rows_with_a_length": len(_len_rows), "cuttable_lengths": len(_cuttable),
      "zero_length_rows": _zero_rows, "rows_with_no_length": _nolen_rows,
-     "total_mm": CAB.get("total_length_mm"), "cannot_determine_rows": cd_rows, "tolerance_rows": len(tol_rows),
+     "total_mm": _total, "modeled_total_mm": CAB.get("modeled_total_length_mm"),
+     "drop_verdicts": _drop_verdicts, "cannot_determine_rows": cd_rows, "tolerance_rows": len(tol_rows),
      "record_says_length_undetermined": CAB.get("length_undetermined"),
-     "count_defect_found": "wiring/cables.json record.length_undetermined names 1 row (mic-hat) but 2 rows carry no cable_mm (mic-hat, hat-dxl-port); this audit counts the rows"})
+     "count_method": "Count actual row fields; a zero-length board stack is not a cut, and modeled_* values are not released lengths."})
 
 # ---------------------------------------------------------------- 6 assembly sequence
 MANUAL = open(os.path.join(ROOT, "ce-assemblies/microduck/iterations/v0.0.1/manual/MANUAL.md"), encoding="utf-8").read()

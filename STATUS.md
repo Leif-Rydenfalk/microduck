@@ -1,5 +1,8 @@
 # STATUS — 2026-09-02, 03:15 (written while the account's session limit blocks agents until 6:50am; a cron resumes everything at 6:53)
 
+**Historical snapshot.** Read the [2026-09-08 recreation/sourcing continuation](docs/RECREATION-2026-09-08.md)
+before using this page for present readiness or task ownership.
+
 Against GOAL.md's rungs. Nothing below is claimed without its artifact.
 
 | rung | verdict | proof |

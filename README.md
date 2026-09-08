@@ -2,6 +2,11 @@
 
 *A ce-designs machine (`design:microduck`) and a triad root. Started 2026-09-01.*
 
+**2026-09-08 continuation:** [1:1 recreation and sourcing audit](docs/RECREATION-2026-09-08.md).
+Includes fresh supplier observations, shared-session handover, and a reproducible
+correction to the official HAT outline and mounting-hole report. Supplier PASS
+does not establish original-part identity or physical recreation readiness.
+
 Pollen Robotics sells the Microduck (https://pollen-robotics.com/microduck/)
 with its firmware and software open source and its **mechanics closed**. This
 repo rebuilds the mechanics from everything that is public — the product

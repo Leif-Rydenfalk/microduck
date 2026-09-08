@@ -30,12 +30,14 @@ connection's mate()." So for each run in out/fasteners/runs.json this file:
      and insertion axis. A placement that misses by more than
      POSITION_TOL_MM / AXIS_TOL_DEG is NOT WRITTEN — it is a FAIL row.
 
-WHICH CONNECTION, and it is a measurement not a preference:
+NOMINAL CONNECTION MODEL (thread identity is unresolved):
   * the pilot is in a PRINTED part  -> connection:self-tap-m2-pla / -m2.5-pla
   * the pilot is in xl330.stl       -> connection:threaded-m2. Those are the
     Dynamixel's OWN moulded mounting bosses; a joint into somebody else's
     moulded case is not a printed self-tap and ROBOTIS publishes no case
-    polymer, so the self-tap folder refuses it by design.
+    polymer, so the self-tap folder refuses it by design. This exclusion does
+    NOT establish ISO thread form/pitch. The retained M2 model is provisional;
+    a cylindrical mesh pilot cannot distinguish a metric thread from TAP hardware.
 """
 import json
 import math
@@ -183,6 +185,40 @@ def mate_fn(conn_ref):
     raise FileNotFoundError("%s has no cad/mate.py" % conn_ref)
 
 
+def resolve_pilot_endpoint(run, placements=None):
+    """Exact source-key join, never a nearest-instance or mesh-name guess."""
+    e = run.get("pilot_endpoint")
+    if not e or any(k not in e for k in ("mesh", "body", "geom_index", "index")):
+        raise ValueError("CANNOT DETERMINE: chosen pilot provenance missing")
+    if placements is None:
+        with open(os.path.join(ASM, "placements.json"), encoding="utf-8") as f:
+            placements = json.load(f)["record"]["rows"]
+    matches = [p for p in placements if all(p.get(k) == e[k] for k in ("mesh", "body", "geom_index"))]
+    if len(matches) != 1 or not matches[0].get("part"):
+        raise ValueError("CANNOT DETERMINE: exact pilot placement %r has %d matches (requires one mapped part)" % (e, len(matches)))
+    p = matches[0]
+    return {"ref": p["part"], "interface": "mesh_pilot_%d" % e["index"],
+            "instance": "%s/%s#%d" % (e["body"], p["part"].split(":")[1], placements.index(p)),
+            "in_body": e["body"], "geom_index": e["geom_index"], "in_mesh": e["mesh"],
+            "mesh_feature_index": e["index"],
+            "source": "Exact (body, geom_index, mesh) join from fastener_runs.py chosen pilot to assembly placements.json; no proximity inference.",
+            "interface_scope": "Measured reference-mesh pilot center/axis only; rebuilt CAD, seating datum and actual thread identity unverified."}
+
+
+def thread_identity(run):
+    """Mesh diameter/depth support a nominal model, never an original thread ID."""
+    servo = run["pilot_mesh"] == "xl330"
+    return {
+        "verdict": "CANNOT DETERMINE",
+        "scope": "actual mating screw and internal thread form/pitch",
+        "basis": "mesh pilot diameter and depth only; nominal assignment retained for model compatibility",
+        "why": ("XL330 molded pilot does not establish ISO M2x0.4. ROBOTIS retail kits list PHS M2 TAP screws; exact original per-joint screw identity is unverified."
+                if servo else "Printed pilot and nominal ISO screw model do not establish original screw/thread identity or pull-out strength."),
+        "source": "research/fastener-reconciliation-2026-09-08/AUDIT.md",
+        "settled_by": "Exact original per-joint hardware schedule or inspected screw profile/pitch and matching boss specification; pilot diameter alone is insufficient."
+    }
+
+
 # ---------------------------------------------------------------- the placing
 def place(run, seq):
     size = run["size"]
@@ -210,6 +246,7 @@ def place(run, seq):
         "pilot_d_mm": run["pilot_d_mm"],
         "pilot_depth_mm": run["engagement_available_mm"],
         "thread_depth_mm": run["engagement_available_mm"],
+        "thread_identity": thread_identity(run),
         "thread": {"designation": size,
                    "pitch_mm": {"M2": 0.4, "M2.5": 0.45}[size]},
     }
@@ -240,10 +277,15 @@ def place(run, seq):
         "grip_mm": run["grip_mm"], "engagement_available_mm": run["engagement_available_mm"],
         "length_window_mm": run["length_window_mm"],
         "adds": m["adds"], "dof_left": m["dof_left"],
-        "verify": {"head_point_error_mm": round(dp, 9),
+        "thread_identity": thread_identity(run),
+        "pilot_endpoint": resolve_pilot_endpoint(run),
+        "verify": {"scope": "nominal model placement only; actual thread identity unresolved",
+                   "placement_verdict": "PASS" if ok else "FAIL",
+                   "thread_identity_verdict": "CANNOT DETERMINE",
+                   "head_point_error_mm": round(dp, 9),
                    "axis_error_deg": round(da, 9),
                    "tol_mm": POSITION_TOL_MM, "tol_deg": AXIS_TOL_DEG,
-                   "verdict": "PASS" if ok else "FAIL"},
+                   "verdict": "CANNOT DETERMINE" if ok else "FAIL"},
         "source": ("PLACED THROUGH %s. mate() was called with the screw folder's own thread_ext "
                    "frame (%s) and a pilot frame built from this run's measurements; the returned "
                    "transform was inverted to give the world placement, then CHECKED by pushing "
@@ -257,7 +299,8 @@ def place(run, seq):
     return row, ok
 
 
-PROV = ("MEASURED then PLACED THROUGH A CONNECTION, not typed. Chain: "
+PROV = ("Actual screw/thread identity is CANNOT DETERMINE. The nominal ISO connection/part identifiers are retained for geometry compatibility, not procurement closure. "
+        "MEASURED then PLACED THROUGH A CONNECTION, not typed. Chain: "
         "cecad.meshfeatures.features() on Pollen's meshes -> out/fasteners/features-by-mesh.json; "
         "MJCF zero-pose body*geom frames -> out/fasteners/world-placements.json; "
         "tools/fastener_runs.py groups the 601 world holes into coaxial chains and derives grip, "
@@ -296,7 +339,7 @@ def write_assembly(out):
             "instance": "fastener#%d" % p["instance"],
             "owned_by": OWNER,
             "source": p["source"], "why_this_length": p["length_why"],
-            "verify": p["verify"]})
+            "verify": p["verify"], "thread_identity": p["thread_identity"]})
     doc["record"]["rows"] = rows
     doc["record"]["fastener_note"] = PROV
     doc["record"]["counts"] = {"seeded_from_the_mjcf": before,
@@ -317,16 +360,11 @@ def write_assembly(out):
                   "params": p["params"],
                   "measured": "grip %.4f mm from the head seat on %s to the pilot face"
                               % (p["grip_mm"], p["head_seat_mesh"])},
-            "b": {"ref": None, "interface": "pilot" if "self-tap" in p["via_connection"] else "thread_int",
-                  "in_mesh": p["pilot_mesh"],
-                  "measured": "Ø%.3f pilot, %.4f mm of engagement available"
-                              % (p["pilot_d_mm"], p["engagement_available_mm"]),
-                  "why_ref_is_null": ("the pilot was measured on the MESH %s; which ce-parts folder "
-                                      "owns that mesh is a mapping this lane did not take, and a "
-                                      "guessed ref is a dangling ref. Settled by the mesh->part map "
-                                      "already in placements.json." % p["pilot_mesh"])},
+            "b": dict(p["pilot_endpoint"],
+                      measured="Ø%.3f pilot, %.4f mm of engagement available" % (p["pilot_d_mm"], p["engagement_available_mm"])),
             "params": {"length_mm": p["length_mm"], "state": "tight"},
             "dof_left": p["dof_left"],
+            "thread_identity": p["thread_identity"],
             "owned_by": OWNER,
             "why": ("%s x %g. Length window [%.4f, %.4f] mm — the minimum is the 1.5 d ENGAGEMENT "
                     "RULE, the maximum is the pilot's OWN MEASURED depth. %s"
@@ -352,6 +390,8 @@ def write_assembly(out):
             "designation": "%s x %g ISO 4762 socket head cap screw"
                            % ("M2" if "m2-" in ref else "M2.5", L),
             "owned_by": OWNER,
+            "identity_verdict": "CANNOT DETERMINE",
+            "identity_scope": "Nominal modeled ISO family/length, not a confirmed original purchase specification; thread form and head style unresolved.",
             "why": ("%d screw run(s) MEASURED at this length. Head seats on: %s. Length chosen as "
                     "the shortest sourced ISO 4762 length inside each run's measured window "
                     "[grip + 1.5 d, grip + measured pilot depth]."
@@ -426,6 +466,8 @@ def main():
     print("wrote", OUT, "(dry run — assembly records untouched)" if dry else "")
     if not dry:
         write_assembly(out)
+        from gen_fastener_verify import generate
+        generate()
     return out, dry
 
 

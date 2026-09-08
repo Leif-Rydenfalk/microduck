@@ -16,11 +16,10 @@ TEST that is a number or a command exit code (never an adjective), what it
 depends on, and what it unblocks. Work an agent is closing is marked IN FLIGHT
 so the factory does not duplicate it.
 
-EFFORT IS NOT INVENTED. No engineer-day estimate is stated, because this
-workshop has never built a physical unit and has no measured time-per-item for
-any of this work. Each parcel states its QUANTITY (the count of items) and its
-UNIT OF WORK instead, which is checkable; the schedule is the factory's to set
-from its own rates. That is a CANNOT DETERMINE, stated rather than guessed.
+EFFORT FIGURES ARE ESTIMATES, not measurements. The later EFFORT table uses
+explicit assumed rates and parcel quantities; no physical-unit time study
+supports those rates. The computed critical path excludes unquoted vendor and
+shipping waits. A factory must replace the assumptions with its own schedule.
 """
 import datetime
 import html

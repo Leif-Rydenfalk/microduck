@@ -727,15 +727,14 @@ for c in FA["counts"]:
 A.append('</table>')
 A.append('<p><b>Order against this:</b> %s</p>' % E(FA["what_a_buyer_orders_against_en"]))
 A.append('<p class="zh">%s</p>' % E(FA["what_a_buyer_orders_against_zh"].replace("<b>", "").replace("</b>", "")))
-A.append('<p class="lede">Spread at 1000 robots: %s to %s pieces. <b>What closes it:</b> %s</p>'
+A.append('<p class="lede">The unlike counts scale to %s and %s at 1000 robots; '
+         '<b>these are not procurement bounds.</b> %s</p>'
          % (E("{:,}".format(FA["spread_at_1000_robots"]["low"])),
             E("{:,}".format(FA["spread_at_1000_robots"]["high"])), E(FA["what_closes_it"])))
-A.append('<p class="lede zh">按 1000 台计，四个计数之间相差 %s 至 %s 件。'
-         '解决办法有二，按顺序：(1) 完成逐孔明细，使“已装入”成为真正的物料清单（软件代理进行中，WF-FASTENERS）；'
-         '(2) 拆解实物时清点真实螺钉数量（工作包 M-2）并与之比对。在 (2) 完成之前，此处所有计数都源自 Pollen 的仿真网格，'
-         '没有一个与实物核对过。</p>'
-         % (E("{:,}".format(FA["spread_at_1000_robots"]["low"])),
-            E("{:,}".format(FA["spread_at_1000_robots"]["high"]))))
+A.append('<p class="zh">以上计数的统计单位不同，不能作为采购数量上下限。先确认每个连接的牙型、头型和长度，'
+         '再与原机拆解清点比对；目前尚未完成实物核验。</p>')
+A.append('<p><a href="research/fastener-reconciliation-2026-09-08/AUDIT.md">'
+         'Per-line fastener audit / 紧固件逐行核对</a></p>')
 
 # 3.4 pcb
 def _routed(v):
@@ -810,11 +809,14 @@ A.append('<table>' + cols(15, 11, 11, 9, 8, 22, 24) + '<tr>' + th("Cable", "线�
          + th("Connector", "连接器") + th("Basis / note", "依据 / 说明") + '</tr>')
 for c in cables:
     ln = c.get("cable_mm")
+    length_basis = ("floor %.1f mm + slack %.1f mm; " % (c["floor_mm"], c["slack_mm"])
+                    if c.get("floor_mm") is not None and c.get("slack_mm") is not None
+                    else "Physical route/cut CANNOT DETERMINE; ")
     A.append('<tr><td class="m">%s</td><td class="m">%s</td><td class="m">%s</td><td class="num">%s</td><td class="num">%s</td><td>%s</td><td>%s</td></tr>'
              % (E(str(c.get("id"))), E(str(c.get("from"))), E(str(c.get("to"))),
                 E("%.4f" % ln if isinstance(ln, (int, float)) else "CANNOT DETERMINE"),
                 E(str(c.get("conductors", "—"))), E(str(c.get("connector", "—"))),
-                E(("floor %.1f mm + slack %.1f mm; " % (c.get("floor_mm") or 0, c.get("slack_mm") or 0)) + str(c.get("how", "")))))
+                E(length_basis + str(c.get("how", "")))))
 A.append('</table>')
 
 # 3.6 assembly

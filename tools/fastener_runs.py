@@ -227,7 +227,7 @@ def classify(g):
         # without them, and dropping them made tools/fastener_audit.py call a
         # 0.012 mm interference a FAIL against a 0.0316 mm residual it could not
         # see (measured 2026-09-04).
-        features=[{k: h[k] for k in ("mesh", "index", "role", "d_mm", "size",
+        features=[{k: h[k] for k in ("mesh", "body", "geom_index", "index", "role", "d_mm", "size",
                                      "cls", "depth_mm", "through", "s_lo", "s_hi",
                                      "center_world", "reads_as", "residual_mm",
                                      "cover_deg")} for h in g],
@@ -348,6 +348,7 @@ def classify(g):
         cross_part=len({h["mesh"] for h in g}) > 1,
         head_seat_mesh=seat["mesh"], head_seat_class=seat["cls"],
         pilot_mesh=pilot["mesh"], pilot_d_mm=pilot["d_mm"],
+        pilot_endpoint={k: pilot[k] for k in ("mesh", "body", "geom_index", "index", "center_world")},
         head_point_world_mm=[round(v, 4) for v in head_point],
         insertion_axis_world=[round(v, 6) for v in direction],
         stocked_length_mm=chosen,

@@ -1,0 +1,228 @@
+{
+  "status": "SUPERSEDED; historical provenance only; DO NOT EXECUTE",
+  "date": "2026-09-08",
+  "tests": [
+    {
+      "id": "EB-04",
+      "title": "SERVO_V \u2014 the measurement that settles the open question",
+      "purpose": "Determine whether the XL330 servos are fed the raw 2S pack (6.6-8.4 V, above their 6.0 V rating) or a regulated rail.",
+      "pre": [
+        "EB-03 PASS.",
+        "Servo bus plugged in, all 16 devices connected, torque OFF (no robotd running).",
+        "Bench supply raised to 8.20 V, current limit 3.00 A."
+      ],
+      "tool": [
+        "DMM (DC volts, 3 dp)"
+      ],
+      "steps": [
+        {
+          "do": "Measure pin 2 (VDD) to pin 1 (GND) at the HAT end of cable 1 (dxl-hat-id34).",
+          "expect": "record"
+        },
+        {
+          "do": "Measure pin 2 to pin 1 at the far end of the chain, at id24 and at id14.",
+          "expect": "record"
+        },
+        {
+          "do": "Compute the drop from the HAT to each ankle.",
+          "expect": "record"
+        },
+        {
+          "do": "Repeat all three with the supply at 6.60 V (the empty-pack case).",
+          "expect": "record"
+        }
+      ],
+      "measure": "Four DC voltages per supply setting, to 3 dp, and the two computed drops.",
+      "gate": {
+        "PASS": "the measurement is taken at all four points at both supply settings and recorded. Either result is a valid outcome of THIS test.",
+        "FAIL": "the measurement is not taken, or the harness drop from the HAT to the farthest ankle exceeds 0.550 V at 8.20 V in",
+        "CD": "\u2014"
+      },
+      "gate_basis": "0.550 V is the total HAT-to-farthest-ankle drop our own harness model computes for AWG 21 at 8.2 V with 1 A per moving servo (wiring/CABLES.md, cecad.harness.check_drop, PASS at every hop). It is a model, and this test is what checks it. On the outcome: if SERVO_V tracks the supply, production Microducks run stock XL330s 0.6-2.2 V above the vendor's 6.0 V maximum, which is consistent with robotd clearing the Input Voltage Error bit of Shutdown(63); if SERVO_V sits inside 3.7-6.0 V, the HAT regulates and docs/ELECTRONICS-AND-SOFTWARE.md 3.4 must be corrected.",
+      "log": "logs/<serial>/EB-04-servo-vdd.csv",
+      "src": [
+        "E1",
+        "XLPART",
+        "MODEL",
+        "CABLES",
+        "ELEC"
+      ]
+    },
+    {
+      "id": "EB-05",
+      "title": "Bus standby current",
+      "purpose": "Confirm every device on the bus is actually powered before anyone asks it to move.",
+      "pre": [
+        "EB-04 PASS. Supply at 7.40 V, torque off everywhere."
+      ],
+      "tool": [
+        "Bench PSU readout or DMM in series"
+      ],
+      "steps": [
+        {
+          "do": "Record the total input current with all 16 devices connected and idle.",
+          "expect": "record"
+        },
+        {
+          "do": "Subtract the EB-02 board-only figure to get the servo-rail standby.",
+          "expect": "record"
+        }
+      ],
+      "measure": "Total input current and the derived servo-rail standby, in A to 3 dp.",
+      "gate": {
+        "PASS": "the derived servo standby is >= @STANDBY_TOTAL_A@ A AND SV-03 finds all 16 devices",
+        "FAIL": "SV-03 finds fewer than 16 devices",
+        "CD": "the current is below @STANDBY_TOTAL_A@ A but SV-03 finds 16 devices \u2014 the current path and the data path disagree; do not proceed"
+      },
+      "gate_basis": "@STANDBY_TOTAL_A@ A = 15 x 17 mA, the vendor's Standby Current for the XL330-M288-T (E1 Specifications; no test voltage is stated for it). The imu_to_dxl board's own standby is CANNOT DETERMINE (unpublished board), so this is a floor and not a window. The devices answering on the bus is the stronger evidence, which is why SV-03 is in the gate.",
+      "log": "logs/<serial>/EB-05-standby.txt",
+      "src": [
+        "E1",
+        "XLPART"
+      ]
+    },
+    {
+      "id": "EB-06",
+      "title": "Pack fitted: what the robot reads against what a meter reads",
+      "purpose": "Cross-check the only voltage the robot can measure about itself.",
+      "pre": [
+        "EB-05 PASS. Bench supply removed. A charged NP-F550 pack fitted.",
+        "robotd running, torque off."
+      ],
+      "tool": [
+        "DMM",
+        "robotctl"
+      ],
+      "steps": [
+        {
+          "do": "Measure the pack terminals with a meter.",
+          "expect": "6.60 - 8.40 V"
+        },
+        {
+          "do": "Read every servo's Present Input Voltage(144), 0.1 V per count.",
+          "cmd": "robotctl monitor --json --hz 50 | head -1",
+          "expect": "a voltage on the health row"
+        },
+        {
+          "do": "Compare. Note that robotd reads the pack THROUGH the servos: there is no fuel gauge and no ADC anywhere on this robot.",
+          "expect": "agreement"
+        }
+      ],
+      "measure": "Meter voltage to 3 dp; the register value in counts and in volts.",
+      "gate": {
+        "PASS": "|V_meter - V_register| <= 0.100 V",
+        "FAIL": "the difference exceeds 0.100 V",
+        "CD": "the register reads nothing \u2014 'batt not read yet' on the monitor means no tick has completed; fix that first"
+      },
+      "gate_basis": "0.100 V is the register's own quantisation: Present Input Voltage(144) is 0.1 V per count (E1 Control Table). It is the tightest honest tolerance for this comparison and it is a vendor figure, not a choice.",
+      "log": "logs/<serial>/EB-06-battery.csv",
+      "src": [
+        "E1",
+        "MODEL",
+        "CHEAT"
+      ]
+    },
+    {
+      "id": "EN-01",
+      "title": "Runtime to empty, in use",
+      "purpose": "The advertised runtime, measured - and with it the compute-and-sensor draw that every power figure in this repository currently sweeps instead of knowing.",
+      "pre": [
+        "WK-02 passed.",
+        "A pack straight off the dual charger, open-circuit voltage recorded before fitting.",
+        "The floor of section @SEC_WALK@, clear for the whole run."
+      ],
+      "tool": [
+        "DC current clamp or shunt",
+        "Stopwatch",
+        "`robotctl monitor --json`"
+      ],
+      "steps": [
+        {
+          "do": "Record the pack: maker, printed capacity, and open-circuit voltage off the charger, to 3 dp.",
+          "expect": "a fully charged 2S reads about 8.4 V open-circuit"
+        },
+        {
+          "do": "Start the log before the first motion and leave it running to the end.",
+          "cmd": "robotctl monitor --json --hz 50 > logs/<serial>/EN-01-run.jsonl",
+          "expect": "one line per tick"
+        },
+        {
+          "do": "Drive a repeating circuit: 60 s walking, 30 s standing, one sit-stand, repeat. Note the wall clock at every cycle.",
+          "expect": "\u2014"
+        },
+        {
+          "do": "Every minute, read the clamp on the pack lead and write the row: minutes, Present Input Voltage(144), battery percent, amperes, activity.",
+          "expect": "a monotonically falling voltage"
+        },
+        {
+          "do": "Let it run to the automatic shutdown. Timestamp the sit and the power-off separately.",
+          "expect": "the robot sits down, then powers off"
+        },
+        {
+          "do": "Compute the compute-and-sensor draw by difference: measured pack power minus the servo power the same run's `Present Current(126)` readings account for.",
+          "expect": "a watt figure this repository has never had"
+        }
+      ],
+      "measure": "Minutes from first motion to power-off; mean and peak pack current; the voltage curve; and compute-and-sensor watts by difference.",
+      "gate": {
+        "PASS": ">= 60 minutes of this duty cycle, ending in a graceful sit and a clean power-off",
+        "FAIL": "under 60 minutes, or the robot falls at cut-off instead of sitting",
+        "CD": "the fitted pack cannot be identified. A '2600 mAh NP-F550' is necessarily third-party - Sony's own NP-F550 is 1500 mAh / 10.8 Wh - so a short run can be the pack rather than the robot. Record the maker and the off-charger voltage, and repeat with a second pack before judging the unit"
+      },
+      "gate_basis": "The 60-minute floor is Pollen's own claim, from the press-kit spec sheet: 'Removable NP-F550 camera battery, 2600 mAh, around one hour of runtime depending on use'. Our simulated figure is the band this measurement should land in and is stated as an UPPER bound: out/sim-evidence/battery-runtime.json integrates the measured MuJoCo torque and speed profile through ROBOTIS's published XL330 rows and gets 112.7 min of continuous walking at 1.0 W of compute down to 80.4 min at 5.0 W, with pack current 1.3453-1.8859 A at 7.4 V; standing runs 292.94 min down to 143.29 min over the same sweep. That study credits the whole 18.7 Wh, credits no regeneration and takes the PWM stage as loss-free, so the real number must be lower. The compute draw is swept rather than known because NO vendor figure exists: Radxa publishes a 5 V/2 A supply REQUIREMENT and no consumption, and ROBOTIS publishes no no-load current for the XL330-M288-T at any voltage.",
+      "log": "logs/<serial>/EN-01-runtime.csv",
+      "src": [
+        "PRESS",
+        "RUNTIME",
+        "XLPART",
+        "RADXAPART"
+      ]
+    },
+    {
+      "id": "EN-02",
+      "title": "Empty-battery behaviour",
+      "purpose": "A biped that runs out of power standing up falls over. This checks that it sits down first.",
+      "pre": [
+        "Either the tail of EN-01, or the servo bus on the bench supply with no pack fitted.",
+        "/etc/robot/robotd.toml read and its [safety] block recorded."
+      ],
+      "tool": [
+        "Bench PSU",
+        "`robotctl monitor`"
+      ],
+      "steps": [
+        {
+          "do": "Read the config this board actually has - the file is not overwritten by updates, so a board provisioned long ago can differ from the release default.",
+          "cmd": "grep -A2 battery_empty_shutdown /etc/robot/robotd.toml",
+          "expect": "`battery_empty_shutdown = true`, or commented (also true)"
+        },
+        {
+          "do": "With the robot standing, walk the supply down slowly from 7.400 V toward 6.600 V, no faster than 0.05 V per 10 s.",
+          "expect": "battery percent falls with it"
+        },
+        {
+          "do": "Read percent against voltage at 8.200, 7.400 and 6.600 V.",
+          "cmd": "robotctl monitor",
+          "expect": "100 %, 50 %, 0 %"
+        },
+        {
+          "do": "Hold at 6.600 V and watch. The EMA moves over about 10 s, so the response is not instant.",
+          "expect": "the robot sits down gracefully, then powers off"
+        }
+      ],
+      "measure": "Battery percent at three voltages; the delay between reaching 6.600 V and the sit; whether the sit is controlled; whether the machine powers off.",
+      "gate": {
+        "PASS": "percent reads 100 / 50 / 0 at 8.200 / 7.400 / 6.600 V, and at a sustained 6.600 V the robot sits down under control and powers off",
+        "FAIL": "it keeps standing or walking below 6.600 V, or it drops rather than sits",
+        "CD": "this board has `battery_empty_shutdown = false` - then the behaviour is correct for its configuration and the unit must not ship that way"
+      },
+      "gate_basis": "`robotd.toml [safety]`, verbatim: 'Sit down gracefully and power the machine off when the battery EMA reaches the empty floor (6.6 V - the same value the battery percentage maps to 0%). The EMA moves over ~10 s, so a load sag cannot trip it; reaching 6.6 requires a genuinely spent pack.' The three percent points are exact, not approximate: model.rs defines BATTERY_FULL_V = 8.2 and BATTERY_EMPTY_V = 6.6 and maps them linearly, and its own test asserts battery_percent(7.4) == 50.0 to within 0.001. Remember what the robot is reading: there is no fuel gauge and no ADC on this design - the only voltage it knows is the servos' `Present Input Voltage(144)`, quantised at 0.1 V per count, which is why EB-06 checks it against a meter.",
+      "log": "logs/<serial>/EN-02-empty.csv",
+      "src": [
+        "TOML",
+        "MODEL",
+        "E1"
+      ]
+    }
+  ]
+}

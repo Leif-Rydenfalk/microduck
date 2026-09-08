@@ -5,14 +5,14 @@
  "host": "radxa-zero-3w",
  "netlist_verdict": "CANNOT DETERMINE",
  "verdict": "CANNOT DETERMINE",
- "verdict_basis": "80 of 82 declared subjects were never graded. A verdict over part of a circuit is not a verdict about the circuit.",
+ "verdict_basis": "81 of 85 declared subjects were never graded. A verdict over part of a circuit is not a verdict about the circuit.",
  "lane_verdict": "CANNOT DETERMINE",
  "verdict_rule": "the worse of `wire build`'s netlist verdict and these four lanes' \u2014 a subset may never overturn the whole",
  "coverage": {
-  "chkd": 2,
-  "unchk": 80,
-  "decl": 82,
-  "req": 82,
+  "chkd": 4,
+  "unchk": 81,
+  "decl": 85,
+  "req": 85,
   "complete": false
  },
  "lanes": [
@@ -48,14 +48,14 @@
      "capacity": null
     },
     {
-     "subject": "J5_3V3/typical",
-     "net": "J5_3V3",
+     "subject": "HAT_1V8/typical",
+     "net": "HAT_1V8",
      "which": "typical",
-     "verdict": "CANNOT DETERMINE",
-     "graded": false,
+     "verdict": "PASS",
+     "graded": true,
      "grader": "cecad.netlist.check_current",
-     "why": "J5_3V3 typical demand is 95 mA, from all 1 part(s) drawing it:\n  tof@direct             vl53l5cx              95 mA\nTHE DEMAND IS KNOWN. THE SUPPLY IS NOT. No document read here puts a NUMBER on a\ncurrent limit for this net, for a port or for a connector, so there is nothing to\ncompare 95 mA against and no headroom can be reported. This is a demand figure,\nnot a pass.",
-     "demand_mA": 95.0,
+     "why": "nothing in this system is documented as drawing HAT_1V8, and every terminal on it\nstates a direction. Demand 0.0 mA \u2014 a computed total over an empty set, not a missing one.",
+     "demand_mA": 0.0,
      "demand_is_floor": false,
      "unsourced_parts": 0,
      "capacity_mA": null,
@@ -63,7 +63,60 @@
      "capacity": null,
      "unstated_limits": [],
      "arithmetic": null,
+     "demand_rows": []
+    },
+    {
+     "subject": "HAT_1V8/peak",
+     "net": "HAT_1V8",
+     "which": "peak",
+     "verdict": "PASS",
+     "graded": true,
+     "grader": "cecad.netlist.check_current",
+     "why": "nothing in this system is documented as drawing HAT_1V8, and every terminal on it\nstates a direction. Demand 0.0 mA \u2014 a computed total over an empty set, not a missing one.",
+     "demand_mA": 0.0,
+     "demand_is_floor": false,
+     "unsourced_parts": 0,
+     "capacity_mA": null,
+     "capacity_quote_check": null,
+     "capacity": null,
+     "unstated_limits": [],
+     "arithmetic": null,
+     "demand_rows": []
+    },
+    {
+     "subject": "J5_3V3/typical",
+     "net": "J5_3V3",
+     "which": "typical",
+     "verdict": "CANNOT DETERMINE",
+     "graded": false,
+     "grader": "cecad.netlist.check_current",
+     "why": "1 of 2 part(s) drawing J5_3V3 have no sourced typical current:\n  hat@direct             (no chip named) NOT SOURCED\n      Total board load and Radxa header capacity not established.\nsourced so far:\n  tof@direct             vl53l5cx              95 mA\nThat comes to 95 mA, which is a FLOOR and NOT the total. The missing parts\nare not drawing zero \u2014 nobody wrote down what they draw. Adding them in as 0 mA\nis how a budget passes a net that browns out on the bench.\nTo close it: fetch the datasheet and add the part to cecad/data/chips.json, or\nmeasure it and record what you found.",
+     "demand_mA": null,
+     "demand_is_floor": true,
+     "unsourced_parts": 1,
+     "capacity_mA": null,
+     "capacity_quote_check": null,
+     "capacity": null,
+     "unstated_limits": [],
+     "arithmetic": null,
      "demand_rows": [
+      {
+       "owner": "hat@direct",
+       "part": "microduck-robot-hat-pcb",
+       "chip": null,
+       "value_mA": null,
+       "quote": "",
+       "cite": "Pinned public Pollen HAT 23eab11927f95ceca0dfa35bf182caeb7db39ea0: reference/pollen-elec-rpi-robot-hat/elec_RPI_Robot_HAT.kicad_pcb Public board-family model only; exact installed Microduck board revision remains unconfirmed.",
+       "condition": "Total board load and Radxa header capacity not established.",
+       "caveats": [],
+       "figure": {
+        "figure_used": null,
+        "value_mA": null,
+        "figure_basis": "Total board load and Radxa header capacity not established.",
+        "figures_not_summed": [],
+        "basis": "no chip record is referenced by this need's `current_from`, so no field was read"
+       }
+      },
       {
        "owner": "tof@direct",
        "part": "microduck-tof-module",
@@ -97,16 +150,33 @@
      "verdict": "CANNOT DETERMINE",
      "graded": false,
      "grader": "cecad.netlist.check_current",
-     "why": "J5_3V3 peak demand is 150 mA, from all 1 part(s) drawing it:\n  tof@direct             vl53l5cx             150 mA\nTHE DEMAND IS KNOWN. THE SUPPLY IS NOT. No document read here puts a NUMBER on a\ncurrent limit for this net, for a port or for a connector, so there is nothing to\ncompare 150 mA against and no headroom can be reported. This is a demand figure,\nnot a pass.",
-     "demand_mA": 150.0,
-     "demand_is_floor": false,
-     "unsourced_parts": 0,
+     "why": "1 of 2 part(s) drawing J5_3V3 have no sourced peak current:\n  hat@direct             (no chip named) NOT SOURCED\n      Total board load and Radxa header capacity not established.\nsourced so far:\n  tof@direct             vl53l5cx             150 mA\nThat comes to 150 mA, which is a FLOOR and NOT the total. The missing parts\nare not drawing zero \u2014 nobody wrote down what they draw. Adding them in as 0 mA\nis how a budget passes a net that browns out on the bench.\nTo close it: fetch the datasheet and add the part to cecad/data/chips.json, or\nmeasure it and record what you found.",
+     "demand_mA": null,
+     "demand_is_floor": true,
+     "unsourced_parts": 1,
      "capacity_mA": null,
      "capacity_quote_check": null,
      "capacity": null,
      "unstated_limits": [],
      "arithmetic": null,
      "demand_rows": [
+      {
+       "owner": "hat@direct",
+       "part": "microduck-robot-hat-pcb",
+       "chip": null,
+       "value_mA": null,
+       "quote": "",
+       "cite": "Pinned public Pollen HAT 23eab11927f95ceca0dfa35bf182caeb7db39ea0: reference/pollen-elec-rpi-robot-hat/elec_RPI_Robot_HAT.kicad_pcb Public board-family model only; exact installed Microduck board revision remains unconfirmed.",
+       "condition": "Total board load and Radxa header capacity not established.",
+       "caveats": [],
+       "figure": {
+        "figure_used": null,
+        "value_mA": null,
+        "figure_basis": "Total board load and Radxa header capacity not established.",
+        "figures_not_summed": [],
+        "basis": "no chip record is referenced by this need's `current_from`, so no field was read"
+       }
+      },
       {
        "owner": "tof@direct",
        "part": "microduck-tof-module",
@@ -1535,10 +1605,10 @@
     }
    ],
    "coverage": {
-    "chkd": 0,
+    "chkd": 2,
     "unchk": 14,
-    "decl": 14,
-    "req": 14,
+    "decl": 16,
+    "req": 16,
     "complete": false
    }
   },
@@ -1951,19 +2021,6 @@
      "cite": "hosts[radxa-zero-3w] (no pin_roster key)"
     },
     {
-     "subject": "hdr13_I2S3_MCLK_M0<-hat.MCLK",
-     "pin": "hdr13_I2S3_MCLK_M0",
-     "connection": "hat.MCLK",
-     "net": "hdr13_I2S3_MCLK_M0",
-     "function": "i2s",
-     "verdict": "CANNOT DETERMINE",
-     "graded": false,
-     "grader": "none",
-     "message": "host `radxa-zero-3w` names no `pin_roster`, so `check_roster` RETURNS AN EMPTY REPORT and `cecad.pins` is never asked whether hdr13_I2S3_MCLK_M0 exists on RK3566, whether the board has already spent it, or whether it can carry i2s. This is a silence, not a pass.",
-     "quote": "",
-     "cite": "hosts[radxa-zero-3w] (no pin_roster key)"
-    },
-    {
      "subject": "hdr35_I2S3_LRCK_M0<-hat.I2S3_LRCK",
      "pin": "hdr35_I2S3_LRCK_M0",
      "connection": "hat.I2S3_LRCK",
@@ -2202,6 +2259,18 @@
      "why": "this terminal names no host pin \u2014 it lands on a rail, a chained segment or another part, so pin capability is not a question about it"
     },
     {
+     "connection": "hat.V1V8_OUT",
+     "net": "HAT_1V8",
+     "kind": "supply",
+     "why": "this terminal names no host pin \u2014 it lands on a rail, a chained segment or another part, so pin capability is not a question about it"
+    },
+    {
+     "connection": "hat.V3V3_IN",
+     "net": "J5_3V3",
+     "kind": "supply",
+     "why": "this terminal names no host pin \u2014 it lands on a rail, a chained segment or another part, so pin capability is not a question about it"
+    },
+    {
      "connection": "hat.J5_3V3",
      "net": "J5_3V3",
      "kind": "supply",
@@ -2360,9 +2429,9 @@
    ],
    "coverage": {
     "chkd": 0,
-    "unchk": 40,
-    "decl": 40,
-    "req": 40,
+    "unchk": 39,
+    "decl": 39,
+    "req": 39,
     "complete": false
    }
   },
@@ -2385,6 +2454,23 @@
       "route.leads[].current_mA \u2014 already documented for some nets by check_current, but not attached to any lead because there is no lead"
      ],
      "message": "no voltage drop is computed for GND. cecad.harness will not import: cecad.harness needs FreeCAD's geometry kernel, which this interpreter does not have (No module named 'FreeCAD').\n    Run designs through bin/cad \u2014 FreeCAD's interpreter ignores PYTHONPATH and `FreeCAD -c` hangs on stdin.\n    cecad.electrical and cecad.vision are kernel-free and work here., and it takes a `Harness` whose `Route` carries both connectors' positions in mm off a real `Assembly`. `design.json` has 8 keys \u2014 id, title, host, host_power, nodes, segments, external, order \u2014 and not one of them can hold a position. The bridge is `cecad.unify.bind(assembly, design)`; no assembly is bound to this design. THE DROP IS NOT SMALL AND IT IS NOT ZERO \u2014 it is not computed.",
+     "quote": "",
+     "cite": "cecad/harness.py:check_drop"
+    },
+    {
+     "subject": "drop/HAT_1V8",
+     "net": "HAT_1V8",
+     "carries": "supply",
+     "verdict": "CANNOT DETERMINE",
+     "graded": false,
+     "grader": "cecad.harness.check_drop",
+     "grader_available": false,
+     "missing": [
+      "route.length_mm \u2014 the straight-line distance between the two connectors in a root Assembly's frame",
+      "route.leads[].awg \u2014 the gauge, derived from the documented current on the lead",
+      "route.leads[].current_mA \u2014 already documented for some nets by check_current, but not attached to any lead because there is no lead"
+     ],
+     "message": "no voltage drop is computed for HAT_1V8. cecad.harness will not import: cecad.harness needs FreeCAD's geometry kernel, which this interpreter does not have (No module named 'FreeCAD').\n    Run designs through bin/cad \u2014 FreeCAD's interpreter ignores PYTHONPATH and `FreeCAD -c` hangs on stdin.\n    cecad.electrical and cecad.vision are kernel-free and work here., and it takes a `Harness` whose `Route` carries both connectors' positions in mm off a real `Assembly`. `design.json` has 8 keys \u2014 id, title, host, host_power, nodes, segments, external, order \u2014 and not one of them can hold a position. The bridge is `cecad.unify.bind(assembly, design)`; no assembly is bound to this design. THE DROP IS NOT SMALL AND IT IS NOT ZERO \u2014 it is not computed.",
      "quote": "",
      "cite": "cecad/harness.py:check_drop"
     },
@@ -2493,9 +2579,9 @@
    ],
    "coverage": {
     "chkd": 0,
-    "unchk": 7,
-    "decl": 7,
-    "req": 7,
+    "unchk": 8,
+    "decl": 8,
+    "req": 8,
     "complete": false
    }
   },
@@ -2504,6 +2590,23 @@
    "asks": "what does each named chip draw, and under what condition does its datasheet say so?",
    "grader": "cecad.electrical.ChipSpec.draw",
    "rows": [
+    {
+     "subject": "hat@direct@J5_3V3",
+     "owner": "hat@direct",
+     "part": "microduck-robot-hat-pcb",
+     "chip": null,
+     "rail": "J5_3V3",
+     "typical_mA": null,
+     "peak_mA": null,
+     "graded": false,
+     "verdict": "CANNOT DETERMINE",
+     "condition": "Total board load and Radxa header capacity not established.",
+     "quote": "",
+     "cite": "Pinned public Pollen HAT 23eab11927f95ceca0dfa35bf182caeb7db39ea0: reference/pollen-elec-rpi-robot-hat/elec_RPI_Robot_HAT.kicad_pcb Public board-family model only; exact installed Microduck board revision remains unconfirmed.",
+     "caveats": [],
+     "typical": null,
+     "peak": null
+    },
     {
      "subject": "tof@direct@J5_3V3",
      "owner": "tof@direct",
@@ -3842,9 +3945,9 @@
    ],
    "coverage": {
     "chkd": 2,
-    "unchk": 19,
-    "decl": 21,
-    "req": 21,
+    "unchk": 20,
+    "decl": 22,
+    "req": 22,
     "complete": false
    }
   }
@@ -3868,14 +3971,14 @@
    "lane": "rail_budget",
    "subject": "J5_3V3/typical",
    "verdict": "CANNOT DETERMINE",
-   "reason": "J5_3V3 typical demand is 95 mA, from all 1 part(s) drawing it:\n  tof@direct             vl53l5cx              95 mA\nTHE DEMAND IS KNOWN. THE SUPPLY IS NOT. No document read here puts a NUMBER on a\ncurrent limit for this net, for a port or for a connector, so there is nothing to\ncompare 95 mA against and no headroom can be reported. This is a demand figure,\nnot a pass.",
+   "reason": "1 of 2 part(s) drawing J5_3V3 have no sourced typical current:\n  hat@direct             (no chip named) NOT SOURCED\n      Total board load and Radxa header capacity not established.\nsourced so far:\n  tof@direct             vl53l5cx              95 mA\nThat comes to 95 mA, which is a FLOOR and NOT the total. The missing parts\nare not drawing zero \u2014 nobody wrote down what they draw. Adding them in as 0 mA\nis how a budget passes a net that browns out on the bench.\nTo close it: fetch the datasheet and add the part to cecad/data/chips.json, or\nmeasure it and record what you found.",
    "cite": ""
   },
   {
    "lane": "rail_budget",
    "subject": "J5_3V3/peak",
    "verdict": "CANNOT DETERMINE",
-   "reason": "J5_3V3 peak demand is 150 mA, from all 1 part(s) drawing it:\n  tof@direct             vl53l5cx             150 mA\nTHE DEMAND IS KNOWN. THE SUPPLY IS NOT. No document read here puts a NUMBER on a\ncurrent limit for this net, for a port or for a connector, so there is nothing to\ncompare 150 mA against and no headroom can be reported. This is a demand figure,\nnot a pass.",
+   "reason": "1 of 2 part(s) drawing J5_3V3 have no sourced peak current:\n  hat@direct             (no chip named) NOT SOURCED\n      Total board load and Radxa header capacity not established.\nsourced so far:\n  tof@direct             vl53l5cx             150 mA\nThat comes to 150 mA, which is a FLOOR and NOT the total. The missing parts\nare not drawing zero \u2014 nobody wrote down what they draw. Adding them in as 0 mA\nis how a budget passes a net that browns out on the bench.\nTo close it: fetch the datasheet and add the part to cecad/data/chips.json, or\nmeasure it and record what you found.",
    "cite": ""
   },
   {
@@ -4167,13 +4270,6 @@
   },
   {
    "lane": "pin_capability",
-   "subject": "hdr13_I2S3_MCLK_M0<-hat.MCLK",
-   "verdict": "CANNOT DETERMINE",
-   "reason": "host `radxa-zero-3w` names no `pin_roster`, so `check_roster` RETURNS AN EMPTY REPORT and `cecad.pins` is never asked whether hdr13_I2S3_MCLK_M0 exists on RK3566, whether the board has already spent it, or whether it can carry i2s. This is a silence, not a pass.",
-   "cite": "hosts[radxa-zero-3w] (no pin_roster key)"
-  },
-  {
-   "lane": "pin_capability",
    "subject": "hdr35_I2S3_LRCK_M0<-hat.I2S3_LRCK",
    "verdict": "CANNOT DETERMINE",
    "reason": "host `radxa-zero-3w` names no `pin_roster`, so `check_roster` RETURNS AN EMPTY REPORT and `cecad.pins` is never asked whether hdr35_I2S3_LRCK_M0 exists on RK3566, whether the board has already spent it, or whether it can carry i2s. This is a silence, not a pass.",
@@ -4237,6 +4333,13 @@
   },
   {
    "lane": "loom_drop",
+   "subject": "drop/HAT_1V8",
+   "verdict": "CANNOT DETERMINE",
+   "reason": "no voltage drop is computed for HAT_1V8. cecad.harness will not import: cecad.harness needs FreeCAD's geometry kernel, which this interpreter does not have (No module named 'FreeCAD').\n    Run designs through bin/cad \u2014 FreeCAD's interpreter ignores PYTHONPATH and `FreeCAD -c` hangs on stdin.\n    cecad.electrical and cecad.vision are kernel-free and work here., and it takes a `Harness` whose `Route` carries both connectors' positions in mm off a real `Assembly`. `design.json` has 8 keys \u2014 id, title, host, host_power, nodes, segments, external, order \u2014 and not one of them can hold a position. The bridge is `cecad.unify.bind(assembly, design)`; no assembly is bound to this design. THE DROP IS NOT SMALL AND IT IS NOT ZERO \u2014 it is not computed.",
+   "cite": "cecad/harness.py:check_drop"
+  },
+  {
+   "lane": "loom_drop",
    "subject": "drop/J5_3V3",
    "verdict": "CANNOT DETERMINE",
    "reason": "no voltage drop is computed for J5_3V3. cecad.harness will not import: cecad.harness needs FreeCAD's geometry kernel, which this interpreter does not have (No module named 'FreeCAD').\n    Run designs through bin/cad \u2014 FreeCAD's interpreter ignores PYTHONPATH and `FreeCAD -c` hangs on stdin.\n    cecad.electrical and cecad.vision are kernel-free and work here., and it takes a `Harness` whose `Route` carries both connectors' positions in mm off a real `Assembly`. `design.json` has 8 keys \u2014 id, title, host, host_power, nodes, segments, external, order \u2014 and not one of them can hold a position. The bridge is `cecad.unify.bind(assembly, design)`; no assembly is bound to this design. THE DROP IS NOT SMALL AND IT IS NOT ZERO \u2014 it is not computed.",
@@ -4276,6 +4379,13 @@
    "verdict": "CANNOT DETERMINE",
    "reason": "no voltage drop is computed for csi_J7_p22_VCC_3V3. cecad.harness will not import: cecad.harness needs FreeCAD's geometry kernel, which this interpreter does not have (No module named 'FreeCAD').\n    Run designs through bin/cad \u2014 FreeCAD's interpreter ignores PYTHONPATH and `FreeCAD -c` hangs on stdin.\n    cecad.electrical and cecad.vision are kernel-free and work here., and it takes a `Harness` whose `Route` carries both connectors' positions in mm off a real `Assembly`. `design.json` has 8 keys \u2014 id, title, host, host_power, nodes, segments, external, order \u2014 and not one of them can hold a position. The bridge is `cecad.unify.bind(assembly, design)`; no assembly is bound to this design. THE DROP IS NOT SMALL AND IT IS NOT ZERO \u2014 it is not computed.",
    "cite": "cecad/harness.py:check_drop"
+  },
+  {
+   "lane": "chip_draw",
+   "subject": "hat@direct@J5_3V3",
+   "verdict": "CANNOT DETERMINE",
+   "reason": "Total board load and Radxa header capacity not established.",
+   "cite": "Pinned public Pollen HAT 23eab11927f95ceca0dfa35bf182caeb7db39ea0: reference/pollen-elec-rpi-robot-hat/elec_RPI_Robot_HAT.kicad_pcb Public board-family model only; exact installed Microduck board revision remains unconfirmed."
   },
   {
    "lane": "chip_draw",
