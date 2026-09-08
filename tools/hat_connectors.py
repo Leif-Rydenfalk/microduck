@@ -10,20 +10,15 @@ reason is now false: Pollen published the board (Apache-2.0) and this repo has
 it at reference/pollen-elec-rpi-robot-hat. The connector positions are a
 MEASUREMENT and this tool takes it.
 
-THE TRAP THIS TOOL EXISTS TO KEEP IN VIEW. out/pcb/hat/mesh-revision.json (lane
-internals-build2) settled that the HAT mesh in our assembly is the PRE-RELEASE
-revision fbd885d, which Pollen never produced, and that its connector bank sits
-at the other end of the board. So there are two answers to "where does the servo
-cable plug in", and this tool reports BOTH:
+SOURCE SCOPE. The public C1 board and the reference mesh differ. Their
+footprint coordinates and an inferred reflected placement are reported as
+public-family/model evidence. The exact board installed in the target robot
+is unresolved; neither projection establishes an actual assembled wire exit.
 
-    as_modelled  the position on the board that is actually in our CAD
-    as_built     the position on the board that is in the real robot (C1)
+    as_modelled      inferred placement in the historical reference mesh
+    public_c1_world  public C1 footprint center projected into the model pose
 
-and the vector between them. Nothing here picks one. Picking one is
-part:microduck-robot-hat-pcb's iteration, not the harness's.
-
-FRAMES. The mesh's own local frame and the KiCad board frame are the SAME
-coordinates: the STL bbox is checked against the board outline in this tool and
+FRAMES. Projection ASSUMES a common local coordinate origin: the STL bbox is checked against the board outline in this tool and
 the check is written into the output. Board z = 0 is the bottom substrate face
 (the mesh spans z 0..0.840 = 0.770 dielectric + 2 x 0.035 inner copper), so the
 top surface a vertical connector seats on is z = 0.960 (0.840 + 0.070 outer
@@ -140,13 +135,13 @@ def main():
         "x_max_delta_mm": round(hi[0] - outline["x"][1], 4),
         "y_min_delta_mm": round(lo[1] - outline["y"][0], 4),
     }
-    frame_check["verdict"] = ("PASS — the +x and -y extremes agree to 0.005 mm, so the two "
-                              "revisions are drawn on one origin and a board coordinate is a "
-                              "mesh coordinate"
+    frame_check["bbox_alignment_check"] = ("PASS — x-max and y-min fall within 0.01/0.02 mm; this is bounding-box consistency only, not coordinate-frame or installed-revision proof"
                               if abs(frame_check["x_max_delta_mm"]) < 0.01
                               and abs(frame_check["y_min_delta_mm"]) < 0.02
                               else "FAIL — the frames do not share an origin: %s"
                               % frame_check)
+    frame_check["verdict"] = "FAIL" if frame_check["bbox_alignment_check"].startswith("FAIL") else "CANNOT DETERMINE"
+    frame_check["scope"] = "Projection assumes common origin/orientation; bounding-box agreement does not verify actual connector exits or target board identity."
 
     fps = kicad_footprints(KICAD)
     ox, oy = comp["board"]["origin_offset_kicad_mm"]
@@ -234,21 +229,22 @@ def main():
         w_o = add(mul(Rm, origin_b), t)
         w_z = mul(Rm, zaxis_b)
         w_x = mul(Rm, xaxis_b) if xaxis_b else None
-        row["as_built_world"] = {"origin_mm": [round(v, 4) for v in w_o],
+        row["public_c1_world"] = {"origin_mm": [round(v, 4) for v in w_o],
                                  "z_axis": [round(v, 6) for v in w_z],
                                  "x_axis": [round(v, 6) for v in w_x] if w_x else None,
-                                 "basis": "C1 (release) placement from out/pcb/hat/components.json "
+                                 "identity_verdict": "CANNOT DETERMINE",
+                                 "point_kind": "footprint_center_at_board_surface_not_wire_exit",
+                                 "basis": "Public C1 family placement from out/pcb/hat/components.json "
                                           "(manufacturer POS) put through the HAT placement row of "
-                                          "ce-assemblies/microduck/current/placements.json"}
+                                          "ce-assemblies/microduck/current/placements.json; installed target revision and actual wire exit remain unresolved"}
         if plane and ref in ("J13", "J14", "J3", "J11"):
             ob = [round(2 * plane - centre[0], 4), centre[1], zsurf]
             wo2 = add(mul(Rm, ob), t)
             row["as_modelled"] = {
                 "board_mm": ob,
                 "world_origin_mm": [round(v, 4) for v in wo2],
-                "delta_to_as_built_mm": round(math.dist(wo2, w_o), 4),
-                "basis": "the position this connector occupies on the board that is ACTUALLY in "
-                         "our CAD (pre-release fbd885d), obtained by reflecting the C1 position "
+                "delta_to_public_c1_mm": round(math.dist(wo2, w_o), 4),
+                "basis": "Inferred historical reference-mesh position (associated with fbd885d), obtained by reflecting the public C1 footprint position "
                          "about board x = %s mm — the plane solved above from the mesh's own "
                          "0.95 mm hole columns" % plane}
         conns.append(row)
@@ -257,6 +253,8 @@ def main():
            "generated_by": "tools/hat_connectors.py",
            "record": {
                "ref": "part:microduck-robot-hat-pcb",
+               "identity_verdict": "CANNOT DETERMINE",
+               "scope": "Public board-family footprint-center projections only, not installed original connector exits or manufacturing routing data.",
                "units": "mm",
                "frame": "assembly world = MJCF world at the zero pose, the frame of "
                         "wiring/cables.json and out/wiring/cables3d.json",
@@ -266,25 +264,25 @@ def main():
                "board_frame_check": frame_check,
                "revision_mirror": mirror,
                "top_surface_z_mm": TOP_SURFACE_Z,
-               "counts": {"connectors_located": sum(1 for c in conns if c.get("as_built_world")),
+               "counts": {"connectors_located": sum(1 for c in conns if c.get("public_c1_world")),
                           "connectors_asked_for": len(wanted),
                           "with_both_revisions": sum(1 for c in conns if c.get("as_modelled"))},
                "what_this_replaces": "out/wiring/cables3d.json records five HAT-end runs with "
                                      "why_unlocated 'HAT mesh centroid (bbox centre through the "
                                      "placement) — connector positions unpublished'. They are "
-                                     "published and they are here.",
+                                     "published as public-family footprint coordinates here; actual target exits remain unresolved.",
                "connectors": conns}}
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     json.dump(doc, open(OUT, "w"), indent=1)
     print("frame check:", frame_check["verdict"])
     print("mirror plane x = %s mm, residual %s mm" % (mirror["plane_x_mm"], mirror["residual_mm"]))
     for c in conns:
-        if c.get("as_built_world"):
+        if c.get("public_c1_world"):
             am = c.get("as_modelled")
-            print("%-4s %-14s as-built world %s%s" % (
+            print("%-4s %-14s public C1 projected world %s%s" % (
                 c["refdes"], c["series"],
-                c["as_built_world"]["origin_mm"],
-                ("   as-modelled %s  delta %.4f mm" % (am["world_origin_mm"], am["delta_to_as_built_mm"]))
+                c["public_c1_world"]["origin_mm"],
+                ("   as-modelled %s  delta %.4f mm" % (am["world_origin_mm"], am["delta_to_public_c1_mm"]))
                 if am else ""))
         else:
             print("%-4s CANNOT DETERMINE %s" % (c["refdes"], c.get("why")))

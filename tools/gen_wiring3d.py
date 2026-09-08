@@ -99,16 +99,16 @@ def main():
                chip(v)))
     hatrows = []
     for c in (HATC["record"]["connectors"] if HATC else []):
-        if not c.get("as_built_world"):
+        if not c.get("public_c1_world"):
             continue
         am = c.get("as_modelled")
         hatrows.append(
             "<tr><td><code>%s</code></td><td>%s</td><td>%s</td><td class='mono'>%s</td>"
             "<td class='mono'>%s</td><td class='n'>%s</td><td>%s</td></tr>"
             % (E(c["refdes"]), E(c["series"]), E(c["what"]),
-               E(str(c["as_built_world"]["origin_mm"])),
+               E(str(c["public_c1_world"]["origin_mm"])),
                E(str(am["world_origin_mm"])) if am else "&mdash;",
-               num(am["delta_to_as_built_mm"], 4) if am else "&mdash;",
+               num(am["delta_to_public_c1_mm"], 4) if am else "&mdash;",
                E(", ".join("%s:%s" % (k, v) for k, v in sorted((c.get("nets_by_pin") or {}).items()))[:60])))
     # the exact-vs-grid comparison, COMPUTED here from the two columns actually
     # printed, so the sentence cannot drift from the table above it
@@ -219,7 +219,7 @@ def main():
     DETERMINE. Bend radius is CANNOT DETERMINE on every routed run <i>by construction</i>:
     ROBOTIS publishes no minimum bend radius for the X3P lead, so only the ACHIEVED radius is
     reported and there is nothing to judge it against. The FAILs are leads, not verdicts on the
-    design &mdash; the real robot has these cables, so a run with no corridor is a place where
+    design &mdash; these are historical modeled cable routes, so a run with no corridor is a place where
     our model is missing a passage.
   </div>
 </section>
@@ -234,12 +234,13 @@ def main():
   {max_over:.4f}&nbsp;mm, and understates on {n_under}. <b>{n_tight} of {n_ex} runs are under the
   stated 1.0000&nbsp;mm floor when measured exactly</b> &mdash; so the grid-based clearance
   verdicts in this table are optimistic, and the exact column is what a verdict should rest on.</p>
-  <p>Routed length and <code>cables.json</code>&rsquo;s <code>cable_mm</code> are BOTH printed and
-  neither overwrites the other: the routed figure is the length at the zero pose, the
-  <code>cable_mm</code> figure is a floor plus a slack allowance over each crossed joint&rsquo;s
-  whole range. Volume is the divergence theorem over the cable&rsquo;s own closed mesh.</p>
+  <p>This table retains historical modeled route lengths and cached proxy estimates.
+  Current <code>wiring/cables.json</code> leaves every physical wire cut null; its
+  <code>modeled_*</code> values preserve conditional arithmetic. Proxy endpoints and
+  public-family footprint centers do not establish actual original wire exits or
+  manufacturing lengths. Existing clearance failures remain failures.</p>
   <table class="data">
-    <thead><tr><th>run</th><th>ends</th><th>OD mm</th><th>routed mm</th><th>cables.json mm</th>
+    <thead><tr><th>run</th><th>ends</th><th>OD mm</th><th>routed mm</th><th>historical proxy mm</th>
     <th>&Delta; mm</th><th>grid clear mm</th><th>EXACT clear mm</th><th>nearest body</th>
     <th>bend R mm</th><th>pierce</th><th>vol mm&sup3;</th>
     <th>verdict</th></tr></thead>
@@ -260,6 +261,7 @@ def main():
 </section>
 
 <section id="hat">
+  <p><b>Public-family projections only.</b> C1 is not established as the original installed board. These are footprint centers, not measured wire exits. Actual route floors and manufacturing cuts are unknown.</p>
   <h2><span class="n">4</span>The HAT connectors, and the revision that moves them</h2>
   <p>Five HAT-end runs were recorded with the endpoint &ldquo;HAT mesh centroid &mdash; connector
   positions unpublished&rdquo;. They are published: Pollen&rsquo;s board is Apache-2.0 and is in
@@ -271,7 +273,7 @@ def main():
   {HATC['record']['revision_mirror']['residual_mm']:.1e}&nbsp;mm &mdash; so it is a mirror, not the
   &ldquo;end-for-end&rdquo; adjective, and both positions are given here.</p>
   <table class="data">
-    <thead><tr><th>ref</th><th>series</th><th>what</th><th>as built (C1) world mm</th>
+    <thead><tr><th>ref</th><th>series</th><th>what</th><th>public C1 projected mm</th>
     <th>as modelled (fbd885d) world mm</th><th>&Delta; mm</th><th>nets</th></tr></thead>
     <tbody>
 {chr(10).join(hatrows)}

@@ -63,7 +63,13 @@ class HatI2SWiring(unittest.TestCase):
                     continue
                 if row.get('id') == 'hat-radxa-40pin':
                     literals.append(row)
-        self.assertEqual(literals, [self.row])
+        self.assertEqual(len(literals), 1)
+        self.assertEqual(literals[0], {k: self.row[k] for k in literals[0]})
+        self.assertEqual(set(self.row) - set(literals[0]),
+                         {'route_verdict', 'cut_verdict', 'endpoint_evidence', 'length_scope'})
+        self.assertEqual(self.row['cut_verdict'], 'CANNOT DETERMINE')
+        self.assertEqual(self.row['cable_mm'], 0)  # board-to-board, not a cut
+
         rendered = next(line for line in (ROOT / 'wiring/CABLES.md').read_text().splitlines()
                         if '`hat-radxa-40pin`' in line)
         self.assertIn(self.row['pins'], rendered)
