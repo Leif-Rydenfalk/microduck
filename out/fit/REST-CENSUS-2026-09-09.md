@@ -88,6 +88,26 @@ Ten of the 38 unique meshes are non-manifold (power_support, np_f970, both
 soles and feet, jaw_soft, soft_mouth_top, jaw); one is open (yaw_roll_motion).
 Ray-parity volumes on the non-manifold ones are reported but carry that caveat.
 
+## Part 29 (yaw_roll_motion) graded with the closed mesh — added 01:50 CST
+
+`tools/fit_yaw_roll_closed.py` substitutes, in memory only, the review lane's
+closed repair `out/review-geometry/microduck-yaw-roll-motion.stl` (same part
+frame as the reference: Kabsch on the 1242 shared triangles is identity to
+1e-6 mm) and re-measures every AABB-overlapping pair. Result
+`out/fit/yaw-roll-closed.json`:
+
+| pair | result |
+|---|---|
+| yaw_roll_motion × its own xl330 (head-yaw servo) | 404.0 mm³ shared, 0.92 mm depth — the same servo-seat family as yaw2roll (405.6 mm³) and the legs; see reading 1 |
+| × both 22×16×4 bearings | 0.02 mm; seated contact |
+| × jaw_soft/xl330 | 0.0002 mm³; touching |
+| × motor_support, top_head_shell, jaw, bottom_head_shell | clear, zero crossing triangles |
+| × fasteners #38–#41 | thread engagement 1.5–2.5 mm; the part they are driven into |
+
+So the opening in part 29 does not put the part into any shell, the jaw or the
+motor support at rest. The only overlap it has is the servo-seat overlap every
+servo-carrying part has. Range-of-motion is the sweep stage, below.
+
 ## Not done
 
 `sweep` (joint-range) and `access` (driver reach) stages are documented in the
