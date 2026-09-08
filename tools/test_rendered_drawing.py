@@ -122,6 +122,38 @@ def scale_regression(canonical, tmp):
     render(part, str(raster), framing=cached, ortho_pixels_per_mm=5., **args)
     assert cached['pixels_per_model_mm'] == 5.
     assert all(abs(a-b)<=3 for a,b in zip(pixel_extent(), (100,50))), 'Explicit zoom must isolate cache and affect real pixels'
+    fit_center=list(cached['center_projected_mm'])
+    shifted=[fit_center[0]+4.,fit_center[1]+3.]
+    render(part,str(raster),framing=cached,ortho_pixels_per_mm=5.,ortho_center_projected_mm=shifted,**args)
+    assert cached['center_projected_mm']==shifted
+    a=np.asarray(Image.open(raster).convert('RGB')); ys,xs=np.where(a.min(axis=2)<245)
+    assert abs((xs.min()+xs.max())/2-(110-4*5))<2
+    assert abs((ys.min()+ys.max())/2-(110+3*5))<2
+    assert all(abs(a-b)<=3 for a,b in zip(pixel_extent(),(100,50))), 'Shift must not stretch either axis'
+    hit={}
+    render(part,str(raster),framing=hit,ortho_pixels_per_mm=5.,ortho_center_projected_mm=shifted,**args)
+    assert hit==cached
+    from radius_locators import paper_point
+    panel={'box_mm':[0.,0.,220.,220.],'framing':hit}
+    r,u=hit['camera_right'],hit['camera_up']
+    feature=[shifted[0]*r[i]+shifted[1]*u[i] for i in range(3)]
+    assert max(abs(v-110) for v in paper_point(feature,panel))<1e-8
+    feature_part=Part('centre_feature_fixture').cyl(8.,2.,at=(7.,-3.,0.))
+    render(feature_part,str(raster),framing=cached,ortho_pixels_per_mm=5.,
+           ortho_center_projected_mm=(7.,-3.),**args)
+    a=np.asarray(Image.open(raster).convert('RGB'));ys,xs=np.where(a.min(axis=2)<245)
+    assert abs((xs.min()+xs.max())/2-110)<2 and abs((ys.min()+ys.max())/2-110)<2
+    assert all(abs(a-b)<=3 for a,b in zip(pixel_extent(),(40,40))), 'Known circular feature must land at camera centre without stretching'
+    for invalid in ((0.,), (0.,1.,2.), (float('nan'),0.),(0.,float('inf')), 3., '12', b'12'):
+        try:
+            render(part,str(raster),ortho_center_projected_mm=invalid,**args)
+            raise AssertionError('Invalid camera centre accepted')
+        except ValueError:pass
+    for misuse in ({'projection':'perspective'},{'title':'Has title'}):
+        try:
+            render(part,str(raster),ortho_center_projected_mm=(0.,0.),**dict(args,**misuse))
+            raise AssertionError('Unsupported centre projection accepted')
+        except ValueError:pass
     for invalid in (0., -1., float('nan'), float('inf')):
         try:
             render(part, str(raster), ortho_pixels_per_mm=invalid, **args)
@@ -144,6 +176,62 @@ def scale_regression(canonical, tmp):
     print('PASS known solid pixel scale, cache isolation, invalid zoom, label and paper-width controls')
 
 
+def supplemental_scale_regression(canonical,tmp):
+    import xml.etree.ElementTree as ET
+    source=canonical/'microduck-shin.svg'
+    panels=json.loads((canonical/'layout-evidence.json').read_text())['panels']
+    groups=[{'kind':'principal','renders':[1,2,3,4]}, {'kind':'detail','renders':[5,6]}]
+    assert verify_render_scales(source,panels,groups)['verdict']=='FAIL', 'Unenlarged details must fail'
+    tree=ET.parse(source)
+    images=[e for e in tree.iter() if e.tag.endswith('}image')]
+    for i in (4,5):
+        for key in ('width','height'):
+            images[i].set(key,str(float(images[i].get(key))*1.5))
+        old=f"RENDER {i+1} / SCALE {panels[i]['paper_scale']:.5f}:1"
+        for e in tree.iter():
+            if e.tag.endswith('}text') and e.text==old:
+                e.text=f"RENDER {i+1} / SCALE {panels[i]['paper_scale']*1.5:.5f}:1"
+    path=tmp/'supplemental-scale.svg';tree.write(path)
+    assert verify_render_scales(path,panels)['verdict']=='FAIL', 'Default shared-scale contract must remain unchanged'
+    assert verify_render_scales(path,panels,groups)['verdict']=='PASS'
+    assert verify_render_scales(path,panels,[groups[0],{'kind':'detail','renders':[4,5,6]}])['verdict']=='FAIL'
+    raw=path.read_text();path.write_text(raw.replace('RENDER 5 / SCALE','ALTERED / SCALE'))
+    assert verify_render_scales(path,panels,groups)['verdict']=='FAIL'
+    tree.write(path)
+    images[4].set('width',str(float(images[4].get('width'))*1.1));tree.write(path)
+    assert verify_render_scales(path,panels,groups)['verdict']=='FAIL', 'Stretch must fail even with explicit scale groups'
+    print('PASS supplemental explicit groups, unchanged default, unenlarged/duplicate/label/stretch negative controls')
+    from rendered_details import verify_context
+    import copy
+    src=Path(panels[0]['raster']); actual=tmp/'context.png';actual.write_bytes(src.read_bytes())
+    frame=panels[0]['framing']
+    assert verify_context(src,actual,frame,copy.deepcopy(frame))['verdict']=='PASS'
+    for kind in ('pixels','camera'):
+        actual.write_bytes(src.read_bytes()); changed=copy.deepcopy(frame)
+        if kind=='pixels':actual.write_bytes(actual.read_bytes()+b'changed')
+        else:changed['center_projected_mm'][0]+=.1
+        try:
+            verify_context(src,actual,frame,changed)
+            raise AssertionError('Stale context accepted: '+kind)
+        except ValueError:pass
+    print('PASS exact context pixels/camera and substituted-pixel/shifted-frame controls')
+
+
+def filament_note_regression():
+    from cecad.autosheet import _filament_note
+    for value in (None,0.,-1.,float('nan'),float('inf')):
+        text=_filament_note('PLA',{'filament_g':value,'layers':290})
+        assert 'mass CANNOT DETERMINE' in text and '~0' not in text
+        assert '290 modelled layers @ 0.2 mm' in text
+    assert 'mass CANNOT DETERMINE' in _filament_note('PLA',{'layers':290})
+    small=_filament_note('PLA',{'filament_g':.1,'layers':1})
+    assert '~0.1 g' in small and '~0 g' not in small
+    assert '~0.01 g' in _filament_note('PLA',{'filament_g':.01,'layers':1})
+    positive=_filament_note('PLA',{'filament_g':4.2,'layers':290})
+    assert '~4.2 g (shell/infill estimate, not weighed)' in positive
+    print('PASS missing/null/zero/nonfinite mass refusal, nonzero small mass, explicit model estimate and sourced layer count')
+
+
 def main():
     canonical = ROOT/'out/drawings/microduck-shin'
     with tempfile.TemporaryDirectory(prefix='microduck-drawing-tests-') as td:
@@ -152,8 +240,11 @@ def main():
         detail_regression()
         caption_regression(canonical, tmp)
         scale_regression(canonical, tmp)
-        pdfsheet.self_test()
-        sheetcheck.self_test(workdir=str(tmp/'sheetcheck'))
+        supplemental_scale_regression(canonical,tmp)
+        filament_note_regression()
+        assert pdfsheet.self_test() is True
+        cases,passed=sheetcheck.self_test(workdir=str(tmp/'sheetcheck'))
+        assert passed, 'Core checker self-test failures: '+str([c['case'] for c in cases if not c['ok']])
     print('PASS all rendered drawing regressions')
 
 

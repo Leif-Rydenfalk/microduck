@@ -4,7 +4,6 @@ PASS real captions, old any-text defect and undersized-render controls
 PASS known solid pixel scale, cache isolation, invalid zoom, label and paper-width controls
 PASS supplemental explicit groups, unchanged default, unenlarged/duplicate/label/stretch negative controls
 PASS exact context pixels/camera and substituted-pixel/shifted-frame controls
-PASS missing/null/zero/nonfinite mass refusal, nonzero small mass, explicit model estimate and sourced layer count
   [PASS] writes and parses back — S/f/Tj = 4/1/2, 1394 B
   [PASS] operator counts are the independent ones — (4, 1, 2)
   [PASS] BREAK: a stroke painted as no-op -> FAIL — operators S/f/Tj = 3/1/2, the primitive list needs 4/1/2
@@ -21,7 +20,7 @@ PASS missing/null/zero/nonfinite mass refusal, nonzero small mass, explicit mode
   [PASS] missing raster fails and preserves previous PDF
   [PASS] failed final readback preserves previous PDF and removes staging
 pdfsheet self_test: 15 checks passed
-sheetcheck --self-test   (workdir /var/folders/10/grbnlfxx7zv19wrbq9d3xr2r0000gn/T/microduck-drawing-tests-qw0glky5/sheetcheck)
+sheetcheck --self-test   (workdir /var/folders/10/grbnlfxx7zv19wrbq9d3xr2r0000gn/T/microduck-drawing-tests-3bom_rva/sheetcheck)
   THE CONTROL FIRST: a sheet built to pass all 8 rules
   control-good             line_ratio    want PASS             got PASS             ok
   control-good             coverage      want PASS             got PASS             ok
@@ -81,9 +80,8 @@ sheetcheck --self-test   (workdir /var/folders/10/grbnlfxx7zv19wrbq9d3xr2r0000gn
   sweep-nonpart-dir-skippe sweep         want ['another-lanes-plot-dir', 'another-lanes-probe-dir'] got ['another-lanes-plot-dir', 'another-lanes-probe-dir'] ok
   sweep-nonpart-with-svg-n sweep         want []               got []               ok
   sweep-break-nonpart-goes sweep         want True             got True             ok
-  realpred-found-a-part-to sweep         want True             got True             ok
-  realpred-knows-a-real-pa sweep         want (True, True)     got (True, True)     ok
-  realpred-refuses-a-nonpa sweep         want False            got False            ok
+  realpred-found-a-part-to sweep         want True             got False            *** WRONG ***
+  realpred-refuses-a-nonpa sweep         want False            got None             *** WRONG ***
   realpred-unconsultable-i sweep         want True             got True             ok
   and the SECTION ROLL-UP — A / A2 / A3 / A4 counted apart
   sections-control-all-pas sections      want {'A': 'PASS', 'A2': 'PASS', 'A3': 'PASS', 'A4': 'PASS'} got {'A': 'PASS', 'A2': 'PASS', 'A3': 'PASS', 'A4': 'PASS'} ok
@@ -93,5 +91,7 @@ sheetcheck --self-test   (workdir /var/folders/10/grbnlfxx7zv19wrbq9d3xr2r0000gn
   sections-a2-coverage-is- sections      want (60.0, 85.0)     got (60.0, 85.0)     ok
   colour-shadow-counted-ap sections      want (6, 0, 6)        got (6, 0, 6)        ok
 
-  64/64 self-test cases behaved as required
+  61/63 self-test cases behaved as required
+  FAILED SELF-TEST: realpred-found-a-part-to-test / sweep wanted True got False — the predicate is measured against a part that exists: TriadError: $CE_TRIAD_ROOT entry '/Users/leifrydenfalk/dev/ce-designs/microduck' is not a directory. Fix it or point it at the ce-workshop checkout.
+  FAILED SELF-TEST: realpred-refuses-a-nonpart / sweep wanted False got None — a name no triad root holds is not a part folder
 PASS all rendered drawing regressions

@@ -23,7 +23,7 @@ def _panel(index, width, height, margin=10.):
     w=fw*widths[col]-1;h=fh*(.54 if row==0 else .46)-1
     return x,y,w,h,1200,round(1200*h/w)
 
-def verify_render_scales(svg, panels):
+def verify_render_scales(svg, panels, scale_groups=None):
     """Read paper placement, embedded raster bytes and scale labels back."""
     import base64, xml.etree.ElementTree as ET
     tree=ET.parse(svg)
@@ -47,12 +47,30 @@ def verify_render_scales(svg, panels):
                 failures.append(f'render {i+1}: embedded pixels differ from measured source')
         except Exception as e:
             failures.append(f'render {i+1}: unreadable pixels: {e}')
-    if scales and max(scales)-min(scales)>1e-5:
-        failures.append('principal renders do not share one paper scale')
+    if scale_groups is None:
+        if scales and max(scales)-min(scales)>1e-5:
+            failures.append('principal renders do not share one paper scale')
+    else:
+        # Explicit supplemental groups do not change the default principal
+        # contract. Every render belongs to exactly one group, and each detail
+        # is genuinely larger than the four shared-scale principal views.
+        try:
+            indices=[i for group in scale_groups for i in group['renders']]
+            assert sorted(indices)==list(range(1,len(scales)+1))
+            principal=[g for g in scale_groups if g['kind']=='principal']
+            assert len(principal)==1 and len(principal[0]['renders'])>=4
+            base=scales[principal[0]['renders'][0]-1]
+            for group in scale_groups:
+                assert group['kind'] in ('principal','detail') and group['renders']
+                values=[scales[i-1] for i in group['renders']]
+                assert max(values)-min(values)<=1e-5
+                if group['kind']=='detail': assert min(values)>base+1e-5
+        except (AssertionError,KeyError,IndexError,TypeError):
+            failures.append('invalid, nonuniform or non-enlarged explicit scale groups')
     return {'verdict':'FAIL' if failures else 'PASS','findings':failures,'renders':len(images),
-            'paper_scales':scales}
+            'paper_scales':scales,'scale_groups':scale_groups}
 
-def draw_rendered(slug, outdir=None):
+def draw_rendered(slug, outdir=None, render_bundle=None):
     p=ROOT/'out'/'drawings'/slug
     out=Path(outdir) if outdir is not None else p/'render-panel-build'
     out.mkdir(parents=True,exist_ok=True)
@@ -70,6 +88,9 @@ def draw_rendered(slug, outdir=None):
     evidence=[]; failures=[]
     fitted=[]
     for i,camera in enumerate(cams):
+        if render_bundle is not None:
+            fitted.append(render_bundle['panels'][i]['paper_scale'])
+            continue
         x,y,w,h,px,py=_panel(i,W,H,margin)
         frame={}
         render(part,str(out/('fit-render-%d.png'%(i+1))),view=camera,W=px,H=py,
@@ -86,7 +107,15 @@ def draw_rendered(slug, outdir=None):
      # The end-on faces need lower ambient fill to show their depth; the
      # directional key/fill/rim rig and its shadow direction stay unchanged.
      environment_intensity=1. if i<4 else .25
-     render(part,str(path),view=camera,W=px,H=py,ss=2,mode='pbr',projection='ortho',edges=True,bg=1.,env={'intensity':environment_intensity},verbose=False,framing=framing,ortho_pixels_per_mm=common_scale*px/w)
+     if render_bundle is None:
+      render(part,str(path),view=camera,W=px,H=py,ss=2,mode='pbr',projection='ortho',edges=True,bg=1.,env={'intensity':environment_intensity},verbose=False,framing=framing,ortho_pixels_per_mm=common_scale*px/w)
+     else:
+      source_panel=render_bundle['panels'][i]
+      assert Path(source_panel['raster']).resolve()==path.resolve()
+      framing=dict(source_panel['framing'])
+      camera=list(framing['camera_elev_azim'])
+      environment_intensity=source_panel['environment_intensity']
+      cap=source_panel['caption']
      # Preserve the raster aspect, even for a sub-pixel rounding difference.
      h_actual=w*py/px
      arr=np.asarray(Image.open(path).convert('RGB'))
@@ -97,7 +126,8 @@ def draw_rendered(slug, outdir=None):
      prims+=D.rect(x,y,x+w,y+h_actual,'TITLE')
      prims.append(D.text((x+w/2,y+4),5,cap,'TEXT',anchor='middle'))
      render_scale=w/px*framing['pixels_per_model_mm']
-     assert abs(render_scale-common_scale)<1e-10, 'Camera did not preserve common paper scale'
+     expected_scale=common_scale if render_bundle is None else source_panel['paper_scale']
+     assert abs(render_scale-expected_scale)<1e-10, 'Camera did not preserve declared paper scale'
      prims.append(D.text((x+w/2,y+11),3.5,f'RENDER {i+1} / SCALE {render_scale:.5f}:1','TEXT',anchor='middle'))
      # Test text rectangles against the actual rendered-solid box, not an
      # assumed empty side margin. Leave both image end margins clear.
@@ -208,7 +238,12 @@ def draw_rendered(slug, outdir=None):
        'RECORD: ce-parts/'+slug+'/component.json',
        'GEOMETRY SOURCE: '+str(record.get('source_reference','CANNOT DETERMINE')),
        'ORIGINAL MATERIAL / SURFACE FINISH: CANNOT DETERMINE; obtain original specification or measure original part.',
+       'FINISHED PART MASS: CANNOT DETERMINE; the filament figure is a shell/infill model estimate. Weigh the produced part to establish finished mass.',
        'FASTENER LENGTH / TORQUE / FIT CLASS: CANNOT DETERMINE; verify interface stack and test production coupon.']
+     if render_bundle is not None:
+      axis,cut,keep=render_bundle['display_section']
+      source_notes.insert(1,'SUPPLEMENT '+render_bundle['detail']+' TO PRINCIPAL SHEET. Four context views plus two enlarged details. True top/bottom remain on the principal sheet; full drawing-set acceptance is incomplete.')
+      source_notes.insert(1,'DETAIL '+render_bundle['detail']+' DISPLAY SECTION: '+axis.upper()+' = %.4f mm SOURCE XYZ; KEEP '%cut+keep.upper()+'. Raster boundaries clip the view; original geometry unchanged.')
      interface_file=ROOT/'ce-parts'/slug/'current'/'cad'/'interfaces.json'
      if interface_file.exists():
       interfaces=json.loads(interface_file.read_text())['record']['interfaces']
@@ -229,6 +264,24 @@ def draw_rendered(slug, outdir=None):
       for t in _wrap(note,rw,3.5):
        assert yy>y+20, 'Source metadata does not fit measured margin'
        prims.append(D.text((x+3,yy),3.5,t,'TEXT'));yy-=5
+     from radius_locators import locate, verify_candidates, annotate, coordinate_locators, verify_printed
+     locator_ledger=locate(part.shape,evidence,None if render_bundle is None else [5,6,1,2,3,4])
+     locator_ledger['candidate_readback']=verify_candidates(part.shape,evidence,locator_ledger)
+     assert locator_ledger['candidate_readback']['verdict']=='PASS'
+     if render_bundle is not None:
+      for row in locator_ledger['occurrences']:
+       row['in_detail']=row['source_edge'] in render_bundle['source_edge_ids']
+      locator_ledger['detail_source_edges']=render_bundle['source_edge_ids']
+     prims+=annotate(prims,evidence,locator_ledger)
+     cp=evidence[4];cx,cy,cw,ch=cp['box_mm']
+     prims+=coordinate_locators(prims,locator_ledger,meta['datum_origin_mm'],
+                                (cx+3,cy+20,cx+cp['left_annotation_width_mm'],cy+190))
+     cp=evidence[5];cx,cy,cw,ch=cp['box_mm']; yy=cy+180
+     for note in ['DRAFTING GAPS — NOT RELEASED',
+                  'E009 / E047 / E061 have measured coordinate locators; section or detail leaders remain required by A.5.',
+                  ('Enlarged shaded Detail A is present; mid-feature cluster B and knee/horn cluster C still need enlarged shaded details. Non-circular feature locators remain unaudited.' if render_bundle is not None else 'Enlarged shaded feature-cluster details and non-circular feature locator audit remain incomplete.')]:
+      for line in _wrap(note,cp['left_annotation_width_mm'],3.5):
+       prims.append(D.text((cx+3,yy),3.5,line,'TEXT'));yy-=5
      sh._prims=prims
     D.write_svg(prims,str(out/(slug+'.svg')),page=(W,H),quiet=True)
     # Print the instrument's occupancy number on the sheet's own face.
@@ -239,7 +292,11 @@ def draw_rendered(slug, outdir=None):
     prims.append(D.text((px0+3,py0+22),3.5,
                        f"FRAME OCCUPANCY {preliminary['occupancy_pct']:.2f}%",'TEXT'))
     D.write_svg(prims,str(out/(slug+'.svg')),page=(W,H),quiet=True)
-    scale_readback=verify_render_scales(str(out/(slug+'.svg')),evidence)
+    scale_readback=verify_render_scales(str(out/(slug+'.svg')),evidence,
+                                       None if render_bundle is None else render_bundle['scale_groups'])
+    locator_readback=verify_printed(str(out/(slug+'.svg')),locator_ledger,H)
+    locator_ledger['printed_readback']=locator_readback
+    (out/'radius-locators.json').write_text(json.dumps(locator_ledger,indent=1))
     (out/'render-scale-readback.json').write_text(json.dumps(scale_readback,indent=1))
     if integrate:
      import contextlib,io
@@ -256,20 +313,20 @@ def draw_rendered(slug, outdir=None):
 
     gaps=[
       {'clause':'A.5 / A4','kind':'drafting','status':'PARTIAL',
-       'evidence':'Native radius leaders, hole table, measured feature schedule and three enlarged vector details.',
-       'remaining':'Prove an individual locator for every radius/fillet occurrence; class/value matching alone is insufficient.',
-       'next_action':'Map each measured BRep occurrence to a visible leader or coordinate locator and independently read it back.'},
+       'evidence':str(locator_ledger['printed_count'])+' visible circular-edge leaders and '+str(locator_ledger['coordinate_count'])+' hidden-arc coordinate locators for '+str(locator_ledger['scope_count'])+' in-scope edges; '+str(locator_ledger['count'])+' circular edges enumerated on the complete source solid.',
+       'remaining':'Three hidden arcs have coordinate locators but still need section/detail leaders to satisfy the literal A.5 leader-to-each clause; non-circular feature locators need audit.',
+       'next_action':'Add source-linked section/detail leaders for E009/E047/E061 and audit planar/slot occurrences; retain unmeasured classes as CANNOT DETERMINE.'},
       {'clause':'A3.2','kind':'drafting','status':'PARTIAL',
-       'evidence':'Four large shaded isometric corners and true top-down/bottom-up colour renders; three 4:1 vector details.',
-       'remaining':'Enlarged shaded feature-cluster detail renders.',
-       'next_action':'Add a detail sheet with six true camera-rendered feature views and preserve every per-sheet area threshold.'},
+       'evidence':('Enlarged shaded ankle Detail A at %.5f:1, with four context ISO views; true top/bottom remain on the retained principal sheet.'%render_bundle['common_scale'] if render_bundle is not None else 'Four large shaded isometric corners and true top-down/bottom-up colour renders; three 4:1 vector details.'),
+       'remaining':('Enlarged shaded views for mid-feature cluster B and knee/horn cluster C; drawing-set interpretation for supplemental top/bottom coverage remains explicit.' if render_bundle is not None else 'Enlarged shaded feature-cluster detail renders.'),
+       'next_action':'Add source-measured shaded supplements for the remaining clusters and preserve every per-sheet area threshold.'},
       {'clause':'A4','kind':'measurement','status':'CANNOT DETERMINE',
        'evidence':str(len(unknowns))+' unmeasured feature classes disclosed on the sheet with what settles them.',
        'remaining':'Unmeasured chamfer, rib, draft, step, mate and wall geometry as enumerated by the instrument.',
        'next_action':'Use original CAD or independently measured feature sections and interface observations.'},
       {'clause':'A4 tolerances / A3.5','kind':'measurement','status':'CANNOT DETERMINE',
        'evidence':'Tolerance, original material/finish and fastener length/torque/fit uncertainties explicitly printed.',
-       'remaining':'Production fit bands, original material/finish specification and qualified fastener stack.',
+       'remaining':'Production fit bands, original material/finish specification, qualified mass/density and fastener stack.',
        'next_action':'Obtain source drawings and perform recorded fit/coupon and fastener-stack measurements.'}]
     limits=['Automated BUILD, PDF pixels/placement, render scale and eight sheet gates grade separate subjects; none alone authorizes manufacturing release.',
             'DXF is the vector companion; SVG and PDF carry the actual raster views.']
@@ -298,15 +355,17 @@ def draw_rendered(slug, outdir=None):
      'origin':'generated', 'record_verdict':record.get('verdict'),
      'source':'part:'+slug, 'pdf_readback':verify_pdf(str(pdf),prims,(W,H)),
      'render_scale_readback':scale_readback,
-     'common_render_scale':common_scale,'individual_fit_scales':fitted,
-     'common_scale_basis':'Minimum of the six actual fit-camera paper scales; retains the renderer standard 10% framing margin and fits every required view.',
+     'radius_locator_readback':locator_readback,
+     'detail_context':render_bundle,
+     'common_render_scale':common_scale,'individual_fit_scales':fitted if render_bundle is None else None,
+     'common_scale_basis':('Principal context retains the verified principal-sheet scale; the separately labeled detail pair uses the minimum measured camera scale preserving two 126 mm annotation margins and 22 mm end margins.' if render_bundle is not None else 'Minimum of the six actual fit-camera paper scales; retains the renderer standard 10% framing margin and fits every required view.'),
      'generated':__import__('datetime').datetime.now().isoformat(timespec='seconds')}
     (out/'result.json').write_text(json.dumps(result,indent=1))
-    if outdir is None and verified and g['verdict']=='PASS' and scale_readback['verdict']=='PASS' and result['pdf_readback']['verdict']=='PASS':
+    if outdir is None and verified and g['verdict']=='PASS' and scale_readback['verdict']=='PASS' and locator_readback['verdict']=='PASS' and result['pdf_readback']['verdict']=='PASS':
         import shutil
         names=[slug+'.svg',slug+'.pdf',slug+'.dxf','result.json','sheetcheck.json',
                'verify-sheet.log','layout-evidence.json','pdf-readback.json',
-               'render-scale-readback.json','view.html','sheetcheck-solid.json',
+               'render-scale-readback.json','radius-locators.json','view.html','sheetcheck-solid.json',
                'sheetcheck-edges.json']+[f'render-{i}.png' for i in range(1,7)]
         backup=p/'verified-a0-before-render-panels-2026-09-08'
         if not backup.exists():

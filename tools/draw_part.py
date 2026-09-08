@@ -578,14 +578,19 @@ def main():
     size = sizes[-1] if sizes else None
     layouts = [a.split('=', 1)[1] for a in sys.argv[1:] if a.startswith('--layout=')]
     layout = layouts[-1] if layouts else 'auto'
-    if layout not in ('auto', 'render-panels'):
+    if layout not in ('auto', 'render-panels','render-details'):
         raise ValueError('Unknown drawing layout: ' + layout)
     if size is not None and size not in ("A4", "A3", "A2", "A1", "A0"):
         raise ValueError("Unknown drawing paper size: " + size)
     done = []
     for slug in slugs:
         try:
-            if layout == 'render-panels':
+            if layout == 'render-details':
+                if size not in (None,'A0'):
+                    raise ValueError('render-details currently requires A0')
+                from rendered_details import draw_details
+                done.append(draw_details(slug))
+            elif layout == 'render-panels':
                 if size not in (None, 'A0'):
                     raise ValueError('render-panels currently requires A0')
                 from rendered_drawing import draw_rendered
