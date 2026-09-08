@@ -1,0 +1,387 @@
+#!/usr/bin/env python3
+"""gen_index.py — build INDEX.html, the front door of the repository.
+
+Every entry is CHECKED against the filesystem before it is written, so the index
+can never advertise a document that is not there. A missing target is published
+as missing, with the reason, rather than as a dead link.
+"""
+import json, os, html, datetime, re
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+REPO = os.path.dirname(HERE)
+
+def wbr(path):
+    """A path with explicit break opportunities after its separators, escaped."""
+    return html.escape(path).replace("/", "/<wbr>").replace("-", "-<wbr>")
+
+
+def _count_tests():
+    """How many gated tests TEST-PLAN.html actually carries, counted off the published
+    document rather than typed into this index. A number in two files is a number that
+    goes stale in one of them."""
+    fp = os.path.join(REPO, "TEST-PLAN.html")
+    if not os.path.exists(fp):
+        return None
+    return open(fp, encoding="utf-8").read().count('<article class="test"')
+
+_N_TESTS = _count_tests()
+_TESTS_PHRASE = ("%d gated tests" % _N_TESTS) if _N_TESTS else "Gated tests"
+
+SECTIONS = [
+    ("1:1 recreation · September 8", "Current source corrections, factory inquiries and unresolved original-unit evidence.", [
+        ("docs/RECREATION-2026-09-08.md", "Recreation status and evidence", "HAT, power, mechanics, exact sourcing and the remaining physical validation work."),
+        ("research/ming-handoff-2026-09-08/update-b/READ-FIRST.html", "Ming engineering review packet B", "Frozen ZIP sent to Ming Chan; outgoing file observed in WeChat. A later reply and the parallel session response are recorded; download status remains unverified."),
+        ("research/tof-power-sourcing-2026-09-08/REPORT.html", "Battery kits and ToF interfaces", "Whole-package quantities, conditional replacements, current limits and interface mismatches."),
+        ("research/camera-identity-2026-09-08/REPORT.html", "Camera identity and fit", "Rejected oversized board and remaining original camera, lens and cable revision questions."),
+        ("research/head-peripherals-sourcing-2026-09-08/REPORT.html", "Speaker, LEDs and NFC sourcing", "Conditional dimensional matches and unresolved original electronics."),
+        ("research/fastener-endpoint-integrity-2026-09-08/AUDIT.md", "Fastener endpoint integrity", "All 64 modeled screw targets resolve; actual threads and production stacks remain unverified."),
+        ("research/harness-route-confidence-2026-09-08/AUDIT.md", "Harness route confidence", "Historical model lengths are retained separately from unknown physical cut lengths."),
+        ("research/readiness-claim-audit-2026-09-08/AUDIT.md", "Test procedure holds and readiness claims", "Five power procedures held; original identity and actual execution distinguished from defined test gates."),
+        ("research/triad-integrity-2026-09-08/REPORT.html", "Evidence integrity corrections", "Append-only metadata repairs preserve physical findings and expose misclassified eye-ring evidence."),
+        ("research/original-cad-access-2026-09-08/REPORT.html", "Original CAD access and version map", "43 part sidecars across three CAD microversions; guest access requires sign-in and original STEP/BRep remains unavailable."),
+        ("research/hat-pcba-rfq-2026-09-08/APPENDIX.html", "Public HAT conditional PCBA quote", "Physical BOM and placement reconciliation, DRC results and fabrication questions. Not a manufacturing release."),
+        ("research/servo-power-audit-2026-09-08/AUDIT.md", "Servo supply and shutdown evidence", "Pinned runtime behavior, manufacturer limits and the factory evidence procedure."),
+        ("research/xl330-mechanical-source-2026-09-08/REPORT.html", "ROBOTIS mechanical sources", "Official drawing and STEP show M2 tapping pilots and a 3 mm maximum face-hole depth."),
+        ("research/xl330-geometry-revision-2026-09-08/README.md", "Servo geometry correction candidate", "100 finished-solid probes pass; simplified exterior and original identity remain unresolved."),
+        ("research/xl330-interface-revision-review-2026-09-08/REPORT.html", "Servo major-revision dependencies", "66 direct endpoints and 18 declared acceptors; coordinated part/connection revision required, including removal of unsupported ISO additions."),
+        ("research/servo-fastener-restriction-2026-09-08/REPORT.html", "Servo screw proposals withdrawn", "All 52 ISO-length proposals withdrawn; 35 historical modeled penetrations exceed 3 mm. Assembly preserved pending correct hardware."),
+        ("research/servo-capture-tooling-2026-09-08/README.md", "Offline servo identity evidence", "Validates captured files without hardware I/O or physical acceptance claims; 14 regressions pass."),
+        ("research/fastener-reconciliation-2026-09-08/AUDIT.md", "Fastener purchase gaps", "Per-line modeled sizes, missing purchase lines and unresolved metric versus TAP identity."),
+        ("research/fastener-source-routes-2026-09-08/REPORT.html", "Conditional missing-size fastener sources", "Three nominal sizes, whole-pack quotes and a China catalog route; original hardware equivalence remains unverified."),
+        ("research/bearing-sourcing-2026-09-08/REPORT.html", "Bearing source comparison", "Measured envelopes, conditional offers and the rejected shielded 4 mm substitute."),
+        ("research/imu-contact-identity-2026-09-08/AUDIT.md", "IMU and battery contact-board identity", "Current official source search, known host protocol and still-unresolved hardware identity."),
+        ("research/original-unit-route-2026-09-08/BRIEF.html", "Original-unit access route", "Official preorder terms, shipping coverage and an unsent request for earlier specimen access."),
+        ("out/handover/RECREATION-2026-09-08-CODEX.md", "Local session coordination", "Current file ownership, fit correction and delivery limits for other Codex or Claude sessions."),
+    ]),
+    ("Start here", "What is this, is it real, and can a factory build it today.", [
+        ("FACTORY-PACK.html", "Factory pack \u2014 the document a factory builds from",
+         "The single coherent pack for a partner factory and its engineers, bilingual EN/zh: what the product is with the measured envelope and the sliced mass, then WHAT IS NOT READY at the front with the measurement behind each row and who closes it, then what to build \u2014 every drawing sheet with its verdict, every printed part with its real ce-slice grams and seconds and its licence, every bought line with a price read off a live page, the three custom boards with their true DRC state, the harness, the 11 assembly stations \u2014 then the 42 end-of-line acceptance gates, the licence position, and where every underlying file sits. It separates source and simulation evidence from unverified physical recreation and end-of-line acceptance. Generated by tools/gen_factory_pack.py."),
+        ("WORK-BREAKDOWN.html", "Work breakdown \u2014 what needs to be done",
+         "Every open piece of work cut into parcels sized for ONE engineer, laid out as ten parallel tracks, one per engineer, with the critical path in a sentence. Each parcel carries its deliverable, an acceptance test that is a number or a command, its dependencies, what it unblocks, an effort estimate in engineer-days with the arithmetic it rests on, and whether it needs a real machine, a real material, a real measurement or only a desk. Work a software agent is closing tonight is marked IN FLIGHT with the workflow that owns it. Generated by tools/gen_workplan.py."),
+        ("FACTORY-QUESTIONS.html", "Questions for the factory",
+         "The questions only a factory with real machines can answer, each with why we ask and a branch table saying what we do with EACH possible answer: process capability and the tolerance they can actually hold, their filament's real tensile datasheet (our whole safety-factor set rests on one unsourced 50 MPa row), moulding MOQ, tooling cost and lead time against our printed baseline, per-part manufacturability, their PCB fab and assembly capability against our three boards, their labour rate and the fixtures they want, and what they need from us that we have not sent. Generated by tools/gen_questions.py."),
+        ("out/factory/pack.json", "Factory pack (data)",
+         "Everything the pack states, as data: the not-ready rows, the BOM with its USD-only subtotal and the lines it excludes, the print totals, the stations and the artifact map."),
+        ("out/factory/workplan.json", "Work breakdown (data)",
+         "Current parcels and engineer tracks with assumed effort estimates and the computed critical path."),
+        ("out/factory/questions.json", "Factory questions (data)",
+         "Every question with its answer branches, plus the provenance table: each number quoted in the document, its value and the file it was read from."),
+        ("out/factory/readiness.html", "Readiness audit \u2014 read first",
+         "Artifact by artifact, READY TO BUILD FROM or NOT YET, with the measurement behind every grade and, for every NOT YET, whether an agent closes it tonight or a person must. "
+         "Covers available drawing sheets against bin/sheetcheck's eight rules, all 30 print files against ce-slice's own grams and seconds, all 32 bought lines, the three custom PCBs against their own DRC, "
+         "the harness cut list, the 23 places the assembly manual assumes knowledge a stranger does not have, the test plan and all discovered shelf refs. Bilingual EN/zh. "
+         "Generated by tools/gen_readiness.py from the measurements tools/measure_readiness.py takes."),
+        ("out/factory/readiness.json", "Readiness audit (data)",
+         "One row per artifact with its grade, its measurement, the file that measurement was read from, what is missing and who closes it."),
+        ("RELEASE.html", "Release dossier",
+         "The master document: readiness matrix, BOM, full assembly sequence, wiring, power-up, and what still blocks a factory release."),
+        ("COMPARISON.html", "Reference match",
+         "Our CAD beside the real product photographs at matched camera angles, plus the measured dimension table for all 47 meshes and the head-conformance measurement."),
+        ("HEAD-RECONSTRUCTION.html", "Head conformance",
+         "Is the simulation head the product head? Every store photograph scaled by the XL330 in frame, our model posed to it with a perspective camera, the head measured in mm against the mesh under the 1.5 mm rule; the eye bezel settled (it is the noenoeil mesh). Generated from out/head/head.json."),
+    ]),
+    ("Specification & parts", "What the machine is, measured.", [
+        ("SPEC.html", "Specification", "Envelope, the 15-joint table, and every mesh with its measured bounding box."),
+        ("docs/PARTS.html", "Parts catalogue", "Every part: quantity, material, body, joint, and rebuild status."),
+        ("FASTENERS.html", "Fasteners \u2014 every screw as a real solid",
+         "Historical nominal fastener model and geometric audit. Current source correction withdraws 52 servo ISO-length proposals; this preserved placement is not physical hardware acceptance. See the servo screw restriction report above. Generated by tools/gen_fasteners_doc.py."),
+        ("INTERNALS.html", "Internals \u2014 the real robot beside ours",
+         "What is inside the shell and whether our reconstruction of it makes sense: the boards, the chips on them, the wiring and the way it all packs into the head and trunk, put beside the reference photographs of the real internals at matched viewpoints. Generated by tools/gen_internals.py."),
+        ("SHELF-STATUS.html", "Triad shelf status",
+         "Every part, connection and assembly folder on the shelf with the verdict "
+         "`bin/triad check --all` gives it and the sentence the folder wrote about itself, "
+         "grouped by defect class. A snapshot of a live checker run: "
+         "`python3 tools/gen_shelf_status.py --verify` says whether it has gone stale."),
+        ("out/laneT/shelf-status.json", "Triad shelf status (data)",
+         "Every ref, every reason whole and untruncated, its defect class and the file it was "
+         "raised against \u2014 what the page above is rendered from."),
+        ("docs/BOM.html", "Bill of materials", "Every line, bought and made."),
+        ("docs/CABLES.html", "Cable schedule", "23 cable rows, 20 with a cuttable length (one is a 0 mm stacking header, two rows carry no length); voltage-drop PASS at AWG 21/22."),
+        ("wiring/CABLES.html", "Cable schedule (wiring lane)", "The wiring lane's copy of the cable runs."),
+    ]),
+    ("Electronics", "The electrical half, three levels of detail.", [
+        ("PCB-PACKAGE.html", "Custom PCB package",
+         "The three boards Pollen publishes no design for \u2014 Robot HAT, IMU-to-Dynamixel, banana battery contact: schematic capture, layout, Gerbers, the DRC report as it actually stands, and a fabrication statement of work with real fab capability against it. Generated by tools/gen_pcb_package.py."),
+        ("ELECTRONICS-DATASHEET.html", "Electronics datasheet", "The assembled electronics reference: every IC with provenance."),
+        ("electronics/1-block-diagram.svg", "1 · Block diagram", "Functional blocks and the buses between them — how it flows."),
+        ("electronics/2-schematic-radxa.svg", "2 · Schematic — compute", "Radxa Zero 3W header: every used pin and its net."),
+        ("electronics/2-schematic-hat.svg", "2 · Schematic — Robot HAT", "Codec, IMU, ToF header, Dynamixel transceiver, power path."),
+        ("electronics/2-schematic-imu.svg", "2 · Schematic — imu_to_dxl", "LSM6DSV16X as a Dynamixel Protocol-2 slave."),
+        ("electronics/2-schematic-sensors.svg", "2 · Schematic — sensors", "Camera, ToF, audio."),
+        ("electronics/3-layout.svg", "3 · Physical layout", "Where each board and device physically sits, and every cable run with its length."),
+        ("docs/ELECTRONICS-AND-SOFTWARE.html", "Electronics & software", "Bus, registers, daemons, pin map."),
+        ("WIRING-3D.html", "Wiring in 3D — the loom routed through the body",
+         "The harness routed in 3D through the real assemblies: six rendered views with the cables and connector housings placed by the wiring lane, the per-run clearance findings, and the runs that still have no corridor stated as leads, not hidden. Generated by tools/gen_wiring3d.py."),
+    ]),
+    ("Manufacturing", "What a shop needs to actually build it.", [
+        ("docs/PRODUCTION.html", "Production", "Costs at 1/10/100/1000, print-vs-mould, compliance."),
+        ("docs/MANUFACTURING-REQUIREMENTS.html", "Manufacturing requirements", "The standard our drawings and schematics are graded against."),
+        ("ce-assemblies/microduck/current/manual/MANUAL.html", "Construction manual", "The step-by-step build the release's assembly section is drawn from."),
+        ("out/drawings/INDEX.html", "Mechanical drawings", "Dimensioned sheets: third-angle views, hole tables, sections."),
+        ("MANUFACTURING-PLAYBOOK.html", "Manufacturing playbook",
+         "The document the team executes to build units: process selection per part with the break-even quantity computed from the sliced grams and seconds, a DFM finding for every printed part measured off the STL that will be printed, the print profiles the slicer actually used, the assembly line with its six printed jigs and the torque specification, the QA gates station by station, and the battery packaging obligations. Generated by tools/gen_playbook.py from tools/data/playbook.json, out/print/slice.json, out/dfm/dfm.json and out/jigs/jigs.json."),
+        ("out/dfm/dfm.json", "DFM measurement (data)",
+         "Per part: unsupported area in all six axis-aligned build directions off the STL's own facet normals with the bed-contact footprint excluded, ray-cast wall min/p1/p5/median, and cecad holes, radii and thinnest wall on every parametric rebuild."),
+        ("out/jigs/jigs.json", "Assembly jigs (data)", "The six printed jigs, their measured geometry, mass and drawing."),
+        ("out/print/PRINT.html", "Print package", "Plate files and the measured filament/time for every printed part."),
+        ("BUILD-BOOK.html", "Build book", "The long-form build narrative."),
+    ]),
+    ("Test & validation", "How a built unit is proved to work, before it ships.", [
+        ("TEST-PLAN.html", "Test & validation plan",
+         _TESTS_PHRASE + " from a never-powered robot to one that has walked: electrical bring-up, servo ID and calibration, sensor checks, control-loop acceptance, the two radios and the pairing PIN, a walk test, and an endurance and thermal soak. Every gate names whether its number came from a vendor datasheet, Pollen's source, our simulation, or a decision of the plan."),
+        ("spec/test-plan.json", "Test plan (data)",
+         "The data the plan is generated from: the rail table, the XL330 register set, the ID map, the gamepad map and every gate with its basis."),
+        ("firmware/upstream.json", "Firmware pointers (data)",
+         "Everything running below Linux: the servo firmware and its identity registers, the unpublished imu_to_dxl board and the 12-byte block it serves at address 124, the ToF sensor's uploaded ST blob, the board overlays, and the signed release payload \u2014 each marked published or not."),
+        ("software/upstream.json", "Software pointers (data)",
+         "Pollen's published software: both upstream repositories with their licence read live from the GitHub API, the seven daemons and which test touches each, the policy set and its 61-input/14-output shape, and the config file that survives an update."),
+    ]),
+    ("Licence & origin", "What may be built, what may be sold, and what is ours. Read before cutting tooling.", [
+        ("LICENCE-POSITION.html", "Licence and origin position",
+         "16 facts with a URL, a verbatim quote, a fetch time and a sha256 of the archived bytes; the four questions a factory asks answered plainly (build engineering units yes, sell no, volume does not change it, and an inventory of ours vs upstream); the Robot HAT board that Pollen publish under Apache-2.0 with Gerbers and may therefore be sold; Pollen's terms of sale, which forbid buying a unit and taking it apart; and five open items with exactly what settles each. Bilingual EN/zh. Generated by tools/gen_licence.py from out/factory/licence.json."),
+        ("out/factory/licence.json", "Licence position (data)",
+         "The facts, the questions, the CANNOT DETERMINE items and the hash of every archived page in out/factory/licence-evidence/."),
+    ]),
+    ("Sourcing & procurement", "Where every bought part comes from, and what it costs.", [
+        ("SOURCING.html", "Sourcing evidence", "Every bought line: two or more real distributors, tier prices, MOQ, lead time, alternates, and the URL of every page that refused a price."),
+        ("SOURCES.html", "Ingested sources \u2014 what we read and what it changed",
+         "Every external source this project ingested, archived into the repository with its licence, its attribution and the commit SHA where one exists, and what each one actually changed in our geometry or our numbers. Generated by tools/gen_sources.py."),
+        ("RFQ.html", "Requests for quotation", "One ready-to-send request per supplier, placeholders for the human's contact details. Nothing has been sent."),
+        ("spec/sourcing.json", "Sourcing (data)", "The 32 bought lines both pages are generated from; every price carries its vendor URL and fetch date."),
+        ("out/release/bom.csv", "Bill of materials (CSV, generated)", "One row per bought line with the unit price, the per-robot cost, the vendor page and the fetch date - written by tools/gen_sourcing.py from spec/sourcing.json since 2026-09-03, so it cannot drift from SOURCING.html the way the hand-written version did."),
+        ("docs/production/components.md", "Components at volume (prior lane)", "The prose sourcing pass this data file supersedes."),
+    ]),
+    ("Simulation & evidence", "Every claim that has a measurement behind it.", [
+        ("SIMULATION.html", "Simulation evidence — every study, one document",
+         "Generated by tools/gen_simulation.py from every JSON under out/sim-evidence/ and out/stress/: a verdict matrix over all study files, the load-basis chain measured end to end (MJCF mass, MuJoCo peaks, the force each CalculiX deck actually applied), cross-checks between the three simulation lanes with every disagreement printed, the lanes' own chapters (structural / gait & battery / thermal & tolerance) included verbatim, the register of every CANNOT DETERMINE with what settles it, and every image and video read back."),
+        ("STRUCTURAL.html", "Structural evidence",
+         "FEA on every load-bearing part with the loads MuJoCo measured (walk peak, 0.250 m drop), buckling of the slender members, drop/impact model bracket, ankle fatigue on a cited PLA S-N curve. Generated from out/sim-evidence/*.json."),
+        ("MOTION.html", "Motion — the machine moving",
+         "The one document for Leif's question of 2026-09-02: is the neck as dynamic, and show the mechanics moving. 23 videos of our rebuilt parts under Pollen's own policies \u2014 the body walking, every leg and head joint in tracked close-up, the composite and the 0.25\u00d7 gait cycle \u2014 each with the measurement it is evidence for: MJCF range, travel used, peak angular velocity, tracking lag and torque, the self-collision table, and our renders beside the real product where a photograph of the same motion exists."),
+        ("HEAD-MOTION.html", "Head and neck dynamics", "Is the neck as dynamic? Every head joint driven through its full MJCF range under Pollen's stand policy, with travel, peak velocity, tracking lag, torque, a self-collision range probe and four videos."),
+        ("out/motion/head.json", "Head and neck dynamics (data)", "The joint table, the kinematic range probe, the servo datasheet numbers and the verdict."),
+        ("out/motion/head_real_video.json", "Real robot head motion (data)", "Head-pitch travel and rate tracked frame by frame off Pollen's own gallery_chorale.mp4, with its error budget."),
+        ("out/motion/WALK.html", "Walking mechanics", "Nine tracked-camera videos of the walk \u2014 full body, knee/hip/ankle close-ups, a 2\u00d72 composite and one gait cycle at 0.25\u00d7 with the joint-angle traces \u2014 with every joint's travel and peak angular velocity, and our gait phase-matched against Pollen's own move clip."),
+        ("out/motion/walk.json", "Walking mechanics (data)", "Per joint: MJCF range, travel actually used, peak angular velocity and the frame it happened on; the gait period; and the frame-by-frame read-back verdict of all nine videos."),
+        ("LEG-MOTION.html", "Leg mechanics", "Every leg joint driven through its whole MJCF range one at a time, then in the two-joint and both-leg postures a one-at-a-time sweep cannot reach, then by Pollen's own sit-stand and stand policies \u2014 ten tracked-camera clips, travel, peak velocity, tracking error, and every MuJoCo self-collision with the angle at which the pair first touches."),
+        ("out/motion/legs.json", "Leg mechanics (data)", "Per leg joint: MJCF range with a file:line citation, travel reached, peak velocity, tracking RMS, and what the walking / sit-stand / squat policies actually use of it; the self-collision sweeps with their onset angles and the controls that prove the detector fires; and the frustum check that the close-ups contain the servo and the bearing."),
+        ("docs/SIM-CAPABILITY.html", "Simulation capability", "What the simulation can and cannot do, stated honestly."),
+        ("out/verify/mech_dims.json", "Measured dimensions (data)", "Bounding box of all 47 meshes in mm to 4 dp, plus rebuild deviation."),
+        ("out/verify/head_analysis.json", "Head conformance (data)", "Scale-free silhouette ratios for the head, and why the verdict is CANNOT DETERMINE."),
+        ("LOAD-BASIS-CORRECTION.html", "Load basis correction",
+         "The landing case was labelled 3x bodyweight and applied 8.30x. Re-solved at the correct load; the ankle does not yield."),
+        ("out/stress/corrected.json", "Corrected FEA (data)", "Re-solved leg cases at a load basis that survives arithmetic."),
+        ("out/stress/matrix.json", "Structural FEA matrix (data)", "Every part × load case × material. Its landing case is SUPERSEDED — see the correction."),
+        ("out/stress/report.json", "Structural FEA — standing case (data)", "The original single-case run."),
+    ]),
+    ("Project", "How the work is run and reproduced.", [
+        ("STATUS.html", "Status", "Where each lane stands."),
+        ("out/open/triage.html", "Closure-route triage — every open CANNOT DETERMINE, routed",
+         "Every distinct open CANNOT DETERMINE in the repository with exactly one closure route: a named check/command, a named source, a named ingested file, a named bench test, or an honest one-line reason none applies. Dark table; checks marked RAN re-ran their tool and wrote the cited artifact. Generated by tools/gen_triage.py from the census tools/open_items.py takes."),
+        ("GOAL.html", "Goal", "What done means."),
+        ("TOOLCHAIN.html", "Toolchain", "Exact tool and kernel versions to reproduce every file."),
+        ("README.md", "Readme", "Repository orientation."),
+    ]),
+]
+
+TOOLS = [
+    ("tools/gen_comparison.py", "Builds COMPARISON.html from the measured data."),
+    ("tools/gen_head.py", "Builds HEAD-RECONSTRUCTION.html from out/head/head.json (tools/head_verdict.py merges tools/head_photomatch.py, head_frontview.py and head_profile_frame.py)."),
+    ("tools/gen_index.py", "Builds this index, checking every link."),
+    ("tools/gen_test_plan.py", "Builds TEST-PLAN.html from spec/test-plan.json; computes every derived figure (degrees, encoder counts, tilt thresholds, the walk reference read out of out/sim/report.json) rather than carrying it as text, and REFUSES to publish \u2014 exiting non-zero having written nothing \u2014 on any of 15 self-checks: a gated test missing from the end-of-line checklist, an unresolved source key, an ID-map range that disagrees with the MJCF, an unfilled token. Each was broken on purpose and watched to fire."),
+    ("tools/gen_sourcing.py", "Builds SOURCING.html and RFQ.html from spec/sourcing.json; refuses to publish a verdict the data does not support."),
+    ("tools/gen_shelf_status.py", "Runs bin/triad check --all and renders SHELF-STATUS.html + out/laneT/shelf-status.json from its stdout \u2014 quoting every verdict, re-grading nothing, and marking every place a folder\u2019s paragraph is cut. --verify re-runs the checker and exits 1 if the committed page no longer matches the shelf."),
+    ("tools/head_analysis.py", "Measures head conformance from silhouettes."),
+    ("tools/gen_head_motion.py", "Builds HEAD-MOTION.html from out/motion/head.json."),
+    ("sim/head_sweep.py", "Drives and measures the four head joints, renders the head videos, probes the collision-free range."),
+    ("sim/head_real_video.py", "Measures the real robot's head motion off a product video."),
+    ("sim/head_compare.py", "Puts our head beside the real one at the same camera."),
+    ("sim/head_verify.py", "Reads every head video back off disk and refuses blank or frozen frames."),
+    ("tools/gen_playbook.py", "Builds MANUFACTURING-PLAYBOOK.html from tools/data/playbook.json plus the measured slice/DFM/jig data; every cost, break-even and DFM verdict is computed here rather than carried as text."),
+    ("tools/measure_dfm.py", "Measures the DFM data: per-build-direction overhang off the STL facet normals (bed-contact facets excluded) and ray-cast wall percentiles, plus cecad.inspect on the parametric rebuilds."),
+    ("tools/jigs.py", "Builds the six assembly jigs as cecad parts and draws them."),
+    ("tools/tablefit.py", "Measures, in a real browser, whether every table in a document fits the 840 px sheet \u2014 an overflowing table silently scrolls its last column out of sight and loses it on paper. Exits non-zero on any overflow."),
+    ("tools/md2html.py", "Converts the Markdown docs to the shared HTML style."),
+    ("sim/mech_dims.py", "Measures every mesh through the FreeCAD kernel."),
+    ("sim/stress_matrix.py", "The structural FEA matrix: parts × load cases × materials."),
+    ("sim/compare_render.py", "Photo-matched studio renders and joint close-ups."),
+    ("sim/motion_render.py", "Films the walk: joint-tracking studio videos, the composite and the 0.25\u00d7 gait cycle, and the per-joint travel/velocity table."),
+    ("sim/walk_vs_product.py", "Phase-matches our walk against Pollen's published move clip; measures both gait periods."),
+    ("tools/gen_walk_motion.py", "Builds out/motion/WALK.html from out/motion/walk.json."),
+    ("sim/leg_sweep.py", "Sweeps every leg joint through its MJCF range, measures travel / peak velocity / tracking, and finds every MuJoCo self-collision with its onset angle."),
+    ("sim/leg_render.py", "Films the legs: per-joint tracked close-ups, the squat, the sit-stand, the leg lift, the self-collision case and the composite."),
+    ("sim/leg_plots.py", "Draws the leg tracking, range-envelope and self-collision figures from the same arrays as the numbers."),
+    ("sim/leg_framing.py", "Projects every servo and bearing geom into each close-up frustum to prove the close-ups contain them."),
+    ("sim/leg_compare.py", "Puts our standing and sitting renders beside the product photos at the same subject height."),
+    ("sim/leg_verify.py", "Reads every leg clip back out of the encoded mp4 and gif and refuses blank, frozen or oversized ones."),
+    ("tools/gen_leg_motion.py", "Builds LEG-MOTION.html from out/motion/legs.json."),
+    ("tools/gen_motion.py", "Builds MOTION.html from every out/motion/*.json \u2014 the walk, head and leg "
+                            "lanes in one document; stat()s all 131 referenced files before writing and "
+                            "exits non-zero if any is missing."),
+    ("sim/assembly_steps_mj.py", "Cumulative assembly-step renders."),
+    ("sim/run_policy.py", "Runs Pollen's trained policies on our meshes."),
+    ("sim/gait_sweep.py", "The gait-robustness matrix: speed, mass, friction, slope and push, "
+                          "with per-joint torque and per-foot ground reaction at 200 Hz."),
+    ("sim/gait_evidence.py", "Aggregates the sweep into out/sim-evidence/gait-peaks.json and "
+                             "gait-robustness.json."),
+    ("sim/battery_runtime.py", "Integrates per-servo electrical power over the measured gait into "
+                               "hours on the pack."),
+    ("electronics/gen_ee.py", "Generates the block diagram, schematics and layout."),
+]
+
+
+def stat(rel):
+    p = os.path.join(REPO, rel)
+    if not os.path.exists(p):
+        return None
+    sz = os.path.getsize(p)
+    mt = datetime.datetime.fromtimestamp(os.path.getmtime(p)).strftime("%Y-%m-%d %H:%M")
+    return sz, mt
+
+
+def human(n):
+    for u in ("B", "KB", "MB"):
+        if n < 1024 or u == "MB":
+            return f"{n:.0f} {u}" if u == "B" else f"{n/1:.0f} {u}"
+        n /= 1024.0
+
+
+def size_str(n):
+    if n < 1024: return f"{n} B"
+    if n < 1024*1024: return f"{n/1024:.0f} KB"
+    return f"{n/1024/1024:.1f} MB"
+
+
+rows_html, present, missing = [], 0, 0
+for title, blurb, items in SECTIONS:
+    body = []
+    for rel, name, desc in items:
+        st = stat(rel)
+        if st:
+            present += 1
+            sz, mt = st
+            body.append(
+                f'<tr><td><a href="{rel}">{html.escape(name)}</a><div class="d">{html.escape(desc)}</div></td>'
+                f'<td><code>{wbr(rel)}</code></td>'
+                f'<td class="n">{size_str(sz)}</td><td class="n">{mt}</td>'
+                f'<td><span class="chip pass">present</span></td></tr>')
+        else:
+            missing += 1
+            body.append(
+                f'<tr class="miss"><td>{html.escape(name)}<div class="d">{html.escape(desc)}</div></td>'
+                f'<td><code>{wbr(rel)}</code></td>'
+                f'<td class="n">—</td><td class="n">—</td>'
+                f'<td><span class="chip cd">not generated yet</span></td></tr>')
+    rows_html.append(
+        f'<section id="{re.sub(r"[^a-z0-9]+", "-", title.lower()).strip("-")}">'
+        f'<h2>{html.escape(title)}</h2><p class="lede">{html.escape(blurb)}</p>'
+        f'<div class="tw"><table class="data"><thead><tr><th>Document</th><th>Path</th>'
+        f'<th class="n">Size</th><th class="n">Updated</th><th>State</th></tr></thead>'
+        f'<tbody>{"".join(body)}</tbody></table></div></section>')
+
+# ---------------------------------------------------------------- completeness
+# THE DEFECT THIS EXISTS TO PREVENT, found 2026-09-04 by a factory reviewer: the
+# index reached 24 documents and MISSED three that had been published for 11, 16
+# and 0 hours (INTERNALS.html, SOURCES.html, FASTENERS.html), because SECTIONS is
+# hand-written and a new document only enters it if someone remembers. A front
+# door that silently omits a published document is worse than one that is empty.
+# So: sweep every .html actually on disk at the repository root, subtract the ones
+# any section already names, and PUBLISH the remainder here rather than dropping
+# it. Nothing is hidden; a document either has a home above or a row below.
+_filed = {rel for _t, _b, items in SECTIONS for rel, _n, _d in items}
+_on_disk = sorted(f for f in os.listdir(REPO)
+                  if f.endswith(".html") and f != "INDEX.html"
+                  and os.path.isfile(os.path.join(REPO, f)))
+_unfiled = [f for f in _on_disk if f not in _filed]
+if _unfiled:
+    body = []
+    for rel in _unfiled:
+        sz, mt = stat(rel)
+        present += 1
+        body.append(
+            f'<tr><td><a href="{rel}">{html.escape(rel)}</a>'
+            f'<div class="d">Published at the repository root and not yet filed into a section '
+            f'above. It is listed here by the completeness sweep so the index cannot fail to '
+            f'reach a document that exists. Give it a section in tools/gen_index.py.</div></td>'
+            f'<td><code>{wbr(rel)}</code></td>'
+            f'<td class="n">{size_str(sz)}</td><td class="n">{mt}</td>'
+            f'<td><span class="chip pass">present</span></td></tr>')
+    rows_html.append(
+        '<section id="unfiled"><h2>Unfiled \u2014 published, reached by the completeness sweep</h2>'
+        '<p class="lede">Every <code>.html</code> at the repository root is swept and compared '
+        'against the sections above. These are on disk and were not named by any section, so '
+        'they are published here rather than dropped. An empty list is the healthy state.</p>'
+        '<div class="tw"><table class="data"><thead><tr><th>Document</th><th>Path</th>'
+        '<th class="n">Size</th><th class="n">Updated</th><th>State</th></tr></thead>'
+        f'<tbody>{"".join(body)}</tbody></table></div></section>')
+print("index completeness sweep: %d root .html on disk, %d filed by a section, %d unfiled"
+      % (len(_on_disk), len(_on_disk) - len(_unfiled), len(_unfiled)))
+
+tool_rows = "".join(
+    f'<tr><td><code>{wbr(t)}</code></td><td>{html.escape(d)}</td>'
+    f'<td><span class="chip {"pass" if stat(t) else "cd"}">{"present" if stat(t) else "missing"}</span></td></tr>'
+    for t, d in TOOLS)
+
+HTML = f"""<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Microduck Repository Index</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="tools/doc.css">
+<style>
+  .d{{font-size:12.5px;color:var(--ink-2);margin-top:2px;max-width:46em}}
+  tr.miss td{{opacity:.72}}
+  /* A path has no space in it, so with no break opportunity it widens the table past the
+     840px sheet and .tw scrolls the State column out of sight (measured with
+     tools/tablefit.py, 2026-09-03). The break opportunities are placed explicitly with <wbr>
+     after each "/" and "-" by wbr() below, so a path breaks at a separator or not at all —
+     overflow-wrap:anywhere fixed the width but broke "PRODUCTION.html" mid-word. */
+  table.data td code{{font-size:11.5px}}
+  table.data td code wbr{{display:inline}}
+  .statbar{{display:flex;flex-wrap:wrap;border-bottom:1px solid var(--hair);margin:10px 0 2px}}
+  .stat{{padding:12px 26px 12px 0;margin-right:22px}}
+  .stat b{{display:block;font-weight:700;font-size:22px;font-variant-numeric:tabular-nums}}
+  .stat span{{font-family:var(--sans);font-size:12px;color:var(--ink-2)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="hero">
+  <p class="eyebrow">ce-designs/microduck · repository index</p>
+  <h1>Microduck — every document in this repository</h1>
+  <p class="sub">A reverse-engineered, manufacturable reconstruction of the Pollen Robotics
+  Microduck. Every entry below was checked against the filesystem when this page was generated;
+  anything not yet produced is listed as such rather than linked into a 404.</p>
+  <div class="rev"><span>MD-IDX-001</span><span>generated {datetime.datetime.now().strftime('%Y-%m-%d %H:%M')}</span>
+    <span>by <code>tools/gen_index.py</code></span></div>
+</header>
+
+<div class="statbar">
+  <div class="stat"><b>{present}</b><span>documents present</span></div>
+  <div class="stat"><b>{missing}</b><span>not yet generated</span></div>
+  <div class="stat"><b>47</b><span>parts measured</span></div>
+  <div class="stat"><b>9/9</b><span>rebuilds dimensionally PASS</span></div>
+</div>
+
+{"".join(rows_html)}
+
+<section><h2>Tools — how every document above is regenerated</h2>
+<p class="lede">Nothing in this repository is hand-maintained if a script can own it. Each tool
+below regenerates its document from the measured data, so a stale number is a bug with a fix
+rather than an edit.</p>
+<div class="tw"><table class="data">
+<thead><tr><th>Script</th><th>What it generates</th><th>State</th></tr></thead>
+<tbody>{tool_rows}</tbody></table></div>
+<p style="font-size:13px;color:var(--ink-2)">Run anything under <code>sim/</code> or that
+imports the CAD kernel with <code>ce-cad/bin/cad &lt;script.py&gt;</code> — the system
+<code>python3</code> has neither numpy nor PIL.</p>
+</section>
+
+</div>
+</body>
+</html>
+"""
+open(os.path.join(REPO, "INDEX.html"), "w").write(HTML)
+print(f"wrote INDEX.html — {present} present, {missing} not yet generated")

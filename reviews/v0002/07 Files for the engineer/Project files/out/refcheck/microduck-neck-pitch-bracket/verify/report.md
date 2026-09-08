@@ -1,0 +1,27 @@
+# refcheck part:microduck-neck-pitch-bracket vs neck_pitch.stl
+
+**PASS** — p95 surface distance 0.01 mm <= 1.00 both ways; bbox within 0.00 mm
+
+| | ref->ours | ours->ref |
+|---|---|---|
+| mean mm | 0.002 | 0.002 |
+| p50 mm | 0.000 | 0.000 |
+| p95 mm | 0.007 | 0.007 |
+| max mm | 0.324 | 0.340 |
+| within 1.0 mm | 100.0% | 100.0% |
+
+bbox ours [35.0, 18.0, 27.693]  ref [35.0, 18.0, 27.693]  delta [-0.0, 0.0, -0.0]
+volume ratio ours/ref 1.0 (closed-mesh figure, see compare.json)
+
+## features
+
+reference: 19 holes, 2 bosses · ours: 19 holes, 2 bosses · matched 21 · unmatched reference 0 · extra ours 0
+
+## renders
+
+- overlay_front.png
+- overlay_left.png
+- overlay_top.png
+- overlay_iso.png
+- ours_iso.png
+- ref_iso.png

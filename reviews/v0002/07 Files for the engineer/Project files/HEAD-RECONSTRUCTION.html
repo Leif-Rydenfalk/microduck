@@ -1,0 +1,420 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Head Reconstruction</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="tools/doc.css">
+<style>
+  .pair{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:10px 0 4px}
+  .pair figure{margin:0;padding:8px}
+  .pair figure img{width:100%;object-fit:contain;background:#fff}
+  figure.wide{margin:10px 0 4px;padding:8px} figure.wide img{width:100%;background:#fff}
+  figcaption{font-family:var(--sans);font-size:12px;color:var(--ink-2);margin-top:4px}
+  .tag{font-family:var(--sans);font-size:10.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;display:inline-block;padding:2px 8px;margin-bottom:6px;border:1px solid var(--hair);color:var(--ink-2)}
+  .tag.ours{color:var(--accent);border-color:var(--accent)}
+  .paircap{font-family:var(--sans);font-size:12.5px;color:var(--ink-2);margin:0 0 2px}
+  .note{font-size:13.5px;color:var(--ink-2);margin:2px 0 18px;max-width:54em}
+  .verdict{border-left:3px solid var(--accent);padding:2px 0 2px 18px;margin:14px 0;font-size:15.5px}
+  .verdict b{color:var(--accent)} .verdict.warn{border-left-color:var(--no)} .verdict.warn b{color:var(--no)}
+  .verdict.cd{border-left-color:var(--cd)} .verdict.cd b{color:var(--cd)}
+  .chip.no{color:var(--no);border-color:var(--no)}
+  .statbar{display:flex;flex-wrap:wrap;gap:0;border-bottom:1px solid var(--hair);margin:8px 0 2px}
+  .stat{padding:12px 26px 12px 0;margin-right:22px}
+  .stat b{display:block;font-weight:700;font-size:22px;font-variant-numeric:tabular-nums}
+  .stat span{font-family:var(--sans);font-size:12px;color:var(--ink-2)}
+  table.data td.n,table.data th.n{text-align:right;font-variant-numeric:tabular-nums}
+  table.data{font-size:12px;table-layout:auto} table.data th{white-space:normal;padding:6px 8px 5px;font-size:10.5px} table.data td{padding:5px 8px}
+  table.data td code,table.data td a{overflow-wrap:anywhere}
+  table.data td:first-child code{white-space:nowrap} table.data small{font-size:11px;color:var(--ink-2)}
+  table.data td.n{white-space:normal;overflow-wrap:normal;word-break:keep-all} table.data tr.sub td{border-bottom:1px solid var(--hair);padding-top:0;line-height:1.35}
+  ul.tests{font-size:13px;margin:0 0 10px 0;padding-left:22px;max-width:70em} ul.tests li{margin:3px 0}
+  .chip{white-space:nowrap}
+  tr.total td{border-top:2px solid var(--rule)}
+  @media(max-width:640px){.pair{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<p class="backlink"><a href="RELEASE.html">← Release dossier</a> · <a href="COMPARISON.html">Reference match</a></p>
+
+<header class="hero">
+  <p class="eyebrow">Microduck reverse-engineering · lane A · head conformance</p>
+  <h1>Is the simulation head the product head? Measured from the photographs.</h1>
+  <p class="sub">GOAL.md finding 1 said the simulation head is "far longer front-to-back than the compact domed head in every product photo"
+  and its eye bezel is missing; the handover correction demoted that to CANNOT DETERMINE. Leif: <em>"im not sure that the simulation
+  meshes are the same as their product meshes! you have to use the images as references"</em>. This document settles it by measurement:
+  every product photograph is scaled by the XL330-M288-T servo visible in the same frame, our model is posed to the photograph with a
+  perspective camera, and the head shell is compared in millimetres against the mesh's 91.760 × 122.690 × 46.336 mm under the rebuild
+  rule (1.5 mm per axis), never loosened.</p>
+  <div class="rev"><span>MD-HEAD-001 · Rev A</span><span>2026-09-03 05:45</span><span>data: <code>out/head/head.json</code></span><span>generator: <code>tools/gen_head.py</code></span></div>
+</header>
+
+<div class="statbar">
+  <div class="stat"><b>2</b><span>photographs measured</span></div>
+  <div class="stat"><b>+0.9972&nbsp;±&nbsp;0.0386</b><span>product / mesh size ratio</span></div>
+  <div class="stat"><b>-0.35&nbsp;±&nbsp;4.74 mm</b><span>head length, product − mesh</span></div>
+  <div class="stat"><b><span class="chip no">FAIL</span></b><span>head verdict at the 1.5 mm rule</span></div>
+  <div class="stat"><b><span class="chip cd">CANNOT DETERMINE</span></b><span>front view: ring OD / head width</span></div>
+  <div class="stat"><b><span class="chip cd">CANNOT DETERMINE</span></b><span>eye bezel</span></div>
+  <div class="stat"><b><span class="chip no">FAIL</span></b><span>trim band ÷ the head&rsquo;s widest row (§7)</span></div>
+  <div class="stat"><b>89.386 mm</b><span>head width measured (mesh 91.763)</span></div>
+</div>
+
+<nav class="toc">
+  <a href="#answer">1 Verdict</a><a href="#rule">2 The question and the rule</a><a href="#scale">3 Scale</a>
+  <a href="#photos">4 Photographs, posed and overlaid</a><a href="#dims">5 Measured dimensions</a><a href="#eye">6 Eye bezel</a>
+  <a href="#sens">6b Camera distance</a><a href="#attrib">7 Attribution</a><a href="#settle">8 What would settle the rest</a><a href="#method">9 Method and limits</a>
+</nav>
+
+<section id="answer">
+  <h2><span class="n">1</span>Verdict</h2>
+  <div class="verdict warn">
+    <b>Head: FAIL.</b> The accent trim band at the head&#x27;s split line is 3.069 mm narrower than the head&#x27;s own widest row on the product (0.9666 ± 0.0090 of it) and exactly as wide on the mesh (1.0000); the same finding survives the adversarial reading in which only the jaw carries the accent colour (2.6014194544549714 mm vs the jaw alone, FAIL) — a shape difference that needs no scale, no camera and no ring, MEASURED at 3.7 sigma and confirmed at 8x on both edges (the cream shell&#x27;s outer edge sits at x 130 / 557 in the flat-lay while the band&#x27;s sits at 138 / 551). Head WIDTH, from the two lines that never use the ring&#x27;s diameter (the profile silhouettes refitted at a swept lateral scale, and the ToF aperture&#x27;s offset from the eye axis): 89.386 ± 1.815 mm against the mesh&#x27;s 91.763 (CANNOT DETERMINE). Eye ring OD 31.239 ± 1.065 mm against 30.000 (CANNOT DETERMINE). The front view&#x27;s ring/width pair is +6.9 ± 2.7 % (CANNOT DETERMINE). Head length from the servo-scaled profiles: -0.35 ± 4.74 mm (CANNOT DETERMINE), per-axis major +0.06 ± 4.78 / minor +0.62 ± 2.47.
+    Across 2 admitted profile photographs (cream-profile-left, graphite-profile-right) the product head is
+    <b>+0.9972&nbsp;±&nbsp;0.0386</b> times the simulation mesh in length (a deviation of
+    <b>-0.35&nbsp;±&nbsp;4.74 mm</b> on 122.690 mm; along the head's own principal axes
+    +0.06&nbsp;±&nbsp;4.78 mm and +0.62&nbsp;±&nbsp;2.47 mm).
+    The "far longer" head of finding 1 is not in the photographs: the length agrees to the stated uncertainty, and the silhouettes
+    overlay (§4) once the jaw is posed open and the head is yawed as in the shot.
+  </div>
+  <div class="verdict cd">
+    <b>Front view, ring OD / head width: CANNOT DETERMINE.</b> In the one true front view the eye ring's outer diameter is
+    <b>0.3547</b> of the head&rsquo;s outer silhouette width against <b>0.3318</b> on the mesh
+    (+6.9 %; +2.10&nbsp;±&nbsp;0.83 mm at the mesh width, and between
+    +1.64 and +2.74 mm over every
+    camera distance from 400 mm to infinity). Which member of the pair is off is <b>CANNOT DETERMINE</b> from a ratio: The width is measured by two lines that never use the ring&#x27;s diameter — the profile silhouettes (cream-profile-left s_w 0.9641, graphite-profile-right s_w 0.9772) and the ToF aperture offset — and they agree (89.040 ± 2.410, 89.839 ± 2.760 mm). The ring cannot be measured by the profiles at all: their s_r sweeps put it at opposite ends of the swept range (cream-profile-left 1.1200, graphite-profile-right 0.9600), each minimum ON the end of the sweep, which is a refusal, not a measurement. So the front view&#x27;s excess is NOT attributable to the ring by elimination, and it is not attributable to the width alone either: the measured width deficit accounts for 2.7 of the 6.9 %..
+    Implied, if the ring is the mesh's 30.000 mm: head width <b>84.59 mm</b> (-7.18 mm);
+    if the width is the mesh's 91.763 mm: ring OD <b>32.07 mm</b>.
+  </div>
+  <div class="verdict cd">
+    <b>Eye bezel: CANNOT DETERMINE.</b> The bezel is <em>not</em> missing from the mesh: <code>noenoeil.stl</code> is a Ø30.000 mm ring,
+    7.5 mm long, standing proud of the face panel (whose only opening is the Ø14.5 mm lens hole) — exactly the accent-colour ring in the
+    photographs (<span class="chip pass">PASS</span> exists). Its diameter at the head's own length scale (ring over head extent, photograph
+    against render, scale-free) reads +0.49&nbsp;±&nbsp;0.45 mm in the store photographs whose ring is seen whole (Table 5) <span class="chip pass">PASS</span>;
+    the front view's ring/width pair is <span class="chip cd">CANNOT DETERMINE</span> and its attribution to the ring <span class="chip cd">CANNOT DETERMINE</span>.
+    Face layout in the front view (Table 6, each graded): eye centre below the shell top +2.34 mm <span class="chip cd">CANNOT DETERMINE</span>, eye centre off the mid-line -0.16 mm <span class="chip pass">PASS</span>, ToF window from the MJCF site +1.25 mm <span class="chip cd">CANNOT DETERMINE</span>.
+  </div>
+  <div class="verdict warn"><b>Re-model?</b> What FAILS is one feature, and it is the only one the photographs resolve at the rule: the accent trim band at the split line is 3.069 ± 0.831 mm narrower than the head&#x27;s widest row on the product and flush with it on the mesh. Modelling that means the top shell&#x27;s lower rim overhangs the band by about 1.53 mm per side — an EXTERNAL feature, so it is modelled, not guessed. What does NOT justify a re-model: the head&#x27;s overall WIDTH (89.386 ± 1.815 mm against 91.763, CANNOT DETERMINE) and the eye ring&#x27;s OD (31.239 ± 1.065 mm against 30.000, CANNOT DETERMINE). Both point the same way as the front view&#x27;s ratio and neither clears the 1.5 mm rule, so scaling the shells to either number would be a plausible default written into tooling — refused. What a lateral scale would break, MEASURED: part:microduck-jaw&#x27;s hinge interfaces sit at x +42.068 (mouth_horn, the servo horn face) and x -39.700 (bearing_journal) in the mesh frame; the XL330 that drives them does not scale, so a 3 % lateral scale of the shells moves the horn face 1.26 mm off the servo. Where a width change comes out of the section is CANNOT DETERMINE from photographs (a thinner side wall, a narrower core and a different shell profile all give the same silhouette), so the shells stay Pollen&#x27;s geometry until a calliper says otherwise.</div>
+  <p class="note">head: 2 photographs admitted (cream-profile-left, graphite-profile-right), each scaled by the XL330-M288-T case in the same frame (20.000 mm), posed and fitted with a perspective camera, size ratio product/mesh = k * W_render / W_photo; combined length deviation -0.348 ± 4.738 mm; per-axis +0.056 ± 4.783 / +0.620 ± 2.469. Front view (RE-MEASURED on the head&#x27;s OUTER silhouette, one estimator both sides, pose gated): ring OD / head width, photo 0.3547 vs mesh 0.3318 (CANNOT DETERMINE). Eye bezel: profile ring diameter at the head&#x27;s length scale +0.49 ± 0.45 mm vs the noenoeil mesh 30.000 mm. The one FAIL is the accent trim band, 0.9666 ± 0.0090 of the head&#x27;s own widest row on the product against 1.0000 on the mesh (-3.069 ± 0.831 mm). Head width -2.377 ± 1.815 mm on 91.763 (CANNOT DETERMINE); ring OD +1.239 ± 1.065 mm on 30.000 (CANNOT DETERMINE).</p>
+</section>
+
+<section id="rule">
+  <h2><span class="n">2</span>The question and the rule</h2>
+  <p>COMPARISON.html §5.1 could only compare scale-free silhouette ratios, and the one photograph it used has the beak open and the head
+  pitched and yawed — so its +69 % aspect-ratio difference was confounded and it stopped at CANNOT DETERMINE, naming photogrammetric
+  scaling against the servo as the evidence that would settle it. That is what this document does. The grading rule is the one every
+  rebuilt part on this shelf is held to — <b>docs/REBUILD-PROTOCOL.md §3: PASS = p95 &lt;= 1.0 mm both ways AND bbox within 1.5 mm per axis AND 0 unmatched reference features</b> — applied to the product as the reference and Pollen's mesh as the
+  candidate. Because a photograph yields a deviation <i>d</i> with an uncertainty <i>u</i>, the verdict is decided the only honest way:
+  PASS when |d| + u ≤ 1.5 mm, FAIL when |d| − u &gt; 1.5 mm, otherwise CANNOT DETERMINE. Nothing is loosened; a measurement that cannot
+  discriminate at 1.5 mm says so.</p>
+  <div class="tw"><table class="data">
+    <caption>Table 1. The mesh under test (out/verify/mech_dims.json, mm, file frame) and the known-size features used for scale.</caption>
+    <thead><tr><th>Item</th><th>Value</th><th>Source</th></tr></thead>
+    <tbody>
+      <tr><td><code>top_head_shell</code></td><td class=n>91.760 × 122.690 × 46.336</td><td><code>out/verify/mech_dims.json</code> (length = 122.690 along the mesh's second axis)</td></tr>
+      <tr><td><code>bottom_head_shell</code></td><td class=n>91.763 × 116.748 × 20.136</td><td><code>out/verify/mech_dims.json</code></td></tr>
+      <tr><td><code>jaw</code></td><td class=n>91.416 × 68.710 × 29.448</td><td><code>out/verify/mech_dims.json</code></td></tr>
+      <tr><td><code>noenoeil</code> (eye ring)</td><td class=n>Ø30.000 × 7.5 boss, Ø14.4 bore</td><td>reference/pollen-microduck-rl/assets/noenoeil.stl via cecad.meshfeatures.cylinders(scale=1000): boss d_mm 30.0 length 7.5 axis y; hole d 14.4 length 6.0. face_part.stl: hole d 14.5 length 1.3 at the same axis, no 30 mm opening — the ring stands proud of the face panel (noenoeil y -63.5..-54.0, face_part front at y -55.5).</td></tr>
+      <tr><td>XL330-M288-T case width</td><td class=n>20.000 mm</td><td>ROBOTIS e-manual, XL330-M288-T, Specifications table: &#x27;Dimensions (W x H x D) 20.0 x 34.0 x 26.0 [mm]&#x27;, https://emanual.robotis.com/docs/en/dxl/x/xl330-m288/ (fetched 2026-09-02; the same table at https://docs.robotis.com/docs/dxl/model_reference/x_series/xl_series/xl330-m288/, which links XL330.pdf/.dwg/.stp). Face seen: the 20.000 x 34.0 horn/label face — the servo mesh in Pollen&#x27;s MJCF is 20.000 (mesh x) x 34.06 (mesh z) x 29.04 (mesh y = 26.0 case + 3.04 horn) and in the neck body mesh x = world -x, mesh z = world -z (tools/head_probe.py).</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="scale">
+  <h2><span class="n">3</span>Scale — millimetres per pixel from the servo in the same frame</h2>
+  <p>The XL330-M288-T is the only object of independently known size in every store photograph. Its case width is read as the mode of the
+  dark-run widths over many scan lines across the case (label text and cables break single lines; the case gives the same width on every
+  clean line). The width the same 20.000 mm face has in our render at the fitted camera is W<sub>render</sub> = 20.000 mm × f / z — the exact pinhole the
+  frame was drawn with (f from its field of view, z the servo geom's mean vertex depth in the fitted camera, MuJoCo's stereo pair averaged as
+  its mono render does). The model's servo therefore fixes the <em>depth</em>; the face the photograph shows is identified on the photograph
+  (the label text sits on the 20 × 34 face — Table 2's evidence column) and, for the ankle, checked against the neck-servo scale of the same
+  shoot. The size ratio product/mesh = k · W<sub>render</sub> / W<sub>photo</sub> carries the servo-to-head depth difference through the camera
+  model rather than assuming it away. The projection is cross-checked for <em>every</em> servo: in a second ±250 mm / 1600 px frame at the same
+  camera the servo geom's segmentation mask is read across its own axis with the same mode-of-runs estimator and compared with its projected
+  width (Table 2; the first release of this page skipped that read for the ankle and still printed PASS — a defect found by review and
+  fixed 2026-09-03). Uncertainty per servo: ±1 px per edge plus the accepted lines' spread, the fit's spread of k, and the camera-distance
+  term of §6b.</p>
+  <div class="tw"><table class="data">
+    <caption>Table 2. Scale features. mm/px is at the servo's depth. W<sub>render</sub> = 20.000 mm × f / z through the head frame's pinhole (Table 3's D). The cross-check reads the servo geom's segmentation mask across its own axis in a frame wide enough to hold it (the ankle included) against the geom's projected-vertex width; a servo without that read is never graded PASS.</caption>
+    <thead><tr><th>Photograph</th><th>Feature</th><th class=n>Width in photo (px)</th><th class=n>mm / px</th><th class=n>W<sub>render</sub> (px): 20.000 mm at the servo's depth</th><th class=n>Model servo silhouette (mm)</th><th>Cross-check: mask vs projected width, ±250 mm frame</th><th class=n>Size ratio product/mesh</th></tr></thead>
+    <tbody>
+<tr><td>Cream, standing, left profile (store)</td><td>upper neck servo (head_pitch), horn/label face</td><td class=n>131.30<br><small>30 of 129 lines</small></td><td class=n>+0.15232&nbsp;±&nbsp;0.00172</td><td class=n>68.28</td><td class=n>20.26</td><td><span class="chip pass">PASS</span> 65.0 / 65.7 px: <b>-1.07 %</b>, 39 % of the box visible</td><td class=n>+1.0440&nbsp;±&nbsp;0.0122</td></tr>
+<tr class="sub"><td></td><td colspan=7><small><b>face evidence:</b> the 20 x 34 label face: &#x27;DYNAMIXEL XL330-M288-T&#x27; printed across it (visible in the pair picture), the neck pitch axes are lateral so the horn faces a profile camera; the model&#x27;s neck servo geom shows the same 20 mm face (render_silhouette_mm)</small></td></tr>
+<tr><td>Cream, standing, left profile (store)</td><td>lower neck servo (neck_pitch), horn/label face</td><td class=n>131.46<br><small>46 of 63 lines</small></td><td class=n>+0.15214&nbsp;±&nbsp;0.00174</td><td class=n>68.18</td><td class=n>20.26</td><td><span class="chip pass">PASS</span> 65.0 / 65.6 px: <b>-0.95 %</b>, 42 % of the box visible</td><td class=n>+1.0412&nbsp;±&nbsp;0.0123</td></tr>
+<tr class="sub"><td></td><td colspan=7><small><b>face evidence:</b> as the upper servo: label text across the scanned face, lateral pitch axis</small></td></tr>
+<tr><td>Sky, standing, three-quarter front-left (store)</td><td>upper neck servo (head_pitch), label face + side face</td><td class=n>151.22<br><small>32 of 83 lines</small></td><td class=n>+0.13226&nbsp;±&nbsp;0.00146</td><td class=n>68.46</td><td class=n>27.95</td><td><span class="chip pass">PASS</span> 91.0 / 90.9 px: <b>+0.11 %</b>, 46 % of the box visible</td><td class=n>+0.8721&nbsp;±&nbsp;0.0103</td></tr>
+<tr class="sub"><td></td><td colspan=7><small><b>face evidence:</b> CANNOT DETERMINE: no face evidence recorded for this scan · <b>model servo:</b> the model&#x27;s servo geom presents a 27.95 mm silhouette across its axis at this camera — a 20 x 26 case turned 20.9 deg about its long axis (leg pose + hip yaw in the model&#x27;s keyframe), not the square-on 20.000 mm label face the photograph shows; the geom fixes the depth only, the face width comes from the photograph&#x27;s face_evidence</small></td></tr>
+<tr><td>Sky, standing, three-quarter front-left (store)</td><td>lower neck servo (neck_pitch), label face + side face</td><td class=n>165.45<br><small>11 of 57 lines</small></td><td class=n>+0.12088&nbsp;±&nbsp;0.00126</td><td class=n>68.12</td><td class=n>27.99</td><td><span class="chip no">FAIL</span> 79.1 / 90.6 px: <b>-12.60 %</b>, 55 % of the box visible</td><td class=n>+0.7931&nbsp;±&nbsp;0.0089</td></tr>
+<tr class="sub"><td></td><td colspan=7><small><b>face evidence:</b> CANNOT DETERMINE: no face evidence recorded for this scan · <b>model servo:</b> the model&#x27;s servo geom presents a 27.99 mm silhouette across its axis at this camera — a 20 x 26 case turned 21.0 deg about its long axis (leg pose + hip yaw in the model&#x27;s keyframe), not the square-on 20.000 mm label face the photograph shows; the geom fixes the depth only, the face width comes from the photograph&#x27;s face_evidence</small></td></tr>
+<tr><td>Graphite, standing, right profile (store)</td><td>near (right) ankle servo, label face; tilted with the shin</td><td class=n>136.81<br><small>42 of 65 lines</small></td><td class=n>+0.14619&nbsp;±&nbsp;0.00178</td><td class=n>71.90</td><td class=n>22.27</td><td><span class="chip pass">PASS</span> 73.3 / 76.1 px: <b>-3.60 %</b>, 37 % of the box visible</td><td class=n>+0.9644&nbsp;±&nbsp;0.0123</td></tr>
+<tr class="sub"><td></td><td colspan=7><small><b>face evidence:</b> the 20 x 34 label face: &#x27;DYNAMIXEL XL330-M288-T&#x27; is printed across the scanned face (read at 4x zoom, rows 1700-2100 x 780-1180 of the photograph); the ankle joint&#x27;s bearing at (1030, 1850) is seen face-on, so the joint axis — the servo&#x27;s horn axis — points at the camera and the horn/label faces are what a profile sees; and the run (136.8 px) is 20.8 mm at the cream shoot&#x27;s neck-servo scale (0.1523 mm/px), not the 26 mm side face (171 px) · <b>model servo:</b> the model&#x27;s servo geom presents a 22.27 mm silhouette across its axis at this camera — a 20 x 26 case turned 5.2 deg about its long axis (leg pose + hip yaw in the model&#x27;s keyframe), not the square-on 20.000 mm label face the photograph shows; the geom fixes the depth only, the face width comes from the photograph&#x27;s face_evidence</small></td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="photos">
+  <h2><span class="n">4</span>Photographs, posed and overlaid — real beside ours, always</h2>
+  <p>For each photograph the model is posed by fitting camera elevation, azimuth (3/4 shots), distance, head pitch / yaw / roll, the jaw opening
+  and a similarity transform, maximising silhouette IoU of the head region plus the eye-ring ellipse match. The jaw is not a joint in the
+  published model; its geoms are rotated about the measured hinge (the 15×10×3 bearing centre). Head pitch is the head's orientation relative to the trunk, 0 = level (eye-ring axis horizontal, bisected on the mesh), positive = face up.</p>
+  <div class="tw"><table class="data">
+    <caption>Table 3. Fitted pose per photograph. k = photo px per render px (fit spread from re-polishing). Search boxes: el ±12°, pitch ±40°, yaw 0..±90°, roll ±45° (wider than the head_roll joint's ±25° so the fit cannot sit on the joint limit unreported — the first run's cream fit did, at exactly −25.00°), jaw 0..40°, k ×0.7..1.4; a parameter on its box edge is a constrained solution and fails the scale.</caption>
+    <thead><tr><th>Photograph</th><th class=n>IoU</th><th class=n>eye term</th><th class=n>D (mm)</th><th class=n>az (°)</th><th class=n>el (°)</th><th class=n>pitch (°)</th><th class=n>yaw (°)</th><th class=n>roll (°)</th><th class=n>jaw (°)</th><th class=n>k</th><th>On a bound?</th></tr></thead>
+    <tbody>
+<tr><td>Cream, standing, left profile (store)</td><td class=n>0.9544</td><td class=n>0.00154</td><td class=n>1100</td><td class=n>269.99</td><td class=n>-2.12</td><td class=n>-6.81</td><td class=n>63.81</td><td class=n>-30.57<br><small>beyond the joint's ±25°</small></td><td class=n>23.51</td><td class=n>+2.0075&nbsp;±&nbsp;0.0058</td><td><span class="chip pass">PASS</span></td></tr>
+<tr><td>Sky, standing, three-quarter front-left (store)</td><td class=n>0.9585</td><td class=n>0.00026</td><td class=n>1100</td><td class=n>243.75</td><td class=n>-6.81</td><td class=n>-21.12</td><td class=n>38.60</td><td class=n>-19.60</td><td class=n>21.52</td><td class=n>+1.9264&nbsp;±&nbsp;0.0079</td><td><span class="chip pass">PASS</span></td></tr>
+<tr><td>Graphite, standing, right profile (store)</td><td class=n>0.9611</td><td class=n>0.00063</td><td class=n>1100</td><td class=n>90.01</td><td class=n>3.52</td><td class=n>-21.07</td><td class=n>-49.05</td><td class=n>9.43</td><td class=n>0.00</td><td class=n>+1.8349&nbsp;±&nbsp;0.0070</td><td><span class="chip pass">PASS</span></td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>4.1 Cream, standing, left profile (store)</h3>
+  <p class="paircap">head yawed towards the camera, jaw open · <code>images/store/store_microduck-cream-standing-profile-left.jpg</code> 2400×2400 px ·
+    camera distance <b>1100 mm</b> (assumed, §6b), IoU <b>0.954</b>,
+    head pitch -6.8° yaw 63.8° roll -30.6° jaw 23.5°</p>
+  <figure class="wide"><img src="out/head/cream-profile-left_pair.png" alt="cream-profile-left real | ours | overlay">
+    <figcaption>Real (left), ours at the same camera and fitted pose (centre), overlay (right; blue = photograph's head region, orange = our head silhouette and eye ring).</figcaption></figure>
+  <div class="pair">
+    <figure><span class="tag">Real · the measurements drawn</span><img src="out/head/cream-profile-left_measure.png" alt="cream-profile-left measurement">
+      <figcaption>Blue lines: the servo-case scan lines that set the scale; green: the eye-ring ellipse; red: the neck cut; purple: the head region.</figcaption></figure>
+    <figure><span class="tag ours">Ours · the same servo in the render, cross-checked</span><img src="out/head/cream-profile-left_render_servo_wide.png" alt="cream-profile-left render servo, wide frame"><figcaption>The ±250 mm cross-check frame at the fitted camera: the servo geom's mask (box) read across its own axis against its projected width.</figcaption></figure>
+  </div>
+  <p class="note"><b>Scale tests</b>, each run:</p><ul class="tests"><li><span class="chip pass">PASS</span> render mask vs analytic width (upper neck servo (head_pitch), horn/label face) — -1.07 % (mask 65.0 px, analytic 65.7 px, 39 % of the projected box visible, frame ±250 mm at 1600 px)</li><li><span class="chip pass">PASS</span> render mask vs analytic width (lower neck servo (neck_pitch), horn/label face) — -0.95 % (mask 65.0 px, analytic 65.6 px, 42 % of the projected box visible, frame ±250 mm at 1600 px)</li><li><span class="chip pass">PASS</span> two servos agree — 1.0440 vs 1.0412, 0.2 sigma apart</li><li><span class="chip pass">PASS</span> no fitted parameter on its search bound — all 9 free parameters inside their boxes</li><li><b>note</b> fitted head roll vs the MJCF joint range — roll -30.57 deg exceeds the head_roll joint&#x27;s ±25 deg (sim/microduck_ours.xml:215): the photographed pose includes a camera roll or a hand-posed unit; a geometric fit parameter, not a joint command</li></ul>
+  <p class="note">Scale <span class="chip pass">PASS</span> — every scale test ran and passed: render mask vs analytic width (upper neck servo (head_pitch), horn/label face) -1.07 % (mask 65.0 px, analytic 65.7 px, 39 % of the projected box visible, frame ±250 mm at 1600 px); render mask vs analytic width (lower neck servo (neck_pitch), horn/label face) -0.95 % (mask 65.0 px, analytic 65.6 px, 42 % of the projected box visible, frame ±250 mm at 1600 px); two servos agree 1.0440 vs 1.0412, 0.2 sigma apart; no fitted parameter on its search bound all 9 free parameters inside their boxes.
+    Size ratio product/mesh <b>+1.0426&nbsp;±&nbsp;0.0300</b> (camera distance is CANNOT DETERMINE from the store frame; the half-range of r over this photo&#x27;s runs at D = 2000, 600, 1100 mm (0.0287) is added in quadrature) → head length +5.228&nbsp;±&nbsp;3.680 mm <span class="chip cd">CANNOT DETERMINE</span> — the photographs disagree by 4.74 mm rms, more than this photo&#x27;s own ±3.68 mm — a systematic error the per-photo uncertainty does not contain; only the combined row grades; along the head's own axes: major +5.308&nbsp;±&nbsp;3.713 mm, minor +4.475&nbsp;±&nbsp;3.024 mm.</p>
+
+  <h3>4.2 Sky, standing, three-quarter front-left (store)</h3>
+  <p class="paircap">three-quarter view, jaw open; camera azimuth fitted · <code>images/store/store_microduck-sky-standing-three-quarter-left-02.jpg</code> 2400×2400 px ·
+    camera distance <b>1100 mm</b> (assumed, §6b), IoU <b>0.959</b>,
+    head pitch -21.1° yaw 38.6° roll -19.6° jaw 21.5°</p>
+  <figure class="wide"><img src="out/head/sky-three-quarter-front-left_pair.png" alt="sky-three-quarter-front-left real | ours | overlay">
+    <figcaption>Real (left), ours at the same camera and fitted pose (centre), overlay (right; blue = photograph's head region, orange = our head silhouette and eye ring).</figcaption></figure>
+  <div class="pair">
+    <figure><span class="tag">Real · the measurements drawn</span><img src="out/head/sky-three-quarter-front-left_measure.png" alt="sky-three-quarter-front-left measurement">
+      <figcaption>Blue lines: the servo-case scan lines that set the scale; green: the eye-ring ellipse; red: the neck cut; purple: the head region.</figcaption></figure>
+    <figure><span class="tag ours">Ours · the same servo in the render, cross-checked</span><img src="out/head/sky-three-quarter-front-left_render_servo_wide.png" alt="sky-three-quarter-front-left render servo, wide frame"><figcaption>The ±250 mm cross-check frame at the fitted camera: the servo geom's mask (box) read across its own axis against its projected width.</figcaption></figure>
+  </div>
+  <p class="note"><b>Scale tests</b>, each run:</p><ul class="tests"><li><span class="chip pass">PASS</span> render mask vs analytic width (upper neck servo (head_pitch), label face + side face) — +0.11 % (mask 91.0 px, analytic 90.9 px, 46 % of the projected box visible, frame ±250 mm at 1600 px)</li><li><b>note</b> face the model&#x27;s servo presents (upper neck servo (head_pitch), label face + side face) — the model&#x27;s servo geom presents a 27.95 mm silhouette across its axis at this camera — a 20 x 26 case turned 20.9 deg about its long axis (leg pose + hip yaw in the model&#x27;s keyframe), not the square-on 20.000 mm label face the photograph shows; the geom fixes the depth only, the face width comes from the photograph&#x27;s face_evidence</li><li><span class="chip no">FAIL</span> render mask vs analytic width (lower neck servo (neck_pitch), label face + side face) — -12.60 % (mask 79.1 px, analytic 90.6 px, 55 % of the projected box visible, frame ±250 mm at 1600 px)</li><li><b>note</b> face the model&#x27;s servo presents (lower neck servo (neck_pitch), label face + side face) — the model&#x27;s servo geom presents a 27.99 mm silhouette across its axis at this camera — a 20 x 26 case turned 21.0 deg about its long axis (leg pose + hip yaw in the model&#x27;s keyframe), not the square-on 20.000 mm label face the photograph shows; the geom fixes the depth only, the face width comes from the photograph&#x27;s face_evidence</li><li><span class="chip no">FAIL</span> two servos agree — 0.8721 vs 0.7931, 5.8 sigma apart</li><li><span class="chip pass">PASS</span> no fitted parameter on its search bound — all 9 free parameters inside their boxes</li></ul>
+  <p class="note">Scale <span class="chip cd">CANNOT DETERMINE</span> — lower neck servo (neck_pitch), label face + side face: the render&#x27;s mask read of the servo is -12.6 % off its projected width, so what the render shows at this azimuth is not the clean case face the photo scan assumes; the two servos read in this photo give size ratios 0.8721 and 0.7931 — 5.8 sigma apart (their dark runs are not the same face). The read this scale would have given — r = +0.8269&nbsp;±&nbsp;0.0067, -21.24&nbsp;±&nbsp;0.83 mm — is recorded but not used.
+    </p>
+
+  <h3>4.3 Graphite, standing, right profile (store)</h3>
+  <p class="paircap">head yawed towards the camera, jaw closed; scale from the ankle servo (44 mm nearer the camera than the head — the perspective camera carries that) · <code>images/store/store_microduck-graphite-standing-profile-right-02.jpg</code> 2400×2400 px ·
+    camera distance <b>1100 mm</b> (assumed, §6b), IoU <b>0.961</b>,
+    head pitch -21.1° yaw -49.1° roll 9.4° jaw 0.0°</p>
+  <figure class="wide"><img src="out/head/graphite-profile-right_pair.png" alt="graphite-profile-right real | ours | overlay">
+    <figcaption>Real (left), ours at the same camera and fitted pose (centre), overlay (right; blue = photograph's head region, orange = our head silhouette and eye ring).</figcaption></figure>
+  <div class="pair">
+    <figure><span class="tag">Real · the measurements drawn</span><img src="out/head/graphite-profile-right_measure.png" alt="graphite-profile-right measurement">
+      <figcaption>Blue lines: the servo-case scan lines that set the scale; green: the eye-ring ellipse; red: the neck cut; purple: the head region.</figcaption></figure>
+    <figure><span class="tag ours">Ours · the same servo in the render, cross-checked</span><img src="out/head/graphite-profile-right_render_servo_wide.png" alt="graphite-profile-right render servo, wide frame"><figcaption>The ±250 mm cross-check frame at the fitted camera: the servo geom's mask (box) read across its own axis against its projected width.</figcaption></figure>
+  </div>
+  <p class="note"><b>Scale tests</b>, each run:</p><ul class="tests"><li><span class="chip pass">PASS</span> render mask vs analytic width (near (right) ankle servo, label face; tilted with the shin) — -3.60 % (mask 73.3 px, analytic 76.1 px, 37 % of the projected box visible, frame ±250 mm at 1600 px)</li><li><b>note</b> face the model&#x27;s servo presents (near (right) ankle servo, label face; tilted with the shin) — the model&#x27;s servo geom presents a 22.27 mm silhouette across its axis at this camera — a 20 x 26 case turned 5.2 deg about its long axis (leg pose + hip yaw in the model&#x27;s keyframe), not the square-on 20.000 mm label face the photograph shows; the geom fixes the depth only, the face width comes from the photograph&#x27;s face_evidence</li><li><span class="chip cd">CANNOT DETERMINE</span> two servos agree — one servo readable in this photograph — nothing to compare; the cross-check above is the only test of its scale</li><li><span class="chip pass">PASS</span> no fitted parameter on its search bound — all 9 free parameters inside their boxes</li></ul>
+  <p class="note">Scale <span class="chip pass">PASS</span> — every scale test ran and passed: render mask vs analytic width (near (right) ankle servo, label face; tilted with the shin) -3.60 % (mask 73.3 px, analytic 76.1 px, 37 % of the projected box visible, frame ±250 mm at 1600 px); no fitted parameter on its search bound all 9 free parameters inside their boxes.
+    Size ratio product/mesh <b>+0.9644&nbsp;±&nbsp;0.0255</b> (camera distance is CANNOT DETERMINE from the store frame; the half-range of r over this photo&#x27;s runs at D = 2000, 600, 1100 mm (0.0223) is added in quadrature) → head length -4.374&nbsp;±&nbsp;3.127 mm <span class="chip cd">CANNOT DETERMINE</span> — the photographs disagree by 4.74 mm rms, more than this photo&#x27;s own ±3.13 mm — a systematic error the per-photo uncertainty does not contain; only the combined row grades; along the head's own axes: major -4.300&nbsp;±&nbsp;3.381 mm, minor -0.962&nbsp;±&nbsp;1.937 mm.</p>
+</section>
+
+<section id="dims">
+  <h2><span class="n">5</span>Measured dimensions — product against mesh, in millimetres</h2>
+  <p>Head length deviation = 122.690 × (r − 1). Major / minor are the extents of the head region along its own principal axes in the photograph
+  (0.5 / 99.5 percentile, so a stray pixel cannot set them) against the render's extents at the servo-anchored scale — the shape residual left
+  after the size ratio. Uncertainty per axis: the scale uncertainty, ±2 px on each mask edge, and the mm/px uncertainty, in quadrature.</p>
+  <div class="tw"><table class="data">
+    <caption>Table 4. Deviations product − mesh, mm ± uncertainty; verdict per the 1.5 mm rule (PASS |d|+u ≤ 1.5; FAIL |d|−u &gt; 1.5; else CANNOT DETERMINE).</caption>
+    <thead><tr><th>Photograph</th><th class=n>r = product/mesh</th><th class=n>Length dev (mm)</th><th class=n>Major photo (mm)</th><th class=n>Major mesh (mm)</th><th class=n>Δ major (mm)</th><th class=n>Minor photo (mm)</th><th class=n>Minor mesh (mm)</th><th>Δ minor (mm) · verdict</th></tr></thead>
+    <tbody>
+<tr><td>Cream, standing, left profile (store)</td><td class=n>+1.0426&nbsp;±&nbsp;0.0300</td><td class=n>+5.228&nbsp;±&nbsp;3.680</td><td class=n>118.724</td><td class=n>113.416</td><td class=n>+5.308&nbsp;±&nbsp;3.713</td><td class=n>96.151</td><td class=n>91.676</td><td>+4.475&nbsp;±&nbsp;3.024 <span class="chip cd">CANNOT DETERMINE</span><br><small>the photographs disagree by 4.74 mm rms, more than this photo&#x27;s own ±3.68 mm — a systematic error the per-photo uncertainty does not contain; only the combined row grades</small></td></tr>
+<tr><td>Sky, standing, three-quarter front-left (store)</td><td colspan=8><span class="chip cd">CANNOT DETERMINE</span> — scale excluded: lower neck servo (neck_pitch), label face + side face: the render&#x27;s mask read of the servo is -12.6 % off its projected width, so what the render shows at this azimuth is not the clean case face the photo scan assumes; the two servos read in this photo give size ratios 0.8721 and 0.7931 — 5.8 sigma apart (their dark runs are not the same face) (the excluded read would have been r = +0.8269&nbsp;±&nbsp;0.0067, -21.24&nbsp;±&nbsp;0.83 mm)</td></tr>
+<tr><td>Graphite, standing, right profile (store)</td><td class=n>+0.9644&nbsp;±&nbsp;0.0255</td><td class=n>-4.374&nbsp;±&nbsp;3.127</td><td class=n>114.415</td><td class=n>118.715</td><td class=n>-4.300&nbsp;±&nbsp;3.381</td><td class=n>64.320</td><td class=n>65.282</td><td>-0.962&nbsp;±&nbsp;1.937 <span class="chip cd">CANNOT DETERMINE</span><br><small>the photographs disagree by 4.74 mm rms, more than this photo&#x27;s own ±3.13 mm — a systematic error the per-photo uncertainty does not contain; only the combined row grades</small></td></tr>
+<tr class=total><td><b>Combined (inverse-variance; spread 4.738 mm)</b></td><td class=n><b>+0.9972&nbsp;±&nbsp;0.0386</b></td><td class=n><b>-0.348&nbsp;±&nbsp;4.738</b></td><td class=n>—</td><td class=n>—</td><td class=n><b>+0.056&nbsp;±&nbsp;4.783</b></td><td class=n>—</td><td class=n>—</td><td><b>+0.620&nbsp;±&nbsp;2.469</b> <span class="chip cd">CANNOT DETERMINE</span></td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="eye">
+  <h2><span class="n">6</span>Eye bezel — does the product have a part the mesh lacks?</h2>
+  <p>No. The mesh has it: <code>noenoeil</code> is a Ø30.000 mm × 7.5 mm ring in front of the face panel (Table 1). The shelf part
+  <code>ce-parts/microduck-eye-ring</code> (v0.0.1, the noenoeil mesh loaded unchanged by <code>tools/head_eye_ring_shelve.py</code>) carries the numbers below in its evidence ledger. Two independent
+  reads of the product ring: (a) in each profile photograph the accent-hue ring pixels give an ellipse whose major axis is the ring diameter,
+  scaled by the servo (and, more robustly, by the same ring in the render through the fitted similarity — "via render", which needs no mm/px);
+  (b) the flat-lay <em>inside-the-box</em> photograph is a true front view, so every face feature is a scale-free ratio to the head width, compared
+  with our mesh rendered in a true front view with the head level.</p>
+  <div class="tw"><table class="data">
+    <caption>Table 5. Eye ring in the profile photographs (mesh 30.000 mm). The scale-free column is the ring's diameter over the head's extent, photograph against render at the fitted pose — independent of the servo, of mm/px and of the camera distance; Δ Ø = 30 × (ratio − 1). Centre offset = photo ring centre − render ring centre, mm (x right, y down).</caption>
+    <thead><tr><th>Photograph</th><th class=n>Ellipse major × minor (px)</th><th class=n>ring / head extent, photo / render</th><th class=n>Δ Ø scale-free (mm)</th><th class=n>Ø via servo (mm, carries the D question)</th><th class=n>Centre offset (mm)</th><th>Verdict</th></tr></thead>
+    <tbody>
+<tr><td>Cream, standing, left profile (store)</td><td class=n>243.3 × 202.4</td><td class=n>0.3119 / 0.2712</td><td class=n>+4.51&nbsp;±&nbsp;0.48</td><td class=n>+37.04&nbsp;±&nbsp;0.52</td><td class=n>-1.23 / -1.37</td><td><span class="chip cd">CANNOT DETERMINE</span><br><small>ring axis ratio photo 0.832 vs render 0.990: the render&#x27;s ring is partly hidden at this pose, the two extents are not the same feature</small></td></tr>
+<tr><td>Sky, standing, three-quarter front-left (store)</td><td class=n>205.7 × 204.9</td><td class=n>0.2796 / 0.2751</td><td class=n>+0.49&nbsp;±&nbsp;0.45</td><td class=n>+26.04&nbsp;±&nbsp;1.23</td><td class=n>-1.26 / -0.93</td><td><span class="chip pass">PASS</span><br><small>ring axis ratio photo 0.996 vs render 0.997 agree</small></td></tr>
+<tr><td>Graphite, standing, right profile (store)</td><td class=n>189.5 × 145.2</td><td class=n>0.2421 / 0.2436</td><td class=n>-0.18&nbsp;±&nbsp;0.45</td><td class=n>+27.70&nbsp;±&nbsp;0.45</td><td class=n>+0.60 / +0.07</td><td><span class="chip cd">CANNOT DETERMINE</span><br><small>ring axis ratio photo 0.766 vs render 0.870: the render&#x27;s ring is partly hidden at this pose, the two extents are not the same feature</small></td></tr>
+    </tbody>
+  </table></div>
+  <figure class="wide"><img src="out/head/front_pair.png" alt="front view: real flat-lay beside our mesh">
+    <figcaption>True front view: the flat-lay photograph (left; a composite — the battery and gamepad in it carry two different mm/px, so no other object is used for scale) beside our mesh rendered front-on with the head level. Blue = the beak-band width and mid-line (the width used); violet = the shell silhouette's widest row, which the soft shadow to the right of the shell inflates (433–500 px over the threshold sweep — the first release used it and read the eye 2.13 mm off the mid-line; the beak band puts it at -0.16 mm); green = eye-ring ellipse; red = ToF window.</figcaption></figure>
+  <div class="tw"><table class="data">
+    <caption>Table 6. Face layout as ratios to the head width (the beak band, 419 px in the photograph, beak band (jaw + bottom shell) x extent at its widest row, saturation-thresholded accent hue), photo vs mesh, each with its propagated uncertainty and graded at the 1.5 mm rule; mm columns assume the head width is the mesh's 91.763 mm. Rows whose two features sit at different depths are corrected over a camera-distance bracket 400 mm..∞ and graded at every point of it. Source <code>out/head/front_view.json</code>.</caption>
+    <thead><tr><th>Ratio</th><th class=n>Photo ± u</th><th class=n>Mesh</th><th class=n>Diff</th><th class=n>Photo (mm, implied)</th><th class=n>Mesh (mm)</th><th class=n>Δ (mm) ± u</th><th>Verdict</th></tr></thead>
+    <tbody>
+<tr><td>eye ring OD / head width</td><td class=n>+0.3521&nbsp;±&nbsp;0.0080</td><td class=n>0.3226</td><td class=n>+9.11 %</td><td class=n>32.31</td><td class=n>29.61</td><td class=n>+2.70&nbsp;±&nbsp;0.76<br><small>D bracket +2.35..+2.70</small></td><td><span class="chip no">FAIL</span><br><small>the same verdict at every camera distance from 400 mm to infinity</small></td></tr>
+<tr><td>eye ring minor / major (view tilt)</td><td class=n>+0.9820&nbsp;±&nbsp;0.0192</td><td class=n>0.9998</td><td class=n>-0.0178</td><td class=n>—</td><td class=n>—</td><td class=n>—</td><td>n/a — a unitless axis ratio — the view tilt of each picture (photo 10.9 deg, render 1.2 deg off-axis), not a length; carries no mm</td></tr>
+<tr><td>eye centre below shell top / head width</td><td class=n>+0.3214&nbsp;±&nbsp;0.0601</td><td class=n>0.2959</td><td class=n>+8.61 %</td><td class=n>29.50</td><td class=n>27.16</td><td class=n>+2.34&nbsp;±&nbsp;5.52<br><small>D bracket +1.92..+2.34</small></td><td><span class="chip cd">CANNOT DETERMINE</span><br><small>the same verdict at every camera distance from 400 mm to infinity</small></td></tr>
+<tr><td>eye centre off the mid-line / head width</td><td class=n>-0.0027&nbsp;±&nbsp;0.0051</td><td class=n>-0.0010</td><td class=n>— (mesh ≈ 0)</td><td class=n>-0.25</td><td class=n>-0.09</td><td class=n>-0.16&nbsp;±&nbsp;0.50</td><td><span class="chip pass">PASS</span><br><small>numerator and width features at the same depth: no perspective term</small></td></tr>
+<tr><td>ToF window centre right of the eye / head width</td><td class=n>+0.2578&nbsp;±&nbsp;0.0054</td><td class=n>0.2441</td><td class=n>+5.60 %</td><td class=n>23.65</td><td class=n>22.40</td><td class=n>+1.25&nbsp;±&nbsp;0.53<br><small>D bracket +1.25..+1.47</small></td><td><span class="chip cd">CANNOT DETERMINE</span><br><small>the same verdict at every camera distance from 400 mm to infinity</small></td></tr>
+<tr><td>ToF window centre below the eye / head width</td><td class=n>+0.0018&nbsp;±&nbsp;0.0053</td><td class=n>—</td><td class=n>—</td><td class=n>0.17</td><td class=n>—</td><td class=n>—</td><td><span class="chip cd">CANNOT DETERMINE</span> no mesh-side value: the mesh has no ToF window geom</td></tr>
+<tr><td>ToF window width / head width</td><td class=n>+0.1122&nbsp;±&nbsp;0.0036</td><td class=n>—</td><td class=n>—</td><td class=n>10.29</td><td class=n>—</td><td class=n>—</td><td><span class="chip cd">CANNOT DETERMINE</span> no mesh-side value: the mesh has no ToF window geom</td></tr>
+<tr><td>ToF window height / head width</td><td class=n>+0.0621&nbsp;±&nbsp;0.0037</td><td class=n>—</td><td class=n>—</td><td class=n>5.69</td><td class=n>—</td><td class=n>—</td><td><span class="chip cd">CANNOT DETERMINE</span> no mesh-side value: the mesh has no ToF window geom</td></tr>
+<tr><td>beak lip (bottom shell) top edge below shell top / head width</td><td class=n>+0.5370&nbsp;±&nbsp;0.0605</td><td class=n>0.5159</td><td class=n>+4.09 %</td><td class=n>49.28</td><td class=n>47.34</td><td class=n>+1.94&nbsp;±&nbsp;5.55<br><small>D bracket +1.94..+1.94</small></td><td><span class="chip cd">CANNOT DETERMINE</span><br><small>the same verdict at every camera distance from 400 mm to infinity</small></td></tr>
+    </tbody>
+  </table></div>
+  <p class="note">every ratio carries a propagated uncertainty: the head width from the beak band&#x27;s saturation sweep 419-419 px (half-range) plus 1 px per edge, +-2 px on the ring ellipse, the shell top row&#x27;s threshold spread, and the flat-lay foreshortening — the ring is seen 10.9 deg off-axis (minor/major 0.9820), which scales vertical lengths by 0.9995 and horizontal by 0.9825, taken as a systematic on every ratio whose numerator and denominator run along different axes. The shell silhouette&#x27;s own width sweeps 433-500 px over min-channel thresholds [200, 210, 220, 228, 235, 240] (the soft shadow to the right of the shell), which is why the saturated beak band is the width used. The photo&#x27;s mm values assume the head width is the mesh&#x27;s 91.763 mm — they are the implied product dimension, not an independent measurement. The ToF window (a rounded slot 10.3 × 5.7 mm implied) has no geom in the mesh — the face panel's slot is CANNOT DETERMINE on the mesh side and is a feature the face-part rebuild must carry.</p>
+</section>
+
+<section id="sens">
+  <h2><span class="n">6b</span>Camera distance — the one thing the store frames do not give</h2>
+  <p>The store photographs carry no EXIF and no ruler; the near ankle servo reads 136–146 px against the neck's 131.4 px (44.1 mm nearer)
+  depending on the scan tilt, which brackets D only between ~700 and ~1650 mm. Because the head is yawed ~50° towards the camera, its face is
+  ~45 mm nearer than the servo and the head-to-servo ratio moves with D. The fit was therefore repeated at other distances; the half-range of
+  r over these runs is added to the uncertainty of the verdict.</p>
+  <div class="tw"><table class="data">
+    <caption>Table 7. Sensitivity of the size ratio to the assumed camera distance (same photograph, same method, quick fits).</caption>
+    <thead><tr><th>Photograph</th><th class=n>D (mm)</th><th class=n>IoU</th><th class=n>fitted yaw / roll (°)</th><th class=n>r = product/mesh (fit u only)</th><th class=n>head length dev (mm)</th><th>file</th></tr></thead>
+    <tbody>
+<tr><td>cream-profile-left</td><td class=n>2000</td><td class=n>0.8442</td><td class=n>60.8 / -3.1</td><td class=n>+1.0600&nbsp;±&nbsp;0.0086</td><td class=n>+7.36</td><td><code>out/head/head_fit_D2000.json</code></td></tr>
+<tr><td>cream-profile-left</td><td class=n>600</td><td class=n>0.9414</td><td class=n>58.1 / -29.1</td><td class=n>+1.0026&nbsp;±&nbsp;0.0081</td><td class=n>+0.32</td><td><code>out/head/head_fit_D600.json</code></td></tr>
+<tr><td>graphite-profile-right</td><td class=n>2000</td><td class=n>0.8990</td><td class=n>-50.4 / -2.2</td><td class=n>+0.9735&nbsp;±&nbsp;0.0119</td><td class=n>-3.25</td><td><code>out/head/head_fit_graphite-profile-right_D2000.json</code></td></tr>
+<tr><td>graphite-profile-right</td><td class=n>600</td><td class=n>0.9530</td><td class=n>-50.1 / 12.0</td><td class=n>+1.0090&nbsp;±&nbsp;0.0159</td><td class=n>+1.10</td><td><code>out/head/head_fit_graphite-profile-right_D600.json</code></td></tr>
+<tr><td>cream-profile-left (main run)</td><td class=n>1100</td><td class=n>0.9544</td><td class=n>63.8 / -30.6</td><td class=n>+1.0426&nbsp;±&nbsp;0.0086</td><td class=n>+5.23</td><td><code>out/head/head_fit.json</code></td></tr>
+<tr><td>graphite-profile-right (main run)</td><td class=n>1100</td><td class=n>0.9611</td><td class=n>-49.1 / 9.4</td><td class=n>+0.9644&nbsp;±&nbsp;0.0123</td><td class=n>-4.37</td><td><code>out/head/head_fit.json</code></td></tr>
+    </tbody>
+  </table></div>
+  <p class="note">per photo: the half-range of r over that photo&#x27;s runs at other camera distances is in its own uncertainty (photos[].size.D_note); the combined row inherits it. <b>cream-profile-left</b>: camera distance is CANNOT DETERMINE from the store frame; the half-range of r over this photo&#x27;s runs at D = 2000, 600, 1100 mm (0.0287) is added in quadrature. <b>graphite-profile-right</b>: camera distance is CANNOT DETERMINE from the store frame; the half-range of r over this photo&#x27;s runs at D = 2000, 600, 1100 mm (0.0223) is added in quadrature.</p>
+  <h3>The pure-profile frame — scale-free check</h3>
+  <p>scale-free: head silhouette major/minor, real 2.5291 vs Pollen&#x27;s render of these meshes 2.4387 (ratio 1.0371); the two halves are not the same pose (head pitch -166.6 vs -170.5 deg in the image), so this is a coarse check, not a dimension. Neither half yields a mm/px. Real half: the dark run of 84.9 px ends on bright pixels inside the region, but a 20 mm case is ~45 px at this frame&#x27;s scale (head 317 px ~ 123 mm): the run is more than the case — out/head/profile_frame_servo_zoom.png shows what it spans — at 4x the left case edge is visible at x ~1905 but the right edge is behind the grey horn bracket (x ~1950-1995) and the cables, so the run is case + bracket. Simulator half: the dark run of 102.3 px ends on bright pixels inside the region, but a 20 mm case is ~45 px at this frame&#x27;s scale (head 293 px ~ 123 mm): the run is more than the case — out/head/profile_frame_servo_zoom.png shows what it spans — at 4x the run spans the servo case AND the grey neck plate beside it: both are unsaturated greys of the same luminance in this render, so no threshold separates them. Both scans are bounded to the drawn region and a run that reaches the bound is refused; the zoom below shows every accepted run. The frame is kept because it is the only published view with the head un-yawed, real beside Pollen's own render.</p>
+  <figure class="wide"><img src="out/head/profile_frame_pair.png" alt="pure profile frame, sim beside real"><figcaption>Pollen's README frame: their simulator render (left) beside the real unit (right); blue = the head silhouette's principal-axis box on each; orange = the bounded servo scan region and its accepted runs.</figcaption></figure>
+  <figure class="wide"><img src="out/head/profile_frame_servo_zoom.png" alt="the two servo regions at 4x"><figcaption>The two servo regions at 4×, real (left) and simulator (right): the accepted scan runs in blue span the case plus the horn bracket (real) and the case plus the grey neck plate (simulator) — the reason each half is CANNOT DETERMINE, visible rather than asserted.</figcaption></figure>
+</section>
+
+<section id="attrib">
+  <h2><span class="n">7</span>Attribution — which of {ring, head width} is wrong, re-measured like for like</h2>
+  <p>§6 leaves one thing open and it is the important one: the front view fixes the <i>ratio</i> eye-ring&nbsp;OD ÷ head width, and a ratio
+  cannot say which member of the pair is off. Re-reading that measurement found that it was also not comparing the same feature on the two
+  sides. Both are settled here — the first by measuring the pair with one estimator, the second by measuring the head width twice with
+  instruments that never touch the ring at all.</p>
+
+  <div class="verdict cd"><b>Retraction.</b> out/head/head.json published front_pair = FAIL (+9.1 %) for ring OD / head width. That comparison put the photograph&#x27;s ACCENT TRIM BAND (419 px) against the mesh&#x27;s whole bottom-shell silhouette (692 px). On the mesh those are the same feature to 0.35 mm; on the product they are not — the band is 3.069 ± 0.831 mm inset from the head&#x27;s widest row. Re-measured on the head&#x27;s OUTER silhouette on both sides, with one estimator and a gated pose, the excess is 6.9 ± 2.7 % and the pair&#x27;s verdict is CANNOT DETERMINE. The +9.1 % figure is superseded.</div>
+
+  <div class="verdict warn"><b>What does FAIL: the accent trim band is inset on the product and flush on the mesh.</b>
+  Band width ÷ the head&rsquo;s own widest row is <b>0.9666 ± 0.0090</b> on the product against <b>1.0000</b> on the mesh —
+  <b>-3.069 mm</b> at the mesh width, 3.7σ, <span class="chip no">FAIL</span>. It survives the adversarial reading in which only the jaw carries the
+  accent colour (-2.601 mm against the jaw alone, <span class="chip no">FAIL</span>). This ratio uses no scale, no camera model and no ring: it is two
+  widths on the same object in the same photograph.</p>
+  <p class="note">ONE photograph — images/store/store_microduck-inside-the-box.png is the only published TRUE front view of the head. What that does and does not weaken: (a) the ratio is two widths in the same image of the same object, so a composite that rescaled the robot layer, uniformly or not, along x preserves it; (b) pose cannot make it: over every admitted camera distance and yaw the MESH&#x27;s own band/shell stays 0.99855-1.00000, so a 3.3 % inset is not a viewing effect; (c) if the frame were a RENDER rather than a photograph it would strengthen the finding, since a render of these meshes would show the band flush; (d) what it still cannot rule out is a unit-to-unit or print-to-print difference, and that needs a second true front view or a calliper.</p></div>
+
+  <figure class="wide"><img src="out/head/front_edges.png" alt="the head's shell edge against the trim band's, at 8x, both sides">
+    <figcaption>The FAIL at 8× on the photograph itself. Blue = the cream shell&rsquo;s outer edge at the head&rsquo;s widest row
+    (x&nbsp;129 and 561); orange = the accent band&rsquo;s edge (x&nbsp;137 and 555). The shell overhangs the band by about
+    1.53 mm per side. On Pollen&rsquo;s mesh <code>top_head_shell</code> (91.760), <code>bottom_head_shell</code> (91.763) and
+    <code>jaw</code> (91.416 mm) are flush to 0.35 mm.</figcaption></figure>
+
+  <figure class="wide"><img src="out/head/front_fit_pair.png" alt="front view, real beside ours at two lateral scales">
+    <figcaption>The front view re-measured: the flat-lay with the head&rsquo;s <em>outer</em> silhouette, the ring ellipse and the ToF window
+    marked, beside our mesh rendered head-level at the mesh width and at a lateral scale of 0.936. Both sides now use the same estimator
+    (masks filled, full principal extents) and the mesh pose is gated by the ring&rsquo;s ellipticity <i>and</i> by its offset from the
+    shell mid-line (12 of 30 rendered poses admitted: ring ellipticity within 2u AND ring-centre offset from the shell mid-line within 2u).</figcaption></figure>
+
+  <div class="tw"><table class="data">
+    <caption>Table 7. The head width, measured three ways, and the ring that follows. A line is <i>ring-free</i> when its value does not
+    depend on the eye ring&rsquo;s diameter — only those are combined, so the answer is not assumed into existence.</caption>
+    <thead><tr><th>Line</th><th>Ring-free</th><th class=n>Head width (mm)</th><th class=n>u</th><th>What it is</th></tr></thead>
+    <tbody><tr><td>profile photographs, head silhouette (2)</td><td>yes</td><td class=n>89.040</td><td class=n>± 2.410</td><td>the lateral scale s_w at which the posed mesh best reproduces each profile silhouette; the eye ring is held at 30.000 mm, so this line does not use the ring at all</td></tr>
+<tr><td>front view, eye ring OD / head width</td><td><b>no</b></td><td class=n>84.587</td><td class=n>± 2.317</td><td>the flat-lay front view, both sides measured with one estimator on the head&#x27;s OUTER silhouette, the mesh pose gated by the ring&#x27;s ellipticity and its offset from the shell mid-line, over a camera-distance bracket</td></tr>
+<tr><td>front view, ToF window aperture offset from the eye axis</td><td>yes</td><td class=n>89.839</td><td class=n>± 2.760</td><td>the ToF window is an APERTURE in face_part (10.658 x 6.053 mm, MEASURED as the hole in the face_part segmentation mask that does not contain the eye ring — the compute board renders through it), whose centre sits 22.387 mm to the head&#x27;s right of the eye-ring centre. The photograph gives the same offset as a fraction of the head width, so it implies a width without using the ring&#x27;s diameter.</td></tr>
+<tr class="total"><td><b>Head width — the ring-free lines combined</b></td><td>yes</td><td class=n><b>89.386</b></td><td class=n><b>± 1.815</b></td><td>-2.377 mm <span class="chip cd">CANNOT DETERMINE</span> vs the mesh 91.763 mm; &chi;&sup2; 0.0476 on 1 dof</td></tr>
+<tr class="total"><td><b>Eye ring OD — the front view’s ratio at that width</b></td><td>—</td><td class=n><b>31.239</b></td><td class=n><b>± 1.065</b></td><td>+1.239 mm <span class="chip cd">CANNOT DETERMINE</span> vs the mesh 30.000 mm</td></tr></tbody>
+  </table></div>
+  <div class="verdict cd"><b>Attribution: both, and neither alone</b> 2.7 % of the front view&#x27;s 6.9 % ring/width excess is the head being 2.38 mm narrower than the mesh, and the remaining 4.2 % would be the ring being 1.24 mm larger. Each of the two is CANNOT DETERMINE at the 1.5 mm rule on its own; the PAIR is CANNOT DETERMINE at 2.5 sigma.</div>
+  <p class="note">The width is measured by two lines that never use the ring&#x27;s diameter — the profile silhouettes (cream-profile-left s_w 0.9641, graphite-profile-right s_w 0.9772) and the ToF aperture offset — and they agree (89.040 ± 2.410, 89.839 ± 2.760 mm). The ring cannot be measured by the profiles at all: their s_r sweeps put it at opposite ends of the swept range (cream-profile-left 1.1200, graphite-profile-right 0.9600), each minimum ON the end of the sweep, which is a refusal, not a measurement. So the front view&#x27;s excess is NOT attributable to the ring by elimination, and it is not attributable to the width alone either: the measured width deficit accounts for 2.7 of the 6.9 %.</p>
+
+  <div class="tw"><table class="data">
+    <caption>Table 8. The profile-likelihood sweeps behind the first line. The head is rebuilt at a swept lateral scale (shells, face panel,
+    jaw and soft pads scaled about the head&rsquo;s own mid-plane — MEASURED as body <i>y</i> to 0.0000°, the eye ring left at 30.000 mm) or
+    at a swept ring scale, and the full pose is refitted at each. σ is the displacement at which the parabola rises by the fit&rsquo;s own
+    measured noise (the spread of its restarts).</caption>
+    <thead><tr><th>Photograph</th><th>Parameter</th><th class=n>minimiser</th><th class=n>σ</th><th class=n>fit noise</th><th>Reading</th></tr></thead>
+    <tbody><tr><td><code>cream-profile-left</code></td><td>lateral scale <i>s<sub>w</sub></i></td><td class=n>0.9641</td><td class=n>0.0351</td><td class=n>0.00394</td><td>grid 0.9400, local-3 0.9500, IoU peak at 0.9400</td></tr>
+<tr class="sub"><td colspan=6><small>s / objective: 0.9000&thinsp;/&thinsp;0.06868 0.9400&thinsp;/&thinsp;0.05253 0.9700&thinsp;/&thinsp;0.05457 1.0000&thinsp;/&thinsp;0.06031 1.0400&thinsp;/&thinsp;0.07191</small></td></tr>
+<tr><td><code>cream-profile-left</code></td><td>ring scale <i>s<sub>r</sub></i></td><td class=n>1.1757</td><td class=n>0.1106</td><td class=n>0.00487</td><td><b>minimum on the end of the swept range</b> (runs above 1.1200) &mdash; a refusal, not a measurement</td></tr>
+<tr class="sub"><td colspan=6><small>s / objective: 0.9600&thinsp;/&thinsp;0.06783 1.0000&thinsp;/&thinsp;0.06031 1.0400&thinsp;/&thinsp;0.05596 1.0800&thinsp;/&thinsp;0.05364 1.1200&thinsp;/&thinsp;0.04956</small></td></tr>
+<tr><td><code>graphite-profile-right</code></td><td>lateral scale <i>s<sub>w</sub></i></td><td class=n>0.9772</td><td class=n>0.0369</td><td class=n>0.00293</td><td>grid 0.9700, local-3 0.9619, IoU peak at 0.9400</td></tr>
+<tr class="sub"><td colspan=6><small>s / objective: 0.9000&thinsp;/&thinsp;0.05776 0.9400&thinsp;/&thinsp;0.04465 0.9700&thinsp;/&thinsp;0.04391 1.0000&thinsp;/&thinsp;0.04639 1.0400&thinsp;/&thinsp;0.05162</small></td></tr>
+<tr><td><code>graphite-profile-right</code></td><td>ring scale <i>s<sub>r</sub></i></td><td class=n>0.9009</td><td class=n>0.0994</td><td class=n>0.00455</td><td><b>minimum on the end of the swept range</b> (runs below 0.9600) &mdash; a refusal, not a measurement</td></tr>
+<tr class="sub"><td colspan=6><small>s / objective: 0.9600&thinsp;/&thinsp;0.04387 1.0000&thinsp;/&thinsp;0.04639 1.0400&thinsp;/&thinsp;0.05137 1.0800&thinsp;/&thinsp;0.05683 1.1200&thinsp;/&thinsp;0.06426</small></td></tr></tbody>
+  </table></div>
+  <div class="pair">
+    <figure><span class="tag">Real vs ours</span><img src="out/head/width_cream-profile-left_s_w_tight.png" alt="cream profile, lateral-scale sweep"><figcaption>Cream, left profile: the photograph with our silhouette at <i>s<sub>w</sub></i> = 1 (red) and at the fitted scale (blue), then our render at both.</figcaption></figure>
+    <figure><span class="tag">Real vs ours</span><img src="out/head/width_graphite-profile-right_s_w_tight.png" alt="graphite profile, lateral-scale sweep"><figcaption>Graphite, right profile: the same, from the other side and a different colourway.</figcaption></figure>
+  </div>
+
+  <h3>7.1 The outline itself, with nothing fitted</h3>
+  <p>The head&rsquo;s front-view outline, width at each row ÷ the widest row, against that row&rsquo;s height above or below the
+  <em>eye-ring centre</em> in the same units. No scale, no camera, no pose fit — if the product and the mesh are the same shape the two
+  curves lie on each other. Over the compared range they agree to <b>1.185 mm rms</b> (worst 2.326 mm, 0 of
+  60 sample rows outside the rule by more than their own uncertainty): <span class="chip cd">CANNOT DETERMINE</span>. The systematic that remains is the same
+  finding as above — the product is wider above its widest row and narrower below it, and its widest row sits 0.0232 head-widths
+  higher than the mesh&rsquo;s.</p>
+  <figure class="wide"><svg viewBox="0 0 760 300" width="100%" role="img" aria-label="head outline, product against mesh"><line x1="73.3" y1="16.0" x2="73.3" y2="266.0" stroke="#c9c4bb"/><text x="73.3" y="279.0" font-size="10" text-anchor="middle" fill="#6b665e">-0.1</text><line x1="235.0" y1="16.0" x2="235.0" y2="266.0" stroke="#c9c4bb"/><text x="235.0" y="279.0" font-size="10" text-anchor="middle" fill="#6b665e">+0.0</text><line x1="396.7" y1="16.0" x2="396.7" y2="266.0" stroke="#c9c4bb"/><text x="396.7" y="279.0" font-size="10" text-anchor="middle" fill="#6b665e">+0.1</text><line x1="558.4" y1="16.0" x2="558.4" y2="266.0" stroke="#c9c4bb"/><text x="558.4" y="279.0" font-size="10" text-anchor="middle" fill="#6b665e">+0.2</text><line x1="720.0" y1="16.0" x2="720.0" y2="266.0" stroke="#c9c4bb"/><text x="720.0" y="279.0" font-size="10" text-anchor="middle" fill="#6b665e">+0.3</text><line x1="54.0" y1="226.5" x2="744.0" y2="226.5" stroke="#eae6df"/><text x="48.0" y="229.5" font-size="10" text-anchor="end" fill="#6b665e">0.85</text><line x1="54.0" y1="160.7" x2="744.0" y2="160.7" stroke="#eae6df"/><text x="48.0" y="163.7" font-size="10" text-anchor="end" fill="#6b665e">0.90</text><line x1="54.0" y1="94.9" x2="744.0" y2="94.9" stroke="#eae6df"/><text x="48.0" y="97.9" font-size="10" text-anchor="end" fill="#6b665e">0.95</text><line x1="54.0" y1="29.2" x2="744.0" y2="29.2" stroke="#eae6df"/><text x="48.0" y="32.2" font-size="10" text-anchor="end" fill="#6b665e">1.00</text><path d="M54.0 201.7 L65.7 191.9 L77.4 184.4 L89.1 174.4 L100.8 167.3 L112.5 157.8 L124.2 149.7 L135.9 142.9 L147.6 136.3 L159.3 129.7 L170.9 123.1 L182.6 116.6 L194.3 111.6 L206.0 106.5 L217.7 99.9 L229.4 94.7 L241.1 91.0 L252.8 86.9 L264.5 81.6 L276.2 77.7 L287.9 75.8 L299.6 69.9 L311.3 65.0 L323.0 62.7 L334.7 59.2 L346.4 56.1 L358.1 53.8 L369.8 50.4 L381.5 49.8 L393.2 44.3 L404.8 44.2 L416.5 41.3 L428.2 39.2 L439.9 38.3 L451.6 35.4 L463.3 35.2 L475.0 35.2 L486.7 35.2 L498.4 32.7 L510.1 31.6 L521.8 29.7 L533.5 29.2 L545.2 29.2 L556.9 29.2 L568.6 34.7 L580.3 41.9 L592.0 47.7 L603.7 55.5 L615.4 59.5 L627.1 59.5 L638.7 62.6 L650.4 65.5 L662.1 68.0 L673.8 67.4 L685.5 62.5 L697.2 63.6 L708.9 65.7 L720.6 68.8 L732.3 76.9 L744.0 84.9" fill="none" stroke="#b3541e" stroke-width="2"/><path d="M54.0 219.3 L65.7 209.5 L77.4 200.6 L89.1 193.1 L100.8 182.4 L112.5 174.4 L124.2 169.8 L135.9 162.4 L147.6 154.6 L159.3 148.1 L170.9 140.9 L182.6 134.5 L194.3 129.2 L206.0 122.7 L217.7 117.8 L229.4 111.2 L241.1 106.4 L252.8 102.6 L264.5 98.0 L276.2 92.2 L287.9 87.6 L299.6 83.9 L311.3 80.2 L323.0 76.4 L334.7 72.7 L346.4 69.0 L358.1 65.2 L369.8 61.5 L381.5 58.9 L393.2 57.1 L404.8 54.1 L416.5 50.4 L428.2 46.6 L439.9 44.4 L451.6 43.0 L463.3 40.6 L475.0 39.3 L486.7 36.8 L498.4 35.7 L510.1 33.0 L521.8 33.0 L533.5 33.0 L545.2 32.1 L556.9 29.2 L568.6 29.2 L580.3 29.2 L592.0 29.2 L603.7 29.6 L615.4 33.0 L627.1 33.3 L638.7 36.8 L650.4 37.4 L662.1 50.0 L673.8 36.8 L685.5 40.5 L697.2 40.6 L708.9 44.2 L720.6 44.4 L732.3 47.8 L744.0 51.6" fill="none" stroke="#2f5d9e" stroke-width="2"/><text x="399.0" y="298.0" font-size="10" fill="#6b665e" text-anchor="middle">height above/below the eye-ring centre, in head widths</text><text x="12" y="150.0" font-size="10" fill="#6b665e" transform="rotate(-90 12 150.0)" text-anchor="middle">width / widest row</text><g font-size="11"><rect x="68.0" y="24.0" width="14" height="3" fill="#b3541e"/><text x="86.0" y="28.0">product</text><rect x="68.0" y="42.0" width="14" height="3" fill="#2f5d9e"/><text x="86.0" y="46.0">Pollen mesh</text></g></svg><figcaption>Excluded and why: every row above the one where either outline first reaches 0.85 of its widest width — the dome apex, where the outline is a tangent and a width difference measures the vertical registration rather than the shape (the propagated anchor term there is 1.4 mm and still not the whole story) — and the last 0.045 of u, where the photograph&#x27;s head runs into the neck cut and the mesh&#x27;s carries the soft pads: different features, named and dropped rather than trimmed until the curves agree</figcaption></figure>
+
+  <h3>7.2 The ToF window — the mesh has one, and it is measurable</h3>
+  <p>front_view.json recorded &#x27;the mesh has no ToF window geom&#x27; and marked the window CANNOT DETERMINE on the mesh side. There is no ToF GEOM; there IS a ToF aperture, and it is measurable. The MJCF&#x27;s tof SITE sits at 22.5000 mm, 0.113 mm outboard of the aperture centre. The aperture measures <b>10.658 × 6.053 mm</b> and its centre sits <b>22.387 mm</b> to the head&rsquo;s right of the
+  eye-ring axis.</p>
+  <div class="tw"><table class="data">
+    <caption>Table 9. The ToF window, both sides, as fractions of the head width (the photograph carries no scale of its own).</caption>
+    <thead><tr><th>Ratio</th><th class=n>Product</th><th class=n>Mesh</th><th class=n>Δ at the mesh width (mm)</th></tr></thead>
+    <tbody><tr><td>window width / head width</td><td class=n>0.10842</td><td class=n>0.11392</td><td class=n>-0.505</td></tr>
+<tr><td>window height / head width</td><td class=n>0.05998</td><td class=n>0.06462</td><td class=n>-0.426</td></tr>
+<tr><td>centre offset from the eye axis / head width</td><td class=n>0.24919</td><td class=n>0.24396</td><td class=n>+0.479</td></tr>
+<tr><td>centre offset below the eye axis / head width</td><td class=n>0.00155</td><td class=n>0.02355</td><td class=n>-2.018</td></tr></tbody>
+  </table></div>
+</section>
+
+<section id="settle">
+  <h2><span class="n">8</span>What would settle the remaining CANNOT DETERMINEs</h2>
+  <ul><li>A calliper on one product head: top_head_shell length (mesh 122.690 mm), WIDTH across the beak and across the shell rim (mesh 91.763 / 91.760) and height (46.336) to 0.1 mm, and the eye ring&#x27;s outer diameter (mesh 30.000) — a 0.1 mm reading beats every photograph here by an order of magnitude, settles the 1.5 mm rule outright and attributes the front-view ring/width excess to the ring or to the width.</li><li>Or one photograph taken for the purpose: a true front view with a ruler in the plane of the face (fixes the ring/width pair in mm), and one pure profile, beak closed, head level, the XL330 label face in the focal plane of the head, 4000+ px on the long side (the length to 0.6 mm).</li><li>The camera distance of the store photographs (EXIF focal length + sensor, stripped from the published files, or a ruler in the frame) would remove the D term from every servo-scaled ratio (photos[].size.D_note).</li><li>A cleaner pure-profile frame from Pollen&#x27;s video (the README frame&#x27;s neck servo is merged with its horn bracket and cables at 4x, out/head/profile_frame_servo_zoom.png).</li></ul>
+</section>
+
+<section id="method">
+  <h2><span class="n">9</span>Method and honest limits</h2>
+  <ul>
+    <li><b>Scripts.</b> <code>tools/head_photomatch.py</code> (scale, pose fit, size — writes <code>out/head/head_fit.json</code> and every overlay),
+      <code>tools/head_frontview.py</code> (front-view ratios with propagated uncertainty and verdicts — <code>out/head/front_view.json</code>), <code>tools/head_profile_frame.py</code> (the README frame — <code>out/head/profile_frame.json</code>), <code>tools/head_frontfit.py</code> (the front view re-measured like for like — <code>out/head/front_fit.json</code>),
+      <code>tools/head_width.py</code> (the head rebuilt at a swept lateral or ring scale and refitted — <code>out/head/width_tight.json</code>),
+      <code>tools/head_width_verdict.py</code> (the two unknowns solved — <code>out/head/head_width_verdict.json</code>),
+      <code>tools/head_verdict.py</code> (merge + verdict —
+      <code>out/head/head.json</code>), <code>tools/gen_head.py</code> (this page), <code>tools/shot_page.py</code> (the read-back in <code>out/head/readback/</code>). Renderer: MuJoCo offscreen segmentation at 1000², perspective free camera whose
+      field of view follows the fitted distance so the head always spans the same frame.</li>
+    <li><b>Which servo face.</b> Read off the published MJCF: the servo mesh is 20.000 (mesh x) × 34.06 (mesh z) × 29.04 (mesh y, case + horn) and in the neck body
+      mesh x = world −x, mesh z = world −z, so a profile camera sees the 20.000 × 34 horn/label face (<code>tools/head_probe.py</code>). The photographs show the
+      label on that face, as the drawing does.</li>
+    <li><b>Perspective.</b> The store shots are close (D in Table 3 is an assumption inside a measured 700–1650 mm bracket, §6b); the near and far edges of the head differ in scale by up to 4 % at 0.5 m, which is why
+      the camera is perspective and the fit is repeated over D. The flat-lay front view is perspective too: its ring stands 4.4 mm nearer the camera than the beak edge (mesh depths in <code>front_view.json</code>), carried as the D bracket of Table 6.</li>
+    <li><b>Constrained fits.</b> A fitted parameter on the edge of its search box means the optimum is outside the box; Table 3 lists every such parameter and the photograph's scale is then refused. The first release's cream fit sat on the roll bound at −25.00° and was published without saying so; the roll box is now ±45° and the check is automatic.</li>
+    <li><b>Defects found by review on the first release, all fixed 2026-09-03:</b> a PASS printed for a cross-check that was never read (graphite's ankle servo); a section contradicting its own table on that point; a citation to sensitivity files that did not exist (D700/D1600 — the runs are D600/D2000) and a mis-stated bracket centre; a unitless ratio printed in millimetres; the largest front-view deviation (eye off the mid-line, −2.13 mm) reported as a match — a shadow artefact, now -0.16 mm on the beak band; a front-view uncertainty typed as 2 % instead of propagated; a profile-frame scan that ran into the background and blamed a bracket; a D-sensitivity note that described a different number than the one used; a licence version that the source does not state; a missing full stop; and tables wider than the page.</li>
+    <li><b>What §7 supersedes, and what it does not.</b> §6 and Table 6 are the FIRST front-view measurement and are kept as published: they
+      are what §7 corrects, and a reader who cannot see the old number cannot check the correction. Where the two disagree, §7 governs — it
+      measures the same feature on both sides. §5 (head length, from the profiles) and §3 (scale) are untouched by it.</li>
+    <li><b>The lateral-scale instrument, and how it was broken on purpose.</b> <code>tools/head_width.py</code> edits the head meshes&rsquo;
+      vertices before the renderer is built (MuJoCo uploads mesh data to its GL context once, at construction) and scales them about the head
+      body&rsquo;s own lateral axis, which is MEASURED as body <i>y</i> to 0.0000°. Self-test: a shell scale of 0.5 halves the rendered head
+      mask (442 → 222 px) and leaves the ring mask at 146 px; a ring scale of 1.5 takes the ring mask 146 → 219 px (×1.500) and leaves the
+      head mask at 442 px.</li>
+    <li><b>What the numbers are not.</b> Bounding-box level agreement between the product and the mesh. Not a p95 surface-distance check (that needs a scan
+      of a product head), not a manufacturing tolerance. Every number is from published photographs and published digital assets; no physical unit has
+      been callipered.</li>
+    <li><b>Mask edges.</b> The head region is the non-white silhouette above a neck cut, minus a neck polygon drawn by hand and shown on every measurement picture;
+      the cream shell against the white background is segmented by chroma as well as luminance. Edge uncertainty ±2 px is carried into every mm.</li>
+  </ul>
+</section>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,68 @@
+{
+ "generated": "2026-09-02",
+ "tool": "cecad.stress (gmsh + CalculiX), PLA",
+ "load_basis": "737 g robot; 20 N design load per structural link (2x over ~9.4 N slow-walk single-leg peak); static, first-order",
+ "results": [
+  {
+   "slug": "microduck-shin",
+   "material": "PLA",
+   "load_N": 20.0,
+   "fixed": "knee",
+   "loaded": "ankle",
+   "why": "shin carries the standing/walking load from the knee down to the ankle",
+   "connectors": [
+    "knee",
+    "ankle"
+   ],
+   "verdict": "PASS",
+   "sf": 7.510634459976798,
+   "summary": "<cecad.stress.LoadReport object at 0x111942190>"
+  },
+  {
+   "slug": "microduck-upper-leg-left",
+   "verdict": "CANNOT DETERMINE",
+   "why": "solve failed: gmsh failed on microduck-upper-leg-left: Error   : Invalid boundary mesh (overlapping facets) on surface 350 surface 350\nWarning : No elements in volume 1\nWarning : Surface mesh: worst distortion = -5.4665 (avg = 0.965824, 48 elements with jac. < 0); worst gamma = 1.15386e-06\nWarning : Surface mesh: worst distortion = -5.4665 (avg = 0.965824, 48 elements with jac. < 0); worst gamma = 1.15386e-06\nWarning : Final surface mesh: worst distortion = -1.29347 (avg = 0.988664, 1 elements with jac. < 0); worst gamma = 1.15386e-06\nError   : ------------------------------\nError   : Mesh generation error summary\nError   :     4 warnings\nError   :     1 error\nError   : Check the full log for details\nError   : ------------------------------\n",
+   "connectors": [
+    "hip_pitch_axle",
+    "knee_axle",
+    "hip_pitch_servo_seat",
+    "knee_servo_seat",
+    "pin_1",
+    "pin_2",
+    "pin_3",
+    "pin_4"
+   ]
+  },
+  {
+   "slug": "microduck-ankle-left",
+   "material": "PLA",
+   "load_N": 20.0,
+   "fixed": "bearing_seat",
+   "loaded": "horn_face",
+   "why": "standing/walking load from bearing_seat (held) to horn_face (loaded)",
+   "connectors": [
+    "bearing_seat",
+    "horn_face",
+    "foot_screw"
+   ],
+   "verdict": "PASS",
+   "sf": 2.0210281854992354,
+   "summary": "<cecad.stress.LoadReport object at 0x126b2f990>"
+  },
+  {
+   "slug": "microduck-hip-bracket",
+   "material": "PLA",
+   "load_N": 20.0,
+   "fixed": "roll_boss",
+   "loaded": "pitch_boss",
+   "why": "standing/walking load from roll_boss (held) to pitch_boss (loaded)",
+   "connectors": [
+    "roll_boss",
+    "pitch_boss"
+   ],
+   "verdict": "PASS",
+   "sf": 6.424036301436047,
+   "summary": "<cecad.stress.LoadReport object at 0x12742a690>"
+  }
+ ]
+}

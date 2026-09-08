@@ -1,0 +1,102 @@
+{
+  "$parts_folder": 1,
+  "kind": "chip",
+  "record": {
+    "part": "st25r3916",
+    "part_note": "Everything below was read off datasheet.pdf IN THIS FOLDER — ST DS12484 Rev 8 (May 2023, 160 pages), fetched 2026-09-02, sha256 1170f4d74ff501917262ae42bf81c60c38c11d121e2ea2af6b1e845433befef1 (PROVENANCE.json) — via `pdftotext -layout`; quotes are that extraction with whitespace collapsed and tools/datasheet-quotes-check.py re-finds each in the PDF. The document covers ST25R3916 AND ST25R3917; this record is the ST25R3916 (the member with EMVCo and card-emulation; p.1 Table 1 lists the differences).",
+    "manufacturer": "STMicroelectronics",
+    "description": "13.56 MHz NFC universal device: reader/writer for NFC-A/B/F/V, card emulation (NFC-A/F), active and passive P2P, EMVCo 3.0 reader; integrated regulators, 512-byte FIFO, SPI up to 10 Mbit/s or I2C up to 3.4 Mbit/s host interface; can drive two independent single-ended antennas. p.1 title verbatim: 'High performance NFC universal device and EMVCo reader'.",
+    "description_quote": "High performance NFC universal device and EMVCo reader",
+    "fetched": true,
+    "datasheet_url": "https://www.st.com/resource/en/datasheet/st25r3916.pdf",
+    "datasheet_local": "datasheet.pdf",
+    "datasheet_fetched": "2026-09-02",
+    "datasheet_rev": "DS12484 Rev 8 — p.1 footer verbatim 'May 2023 DS12484 Rev 8 1/160'; every page footer carries 'DS12484 Rev 8'; p.1 header 'Datasheet - production data'. PDF Title 'Datasheet - ST25R3916 ST25R3917 - High performance NFC universal device and EMVCo reader', Author STMICROELECTRONICS, CreationDate 2023-05-09. HTTP 200, application/pdf, 2241765 bytes, fetched 2026-09-02 with curl and a browser User-Agent from st.com.",
+    "datasheet_rev_quote": "May 2023 DS12484 Rev 8 1/160",
+    "package": "VFQFPN32 (5x5 mm, wettable flanks, suffix QW), UFQFPN32 (5x5 mm, suffix QE), WLCSP36 (suffix WL) — p.1 package figure 'VFQFPN32 UFQFPN32 WLCSP36' with '(5x5 mm) (5x5 mm)'; §7 Ordering information verbatim 'QW = 32-pin VFQFPN (5 x 5 mm) with wettable flanks'.",
+    "package_quote": "QW = 32-pin VFQFPN (5 x 5 mm) with wettable flanks",
+    "ordering_example": "ST25R3916-AQWT = ST25 R 3916 -A QW T: 'A = -40 °C to 105 °C', QW package, 'T = 4000 pcs/reel (VFQFPN/UFQFPN), 5000 pcs/reel (WLCSP)' (§7).",
+    "ordering_quote": "A = -40 °C to 105 °C",
+    "used_by": [],
+    "rails": ["3V3"],
+    "rails_why": "VDD/VDD_TX accept 2.4–5.5 V and VDD_IO 1.65–5.5 V (Table 119), so both the Radxa's 3.3 V and a 5 V rail are inside the window; 3V3 named here because the Radxa Zero 3W header I2C/SPI is 3.3 V logic.",
+    "absolute_max": "p.136 Table 118 'Absolute maximum ratings', rows verbatim: 'Positive supply voltage -0.3 6.0' (VDD, VDD_TX, V); 'Positive supply voltage when option bit sup3V is set -0.3 5'; 'Peripheral communication supply voltage -0.3 6' (VDD_IO); 'Total power dissipation (all supplies and outputs) - 300 mW'; 'Junction temperature -40 125' (°C); 'Storage temperature -65 150'.",
+    "absolute_max_quotes": [
+      "Positive supply voltage -0.3 6.0",
+      "Peripheral communication supply voltage -0.3 6",
+      "Total power dissipation (all supplies and outputs) - 300 mW",
+      "Junction temperature -40 125"
+    ],
+    "supplies": [
+      {
+        "name": "VDD / VDD_TX",
+        "rail": "3V3",
+        "v_min": 2.4,
+        "v_typ": null,
+        "v_max": 5.5,
+        "cite": "p.137 Table 119 'Operating conditions', rows verbatim: 'Positive supply voltage (pins 8 and 10), 2.6 5.5 Tamb = -40 to 105 °C, rege <3:0> ≥ 07h' and 'Positive supply voltage (pins 8 and 10), 2.4 5.5 Tamb = -20 to 105 °C'. 2.4 V is the -20 °C floor, 2.6 V the -40 °C floor. No TYP column exists in Table 119 — v_typ null by observation. With option bit sup3V set the ceiling drops to 3.6 V (same table).",
+        "quote": "Positive supply voltage (pins 8 and 10), 2.6 5.5 Tamb = -40 to 105 °C, rege <3:0> ≥ 07h"
+      },
+      {
+        "name": "VDD_IO",
+        "rail": "3V3",
+        "v_min": 1.65,
+        "v_typ": null,
+        "v_max": 5.5,
+        "cite": "p.137 Table 119 row verbatim: 'Peripheral communication supply voltage (pin 1)(4) 1.65 5.5' — the host-interface (SPI/I2C) supply, which is what sets the logic levels toward the Radxa.",
+        "quote": "Peripheral communication supply voltage (pin 1)(4) 1.65 5.5"
+      }
+    ],
+    "current_mA": {
+      "rail": "3V3",
+      "rail_basis": "VDD/VDD_TX and VDD_IO all on 3.3 V is the Radxa-header case.",
+      "typical": null,
+      "typical_basis": "NOT TRANSCRIBED. The sheet's current figures live in Table 121 'ST25R3916/7 electrical characteristics (VDD = 3.3 V)' (p.138 ff.) as many operating-mode rows (transmit at a given RFO driver setting, receive, wake-up, power-down) and no single typical exists; a design chooses a mode. The ABSOLUTE ceilings are quoted instead: 'Maximum driver current using internal voltage regulator - 350(4)' mA and 'Peak current supplied from an external source, internal voltage regulator bypassed 500(6)' mA (Table 118).",
+      "peak": 350,
+      "peak_basis": "Table 118 row verbatim 'Maximum driver current using internal voltage regulator - 350(4)' (mA; footnote 4 'Provide good thermal management…'). An absolute-maximum RF-driver current, not a measured typical draw.",
+      "sleep": null,
+      "sleep_basis": "NOT TRANSCRIBED — power-down / wake-up currents are in Table 121 and were not read into this record.",
+      "excludes": "antenna matching losses; the host MCU",
+      "caveats": ["Field-on current depends entirely on the antenna, matching and driver-resistance setting; the 350 mA figure is a ceiling, not a budget line."],
+      "cite": "p.136 Table 118 rows IVDD_LDO and IVDD_EXT; Table 121 for mode currents (not transcribed).",
+      "quote": "Maximum driver current using internal voltage regulator - 350(4)"
+    },
+    "logic": {
+      "vih_min": null,
+      "vil_max": null,
+      "three_v3_tolerant": true,
+      "derived": true,
+      "cite": "Table 120 'Characteristics of CMOS I/Os' was not transcribed; three_v3_tolerant is DERIVED from Table 119 'Peripheral communication supply voltage (pin 1)(4) 1.65 5.5' and Table 118 'Peripheral communication supply voltage -0.3 6' — a 3.3 V VDD_IO is inside both windows."
+    },
+    "interface": "SPI or I2C",
+    "interface_max_hz": 10000000,
+    "interface_cite": "p.1 Features verbatim 'Serial peripheral interface (SPI) up to' … '10 Mbit/s' (the 10 Mbit/s sits on the next extracted line) and 'I2C with up to 400 kbit/s in Fast-mode, 1 Mbit/s in Fast-mode Plus, and 3.4 Mbit/s in High-speed mode'. 10 MHz is the SPI figure; I2C tops out at 3.4 MHz.",
+    "interface_quote": "I2C with up to 400 kbit/s in Fast-mode,",
+    "i2c_address": null,
+    "i2c_address_why": "NOT TRANSCRIBED — the I2C address and its selection are in §4.3.4 'I2C interface'; the extraction was not read for it. null, not a guess.",
+    "two_antennas": {
+      "quote": "Possibility to drive two independent single",
+      "cite": "p.1 Features: 'Possibility to drive two independent single' / 'ended antennas' (wrapped across two extracted lines). This is the feature that makes the ST25R3916 a candidate for a head antenna plus a beak antenna on one IC; whether Pollen did that is CANNOT DETERMINE."
+    },
+    "standards_claimed": {
+      "quotes": [
+        "NFC-V / ISO15693 up to 53 kb/s",
+        "EMVCo 3.0 analog and digital compliant",
+        "ISO14443 and ISO15693 compliant general purpose NFC device"
+      ],
+      "cite": "p.1 Features and p.10 Applications. Vendor claims of protocol compliance; nothing here verifies them."
+    },
+    "pinout": {
+      "$about": "NOT TRANSCRIBED. Table 2 'ST25R3916 - UFQFPN32 VFQFPN32 and WLCSP36 pin assignment' (p.20) holds the 32-pin map; only the supply pin numbers Table 119 names are carried: VDD/VDD_TX = pins 8 and 10, VDD_IO = pin 1, VGND = pins 6, 12, 16, 26.",
+      "verdict": "CANNOT DETERMINE",
+      "cite": "datasheet.pdf p.20 Table 2 (unread); p.137 Table 119 for the pin numbers quoted."
+    },
+    "unknowns": [
+      "THE FITTED NFC IC IN THE MICRODUCK: CANNOT DETERMINE. No NFC code in the published runtime, HAT unpublished (docs/ELECTRONICS-AND-SOFTWARE.md §8). This is a candidate.",
+      "Mode currents (Table 121) and the I2C address (§4.3.4) not transcribed.",
+      "Full pin map (Table 2) not transcribed.",
+      "Antenna design: the sheet's matching guidance is in the application notes it references, not fetched.",
+      "No physical part measured; no sourced offer."
+    ]
+  }
+}

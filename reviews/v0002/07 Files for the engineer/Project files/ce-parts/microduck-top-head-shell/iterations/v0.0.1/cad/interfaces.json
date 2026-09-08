@@ -1,0 +1,213 @@
+{
+  "$triad": 1,
+  "kind": "interfaces",
+  "generated_by": "cecad.meshshelve",
+  "record": {
+    "ref": "part:microduck-top-head-shell@v0.0.1",
+    "frame": "Pollen's mesh frame for top_head_shell.stl: bbox x -45.8797..45.8798, y -66.1900..56.5000, z -0.0014..46.3348 (91.7595 x 122.6900 x 46.3361 mm); the three shell screws lie on a \u00d8112.1175 circle about (0.0000, -16.5000). Kept so the MJCF geom pos/quat (body jaw_soft) place it directly. SEE COMPARISON.html finding 1: this mesh is NOT the product head.",
+    "units": "mm",
+    "interfaces_live_at": "the top-level `interfaces` key, per ce-parts/SCHEMA.md v2.4 (b) which cites `interfaces[0]`. The duplicate `record.interfaces` was removed 2026-09-02 (lane T) after `bin/triad check` FAILed the folder for carrying two spellings of one fact."
+  },
+  "interfaces": [
+    {
+      "name": "shell_screws",
+      "frame": {
+        "origin_mm": [
+          0.0,
+          49.5,
+          3.2
+        ],
+        "z_axis": [
+          0,
+          0,
+          1
+        ],
+        "x_axis": [
+          1,
+          0,
+          0
+        ]
+      },
+      "accepts": [
+        "connection:threaded-m2"
+      ],
+      "role": "screw_pattern",
+      "what": "the three screws that close the head: \u00d82.1000 x 11.2000 thread-forming pilots at (x, y) = (0.0000, 49.5000), (39.0000, -49.5000) and (-39.0000, -49.5000), each entered through a \u00d82.8000 x 0.8000 counterbore, all axis z. Pilot centres z 9.6000 (span z 4.0000..15.2000); counterbore centres z 3.6000 (span z 3.2000..4.0000), so the seating plane is z 4.0000 and the frame origin is the counterbore mouth. Fit residual 0.0000 mm at 355.0 deg on all six. The three positions lie on a \u00d8112.1175 circle and match part:microduck-bottom-head-shell 'head_shell_screws' \u2014 \u00d82.6950 x 2.0040 clearance at the SAME three (x, y), fitted independently on the other mesh.",
+      "source": "MEASURED off Pollen's top_head_shell.stl by cecad.meshfeatures.cylinders and the mesh bbox, frozen 2026-09-02 by tools/measure_mesh_features.py into out/laneT/features/top_head_shell.json (lane T); the MJCF places this mesh in body 'jaw_soft' at world [26.1, -0.0, 231.1146] mm, quat (wxyz) [0.707107, 0.0, 0.0, 0.707107] (ce-assemblies/microduck/current/placements.json)"
+    },
+    {
+      "name": "beak_envelope",
+      "frame": {
+        "origin_mm": [
+          0.0,
+          -4.845,
+          0.0
+        ],
+        "z_axis": [
+          0,
+          0,
+          1
+        ],
+        "x_axis": [
+          1,
+          0,
+          0
+        ]
+      },
+      "accepts": [],
+      "role": "envelope",
+      "what": "the shell's own extent, declared as an interface because it is the number that BLOCKS this part: bbox x -45.8797..45.8798, y -66.1900..56.5000, z -0.0014..46.3348 = 91.7595 x 122.6900 x 46.3361 mm. Frame origin is the bbox centre in x and y on the z=0 datum plane. COMPARISON.html finding 1 is measured against this row: 122.6900 mm front-to-back is far longer than the compact domed head in every product photograph (images/store/*), and no eye bezel is modelled here at all. Any tooling cut from this mesh is wrong. This row exists so that the envelope has a number a replacement can be graded against; it accepts no connection because it is not a joint.",
+      "source": "MEASURED off Pollen's top_head_shell.stl by cecad.meshfeatures.cylinders and the mesh bbox, frozen 2026-09-02 by tools/measure_mesh_features.py into out/laneT/features/top_head_shell.json (lane T); the MJCF places this mesh in body 'jaw_soft' at world [26.1, -0.0, 231.1146] mm, quat (wxyz) [0.707107, 0.0, 0.0, 0.707107] (ce-assemblies/microduck/current/placements.json)"
+    },
+    {
+      "name": "mesh_pilot_0",
+      "owned_by": "tools/gen_pilot_interfaces.py",
+      "role": "measured_mesh_pilot",
+      "frame": {
+        "origin_mm": [
+          -0.0,
+          49.5,
+          9.6
+        ],
+        "z_axis": [
+          0.0,
+          0.0,
+          -1.0
+        ],
+        "x_axis": [
+          1.0,
+          0.0,
+          0.0
+        ]
+      },
+      "accepts": [],
+      "accepts_why": "Actual screw/thread and mating datum unresolved; retained nominal assembly connection is not compatibility evidence.",
+      "pilot_d_mm": 2.1,
+      "pilot_depth_mm": 11.2,
+      "extent_along_axis_mm": [
+        -15.2,
+        -4.0
+      ],
+      "verdict": "CANNOT DETERMINE",
+      "verdict_scope": "Reference mesh anchor measured; rebuilt CAD correspondence and original hardware compatibility unverified.",
+      "source": {
+        "path": "out/fasteners/features-by-mesh.json",
+        "sha256": "98168dab06ba1b2513bc825db3cf4239e890b4242db73eb89c072e0a1fdf72bb",
+        "mesh": "top_head_shell",
+        "feature_index": 0,
+        "method": "cecad.meshfeatures.features: dihedral patch (35 deg) -> least-squares cylinder; ends by 24 axis-parallel probe rays (0.55/0.75/0.95 r x 8 angles, probe 0.15 mm); counterbore = coaxial relation",
+        "fit": {
+          "faces": 144,
+          "cover_deg": 355.0,
+          "residual_mm": 0.0
+        },
+        "declared_shelf_frame": "Pollen's mesh frame for top_head_shell.stl: bbox x -45.8797..45.8798, y -66.1900..56.5000, z -0.0014..46.3348 (91.7595 x 122.6900 x 46.3361 mm); the three shell screws lie on a \u00d8112.1175 circle about (0.0000, -16.5000). Kept so the MJCF geom pos/quat (body jaw_soft) place it directly. SEE COMPARISON.html finding 1: this mesh is NOT the product head."
+      },
+      "thread_identity": {
+        "verdict": "CANNOT DETERMINE",
+        "why": "Smooth mesh pilot cannot establish original screw profile/pitch or mating strength."
+      },
+      "what": "Local center and axis of the selected reference-mesh hole. This center is not a claimed screw seating datum; no rebuilt solid or physical unit was measured."
+    },
+    {
+      "name": "mesh_pilot_1",
+      "owned_by": "tools/gen_pilot_interfaces.py",
+      "role": "measured_mesh_pilot",
+      "frame": {
+        "origin_mm": [
+          -39.0,
+          -49.5,
+          9.6
+        ],
+        "z_axis": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "x_axis": [
+          1.0,
+          0.0,
+          0.0
+        ]
+      },
+      "accepts": [],
+      "accepts_why": "Actual screw/thread and mating datum unresolved; retained nominal assembly connection is not compatibility evidence.",
+      "pilot_d_mm": 2.1,
+      "pilot_depth_mm": 11.2,
+      "extent_along_axis_mm": [
+        4.0,
+        15.2
+      ],
+      "verdict": "CANNOT DETERMINE",
+      "verdict_scope": "Reference mesh anchor measured; rebuilt CAD correspondence and original hardware compatibility unverified.",
+      "source": {
+        "path": "out/fasteners/features-by-mesh.json",
+        "sha256": "98168dab06ba1b2513bc825db3cf4239e890b4242db73eb89c072e0a1fdf72bb",
+        "mesh": "top_head_shell",
+        "feature_index": 1,
+        "method": "cecad.meshfeatures.features: dihedral patch (35 deg) -> least-squares cylinder; ends by 24 axis-parallel probe rays (0.55/0.75/0.95 r x 8 angles, probe 0.15 mm); counterbore = coaxial relation",
+        "fit": {
+          "faces": 144,
+          "cover_deg": 355.0,
+          "residual_mm": 0.0
+        },
+        "declared_shelf_frame": "Pollen's mesh frame for top_head_shell.stl: bbox x -45.8797..45.8798, y -66.1900..56.5000, z -0.0014..46.3348 (91.7595 x 122.6900 x 46.3361 mm); the three shell screws lie on a \u00d8112.1175 circle about (0.0000, -16.5000). Kept so the MJCF geom pos/quat (body jaw_soft) place it directly. SEE COMPARISON.html finding 1: this mesh is NOT the product head."
+      },
+      "thread_identity": {
+        "verdict": "CANNOT DETERMINE",
+        "why": "Smooth mesh pilot cannot establish original screw profile/pitch or mating strength."
+      },
+      "what": "Local center and axis of the selected reference-mesh hole. This center is not a claimed screw seating datum; no rebuilt solid or physical unit was measured."
+    },
+    {
+      "name": "mesh_pilot_2",
+      "owned_by": "tools/gen_pilot_interfaces.py",
+      "role": "measured_mesh_pilot",
+      "frame": {
+        "origin_mm": [
+          39.0,
+          -49.5,
+          9.6
+        ],
+        "z_axis": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "x_axis": [
+          1.0,
+          0.0,
+          0.0
+        ]
+      },
+      "accepts": [],
+      "accepts_why": "Actual screw/thread and mating datum unresolved; retained nominal assembly connection is not compatibility evidence.",
+      "pilot_d_mm": 2.1,
+      "pilot_depth_mm": 11.2,
+      "extent_along_axis_mm": [
+        4.0,
+        15.2
+      ],
+      "verdict": "CANNOT DETERMINE",
+      "verdict_scope": "Reference mesh anchor measured; rebuilt CAD correspondence and original hardware compatibility unverified.",
+      "source": {
+        "path": "out/fasteners/features-by-mesh.json",
+        "sha256": "98168dab06ba1b2513bc825db3cf4239e890b4242db73eb89c072e0a1fdf72bb",
+        "mesh": "top_head_shell",
+        "feature_index": 2,
+        "method": "cecad.meshfeatures.features: dihedral patch (35 deg) -> least-squares cylinder; ends by 24 axis-parallel probe rays (0.55/0.75/0.95 r x 8 angles, probe 0.15 mm); counterbore = coaxial relation",
+        "fit": {
+          "faces": 144,
+          "cover_deg": 355.0,
+          "residual_mm": 0.0
+        },
+        "declared_shelf_frame": "Pollen's mesh frame for top_head_shell.stl: bbox x -45.8797..45.8798, y -66.1900..56.5000, z -0.0014..46.3348 (91.7595 x 122.6900 x 46.3361 mm); the three shell screws lie on a \u00d8112.1175 circle about (0.0000, -16.5000). Kept so the MJCF geom pos/quat (body jaw_soft) place it directly. SEE COMPARISON.html finding 1: this mesh is NOT the product head."
+      },
+      "thread_identity": {
+        "verdict": "CANNOT DETERMINE",
+        "why": "Smooth mesh pilot cannot establish original screw profile/pitch or mating strength."
+      },
+      "what": "Local center and axis of the selected reference-mesh hole. This center is not a claimed screw seating datum; no rebuilt solid or physical unit was measured."
+    }
+  ]
+}

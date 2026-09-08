@@ -1,0 +1,665 @@
+{
+ "generated": "2026-09-04 07:05",
+ "method": "pose_photomatch.py \u2014 recover the FULL articulated pose of every usable product\nphotograph as joint angles, and prove each pose is mechanically reachable.\n\nLeif, 2026-09-03: \"the cad render of the microduck shoukd have the exact same\nmechanical pose as teh reference image with the mouth and legs and neck and all\nservos should move properly in our renders to show that its mechanically feasable.\"\n\nThis EXTENDS tools/head_photomatch.py (the working per-photo camera+pose fitter)\nto the whole body. Reused from it, not rewritten: the photograph silhouette rule,\nthe render->photo similarity (k, tx, ty), the IoU, the eye-ring ellipse measure,\nthe jaw hinge (body-frame y through (3.2, *, -18.0) mm, tools/head_probe.py) and\nthe perspective MuJoCo free camera whose frame spans +-HALF_FRAME_MM at the lookat.\n\nWhat is fitted, per photograph (differential evolution then Nelder-Mead, exactly\nas the head fitter):\n  camera      elevation, azimuth, distance D (mm; whole-body perspective now\n              carries near/far leg information, so D is fitted inside 600-2500 mm)\n  base        trunk pitch and roll of the free joint (yaw is the camera azimuth)\n  joints      ALL 14 MJCF hinges \u2014 left/right hip yaw, hip roll, hip pitch, knee,\n              ankle; neck_pitch, head_pitch, head_yaw, head_roll \u2014 each searched\n              ONLY inside its own MJCF range (sim/microduck_ours.xml), so a fitted\n              pose is reachable by construction; a joint that runs to its bound is\n              reported by name (at_bound), never silently accepted.\n  jaw         the jaw opening in degrees. The jaw is NOT an actuated joint in\n              Pollen's published model (no <joint> for it; the jaw + jaw_soft\n              geoms are rigid in body jaw_soft). It is posed here by rotating those\n              two geoms about the measured hinge line \u2014 a MODELLING CHOICE for the\n              render, not a policy output \u2014 and the angle is reported as such.\n  similarity  k, tx, ty between render pixels and photo pixels.\n\nObjective = (1 - IoU of the WHOLE-ROBOT silhouettes)\n          + w_land * sum |projected landmark - photo landmark|^2 / L^2\n          + w_floor * ((z_sole_left - z_sole_right) / 10 mm)^2   [standing photos only]\nwhere the landmarks are joint anchors (knee bearing, ankle horn, the two neck\nhorns) and the eye-ring centre, whose photo pixels were read off gridded crops\n(+-15 px) and are drawn on the *_measure.png so a reader can check them, and\nthe floor term states that a standing robot's two soles share one plane.\n\nFor every fitted pose the tool then reports:\n  * the range check per joint: MJCF range (deg) and the fitted value, PASS/FAIL\n  * the self-collision census in that pose on the honest model\n    sim/microduck_ours_selfcontact.xml (every geom contype/conaffinity 2, floor\n    excluded) \u2014 every penetrating robot-robot contact pair with its depth\n  * the residual silhouette IoU and the landmark residuals in mm at the photo scale\n  * the fit's uncertainty per parameter: a profile-likelihood scan \u2014 how far each\n    parameter can move (others fixed) before the objective rises by DELTA; a\n    parameter that reaches its search box is reported UNCONSTRAINED by the photo\n    (a hidden far leg in a profile shot is the expected case)\nand renders OUR CAD in the studio (sim/compare_render.py's scene) at the fitted\ncamera + pose beside the real photograph with the silhouette overlay.\n\nCheckpointing: out/pose/poses.json is rewritten after EVERY photo (entries merge\nby id), so a killed run leaves every finished photo on disk.\n\n    /Applications/FreeCAD.app/Contents/Resources/bin/python tools/pose_photomatch.py [--quick] [--only ID,ID] [--skip-done]\n",
+ "quick": true,
+ "jaw_note": "the jaw is NOT an actuated joint in Pollen's published model (sim/microduck_ours.xml has no jaw <joint>; the jaw + jaw_soft geoms are rigid in body jaw_soft). It is posed for the render by rotating those two geoms about the hinge line measured in tools/head_probe.py (body-frame y through (3.2, *, -18.0) mm, the 15x10x3 bearing centre) \u2014 a modelling choice for the picture, not a policy output. The real jaw is driven by the mouth XL330 seen in press_desk.jpg (out/sources/internals/real_desk_head_jaw_off.png).",
+ "joints": [
+  "left_hip_yaw",
+  "left_hip_roll",
+  "left_hip_pitch",
+  "left_knee",
+  "left_ankle",
+  "neck_pitch",
+  "head_pitch",
+  "head_yaw",
+  "head_roll",
+  "right_hip_yaw",
+  "right_hip_roll",
+  "right_hip_pitch",
+  "right_knee",
+  "right_ankle"
+ ],
+ "delta_obj": 0.01,
+ "n_photos": 1,
+ "n_complete": 1,
+ "photos": [
+  {
+   "id": "cream-profile-left",
+   "title": "Cream, standing, left profile (store)",
+   "path": "images/store/store_microduck-cream-standing-profile-left.jpg",
+   "colourway": "cream",
+   "standing": true,
+   "status": "complete",
+   "quick": true,
+   "image_size_px": [
+    2400,
+    2400
+   ],
+   "silhouette_rule": "min channel < 200 or chroma > 20 (floor shadow excluded)",
+   "camera": {
+    "azimuth_deg": 266.0387,
+    "elevation_deg": -5.1524,
+    "distance_mm": 1226.94,
+    "lookat": "trunk_base body origin",
+    "frame_half_mm": 200.0,
+    "note": "MuJoCo free camera (compare_render.studio_scene); azimuth 270 = pure left profile, 90 = right, 180 = front"
+   },
+   "base": {
+    "pitch_deg": -0.0,
+    "roll_deg": 0.0003,
+    "note": "trunk_base free-joint orientation (yaw absorbed by the camera azimuth)"
+   },
+   "joints_deg": {
+    "left_hip_yaw": 0.3775,
+    "left_hip_roll": -5.5871,
+    "left_hip_pitch": -20.3245,
+    "left_knee": 0.0509,
+    "left_ankle": 25.1531,
+    "neck_pitch": 1.0842,
+    "head_pitch": -3.4312,
+    "head_yaw": 36.4868,
+    "head_roll": -25.0,
+    "right_hip_yaw": -3.7889,
+    "right_hip_roll": 4.8035,
+    "right_hip_pitch": 22.0494,
+    "right_knee": -6.6633,
+    "right_ankle": -27.2642
+   },
+   "jaw_deg": 25.3513,
+   "jaw_note": "the jaw is NOT an actuated joint in Pollen's published model (sim/microduck_ours.xml has no jaw <joint>; the jaw + jaw_soft geoms are rigid in body jaw_soft). It is posed for the render by rotating those two geoms about the hinge line measured in tools/head_probe.py (body-frame y through (3.2, *, -18.0) mm, the 15x10x3 bearing centre) \u2014 a modelling choice for the picture, not a policy output. The real jaw is driven by the mouth XL330 seen in press_desk.jpg (out/sources/internals/real_desk_head_jaw_off.png).",
+   "range_check": [
+    {
+     "joint": "left_hip_yaw",
+     "fitted_deg": 0.3775,
+     "range_deg": [
+      -25.0,
+      30.0
+     ],
+     "verdict": "PASS",
+     "margin_deg": 25.3775,
+     "source": "sim/microduck_ours.xml joint left_hip_yaw range"
+    },
+    {
+     "joint": "left_hip_roll",
+     "fitted_deg": -5.5871,
+     "range_deg": [
+      -22.0,
+      22.0
+     ],
+     "verdict": "PASS",
+     "margin_deg": 16.4129,
+     "source": "sim/microduck_ours.xml joint left_hip_roll range"
+    },
+    {
+     "joint": "left_hip_pitch",
+     "fitted_deg": -20.3245,
+     "range_deg": [
+      -90.0,
+      90.0
+     ],
+     "verdict": "PASS",
+     "margin_deg": 69.6755,
+     "source": "sim/microduck_ours.xml joint left_hip_pitch range"
+    },
+    {
+     "joint": "left_knee",
+     "fitted_deg": 0.0509,
+     "range_deg": [
+      -90.0,
+      90.0
+     ],
+     "verdict": "PASS",
+     "margin_deg": 89.9491,
+     "source": "sim/microduck_ours.xml joint left_knee range"
+    },
+    {
+     "joint": "left_ankle",
+     "fitted_deg": 25.1531,
+     "range_deg": [
+      -90.0,
+      90.0
+     ],
+     "verdict": "PASS",
+     "margin_deg": 64.8469,
+     "source": "sim/microduck_ours.xml joint left_ankle range"
+    },
+    {
+     "joint": "neck_pitch",
+     "fitted_deg": 1.0842,
+     "range_deg": [
+      -90.0,
+      60.0
+     ],
+     "verdict": "PASS",
+     "margin_deg": 58.9158,
+     "source": "sim/microduck_ours.xml joint neck_pitch range"
+    },
+    {
+     "joint": "head_pitch",
+     "fitted_deg": -3.4312,
+     "range_deg": [
+      -90.0,
+      90.0
+     ],
+     "verdict": "PASS",
+     "margin_deg": 86.5688,
+     "source": "sim/microduck_ours.xml joint head_pitch range"
+    },
+    {
+     "joint": "head_yaw",
+     "fitted_deg": 36.4868,
+     "range_deg": [
+      -170.0,
+      170.0
+     ],
+     "verdict": "PASS",
+     "margin_deg": 133.5132,
+     "source": "sim/microduck_ours.xml joint head_yaw range"
+    },
+    {
+     "joint": "head_roll",
+     "fitted_deg": -25.0,
+     "range_deg": [
+      -25.0,
+      25.0
+     ],
+     "verdict": "PASS",
+     "margin_deg": 0.0,
+     "source": "sim/microduck_ours.xml joint head_roll range"
+    },
+    {
+     "joint": "right_hip_yaw",
+     "fitted_deg": -3.7889,
+     "range_deg": [
+      -30.0,
+      25.0
+     ],
+     "verdict": "PASS",
+     "margin_deg": 26.2111,
+     "source": "sim/microduck_ours.xml joint right_hip_yaw range"
+    },
+    {
+     "joint": "right_hip_roll",
+     "fitted_deg": 4.8035,
+     "range_deg": [
+      -22.0,
+      22.0
+     ],
+     "verdict": "PASS",
+     "margin_deg": 17.1965,
+     "source": "sim/microduck_ours.xml joint right_hip_roll range"
+    },
+    {
+     "joint": "right_hip_pitch",
+     "fitted_deg": 22.0494,
+     "range_deg": [
+      -90.0,
+      90.0
+     ],
+     "verdict": "PASS",
+     "margin_deg": 67.9506,
+     "source": "sim/microduck_ours.xml joint right_hip_pitch range"
+    },
+    {
+     "joint": "right_knee",
+     "fitted_deg": -6.6633,
+     "range_deg": [
+      -90.0,
+      90.0
+     ],
+     "verdict": "PASS",
+     "margin_deg": 83.3367,
+     "source": "sim/microduck_ours.xml joint right_knee range"
+    },
+    {
+     "joint": "right_ankle",
+     "fitted_deg": -27.2642,
+     "range_deg": [
+      -90.0,
+      90.0
+     ],
+     "verdict": "PASS",
+     "margin_deg": 62.7358,
+     "source": "sim/microduck_ours.xml joint right_ankle range"
+    }
+   ],
+   "range_verdict": "PASS",
+   "self_collision": {
+    "model": "sim/microduck_ours_selfcontact.xml (every geom contype=conaffinity=2; floor excluded, base at z 0.5 m)",
+    "n_contacts_total": 3,
+    "n_penetrating_robot_pairs": 3,
+    "pairs": [
+     {
+      "body1": "neck",
+      "body2": "jaw_soft",
+      "geom1": 33,
+      "geom2": 52,
+      "depth_mm": 0.1359
+     },
+     {
+      "body1": "neck",
+      "body2": "jaw_soft",
+      "geom1": 33,
+      "geom2": 52,
+      "depth_mm": 0.1432
+     },
+     {
+      "body1": "neck",
+      "body2": "jaw_soft",
+      "geom1": 33,
+      "geom2": 53,
+      "depth_mm": 1.1545
+     }
+    ],
+    "verdict": "FAIL",
+    "note": "the jaw geoms are rigid in body jaw_soft in this model, so the posed jaw is NOT part of this census (same-body geoms never collide)"
+   },
+   "fit": {
+    "iou": 0.7445,
+    "objective": 0.41787,
+    "landmark_term": 0.008041,
+    "floor_term": 0.15464,
+    "sole_dz_mm": -3.932,
+    "seconds": 216.5,
+    "n_eval": 2142,
+    "polishes": [
+     0.42236,
+     0.41787
+    ],
+    "at_bound": [
+     {
+      "param": "head_roll",
+      "value": -25.000000000000508,
+      "bounds": [
+       -25.000000000000508,
+       24.999999999999492
+      ]
+     }
+    ],
+    "k_photo_px_per_render_px": 8.74549103856339,
+    "mm_per_photo_px": 0.15246,
+    "tx": 74.82806437676777,
+    "ty": 51.066422756239035,
+    "crop_box": [
+     597,
+     196,
+     1805,
+     2253
+    ],
+    "photo_height_px": 1938.0,
+    "bounds": {
+     "cam_el": [
+      -18.0,
+      12.0
+     ],
+     "cam_az": [
+      265.0,
+      275.0
+     ],
+     "cam_D": [
+      600.0,
+      2500.0
+     ],
+     "base_pitch": [
+      -35.0,
+      35.0
+     ],
+     "base_roll": [
+      -20.0,
+      20.0
+     ],
+     "left_hip_yaw": [
+      -25.0,
+      29.999999999999996
+     ],
+     "left_hip_roll": [
+      -22.0,
+      22.0
+     ],
+     "left_hip_pitch": [
+      -90.00000000000621,
+      89.99999999999379
+     ],
+     "left_knee": [
+      -90.00000000000662,
+      89.99999999999338
+     ],
+     "left_ankle": [
+      -90.0000000000003,
+      89.99999999999969
+     ],
+     "neck_pitch": [
+      -90.0,
+      59.99999999999999
+     ],
+     "head_pitch": [
+      -90.00000000000006,
+      89.99999999999994
+     ],
+     "head_yaw": [
+      -170.0000000000007,
+      169.9999999999993
+     ],
+     "head_roll": [
+      -25.000000000000508,
+      24.999999999999492
+     ],
+     "right_hip_yaw": [
+      -29.999999999999996,
+      25.0
+     ],
+     "right_hip_roll": [
+      -22.0,
+      22.0
+     ],
+     "right_hip_pitch": [
+      -90.00000000000173,
+      89.99999999999827
+     ],
+     "right_knee": [
+      -90.00000000000203,
+      89.99999999999797
+     ],
+     "right_ankle": [
+      -90.00000000000051,
+      89.99999999999949
+     ],
+     "jaw": [
+      0.0,
+      40.0
+     ],
+     "k": [
+      0.7729184629122007,
+      2.061115901099202
+     ],
+     "tx": [
+      -182.20474239194715,
+      17.795257608052864
+     ],
+     "ty": [
+      -119.07448648850433,
+      80.92551351149567
+     ]
+    }
+   },
+   "uncertainty": {
+    "cam_el": {
+     "minus": 3.000000000000001,
+     "minus_hits_bound": false,
+     "plus": 4.0,
+     "plus_hits_bound": false
+    },
+    "cam_az": {
+     "minus": 1.0387361814109113,
+     "minus_hits_bound": true,
+     "plus": 2.8333333333336554,
+     "plus_hits_bound": false
+    },
+    "cam_D": {
+     "minus": 475.0000000000001,
+     "minus_hits_bound": false,
+     "plus": 601.6666666666681,
+     "plus_hits_bound": false
+    },
+    "base_pitch": {
+     "minus": 0.0,
+     "minus_hits_bound": false,
+     "plus": 2.3333333333333335,
+     "plus_hits_bound": false
+    },
+    "base_roll": {
+     "minus": 1.9999999999999998,
+     "minus_hits_bound": false,
+     "plus": 4.666666666666666,
+     "plus_hits_bound": false
+    },
+    "left_hip_yaw": {
+     "minus": 11.916666666666666,
+     "minus_hits_bound": false,
+     "plus": 3.666666666666667,
+     "plus_hits_bound": false
+    },
+    "left_hip_roll": {
+     "minus": 8.799999999999994,
+     "minus_hits_bound": false,
+     "plus": 7.333333333333334,
+     "plus_hits_bound": false
+    },
+    "left_hip_pitch": {
+     "minus": 3.0,
+     "minus_hits_bound": false,
+     "plus": 3.0,
+     "plus_hits_bound": false
+    },
+    "left_knee": {
+     "minus": 9.0,
+     "minus_hits_bound": false,
+     "plus": 3.0,
+     "plus_hits_bound": false
+    },
+    "left_ankle": {
+     "minus": 18.0,
+     "minus_hits_bound": false,
+     "plus": 15.0,
+     "plus_hits_bound": false
+    },
+    "neck_pitch": {
+     "minus": 5.0,
+     "minus_hits_bound": false,
+     "plus": 0.0,
+     "plus_hits_bound": false
+    },
+    "head_pitch": {
+     "minus": 0.0,
+     "minus_hits_bound": false,
+     "plus": 3.0,
+     "plus_hits_bound": false
+    },
+    "head_yaw": {
+     "minus": 5.666666666666668,
+     "minus_hits_bound": false,
+     "plus": 5.666666666666664,
+     "plus_hits_bound": false
+    },
+    "head_roll": {
+     "minus": 0.0,
+     "minus_hits_bound": true,
+     "plus": 12.499999999999991,
+     "plus_hits_bound": false
+    },
+    "right_hip_yaw": {
+     "minus": 9.166666666666664,
+     "minus_hits_bound": false,
+     "plus": 28.788925020752064,
+     "plus_hits_bound": true
+    },
+    "right_hip_roll": {
+     "minus": 8.066666666666666,
+     "minus_hits_bound": false,
+     "plus": 17.19651423371963,
+     "plus_hits_bound": true
+    },
+    "right_hip_pitch": {
+     "minus": 18.0,
+     "minus_hits_bound": false,
+     "plus": 6.0,
+     "plus_hits_bound": false
+    },
+    "right_knee": {
+     "minus": 9.0,
+     "minus_hits_bound": false,
+     "plus": 21.0,
+     "plus_hits_bound": false
+    },
+    "right_ankle": {
+     "minus": 56.99999999999999,
+     "minus_hits_bound": false,
+     "plus": 84.0,
+     "plus_hits_bound": false
+    },
+    "jaw": {
+     "minus": 15.333333333333345,
+     "minus_hits_bound": false,
+     "plus": 4.666666666666675,
+     "plus_hits_bound": false
+    },
+    "k": {
+     "minus": 0.0,
+     "minus_hits_bound": false,
+     "plus": 0.0,
+     "plus_hits_bound": false
+    },
+    "tx": {
+     "minus": 0.0,
+     "minus_hits_bound": false,
+     "plus": 0.0,
+     "plus_hits_bound": false
+    },
+    "ty": {
+     "minus": 0.0,
+     "minus_hits_bound": false,
+     "plus": 0.0,
+     "plus_hits_bound": false
+    }
+   },
+   "landmarks": {
+    "names": [
+     "eye",
+     "head_pitch",
+     "left_ankle",
+     "left_knee",
+     "neck_pitch"
+    ],
+    "photo_px": [
+     [
+      908.0368719704105,
+      465.051482919433
+     ],
+     [
+      1227.0,
+      789.0
+     ],
+     [
+      1498.0,
+      1975.0
+     ],
+     [
+      1439.0,
+      1836.0
+     ],
+     [
+      1212.0,
+      1126.0
+     ]
+    ],
+    "residual_px": [
+     [
+      -2.119572688631365,
+      12.378178731258174
+     ],
+     [
+      -0.7943089418661202,
+      34.71918118138183
+     ],
+     [
+      -36.49486996665041,
+      62.80436790567137
+     ],
+     [
+      110.09584274198755,
+      -101.8628389925791
+     ],
+     [
+      8.504834437814225,
+      31.47183942188167
+     ]
+    ],
+    "residual_mm": [
+     [
+      -0.323,
+      1.887
+     ],
+     [
+      -0.121,
+      5.293
+     ],
+     [
+      -5.564,
+      9.575
+     ],
+     [
+      16.785,
+      -15.53
+     ],
+     [
+      1.297,
+      4.798
+     ]
+    ],
+    "read_unc_px": 15.0,
+    "evidence": "head_pitch = upper neck servo horn (screw circle at the top of the servo labelled DYNAMIXEL XL330-M288-T); neck_pitch = the 4-screw bracket at the foot of the lower neck servo where it meets the trunk; left_knee = the flanged bearing on the near shin at the top of the ankle servo; left_ankle = the horn screw circle on the orange foot bracket",
+    "how": "photo px read off a 100 px gridded crop of the original; model point = the joint's MuJoCo anchor (xanchor) or the noenoeil geom centre, projected through the fit frame's pinhole and the fitted similarity"
+   },
+   "eye": {
+    "centre": [
+     908.0368719704105,
+     465.051482919433
+    ],
+    "major_px": 243.28179588197943,
+    "minor_px": 202.38533985981525,
+    "major_axis_dir": [
+     -0.09646482772008451,
+     0.9953363938955182
+    ],
+    "n_px": 43529,
+    "view_angle_deg": 33.70592212690463,
+    "unc_px": 2.0,
+    "box": [
+     735,
+     335,
+     1000,
+     585
+    ],
+    "hue": [
+     20,
+     55
+    ]
+   },
+   "pictures": {
+    "pair": "out/pose/cream-profile-left_pair.png",
+    "overlay": "out/pose/cream-profile-left_overlay.png",
+    "measure": "out/pose/cream-profile-left_measure.png",
+    "ours": "out/pose/cream-profile-left_ours.png"
+   },
+   "inputs": {
+    "cam_az": 270.0,
+    "az_free": 5.0,
+    "el0": -3.0,
+    "jaw_open": true,
+    "eye_box": [
+     735,
+     335,
+     1000,
+     585
+    ],
+    "eye_hue": [
+     20,
+     55
+    ],
+    "seed": {
+     "neck_pitch": 0.0,
+     "head_pitch": -7.0,
+     "head_yaw": 64.0,
+     "head_roll": -25.0,
+     "jaw": 23.5,
+     "left_hip_pitch": -26.0,
+     "left_knee": -0.3,
+     "left_ankle": 26.0,
+     "right_hip_pitch": 26.0,
+     "right_knee": 0.3,
+     "right_ankle": -26.0
+    }
+   }
+  }
+ ]
+}

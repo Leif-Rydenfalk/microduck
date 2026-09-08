@@ -1,0 +1,253 @@
+{
+  "revision": "MD-CAMERA-20260908-A",
+  "date": "2026-09-08",
+  "verdict": "Exact production camera board, lens and FFC CANNOT DETERMINE; sourced modules are candidates only",
+  "runtime_commit": "5984efb770855432b03dafd3d879e9929981e45b",
+  "identity": {
+    "sensor": "IMX219 verified in official bring-up log for that tested board, not a manufacturing BOM guarantee",
+    "sensor_source": "https://raw.githubusercontent.com/pollen-robotics/microduck/5984efb770855432b03dafd3d879e9929981e45b/docs/project/media-bringup.md",
+    "current_mount_degrees": 90,
+    "current_mount_source": "https://raw.githubusercontent.com/pollen-robotics/microduck/5984efb770855432b03dafd3d879e9929981e45b/mediad/src/main.rs",
+    "rotation_behavior": "Current main.rs default90 describes clockwise mounting; mount metadata is sent to display consumer. In-pipeline rotation off by default. Historical180 applies to alpha bring-up entry, not a universal installed orientation.",
+    "optics": "Official press kit still calls camera resolution and field of view provisional; no focal length or exact lens MPN established. Community62deg and B0183 supplier75deg are not original evidence.",
+    "official_photo": "Viewed official-product.jpg: front lens visible within coloured eye ring; no readable barrel/board marking, hidden rear PCB and FFC. No measurement scale; cannot establish focal length or module revision.",
+    "original_board_mpn": null,
+    "original_lens_mpn": null,
+    "original_ffc_length_contact_side_pin_map": null
+  },
+  "mesh": {
+    "lens_envelope_diameter_length_mm": [
+      16.94,
+      18.92
+    ],
+    "holder_xyz_mm": [
+      24,
+      14.8,
+      16
+    ],
+    "camera_board_envelope_measured": false,
+    "scope": "Existing out/verify/mech_dims.json measurements reused. Holder is not camera PCB outline; barrel bounding dimensions do not determine optics or aperture fit."
+  },
+  "comparison": [
+    {
+      "module": "Seeed 102110719",
+      "url": "https://www.seeedstudio.com/IMX-219-CMOS-camera-module-M12-and-CS-camera-available-p-5372.html",
+      "sensor": "IMX219",
+      "documented_module_size_without_lens_mm": [
+        38,
+        38,
+        16
+      ],
+      "size_basis": "Supplier structured description comparison table, third product column; not 25 x 24. Includes mounting assembly; bare PCB drawing not independently resolved.",
+      "connectors": "Both 15 and 22 pin CSI ports; same connector count alone does not prove pin mapping/contact-side compatibility",
+      "lens": "No lens in package; M12 and CS holders supplied; focal length/FOV depend on selected lens",
+      "included_cables": "15 pin 125 mm FFC  plus 22 pin 150 mm FFC per supplier package description",
+      "price_currency": "USD",
+      "unit_prices_1_100_1000": [
+        15.9,
+        12.5,
+        12.5
+      ],
+      "extended_1_100_1000": [
+        15.9,
+        1250,
+        12500
+      ],
+      "stock": "In stock; quantity and volume lead time unknown",
+      "fit_status": "Not the 25 x 24 mm-class module suggested by B6 RFQ. No measured head fit; sensor match insufficient. Prices exclude added lens and any selected adapter."
+    },
+    {
+      "module": "Arducam B0183 current UCTRONICS Orin listing",
+      "url": "https://www.uctronics.com/camera-modules/camera-for-nvidia/arducam-8-mp-sony-imx219-m12-mount-low-distortion-camera-module-for-nvidia-jetson-nano.html",
+      "sensor": "IMX219",
+      "board_size_mm": [
+        24,
+        25
+      ],
+      "lens": {
+        "efl_mm": 2.8,
+        "f_number": 2.8,
+        "fov_d_h_v_deg": [
+          88,
+          75,
+          60
+        ],
+        "distortion_claim": "less than 3%",
+        "filter": "integral IR cut, visible only",
+        "mount": "M12",
+        "replacement": "Current listing says lens not interchangeable; contact sales before replacing"
+      },
+      "included_cables": "150 mm 22-to-22 FFC and150 mm 15-to-22 FPC; implies22pin camera end but connector drawing/pitch/contact type still needs confirmation",
+      "price_currency": "USD",
+      "unit_prices_1_100_1000": [
+        23.99,
+        23.99,
+        23.99
+      ],
+      "extended_1_100_1000": [
+        23.99,
+        2399,
+        23990
+      ],
+      "stock": "Add to cart; quantity and lead time not stated",
+      "fit_status": "Dimension-class candidate only. No barrel length/diameter, mounting-hole coordinates, connector drawing or Radxa software acceptance verified. Totals are retail extrapolation, not volume quotes."
+    },
+    {
+      "module": "Arducam B0183 Welectron Nano/Xavier NX listing",
+      "url": "https://www.welectron.com/Arducam-B0183-IMX219-Low-Distortion-M12-Mount-Camera-Module-for-NVIDIA-Jetson-Nano-Xavier-NX_1",
+      "included_cables": "150mm15pin1mm-pitch FPC, unlike current UCTRONICS package",
+      "price_currency": "EUR",
+      "unit_prices_1_100_1000": [
+        38.57,
+        38.57,
+        38.57
+      ],
+      "extended_1_100_1000": [
+        38.57,
+        3857,
+        38570
+      ],
+      "stock": "On stock;1\u20133business days Germany, international may differ; no quantity",
+      "price_basis": "45.90EUR including19%VAT /38.57excluding; retail extrapolation, shipping extra",
+      "fit_status": "Same SKU but divergent package/platform claims; supplier must freeze board revision, lens and connector. Not independently equivalent to current UCTRONICS variant."
+    }
+  ],
+  "ffc": {
+    "host_documentation": "https://docs.radxa.com/en/zero/zero3/accessories/camera",
+    "host": "Radxa ZERO3 documents22pin CSI and support for Pi CameraV2/IMX219. This does not establish compatibility of every IMX219 module.",
+    "local_length_observation": "wiring/CABLES.md row 20 uses Radxa centroid to camera site 13.3 mm with 15 mm rounded cut. These are not measured connector exits, service loop or bend radius; 15 mm is not an original ribbon length or validated manufacturable route.",
+    "routes": [
+      {
+        "url": "https://www.adafruit.com/product/5211",
+        "part": "Adafruit 5211",
+        "length_mm": 300,
+        "type": "Pi Zero camera adapter cable; exact contact-side/pin-map proof for selected module still required",
+        "prices_usd_1_100_1000": [
+          3.95,
+          3.16,
+          3.16
+        ],
+        "totals_usd_1_100_1000": [
+          3.95,
+          316,
+          3160
+        ],
+        "stock": "In stock, no numeric quantity observed"
+      },
+      {
+        "url": "https://shop.pimoroni.com/en-us/products/camera-cable-raspberry-pi-zero-edition",
+        "part": "Pi Zero camera cable38mm /150mm options",
+        "type": "22pin0.5mm to15pin1mm",
+        "price": null,
+        "stock": "Dynamic variant status not verified in this pass; historical offer not promoted current"
+      }
+    ],
+    "required_measurements": [
+      "Both connector part numbers, pin1 orientation, pitch, latch side, contact face and insertion depth",
+      "Full continuity/pin assignment including grounds, data lanes, clock, I2C, reset/power; position count is insufficient",
+      "Installed route between connector exits, minimum bend radius, folds, flex thickness/stiffeners and slack; validate without altering head CAD",
+      "One bench capture on exact board/FFC/module/kernel combination; active crop and rotation documented"
+    ]
+  },
+  "correction_proposals": [
+    "B6 Seeed 102110719 is38x38x16mm module withoutlens per its own description; do not score it as a25x24mm drop-in",
+    "B6 B0183 does not lock cable bundle or revision across vendors. Current UCTRONICS lens replacement restriction contradicts interchangeable-lens assumption",
+    "B8 centroid/site 13.3 mm and15mm cut are routing proxies, not actual original FFC or connector-to-connector route",
+    "ELECTRONICS-AND-SOFTWARE mounting/rotation statement needs current90deg metadata behavior distinguished from alpha180deg historical report"
+  ],
+  "supplier_request": "Quote1/100/1000 sets separately. Return exact board revision/MPN, mechanical drawing with lens/barrel and hole coordinates, sensor/filter, lens EFL/FOV at specified active crop, focus setting, connector drawings and FFC continuity/contact sides/length, package contents, prices/MOQ/stockdate/leadtime. State substitutions. No order or head-fit approval implied.",
+  "sources": [
+    {
+      "id": "seeed",
+      "url": "https://www.seeedstudio.com/IMX-219-CMOS-camera-module-M12-and-CS-camera-available-p-5372.html",
+      "fetched": "2026-09-08",
+      "file": "seeed.html",
+      "sha256": "ab6c7457c8650f30436fd950d33e857cdad29bc7e8721ca1202875d447bdeb7f"
+    },
+    {
+      "id": "uctronics",
+      "url": "https://www.uctronics.com/camera-modules/camera-for-nvidia/arducam-8-mp-sony-imx219-m12-mount-low-distortion-camera-module-for-nvidia-jetson-nano.html",
+      "fetched": "2026-09-08",
+      "file": "uctronics.html",
+      "sha256": "bf38c04aff361b244402efa944d00091f4590d7a7ac075ea317fab8505f821f8"
+    },
+    {
+      "id": "welectron",
+      "url": "https://www.welectron.com/Arducam-B0183-IMX219-Low-Distortion-M12-Mount-Camera-Module-for-NVIDIA-Jetson-Nano-Xavier-NX_1",
+      "fetched": "2026-09-08",
+      "file": "welectron.html",
+      "sha256": "3f3bd60cdf21886353e188618e8c566ec5b41dd0dd06bd7dc3beb5f4cbf13ba6"
+    },
+    {
+      "id": "radxa",
+      "url": "https://docs.radxa.com/en/zero/zero3/accessories/camera",
+      "fetched": "2026-09-08",
+      "file": "radxa.html",
+      "sha256": "0ea9c4dc969a2b0246cac8dea80147bc0a688fd69d93e426f95a932f09523ae8"
+    },
+    {
+      "id": "presskit",
+      "url": "https://pollen-robotics.com/microduck/press-kit/",
+      "fetched": "2026-09-08",
+      "file": "presskit.html",
+      "sha256": "dd2ff5b936d5a838706b69e8adcc4394c157da48eaef9c44794d6de7cb77dec0"
+    },
+    {
+      "id": "runtime",
+      "url": "https://raw.githubusercontent.com/pollen-robotics/microduck/5984efb770855432b03dafd3d879e9929981e45b/mediad/src/main.rs",
+      "fetched": "2026-09-08",
+      "file": "runtime.rs",
+      "sha256": "ed3ad638c75a6fd8b819968b1bcd290eaf586dba9948bd10b16e9085adffa574"
+    },
+    {
+      "id": "bringup",
+      "url": "https://raw.githubusercontent.com/pollen-robotics/microduck/5984efb770855432b03dafd3d879e9929981e45b/docs/project/media-bringup.md",
+      "fetched": "2026-09-08",
+      "file": "bringup.md",
+      "sha256": "0b9d434b86d19771eb0a7ac5f0d89937f0e4c4e273fc93bd0c2809c190a5350e"
+    },
+    {
+      "id": "adafruit",
+      "url": "https://www.adafruit.com/product/5211",
+      "fetched": "2026-09-08",
+      "file": "adafruit.html",
+      "sha256": "030581695e41816d363c82e5b4a0ee941cb45d43e6bc7bba4ccfed9fa675b8c7"
+    },
+    {
+      "id": "pimoroni",
+      "url": "https://shop.pimoroni.com/en-us/products/camera-cable-raspberry-pi-zero-edition",
+      "fetched": "2026-09-08",
+      "file": "pimoroni.html",
+      "sha256": "12ffaea195953ca782a40372cbf71ddbeff7842bc0b046f645060f8aedabdcd3"
+    },
+    {
+      "id": "official-photo",
+      "url": "https://cdn.shopify.com/s/files/1/0988/4640/9078/files/microduck-squad-sitting.png?v=1787585447",
+      "file": "official-product.jpg",
+      "sha256": "11bdbdd16d423c222721a8e1731ec0fbf4450a8e520a8d93a7cd30bcb7b27beb",
+      "fetched": "2026-09-08"
+    }
+  ],
+  "local_sources": [
+    {
+      "path": "spec/sourcing.json",
+      "sha256": "a677e1696ffa06271672154640651bc0d1834e55e8a1f8bfeeedcb114ee00e47"
+    },
+    {
+      "path": "out/verify/mech_dims.json",
+      "sha256": "572a8457d4e7f5d5d4b6f32cd840196b2b04b9e00a063dc09ac228d9fda7e439"
+    },
+    {
+      "path": "wiring/CABLES.md",
+      "sha256": "43b2d7d28e8cd36e8b321e987a10a17c6ebd8b32ef9173eff051674b33de542f"
+    },
+    {
+      "path": "docs/ELECTRONICS-AND-SOFTWARE.md",
+      "sha256": "bf42e589846709fbc15780c5cddc48326f1cd34e36cda1eca20560a2923f09de"
+    },
+    {
+      "path": "ce-parts/microduck-camera-module/component.json",
+      "sha256": "bfac811a7bbb1a34872870519c7d286ca9abe313fe5250525b8679093dda736b"
+    }
+  ]
+}

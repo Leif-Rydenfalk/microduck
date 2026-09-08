@@ -1,0 +1,30 @@
+{
+ "$what": "CLASS 6 \u2014 what does not match, geometrically. Every CANNOT DETERMINE of the harvest that is a geometry-matching question, worked here one by one. Each item ends RESOLVED with its source, or CANNOT DETERMINE with (a) the evidence gathered, (b) the option it best supports and the one it beat, (c) the exact instrument/measurement/page that settles it.",
+ "$owner": "resolve-geometry lane (2026-09-04). OWNS out/open/geometry-match.json, out/open/geometry/, tools/geometry_*.py. Writes nothing else.",
+ "$status": "PARTIAL \u2014 checkpoint 0: items resolved from what was already on disk; kernel measurements not yet run",
+ "generated": "2026-09-04 02:10",
+ "harvest": "out/open/cannot-determine-harvest.json items 20,21,22,23,24,29,38,42,43,44,98,120,121,123,124,125 + the ankle-revision question from the task brief",
+ "items": [
+  {
+   "id": "ankle-revision",
+   "harvest_ids": [],
+   "what": "The two ankle revisions (ankle_left Y 36.500 mm vs ankle_l_v1 Y 46.498 mm) \u2014 which is current",
+   "status": "RESOLVED",
+   "answer": "ankle_left / ankle_right (Y extent 36.500 mm) is the walking product's ankle; ankle_l_v1 / ankle_r_v1 (46.498 mm) is NOT an older revision but the ROLLER-SKATE variant's ankle: it appears only in robot_allcollisions_rollers.xml (both the microduck_rl and the HF simulator copies) together with rim / roller_blade / tire and without foot_* / sole_*, and its \u00d82.2 vertical screw at (50.109, -5.500) matches roller_blade's own \u00d81.6 pilot while ankle_left's \u00d82.2 at (50.000, 4.502) matches foot_left's \u00d81.6 boss at 0.000 mm residual. Upstream develop 29e887e still ships both pairs under the same names (out/sources/upstream-develop.html: ankle_left x11, ankle_l_v1 x3).",
+   "source": "out/laneT/ankle-revision.json (tools/ankle_revision.py, 2026-09-02, verdict PASS, three independent readings + the retail-box photograph images/store/store_microduck-inside-the-box.png showing feet, no roller kit); re-read 2026-09-04"
+  },
+  {
+   "id": "store-camera-distance",
+   "harvest_ids": [
+    22,
+    125
+   ],
+   "what": "The camera distance D of the store photographs",
+   "status": "CANNOT DETERMINE",
+   "evidence": "MEASURED 2026-09-04 with PIL getexif().get_ifd(0x8769) and exiftool 13.x on every file in images/store/: the Shopify-served PNG/JPEGs carry ONLY ExifVersion 0210, ColorSpace 65535 and the pixel dimensions (plus Software 'imagery4' and DPI in IFD0) \u2014 no Make/Model, no FocalLength, no FocalLengthIn35mmFilm, no SubjectDistance, no maker note. The EXIF route named by the harvest is therefore closed for the store images. The PRESS-KIT JPEGs (images/press/press_*.jpg) DO carry a camera: Sony ILCE-7SM3 (full-frame 35.6 x 23.8 mm, 4240 x 2832 px native => 8.396 um pitch), FE 24-70mm F2.8 GM II, FocalLength 24 mm (closeup, screentime, watching), 37 mm (morning), 45 mm (desk), 70 mm (stickers, playtime); their Sony maker note (FocusDistance2) was stripped by Lightroom Classic 15.4.1/15.5, so D is not on file there either, but f + pitch + the head's own pixel width give D to the same 2-3 % the head width is known to, which removes the D term from any servo-scaled ratio taken on a press photograph.",
+   "best_supported": "Keep D as a bracket [600, 2000] mm for the store images (out/head/head_fit_D600/D2000.json; it moves the front-view ratio by +-0.0105, which is not what blocks the verdict) \u2014 beat the alternative of assuming a 50 mm-equivalent product-shot lens, which would give one confident number with no source.",
+   "what_settles_it": "The original camera files from Pollen (the Shopify upload strips EXIF), or ONE frame with a ruler in the plane of the face; for press-kit photographs, D = f x W_head / (w_px x 8.396 um) with f from the EXIF FocalLength tag (measured above) and W_head the calliper width.",
+   "source": "PIL 11 / exiftool on images/store/*.png|jpg and images/press/*.jpg, 2026-09-04"
+  }
+ ]
+}

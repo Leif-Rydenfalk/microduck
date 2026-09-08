@@ -1,0 +1,129 @@
+{
+  "status": "SUPERSEDED; provenance only, DO NOT EXECUTE",
+  "test": {
+    "id": "SV-01",
+    "title": "ID and baud assignment, one servo at a time",
+    "purpose": "Give each servo the identity the bus needs. This is the only per-unit EEPROM value that cannot be self-assigned.",
+    "pre": [
+      "Servo out of the robot, or fitted but with its lead the only one on the adapter.",
+      "Dynamixel TTL adapter connected, servo powered at 5.00 V from the bench supply (the vendor's recommended operating point)."
+    ],
+    "tool": [
+      "Dynamixel TTL adapter",
+      "5.00 V bench supply"
+    ],
+    "steps": [
+      {
+        "do": "Scan at 57,600 bps (Baud Rate(8) initial value 1). Expect exactly one device at ID 1.",
+        "expect": "one device, ID 1"
+      },
+      {
+        "do": "Read Model Number(0) and Firmware Version(6) before writing anything, and record both against the servo's serial position in the build.",
+        "expect": "Model Number(0) = 1,200; the firmware version is recorded, whatever it is"
+      },
+      {
+        "do": "Write Torque Enable(64) = 0.",
+        "expect": "ack"
+      },
+      {
+        "do": "Write ID(7) = the assigned ID from the map in section @SEC_SERVO@.1.",
+        "expect": "ack"
+      },
+      {
+        "do": "Write Baud Rate(8) = 3.",
+        "expect": "ack"
+      },
+      {
+        "do": "Power-cycle the servo, re-scan at 1,000,000 bps.",
+        "expect": "one device at the assigned ID"
+      },
+      {
+        "do": "Write, then read back: Return Delay Time(9) = 0, PWM Slope(62) = 255, Shutdown(63) = 52.",
+        "expect": "read-back equals written"
+      },
+      {
+        "do": "Read back and record, do not write: Protocol Type(13) = 2, Temperature Limit(31) = 70, Max Voltage Limit(32) = 70, Min Voltage Limit(34) = 35, Current Limit(38) = 1750.",
+        "expect": "all at their factory values"
+      },
+      {
+        "do": "Write a label with the ID on the servo case before it goes back in the robot.",
+        "expect": "\u2014"
+      }
+    ],
+    "measure": "Per servo: the @SV01_READBACK_WORD@ register values read back after the power cycle (@SV01_SCAN_N@ proved by the re-scan, @SV01_WRITTEN_N@ written-then-read, @SV01_VERIFY_N@ read-only) - the addresses are listed in the data file and the count is computed from that list, not typed. Torque Enable(64) is RAM, is not read back, and is not one of them; Table @T_REG@ lists every register this plan touches, which is a larger set.",
+    "gate": {
+      "PASS": "every written register reads back exactly the written value, and every verify-only register is at its factory value",
+      "FAIL": "Model Number(0) is not 1,200 - the wrong servo model is fitted and every band in this document is the wrong one for it - or any other read-back differs, or the servo does not answer at 1 Mbps after the power cycle",
+      "CD": "a verify-only register differs from factory \u2014 the servo has been used elsewhere; restore it and re-run rather than accepting it"
+    },
+    "gate_basis": "Every value and every initial value here is quoted verbatim from E1's control table in ce-parts/xl330-m288-t/electrical.chip.json. EEPROM writes are gated on Torque Enable(64) = 0 by the vendor's own rule.",
+    "log": "logs/<serial>/SV-01-servo-<id>.csv",
+    "src": [
+      "E1",
+      "XLPART",
+      "MODEL"
+    ],
+    "readback": [
+      [
+        7,
+        "scan",
+        "re-scan at 1 Mbps proves ID(7) took"
+      ],
+      [
+        8,
+        "scan",
+        "re-scan at 1 Mbps proves Baud Rate(8) took"
+      ],
+      [
+        9,
+        "written",
+        "Return Delay Time written then read"
+      ],
+      [
+        62,
+        "written",
+        "PWM Slope written then read"
+      ],
+      [
+        63,
+        "written",
+        "Shutdown written then read"
+      ],
+      [
+        13,
+        "verify",
+        "Protocol Type read only"
+      ],
+      [
+        31,
+        "verify",
+        "Temperature Limit read only"
+      ],
+      [
+        32,
+        "verify",
+        "Max Voltage Limit read only"
+      ],
+      [
+        34,
+        "verify",
+        "Min Voltage Limit read only"
+      ],
+      [
+        38,
+        "verify",
+        "Current Limit read only"
+      ],
+      [
+        0,
+        "verify",
+        "Model Number read only - 1,200 is the XL330-M288-T"
+      ],
+      [
+        6,
+        "verify",
+        "Firmware Version read and recorded, not gated"
+      ]
+    ]
+  }
+}

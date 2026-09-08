@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reference Match</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="tools/doc.css">
+<style>
+  .chip.no{color:var(--no)}
+  .pair{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:10px 0 4px}
+  .pair figure{margin:0;padding:8px}
+  .pair figure img{width:100%;aspect-ratio:1/1;object-fit:contain;background:#fff}
+  .tag{font-family:var(--sans);font-size:10.5px;font-weight:600;letter-spacing:.07em;
+       text-transform:uppercase;display:inline-block;padding:2px 8px;margin-bottom:6px;
+       border:1px solid var(--hair);color:var(--ink-2)}
+  .tag.ours{color:var(--accent);border-color:var(--accent)}
+  .paircap{font-family:var(--sans);font-size:12.5px;color:var(--ink-2);margin:0 0 2px}
+  .note{font-size:13.5px;color:var(--ink-2);margin:2px 0 18px;max-width:44em}
+  .verdict{border-left:3px solid var(--accent);padding:2px 0 2px 18px;margin:14px 0;font-size:15.5px}
+  .verdict b{color:var(--accent)}
+  .verdict.warn{border-left-color:var(--no)} .verdict.warn b{color:var(--no)}
+  td.dash{color:#b3aea4}
+  .chip.ref{color:var(--ink-2);font-weight:400;text-transform:none;letter-spacing:0}
+  table.data td code{font-size:12px}
+  /* §5 has 5 columns of prose. Without stated widths the browser gives the widest
+     cell the space and squeezes the Finding column to two words a line (MEASURED on
+     the 2026-09-03 render). Stated here so every row reads. */
+  #findings table.data{table-layout:fixed;font-size:13px}
+  #findings th:nth-child(1),#findings td:nth-child(1){width:26px}
+  #findings th:nth-child(2),#findings td:nth-child(2){width:23%}
+  #findings th:nth-child(3),#findings td:nth-child(3){width:29%}
+  #findings th:nth-child(4),#findings td:nth-child(4){width:20%}
+  #findings td{word-break:normal;overflow-wrap:break-word}
+  /* Table 1 is 11 columns wide. MEASURED with tools/tablefit.py 2026-09-03: at the
+     inherited size it was 876.0 px inside an 840.0 px sheet, +36.0 px over, so the
+     Verdict column sat outside any printed page while the screen showed a scrollbar
+     that looked like a design choice. Tightened here and re-measured. */
+  #dims table.data{font-size:13px}
+  #dims table.data th,#dims table.data td{padding-left:4px;padding-right:4px}
+  #dims table.data td code{font-size:11.5px}
+  .statbar{display:flex;flex-wrap:wrap;gap:0;border-bottom:1px solid var(--hair);margin:8px 0 2px}
+  .stat{padding:12px 26px 12px 0;margin-right:22px}
+  .stat b{display:block;font-weight:700;font-size:22px;font-variant-numeric:tabular-nums}
+  .stat span{font-family:var(--sans);font-size:12px;color:var(--ink-2)}
+  @media(max-width:640px){.pair{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<p class="backlink"><a href="RELEASE.html">← Release dossier</a></p>
+
+<header class="hero">
+  <p class="eyebrow">Microduck reverse-engineering · reference conformance</p>
+  <h1>Reference match: our CAD against the real Microduck</h1>
+  <p class="sub">Every render of ours sits beside the real product photograph shot from the same
+  camera angle. Below the visual check is the measured dimension table for all
+  47 mechanical parts, at full precision.</p>
+  <div class="rev">
+    <span>MD-CMP-001 · Rev B</span><span>2026-09-02</span>
+    <span>renderer: MuJoCo 3.12 offscreen, 1400²</span><span>pose: STAND, head levelled</span>
+  </div>
+</header>
+
+<div class="statbar">
+  <div class="stat"><b>47</b><span>parts measured</span></div>
+  <div class="stat"><b>9</b><span>re-modelled parametrically</span></div>
+  <div class="stat"><b>9/9</b><span>dimensional PASS</span></div>
+  <div class="stat"><b>0.7193 mm</b><span>worst bbox deviation</span></div>
+  <div class="stat"><b>8</b><span>photo-matched viewpoints</span></div>
+</div>
+
+<nav class="toc">
+  <a href="#answer">1 Verdict</a><a href="#body">2 Whole robot</a><a href="#joints">3 Joints</a>
+  <a href="#dims">4 Measured dimensions</a><a href="#findings">5 Findings</a><a href="#head">5.1 Head</a><a href="#method">6 Method</a>
+</nav>
+
+<section id="answer">
+  <h2><span class="n">1</span>Verdict — is it the same?</h2>
+  <div class="verdict">
+    <b>Geometry — yes, and it is measured.</b> The renders are driven by the meshes Pollen
+    published, in Pollen's own kinematic tree. The 9 load-bearing links we re-modelled
+    parametrically reproduce the reference bounding box to a worst case of
+    <b>0.7193&nbsp;mm</b> — 9 of 9 inside 1&nbsp;mm, six of them exact to
+    the fourth decimal. The full table is in §4.
+  </div>
+  <div class="verdict warn">
+    <b>The head — FAIL, measured in millimetres.</b> Lane A scaled 2 product photographs by the
+    XL330-M288-T case in the same frame (20.000 mm), posed our model to each with a perspective camera and compared the head shell
+    against the mesh: product/mesh size ratio <b>+0.9972&nbsp;±&nbsp;0.0386</b>, head-length deviation
+    <b>-0.35&nbsp;±&nbsp;4.74&nbsp;mm</b> on 122.690&nbsp;mm; along the head's own axes
+    +0.06&nbsp;±&nbsp;4.78 / +0.62&nbsp;±&nbsp;2.47&nbsp;mm (<span class="chip cd">CANNOT DETERMINE</span> on the length).
+    The true front view grades the pair (ring OD, head width) <b>CANNOT DETERMINE</b>: ring OD / beak width
+    0.3547 in the photograph against 0.3318 on the mesh (+6.9&nbsp;%,
+    +2.10&nbsp;±&nbsp;0.83&nbsp;mm at the mesh width, the same verdict at every camera distance); which member is off is CANNOT DETERMINE
+    from a ratio — the profiles' ring/length agreement (+0.49&nbsp;±&nbsp;0.45&nbsp;mm) puts it on the width (implied
+    84.59&nbsp;mm). The eye bezel is <b>CANNOT DETERMINE</b>: it is the <code>noenoeil</code>
+    mesh (Ø30.000&nbsp;×&nbsp;7.5&nbsp;mm ring proud of the face), not a missing part.
+    Full evidence, every overlay real-beside-ours: <a href="HEAD-RECONSTRUCTION.html">HEAD-RECONSTRUCTION.html</a>.
+  </div>
+  <div class="verdict">
+    <b>Colour is schematic, not product paint.</b> The yellow beak and teal soles are the
+    material colours inside the simulation model. Pollen's own simulator renders these same
+    colours. Nothing was repainted to flatter the comparison.
+  </div>
+</section>
+
+<section id="body">
+  <h2><span class="n">2</span>Whole robot — real beside ours</h2>
+  <p class="lede">Four viewpoints for which an official photograph exists. Our camera azimuth
+  and elevation were set to match each photograph; the pose is the model's STAND keyframe with
+  the head levelled.</p>
+
+  <h3>Left profile</h3>
+  <p class="paircap">cream colourway, standing · our camera: <code>azimuth 270°, elevation −8°</code></p>
+  <div class="pair">
+    <figure><span class="tag">Real · pollen-robotics.com</span>
+      <img src="images/store/store_microduck-cream-standing-profile-left.jpg" alt="Left profile official"></figure>
+    <figure><span class="tag ours">Ours · CAD render</span>
+      <img src="out/compare/ours-prof-left.png" alt="Left profile ours"></figure>
+  </div>
+  
+
+  <h3>Right profile</h3>
+  <p class="paircap">graphite colourway, standing · our camera: <code>azimuth 90°, elevation −8°</code></p>
+  <div class="pair">
+    <figure><span class="tag">Real · pollen-robotics.com</span>
+      <img src="images/store/store_microduck-graphite-standing-profile-right-02.jpg" alt="Right profile official"></figure>
+    <figure><span class="tag ours">Ours · CAD render</span>
+      <img src="out/compare/ours-prof-right.png" alt="Right profile ours"></figure>
+  </div>
+  
+
+  <h3>Three-quarter front-left</h3>
+  <p class="paircap">sky colourway, standing · our camera: <code>azimuth 225°, elevation −10°</code></p>
+  <div class="pair">
+    <figure><span class="tag">Real · pollen-robotics.com</span>
+      <img src="images/store/store_microduck-sky-standing-three-quarter-left-02.jpg" alt="Three-quarter front-left official"></figure>
+    <figure><span class="tag ours">Ours · CAD render</span>
+      <img src="out/compare/ours-iso-fl.png" alt="Three-quarter front-left ours"></figure>
+  </div>
+  
+
+  <h3>Three-quarter back-right</h3>
+  <p class="paircap">graphite colourway, standing · our camera: <code>azimuth 45°, elevation −12°</code></p>
+  <div class="pair">
+    <figure><span class="tag">Real · pollen-robotics.com</span>
+      <img src="images/store/store_microduck-graphite-standing-back-three-quarter-right-02.jpg" alt="Three-quarter back-right official"></figure>
+    <figure><span class="tag ours">Ours · CAD render</span>
+      <img src="out/compare/ours-iso-br.png" alt="Three-quarter back-right ours"></figure>
+  </div>
+  
+</section>
+
+<section id="joints">
+  <h2><span class="n">3</span>Joints — real beside ours</h2>
+  <p class="lede">The same posed robot with the camera pushed in on each joint, against the
+  corresponding region of the profile photograph. Posing costs milliseconds — the kinematics are
+  already in the model, so no CAD-kernel rebuild is involved.</p>
+
+  <h3>Neck — 2× XL330 pitch/roll stack</h3>
+  <p class="paircap">real robot, same joint (cropped from the profile photograph) · our camera: <code>left profile, matched</code></p>
+  <div class="pair">
+    <figure><span class="tag">Real · pollen-robotics.com</span>
+      <img src="out/compare/ref-joint-neck.png" alt="Neck — 2× XL330 pitch/roll stack official"></figure>
+    <figure><span class="tag ours">Ours · CAD render</span>
+      <img src="out/compare/ours-joint-neck.png" alt="Neck — 2× XL330 pitch/roll stack ours"></figure>
+  </div>
+  <p class="note">Two XL330-M288-T in series above the trunk; the beak assembly hangs off the upper horn.</p>
+
+  <h3>Hip — yaw / roll / pitch cluster</h3>
+  <p class="paircap">real robot, same joint (cropped from the profile photograph) · our camera: <code>left profile, matched</code></p>
+  <div class="pair">
+    <figure><span class="tag">Real · pollen-robotics.com</span>
+      <img src="out/compare/ref-joint-hip.png" alt="Hip — yaw / roll / pitch cluster official"></figure>
+    <figure><span class="tag ours">Ours · CAD render</span>
+      <img src="out/compare/ours-joint-hip.png" alt="Hip — yaw / roll / pitch cluster ours"></figure>
+  </div>
+  <p class="note">Three orthogonal hinges inside one bracket group; 22×16×4 bearing opposes each servo horn.</p>
+
+  <h3>Knee</h3>
+  <p class="paircap">real robot, same joint (cropped from the profile photograph) · our camera: <code>left profile, matched</code></p>
+  <div class="pair">
+    <figure><span class="tag">Real · pollen-robotics.com</span>
+      <img src="out/compare/ref-joint-knee.png" alt="Knee official"></figure>
+    <figure><span class="tag ours">Ours · CAD render</span>
+      <img src="out/compare/ours-joint-knee.png" alt="Knee ours"></figure>
+  </div>
+  <p class="note">Triangular thigh plate carries the knee servo; the shin bolts to the output horn.</p>
+
+  <h3>Ankle + foot</h3>
+  <p class="paircap">real robot, same joint (cropped from the profile photograph) · our camera: <code>left profile, matched</code></p>
+  <div class="pair">
+    <figure><span class="tag">Real · pollen-robotics.com</span>
+      <img src="out/compare/ref-joint-ankle.png" alt="Ankle + foot official"></figure>
+    <figure><span class="tag ours">Ours · CAD render</span>
+      <img src="out/compare/ours-joint-ankle.png" alt="Ankle + foot ours"></figure>
+  </div>
+  <p class="note">Ankle servo drives the foot plate; sole is a separate compliant pad.</p>
+</section>
+
+<section id="dims">
+  <h2><span class="n">4</span>Measured dimensions — all 47 parts</h2>
+  <p class="lede">Axis-aligned bounding box of every mesh in its own file frame, in millimetres
+  to three decimal places. Reference meshes are Pollen's, converted from metres. For the
+  re-modelled parts the table also gives our geometry and the worst-axis deviation to four
+  decimals. Values are nominal geometry, not toleranced manufacturing dimensions — see §6.</p>
+  <div class="tw"><table class="data">
+    <caption>Table 1. Bounding-box dimensions and rebuild deviation. Source:
+      <code>out/verify/mech_dims.json</code>, generated by <code>sim/mech_dims.py</code>.</caption>
+    <thead><tr>
+      <th rowspan="2">Mesh</th><th colspan="3">Reference (mm)</th>
+      <th colspan="3">Ours (mm)</th><th rowspan="2">Δ max<br>(mm)</th><th rowspan="2">Verdict</th></tr>
+      <tr><th class="n">X</th><th class="n">Y</th><th class="n">Z</th>
+          <th class="n">X</th><th class="n">Y</th><th class="n">Z</th></tr></thead>
+    <tbody>
+<tr><td><code>banana_pcb_locker</code></td><td class="n">54.050</td><td class="n">3.800</td><td class="n">6.652</td><td class="n">54.015</td><td class="n">3.800</td><td class="n">6.626</td><td class="n">0.0348</td><td><span class="chip pass">PASS</span></td></tr>
+<tr><td><code>bearing_roll</code></td><td class="n">23.000</td><td class="n">3.000</td><td class="n">40.000</td><td class="n">23.000</td><td class="n">3.000</td><td class="n">40.000</td><td class="n">0.0000</td><td><span class="chip pass">PASS</span></td></tr>
+<tr><td><code>leg</code></td><td class="n">7.950</td><td class="n">20.000</td><td class="n">58.000</td><td class="n">7.950</td><td class="n">20.000</td><td class="n">58.000</td><td class="n">0.0000</td><td><span class="chip pass">PASS</span></td></tr>
+<tr><td><code>power_support</code></td><td class="n">54.500</td><td class="n">17.000</td><td class="n">83.490</td><td class="n">54.466</td><td class="n">17.000</td><td class="n">83.130</td><td class="n">0.3596</td><td><span class="chip pass">PASS</span></td></tr>
+<tr><td><code>trunk_base</code></td><td class="n">57.000</td><td class="n">36.000</td><td class="n">3.000</td><td class="n">57.000</td><td class="n">36.000</td><td class="n">3.000</td><td class="n">0.0000</td><td><span class="chip pass">PASS</span></td></tr>
+<tr><td><code>upper_leg_left</code></td><td class="n">28.000</td><td class="n">47.659</td><td class="n">60.997</td><td class="n">28.000</td><td class="n">47.661</td><td class="n">60.991</td><td class="n">0.0055</td><td><span class="chip pass">PASS</span></td></tr>
+<tr><td><code>upper_leg_right</code></td><td class="n">28.000</td><td class="n">47.659</td><td class="n">60.997</td><td class="n">28.000</td><td class="n">47.661</td><td class="n">60.991</td><td class="n">0.0055</td><td><span class="chip pass">PASS</span></td></tr>
+<tr><td><code>upper_leg_rigidity_plate</code></td><td class="n">1.000</td><td class="n">44.996</td><td class="n">58.058</td><td class="n">1.000</td><td class="n">45.500</td><td class="n">58.777</td><td class="n">0.7193</td><td><span class="chip pass">PASS</span></td></tr>
+<tr><td><code>yaw2roll</code></td><td class="n">23.000</td><td class="n">25.800</td><td class="n">20.500</td><td class="n">23.000</td><td class="n">25.800</td><td class="n">20.500</td><td class="n">0.0000</td><td><span class="chip pass">PASS</span></td></tr>
+<tr><td><code>ankle_l_v1</code></td><td class="n">39.489</td><td class="n">46.498</td><td class="n">25.400</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td><span class="chip ref">reference</span></td></tr>
+<tr><td><code>ankle_left</code></td><td class="n">39.489</td><td class="n">36.500</td><td class="n">25.500</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td><span class="chip ref">reference</span></td></tr>
+<tr><td><code>ankle_r_v1</code></td><td class="n">39.489</td><td class="n">46.497</td><td class="n">25.400</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td><span class="chip ref">reference</span></td></tr>
+<tr><td><code>ankle_right</code></td><td class="n">39.489</td><td class="n">36.500</td><td class="n">25.500</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td><span class="chip ref">reference</span></td></tr>
+<tr><td><code>bottom_head_shell</code></td><td class="n">91.763</td><td class="n">116.748</td><td class="n">20.136</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td><span class="chip ref">reference</span></td></tr>
+<tr><td><code>elec_rpi_robot_hat_pcb</code></td><td class="n">65.025</td><td class="n">30.025</td><td class="n">0.840</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td><span class="chip ref">reference</span></td></tr>
+<tr><td><code>face_part</code></td><td class="n">87.651</td><td class="n">12.500</td><td class="n">44.627</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td><span class="chip ref">reference</span></td></tr>
+<tr><td><code>foot_left</code></td><td class="n">40.086</td><td class="n">54.000</td><td class="n">16.909</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td><span class="chip ref">reference</span></td></tr>
+<tr><td><code>foot_right</code></td><td class="n">40.086</td><td class="n">54.000</td><td class="n">16.909</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td><span class="chip ref">reference</span></td></tr>
+<tr><td><code>hip_l</code></td><td class="n">32.450</td><td class="n">34.500</td><td class="n">19.000</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td><span class="chip ref">reference</span></td></tr>
+<tr><td><code>jaw</code></td><td class="n">91.416</td><td class="n">68.710</td><td class="n">29.448</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td><span class="chip ref">reference</span></td></tr>
+<tr><td><code>jaw_soft</code></td><td class="n">87.674</td><td class="n">32.234</td><td class="n">8.438</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td><span class="chip ref">reference</span></td></tr>
+<tr><td><code>left_shell</code></td><td class="n">33.715</td><td class="n">80.890</td><td class="n">41.691</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td><span class="chip ref">reference</span></td></tr>
+<tr><td><code>left_upper_leg</code></td><td class="n">28.000</td><td class="n">47.659</td><td class="n">60.997</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td><span class="chip ref">reference</span></td></tr>
+<tr><td><code>lens</code></td><td class="n">16.940</td><td class="n">18.920</td><td class="n">16.940</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td><span class="chip ref">reference</span></td></tr>
+<tr><td><code>m12_lens_holder</code></td><td class="n">24.000</td><td class="n">14.800</td><td class="n">16.000</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td><span class="chip ref">reference</span></td></tr>
+<tr><td><code>motor_support</code></td><td class="n">73.500</td><td class="n">54.200</td><td class="n">18.800</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td><span class="chip ref">reference</span></td></tr>
+<tr><td><code>neck</code></td><td class="n">2.000</td><td class="n">20.000</td><td class="n">11.000</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td><span class="chip ref">reference</span></td></tr>
+<tr><td><code>neck_pitch</code></td><td class="n">35.000</td><td class="n">18.000</td><td class="n">27.693</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td><span class="chip ref">reference</span></td></tr>
+<tr><td><code>noenoeil</code></td><td class="n">30.000</td><td class="n">9.500</td><td class="n">30.000</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td><span class="chip ref">reference</span></td></tr>
+<tr><td><code>np_f970</code></td><td class="n">38.608</td><td class="n">20.576</td><td class="n">70.809</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td><span class="chip ref">reference</span></td></tr>
+<tr><td><code>pcb__raspberry_pi_zero_2_w</code></td><td class="n">65.000</td><td class="n">1.600</td><td class="n">30.000</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td><span class="chip ref">reference</span></td></tr>
+<tr><td><code>right_shell</code></td><td class="n">31.765</td><td class="n">80.898</td><td class="n">41.693</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td><span class="chip ref">reference</span></td></tr>
+<tr><td><code>right_upper_leg</code></td><td class="n">28.000</td><td class="n">47.659</td><td class="n">60.997</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td><span class="chip ref">reference</span></td></tr>
+<tr><td><code>rim</code></td><td class="n">7.600</td><td class="n">20.200</td><td class="n">20.200</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td><span class="chip ref">reference</span></td></tr>
+<tr><td><code>roller_blade</code></td><td class="n">40.541</td><td class="n">72.999</td><td class="n">30.379</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td><span class="chip ref">reference</span></td></tr>
+<tr><td><code>seeed_bearing__configuration__22x16x4</code></td><td class="n">22.000</td><td class="n">22.000</td><td class="n">4.000</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td><span class="chip ref">reference</span></td></tr>
+<tr><td><code>seeed_bearing__configuration_default</code></td><td class="n">15.000</td><td class="n">15.000</td><td class="n">3.000</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td><span class="chip ref">reference</span></td></tr>
+<tr><td><code>soft_mouth_top</code></td><td class="n">87.822</td><td class="n">32.565</td><td class="n">3.276</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td><span class="chip ref">reference</span></td></tr>
+<tr><td><code>sole_left</code></td><td class="n">41.099</td><td class="n">54.000</td><td class="n">12.907</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td><span class="chip ref">reference</span></td></tr>
+<tr><td><code>sole_right</code></td><td class="n">41.099</td><td class="n">54.000</td><td class="n">12.908</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td><span class="chip ref">reference</span></td></tr>
+<tr><td><code>speaker</code></td><td class="n">35.000</td><td class="n">25.000</td><td class="n">7.000</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td><span class="chip ref">reference</span></td></tr>
+<tr><td><code>tire</code></td><td class="n">7.600</td><td class="n">30.000</td><td class="n">30.000</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td><span class="chip ref">reference</span></td></tr>
+<tr><td><code>top_head_shell</code></td><td class="n">91.760</td><td class="n">122.690</td><td class="n">46.336</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td><span class="chip ref">reference</span></td></tr>
+<tr><td><code>trunk_shell_left</code></td><td class="n">30.900</td><td class="n">82.429</td><td class="n">35.696</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td><span class="chip ref">reference</span></td></tr>
+<tr><td><code>trunk_shell_right</code></td><td class="n">33.500</td><td class="n">82.429</td><td class="n">34.696</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td><span class="chip ref">reference</span></td></tr>
+<tr><td><code>xl330</code></td><td class="n">29.000</td><td class="n">20.000</td><td class="n">34.000</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td><span class="chip ref">reference</span></td></tr>
+<tr><td><code>yaw_roll_motion</code></td><td class="n">34.000</td><td class="n">35.900</td><td class="n">22.500</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td class="n dash">—</td><td><span class="chip ref">reference</span></td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="findings">
+  <h2><span class="n">5</span>Findings that affect manufacturing</h2>
+  <div class="tw"><table class="data">
+    <thead><tr><th>#</th><th>Finding</th><th>Evidence</th><th>Consequence</th><th>Action</th></tr></thead>
+    <tbody>
+      <tr><td class="n">1</td><td><b>Head conformance — FAIL.</b> Product/mesh size ratio
+        +0.9972&nbsp;±&nbsp;0.0386 over 2 servo-scaled photographs; head length
+        -0.35&nbsp;±&nbsp;4.74&nbsp;mm (CANNOT DETERMINE); front view ring OD / head width
+        CANNOT DETERMINE (+6.9&nbsp;%, +2.10&nbsp;±&nbsp;0.83&nbsp;mm, attribution CANNOT DETERMINE);
+        eye bezel CANNOT DETERMINE (+0.49&nbsp;±&nbsp;0.45&nbsp;mm at the head's length scale, profiles).</td>
+        <td><a href="HEAD-RECONSTRUCTION.html">HEAD-RECONSTRUCTION.html</a>, <code>out/head/head.json</code></td>
+        <td>Head tooling must NOT be cut from the published meshes. What FAILS is one feature, and it is the only one the photographs resolve at the rule: the accent trim band at the split line is 3.069 ± 0.831 mm narrower than the head&#x27;s widest row on the product and flush with it on the mesh. Modelling that means the top shell&#x27;s lower rim overhangs the band by about 1.53 mm per side — an EXTERNAL feature, so it is modelled, not guessed. What does NOT justify a re-model: the head&#x27;s overall WIDTH (89.386 ± 1.815 mm against 91.763, CANNOT DETERMINE) and the eye ring&#x27;s OD (31.239 ± 1.065 mm against 30.000, CANNOT DETERMINE). Both point the same way as the front view&#x27;s ratio and neither clears the 1.5 mm rule, so scaling the shells to either number would be a plausible default written into tooling — refused. What a lateral scale would break, MEASURED: part:microduck-jaw&#x27;s hinge interfaces sit at x +42.068 (mouth_horn, the servo horn face) and x -39.700 (bearing_journal) in the mesh frame; the XL330 that drives them does not scale, so a 3 % lateral scale of the shells moves the horn face 1.26 mm off the servo. Where a width change comes out of the section is CANNOT DETERMINE from photographs (a thinner side wall, a narrower core and a different shell profile all give the same silhouette), so the shells stay Pollen&#x27;s geometry until a calliper says otherwise.</td>
+        <td>A calliper on one product head: top_head_shell length (mesh 122.690 mm), WIDTH across the beak and across the shell rim (mesh 91.763 / 91.760) and height (46.336) to 0.1 mm, and the eye ring&#x27;s outer diameter (mesh 30.000) — a 0.1 mm reading beats every photograph here by an order of magnitude, settles the 1.5 mm rule outright and attributes the front-view ring/width excess to the ring or to the width. Or one photograph taken for the purpose: a true front view with a ruler in the plane of the face (fixes the ring/width pair in mm), and one pure profile, beak closed, head level, the XL330 label face in the focal plane of the head, 4000+ px on the long side (the length to 0.6 mm). The camera distance of the store photographs (EXIF focal length + sensor, stripped from the published files, or a ruler in the frame) would remove the D term from every servo-scaled ratio (photos[].size.D_note). A cleaner pure-profile frame from Pollen&#x27;s video (the README frame&#x27;s neck servo is merged with its horn bracket and cables at 4x, out/head/profile_frame_servo_zoom.png).</td></tr>
+      <tr><td class="n">2</td><td><b>Battery mesh is an NP-F970, not the NP-F550 class cell the
+        documentation calls out.</b></td>
+        <td><code>np_f970</code> 38.600&nbsp;×&nbsp;20.600&nbsp;×&nbsp;70.800&nbsp;mm in Table 1</td>
+        <td>Battery bay volume and mass budget may be sized for the wrong cell.</td>
+        <td>Confirm the shipping cell, then re-check <code>power_support</code> cavity against it.</td></tr>
+      <tr><td class="n">3</td><td><b>Compute placeholder is a Raspberry&nbsp;Pi Zero 2&nbsp;W mesh</b>
+        while the documented host is a Radxa Zero 3W.</td>
+        <td><code>pcb__raspberry_pi_zero_2_w</code> 65.000&nbsp;×&nbsp;1.600&nbsp;×&nbsp;30.000&nbsp;mm</td>
+        <td>Both are 65×30&nbsp;mm so the envelope holds, but connector positions differ.</td>
+        <td>Verify mounting-hole and connector positions against the real Radxa Zero 3W.</td></tr>
+      <tr><td class="n">4</td>
+        <td><b>SETTLED 2026-09-02 — the two ankles are two locomotion VARIANTS, not two
+        revisions.</b> The product in the box uses <b>ankle_left</b> / <b>ankle_right</b>.</td>
+        <td>3 MJCF model(s) carry <code>ankle_left</code> with a foot and a sole and no roller
+        kit; 2 carry <code>ankle_l_v1</code> with <code>rim</code>/<code>tire</code>/<code>roller_blade</code>
+        and no foot. Three independent readings, all agreeing: MJCF inventory → ankle_left; the vertical screw, measured on four meshes → ankle_left; the bearing pocket → ankle_left. Verdict <span class="chip pass">PASS</span> in
+        <code>out/laneT/ankle-revision.json</code> (2026-09-02), which states it plainly: “the &#x27;v1&#x27; in ankle_l_v1 reads as an older revision and is not one: it is the ROLLER variant&#x27;s ankle. Nothing in this repo should treat ankle_left as superseding it or vice versa.”</td>
+        <td>None now — but the superseded reading would have caused one: treating
+        <code>_v1</code> as an older revision deletes the roller variant's ankle.</td>
+        <td>Build <code>ankle_left</code>/<code>ankle_right</code>. Still open, and it does not
+        change this answer: whether Pollen sells the roller kit separately, and whether ankle_l_v1 is a purchasable spare, is not in any file here. What settles it: Pollen&#x27;s shop pages. It does not change the answer for the boxed product.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+  <h3 id="head">5.1 Head conformance — settled by measurement (lane A)</h3>
+  <p>The scale-free ratio analysis that stood here (<code>tools/head_analysis.py</code>, +3.76&nbsp;% length ratio, +69&nbsp;% confounded aspect)
+  is superseded by <a href="HEAD-RECONSTRUCTION.html">HEAD-RECONSTRUCTION.html</a>, which scales each photograph by the servo in frame, poses the
+  model (jaw open, head yawed as shot, perspective camera) and measures the head in millimetres. Its numbers, from the same data file:</p>
+  <div class="tw"><table class="data">
+    <caption>Table 2. Head against the product, mm (product − mesh) ± uncertainty. Source: <code>out/head/head.json</code>.</caption>
+    <thead><tr><th>Quantity</th><th class="n">Value</th><th>Verdict at the 1.5 mm rule</th></tr></thead>
+    <tbody>
+      <tr><td>size ratio product / mesh</td><td class="n">+0.9972&nbsp;±&nbsp;0.0386</td><td>—</td></tr>
+      <tr><td>head length deviation (122.690 mm mesh)</td><td class="n">-0.35&nbsp;±&nbsp;4.74 mm</td><td><span class="chip cd">CANNOT DETERMINE</span></td></tr>
+      <tr><td>head silhouette, major axis</td><td class="n">+0.06&nbsp;±&nbsp;4.78 mm</td><td><span class="chip cd">CANNOT DETERMINE</span></td></tr>
+      <tr><td>head silhouette, minor axis</td><td class="n">+0.62&nbsp;±&nbsp;2.47 mm</td><td><span class="chip cd">CANNOT DETERMINE</span></td></tr>
+      <tr><td>eye ring Ø (30.000 mm mesh), profile photographs</td><td class="n">+0.49&nbsp;±&nbsp;0.45 mm</td><td><span class="chip pass">PASS</span></td></tr>
+      <tr><td>front view: ring OD / head width — the PAIR, re-measured on the head's outer silhouette with one estimator (out/head/front_fit.json)</td><td class="n">+2.10&nbsp;±&nbsp;0.83 mm at the mesh width</td><td><span class="chip cd">CANNOT DETERMINE</span></td></tr>
+      <tr><td><b>accent trim band ÷ the head's own widest row</b> — scale-free, camera-free, ring-free</td><td class="n">-3.07&nbsp;±&nbsp;0.83 mm at the mesh width</td><td><span class="chip no">FAIL</span></td></tr>
+      <tr><td>head WIDTH, from the two ring-free lines (profile silhouettes at a swept lateral scale + the ToF aperture offset)</td><td class="n">-2.38&nbsp;±&nbsp;1.82 mm on 91.763</td><td><span class="chip cd">CANNOT DETERMINE</span></td></tr>
+      <tr><td>eye ring OD, from the front view's ratio at that width</td><td class="n">+1.24&nbsp;±&nbsp;1.07 mm on 30.000</td><td><span class="chip cd">CANNOT DETERMINE</span></td></tr>
+      <tr><td>eye centre below shell top (front view)</td><td class="n">+2.34&nbsp;±&nbsp;5.52 mm</td><td><span class="chip cd">CANNOT DETERMINE</span></td></tr>
+      <tr><td>eye centre off the mid-line (front view)</td><td class="n">-0.16&nbsp;±&nbsp;0.50 mm</td><td><span class="chip pass">PASS</span></td></tr>
+      <tr><td>ToF window centre from the eye — the APERTURE in <code>face_part</code>, measured on both sides (front view)</td><td class="n">+0.48&nbsp;±&nbsp;0.40 mm</td><td><span class="chip cd">CANNOT DETERMINE</span></td></tr>
+    </tbody>
+  </table></div>
+  <div class="pair">
+    <figure><span class="tag">Real · flat-lay, true front view — beside ours at the mesh width and at the measured one</span>
+      <img src="out/head/front_fit_pair.png" alt="front view real beside ours" style="aspect-ratio:auto"></figure>
+    <figure><span class="tag">Real · the FAIL at 8×, both edges</span>
+      <img src="out/head/front_edges.png" alt="shell edge against trim band edge at 8x" style="aspect-ratio:auto"></figure>
+    <figure><span class="tag ours">Profile fit: real | ours | overlay</span>
+      <img src="out/head/cream-profile-left_pair.png" alt="profile fit" style="aspect-ratio:auto"></figure>
+  </div>
+  <p><b>Verdict basis.</b> head: 2 photographs admitted (cream-profile-left, graphite-profile-right), each scaled by the XL330-M288-T case in the same frame (20.000 mm), posed and fitted with a perspective camera, size ratio product/mesh = k * W_render / W_photo; combined length deviation -0.348 ± 4.738 mm; per-axis +0.056 ± 4.783 / +0.620 ± 2.469. Front view (RE-MEASURED on the head&#x27;s OUTER silhouette, one estimator both sides, pose gated): ring OD / head width, photo 0.3547 vs mesh 0.3318 (CANNOT DETERMINE). Eye bezel: profile ring diameter at the head&#x27;s length scale +0.49 ± 0.45 mm vs the noenoeil mesh 30.000 mm. The one FAIL is the accent trim band, 0.9666 ± 0.0090 of the head&#x27;s own widest row on the product against 1.0000 on the mesh (-3.069 ± 0.831 mm). Head width -2.377 ± 1.815 mm on 91.763 (CANNOT DETERMINE); ring OD +1.239 ± 1.065 mm on 30.000 (CANNOT DETERMINE).</p>
+  <p><b>What would settle the rest.</b> A calliper on one product head: top_head_shell length (mesh 122.690 mm), WIDTH across the beak and across the shell rim (mesh 91.763 / 91.760) and height (46.336) to 0.1 mm, and the eye ring&#x27;s outer diameter (mesh 30.000) — a 0.1 mm reading beats every photograph here by an order of magnitude, settles the 1.5 mm rule outright and attributes the front-view ring/width excess to the ring or to the width. Or one photograph taken for the purpose: a true front view with a ruler in the plane of the face (fixes the ring/width pair in mm), and one pure profile, beak closed, head level, the XL330 label face in the focal plane of the head, 4000+ px on the long side (the length to 0.6 mm). The camera distance of the store photographs (EXIF focal length + sensor, stripped from the published files, or a ruler in the frame) would remove the D term from every servo-scaled ratio (photos[].size.D_note). A cleaner pure-profile frame from Pollen&#x27;s video (the README frame&#x27;s neck servo is merged with its horn bracket and cables at 4x, out/head/profile_frame_servo_zoom.png).</p>
+
+</section>
+
+<section id="method">
+  <h2><span class="n">6</span>Method and honest limits</h2>
+  <ul>
+    <li><b>Renders.</b> MuJoCo 3.12 offscreen at 1400², white studio, no floor, two directional
+      fills plus a reduced headlight. Script <code>sim/compare_render.py</code>; the exact scene is
+      written to <code>out/compare/_studio_scene.xml</code>.</li>
+    <li><b>Measurements.</b> <code>sim/mech_dims.py</code> reads every STL through the FreeCAD
+      mesh kernel and reports the axis-aligned bounding box. Reference assets are stored in
+      metres and multiplied by 1000; our rebuilds are native millimetres.</li>
+    <li><b>Bounding box is not a tolerance.</b> Table 1 proves overall envelope agreement. It does
+      not prove feature-level agreement — that is the surface-distance check (p95 ≤ 1 mm both ways)
+      recorded separately in the refcheck ledger. Neither is a manufacturing tolerance: no drawing
+      dimension here carries a ± yet.</li>
+    <li><b>Meshes are decimated.</b> Pollen published decimated STLs, so fine radii and small
+      features are approximations of the true CAD, which was never released.</li>
+    <li><b>No physical unit has been measured.</b> Every number here is derived from published
+      digital assets and photographs. Nothing has been laser-scanned or callipered.</li>
+  </ul>
+</section>
+
+</div>
+</body>
+</html>

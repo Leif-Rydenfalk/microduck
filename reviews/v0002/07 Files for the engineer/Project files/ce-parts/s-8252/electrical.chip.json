@@ -1,0 +1,110 @@
+{
+  "$parts_folder": 1,
+  "kind": "chip",
+  "record": {
+    "part": "s-8252",
+    "part_note": "The S-8252 SERIES (ABLIC). One die, ~30 threshold variants (product name list, datasheet p.3-4); the variant fixes every detection voltage. Everything below was read off datasheet.pdf IN THIS FOLDER (fetched 2026-09-02, sha256 b1f1b492ee36fe4bcaf094ded4c058daadd92f5ca423b7c1b7b774458aa5ccfa, PROVENANCE.json) via `pdftotext -layout`; quotes are that extraction with whitespace collapsed, and tools/datasheet-quotes-check.py re-finds every one of them in the PDF.",
+    "manufacturer": "ABLIC Inc.",
+    "description": "Protection IC for a 2-serial-cell lithium-ion / lithium-polymer pack: per-cell overcharge / overdischarge detection, discharge overcurrent, load short, optional charge overcurrent; drives two external N-FETs (DO discharge gate, CO charge gate) in the pack's negative leg; VM pin senses the load/charger. p.1 verbatim (whitespace collapsed): 'The S-8252 Series is a protection IC for 2-serial-cell lithium-ion / lithium polymer rechargeable batteries and includes high- accuracy voltage detection circuits and delay circuits.'",
+    "description_quote": "The S-8252 Series is a protection IC for 2-serial-cell lithium-ion / lithium polymer rechargeable batteries and includes high- accuracy voltage detection circuits and delay circuits.",
+    "fetched": true,
+    "datasheet_url": "https://www.ablic.com/en/doc/datasheet/battery_protection/S8252_E.pdf",
+    "datasheet_local": "datasheet.pdf",
+    "datasheet_fetched": "2026-09-02",
+    "datasheet_rev": "Rev.4.0_00 — p.1 header verbatim: '© ABLIC Inc., 2011-2019 Rev.4.0_00'; p.2 header 'BATTERY PROTECTION IC FOR 2-SERIAL-CELL PACK'. 37 pages; PDF metadata Author 'ABLIC Inc.', CreationDate 2019-06-20. HTTP 200, application/pdf, 629067 bytes, fetched 2026-09-02 with curl and a browser User-Agent from the vendor's own host.",
+    "datasheet_rev_quote": "© ABLIC Inc., 2011-2019 Rev.4.0_00",
+    "package": "SOT-23-6 and SNT-6A — p.1 'Packages • SOT-23-6 • SNT-6A'. Ordering suffix -M6T1U in every product-list row read (p.3) is the SOT-23-6 member; the SNT-6A suffix was not transcribed.",
+    "package_quote": "Packages • SOT-23-6 • SNT-6A",
+    "used_by": [],
+    "rails": [],
+    "rails_why": "not a rail-powered chip: VDD is the top of the 2S stack, VSS its bottom, VC the mid-tap. It draws from the cells it protects.",
+    "absolute_max": "p.7 Table 8 'Absolute Maximum Ratings' (Ta = +25°C unless otherwise specified), rows verbatim: 'Input voltage between VDD pin and VSS pin VDS VDD VSS − 0.3 to VSS + 12 V'; 'VM pin input voltage VVM VM VDD − 28 to VDD + 0.3 V'; 'Operation ambient temperature Topr − −40 to +85 °C'. Power dissipation 650 mW (SOT-23-6) / 400 mW (SNT-6A) 'when mounted on board' per the table's *1 note (JEDEC STANDARD51-7 board).",
+    "absolute_max_quotes": [
+      "Input voltage between VDD pin and VSS pin VDS VDD VSS − 0.3 to VSS + 12 V",
+      "VM pin input voltage VVM VM VDD − 28 to VDD + 0.3 V",
+      "Operation ambient temperature Topr − −40 to +85 °C"
+    ],
+    "supplies": [
+      {
+        "name": "VDD",
+        "rail": null,
+        "v_min": 1.5,
+        "v_typ": null,
+        "v_max": 10.0,
+        "cite": "datasheet.pdf Electrical Characteristics table (first variant table, ~p.10), row verbatim: 'Operation voltage between VDD pin and VSS pin VDSOP1 − 1.5 − 10 V −'. The TYP cell is '−' — v_typ null by observation. This is the 2S STACK voltage across VDD–VSS, so a 2S Li-ion pack (5.0–8.4 V) sits inside it.",
+        "quote": "Operation voltage between VDD pin and VSS pin VDSOP1 − 1.5 − 10 V −"
+      }
+    ],
+    "current_mA": {
+      "rail": null,
+      "rail_basis": "drawn from the protected stack (VDD–VSS), not from a system rail.",
+      "typical": 0.004,
+      "typical_basis": "Electrical Characteristics row verbatim: 'Current consumption during operation IOPE V1 = V2 = 3.5 V, V3 = 0 V − 4.0 8.0 μA 2' — 4.0 µA typ. A second variant table prints 4.5 / 8.5 µA; the first table's figure is carried here and the difference is in unknowns.",
+      "peak": 0.008,
+      "peak_basis": "same row, MAX column 8.0 µA — the steady-state maximum, not a transient. p.1 Features: 'During operation: 8.0 μA max. (Ta = +25°C)'.",
+      "sleep": 0.0001,
+      "sleep_basis": "p.1 Features 'During power-down: 0.1 μA max. (Ta = +25°C)' — a MAX, not a typical; the power-down function is a per-variant option ('Available, unavailable').",
+      "excludes": "the gate drive of the external FETs and the VM sense path",
+      "caveats": [
+        "Two Electrical Characteristics tables exist (variants differ); IOPE prints 4.0/8.0 µA in one and 4.5/8.5 µA in the other. The variant chosen fixes which applies."
+      ],
+      "cite": "datasheet.pdf Electrical Characteristics, rows IOPE and IOPED; p.1 Features 'Low current consumption'.",
+      "quote": "Current consumption during operation IOPE V1 = V2 = 3.5 V, V3 = 0 V − 4.0 8.0 μA 2"
+    },
+    "thresholds": {
+      "overcharge_detection_V_range": "3.550 V to 4.600 V (5 mV steps), accuracy ±20 mV at Ta = +25°C",
+      "overcharge_detection_quote": "Overcharge detection voltage n (n = 1, 2) 3.550 V to 4.600 V (5 mV steps) Accuracy ±20 mV (Ta = +25°C)",
+      "overdischarge_detection_V_range": "2.000 V to 3.000 V (10 mV steps), accuracy ±50 mV",
+      "overdischarge_detection_quote": "Overdischarge detection voltage n (n = 1, 2) 2.000 V to 3.000 V (10 mV steps) Accuracy ±50 mV",
+      "discharge_overcurrent_V_range": "0.050 V to 0.400 V (10 mV steps), accuracy ±10 mV — a VM-pin voltage; the ampere threshold is set by the external FETs' on-resistance and is NOT in the sheet",
+      "discharge_overcurrent_quote": "Discharge overcurrent detection voltage 0.050 V to 0.400 V (10 mV steps) Accuracy ±10 mV",
+      "cite": "datasheet.pdf p.1 Features, verbatim rows.",
+      "example_variant_for_a_4p2V_per_cell_pack": {
+        "row_quote": "S-8252AAL-M6T1U 4.200 V 4.050 V 2.500 V 3.000 V 0.200 V 0.500 V −0.200 V Inhibited Available (1)",
+        "reading": "p.3 '3. Product name list' row for S-8252AAL-M6T1U. Column order READ OFF THE TABLE HEADER (p.3 'Table 2 (1 / 2)', extracted lines 128-134, whitespace collapsed): 'Product Name', 'Overcharge Detection Voltage [VCU]', 'Overcharge Release Voltage [VCL]', 'Overdischarge Detection Voltage [VDL]', 'Overdischarge Release Voltage [VDU]', 'Discharge Overcurrent Detection Voltage [VDIOV]', 'Load Short-circuiting Detection Voltage [VSHORT]', 'Charge Overcurrent Detection Voltage [VCIOV]', '0 V Battery Charge', 'Power-down Function', 'Delay Time Combination*1'. So for S-8252AAL-M6T1U: VCU 4.200 V, VCL 4.050 V, VDL 2.500 V, VDU 3.000 V, VDIOV 0.200 V, VSHORT 0.500 V, VCIOV −0.200 V, 0 V charge Inhibited, power-down Available, delay combination (1). An overcharge detection of 4.200 V/cell is the ceiling a 4.2 V Li-ion cell is charged to; NOT chosen here — a design chooses its variant against the cell's own datasheet, which this shelf does not have (part:np-f550 unknowns).",
+        "cite": "datasheet.pdf p.3, '3. Product name list', row S-8252AAL-M6T1U"
+      }
+    },
+    "logic": {
+      "vih_min": null,
+      "vil_max": null,
+      "three_v3_tolerant": null,
+      "derived": false,
+      "cite": "DO and CO are CMOS gate-drive OUTPUTS (Table 6: 'Connection pin of discharge control FET gate (CMOS output)'); there is no logic input, so no VIH/VIL exists to transcribe."
+    },
+    "interface": "none",
+    "interface_max_hz": null,
+    "i2c_address": null,
+    "pinout": {
+      "$about": "Pad number -> signal, SOT-23-6, read off datasheet.pdf p.5 'Pin Configurations' Table 6 (whitespace-collapsed extraction; the pin-number column and the wrapped description interleave, so the quotes below are the description fragments, each of which is printed once).",
+      "SOT-23-6": {
+        "1": "DO",
+        "2": "CO",
+        "3": "VM",
+        "4": "VC",
+        "5": "VDD",
+        "6": "VSS"
+      },
+      "descriptions_quotes": [
+        "Connection pin of discharge control FET gate",
+        "Connection pin of charge control FET gate",
+        "Voltage detection pin between VM pin and VSS pin",
+        "Connection pin for negative voltage of battery 1 and",
+        "connection pin for positive voltage of battery 2",
+        "Connection pin for positive power supply input and",
+        "Connection pin for negative power supply input and"
+      ],
+      "cite": "datasheet.pdf p.5 Pin Configurations, '1. SOT-23-6', Table 6: '1 DO', '2 CO', '3 VM', '4 VC', '5 VDD', '6 VSS'.",
+      "verdict": "PASS"
+    },
+    "unknowns": [
+      "WHICH VARIANT. The S-8252 is a family; the detection voltages are fixed per suffix (p.3-4 product name list). No variant is chosen here because the cell inside the Microduck's NP-F550 pack is unidentified (part:np-f550) — a 4.20 V/cell variant such as S-8252AAL-M6T1U is shown as an EXAMPLE only.",
+      "THE AMPERE THRESHOLDS. Overcurrent detection is a VM-pin voltage (0.050–0.400 V); the current it corresponds to is that voltage over the two external FETs' RDS(on) and is not a datasheet figure.",
+      "DELAY TIMES were not transcribed (p.1: 'Detection delay times are generated only by an internal circuit (external capacitors are unnecessary). Accuracy ±20%').",
+      "SNT-6A pinout not transcribed (Table 7); only SOT-23-6 is here.",
+      "Two Electrical Characteristics tables (variant groups) print slightly different IOPE (4.0/8.0 vs 4.5/8.5 µA); the first is carried.",
+      "WHETHER POLLEN'S PRODUCT CARRIES ANY 2S PROTECTION IC, and which: CANNOT DETERMINE — the Robot HAT design is unpublished (docs/ELECTRONICS-AND-SOFTWARE.md §9, §12 item 4). This folder is the reference part for a rebuild, not a teardown finding.",
+      "No physical part measured; no sourced offer; lifecycle not checked."
+    ]
+  }
+}

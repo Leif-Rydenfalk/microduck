@@ -1,0 +1,1 @@
+Only jaw print pose changes from HEAD-V6: +90 degrees around Y, preserving shape, with lower bbox X=3,Y=108.8,Z=0. All other 10 meshes and placements are unchanged. Shared vertex indexing remains. Jaw-side standalone passed strengthened model-layer and air checks. No brim. No printer send.

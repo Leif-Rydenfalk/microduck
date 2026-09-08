@@ -1,0 +1,98 @@
+{
+ "_generated": "by hand, lane internals-build2 (PCBs and chips), 2026-09-04. Every row cites the file it was read from.",
+ "subject": "Our re-created Robot HAT (electronics/robot-hat/board.py, rung 4) measured against Pollen's OFFICIAL published design (reference/pollen-elec-rpi-robot-hat, Apache-2.0, commit 23eab11927f95ceca0dfa35bf182caeb7db39ea0, rev C1, dated 2026-07-08).",
+ "why_this_exists": "electronics/robot-hat/board.py opens with 'THIS IS NOT POLLEN'S BOARD. Pollen has published no PCB, no schematic and no BOM for the RPI Robot HAT'. That premise was true when it was written and is FALSE now: the board is fully published, and the teardown note in reference/makerworld-3250889/upstream-github-fanhao375-microduck-replica/docs/hardware-teardown.en.md section 4 records the correction. This file is the delta, so no downstream document keeps quoting the reconstruction as if it were the robot.",
+ "headline_counts": {
+  "official_placements_fitted": 117,
+  "official_components_fitted": 113,
+  "official_placements_note": "117 rows in the manufacturer's POS.csv, of which 3 are fiducials (FID1-3) and 1 is a logo (H3) — 113 are physical components",
+  "official_bom_lines": 47,
+  "official_dnp_lines": 5,
+  "official_dnp_designators": ["C25", "R10", "R11", "R16", "R17", "R41", "R36", "R37", "U4"],
+  "official_copper_layers": 4,
+  "ours_placements": 24,
+  "ours_bom_lines": 18,
+  "ours_copper_layers": 2,
+  "component_coverage": "24 / 113 = 21.2 % of the real board's components exist in our reconstruction",
+  "source_ours": "electronics/robot-hat/out/fab/microduck_robot_hat-positions.csv (25 lines incl. header), -bom.csv (19 lines incl. header), and the gerber set (F.Cu + B.Cu only)",
+  "source_official": "production/ASE01187-C1_elec_RPI_Robot_HAT_POS.csv, _BOM.csv, and elec_RPI_Robot_HAT.kicad_pcb layers block (F.Cu / In1.Cu / In2.Cu / B.Cu)"
+ },
+ "verdict": "FAIL — the two boards are not the same board and ours cannot be substituted. The correct action is to order the official board from reference/pollen-elec-rpi-robot-hat/production/, and to mark electronics/robot-hat/ as a superseded reconstruction rather than a design to fabricate.",
+ "findings": [
+  {
+   "id": "HAT-1",
+   "severity": "blocking",
+   "claim": "Designator collision: our refdes scheme contradicts the official one, so any sentence in this repo naming a HAT designator is ambiguous.",
+   "measured": {
+    "ours": {"U1": "TLV320AIC3104", "U2": "Pololu D30V30F5 module", "U3": "BMI088", "U4": "74LVC1G125"},
+    "official": {"U1": "PAM8406D", "U2": "TLV320AIC3104IRHBR", "U3": "XC6206P182MR", "U4": "CAT24C32 (DNP)", "U5": "74LVC1G08", "U6": "SN74LVC1G125DBV", "U7": "SN74LVC1G126DBVR", "U8": "SIT3088E", "U9": "AP63205", "U10": "LM5050-1", "U11": "BMI088"}
+   },
+   "action": "adopt the official designators everywhere; out/pcb/hat/components.json already carries them"
+  },
+  {
+   "id": "HAT-2",
+   "severity": "blocking",
+   "claim": "Our 5 V rail is a Pololu D30V30F5 module (decision D1 in board.py). No such module is on the real board.",
+   "measured": "official: U9 = AP63205 (TSOT-23-6 buck, LCSC C2071056) with L4 = Bourns SRN6045TA 6.8 uH 2 A (LCSC C57254) and C21/C22 = 22u 6V3 — a discrete buck, not a module. Datasheet in reference/pollen-elec-rpi-robot-hat/docs/'part - AP63205.pdf'.",
+   "consequence": "our board's height, cost and thermal picture are all wrong: the module is a 15 mm-class brick, the real converter is a 2.9 x 2.8 x 0.95 mm IC beside a 6.0 x 6.0 x 4.2 mm inductor (both measured off the official STEP)."
+  },
+  {
+   "id": "HAT-3",
+   "severity": "closes-a-cannot-determine",
+   "claim": "The 1.8 V codec rail — board.py decision D5, 'NOT SOLVED, and now known to be UNSOLVABLE FROM THE HEADER', left on test point TP1 — is answered by the official design.",
+   "measured": "official U3 = XC6206P182MR in SOT-23-3 (LCSC C347373; datasheet reference/pollen-elec-rpi-robot-hat/docs/'part - XC6202 - C347373.pdf'). The '182' suffix is the 1.8 V option. The HAT therefore makes its own 1.8 V with an LDO, exactly as board.py's D5 argued it must — and refused to invent.",
+   "action": "record 1.8 V = XC6206P182MR LDO; delete TP1's open question."
+  },
+  {
+   "id": "HAT-4",
+   "severity": "design",
+   "claim": "Half-duplex direction control: our topology (one 74LVC1G125 with OE driven by UART TX) is not the official circuit.",
+   "measured": "official U5 = 74LVC1G08 (2-input AND, LCSC C7666), U6 = SN74LVC1G125DBV (buffer, active-LOW OE), U7 = SN74LVC1G126DBVR (buffer, active-HIGH OE) — three parts, i.e. a self-steering pair gated by a logic term, plus U8 = SIT3088E for the RS-485 side.",
+   "note": "the teardown's inference stands — there is no direction GPIO — but the way it is done in hardware is a three-IC arrangement, not a one-IC one."
+  },
+  {
+   "id": "HAT-5",
+   "severity": "design",
+   "claim": "Audio: our reconstruction drives the speaker straight off the codec's HPLOUT (decision D6). The real board has a class-D amplifier.",
+   "measured": "official U1 = PAM8406D in SOIC-16 3.9 x 9.9 mm (LCSC C86270), body measured 9.900 x 6.000 x 1.750 mm off the official STEP; datasheets docs/'part - PAM8406 - C86270.pdf' and docs/'eval - PAM8406-User-Guide.pdf'."
+  },
+  {
+   "id": "HAT-6",
+   "severity": "design",
+   "claim": "Microphone: ours is a connector (J7) for an off-board mic. The real board carries the microphone itself.",
+   "measured": "official MK1 = LMA2718 MEMS microphone (LCSC C7587901), footprint MIC-SMD_4P-L2.8-W1.9-P1.84-TL at (59.857, -11.700) top side, body measured 1.851 x 2.750 x 1.010 mm. Plus J1/J2/J9 = Wago 2059-302 screwless terminals for an EXTERNAL speaker and a second microphone."
+  },
+  {
+   "id": "HAT-7",
+   "severity": "design",
+   "claim": "Connector count: ours has one Dynamixel port and one Stemma port. The real board has four and four.",
+   "measured": "official J13/J14 = JST EH B3B-EH-A 3-pin (Dynamixel TTL, what the XL330 uses), J3/J11 = JST EH B4B-EH-A 4-pin (RS-485), J5/J6/J7/J8 = JST SH BM04B-SRSS-TB 4-pin 1 mm (Stemma/Qwiic). Bodies measured 10.000 x 3.800 x 9.200 (3-pin), 12.500 x 3.800 x 9.200 (4-pin), 6.000 x 3.600 x 4.320 (SH)."
+  },
+  {
+   "id": "HAT-8",
+   "severity": "design",
+   "claim": "Parts absent from our reconstruction entirely.",
+   "measured": ["Y1 12 MHz oscillator (Abracon ASDMB 2.5 x 2.0, the codec's MCLK)", "U8 SIT3088E RS-485 transceiver", "U10 LM5050-1 ideal-diode controller with Q2 SI2312CDS pass FET (reverse-polarity / OR-ing protection — our board has none)", "Q1 MMBT3906", "D1 BAT54W", "D2 3V3 zener", "D4 5V1 zener", "FB1/FB2/FB3 ferrite beads", "TH1 100 R thermistor (over-current protection)", "TP2/TP3/TP4 test loops", "C19 10u 63 V electrolytic, 8.606 x 8.606 x 7.700 mm — the TALLEST part on the board and the one that decides the head's internal clearance", "FID1/FID2/FID3 fiducials (needed for SMT assembly)"]
+  },
+  {
+   "id": "HAT-9",
+   "severity": "geometry",
+   "claim": "Board outline: our bare-board part is 0.875 mm short in Y and 0.160 mm thin.",
+   "measured": {
+    "our_part": "ce-parts/microduck-robot-hat-pcb/current/cad/part.py builds 65.040 x 30.040 x 0.840 (X_MIN -3.52 .. 61.52, Y -26.52 .. 3.52), graded against Pollen's SIMULATION mesh elec_rpi_robot_hat_pcb.stl (65.025 x 30.025 x 0.840)",
+    "official": "Edge.Cuts and the STEP body both give x -3.500 .. 61.500 (65.000) and y -26.500 .. +4.400 (30.900); the STEP body is 0.840 thick because it models dielectric 0.77 + 2 x 0.035 inner copper only",
+    "finished_thickness": "1.000 mm — kicad_pcb line 6 '(thickness 1)', and the stackup sums 0.01 + 0.07 + 0.10 + 0.035 + 0.57 + 0.035 + 0.10 + 0.07 + 0.01 = 1.000"
+   },
+   "reading": "Pollen's simulation mesh is the real board with the +Y tab cut off and the outer copper/mask omitted. Our part matched the MESH, so it inherited both simplifications. The real board is the better reference now that we hold it.",
+   "action": "iterate part:microduck-robot-hat-pcb to the official outline and 1.000 mm."
+  },
+  {
+   "id": "HAT-10",
+   "severity": "manufacturing",
+   "claim": "Layer count: our fab output is 2-layer, the real board is 4-layer.",
+   "measured": "our gerber set has F.Cu + B.Cu only; official layers block is F.Cu / In1.Cu / In2.Cu / B.Cu with the stackup above. A 2-layer version of this board has not been shown to route.",
+   "consequence": "any quote taken against our gerbers is a quote for a different board."
+  }
+ ],
+ "what_this_does_not_change": "The reconstruction's NET LIST reasoning is still useful as a functional block description, and its decisions D1-D6 were each labelled as our choice. Nothing in it was dishonest; it is simply superseded by a document that did not exist to its author."
+}

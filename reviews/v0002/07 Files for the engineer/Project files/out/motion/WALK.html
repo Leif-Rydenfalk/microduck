@@ -1,0 +1,225 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Microduck — walking mechanics, filmed and measured</title>
+<link rel="stylesheet" href="../../tools/doc.css">
+<style>
+ .fig{margin:26px 0}
+ .fig video{width:100%;max-width:760px;display:block;background:#fff;border:1px solid var(--line)}
+ .fig.wide video{max-width:100%}
+ .fig img{width:100%;display:block;margin-top:8px;border:1px solid var(--line)}
+ .grid2{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+ .grid2 .fig{margin:0}
+ .tbl{width:100%;border-collapse:collapse;font-family:var(--sans);font-size:13px;margin:14px 0 6px}
+ .tbl th,.tbl td{border-bottom:1px solid var(--line);padding:5px 7px;text-align:left}
+ .tbl th{background:var(--head);font-size:11px;letter-spacing:.04em;text-transform:uppercase}
+ .num{text-align:right;font-variant-numeric:tabular-nums;font-family:var(--mono)}
+ .chip{font-family:var(--sans);font-size:11px;padding:1px 6px;border:1px solid currentColor;border-radius:2px}
+ .chip.pass{color:var(--pass-ink)} .chip.cd{color:var(--cd-ink)}
+ figcaption{font-family:var(--sans);font-size:12.5px;color:var(--ink-2);margin-top:7px;line-height:1.5}
+ @media(max-width:820px){.grid2{grid-template-columns:1fr}}
+</style></head><body><div class="wrap">
+<header class="top">
+ <div class="eyebrow">Microduck · simulation evidence · motion</div>
+ <h1>Walking mechanics, filmed and measured</h1>
+ <p class="lede">Leif, 2026-09-02: <i>&ldquo;show me renders of the mechanics like our cad system
+ walking, zoom in on joints as they move and the head kmvoing around and the legs moving
+ around.&rdquo;</i> Nine videos of OUR rebuilt parts walking under Pollen's own policy, every camera
+ tracking the joint it is filming, and every joint's travel and peak angular velocity read off the
+ same trajectory.</p>
+</header>
+
+<section id="what">
+<h2>1 · What ran</h2>
+<table class="tbl">
+<tr><td>model</td><td class=mono>sim/microduck_ours.xml (Pollen MJCF verbatim, our meshes on the visual geoms)</td></tr>
+<tr><td>trajectory</td><td class=mono>out/sim/walk_ours_traj.npz</td></tr>
+<tr><td>written by</td><td class=mono>sim/run_policy.py --policy walking --robot ours --seconds 8 --vx 0.25</td></tr>
+<tr><td>rendered by</td><td class=mono>sim/motion_render.py --all</td></tr>
+<tr><td>scene</td><td class=mono>out/motion/_studio_walk_scene.xml</td></tr>
+<tr><td>commanded v<sub>x</sub></td><td class=num>0.250 m/s</td></tr>
+<tr><td>duration / control rate</td><td class=num>8.000 s @ 50 Hz (401 frames, dt 0.0200 s)</td></tr>
+<tr><td>walked</td><td class=num>0.7925 m (x +0.7894, y -0.0696), mean 0.1055 m/s, final yaw -9.47&deg;</td></tr>
+<tr><td>trunk height</td><td class=num>start 0.1200, min 0.1135, max 0.1212, end 0.1156 m</td></tr>
+<tr><td>max tilt / fell</td><td class=num>4.11&deg; / no</td></tr>
+<tr><td>gait cycle</td><td class=num>0.4000 s (20 frames at 50 Hz), cadence 300.00 steps/min, stride 0.0423 m</td></tr>
+</table>
+<p class="note">Gait period method: autocorrelation of left_knee angle over t in [1.5, 7.0] s, lags 0.25-1.60 s (sim/motion_render.py gait_cycle()). Every video below was re-read frame by frame after encoding;
+a blank, white or frozen frame is a defect, not a video — <b>9 of 9 PASS</b>.</p>
+</section>
+
+<section id="body">
+<h2>2 · The whole duck</h2>
+
+<figure class="fig wide">
+  <video controls muted loop playsinline preload="metadata" poster="frames/walk_body_f000.png" src="walk_body.mp4"></video>
+  <img src="walk_body_sheet.png" alt="contact sheet, 8 frames of walk_body">
+  <figcaption><b>walk_body</b> — full body, 3/4 front-left, camera tracking trunk_base.<br>
+    Camera: track trunk_base, azimuth 225 deg, elevation -10 deg, distance 0.520 m. 241 frames at 30 fps (8.033 s), mp4 6.20 MB, <a href="walk_body.gif">GIF</a> 5.16 MB.
+    Read back frame by frame: <span class="chip pass">PASS</span>
+    min frame std 42.67 (blank &lt; 4.0), max inter-frame delta 7.134, blank frames 0, frozen pairs 0.
+  </figcaption>
+</figure>
+</section>
+
+<section id="composite">
+<h2>3 · All four at once, one timeline</h2>
+
+<figure class="fig wide">
+  <video controls muted loop playsinline preload="metadata" poster="frames/walk_composite_f000.png" src="walk_composite.mp4"></video>
+  <img src="walk_composite_sheet.png" alt="contact sheet, 8 frames of walk_composite">
+  <figcaption><b>walk_composite</b> — 2x2 composite on one timeline: walk_body, walk_knee_prof, walk_hip_prof, walk_ankle_prof.<br>
+    Camera: walk_body: az 225 el -10 d 0.520; walk_knee_prof: az 270 el -6 d 0.170; walk_hip_prof: az 270 el -6 d 0.190; walk_ankle_prof: az 270 el -4 d 0.160. 241 frames at 30 fps (8.033 s), mp4 11.93 MB, <a href="walk_composite.gif">GIF</a> 5.48 MB.
+    Read back frame by frame: <span class="chip pass">PASS</span>
+    min frame std 46.99 (blank &lt; 4.0), max inter-frame delta 12.178, blank frames 0, frozen pairs 0.
+  </figcaption>
+</figure>
+</section>
+
+<section id="slowmo">
+<h2>4 · One gait cycle at 0.25&times;, with the angle traces</h2>
+
+<figure class="fig wide">
+  <video controls muted loop playsinline preload="metadata" poster="frames/walk_slowmo_f000.png" src="walk_slowmo.mp4"></video>
+  <img src="walk_slowmo_sheet.png" alt="contact sheet, 8 frames of walk_slowmo">
+  <figcaption><b>walk_slowmo</b> — 0.25x slow motion of one measured gait cycle (0.4000 s, autocorrelation peak 0.9222 at lag 20 frames of left_knee) with the hip/knee/ankle angle traces and a time cursor beneath.<br>
+    Camera: walk_body (az 225) + walk_knee_prof (az 270), both tracked. 68 frames at 30 fps (2.267 s), mp4 1.63 MB, <a href="walk_slowmo.gif">GIF</a> 3.34 MB.
+    Read back frame by frame: <span class="chip pass">PASS</span>
+    min frame std 41.04 (blank &lt; 4.0), max inter-frame delta 2.716, blank frames 0, frozen pairs 0.
+  </figcaption>
+</figure>
+</section>
+
+<section id="joints">
+<h2>5 · Joint close-ups, camera tracking the joint</h2>
+<div class="grid2">
+
+<figure class="fig">
+  <video controls muted loop playsinline preload="metadata" poster="frames/walk_knee_prof_f000.png" src="walk_knee_prof.mp4"></video>
+  <img src="walk_knee_prof_sheet.png" alt="contact sheet, 8 frames of walk_knee_prof">
+  <figcaption><b>walk_knee_prof</b> — left knee (left_knee, body `leg`), profile-left, tracked.<br>
+    Camera: track leg, azimuth 270 deg, elevation -6 deg, distance 0.170 m. 241 frames at 30 fps (8.033 s), mp4 3.26 MB, <a href="walk_knee_prof.gif">GIF</a> 3.55 MB.
+    Read back frame by frame: <span class="chip pass">PASS</span>
+    min frame std 50.91 (blank &lt; 4.0), max inter-frame delta 16.085, blank frames 0, frozen pairs 0.
+  </figcaption>
+</figure>
+
+<figure class="fig">
+  <video controls muted loop playsinline preload="metadata" poster="frames/walk_knee_34_f000.png" src="walk_knee_34.mp4"></video>
+  <img src="walk_knee_34_sheet.png" alt="contact sheet, 8 frames of walk_knee_34">
+  <figcaption><b>walk_knee_34</b> — left knee, 3/4 front-left, tracked.<br>
+    Camera: track leg, azimuth 225 deg, elevation -8 deg, distance 0.185 m. 241 frames at 30 fps (8.033 s), mp4 4.64 MB, <a href="walk_knee_34.gif">GIF</a> 4.78 MB.
+    Read back frame by frame: <span class="chip pass">PASS</span>
+    min frame std 65.57 (blank &lt; 4.0), max inter-frame delta 21.495, blank frames 0, frozen pairs 0.
+  </figcaption>
+</figure>
+
+<figure class="fig">
+  <video controls muted loop playsinline preload="metadata" poster="frames/walk_hip_prof_f000.png" src="walk_hip_prof.mp4"></video>
+  <img src="walk_hip_prof_sheet.png" alt="contact sheet, 8 frames of walk_hip_prof">
+  <figcaption><b>walk_hip_prof</b> — left hip cluster (yaw/roll/pitch, body `upper_leg_left`), profile-left.<br>
+    Camera: track upper_leg_left, azimuth 270 deg, elevation -6 deg, distance 0.190 m. 241 frames at 30 fps (8.033 s), mp4 2.68 MB, <a href="walk_hip_prof.gif">GIF</a> 3.63 MB.
+    Read back frame by frame: <span class="chip pass">PASS</span>
+    min frame std 46.11 (blank &lt; 4.0), max inter-frame delta 10.646, blank frames 0, frozen pairs 0.
+  </figcaption>
+</figure>
+
+<figure class="fig">
+  <video controls muted loop playsinline preload="metadata" poster="frames/walk_hip_34_f000.png" src="walk_hip_34.mp4"></video>
+  <img src="walk_hip_34_sheet.png" alt="contact sheet, 8 frames of walk_hip_34">
+  <figcaption><b>walk_hip_34</b> — left hip cluster, 3/4 front-left.<br>
+    Camera: track upper_leg_left, azimuth 225 deg, elevation -8 deg, distance 0.200 m. 241 frames at 30 fps (8.033 s), mp4 3.90 MB, <a href="walk_hip_34.gif">GIF</a> 4.82 MB.
+    Read back frame by frame: <span class="chip pass">PASS</span>
+    min frame std 61.61 (blank &lt; 4.0), max inter-frame delta 14.665, blank frames 0, frozen pairs 0.
+  </figcaption>
+</figure>
+
+<figure class="fig">
+  <video controls muted loop playsinline preload="metadata" poster="frames/walk_ankle_prof_f000.png" src="walk_ankle_prof.mp4"></video>
+  <img src="walk_ankle_prof_sheet.png" alt="contact sheet, 8 frames of walk_ankle_prof">
+  <figcaption><b>walk_ankle_prof</b> — left ankle + foot (body `ankle_left`), profile-left.<br>
+    Camera: track ankle_left, azimuth 270 deg, elevation -4 deg, distance 0.160 m. 241 frames at 30 fps (8.033 s), mp4 2.78 MB, <a href="walk_ankle_prof.gif">GIF</a> 2.79 MB.
+    Read back frame by frame: <span class="chip pass">PASS</span>
+    min frame std 48.58 (blank &lt; 4.0), max inter-frame delta 17.408, blank frames 0, frozen pairs 0.
+  </figcaption>
+</figure>
+
+<figure class="fig">
+  <video controls muted loop playsinline preload="metadata" poster="frames/walk_ankle_34_f000.png" src="walk_ankle_34.mp4"></video>
+  <img src="walk_ankle_34_sheet.png" alt="contact sheet, 8 frames of walk_ankle_34">
+  <figcaption><b>walk_ankle_34</b> — left ankle + foot, 3/4 front-left.<br>
+    Camera: track ankle_left, azimuth 225 deg, elevation -8 deg, distance 0.170 m. 241 frames at 30 fps (8.033 s), mp4 4.22 MB, <a href="walk_ankle_34.gif">GIF</a> 3.94 MB.
+    Read back frame by frame: <span class="chip pass">PASS</span>
+    min frame std 62.44 (blank &lt; 4.0), max inter-frame delta 22.191, blank frames 0, frozen pairs 0.
+  </figcaption>
+</figure>
+</div>
+</section>
+
+<section id="measured">
+<h2>6 · Measured, off the same trajectory</h2>
+<p>MJCF range is read off the compiled model (Pollen's limits, verbatim). Travel is what the walking
+policy actually used. Peak angular velocity is <code>|qvel|</code> at its maximum, with the 50 Hz
+frame index it happened on — <code>out/sim/walk_ours_traj.npz</code>, computed in
+<code>sim/motion_render.py measure()</code>.</p>
+<h3>Legs</h3>
+<table class="tbl">
+<tr><th>joint</th><th class=num>MJCF range (&deg;)</th><th class=num>span</th><th class=num>used min … max (&deg;)</th>
+<th class=num>travel (&deg;)</th><th class=num>of range</th><th class=num>peak |&omega;| (&deg;/s)</th>
+<th class=num>at frame</th><th class=num>closest to a limit (&deg;)</th></tr>
+<tr><td class=mono>left_hip_yaw</td><td class=num>-25.00 … 30.00</td><td class=num>55.00</td><td class=num>-8.22 … 0.27</td><td class=num><b>8.49</b></td><td class=num>15.4%</td><td class=num>52.3</td><td class=num>55</td><td class=num>16.78</td></tr>
+<tr><td class=mono>left_hip_roll</td><td class=num>-22.00 … 22.00</td><td class=num>44.00</td><td class=num>-7.83 … 2.68</td><td class=num><b>10.51</b></td><td class=num>23.9%</td><td class=num>103.0</td><td class=num>268</td><td class=num>14.17</td></tr>
+<tr><td class=mono>left_hip_pitch</td><td class=num>-90.00 … 90.00</td><td class=num>180.00</td><td class=num>-27.60 … -11.61</td><td class=num><b>15.99</b></td><td class=num>8.9%</td><td class=num>154.0</td><td class=num>63</td><td class=num>62.40</td></tr>
+<tr><td class=mono>left_knee</td><td class=num>-90.00 … 90.00</td><td class=num>180.00</td><td class=num>-14.75 … 22.12</td><td class=num><b>36.86</b></td><td class=num>20.5%</td><td class=num>328.8</td><td class=num>58</td><td class=num>67.88</td></tr>
+<tr><td class=mono>left_ankle</td><td class=num>-90.00 … 90.00</td><td class=num>180.00</td><td class=num>7.97 … 27.58</td><td class=num><b>19.61</b></td><td class=num>10.9%</td><td class=num>181.3</td><td class=num>51</td><td class=num>62.42</td></tr>
+<tr><td class=mono>right_hip_yaw</td><td class=num>-30.00 … 25.00</td><td class=num>55.00</td><td class=num>0.00 … 6.07</td><td class=num><b>6.07</b></td><td class=num>11.0%</td><td class=num>32.0</td><td class=num>74</td><td class=num>18.93</td></tr>
+<tr><td class=mono>right_hip_roll</td><td class=num>-22.00 … 22.00</td><td class=num>44.00</td><td class=num>0.33 … 7.93</td><td class=num><b>7.60</b></td><td class=num>17.3%</td><td class=num>93.7</td><td class=num>346</td><td class=num>14.07</td></tr>
+<tr><td class=mono>right_hip_pitch</td><td class=num>-90.00 … 90.00</td><td class=num>180.00</td><td class=num>10.88 … 27.54</td><td class=num><b>16.66</b></td><td class=num>9.2%</td><td class=num>190.0</td><td class=num>195</td><td class=num>62.46</td></tr>
+<tr><td class=mono>right_knee</td><td class=num>-90.00 … 90.00</td><td class=num>180.00</td><td class=num>-20.00 … 9.51</td><td class=num><b>29.51</b></td><td class=num>16.4%</td><td class=num>285.9</td><td class=num>156</td><td class=num>70.00</td></tr>
+<tr><td class=mono>right_ankle</td><td class=num>-90.00 … 90.00</td><td class=num>180.00</td><td class=num>-27.63 … -12.33</td><td class=num><b>15.30</b></td><td class=num>8.5%</td><td class=num>116.9</td><td class=num>68</td><td class=num>62.37</td></tr>
+</table>
+<h3>Neck and head — during the walk, with no head command</h3>
+<p>The walking policy is driven with the head command slots at zero, so what the head does here is
+the policy's own stabilisation, not a commanded motion. That is the measured answer to
+&ldquo;is the neck stiff&rdquo;: the mechanics allow far more than this row shows.</p>
+<table class="tbl">
+<tr><th>joint</th><th class=num>MJCF range (&deg;)</th><th class=num>span</th><th class=num>used min … max (&deg;)</th>
+<th class=num>travel (&deg;)</th><th class=num>of range</th><th class=num>peak |&omega;| (&deg;/s)</th>
+<th class=num>at frame</th><th class=num>closest to a limit (&deg;)</th></tr>
+<tr><td class=mono>neck_pitch</td><td class=num>-90.00 … 60.00</td><td class=num>150.00</td><td class=num>12.21 … 20.00</td><td class=num><b>7.79</b></td><td class=num>5.2%</td><td class=num>47.0</td><td class=num>49</td><td class=num>40.00</td></tr>
+<tr><td class=mono>head_pitch</td><td class=num>-90.00 … 90.00</td><td class=num>180.00</td><td class=num>20.00 … 24.53</td><td class=num><b>4.53</b></td><td class=num>2.5%</td><td class=num>22.6</td><td class=num>49</td><td class=num>65.47</td></tr>
+<tr><td class=mono>head_yaw</td><td class=num>-170.00 … 170.00</td><td class=num>340.00</td><td class=num>-4.27 … 7.08</td><td class=num><b>11.34</b></td><td class=num>3.3%</td><td class=num>95.3</td><td class=num>70</td><td class=num>162.93</td></tr>
+<tr><td class=mono>head_roll</td><td class=num>-25.00 … 25.00</td><td class=num>50.00</td><td class=num>-5.30 … 0.57</td><td class=num><b>5.87</b></td><td class=num>11.7%</td><td class=num>56.8</td><td class=num>72</td><td class=num>19.70</td></tr>
+</table>
+</section>
+
+<section id="product">
+  <h2>7 · Beside the real product</h2>
+  <p>The only published asset of the product performing <i>this</i> motion is Pollen's portrait move
+  clip <code>images/moves-portrait-alpha_walk.webm</code> (400 frames, 50 fps, 8.000 s, 800×1280, vp9). It is Pollen's own
+  <b>rendered</b> clip, not a photograph — <b>no photograph of the product mid-stride exists in
+  <code>images/</code></b>, so this is a render-to-render comparison and is labelled as one.</p>
+  <p>Both gait periods are measured, not assumed. The product's comes off the pixels: the decoded
+  background is exactly black (938&nbsp;762 of 1&nbsp;024&nbsp;000 px at luma 0 on frame 100), so the
+  silhouette is luma &gt; 0.5 plus any 0-luma pixel enclosed by silhouette on all four sides of its
+  row and column — otherwise the robot's own black plastic is knocked out. Then the x-centroid of
+  the bottom 15&nbsp;% of the silhouette minus the x-centroid of the whole silhouette — one
+  oscillation per gait cycle — autocorrelated. Ours comes off <code>left_knee</code> in the
+  trajectory. <b>Both signals are sampled at 50&nbsp;Hz, so each period is quantised to
+  0.020&nbsp;s</b>: the two agree to within one sample, which is the resolution of the measurement
+  and not a claim of exact equality.</p>
+  <table class="tbl">
+    <tr><th></th><th class=num>gait period (s)</th><th class=num>autocorr peak</th><th class=num>cadence (steps/min)</th></tr>
+    <tr><td>product clip</td><td class=num>0.4000</td><td class=num>0.853</td><td class=num>300.00</td></tr>
+    <tr><td>ours (this sim)</td><td class=num>0.4000</td><td class=num>0.922</td><td class=num>300.00</td></tr>
+    <tr><td>ratio ours / product</td><td class=num colspan=3>1.0000</td></tr>
+  </table>
+  <figure class="fig wide"><img src="walk_vs_product.png" alt="our walk beside Pollen's move clip, phase matched">
+  <figcaption>Five equal phases of one gait cycle each. ours at azimuth 135 deg (3/4 front-right), elevation -10, distance 0.52 m, tracking trunk_base</figcaption></figure>
+</section>
+<footer>
+<p class="note">Regenerate: <code>ce-cad/bin/cad sim/motion_render.py --all</code> (or FreeCAD's
+python directly), then <code>sim/walk_vs_product.py</code>, then
+<code>python3 tools/gen_walk_motion.py</code>. Numbers come from
+<code>out/motion/walk.json</code>; nothing on this page is typed by hand.</p>
+</footer>
+</div></body></html>

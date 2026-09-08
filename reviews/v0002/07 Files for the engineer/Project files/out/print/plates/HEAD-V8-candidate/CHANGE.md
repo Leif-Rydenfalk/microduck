@@ -1,0 +1,1 @@
+Only bracket print pose changes from HEAD-V7: +90 degrees around Y, preserving shape, with lower bbox X=150,Y=120,Z=0. All other 10 meshes and placements are unchanged. Shared vertex indexing remains. Bracket-flat standalone passed strengthened model-layer and air checks. No brim. No printer send.

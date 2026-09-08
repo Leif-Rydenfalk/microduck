@@ -1,0 +1,96 @@
+{
+  "$parts_folder": 1,
+  "kind": "chip",
+  "record": {
+    "part": "pn7150",
+    "part_note": "Everything below was read off datasheet.pdf IN THIS FOLDER — NXP PN7150 product data sheet Rev. 4.2, 2 February 2024, 69 pages, fetched 2026-09-02, sha256 7e56dba817d57e90dd59c6d328fef598e560a4fe59e7d2e847b268dd80332dcf (PROVENANCE.json) — via `pdftotext -layout`; quotes are that extraction with whitespace collapsed (the extraction drops the superscript in 'I²C', printing 'I C-bus') and tools/datasheet-quotes-check.py re-finds each in the PDF.",
+    "manufacturer": "NXP Semiconductors",
+    "description": "NFC Forum-compliant controller with an integrated Arm Cortex-M0 running NXP's NFC stack, exposing an NCI interface over I2C to the host; reader/writer, card emulation and P2P; 13.56 MHz; one antenna path. p.1 title verbatim: 'High performance NFC controller with integrated firmware, supporting all NFC Forum modes'.",
+    "description_quote": "High performance NFC controller with integrated firmware, supporting all NFC Forum modes",
+    "fetched": true,
+    "datasheet_url": "https://www.nxp.com/docs/en/data-sheet/PN7150.pdf",
+    "datasheet_local": "datasheet.pdf",
+    "datasheet_fetched": "2026-09-02",
+    "datasheet_rev": "Rev. 4.2 — 2 February 2024 — p.1 verbatim 'Rev. 4.2 — 2 February 2024 Product data sheet'; every page footer repeats it. 69 pages; PDF CreationDate 2024-02-07. HTTP 200, application/pdf, 693641 bytes, fetched 2026-09-02 with curl, a browser User-Agent and full navigation headers (two plain attempts and WebFetch got 404 from nxp.com's bot gate).",
+    "datasheet_rev_quote": "Rev. 4.2 — 2 February 2024 Product data sheet",
+    "package": "HVQFN40, SOT618-1, 6 mm x 6 mm x 0.85 mm — §7 Table 2 verbatim 'PN7150B0HN/C110xx HVQFN40 plastic thermal enhanced very thin quad flat SOT618-1' / 'package; no leads; 40 terminals; body; 6 mm × 6' / 'mm × 0.85 mm'. The WLCSP42 member (PN7150B0UK/C110xx, SOT1459-1, 2.88 x 2.80 x 0.54 mm) is marked 'Do not use for new designs. Planned for' 'discontinuation.' 'xx = firmware code variant'.",
+    "package_quote": "PN7150B0HN/C110xx HVQFN40 plastic thermal enhanced very thin quad flat SOT618-1",
+    "wlcsp_nrnd_quote": "Do not use for new designs. Planned for",
+    "used_by": [],
+    "rails": ["3V3"],
+    "rails_why": "VBAT accepts 2.3–5.5 V and VDD(PAD) has a '3 V host supply' option at 3.0–3.6 V (Table 26), so a single 3.3 V rail powers both the chip and its host interface toward the Radxa.",
+    "absolute_max": "p.43 Table 25 'Limiting values' — 'In accordance with the Absolute Maximum Rating System (IEC 60134).' Rows verbatim: 'VDD(PAD) VDD(PAD) supply voltage supply voltage for host - 4.35 V'; 'VBAT battery supply voltage - 6 V'; 'Ptot total power dissipation all modes - 600 mW'; 'Tstg storage temperature -55 +150 °C'.",
+    "absolute_max_quotes": [
+      "In accordance with the Absolute Maximum Rating System (IEC 60134).",
+      "VBAT battery supply voltage - 6 V",
+      "Ptot total power dissipation all modes - 600 mW"
+    ],
+    "supplies": [
+      {
+        "name": "VBAT",
+        "rail": "3V3",
+        "v_min": 2.7,
+        "v_typ": null,
+        "v_max": 5.5,
+        "cite": "p.44 Table 26 'Operating conditions', rows verbatim: 'VBAT battery supply voltage battery monitor enabled;VSS = [1][1] 2.3 - 5.5 V' and 'Reader, Active Initiator 2.7 - 5.5 V' (the 'and Active Target;VSS = 0 V' continuation on the next line). 2.7 V is carried as v_min because reader mode is what a tag-reading robot uses; card-emulation / passive-target may run from 2.3 V. TYP column is '-' — null by observation.",
+        "quote": "Reader, Active Initiator 2.7 - 5.5 V"
+      },
+      {
+        "name": "VDD(PAD)",
+        "rail": "3V3",
+        "v_min": 3.0,
+        "v_typ": null,
+        "v_max": 3.6,
+        "cite": "p.44 Table 26 rows verbatim: '• 1.8 V host supply;VSS = 0 V 1.65 1.8 1.95 V' and '• 3 V host supply;VSS = 0 V 3.0 - 3.6 V'. The 3 V option is carried (Radxa header logic is 3.3 V); the 1.8 V option exists.",
+        "quote": "• 3 V host supply;VSS = 0 V 3.0 - 3.6 V"
+      }
+    ],
+    "vbat_monitor_quote": "VBAT battery supply voltage battery monitor enabled;VSS = [1][1] 2.3 - 5.5 V",
+    "current_mA": {
+      "rail": "3V3",
+      "rail_basis": "VBAT and VDD(PAD) both on 3.3 V.",
+      "typical": null,
+      "typical_basis": "NOT TRANSCRIBED as a single figure. Table 26 gives IBAT per state: 'in Hard Power Down - 10 14 μA', 'in Standby state;VBAT = 3.6 V; T - 20 - μA', 'in Monitor state;VBAT = 2.75 V; - - 14 μA', 'in low-power polling - 150 - μA' (loop; VBAT = 3.6 V); the reader field-on current is in §16.1 'Current consumption characteristics' (p.46), not read. A design picks its state.",
+      "peak": null,
+      "peak_basis": "NOT TRANSCRIBED — §16.1 (p.46) holds the transmit-current rows; the only ceiling quoted is Ptot: 'Ptot total power dissipation Reader;IVDD(TX) = 100 mA;VBAT - - 420 mW' (Table 26, '= 5.5 V' continuation), which names IVDD(TX) = 100 mA as the reader test condition.",
+      "sleep": 0.01,
+      "sleep_basis": "Table 26 row verbatim 'IBAT battery supply current in Hard Power Down - 10 14 μA' — 10 µA typ, 14 µA max at VBAT = 3.6 V, 25 °C.",
+      "excludes": "the antenna and matching network; the host",
+      "caveats": ["Field-on current is antenna-dependent and lives in §16.1 (unread)."],
+      "cite": "p.44 Table 26 rows IBAT and Ptot.",
+      "quote": "IBAT battery supply current in Hard Power Down - 10 14 μA"
+    },
+    "logic": {
+      "vih_min": null,
+      "vil_max": null,
+      "three_v3_tolerant": true,
+      "derived": true,
+      "cite": "DERIVED from Table 26 '• 3 V host supply;VSS = 0 V 3.0 - 3.6 V' — VDD(PAD) at 3.3 V is inside the window; the I2C/IRQ/VEN thresholds themselves (§16, p.46 ff.) were not transcribed."
+    },
+    "interface": "I2C (NCI)",
+    "interface_max_hz": null,
+    "interface_cite": "§12.3.1 'I2C-bus interface'; the maximum clock is in '16.2.5 I2C-bus timings' (p.47), not transcribed — null, not a guess.",
+    "i2c_address": null,
+    "i2c_address_why": "SELECTABLE BY TWO PINS, base not transcribed: pin table verbatim 'I2CADR0 1 I VDD(PAD) I C-bus address 0' and 'I2CADR1 3 I VDD(PAD) I C-bus address 1' (HVQFN40 pins 1 and 3). The resulting 7-bit addresses are in §12.3.1.1 'I2C-bus configuration' (p.22), unread. The Microduck's I2C3 already carries 0x18, 0x19/0x68 and 0x29 — a design must pick a strap that avoids those.",
+    "i2c_addr_pin_quote": "I2CADR0 1 I VDD(PAD) I C-bus address 0",
+    "standards_claimed": {
+      "quotes": [
+        "ISO/IEC 18092, Ecma 340 NFCIP-1",
+        "NFC forum T4T, ISO/IEC 14443Acard"
+      ],
+      "cite": "table of contents §12.7.2 and §12.7.3.1 as extracted; plus the title's 'supporting all NFC Forum modes'. Vendor claims of protocol compliance; nothing here verifies them."
+    },
+    "pinout": {
+      "$about": "NOT TRANSCRIBED beyond the two I2C address pins above. §11.1 'Pinning HVQFN40' (p.11) holds the 40-pin map.",
+      "verdict": "CANNOT DETERMINE",
+      "cite": "datasheet.pdf p.11 §11.1 (unread except pins 1 and 3)."
+    },
+    "unknowns": [
+      "THE FITTED NFC IC IN THE MICRODUCK: CANNOT DETERMINE (docs/ELECTRONICS-AND-SOFTWARE.md §8). This is a candidate.",
+      "ONE ANTENNA PATH: the PN7150 drives one antenna (TX1/TX2, RXN/RXP); two antennas (head + beak) would need two controllers or an RF switch — the sheet does not discuss switching. The ST25R3916 candidate states two single-ended antenna drives.",
+      "Reader-mode current (§16.1), I2C timing (§16.2.5), I2C base address (§12.3.1.1) and the full pin map (§11.1) not transcribed.",
+      "Firmware code variant 'xx' in PN7150B0HN/C110xx: the sheet's §3 notes /C11006 'contains a firmware update compared to the previous version' and /C11004 'has been withdrawn' — which variant to order is a live question the product page would settle.",
+      "No physical part measured; no sourced offer."
+    ]
+  }
+}

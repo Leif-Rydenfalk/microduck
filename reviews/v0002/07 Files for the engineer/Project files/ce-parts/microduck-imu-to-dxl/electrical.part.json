@@ -1,0 +1,51 @@
+{
+ "$parts_folder": 1,
+ "kind": "part",
+ "record": {
+  "slug": "microduck-imu-to-dxl",
+  "kind": "module",
+  "chip": "LSM6DSV16X",
+  "title": "Pollen imu_to_dxl v2 — LSM6DSV16X on a Dynamixel-Protocol-2 slave board, bus ID 200, riding the servo bus (GND, VDD, DATA)",
+  "attach": {
+   "how": "direct"
+  },
+  "requires": [
+   {
+    "need": "ground",
+    "name": "GND",
+    "direction": "input",
+    "quote": "Pinout | 1 GND 2 VDD 3 DATA",
+    "cite": "part:xl330-m288-t connector.pinout — the same 3-pin bus the board plugs into (imu.rs:3-4 'rides the Dynamixel bus')"
+   },
+   {
+    "need": "supply",
+    "name": "VDD",
+    "direction": "input",
+    "v_min": null,
+    "v_max": null,
+    "quote": "rides the Dynamixel bus; fetched in the same sync_read as the servos, listed first",
+    "cite": "docs/ELECTRONICS-AND-SOFTWARE.md §4.1 (imu.rs:3-4; bus.rs:92). The board's input band and its regulator are CANNOT DETERMINE — MCU, transceiver, schematic, firmware are not in the repository (docs §4.1 last row).",
+    "current_from": "chips[LSM6DSV16X].current_mA",
+    "current_from_basis": "THE CHIP ONLY (0.65 mA, part:lsm6dsv16x Table 4). The board's MCU and transceiver draw are unpublished, so the board total is CANNOT DETERMINE; this figure is a floor, not the board."
+   },
+   {
+    "need": "signal",
+    "name": "DATA",
+    "direction": "bidirectional",
+    "bus": "UART",
+    "address": "200",
+    "address_quote": "imu_to_dxl v2 (ID 200)",
+    "address_cite": "docs/ELECTRONICS-AND-SOFTWARE.md §3.2 (rdesign:23-38)",
+    "quote": "TTL Multidrop Bus (3.3V Logic, 5V Compatible)",
+    "cite": "part:xl330-m288-t logic.cite — the bus it shares"
+   }
+  ],
+  "provides": [],
+  "uncertainties": [
+   "Connector count on the board is CANNOT DETERMINE. It matters: an XL330 has exactly two bus connectors, so a linear daisy chain can only branch at a device with three or more — the wiring lane puts the head/left-leg/right-leg branch at this board and says so.",
+   "MCU, transceiver, schematic, firmware: not in the repository (docs §4.1)."
+  ],
+  "note": "The control IMU, on the bus as device ID 200. Location: MJCF `imu` site on trunk_base at world (-21, 0, 105.3) mm (docs §4.1).",
+  "written": "2026-09-02, wiring lane (GOAL.md rung 5). Every figure names the document it came from; a figure with no document is null and says so."
+ }
+}
