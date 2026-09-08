@@ -276,9 +276,15 @@ def draw_rendered(slug, outdir=None, render_bundle=None):
      cp=evidence[4];cx,cy,cw,ch=cp['box_mm']
      prims+=coordinate_locators(prims,locator_ledger,meta['datum_origin_mm'],
                                 (cx+3,cy+20,cx+cp['left_annotation_width_mm'],cy+190))
+     section_record=None
+     if render_bundle is not None:
+      from section_locator import e061_section, verify_section
+      section_prims,section_record=e061_section(part,locator_ledger,prims,
+                       (cx+3,cy+25,cx+cp['left_annotation_width_mm'],cy+125))
+      prims+=section_prims
      cp=evidence[5];cx,cy,cw,ch=cp['box_mm']; yy=cy+180
      for note in ['DRAFTING GAPS — NOT RELEASED',
-                  'E009 / E047 / E061 have measured coordinate locators; section or detail leaders remain required by A.5.',
+                  ('E009 / E047 still need section or detail leaders. E061 original edge is located in local Section D; complete physical feature coverage is not implied.' if section_record is not None else 'E009 / E047 / E061 have measured coordinate locators; section or detail leaders remain required by A.5.'),
                   ('Enlarged shaded Detail A is present; mid-feature cluster B and knee/horn cluster C still need enlarged shaded details. Non-circular feature locators remain unaudited.' if render_bundle is not None else 'Enlarged shaded feature-cluster details and non-circular feature locator audit remain incomplete.')]:
       for line in _wrap(note,cp['left_annotation_width_mm'],3.5):
        prims.append(D.text((cx+3,yy),3.5,line,'TEXT'));yy-=5
@@ -295,6 +301,13 @@ def draw_rendered(slug, outdir=None, render_bundle=None):
     scale_readback=verify_render_scales(str(out/(slug+'.svg')),evidence,
                                        None if render_bundle is None else render_bundle['scale_groups'])
     locator_readback=verify_printed(str(out/(slug+'.svg')),locator_ledger,H)
+    if section_record is not None:
+     section_record['readback']=verify_section(str(out/(slug+'.svg')),section_record,H,part)
+     (out/'section-E061.json').write_text(json.dumps(section_record,indent=1))
+     assert section_record['readback']['verdict']=='PASS', 'Section leader readback failed'
+     locator_readback['additional_section_leaders']=[section_record['source_id']]
+     locator_readback['total_verified_leaders']=locator_ledger['printed_count']+1
+     locator_readback['coordinate_only_ids']=[i for i in locator_ledger['unprinted'] if i!=section_record['source_id']]
     locator_ledger['printed_readback']=locator_readback
     (out/'radius-locators.json').write_text(json.dumps(locator_ledger,indent=1))
     (out/'render-scale-readback.json').write_text(json.dumps(scale_readback,indent=1))
@@ -314,8 +327,8 @@ def draw_rendered(slug, outdir=None, render_bundle=None):
     gaps=[
       {'clause':'A.5 / A4','kind':'drafting','status':'PARTIAL',
        'evidence':str(locator_ledger['printed_count'])+' visible circular-edge leaders and '+str(locator_ledger['coordinate_count'])+' hidden-arc coordinate locators for '+str(locator_ledger['scope_count'])+' in-scope edges; '+str(locator_ledger['count'])+' circular edges enumerated on the complete source solid.',
-       'remaining':'Three hidden arcs have coordinate locators but still need section/detail leaders to satisfy the literal A.5 leader-to-each clause; non-circular feature locators need audit.',
-       'next_action':'Add source-linked section/detail leaders for E009/E047/E061 and audit planar/slot occurrences; retain unmeasured classes as CANNOT DETERMINE.'},
+       'remaining':('E009/E047 still need section/detail leaders; E061 original edge now has a verified local Section D leader, without claiming complete physical feature coverage. Non-circular feature locators need audit.' if section_record is not None else 'Three hidden arcs have coordinate locators but still need section/detail leaders to satisfy the literal A.5 leader-to-each clause; non-circular feature locators need audit.'),
+       'next_action':('Add source-linked section/detail leaders for E009/E047 and audit planar/slot occurrences; retain unmeasured classes as CANNOT DETERMINE.' if section_record is not None else 'Add source-linked section/detail leaders for E009/E047/E061 and audit planar/slot occurrences; retain unmeasured classes as CANNOT DETERMINE.')},
       {'clause':'A3.2','kind':'drafting','status':'PARTIAL',
        'evidence':('Enlarged shaded ankle Detail A at %.5f:1, with four context ISO views; true top/bottom remain on the retained principal sheet.'%render_bundle['common_scale'] if render_bundle is not None else 'Four large shaded isometric corners and true top-down/bottom-up colour renders; three 4:1 vector details.'),
        'remaining':('Enlarged shaded views for mid-feature cluster B and knee/horn cluster C; drawing-set interpretation for supplemental top/bottom coverage remains explicit.' if render_bundle is not None else 'Enlarged shaded feature-cluster detail renders.'),
@@ -356,6 +369,7 @@ def draw_rendered(slug, outdir=None, render_bundle=None):
      'source':'part:'+slug, 'pdf_readback':verify_pdf(str(pdf),prims,(W,H)),
      'render_scale_readback':scale_readback,
      'radius_locator_readback':locator_readback,
+     'section_locator_readback':None if section_record is None else section_record['readback'],
      'detail_context':render_bundle,
      'common_render_scale':common_scale,'individual_fit_scales':fitted if render_bundle is None else None,
      'common_scale_basis':('Principal context retains the verified principal-sheet scale; the separately labeled detail pair uses the minimum measured camera scale preserving two 126 mm annotation margins and 22 mm end margins.' if render_bundle is not None else 'Minimum of the six actual fit-camera paper scales; retains the renderer standard 10% framing margin and fits every required view.'),

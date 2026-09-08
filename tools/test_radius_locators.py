@@ -77,6 +77,34 @@ with tempfile.TemporaryDirectory() as tmp:
     assert verify_printed(path,ledger,200.)['verdict']=='FAIL'
 print('PASS locator projection, aspect rejection, front/back/thin-wall visibility, unknown boolean, equal-radius occurrences and trimmed-edge points')
 
+from section_locator import e061_section, verify_section
+from cecad.core import Part as ModelPart
+section_part=ModelPart('section_edge_fixture')
+section_part.shape=Part.makeCylinder(5.,6.,App.Vector(0,0,0),App.Vector(1,0,0)).cut(
+    Part.makeCylinder(1.35,6.,App.Vector(0,0,0),App.Vector(1,0,0))).cut(
+    Part.makeCylinder(2.,4.,App.Vector(0,0,0),App.Vector(1,0,0)))
+source=next(r for r in occurrences(section_part.shape) if abs(r['radius_mm']-1.35)<1e-8 and abs(r['center_mm'][0]-4.)<1e-8)
+source['id']='R061'
+with tempfile.TemporaryDirectory() as tmp:
+    prims,record=e061_section(section_part,{'occurrences':[source]},[],(20.,20.,180.,140.))
+    path=Path(tmp)/'section.svg';D.write_svg(prims,str(path),page=(220.,180.),quiet=True)
+    assert verify_section(path,record,180.,section_part)['verdict']=='PASS'
+    for mutation in ('source_point','paper_anchor','radius','removed_edge','plane_label','label_at','scale'):
+        bad=copy.deepcopy(record)
+        if mutation=='source_point':bad['source_point_mm'][1]+=.2
+        if mutation=='paper_anchor':bad['paper_anchor_mm'][0]+=.2
+        if mutation=='radius':bad['radius_mm']+=.2
+        if mutation=='removed_edge':bad['plane_mm']=4.01
+        if mutation=='plane_label':bad['plane_mm']-=.005
+        if mutation=='label_at':bad['text_at_mm'][0]+=.2
+        if mutation=='scale':bad['scale']=3.
+        assert verify_section(path,bad,180.,section_part)['verdict']=='FAIL',mutation
+    raw=path.read_text()
+    for changed in (raw.replace('SCALE 4:1','SCALE 3:1'),raw.replace('E061 R1.3500','OMITTED'),raw.replace('<line ','<notline ')):
+        path.write_text(changed)
+        assert verify_section(path,record,180.,section_part)['verdict']=='FAIL'
+print('PASS section source-edge preservation, visibility, original-point projection and source/anchor/radius/cut-plane/scale/label/leader negative controls')
+
 if '--shin' in sys.argv:
     from cecad import triad
     root = Path(__file__).resolve().parent.parent

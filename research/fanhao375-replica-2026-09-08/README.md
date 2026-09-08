@@ -4,16 +4,18 @@ Owner: Claude coordinating session. Trigger: Hans-Joachim Michl (弥汉斯) forw
 Channels video by "AI研究室-帆哥" at 23:48 CST; Leif sent the poster frame with "someone has
 already made an open source version".
 
-## 1 · The poster is an AI-generated graphic, not a product sheet
+## 1 · The poster graphic is not the spec sheet; the project behind it is real
 
-`poster-forwarded-…jpg`. Verdict: generated image. Evidence:
+Correction (Leif, 2026-09-08 ~00:05 CST): the video and the replica project are real, made by a
+friend of a friend (via Hans-Joachim Michl). Take numbers from the repo, not from the poster:
+`poster-forwarded-…jpg` reads as a rendered/AI-assisted marketing frame. Evidence:
 - The applications row and two colour names are garbled glyphs ("由雅版", "紫黄版", "机器人竞赛"
   and "编程学习" half-rendered). Real marketing art does not misspell its own captions.
 - Its specs contradict the real robot on every line that can be checked: 16 DOF / STM32F407 /
   650 g / 7.4 V 2000 mAh / ABS + aluminium. The real Microduck is 15 DOF (14 controlled),
   Radxa Zero 3W (RK3566 Linux SoC, needed for ONNX + WebRTC + NPU), 737–780 g, NP-F550 2S,
   printed PLA/TPU. "MD-01" is the only true token; it is the real model number on microduck.shop.
-- The channel name says "AI研究室": an AI-content account riding the launch hype.
+- The channel is the author's own ("AI研究室-帆哥"); the poster is promotional art for the replica work, not its documentation.
 
 The video itself cannot be downloaded from here. WeChat Channels media is streamed and the
 desktop cache holds only an encrypted bubble record (`cache/2026-09/Message/…/Bubble/7_1788882489_b.dat`,
@@ -33,7 +35,7 @@ anyway: play it full-screen in WeChat and Claude records the screen with
    `research/01-product-and-specs.md` and `02-repos-and-code.md` already cite it; the lanes'
    325-piece fastener list (60/80/40/15 + 50 nuts + 60 inserts + 20 M2.5) is copied from its
    `docs/机械采购清单.md` verbatim. What the lanes had NOT consumed is below.
-   "帆哥" ≈ fanhao375 is a name match only, not proven.
+   "帆哥" = fanhao375 confirmed by Leif (friend of a friend via Hans-Joachim Michl).
 
 Three WeChat groups of 200 are full; group 4 QR is `assets/wechat-group.png` in the clone,
 valid until **2026-09-15**. That is 600+ people in China buying exactly our parts list. Leif

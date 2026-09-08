@@ -1,5 +1,6 @@
 import json, os, struct, sys, time, zipfile, re, subprocess
 import numpy as np
+from indexed_3mf import mesh_xml
 sys.path.insert(0, '/Users/leifrydenfalk/dev/ce-workshop/ce-print-scheduler')
 from scheduler import slicer, queue, config
 SCR='/private/tmp/claude-501/-Users-leifrydenfalk-dev/f5f13e03-e37d-40f7-b905-4faa16e201c7/scratchpad'
@@ -94,10 +95,9 @@ with zipfile.ZipFile(out3,'w',zipfile.ZIP_DEFLATED) as z:
     z.writestr('_rels/.rels','<?xml version="1.0" encoding="UTF-8"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Target="/3D/3dmodel.model" Id="rel0" Type="http://schemas.microsoft.com/3dmanufacturing/2013/01/3dmodel"/></Relationships>')
     parts=['<?xml version="1.0" encoding="UTF-8"?>\n<model unit="millimeter" xml:lang="en-US" xmlns="http://schemas.microsoft.com/3dmanufacturing/core/2015/02">\n<resources>\n']
     for oid,name,Wv in objs:
-        parts.append(f'<object id="{oid}" name="{name}" type="model"><mesh><vertices>\n')
-        parts.append(''.join(f'<vertex x="{v[0]:.4f}" y="{v[1]:.4f}" z="{v[2]:.4f}"/>\n' for v in Wv))
-        n=len(Wv)//3
-        parts.append('</vertices><triangles>\n'+''.join(f'<triangle v1="{3*k}" v2="{3*k+1}" v3="{3*k+2}"/>\n' for k in range(n))+'</triangles></mesh></object>\n')
+        parts.append(f'<object id="{oid}" name="{name}" type="model">')
+        parts.append(mesh_xml(Wv))
+        parts.append('</object>\n')
     parts.append('</resources>\n<build>\n'+''.join(f'<item objectid="{oid}" transform="1 0 0 0 1 0 0 0 1 0 0 0"/>\n' for oid,_,_ in objs)+'</build>\n</model>\n')
     z.writestr('3D/3dmodel.model',''.join(parts))
 print('3mf written', os.path.getsize(out3)//1024,'KB'); json.dump(layout,open(SCR+'/layout.json','w'),indent=1)
