@@ -208,3 +208,11 @@ microversions. The old single-version source note now has an additive correction
 These IDs do not identify production revisions. A fresh isolated browser redirects
 to Onshape sign-in and anonymous API calls return 401/403; no original STEP/BRep
 was acquired. Existing public source files and their hashes remain preserved.
+
+The refreshed structural shelf check now reports 18 PASS / 54 CANNOT DETERMINE /
+0 FAIL across 72 references. Four stale metadata hashes were reconciled without
+changing physical findings. The [eye-ring correction](../research/eye-evidence-correction-2026-09-08/REPORT.md)
+withdraws misclassified positive evidence through an audited, append-only CLI;
+all eight historical rows and geometry bytes remain unchanged. Its final T1 is
+simulation evidence, not physical acceptance. Structural PASS is kept separate
+from manufacturing readiness throughout the factory report.
