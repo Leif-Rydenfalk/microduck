@@ -1,7 +1,8 @@
 """Draw ONE microduck part to out/drawings/<slug>/, to the standard in
 docs/MANUFACTURING-REQUIREMENTS.md §A, and read the result back.
 
-    ce-cad/bin/cad tools/draw_part.py <slug>
+    ce-cad/bin/cad tools/draw_part.py <slug> [--size=A0]
+    ce-cad/bin/cad tools/draw_part.py <slug> --layout=render-panels
 
 Two documents, and WHICH ONE a part gets is measured, not chosen:
 
@@ -81,7 +82,8 @@ def grade_the_sheet(svg, slug, outdir):
         from cecad import sheetcheck                          # noqa: PLC0415
         png = os.path.join(outdir, slug + "-sheet.png")
         g = sheetcheck.grade_sheet(svg, png_path=png if os.path.exists(png)
-                                   else None, slug=slug, use_kernel=True)
+                                   else None, slug=slug, use_kernel=True,
+                                   refresh=True)
         return {
             "sheet_verdict": g["verdict"],
             "sheet_verdict_why": g["checks"].get("dim_coverage", {}).get(
@@ -309,7 +311,7 @@ def _shoot(svg_path, stem):
         return None, {"error": "%s: %s" % (type(e).__name__, e)}
 
 
-def draw(slug):
+def draw(slug, size=None):
     outdir = os.path.join(ROOT, "out", "drawings", slug)
     stem = os.path.join(outdir, slug)
     os.makedirs(outdir, exist_ok=True)
@@ -490,7 +492,7 @@ def draw(slug):
         if bp is not None and getattr(bp, "meta", None) is not None:
             bp.meta["general_tolerance"] = GENERAL_TOLERANCE
         r = auto_blueprint(
-            part, stem, manufacturing=True,
+            part, stem, manufacturing=True, size=size,
             source="ce-parts/%s/current/cad/part.py" % slug,
             mosaic=tiles, schedule=sched,
             reference_image=None,
@@ -566,10 +568,24 @@ def main():
     thinnest wall once.
     """
     slugs = [a for a in sys.argv[1:] if not a.startswith("-")]
+    sizes = [a.split("=", 1)[1] for a in sys.argv[1:] if a.startswith("--size=")]
+    size = sizes[-1] if sizes else None
+    layouts = [a.split('=', 1)[1] for a in sys.argv[1:] if a.startswith('--layout=')]
+    layout = layouts[-1] if layouts else 'auto'
+    if layout not in ('auto', 'render-panels'):
+        raise ValueError('Unknown drawing layout: ' + layout)
+    if size is not None and size not in ("A4", "A3", "A2", "A1", "A0"):
+        raise ValueError("Unknown drawing paper size: " + size)
     done = []
     for slug in slugs:
         try:
-            done.append(draw(slug))
+            if layout == 'render-panels':
+                if size not in (None, 'A0'):
+                    raise ValueError('render-panels currently requires A0')
+                from rendered_drawing import draw_rendered
+                done.append(draw_rendered(slug))
+            else:
+                done.append(draw(slug, size=size))
         except Exception as e:                                # noqa: BLE001
             print("DRAW-CRASH %s %s: %s\n%s"
                   % (slug, type(e).__name__, e,
