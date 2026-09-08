@@ -65,16 +65,35 @@ def tier_price(offer, order_qty):
 def usable(offer):
     return (offer.get("confidence") == "read"
             and not offer.get("excluded_from_rollup")
+            and offer.get("compatibility_status") != "rejected"
             and (offer.get("tiers") or []))
 
 
-def purchase_quantity(line, n_robots, lines=None):
+def purchase_quantity(line, n_robots, lines=None, offer=None):
     """Net whole-order packs, credited only from the selected offer's evidence."""
     if n_robots <= 0:
         raise ValueError("robot count must be positive")
     rule = line.get("quantity_rule")
     if not rule:
         return {"order_quantity": line["qty_per_robot"] * n_robots}
+    if rule["kind"] == "whole_offer_package":
+        package = (offer or {}).get("package") or {}
+        if (package.get("confidence") != "read" or not package.get("fetched")
+                or package.get("url") != (offer or {}).get("url")):
+            return None  # An unverified package cannot satisfy this contract.
+        contents = package.get("contents", {})
+        required = {k: v * n_robots for k, v in rule["required_per_robot"].items()}
+        if any(contents.get(k, 0) <= 0 for k, v in required.items() if v > 0):
+            return None
+        packs = max((math.ceil(v / contents[k]) for k, v in required.items() if v > 0), default=0)
+        received = {k: v * packs for k, v in contents.items()}
+        detail = (f'{n_robots:g} robots; policy: {rule["policy"]}. Required {required}; '
+                  f'{packs:g} whole {package.get("unit", "packages")} to purchase, providing {received}. '
+                  f'Package price and contents basis: {package["url"]}, read {package["fetched"]}. '
+                  'Retail/tier extension only; no order or batch availability claim.')
+        return {"order_quantity": packs, "required_items": required,
+                "received_items": received, "quantity_basis": detail,
+                "order_unit": package.get("unit", "packages")}
     if rule["kind"] != "net_of_selected_offer_bundle":
         raise ValueError("unknown quantity rule")
     lines = DATA["lines"] if lines is None else lines
@@ -130,10 +149,12 @@ def line_cost(line, n_robots, lines=None):
                 "detail": " + ".join(parts), "range_high": False,
                 "caveat": None, "stock": None, "page_kind": None, "url": None}
 
-    quantity = purchase_quantity(line, n_robots, lines)
     best = None
     for off in line["offers"]:
         if off.get("currency") != "USD" or not usable(off):
+            continue
+        quantity = purchase_quantity(line, n_robots, lines, off)
+        if quantity is None:
             continue
         need = quantity["order_quantity"]
         up, tq, mo = tier_price(off, need)
@@ -149,6 +170,9 @@ def line_cost(line, n_robots, lines=None):
                 **quantity, "order_quantity": order}
         if line.get("quantity_rule") and order != need:
             cand["quantity_basis"] += f' Vendor MOQ raises purchase from {need:g} to {order:g} packs.'
+            if "received_items" in cand:
+                cand["received_items"] = {k: v * order for k, v in off["package"]["contents"].items()}
+                cand["quantity_basis"] += f' Actual package contents received: {cand["received_items"]}.'
         if best is None or cand["per_robot"] < best["per_robot"]:
             best = cand
     return best
@@ -331,7 +355,8 @@ def priced_domains(line):
     distributor had a price. Re-broken the same way after this fix and it goes
     red naming B10."""
     return {reg_domain(o["url"]) for o in line["offers"]
-            if o.get("confidence") == "read" and offer_has_price(o)}
+            if o.get("confidence") == "read" and offer_has_price(o)
+            and o.get("compatibility_status") != "rejected"}
 
 
 def n_read(line):
@@ -354,7 +379,8 @@ ALL_DOMAINS = sorted({d for l in DATA["lines"] for d in priced_domains(l)})
 ALL_READ_DOMAINS = sorted({d for l in DATA["lines"] for d in read_domains(l)})
 ALL_UNPRICED_DOMAINS = sorted(set(ALL_READ_DOMAINS) - set(ALL_DOMAINS))
 ALL_VENDOR_NAMES = sorted({o["vendor"] for l in DATA["lines"] for o in l["offers"]
-                           if o.get("confidence") == "read" and offer_has_price(o)})
+                           if o.get("confidence") == "read" and offer_has_price(o)
+            and o.get("compatibility_status") != "rejected"})
 
 VERDICTS = {"PASS": 0, "FAIL": 0, "CANNOT DETERMINE": 0}
 for l in DATA["lines"]:
@@ -434,6 +460,10 @@ def offer_rows(line):
         if off.get("field_observations"):
             flags.append("Observation dates by field: " + E(
                 "; ".join(f"{k}: {v}" for k, v in off["field_observations"].items())))
+        if off.get("package"):
+            pack = off["package"]
+            flags.append("Price unit: " + E(pack.get("unit", "package")) + "; contents "
+                         + E(pack["contents"]) + "; evidence read " + E(pack["fetched"]))
         if off.get("no_tiers"):
             flags.append("no tier table published &mdash; @1 is a ceiling")
         if off.get("price_is_range_high"):
@@ -457,7 +487,7 @@ def offer_rows(line):
   <td>{E(off.get('lead_time') or '&mdash;')}</td>
   <td>{E(off.get('stock') or '&mdash;')}</td>
   <td><span class="chip {'pass' if conf=='read' else 'cd'}">{conf}</span> {E(off.get('fetched') or '')}
-      <div class="sub2">counts as distributor <code>{E(dom)}</code></div>
+      <div class="sub2">{"rejected compatibility; not counted as distributor" if off.get("compatibility_status") == "rejected" else "counts as distributor"} <code>{E(dom)}</code></div>
       {'<div class="sub2">' + E(off['note']) + '</div>' if off.get('note') else ''}
       {''.join('<div class="flag">' + f + '</div>' for f in flags)}</td>
 </tr>""")
@@ -512,7 +542,7 @@ def unpriced_txt(line):
     if not k:
         return ""
     doms = ", ".join(sorted(read_domains(line) - priced_domains(line)))
-    return (f' &middot; {k} further domain(s) read that gave no price for this part'
+    return (f' &middot; {k} further domain(s) read without an eligible price for this part'
             f' ({doms})')
 
 
@@ -522,7 +552,9 @@ def line_block(line):
             else ("0 <span class='sub2'>(reference line &mdash; arrives inside another purchase)</span>"
                   if q == 0 else f"{q:g} {E(line.get('qty_unit') or '')}"))
     if line.get("quantity_rule"):
-        qtxt = "batch-dependent; legacy standalone ceiling " + qtxt
+        qtxt = ("batch-dependent; legacy standalone ceiling " + qtxt
+                if line["quantity_rule"]["kind"] == "net_of_selected_offer_bundle"
+                else "whole packages; requirements per robot " + E(line["quantity_rule"]["required_per_robot"]))
         qtxt += "<br>" + "<br>".join(E(READ[line['id']][n]['quantity_basis']) for n in ROBOT_COUNTS)
     unk = "".join(f"<li>{E(u)}</li>" for u in line.get("unknowns", []))
     blk = "".join(f'<li><a href="{E(b["url"])}">{E(b["url"][:88])}</a> &mdash; {E(b["reason"])}</li>'
@@ -570,11 +602,13 @@ def rollup_rows(lines):
             marks.append(f"stock on the fetch date: {E(st)}")
         if c[1].get("caveat"):
             marks.append(E(c[1]["caveat"]))
-        if l.get("quantity_rule"):
+        if l.get("quantity_rule", {}).get("kind") == "net_of_selected_offer_bundle":
             marks.extend(f"@{n}: {c[n]['required_pieces']:g} - {c[n]['included_pieces']:g} = "
                          f"{c[n]['shortfall_pieces']:g} leads; {c[n]['order_quantity']:g} packs"
                          for n in ROBOT_COUNTS)
             marks.append(f'<a href="#line-{E(l["id"])}">Verified bundle source/date and calculation below</a>')
+        if l.get("quantity_rule", {}).get("kind") == "whole_offer_package":
+            marks.extend(E(c[n]["quantity_basis"]) for n in ROBOT_COUNTS)
         quantity_text = ("batch-dependent" if l.get("quantity_rule") else f"{l['qty_per_robot']:g}")
         chip = f'<span class="chip {CHIP.get(l["verdict"], "cd")}">{E(l["verdict"])}</span>'
         out.append(f"""<tr><td><a href="#line-{E(l['id'])}">{E(l['id'])}</a> {E(clip(l['item'], 62))}</td>
@@ -774,8 +808,9 @@ of a 1&nbsp;000-piece bearing lot &mdash; is <i>prorated</i>: the per-robot figu
 per-robot quantity, so the remainder of the pack is charged to the next robot rather than to this one.
 At a build of exactly one robot you pay the whole pack, and the <b>MOQ&nbsp;&gt;&nbsp;need</b> flag is
 where that is said. And the cheapest read vendor is chosen per line and per quantity independently, so a
-line can change supplier between the @1 and the @100 column &mdash; B9 moves from DigiKey to Pololu, B6
-from Seeed's @1 to Seeed's 10+ tier. Nothing is blended.</p>
+line can change supplier between quantity columns. Explicit whole-package rules take precedence over
+proration: B4 buys complete kits to provide one dual charger per robot; B9 counts carrier packages.
+Rejected interface or geometry offers cannot be selected. Nothing is blended.</p>
 
 <p class="lab">Table 2. Lines readable only in another currency &mdash; NOT converted, NOT added</p>
 <div class="tablewrap"><table class="data">
@@ -860,7 +895,11 @@ def rfq_line_table(supplier):
         q = l.get("qty_per_robot")
         per = "CANNOT DETERMINE" if q is None else f"{q:g} {l.get('qty_unit') or ''}"
         tiers = "&mdash;" if q in (None, 0) else " / ".join(qty_txt(q * n) for n in ROBOT_COUNTS)
-        if l.get("quantity_rule"):
+        if l.get("quantity_rule", {}).get("kind") == "whole_offer_package":
+            per = l["quantity_rule"]["policy"]
+            tiers = " / ".join(qty_txt(READ[lid][n]["order_quantity"]) for n in ROBOT_COUNTS)
+            tiers += " whole packages of selected offer; supplier must confirm contents"
+        elif l.get("quantity_rule"):
             per = "batch-dependent packs; selected B1 bundle only"
             tiers = " / ".join(qty_txt(READ[lid][n]["order_quantity"]) for n in ROBOT_COUNTS)
             tiers += " packs; re-evaluate if B1 offer/kit contents change"
@@ -1036,7 +1075,7 @@ def bom_csv():
                    (l.get("verdict_why") or (l["unknowns"][0] if l.get("unknowns") else
                                              "no price was read on any page")),
                    "", "", ""]
-        w.writerow([l["id"], l["category"], l["item"], qtxt, l.get("qty_unit") or "",
+        w.writerow([l["id"], l["category"], l["item"], qtxt, (c.get("order_unit") if c else None) or l.get("qty_unit") or "",
                     l["verdict"]] + row + [l.get("mpn_note") or l.get("mpn_status") or ""])
     p = os.path.join(REPO, "out", "release", "bom.csv")
     os.makedirs(os.path.dirname(p), exist_ok=True)
@@ -1210,7 +1249,7 @@ def main():
           f"that GAVE A PRICE, and a published price in one of the four buckets")
     print(f"distinct distributors: {len(ALL_DOMAINS)} registered domains gave a price, "
           f"entered under {len(ALL_VENDOR_NAMES)} vendor name strings; "
-          f"{len(ALL_UNPRICED_DOMAINS)} further domain(s) read with no price: "
+          f"{len(ALL_UNPRICED_DOMAINS)} further domain(s) read without an eligible price: "
           f"{', '.join(ALL_UNPRICED_DOMAINS) or 'none'}")
     k = patch_release()
     print(f"patched {RELEASE}  {k} generated regions")

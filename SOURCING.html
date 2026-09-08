@@ -78,13 +78,13 @@
 
 <div class="statbar">
   <div class="stat"><b>32</b><span>bought lines</span></div>
-  <div class="stat"><b>19</b><span>PASS &mdash; two or more shops read</span></div>
-  <div class="stat"><b>10</b><span>CANNOT DETERMINE</span></div>
+  <div class="stat"><b>16</b><span>PASS &mdash; two or more shops read</span></div>
+  <div class="stat"><b>13</b><span>CANNOT DETERMINE</span></div>
   <div class="stat"><b>3</b><span>FAIL &mdash; unbuyable as specified</span></div>
-  <div class="stat"><b>$530.9155</b><span>USD / robot @1, lines graded PASS</span></div>
-  <div class="stat"><b>$81.0808</b><span>readable, but from lines graded FAIL / CD</span></div>
+  <div class="stat"><b>$467.3655</b><span>USD / robot @1, lines graded PASS</span></div>
+  <div class="stat"><b>$174.0908</b><span>readable, but from lines graded FAIL / CD</span></div>
   <div class="stat"><b>5</b><span>lines with no price at all</span></div>
-  <div class="stat"><b>37</b><span>distinct distributors that gave a price (registered domains)</span></div>
+  <div class="stat"><b>35</b><span>distinct distributors that gave a price (registered domains)</span></div>
   <div class="stat"><b>57</b><span>pages that refused a price</span></div>
 </div>
 
@@ -99,7 +99,7 @@
 <code>spec/sourcing.json</code>, not in this prose, so the generator and the reader cannot drift apart.</p>
 <div class="grid2">
   <div class="card"><h3>A price is a reading</h3><p>unit price at the vendor&#x27;s own published tier. tiers[] is [order_quantity_of_the_part, unit_price]. A vendor that publishes no tier table carries tiers [[1, price]] and no_tiers=true; its @1 price is then used at every quantity as a CEILING, never as a forecast.</p></div>
-  <div class="card"><h3>Quantity model</h3><p>For N robots the order quantity of a line is qty_per_robot x N. The unit price used is the vendor&#x27;s largest tier whose quantity is &lt;= that order quantity. If the vendor&#x27;s MOQ exceeds the order quantity the MOQ tier price is used and moq_exceeds_need is set. Exception: a quantity_rule subtracts only bundle contents verified for the actually selected source offer and rounds the remaining pieces to complete packs over the whole order; missing bundle evidence gives zero credit. A zero shortfall needs no purchase. Legacy qty_per_robot is not the computed net purchase quantity.</p></div>
+  <div class="card"><h3>Quantity model</h3><p>For N robots the order quantity of a line is qty_per_robot x N. The unit price used is the vendor&#x27;s largest tier whose quantity is &lt;= that order quantity. If the vendor&#x27;s MOQ exceeds the order quantity the MOQ tier price is used and moq_exceeds_need is set. Exception: a quantity_rule subtracts only bundle contents verified for the actually selected source offer and rounds the remaining pieces to complete packs over the whole order; missing bundle evidence gives zero credit. A zero shortfall needs no purchase. Legacy qty_per_robot is not the computed net purchase quantity. Whole-offer package rules use verified package contents and round across the whole batch to meet every required item. B4 requires one battery AND one dual charger per robot; chargers are not shared. B9 requires one completed carrier, with STSATEL documented as two boards per package but excluded as a direct harness substitute.</p></div>
   <div class="card"><h3>No currency is converted</h3><p>Left exactly as the vendor states it. NO FX rate was fetched, so no conversion is performed anywhere. Only USD offers enter the USD roll-up; EUR / GBP / NZD / AUD / INR lines are reported beside it, unconverted.</p></div>
   <div class="card"><h3>An unknown is never zero</h3><p>The roll-up publishes TWO subtotals: the readable subtotal (lines with a read USD price) and the CANNOT DETERMINE list (lines with none). An unknown is NEVER summed as zero.</p></div>
   <div class="card"><h3>The three verdicts</h3><p>PASS = two or more DISTRIBUTORS as defined above (distinct registered domains that each gave a price), and a unit price determinable at 1 / 100 / 1000 robots. CANNOT DETERMINE = fewer than two such distributors, or none. FAIL = the line as specified cannot be bought as specified from anyone read - either the part does not exist in the maker&#x27;s own catalogue (B3: the 1 GB / 32 GB Radxa ZERO 3W SKU Pollen names is absent from Radxa&#x27;s own table), or EVERY distributor that gave a price publishes a process rule this line&#x27;s own artwork measurably violates (P1 and P2: minimum copper track 0.1500 mm measured over 879 and 383 segments in the committed .kicad_pcb, against a published 6 mil = 0.1524 mm line/space floor at both OSH Park and AdvancedPCB - short by 0.0024 mm). This second clause was added 2026-09-03 when the custom-PCB lines were priced for the first time; before that the definition had no bucket for &#x27;priced by two, buildable by neither&#x27; and the page would have had to call such a line PASS. A FAIL line&#x27;s readable money is reported OUTSIDE the headline subtotal, never inside it and never as zero.</p></div>
@@ -117,7 +117,7 @@
   same mutation makes it exit 1 with <code>B11: PASS with 1 distinct read distributor(s)</code>, having
   written nothing. A second guard was added at the same time: a price read off a listing or search page
   rather than a product page refuses to publish, because a listing reflows and the number is gone.
-  19 PASS lines survive both.</p></div>
+  16 PASS lines survive both.</p></div>
   <div class="card"><h3>Nothing was sent</h3><p>No supplier was contacted, no order was placed and no
   money was spent producing this document. <a href="RFQ.html">RFQ.html</a> is written and ready; sending it
   is a human decision.</p></div>
@@ -146,24 +146,6 @@ a vendor whose minimum exceeds what one robot needs.</p>
 <td class="n">$44.0000</td><td class="n">$44.0000</td>
 <td class="n">$44.0000</td>
 <td class="sub2">ceiling &mdash; vendor publishes no tier table; MOQ &gt; need; range high end</td></tr>
-<tr><td><a href="#line-B4">B4</a> NP-F550-form-factor 2S Li-ion pack, 7.2 V, 2600 mAh (+…</td>
-<td><span class="chip pass">PASS</span></td>
-<td class="n">1</td><td>NextBatteries</td>
-<td class="n">$24.9500</td><td class="n">$24.9500</td>
-<td class="n">$24.9500</td>
-<td class="sub2">ceiling &mdash; vendor publishes no tier table</td></tr>
-<tr><td><a href="#line-B9">B9</a> Time-of-Flight 8x8 multizone ranger (module or bare die)</td>
-<td><span class="chip pass">PASS</span></td>
-<td class="n">1</td><td>DigiKey</td>
-<td class="n">$22.7000</td><td class="n">$19.4300</td>
-<td class="n">$19.4300</td>
-<td class="sub2">ceiling &mdash; vendor publishes no tier table</td></tr>
-<tr><td><a href="#line-B6">B6</a> IMX219 camera board, M12 mount, with lens</td>
-<td><span class="chip pass">PASS</span></td>
-<td class="n">1</td><td>Seeed Studio</td>
-<td class="n">$15.9000</td><td class="n">$12.5000</td>
-<td class="n">$12.5000</td>
-<td class="sub2">&mdash;</td></tr>
 <tr><td><a href="#line-B2">B2</a> Robot Cable-X3P 180 mm, 10-pack (Dynamixel bus leads)</td>
 <td><span class="chip pass">PASS</span></td>
 <td class="sub2">batch-dependent</td><td>ROBOTIS International</td>
@@ -230,30 +212,42 @@ a vendor whose minimum exceeds what one robot needs.</p>
 <td class="n">$0.4000</td><td class="n">$0.2760</td>
 <td class="n">$0.2285</td>
 <td class="sub2">&mdash;</td></tr>
-<tr class="totalrow"><td>SUBTOTAL &mdash; 16 lines graded PASS</td><td></td><td class="n"></td><td></td>
-<td class="n">$530.9155</td><td class="n">$502.0984</td>
-<td class="n">$500.9828</td><td></td></tr>
+<tr class="totalrow"><td>SUBTOTAL &mdash; 13 lines graded PASS</td><td></td><td class="n"></td><td></td>
+<td class="n">$467.3655</td><td class="n">$445.2184</td>
+<td class="n">$444.1028</td><td></td></tr>
 <tr class="grouprow"><td colspan="8">Priced, but this document does not grade the line buyable
-&mdash; the flag on each row says why. These 6 lines are shown because their prices were read,
+&mdash; the flag on each row says why. These 9 lines are shown because their prices were read,
 and are kept OUT of the subtotal above.</td></tr>
+<tr><td><a href="#line-B4">B4</a> NP-F550-class battery plus one dual charger per robot (whole…</td>
+<td><span class="chip cd">CANNOT DETERMINE</span></td>
+<td class="sub2">batch-dependent</td><td>NextBatteries</td>
+<td class="n">$49.9000</td><td class="n">$49.9000</td>
+<td class="n">$49.9000</td>
+<td class="sub2">ceiling &mdash; vendor publishes no tier table; Conditional original-unknown kit; one dual charger per robot. Whole-kit retail extension only, no numeric stock or volume supply promise.; 1 robots; policy: one battery and one dual charger per robot; no shared chargers. Required {&#x27;battery&#x27;: 1, &#x27;dual_charger&#x27;: 1}; 1 whole kits to purchase, providing {&#x27;battery&#x27;: 2, &#x27;dual_charger&#x27;: 1}. Package price and contents basis: https://www.nextbatteries.com/products/sony-np-f550-battery-2-pack-2600mah-l-series-dual-charger, read 2026-09-08. Retail/tier extension only; no order or batch availability claim.; 100 robots; policy: one battery and one dual charger per robot; no shared chargers. Required {&#x27;battery&#x27;: 100, &#x27;dual_charger&#x27;: 100}; 100 whole kits to purchase, providing {&#x27;battery&#x27;: 200, &#x27;dual_charger&#x27;: 100}. Package price and contents basis: https://www.nextbatteries.com/products/sony-np-f550-battery-2-pack-2600mah-l-series-dual-charger, read 2026-09-08. Retail/tier extension only; no order or batch availability claim.; 1000 robots; policy: one battery and one dual charger per robot; no shared chargers. Required {&#x27;battery&#x27;: 1000, &#x27;dual_charger&#x27;: 1000}; 1000 whole kits to purchase, providing {&#x27;battery&#x27;: 2000, &#x27;dual_charger&#x27;: 1000}. Package price and contents basis: https://www.nextbatteries.com/products/sony-np-f550-battery-2-pack-2600mah-l-series-dual-charger, read 2026-09-08. Retail/tier extension only; no order or batch availability claim.</td></tr>
 <tr><td><a href="#line-P3">P3</a> Banana battery-contact PCB - custom, bare board + contacts</td>
 <td><span class="chip cd">CANNOT DETERMINE</span></td>
 <td class="n">1</td><td>AdvancedPCB / Advanced Circuits (US)</td>
 <td class="n">$33.0000</td><td class="n">$33.0000</td>
 <td class="n">$33.0000</td>
 <td class="sub2">ceiling &mdash; vendor publishes no tier table; MOQ &gt; need</td></tr>
+<tr><td><a href="#line-B9">B9</a> ToF module on four-pin J5/Qwiic interface; original carrier…</td>
+<td><span class="chip cd">CANNOT DETERMINE</span></td>
+<td class="sub2">batch-dependent</td><td>SparkFun</td>
+<td class="n">$25.9500</td><td class="n">$22.0600</td>
+<td class="n">$22.0600</td>
+<td class="sub2">Conditional original-unknown Qwiic carrier; no installed fit proof. Manufacturer price exists, but DigiKey lifecycle says obsolete. Numeric stock/volume lead time unknown.; 1 robots; policy: one carrier per robot; whole supplier packages. Required {&#x27;tof_module&#x27;: 1}; 1 whole packages to purchase, providing {&#x27;tof_module&#x27;: 1}. Package price and contents basis: https://www.sparkfun.com/sparkfun-qwiic-mini-tof-imager-vl53l5cx.html, read 2026-09-08. Retail/tier extension only; no order or batch availability claim.; 100 robots; policy: one carrier per robot; whole supplier packages. Required {&#x27;tof_module&#x27;: 100}; 100 whole packages to purchase, providing {&#x27;tof_module&#x27;: 100}. Package price and contents basis: https://www.sparkfun.com/sparkfun-qwiic-mini-tof-imager-vl53l5cx.html, read 2026-09-08. Retail/tier extension only; no order or batch availability claim.; 1000 robots; policy: one carrier per robot; whole supplier packages. Required {&#x27;tof_module&#x27;: 1000}; 1000 whole packages to purchase, providing {&#x27;tof_module&#x27;: 1000}. Package price and contents basis: https://www.sparkfun.com/sparkfun-qwiic-mini-tof-imager-vl53l5cx.html, read 2026-09-08. Retail/tier extension only; no order or batch availability claim.</td></tr>
+<tr><td><a href="#line-B6">B6</a> IMX219 camera board, M12 mount, with lens</td>
+<td><span class="chip cd">CANNOT DETERMINE</span></td>
+<td class="n">1</td><td>UCTRONICS (Arducam&#x27;s US shop)</td>
+<td class="n">$23.9900</td><td class="n">$23.9900</td>
+<td class="n">$23.9900</td>
+<td class="sub2">ceiling &mdash; vendor publishes no tier table</td></tr>
 <tr><td><a href="#line-B3">B3</a> Radxa ZERO 3W single-board computer</td>
 <td><span class="chip rail">FAIL</span></td>
 <td class="n">1</td><td>ALLNET China</td>
 <td class="n">$23.0000</td><td class="n">$23.0000</td>
 <td class="n">$23.0000</td>
 <td class="sub2">ceiling &mdash; vendor publishes no tier table; stock on the fetch date: Sold out (every 1 GB and 2/4 GB-with-eMMC variant; only &#x27;2 GB / no eMMC, header&#x27; at $55.99 was in stock); prices RS107-D1E8H1W15, the 1 GB / 8 GB board - NOT the 1 GB / 32 GB configuration this line specifies, which is absent from Radxa&#x27;s own SKU table - and that variant read &#x27;Sold out&#x27; on the fetch date. The catalogue 32 GB part on the same page is $50 / $51. The line is graded FAIL</td></tr>
-<tr><td><a href="#line-B12">B12</a> Speaker, 35 x 25 x 7 mm, 8 ohm, 2 W (head)</td>
-<td><span class="chip cd">CANNOT DETERMINE</span></td>
-<td class="n">1</td><td>DigiKey</td>
-<td class="n">$9.7800</td><td class="n">$6.0800</td>
-<td class="n">$4.9800</td>
-<td class="sub2">the Soberton SPM-2035NU body is 39.0000 x 20.0000 x 8.2000 mm against a 35.0000 x 25.0000 x 7.0000 mm cavity - it does not fit as drawn. The line is graded CANNOT DETERMINE</td></tr>
 <tr><td><a href="#line-B7">B7</a> M12 wide-angle lens (only if the camera board is bought bare)</td>
 <td><span class="chip cd">CANNOT DETERMINE</span></td>
 <td class="n">1</td><td>UCTRONICS</td>
@@ -266,24 +260,30 @@ and are kept OUT of the subtotal above.</td></tr>
 <td class="n">$5.0375</td><td class="n">$3.0225</td>
 <td class="n">$3.0225</td>
 <td class="sub2">MOQ &gt; need</td></tr>
+<tr><td><a href="#line-B12">B12</a> Speaker, reference envelope 35 x 25 x 7 mm (head); original…</td>
+<td><span class="chip cd">CANNOT DETERMINE</span></td>
+<td class="n">1</td><td>ABRA Electronics</td>
+<td class="n">$2.9500</td><td class="n">$2.9500</td>
+<td class="n">$2.9500</td>
+<td class="sub2">ceiling &mdash; vendor publishes no tier table; Conditional size candidate only, not original identity or assembled fit approval. USD 2.95 retail extended at 1/100/1000; no volume quote or numeric stock. Freight/tax unquoted.</td></tr>
 <tr><td><a href="#line-P2">P2</a> imu_to_dxl v2 - custom PCB, bare board + assembly</td>
 <td><span class="chip rail">FAIL</span></td>
 <td class="n">1</td><td>OSH Park (US)</td>
 <td class="n">$2.2733</td><td class="n">$1.3640</td>
 <td class="n">$1.3640</td>
 <td class="sub2">MOQ &gt; need</td></tr>
-<tr class="totalrow"><td>SUBTOTAL &mdash; 6 lines graded FAIL or CANNOT DETERMINE</td><td></td><td class="n"></td><td></td>
-<td class="n">$81.0808</td><td class="n">$74.4565</td>
-<td class="n">$73.3565</td><td></td></tr>
+<tr class="totalrow"><td>SUBTOTAL &mdash; 9 lines graded FAIL or CANNOT DETERMINE</td><td></td><td class="n"></td><td></td>
+<td class="n">$174.0908</td><td class="n">$167.2765</td>
+<td class="n">$167.2765</td><td></td></tr>
 <tr class="totalrow"><td>EVERY READABLE USD LINE &mdash; 22 lines</td><td></td><td class="n"></td><td></td>
-<td class="n">$611.9964</td><td class="n">$576.5549</td>
-<td class="n">$574.3393</td><td></td></tr>
+<td class="n">$641.4564</td><td class="n">$612.4949</td>
+<td class="n">$611.3793</td><td></td></tr>
 </tbody></table></div>
 
 <p class="note"><b>Why the table has three totals and not one.</b> A price being readable does not make the
-line buyable. 6 of the 22 priced lines are graded FAIL or CANNOT DETERMINE by
-this same document &mdash; <b>$81.0808 of the $611.9964 readable at one robot,
-13.25&nbsp;% of it</b> &mdash; and until 2026-09-03 that money sat inside a single headline
+line buyable. 9 of the 22 priced lines are graded FAIL or CANNOT DETERMINE by
+this same document &mdash; <b>$174.0908 of the $641.4564 readable at one robot,
+27.14&nbsp;% of it</b> &mdash; and until 2026-09-03 that money sat inside a single headline
 subtotal with nothing in the row to say so. It is now split out, and the flag on every such row carries the
 reason from the line&#39;s own record: the wrong SKU, sold out on the fetch date, a part that does not fit
 the cavity, or an unfixed specification.</p>
@@ -294,8 +294,9 @@ of a 1&nbsp;000-piece bearing lot &mdash; is <i>prorated</i>: the per-robot figu
 per-robot quantity, so the remainder of the pack is charged to the next robot rather than to this one.
 At a build of exactly one robot you pay the whole pack, and the <b>MOQ&nbsp;&gt;&nbsp;need</b> flag is
 where that is said. And the cheapest read vendor is chosen per line and per quantity independently, so a
-line can change supplier between the @1 and the @100 column &mdash; B9 moves from DigiKey to Pololu, B6
-from Seeed's @1 to Seeed's 10+ tier. Nothing is blended.</p>
+line can change supplier between quantity columns. Explicit whole-package rules take precedence over
+proration: B4 buys complete kits to provide one dual charger per robot; B9 counts carrier packages.
+Rejected interface or geometry offers cannot be selected. Nothing is blended.</p>
 
 <p class="lab">Table 2. Lines readable only in another currency &mdash; NOT converted, NOT added</p>
 <div class="tablewrap"><table class="data">
@@ -328,10 +329,10 @@ from Seeed's @1 to Seeed's 10+ tier. Nothing is blended.</p>
 </tbody></table></div>
 
 <p class="verdict warn"><b>Read this before quoting a unit cost.</b>
-The subtotal of the lines graded PASS is <b>$530.9155</b> at one robot and <b>$500.9828</b> at a
-thousand &mdash; it moves by $29.9327 across a factor of a thousand in volume,
+The subtotal of the lines graded PASS is <b>$467.3655</b> at one robot and <b>$444.1028</b> at a
+thousand &mdash; it moves by $23.2627 across a factor of a thousand in volume,
 because the servos are the majority of it and ROBOTIS publishes no tier at any quantity. A further
-$81.0808 at one robot is readable but comes from 6 line(s) this document grades FAIL
+$174.0908 at one robot is readable but comes from 9 line(s) this document grades FAIL
 or CANNOT DETERMINE, and is kept separate. The subtotal excludes 5 unpriced lines
 &mdash; B13 Microphone(s), B15 Camera-in-use indicator LED, B16 Bluetooth gamepad (Xbox-style), B17 USB-C cable and B18b M2 socket head cap screws, other lengths (x4, x8,… &mdash; and every non-USD line in Table&nbsp;2. It is a floor, not a cost.</p>
 </section>
@@ -519,74 +520,74 @@ date, alternates with the equivalence argument, the open questions, and every pa
 <p class="lab">Open on this line</p><ul class="tight"><li>Lead time from any distributor: CANNOT DETERMINE - every US/CN retailer read was sold out on 2026-09-02.</li><li>Radxa direct / OEM price: CANNOT DETERMINE. radxa.com/products/zeros/zero3w/ shows no price and says the board is &#x27;exclusively available through our network of Approved Partners&#x27;.</li></ul>
 <p class="lab">Pages that refused a price</p><ul class="tight small"><li><a href="https://www.okdo.com/p/okdo-rock-zero-3w-1gb-with-wi-fi-ble-without-gpio/">https://www.okdo.com/p/okdo-rock-zero-3w-1gb-with-wi-fi-ble-without-gpio/</a> &mdash; &#x27;Socket is closed&#x27; x5 (OKdo is Radxa&#x27;s EU/UK distributor)</li><li><a href="https://befr.rs-online.com/web/p/rock-sbc-boards/2564694">https://befr.rs-online.com/web/p/rock-sbc-boards/2564694</a> &mdash; hang / timeout</li></ul>
 
-<h3 id="line-B4"><span class="lid">B4</span> NP-F550-form-factor 2S Li-ion pack, 7.2 V, 2600 mAh (+ dual-charger share)
-  <span class="chip pass">PASS</span></h3>
-<p class="meta">Qty per robot 1  &middot; basis: docs/BOM.md row B4; one pack in the trunk on power_support (docs/PARTS.md row 35) &middot; <code>part:np-f550</code></p>
-<p class="meta">MPN <code>CANNOT DETERMINE - the maker of the fitted pack is unidentified</code> &middot; <i>form factor known, part not</i>
+<h3 id="line-B4"><span class="lid">B4</span> NP-F550-class battery plus one dual charger per robot (whole retail kit)
+  <span class="chip cd">CANNOT DETERMINE</span></h3>
+<p class="meta">Qty per robot whole packages; requirements per robot {&#x27;battery&#x27;: 1, &#x27;dual_charger&#x27;: 1}<br>1 robots; policy: one battery and one dual charger per robot; no shared chargers. Required {&#x27;battery&#x27;: 1, &#x27;dual_charger&#x27;: 1}; 1 whole kits to purchase, providing {&#x27;battery&#x27;: 2, &#x27;dual_charger&#x27;: 1}. Package price and contents basis: https://www.nextbatteries.com/products/sony-np-f550-battery-2-pack-2600mah-l-series-dual-charger, read 2026-09-08. Retail/tier extension only; no order or batch availability claim.<br>100 robots; policy: one battery and one dual charger per robot; no shared chargers. Required {&#x27;battery&#x27;: 100, &#x27;dual_charger&#x27;: 100}; 100 whole kits to purchase, providing {&#x27;battery&#x27;: 200, &#x27;dual_charger&#x27;: 100}. Package price and contents basis: https://www.nextbatteries.com/products/sony-np-f550-battery-2-pack-2600mah-l-series-dual-charger, read 2026-09-08. Retail/tier extension only; no order or batch availability claim.<br>1000 robots; policy: one battery and one dual charger per robot; no shared chargers. Required {&#x27;battery&#x27;: 1000, &#x27;dual_charger&#x27;: 1000}; 1000 whole kits to purchase, providing {&#x27;battery&#x27;: 2000, &#x27;dual_charger&#x27;: 1000}. Package price and contents basis: https://www.nextbatteries.com/products/sony-np-f550-battery-2-pack-2600mah-l-series-dual-charger, read 2026-09-08. Retail/tier extension only; no order or batch availability claim. &middot; basis: docs/BOM.md B4 one installed battery and B5 one dual charger per robot; whole kits satisfy both, extra batteries remain explicit. &middot; <code>part:np-f550</code></p>
+<p class="meta">MPN <code>CANNOT DETERMINE - the maker of the fitted pack is unidentified</code> &middot; <i>original pack/charger unknown; conditional whole-kit candidates</i>
   &middot; 3 distinct distributor(s) that gave a price</p>
-<p class="note">LANE C&#x27;s finding, read 2026-09-02 from ce-parts/np-f550/component.json: &#x27;NP-F550&#x27; names Sony&#x27;s ORIGINAL L-series pack, which Sony rates 1500 mAh / 10.8 Wh. A 2600 mAh &#x27;NP-F550&#x27; is NECESSARILY a third-party pack in Sony&#x27;s shape, and no source names whose. The mesh envelope is 38.6 x 20.6 x 70.8 mm (Pollen&#x27;s np_f970 mesh); Duracell&#x27;s DR5 page states 70 x 38 x 20 mm - consistent to the millimetre. THIS DOES NOT CHANGE THE SOURCING LINE: the shape, the 7.2 V 2S chemistry and the 2600 mAh capacity are what is bought, and the cradle was checked against 38.6 x 20.6 x 70.8. What it changes is that no MPN can be put on a purchase order - only a specification.</p>
+<p class="note">NP-F550 is the documented removable-pack class, not a recovered original manufacturer/order code. The local np_f970 mesh measures 38.6 × 20.6 × 70.8 mm; Duracell DR5 is a 70 × 38 × 20 mm dimensional reference only. Contact/latch tolerances, polarity, pack current capability and installed clearance remain unverified. Full set price is used; historical divided allocations are retained per offer.</p><p class="verdict warn"><b>CANNOT DETERMINE</b> &mdash; Two priced retail kit routes, but original pack/charger identity, contact fit, continuous discharge and protection thresholds remain unconfirmed. Policy is one battery and one dual charger per robot; no shared chargers assumed. Each selected two-battery/one-charger kit is indivisible, so N robots require N kits, delivering 2N batteries and N chargers.</p>
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
 <th>Lead time (as printed)</th><th>Stock, on this offer&#39;s own fetch date</th><th>Read?</th></tr></thead>
 <tbody><tr>
-  <td>NextBatteries<br><span class="sub2"><a href="https://www.nextbatteries.com/products/sony-np-f550-battery-2-pack-2600mah-l-series-dual-charger">NP-F550 2600 mAh 2-pack + dual charger</a></span></td>
-  <td class="n">1+ USD 24.95</td>
+  <td>NextBatteries<br><span class="sub2"><a href="https://www.nextbatteries.com/products/sony-np-f550-battery-2-pack-2600mah-l-series-dual-charger">KIT-BB-NPF550#3 — 2 batteries + dual charger</a></span></td>
+  <td class="n">1+ USD 49.9</td>
   <td class="n">1</td>
-  <td>not stated</td>
-  <td>In Stock</td>
-  <td><span class="chip pass">read</span> 2026-09-02
+  <td>&amp;mdash;</td>
+  <td>available:true; numeric stock unreported</td>
+  <td><span class="chip pass">read</span> 2026-09-08
       <div class="sub2">counts as distributor <code>nextbatteries.com</code></div>
-      <div class="sub2">$49.90 for 2 packs + dual charger (EU plug + car adapter) = $24.95 per pack INCLUDING the charger share. A second listing on the same shop, 2 packs + single charger, is $53.90.</div>
-      <div class="flag">no tier table published &mdash; @1 is a ceiling</div></td>
+      <div class="sub2">Current product JSON: 2 × 7.2 V / 2600 mAh batteries, one dual charger, EU plug and car adapter. Full kit USD 49.90; historical USD 24.95 was allocated half-kit cost, not purchase price. Pack continuous current, protection thresholds, dimensions/contact drawing and charger ratings unreported.</div>
+      <div class="flag">Price unit: kits; contents {&#x27;battery&#x27;: 2, &#x27;dual_charger&#x27;: 1}; evidence read 2026-09-08</div><div class="flag">no tier table published &mdash; @1 is a ceiling</div><div class="flag">carried into Table&nbsp;1 with this caveat: Conditional original-unknown kit; one dual charger per robot. Whole-kit retail extension only, no numeric stock or volume supply promise.</div></td>
 </tr>
 <tr>
   <td>Neewer<br><span class="sub2"><a href="https://neewer.com/products/neewer-4-packs-7-4v-2600mah-np-f550-replacement-batteries-66601510">66601510 (4 x NP-F550 2600 mAh)</a></span></td>
-  <td class="n">1+ USD 26.25</td>
+  <td class="n">1+ USD 104.99</td>
   <td class="n">1</td>
   <td>&#x27;More stock coming soon&#x27;</td>
   <td>0 in stock</td>
   <td><span class="chip pass">read</span> 2026-09-02
       <div class="sub2">counts as distributor <code>neewer.com</code></div>
-      <div class="sub2">$104.99 for 4 packs, no charger = $26.25 per pack. Neewer states 7.4 V; the pack chemistry is the same 2S.</div>
-      <div class="flag">no tier table published &mdash; @1 is a ceiling</div></td>
+      <div class="sub2">$104.99 for 4 packs, no charger = $26.25 per pack. Neewer states 7.4 V; the pack chemistry is the same 2S. Full package price 104.99 USD restored; 26.25 was rounded allocation. No current stock refresh.</div>
+      <div class="flag">Price unit: kits; contents {&#x27;battery&#x27;: 4}; evidence read 2026-09-02</div><div class="flag">no tier table published &mdash; @1 is a ceiling</div><div class="flag">excluded from the roll-up: Incomplete B4+B5 requirement: four batteries, no charger. Full historical package price retained; not a standalone battery-and-charger solution.</div><div class="flag">carried into Table&nbsp;1 with this caveat: Conditional original-unknown kit; one dual charger per robot. Whole-kit retail extension only, no numeric stock or volume supply promise.</div></td>
 </tr>
 <tr>
   <td>Neewer (charger set)<br><span class="sub2"><a href="https://neewer.com/products/batteries-chargers-66600244">66600244 - NEEWER NP-F550 Battery Charger Set for Sony</a></span></td>
-  <td class="n">1+ USD 24.995</td>
+  <td class="n">1+ USD 49.99</td>
   <td class="n">1</td>
-  <td>not stated</td>
-  <td>available (Shopify variant 37973290287297 available:true)</td>
-  <td><span class="chip pass">read</span> 2026-09-03
+  <td>&amp;mdash;</td>
+  <td>available:true; numeric stock unreported</td>
+  <td><span class="chip pass">read</span> 2026-09-08
       <div class="sub2">counts as distributor <code>neewer.com</code></div>
-      <div class="sub2">PRODUCT PAGE, read 2026-09-03 (the 2026-09-02 reading was https://neewer.com/collections/chargers, a collection page). Page data verbatim: sku 66600244, price 4999 (cents) = $49.99, barcode 191073009981, weight 320 g, available true. The set is 2 x NP-F550 2600 mAh packs + 1 dual USB charger + cable, so $49.99 / 2 = $24.9950 per pack INCLUDING the charger share - the same basis on which NextBatteries&#x27; $49.90 2-pack-plus-charger is recorded at $24.95. Previously excluded from the roll-up for pricing a set rather than a pack; that exclusion is withdrawn because the NextBatteries offer it was measured against is the same kind of set, and holding the two to different rules was the inconsistency. It does not change the roll-up: NextBatteries is $0.0450 cheaper per pack. The standalone dual-charger product pages 66600569 / 66600066 both 404.</div>
-      <div class="flag">no tier table published &mdash; @1 is a ceiling</div></td>
+      <div class="sub2">SKU 66600244, two 7.4 V / 2600 mAh packs plus USB dual charger and cable; no wall adapter listed. Input 5 V / 2.1 A; CH1 output 8.4 V / 0.6 A / 5 W. CH2 simultaneous rating, pack continuous current and numeric protection thresholds unknown. Full kit USD 49.99; 24.995 was allocated half-kit cost.</div>
+      <div class="flag">Price unit: kits; contents {&#x27;battery&#x27;: 2, &#x27;dual_charger&#x27;: 1}; evidence read 2026-09-08</div><div class="flag">no tier table published &mdash; @1 is a ceiling</div><div class="flag">carried into Table&nbsp;1 with this caveat: Conditional original-unknown kit; one dual charger per robot. Whole-kit retail extension only, no numeric stock or volume supply promise.</div></td>
 </tr>
 <tr>
   <td>Pollen Robotics (reference, not a supplier to us)<br><span class="sub2"><a href="https://store.pollen-robotics.com/products/charger-pack">charger-pack</a></span></td>
   <td class="n">1+ EUR 33</td>
   <td class="n">1</td>
   <td>not stated</td>
-  <td>not stated</td>
-  <td><span class="chip pass">read</span> 2026-09-02
+  <td>available:true; numeric stock unreported</td>
+  <td><span class="chip pass">read</span> 2026-09-08
       <div class="sub2">counts as distributor <code>pollen-robotics.com</code></div>
-      <div class="sub2">EUR 33 / $39 for 2 packs + dual charger - i.e. Pollen resells at roughly what NextBatteries charges.</div>
-      <div class="flag">no tier table published &mdash; @1 is a ceiling</div><div class="flag">excluded from the roll-up: Pollen is the product's own maker, quoted as a reference point, not a supplier to us</div></td>
+      <div class="sub2">Current default-EUR product JSON: 33 EUR for 2 batteries plus 1 dual charger; original hardware marks, output/input ratings and delivery timing unreported. Historical USD 39 reference retained in previous capture; no FX conversion used.</div>
+      <div class="flag">Price unit: kits; contents {&#x27;battery&#x27;: 2, &#x27;dual_charger&#x27;: 1}; evidence read 2026-09-08</div><div class="flag">no tier table published &mdash; @1 is a ceiling</div><div class="flag">excluded from the roll-up: Pollen is the product's own maker, quoted as a reference point, not a supplier to us</div><div class="flag">carried into Table&nbsp;1 with this caveat: Conditional original-unknown kit; one dual charger per robot. Whole-kit retail extension only, no numeric stock or volume supply promise.</div></td>
 </tr></tbody></table></div>
 
 <div class="tablewrap"><table class="alt">
 <thead><tr><th>Alternate</th><th>Why it is (or is not) equivalent</th><th>Where / price</th></tr></thead>
-<tbody><tr><td><code>Duracell DR5 &#x27;Replacement Sony NP-F330/NP-F550 Battery 7.2V 2600mAh&#x27;</code></td><td>identical form factor, identical 7.2 V / 2600 mAh rating, and its published body 70 x 38 x 20 mm matches the cradle envelope in every axis. This is the vendor sheet lane C saved byte-for-byte (ce-parts/np-f550/docs/duracell-dr5-np-f550-2600mah.html, sha256 239e0651...). No price rendered on that page.</td>
-        <td><a href="https://www.duracellcharge.info/en/product/replacement-sony-np-f330-np-f550-battery/">Duracell Charge (PSA Parts Ltd)</a><div class="sub2">CANNOT DETERMINE - the page carries no price</div></td></tr><tr><td><code>Deity NP-F550 (3350 mAh, LG 18650 cells)</code></td><td>same shape and same 7.2 V 2S topology with a higher capacity; kept as vendor EVIDENCE of the cell type and protection in this shape, not as a substitution (the extra capacity changes pack mass and the runtime&#x27;s 6.6/8.2 V map is unaffected).</td>
+<tbody><tr><td><code>Duracell DR5 &#x27;Replacement Sony NP-F330/NP-F550 Battery 7.2V 2600mAh&#x27;</code></td><td>Conditional dimensional/rating reference: 70 × 38 × 20 mm, 7.2 V / 2600 mAh, 99 g. No contact tolerance, continuous-current or original identity proof.</td>
+        <td><a href="https://www.duracellcharge.info/en/product/replacement-sony-np-f330-np-f550-battery/">Duracell Charge (PSA Parts Ltd)</a><div class="sub2">CANNOT DETERMINE - the page carries no price</div></td></tr><tr><td><code>Deity NP-F550 (3350 mAh, LG 18650 cells)</code></td><td>Different 3350 mAh capacity, 7.4 V; LG 18650 and protection claims are vendor evidence only. Datasheet lists low-power-drain non-light devices; no continuous-discharge rating. Not approved for robot load.</td>
         <td><a href="https://deitymic.com/products/np-f550/">Deity Microphones</a><div class="sub2">CANNOT DETERMINE - datasheet fetched, product page price not read</div></td></tr></tbody></table></div>
-<p class="lab">Open on this line</p><ul class="tight"><li>Standalone charger price at 100 / 1000: CANNOT DETERMINE - no standalone dual-charger page rendered a price.</li><li>OEM pack price at volume: CANNOT DETERMINE. An Alibaba listing (Beston, MOQ 200/500) is indexed at $1.20-3.88/pc but the page body was BLANK to the fetcher, so that number was not read and is not used.</li><li>Cell inside Pollen&#x27;s pack: CANNOT DETERMINE. Two Samsung ICR18650-26J listings were read at $4.99 and both were SOLD OUT (imrbatteries.com, 18650batterystore.com); TME shows the cell &#x27;withdrawn from the offer&#x27;.</li></ul>
+<p class="lab">Open on this line</p><ul class="tight"><li>Original pack and charger supplier/revision, contact/latch dimensions and polarity unknown.</li><li>Pack continuous/pulse discharge rating, protection thresholds, cell maker and robot load profile are unconfirmed.</li><li>Charger both-channel current/termination limits and input adapter requirements need exact vendor evidence; Pollen and NextBatteries pages do not publish these.</li><li>Retail kit allocation is not a fractional purchase: N robots require N kits for one charger each, leaving N spare packs. No shared-charger assumption.</li><li>Volume stock, lead time, certification records and freight/tax destination quote unconfirmed.</li></ul>
 <p class="lab">Pages that refused a price</p><ul class="tight small"><li><a href="https://www.bhphotovideo.com/c/product/1733125-REG/neewer_66600244_2_2600mah_f550.html">https://www.bhphotovideo.com/c/product/1733125-REG/neewer_66600244_2_2600mah_f550.html</a> &mdash; HTTP 403</li><li><a href="https://www.alibaba.com/product-detail/Beston-2600mAh-replacement-NP-F550-NP_60828272766.html">https://www.alibaba.com/product-detail/Beston-2600mAh-replacement-NP-F550-NP_60828272766</a> &mdash; page body blank to the fetcher</li><li><a href="https://eu.nkon.nl/rechargeable/li-ion/18650-size/samsung-icr18650-26j3.html">https://eu.nkon.nl/rechargeable/li-ion/18650-size/samsung-icr18650-26j3.html</a> &mdash; HTTP 403</li></ul>
 
 <h3 id="line-B6"><span class="lid">B6</span> IMX219 camera board, M12 mount, with lens
-  <span class="chip pass">PASS</span></h3>
-<p class="meta">Qty per robot 1  &middot; basis: docs/BOM.md row B6; camera at world (81.4, 0, 251.1), mounted upside down (RELEASE.html §4 step 5) &middot; <code>part:imx219</code></p>
+  <span class="chip cd">CANNOT DETERMINE</span></h3>
+<p class="meta">Qty per robot 1  &middot; basis: One front camera. Published camera site is a location reference, not a verified PCB outline or connector datum. Current runtime mounting default90degrees differs from historical alpha180degrees. &middot; <code>part:imx219</code></p>
 <p class="meta">MPN <code>Arducam B0183 (representative). The module Pollen fits: CANNOT DETERMINE</code> &middot; <i>representative substitute</i>
-  &middot; 5 distinct distributor(s) that gave a price</p>
-
+  &middot; 4 distinct distributor(s) that gave a price &middot; 1 further domain(s) read without an eligible price for this part (seeedstudio.com)</p>
+<p class="verdict warn"><b>CANNOT DETERMINE</b> &mdash; Original installed module, lens and connector revision unidentified. Seeed102110719 is38x38x16mm excludinglens and rejected for the current25x24mm-class requirement. Remaining IMX219 offers are conditional candidates, not1:1 proof. SameB0183 SKU has different cable packages across current UCTRONICS and Welectron listings; supplier must identify board revision and pinout.</p>
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
 <th>Lead time (as printed)</th><th>Stock, on this offer&#39;s own fetch date</th><th>Read?</th></tr></thead>
@@ -608,9 +609,9 @@ date, alternates with the equivalence argument, the open questions, and every pa
   <td>not stated</td>
   <td>In stock</td>
   <td><span class="chip pass">read</span> 2026-09-02
-      <div class="sub2">counts as distributor <code>seeedstudio.com</code></div>
+      <div class="sub2">rejected compatibility; not counted as distributor <code>seeedstudio.com</code></div>
       <div class="sub2">IMX219 M12/CS board WITHOUT a lens - the only line with a published tier. Pair with line B7 for the lens.</div>
-      </td>
+      <div class="flag">excluded from the roll-up: REJECTED for current25x24mm-class reference requirement: manufacturer specifies38x38x16mm excludinglens. Historical prices retained, not a compatible best-cost offer; head fit unverified. Evidence2026-09-08: research/camera-identity-2026-09-08/seeed-description.txt.</div></td>
 </tr>
 <tr>
   <td>Welectron (DE)<br><span class="sub2"><a href="https://www.welectron.com/Arducam-B0183-IMX219-Low-Distortion-M12-Mount-Camera-Module-for-NVIDIA-Jetson-Nano-Xavier-NX_1">B0183</a></span></td>
@@ -650,7 +651,7 @@ date, alternates with the equivalence argument, the open questions, and every pa
 <thead><tr><th>Alternate</th><th>Why it is (or is not) equivalent</th><th>Where / price</th></tr></thead>
 <tbody><tr><td><code>Arducam B0188 (IMX219 NoIR M12)</code></td><td>same IMX219 sensor and M12 mount, IR-cut filter removed. Cheaper ($13.99 special / $24.99 regular at UCTRONICS) but arducam.com&#x27;s index entry reads &#x27;[Discontinued]&#x27; and &#x27;camera board is not included&#x27; - whether B0188 ships a sensor board at all is CANNOT DETERMINE, so this is a candidate, not a substitute.</td>
         <td><a href="https://www.uctronics.com/index.php/arducam-8-mp-sony-imx219-m12-mount-low-distortion-camera-module-for-raspberry-pi-nvidia-jetson-nano.html">UCTRONICS</a><div class="sub2">$13.99 special, $24.99 regular</div></td></tr></tbody></table></div>
-<p class="lab">Open on this line</p><ul class="tight"><li>Which Arducam (or other) board Pollen fits, and the FFC length: CANNOT DETERMINE (docs/BOM.md B6/B8).</li><li>Whether B0183 ships with the lens: UCTRONICS says yes, The Engineer Store says no, for the same SKU.</li></ul>
+<p class="lab">Open on this line</p><ul class="tight"><li>Which Arducam (or other) board Pollen fits, and the FFC length: CANNOT DETERMINE (docs/BOM.md B6/B8).</li><li>Whether B0183 ships with the lens: UCTRONICS says yes, The Engineer Store says no, for the same SKU.</li><li>Current UCTRONICS B0183 read2026-09-08 lists150mm22-to22 and15-to22 cables and says lens not interchangeable; Welectron lists150mm15pin1mm cable. Historical prices below retain their original observation dates; updated package evidence does not guarantee supplied revision.</li><li>Conditional B0183 includes optics; separate B7 lens cost remains an explicitly unresolved independent line, not an approved additional purchase. No camera bundle optimization is implied.</li></ul>
 <p class="lab">Pages that refused a price</p><ul class="tight small"><li><a href="https://www.arducam.com/product/arducam-imx219-low-distortion-m12-mount-camera-module-drop-in-replacement-for-raspberry-pi-v2-camera/">https://www.arducam.com/product/arducam-imx219-low-distortion-m12-mount-camera-module-dr</a> &mdash; HTTP 403 on every arducam.com URL</li></ul>
 
 <h3 id="line-B7"><span class="lid">B7</span> M12 wide-angle lens (only if the camera board is bought bare)
@@ -694,10 +695,10 @@ date, alternates with the equivalence argument, the open questions, and every pa
 
 <h3 id="line-B8"><span class="lid">B8</span> 22-pin 0.5 mm MIPI CSI FFC ribbon, Radxa to camera
   <span class="chip pass">PASS</span></h3>
-<p class="meta">Qty per robot 1  &middot; basis: wiring/CABLES.md row 20; route floor 13.3 mm, cut length 15 mm &middot; <code>part:microduck-camera-module</code></p>
+<p class="meta">Qty per robot 1  &middot; basis: One CSI connection; original cable/length unknown. Historical13.3mm centroid-to-site proxy rounded15mm is not a validated cut length. &middot; <code>part:microduck-camera-module</code></p>
 <p class="meta">MPN <code>22-pin 0.5 mm to 15-pin 1.0 mm FPC camera cable (the Pi-Zero-class part). The ribbon Pollen fits: CANNOT DETERMINE</code> &middot; <i>class identified; exact part and length unknown</i>
   &middot; 2 distinct distributor(s) that gave a price</p>
-<p class="verdict "><b>PASS</b> &mdash; Two distributors now carry a 22-pin 0.5 mm camera ribbon at a read price. The line is PASS on SOURCING and still open on LENGTH, and the two are not the same question: the shortest catalogue part found anywhere is Pimoroni&#x27;s 38 mm SC0004, and our measured route floor is 13.3 mm with a 15 mm cut (wiring/CABLES.md row 20). Every buyable ribbon is at least 2.5x too long, so the head must either absorb ~23 mm of folded flex or a custom-length FFC must be ordered. That is a mechanical finding, not a price one.</p>
+<p class="verdict "><b>PASS</b> &mdash; Priced catalog cable routes exist; installed compatibility and actual length remain unverified. Historical centroid-to-camera-site13.3mm proxy and15mm rounding are not connector-exit measurements and do not prove that38mm is too long or folding is acceptable.</p>
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
 <th>Lead time (as printed)</th><th>Stock, on this offer&#39;s own fetch date</th><th>Read?</th></tr></thead>
@@ -726,17 +727,17 @@ date, alternates with the equivalence argument, the open questions, and every pa
 
 <div class="tablewrap"><table class="alt">
 <thead><tr><th>Alternate</th><th>Why it is (or is not) equivalent</th><th>Where / price</th></tr></thead>
-<tbody><tr><td><code>custom-length 22-pin 0.5 mm FFC, ~15 mm</code></td><td>Not a catalogue part. Our route floor is 13.3 mm and the cut length 15 mm; the shortest buyable ribbon is 38 mm. A custom FFC removes 23 mm of folded flex from a head cavity that is already tight, and FFC is one of the cheapest custom parts there is at volume. Below ~100 robots, folding the 38 mm part is almost certainly right.</td>
+<tbody><tr><td><code>Custom camera FFC (length and full pin map unresolved)</code></td><td>Not a catalog or released design. Establish connector exits, mapping/contact sides and bend/slack allowances before selecting custom length or evaluating a catalog ribbon. Historical15mm rounding is not a specification.</td>
         <td><a href="https://www.digikey.com/en/product-highlight/m/molex-connector/premo-flex-ffc-jumpers">any FFC maker (Molex Premo-Flex is the catalogue family; Molex quotes 4-80 conductors at 0.5 mm with MOQ 1)</a><div class="sub2">CANNOT DETERMINE - no Premo-Flex 22-circuit part number was resolved to a price page</div></td></tr></tbody></table></div>
-<p class="lab">Open on this line</p><ul class="tight"><li>Whether the camera board&#x27;s end is 22-pin 0.5 mm or 15-pin 1.0 mm: CANNOT DETERMINE - it depends on which camera module ships (line B6), and the two cables above are 22-to-15 adaptors, not 22-to-22.</li><li>The length Pollen fits: CANNOT DETERMINE (docs/BOM.md B8).</li><li>NO CATALOGUE PART IS SHORT ENOUGH. Shortest found: 38 mm (Pimoroni SC0004) against a 15 mm cut. Measured, not assumed.</li></ul>
+<p class="lab">Open on this line</p><ul class="tight"><li>Whether the camera board&#x27;s end is 22-pin 0.5 mm or 15-pin 1.0 mm: CANNOT DETERMINE - it depends on which camera module ships (line B6), and the two cables above are 22-to-15 adaptors, not 22-to-22.</li><li>The length Pollen fits: CANNOT DETERMINE (docs/BOM.md B8).</li><li>Actual ribbon length and routing CANNOT DETERMINE. Do not compare catalog lengths against the historical15mm proxy as if it were an approved cut length.</li></ul>
 <p class="lab">Pages that refused a price</p><ul class="tight small"><li><a href="https://esp32s.com/product/radxa-camera-fpc-cable-for-radxa-camera-8m-219-and-rpi-camera-for-zero-3w-3e/">https://esp32s.com/product/radxa-camera-fpc-cable-for-radxa-camera-8m-219-and-rpi-camera</a> &mdash; HTTP 403 (a search snippet claims $1.90 - NOT read, so not used)</li><li><a href="https://www.fabtolab.com/radxa-fpc-cable-zero-3-camera-8m-219-zero-3">https://www.fabtolab.com/radxa-fpc-cable-zero-3-camera-8m-219-zero-3</a> &mdash; Socket is closed</li><li><a href="https://docs.radxa.com/en/zero/zero3/accessories/camera">https://docs.radxa.com/en/zero/zero3/accessories/camera</a> &mdash; documentation, carries no price</li></ul>
 
-<h3 id="line-B9"><span class="lid">B9</span> Time-of-Flight 8x8 multizone ranger (module or bare die)
-  <span class="chip pass">PASS</span></h3>
-<p class="meta">Qty per robot 1  &middot; basis: docs/BOM.md row B9; ToF at world (81.4, 22.4, 249.1), I2C 0x29 on the HAT&#x27;s Stemma J5 &middot; <code>part:vl53l8cx</code></p>
-<p class="meta">MPN <code>VL53L8CX or VL53L5CX - which generation ships is CANNOT DETERMINE (both drivers are vendored in Pollen&#x27;s source)</code> &middot; <i>generation unresolved</i>
-  &middot; 3 distinct distributor(s) that gave a price</p>
-
+<h3 id="line-B9"><span class="lid">B9</span> ToF module on four-pin J5/Qwiic interface; original carrier unknown
+  <span class="chip cd">CANNOT DETERMINE</span></h3>
+<p class="meta">Qty per robot whole packages; requirements per robot {&#x27;tof_module&#x27;: 1}<br>1 robots; policy: one carrier per robot; whole supplier packages. Required {&#x27;tof_module&#x27;: 1}; 1 whole packages to purchase, providing {&#x27;tof_module&#x27;: 1}. Package price and contents basis: https://www.sparkfun.com/sparkfun-qwiic-mini-tof-imager-vl53l5cx.html, read 2026-09-08. Retail/tier extension only; no order or batch availability claim.<br>100 robots; policy: one carrier per robot; whole supplier packages. Required {&#x27;tof_module&#x27;: 100}; 100 whole packages to purchase, providing {&#x27;tof_module&#x27;: 100}. Package price and contents basis: https://www.sparkfun.com/sparkfun-qwiic-mini-tof-imager-vl53l5cx.html, read 2026-09-08. Retail/tier extension only; no order or batch availability claim.<br>1000 robots; policy: one carrier per robot; whole supplier packages. Required {&#x27;tof_module&#x27;: 1000}; 1000 whole packages to purchase, providing {&#x27;tof_module&#x27;: 1000}. Package price and contents basis: https://www.sparkfun.com/sparkfun-qwiic-mini-tof-imager-vl53l5cx.html, read 2026-09-08. Retail/tier extension only; no order or batch availability claim. &middot; basis: docs/BOM.md row B9; ToF at world (81.4, 22.4, 249.1), I2C 0x29 on the HAT&#x27;s Stemma J5 &middot; <code>part:vl53l8cx</code></p>
+<p class="meta">MPN <code>VL53L5CX or VL53L8CX both occur per official runtime; installed carrier order code unknown</code> &middot; <i>generation varies by unit; module identity and installed geometry unresolved</i>
+  &middot; 1 distinct distributor(s) that gave a price &middot; 2 further domain(s) read without an eligible price for this part (digikey.com, pololu.com)</p>
+<p class="verdict warn"><b>CANNOT DETERMINE</b> &mdash; Runtime supports both generations but does not identify a carrier or establish its circuit. SparkFun Mini is a conditional 3V3 Qwiic L5 carrier, with unverified installed fit and a DigiKey lifecycle conflict. Pololu and ST SATEL do not directly mate with the documented four-pin harness. Bare optical packages require a PCB redesign, not a module substitution.</p>
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
 <th>Lead time (as printed)</th><th>Stock, on this offer&#39;s own fetch date</th><th>Read?</th></tr></thead>
@@ -744,23 +745,23 @@ date, alternates with the equivalence argument, the open questions, and every pa
   <td>Pololu<br><span class="sub2"><a href="https://www.pololu.com/product/3419">#3419 VL53L8CX carrier with voltage regulators, 400 cm</a></span></td>
   <td class="n">1+ USD 24.95, 5+ USD 22.95, 25+ USD 21.12, 100+ USD 19.43</td>
   <td class="n">1</td>
-  <td>&#x27;Active and Preferred&#x27;, backorders allowed</td>
-  <td>listed active</td>
-  <td><span class="chip pass">read</span> 2026-09-02
-      <div class="sub2">counts as distributor <code>pololu.com</code></div>
-      <div class="sub2">no tier published above 100.</div>
-      </td>
+  <td>Supply page dated 2026-09-08; 1000-unit availability unconfirmed</td>
+  <td>366 finished; components for at least 100 more within a few days</td>
+  <td><span class="chip pass">read</span> 2026-09-08
+      <div class="sub2">rejected compatibility; not counted as distributor <code>pololu.com</code></div>
+      <div class="sub2">Current 3419: 13 × 23 × 3 mm, 3.2–5.5 V input, regulators/level shifters; 100 mA typical / 150 mA peak. Four published price tiers unchanged. Header hardware separate; existing cable does not directly mate.</div>
+      <div class="flag">Price unit: packages; contents {&#x27;tof_module&#x27;: 1}; evidence read 2026-09-08</div><div class="flag">excluded from the roll-up: REJECTED as direct J5/Qwiic module: 2.54 mm header interface, no Qwiic socket and default SPI. Retained as conditional integration alternative; not a geometry FAIL without an original module envelope.</div></td>
 </tr>
 <tr>
   <td>SparkFun<br><span class="sub2"><a href="https://www.sparkfun.com/sparkfun-qwiic-mini-tof-imager-vl53l5cx.html">SEN-19013 Qwiic Mini ToF Imager (VL53L5CX)</a></span></td>
   <td class="n">1+ USD 25.95, 10+ USD 24.65, 25+ USD 23.36, 100+ USD 22.06</td>
   <td class="n">1</td>
   <td>not stated</td>
-  <td>In stock</td>
-  <td><span class="chip pass">read</span> 2026-09-02
+  <td>Manufacturer offers Add to Cart; numeric quantity unverified; DigiKey exact 19013 says obsolete</td>
+  <td><span class="chip pass">read</span> 2026-09-08
       <div class="sub2">counts as distributor <code>sparkfun.com</code></div>
-      <div class="sub2">SEN-18642 (full-size Qwiic) on the same shop is $32.50 -&gt; $27.63 @100.</div>
-      </td>
+      <div class="sub2">25.4 × 12.7 mm; hole pitch 20.32 mm, height unknown. Two vertical Qwiic sockets. Schematic v10: AVDD/IOVDD directly 3.3 V, 2.2k bus pull-ups, no regulator/level shifter. Original fit not established. Manufacturer current tiers retained; DigiKey lifecycle conflict requires confirmation.</div>
+      <div class="flag">Price unit: packages; contents {&#x27;tof_module&#x27;: 1}; evidence read 2026-09-08</div><div class="flag">carried into Table&nbsp;1 with this caveat: Conditional original-unknown Qwiic carrier; no installed fit proof. Manufacturer price exists, but DigiKey lifecycle says obsolete. Numeric stock/volume lead time unknown.</div></td>
 </tr>
 <tr>
   <td>DigiKey<br><span class="sub2"><a href="https://www.digikey.com/en/products/detail/stmicroelectronics/VL53L5CX-SATEL/14552430">VL53L5CX-SATEL (ST&#x27;s own breakout)</a></span></td>
@@ -769,9 +770,9 @@ date, alternates with the equivalence argument, the open questions, and every pa
   <td>Manufacturer Standard Lead Time 51 Weeks</td>
   <td>463</td>
   <td><span class="chip pass">read</span> 2026-09-02
-      <div class="sub2">counts as distributor <code>digikey.com</code></div>
-      <div class="sub2">SATEL-VL53L8 (the L8 equivalent) is $32.95 with 0 in stock, 1 past due, lead 13 weeks.</div>
-      <div class="flag">no tier table published &mdash; @1 is a ceiling</div></td>
+      <div class="sub2">rejected compatibility; not counted as distributor <code>digikey.com</code></div>
+      <div class="sub2">ST DB4506 Rev 1 package contains 2 breakouts. Full board regulator 5-to-3.3 V; mini board intended 3.3 V with flying wires. No current price/stock refresh; original carrier and mounting fit unknown.</div>
+      <div class="flag">Price unit: packages; contents {&#x27;tof_module&#x27;: 2}; evidence read 2026-09-08</div><div class="flag">no tier table published &mdash; @1 is a ceiling</div><div class="flag">excluded from the roll-up: REJECTED as direct J5/Qwiic module: two 9-pin headers/flying-wire architecture. Historical 22.70 USD is for TWO boards in one package; retain as integration alternative only.</div></td>
 </tr>
 <tr>
   <td>DigiKey<br><span class="sub2"><a href="https://www.digikey.com/en/products/detail/stmicroelectronics/VL53L8CXV0GC-1/18085238">VL53L8CXV0GC/1 (bare optical LGA-16)</a></span></td>
@@ -780,9 +781,9 @@ date, alternates with the equivalence argument, the open questions, and every pa
   <td>22 weeks</td>
   <td>6,174</td>
   <td><span class="chip pass">read</span> 2026-09-02
-      <div class="sub2">counts as distributor <code>digikey.com</code></div>
-      <div class="sub2">The chip itself. IOVDD is 1.2/1.8 V ONLY (part:vl53l8cx), so a 3V3 host cannot drive it directly - that is what the $19-25 carrier buys.</div>
-      <div class="flag">excluded from the roll-up: the bare die needs regulators and a level shifter added to the HAT; it is costed as an alternate, not as this line's module</div></td>
+      <div class="sub2">rejected compatibility; not counted as distributor <code>digikey.com</code></div>
+      <div class="sub2">The chip itself. IOVDD is 1.2/1.8 V ONLY (part:vl53l8cx), so a 3V3 host cannot drive it directly - that is what the $19-25 carrier buys. This is a packaged optical LGA, not a completed module or accepted 1:1 substitute.</div>
+      <div class="flag">Price unit: packages; contents {&#x27;optical_lga&#x27;: 1}; evidence read 2026-09-02</div><div class="flag">excluded from the roll-up: REJECTED as four-pin carrier: bare optical package requires a designed PCB, power/interface and optical placement. Historical chip quote retained.</div></td>
 </tr>
 <tr>
   <td>DigiKey<br><span class="sub2"><a href="https://www.digikey.com/en/products/detail/stmicroelectronics/VL53L5CXV0GC-1/14552424">VL53L5CXV0GC/1 (bare optical LGA-16)</a></span></td>
@@ -791,9 +792,9 @@ date, alternates with the equivalence argument, the open questions, and every pa
   <td>22 weeks</td>
   <td>7,067</td>
   <td><span class="chip pass">read</span> 2026-09-02
-      <div class="sub2">counts as distributor <code>digikey.com</code></div>
-      <div class="sub2">The two bare-chip tier tables came back identical to the cent from their own separate DigiKey pages. Choose on IOVDD (L5CX accepts 3V3, L8CX does not), not on price.</div>
-      <div class="flag">excluded from the roll-up: previous-generation bare die; costed as an alternate</div></td>
+      <div class="sub2">rejected compatibility; not counted as distributor <code>digikey.com</code></div>
+      <div class="sub2">The two bare-chip tier tables came back identical to the cent from their own separate DigiKey pages. Choose on IOVDD (L5CX accepts 3V3, L8CX does not), not on price. This is a packaged optical LGA, not a completed module or accepted 1:1 substitute.</div>
+      <div class="flag">Price unit: packages; contents {&#x27;optical_lga&#x27;: 1}; evidence read 2026-09-02</div><div class="flag">excluded from the roll-up: REJECTED as four-pin carrier: bare optical package requires a designed PCB, power/interface and optical placement. Historical chip quote retained.</div></td>
 </tr>
 <tr>
   <td>SparkFun<br><span class="sub2"><a href="https://www.sparkfun.com/sparkfun-qwiic-tof-imager-vl53l5cx.html">SEN-18642 Qwiic ToF Imager (VL53L5CX), full size</a></span></td>
@@ -804,16 +805,16 @@ date, alternates with the equivalence argument, the open questions, and every pa
   <td><span class="chip pass">read</span> 2026-09-02
       <div class="sub2">counts as distributor <code>sparkfun.com</code></div>
       <div class="sub2">Recorded because it is a second SparkFun reading of the same silicon at a different board size.</div>
-      <div class="flag">excluded from the roll-up: the Qwiic Mini SEN-19013 above is the same sensor on a smaller, cheaper board</div></td>
+      <div class="flag">Price unit: packages; contents {&#x27;tof_module&#x27;: 1}; evidence read 2026-09-02</div><div class="flag">excluded from the roll-up: the Qwiic Mini SEN-19013 above is the same sensor on a smaller, cheaper board</div></td>
 </tr></tbody></table></div>
 
 <div class="tablewrap"><table class="alt">
 <thead><tr><th>Alternate</th><th>Why it is (or is not) equivalent</th><th>Where / price</th></tr></thead>
-<tbody><tr><td><code>VL53L8CXV0GC/1 (bare optical LGA-16, on our own HAT)</code></td><td>identical silicon to the carrier&#x27;s; removes the $19-25 breakout and the Stemma cable. Costs the HAT two regulators and a level shifter. At &gt;= 100 robots this is the correct part: $6.72 @100 and $6.06 @1000 vs $19.43 for the cheapest carrier.</td>
-        <td><a href="https://www.digikey.com/en/products/detail/stmicroelectronics/VL53L8CXV0GC-1/18085238">DigiKey</a><div class="sub2">$8.77 @1 / $7.22 @25 / $6.72 @100 / $6.24 @500 / $6.06 @1000 / $5.77 @3600 reel; stock 6,174; lead 22 weeks</div></td></tr><tr><td><code>VL53L5CXV0GC/1 (bare, previous generation)</code></td><td>the other generation the vendored driver supports; DigiKey&#x27;s tier table is identical to the L8CX to the cent. Choose on IOVDD (L5CX accepts 3V3, L8CX does not) not on price.</td>
+<tbody><tr><td><code>VL53L8CXV0GC/1 (bare optical LGA-16, on our own HAT)</code></td><td>Not equivalent to the purchased carrier. Packaged optical IC requires its own PCB, voltage/interface design and optical mounting; relocating it to the HAT changes the design. Historical chip price is not a module cost or 1:1 approval.</td>
+        <td><a href="https://www.digikey.com/en/products/detail/stmicroelectronics/VL53L8CXV0GC-1/18085238">DigiKey</a><div class="sub2">$8.77 @1 / $7.22 @25 / $6.72 @100 / $6.24 @500 / $6.06 @1000 / $5.77 @3600 reel; stock 6,174; lead 22 weeks</div></td></tr><tr><td><code>VL53L5CXV0GC/1 (bare, previous generation)</code></td><td>Not equivalent to the purchased carrier. Packaged optical IC requires its own PCB, voltage/interface design and optical mounting; relocating it to the HAT changes the design. Historical chip price is not a module cost or 1:1 approval.</td>
         <td><a href="https://www.digikey.com/en/products/detail/stmicroelectronics/VL53L5CXV0GC-1/14552424">DigiKey</a><div class="sub2">$8.77 @1 / $7.217 @25 / $6.718 @100 / $6.059 @1000; stock 7,067; lead 22 weeks</div></td></tr><tr><td><code>Pololu #3418 (VL53L7CX, wide FOV)</code></td><td>same family and same carrier, 90 deg diagonal FOV instead of 65 deg. Cheaper. It is a DIFFERENT sensor and the vendored drivers do not name it - a candidate only if the FOV is found to be wrong.</td>
         <td><a href="https://www.pololu.com/product/3418">Pololu</a><div class="sub2">$19.95 @1 / $16.89 @25 / $15.53 @100</div></td></tr></tbody></table></div>
-<p class="lab">Open on this line</p><ul class="tight"><li>Which generation (L5CX vs L8CX) and which breakout Pollen fits: CANNOT DETERMINE (ce-parts/microduck-tof-module/component.json).</li></ul>
+<p class="lab">Open on this line</p><ul class="tight"><li>Installed carrier order code, regulator/bus architecture, mounting dimensions, height and optical window unconfirmed.</li><li>SparkFun Mini current manufacturer listing and DigiKey obsolete status conflict; numeric availability and 100/1000 lead time need supplier confirmation.</li><li>ST SATEL contains two boards per package; package count is modeled but header/flying-wire boards excluded as direct replacements.</li><li>Both L5 and L8 ship per runtime comments; actual unit identification required. Similar 8×8 support is not original board identity.</li></ul>
 <p class="lab">Pages that refused a price</p><ul class="tight small"><li><a href="https://www.mouser.com/ProductDetail/STMicroelectronics/VL53L5CX-SATEL">https://www.mouser.com/ProductDetail/STMicroelectronics/VL53L5CX-SATEL</a> &mdash; timeout x3</li></ul>
 
 <h3 id="line-B10"><span class="lid">B10</span> Ball bearing 22 x 16 x 4 mm (thin section)
@@ -858,9 +859,9 @@ date, alternates with the equivalence argument, the open questions, and every pa
 <h3 id="line-B11"><span class="lid">B11</span> Ball bearing 15 x 10 x 3 mm
   <span class="chip pass">PASS</span></h3>
 <p class="meta">Qty per robot 3  &middot; basis: one per ankle bracket (x2) + one mouth hinge in the head (RELEASE.html §4 steps 3 and 5) &middot; <code>part:bearing-15x10x3</code></p>
-<p class="meta">MPN <code>MR6700 open (aliases 61700J1, 61700R, 6700E, 6700; ISO 61700)</code> &middot; <i>designation confirmed from dimensions; width community-measured</i>
+<p class="meta">MPN <code>MR6700 / 6700 / 61700 open (dimensional candidates; original MPN unknown)</code> &middot; <i>10 x 15 x 3 mm published mesh envelope confirmed; original installed manufacturer, closure and grade unknown</i>
   &middot; 2 distinct distributor(s) that gave a price</p>
-<p class="note">6700 / 6700ZZ is 10 x 15 x 4, NOT x3 - VXB, FastEddy and Bearings Direct all list 6700-ZZ as 10x15x4. The 3 mm-wide part is the OPEN MR6700 / ISO 61700. If a shielded 10x15x3 is wanted the designation is 61700-2Z (FAG lists 61700-2Z-HLC).</p>
+<p class="note">CORRECTED 2026-09-08: open 6700 / 61700 catalog candidates are 10 x 15 x 3 mm. SMB 6700ZZ and ZEN 61700-2Z are 10 x 15 x 4 mm; ABF lists FAG 61700-2Z-HLC at 4 mm too. The former claim that 61700-2Z is a shielded 3 mm alternative was wrong. Reject these 4 mm variants for the 3 mm reference envelope. Mesh dimensions do not establish the original installed bearing identity. Sources and hashes: research/bearing-sourcing-2026-09-08/audit.json.</p>
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
 <th>Lead time (as printed)</th><th>Stock, on this offer&#39;s own fetch date</th><th>Read?</th></tr></thead>
@@ -889,17 +890,20 @@ date, alternates with the equivalence argument, the open questions, and every pa
 
 <div class="tablewrap"><table class="alt">
 <thead><tr><th>Alternate</th><th>Why it is (or is not) equivalent</th><th>Where / price</th></tr></thead>
-<tbody><tr><td><code>6700-ZZ (10 x 15 x 4, shielded)</code></td><td>NOT dimensionally equivalent - 1 mm wider. Recorded because it is what a shop will ship if the order says &#x27;6700ZZ&#x27;, and because the true fitted width is community-measured &#x27;~3 mm&#x27;, not measured on a unit. If the real part turns out to be 4 mm wide this is the cheapest source read.</td>
-        <td><a href="https://www.fasteddybearings.com/10x15x4-metal-shielded-bearing-6700-zz/">FastEddy Bearings (US)</a><div class="sub2">$1.25, backorder 7-10 days</div></td></tr></tbody></table></div>
-<p class="lab">Open on this line</p><ul class="tight"><li>Open vs shielded at this width: CANNOT DETERMINE from the mesh (ce-parts/bearing-15x10x3/sourcing.json). The true width is community-measured, not measured on a unit.</li><li>VXB&#x27;s 1,000+ tier is &#x27;OEM ... Only for Manufacturers&#x27; with no price printed, so the 3,000-piece quantity a 1,000-robot build needs is priced at VXB&#x27;s 100+ tier here, as a ceiling. Bearings Direct is cheaper at every quantity read, so this does not move the roll-up. What settles it: a VXB OEM quote.</li></ul>
+<tbody><tr><td><code>6700-ZZ (10 x 15 x 4, shielded)</code></td><td>REJECTED for the 3 mm reference envelope: this shielded variant is 4 mm wide. Historical offer retained for provenance only; excluded from priced offers and best-cost selection. Original installed width/closure must be measured before considering any different envelope.</td>
+        <td><a href="https://www.fasteddybearings.com/10x15x4-metal-shielded-bearing-6700-zz/">FastEddy Bearings (US)</a><div class="sub2">Historical observation only (2026-09-02): $1.25, backorder 7-10 days; not reverified by the 2026-09-08 width correction.</div></td></tr><tr><td><code>61700-2Z / FAG 61700-2Z-HLC (10 x 15 x 4 mm)</code></td><td>REJECTED for 3 mm envelope. Corrects the former false 3 mm shielded-alternative claim. ZEN manufacturer table and ABF FAG listing specify 4 mm; no priced substitute added.</td>
+        <td><a href="https://www.zen.biz/thin-section-bearings">ZEN manufacturer catalog; FAG distributor corroboration in audit</a><div class="sub2">No quote; dimensional evidence reviewed 2026-09-08.</div></td></tr><tr><td><code>6700 open (10 x 15 x 3 mm)</code></td><td>Dimensional/type candidate only; original manufacturer, closure, lubricant, clearance and grade unknown. SMB states it is an authorized EZO distributor. Request full offered MPN and configuration.</td>
+        <td><a href="https://www.smbbearings.com/products/thin-section-bearings.html">SMB Bearings (UK)</a><div class="sub2">Catalog read 2026-09-08; price, MOQ and stock unknown; RFQ only, excluded from cost selection.</div></td></tr><tr><td><code>61700 open (10 x 15 x 3 mm)</code></td><td>Dimensional/type candidate only; original identity unconfirmed. C3 clearance and stainless variants are separate configurations, not assumed equivalent.</td>
+        <td><a href="https://www.zen.biz/thin-section-bearings">ZEN Bearings manufacturer</a><div class="sub2">Catalog read 2026-09-08; price, MOQ and stock unknown; RFQ only, excluded from cost selection.</div></td></tr></tbody></table></div>
+<p class="lab">Open on this line</p><ul class="tight"><li>Original manufacturer, closure, material, clearance, tolerance and lubricant: CANNOT DETERMINE from published mesh. Mesh bore/OD/width are 10 x 15 x 3 mm; actual-unit measurement and markings must settle installed identity. A catalog source match is not proof of the original part.</li><li>VXB&#x27;s 1,000+ tier is &#x27;OEM ... Only for Manufacturers&#x27; with no price printed, so the 3,000-piece quantity a 1,000-robot build needs is priced at VXB&#x27;s 100+ tier here, as a ceiling. Bearings Direct is cheaper at every quantity read, so this does not move the roll-up. What settles it: a VXB OEM quote.</li></ul>
 <p class="lab">Pages that refused a price</p><ul class="tight small"><li><a href="https://www.123bearing.com/bearing-housing/deep-groove-bearing/single-row/6700">https://www.123bearing.com/bearing-housing/deep-groove-bearing/single-row/6700</a> &mdash; no price rendered</li></ul>
 
-<h3 id="line-B12"><span class="lid">B12</span> Speaker, 35 x 25 x 7 mm, 8 ohm, 2 W (head)
+<h3 id="line-B12"><span class="lid">B12</span> Speaker, reference envelope 35 x 25 x 7 mm (head); original electrical specification unknown
   <span class="chip cd">CANNOT DETERMINE</span></h3>
 <p class="meta">Qty per robot 1  &middot; basis: docs/BOM.md row B12; one speaker in the head, 70 mm lead to the HAT (wiring/CABLES.md row 18) &middot; <code>part:microduck-speaker</code></p>
-<p class="meta">MPN <code>CANNOT DETERMINE - Pollen&#x27;s mesh is a 12-triangle box, no part number anywhere</code> &middot; <i>unknown; two catalogued substitutes priced</i>
-  &middot; 2 distinct distributor(s) that gave a price</p>
-<p class="verdict warn"><b>CANNOT DETERMINE</b> &mdash; Downgraded from PASS by this document&#x27;s own consistency check. The two priced parts are BOTH DigiKey lines, so there is one distributor, not two; the third reading is a different Visaton variant in another currency; and neither priced part FITS - Soberton&#x27;s SPM-2035NU is 39 x 20 x 8.2 mm and Visaton&#x27;s K 28.40 is 40 x 28 x 11.7 mm against a 35 x 25 x 7 mm cavity. No distributor anywhere prices a 35 x 25 x 7 part. Two prices for two parts that do not fit is not a sourced line.</p>
+<p class="meta">MPN <code>CANNOT DETERMINE - original unit speaker not identified; local reference mesh is a 12-triangle placeholder</code> &middot; <i>unknown original; one priced conditional dimensional candidate, historical oversized offers rejected</i>
+  &middot; 1 distinct distributor(s) that gave a price &middot; 2 further domain(s) read without an eligible price for this part (digikey.com, reichelt.de)</p>
+<p class="verdict warn"><b>CANNOT DETERMINE</b> &mdash; Original manufacturer, electrical specification and installed fit remain unknown. ABRA SPK-3525-2W-GH is a 35 x 25 x 6.8 mm conditional dimensional candidate priced at USD 2.95 on 2026-09-08, with no numeric stock or volume quote. Soberton and non-H Visaton historical offers exceed the reference envelope. Reichelt H variant is family-only with unverified dimensions; Thingbits has conflicting specifications. Only ABRA counts as a currently supported priced conditional route.</p>
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
 <th>Lead time (as printed)</th><th>Stock, on this offer&#39;s own fetch date</th><th>Read?</th></tr></thead>
@@ -910,9 +914,9 @@ date, alternates with the equivalence argument, the open questions, and every pa
   <td>9 weeks</td>
   <td>75</td>
   <td><span class="chip pass">read</span> 2026-09-02
-      <div class="sub2">counts as distributor <code>digikey.com</code></div>
-      <div class="sub2">8 ohm, 2 W (2.5 W max), 82 dB. Body 39 x 20 x 8.2 mm - 4 mm LONGER and 1.2 mm THICKER than the cavity. Does not fit as drawn.</div>
-      <div class="flag">carried into Table&nbsp;1 with this caveat: the Soberton SPM-2035NU body is 39.0000 x 20.0000 x 8.2000 mm against a 35.0000 x 25.0000 x 7.0000 mm cavity - it does not fit as drawn. The line is graded CANNOT DETERMINE</div></td>
+      <div class="sub2">rejected compatibility; not counted as distributor <code>digikey.com</code></div>
+      <div class="sub2">8 ohm, 2 W (2.5 W max), 82 dB. Body 39 x 20 x 8.2 mm - 4 mm LONGER and 1.2 mm THICKER than the reference envelope. Not accepted for the current reference envelope.</div>
+      <div class="flag">excluded from the roll-up: REJECTED: published body exceeds the current 35 x 25 x 7 mm reference envelope. Historical quote retained; not an accepted substitute.</div></td>
 </tr>
 <tr>
   <td>DigiKey<br><span class="sub2"><a href="https://www.digikey.com/en/products/detail/visaton-gmbh-co-kg/K-28-40-8-OHM/2056-K28-40-8OHM-ND/9842383">Visaton K 28.40 - 8 OHM</a></span></td>
@@ -921,9 +925,9 @@ date, alternates with the equivalence argument, the open questions, and every pa
   <td>11 weeks</td>
   <td>919</td>
   <td><span class="chip pass">read</span> 2026-09-02
-      <div class="sub2">counts as distributor <code>digikey.com</code></div>
-      <div class="sub2">8 ohm, 2 W rated / 3 W max. Body 40.00 x 28.00 x 11.70 mm - larger than the cavity in all three axes. Recorded as the second READ tier table for a 2 W 8 ohm rectangular driver, not as a fit.</div>
-      </td>
+      <div class="sub2">rejected compatibility; not counted as distributor <code>digikey.com</code></div>
+      <div class="sub2">8 ohm, 2 W rated / 3 W max. Body 40.00 x 28.00 x 11.70 mm - larger than the reference envelope in all three axes. Recorded as the second READ tier table for a 2 W 8 ohm rectangular driver, not as a fit.</div>
+      <div class="flag">excluded from the roll-up: REJECTED: published body exceeds the current 35 x 25 x 7 mm reference envelope. Historical quote retained; not an accepted substitute.</div></td>
 </tr>
 <tr>
   <td>reichelt elektronik (DE)<br><span class="sub2"><a href="https://www.reichelt.de/de/de/shop/produkt/kleinlautsprecher_k_28_40_h_2_w_8_ohm-372617">VIS 2947 - Visaton K 28.40 H, 2 W, 8 Ohm</a></span></td>
@@ -932,17 +936,28 @@ date, alternates with the equivalence argument, the open questions, and every pa
   <td>ab Lager, Lieferzeit: 1 - 2 Werktage</td>
   <td>ab Lager</td>
   <td><span class="chip pass">read</span> 2026-09-02
-      <div class="sub2">counts as distributor <code>reichelt.de</code></div>
+      <div class="sub2">rejected compatibility; not counted as distributor <code>reichelt.de</code></div>
       <div class="sub2">EUR 10,95 incl 19 % VAT. NOTE THE SUFFIX: this is the K 28.40 **H**, not the K 28.40 DigiKey lists. Visaton&#x27;s H variants differ; treating them as one part would be a guess. Recorded as a second European source for the FAMILY, not as a second price for the same part. The 33 x 16 x 69.5 mm on the page is reichelt&#x27;s shipping box, not the driver.</div>
-      <div class="flag">no tier table published &mdash; @1 is a ceiling</div><div class="flag">excluded from the roll-up: a DIFFERENT variant (K 28.40 H, not K 28.40) and a different currency</div></td>
+      <div class="flag">no tier table published &mdash; @1 is a ceiling</div><div class="flag">excluded from the roll-up: REJECTED as a supported substitute: different H variant, unverified body dimensions and original identity; historical family quote only. No dimensional incompatibility is asserted without evidence.</div></td>
+</tr>
+<tr>
+  <td>ABRA Electronics<br><span class="sub2"><a href="https://abra-electronics.com/electromechanical/audible-devices/speakers/spk-3525-2w-gh-3525-8r-2w-box-speaker-with-gh1-25-terminal-wire.html">SPK-3525-2W-GH</a></span></td>
+  <td class="n">1+ USD 2.95</td>
+  <td class="n">&amp;mdash;</td>
+  <td>&amp;mdash;</td>
+  <td>In stock; numeric quantity not published</td>
+  <td><span class="chip pass">read</span> 2026-09-08
+      <div class="sub2">counts as distributor <code>abra-electronics.com</code></div>
+      <div class="sub2">35 x 25 x 6.8 mm, 8 ohm +/-15% at 1 kHz, rated 2 W / max 2.5 W; GH1.25-labelled lead. Original and catalogue manufacturer unknown. Retail price observed; MOQ, batch availability and connector manufacturer/polarity unconfirmed. Source capture and hash: research/head-peripherals-sourcing-2026-09-08/manifest.json.</div>
+      <div class="flag">no tier table published &mdash; @1 is a ceiling</div><div class="flag">carried into Table&nbsp;1 with this caveat: Conditional size candidate only, not original identity or assembled fit approval. USD 2.95 retail extended at 1/100/1000; no volume quote or numeric stock. Freight/tax unquoted.</div></td>
 </tr></tbody></table></div>
 
 <div class="tablewrap"><table class="alt">
 <thead><tr><th>Alternate</th><th>Why it is (or is not) equivalent</th><th>Where / price</th></tr></thead>
-<tbody><tr><td><code>&#x27;3525&#x27; waterproof 8 ohm 2 W cavity speaker</code></td><td>the commodity part that IS 35 x 25 mm - the size class Pollen&#x27;s box mesh represents (35 x 25 x 6.2 mm on the vendor page). This is the right SHAPE; it is a generic Chinese part with no manufacturer designation, so it cannot be put on a purchase order as an MPN.</td>
-        <td><a href="https://www.thingbits.net/products/3525-waterproof-8-ohm-2w-cavity-speaker">Thingbits (IN)</a><div class="sub2">Rs 89.00 ex GST (Rs 105.02 inc) - SOLD OUT on 2026-09-02</div></td></tr><tr><td><code>Adafruit #4227 mini oval speaker</code></td><td>30 x 20 x 5 mm, 8 ohm but only 1 W - it FITS the cavity with room to spare and halves the power. A valid substitution if 1 W is acceptable acoustically; that has not been evaluated.</td>
+<tbody><tr><td><code>TH1504 / XHXDZ-3525-8R2W (Thingbits listing codes)</code></td><td>HOLD, not established equivalent: listed 35 x 25 x 6.2 mm; title says 8 ohm / 2 W, table 9 ohm +/-15%, section heading 4 ohm / 3 W and prose 3 W. Request corrected supplier drawing/datasheet; original manufacturer unknown.</td>
+        <td><a href="https://www.thingbits.net/products/3525-waterproof-8-ohm-2w-cavity-speaker">Thingbits (IN)</a><div class="sub2">Observed 2026-09-08: INR 89.00 ex GST / 105.02 including GST; SOLD OUT. Disputed specifications, no volume quote; excluded from priced compatible supplier count.</div></td></tr><tr><td><code>Adafruit #4227 mini oval speaker</code></td><td>Listed 30 x 20 x 5 mm, 8 ohm, 1 W: within placeholder dimensions but below representative 2 W target. Original power requirement, mounting and acoustic suitability remain unknown; no accepted substitution.</td>
         <td><a href="https://www.adafruit.com/product/4227">Adafruit</a><div class="sub2">$1.95 @1 / $1.76 @10-99 / $1.56 @100+ - Out of stock 2026-09-02</div></td></tr></tbody></table></div>
-<p class="lab">Open on this line</p><ul class="tight"><li>The fitted speaker&#x27;s manufacturer, part number, SPL and impedance: CANNOT DETERMINE.</li><li>No exact 35 x 25 part with a tier table at any distributor was readable. Both priced substitutes are OVERSIZE for the modelled cavity.</li></ul>
+<p class="lab">Open on this line</p><ul class="tight"><li>Original manufacturer/order code, impedance, rated power, SPL, resonance, mounting and connector identity remain unknown.</li><li>35 x 25 x 7 mm is a 12-triangle reference placeholder, not a measured head cavity or fit tolerance.</li><li>ABRA numeric stock, MOQ, production supply, lead time and landed quote at 1/100/1000 remain unknown; current retail extensions are not volume quotes.</li><li>Thingbits electrical specifications conflict; Reichelt H variant dimensions are unverified. Historical oversized alternatives cannot be selected.</li></ul>
 <p class="lab">Pages that refused a price</p><ul class="tight small"><li><a href="https://www.amazon.com/CQRobot-Rectangle-Electronic-Application-Components/dp/B0CMQCQQV4">https://www.amazon.com/CQRobot-Rectangle-Electronic-Application-Components/dp/B0CMQCQQV4</a> &mdash; page body not served</li><li><a href="https://www.ebay.com/itm/277690727056">https://www.ebay.com/itm/277690727056</a> &mdash; timeout x6 across three eBay 3525 listings</li></ul>
 
 <h3 id="line-B13"><span class="lid">B13</span> Microphone(s)
@@ -1040,7 +1055,7 @@ date, alternates with the equivalence argument, the open questions, and every pa
   <span class="chip cd">CANNOT DETERMINE</span></h3>
 <p class="meta">Qty per robot 1  &middot; basis: Pollen ships one with the robot</p>
 <p class="meta">MPN <code>CANNOT DETERMINE</code> &middot; <i>unknown</i>
-  &middot; 0 distinct distributor(s) that gave a price &middot; 1 further domain(s) read that gave no price for this part (pollen-robotics.com)</p>
+  &middot; 0 distinct distributor(s) that gave a price &middot; 1 further domain(s) read without an eligible price for this part (pollen-robotics.com)</p>
 <p class="verdict warn"><b>CANNOT DETERMINE</b> &mdash; The gamepad is INCLUDED in Pollen&#x27;s $399 retail bundle, so no price for it alone exists on any Pollen page; and the model is unnamed, so no third-party price applies to it.</p>
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
@@ -1663,8 +1678,8 @@ date, alternates with the equivalence argument, the open questions, and every pa
 
 <div class="tablewrap"><table class="alt">
 <thead><tr><th>Alternate</th><th>Why it is (or is not) equivalent</th><th>Where / price</th></tr></thead>
-<tbody><tr><td><code>Qwiic / Stemma QT pre-made 4-conductor cable</code></td><td>the ToF link is a standard Qwiic/Stemma bus (JST-SH 1.0 mm 4-pin, GND/3V3/SDA/SCL) and every ToF breakout in line B9 ships with one. Buying the breakout usually makes this line zero.</td>
-        <td><a href="https://www.sparkfun.com/sparkfun-qwiic-mini-tof-imager-vl53l5cx.html">SparkFun / Pololu / Adafruit</a><div class="sub2">typically included with the breakout</div></td></tr></tbody></table></div>
+<tbody><tr><td><code>Qwiic / Stemma QT pre-made 4-conductor cable</code></td><td>Conditional separately sourced four-conductor JST-SH1.00mm cable for a confirmed Qwiic endpoint. SparkFun SEN-19013 documents two Qwiic sockets, not an included cable; Pololu3419 has2.54mmheaders and noQwiic socket. No universal breakout bundle is established. C2 also includes GHspeaker housings, which a ToFcable cannot replace. Do not credit any included cable or reduce this line without exact selected-offer inclusion evidence and endpoint confirmation.</td>
+        <td><a href="https://www.sparkfun.com/sparkfun-qwiic-mini-tof-imager-vl53l5cx.html">SparkFun / Pololu / Adafruit</a><div class="sub2">No cable inclusion or cable price verified for the selected carrier. Research2026-09-08: research/tof-power-sourcing-2026-09-08/manifest.json; SparkFun product/schematic and Pololu3419 interface.</div></td></tr></tbody></table></div>
 <p class="lab">Open on this line</p><ul class="tight"><li>Crimp contacts (SSHL-002T-P0.2 for SH, SSHL-002T-P0.2 / SGHD-001T-P0.2 for GH) were not priced - no page fetched.</li><li>The connector on the ToF board and on the HAT&#x27;s speaker output: CANNOT DETERMINE (wiring/CABLES.md rows 17-18).</li></ul>
 
 
@@ -1672,7 +1687,7 @@ date, alternates with the equivalence argument, the open questions, and every pa
   <span class="chip rail">FAIL</span></h3>
 <p class="meta">Qty per robot 1  &middot; basis: one HAT stacked on the Radxa 40-pin header &middot; <code>part:microduck-robot-hat-pcb</code></p>
 <p class="meta">MPN <code>microduck_robot_hat (this repository&#x27;s own design; fab package electronics/robot-hat/out/fab/microduck_robot_hat-fab.zip)</code> &middot; <i>in-house design, DRC verdict FAIL - quotable as an outline and stackup, not releasable as artwork</i>
-  &middot; 2 distinct distributor(s) that gave a price &middot; 2 further domain(s) read that gave no price for this part (jlcpcb.com, pcbway.com)</p>
+  &middot; 2 distinct distributor(s) that gave a price &middot; 2 further domain(s) read without an eligible price for this part (jlcpcb.com, pcbway.com)</p>
 <p class="note">THE DESIGN EXISTS AND IS IN THIS REPOSITORY. electronics/robot-hat/out/fab/ holds microduck_robot_hat-fab.zip plus the loose Gerbers (F.Cu.GTL, B.Cu.GBL, F/B.Mask, F/B.Silk, F/B.Paste, Edge.Cuts.GKO), PTH.drl and NPTH.drl, positions.csv, bom.csv and the .kicad_pcb. Until 2026-09-03 this line read &#x27;There is nothing to send a fab&#x27; - a refusal the repository itself contradicted, and the reason the largest unknown in the cost model stayed unpriced. Board data below is measured off that .kicad_pcb, not transcribed: 1 759 copper segments (879 at 0.1500 mm, 803 at 0.3000 mm, 61 at 0.8000 mm, 10 at 0.2500 mm, 4 at 0.2000 mm, 2 at 0.4000 mm), 33 vias at 0.800 mm pad / 0.300 mm drill, 64 through-hole pads, 97 drilled holes in all.</p><p class="verdict warn"><b>FAIL</b> &mdash; Two fabs published a price this document could compute for a board of this outline and stackup, and NEITHER WILL BUILD THIS ARTWORK: the minimum copper track is 0.1500 mm, measured over 879 segments in microduck_robot_hat.kicad_pcb, against a published floor of 6 mil = 0.1524 mm at OSH Park and 0.006&quot; at AdvancedPCB - short by 0.0024 mm. The board&#x27;s own DRC is FAIL besides (7 unrouted nets). The bare-board money is therefore readable and is reported outside the headline subtotal; the assembly price is CANNOT DETERMINE. WHAT SETTLES IT: either lane D widens the minimum track to 0.1524 mm and re-routes, or a 4 mil fab quotes it - JLCPCB&#x27;s published 2-layer process accepts 0.10 mm but publishes only a &#x27;From $2.00 / 5 pcs&#x27; floor with no size attached, so the RFQ to JLCPCB in RFQ.html is the instrument that closes this.</p>
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
@@ -1730,7 +1745,7 @@ date, alternates with the equivalence argument, the open questions, and every pa
   <span class="chip rail">FAIL</span></h3>
 <p class="meta">Qty per robot 1  &middot; basis: one board on the bus at Dynamixel Protocol-2 slave ID 200 &middot; <code>part:microduck-imu-to-dxl</code></p>
 <p class="meta">MPN <code>microduck_imu_to_dxl (this repository&#x27;s own design; fab package electronics/imu-to-dxl/out/fab/microduck_imu_to_dxl-fab.zip)</code> &middot; <i>in-house design, DRC verdict FAIL - quotable as an outline and stackup, not releasable as artwork</i>
-  &middot; 2 distinct distributor(s) that gave a price &middot; 2 further domain(s) read that gave no price for this part (jlcpcb.com, pcbway.com)</p>
+  &middot; 2 distinct distributor(s) that gave a price &middot; 2 further domain(s) read without an eligible price for this part (jlcpcb.com, pcbway.com)</p>
 <p class="note">THE DESIGN EXISTS AND IS IN THIS REPOSITORY: electronics/imu-to-dxl/out/fab/ holds the fab zip, the loose Gerbers, PTH/NPTH drills, positions.csv and bom.csv. Measured off the .kicad_pcb: 590 copper segments (383 at 0.1500 mm, 190 at 0.3000 mm, 9 at 0.4000 mm, 8 at 2.0000 mm), 27 vias (23 at 0.800 mm pad / 0.300 mm drill, 4 at 1.000 mm / 0.300 mm), 11 through-hole pads, 38 drilled holes in all.</p><p class="verdict warn"><b>FAIL</b> &mdash; Same defect as P1 and the same evidence: a bare-board price is readable at two fabs for a board of this outline, and neither will build the artwork - minimum copper track 0.1500 mm over 383 segments against a published 6 mil (0.1524 mm) floor at both, short by 0.0024 mm - and the board&#x27;s own DRC is FAIL with three unrouted nets. Assembly price CANNOT DETERMINE. WHAT SETTLES IT: a 0.1524 mm re-route, or a quotation from a 4 mil fab; the request is drafted in RFQ.html.</p>
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
@@ -1788,7 +1803,7 @@ date, alternates with the equivalence argument, the open questions, and every pa
   <span class="chip cd">CANNOT DETERMINE</span></h3>
 <p class="meta">Qty per robot 1  &middot; basis: one board clamped onto power_support&#x27;s pins by banana_pcb_locker (RELEASE.html §4 step 1)</p>
 <p class="meta">MPN <code>microduck_banana_contact (this repository&#x27;s own design; fab package electronics/banana-contact/out/fab/microduck_banana_contact-fab.zip)</code> &middot; <i>in-house design, DRC verdict CANNOT DETERMINE - the outline and stackup are quotable, the contact part is not</i>
-  &middot; 1 distinct distributor(s) that gave a price &middot; 2 further domain(s) read that gave no price for this part (jlcpcb.com, pcbway.com)</p>
+  &middot; 1 distinct distributor(s) that gave a price &middot; 2 further domain(s) read without an eligible price for this part (jlcpcb.com, pcbway.com)</p>
 <p class="note">THE OUTLINE IS NOT UNKNOWN. Measured off Edge.Cuts.GKO / the .kicad_pcb in electronics/banana-contact/out/fab/: a single closed rounded rectangle 45.8000 x 4.6000 mm, corner radius 0.5000 mm, no internal cut-outs, three 0.8000 mm plated holes, copper tracks 0.4000 mm (1) and 1.5000 mm (2). Until 2026-09-03 this line said &#x27;Board outline, contact part, plating, current rating, price: all CANNOT DETERMINE&#x27;; three of those five were already answered on disk. PLATING is ENIG and the board&#x27;s own fab README says why - &#x27;A sliding spring contact on a HASL pad cold-flows and oxidises&#x27; - and JLCPCB publishes ENIG as an order option on this process. CURRENT CAPACITY is 3.21 A at a 10 degC rise (4.35 A at 20 degC) for the two 1.500 mm tracks on 1 oz outer copper, by IPC-2221 6.2 I = 0.048*dT^0.44*A^0.725; it is the current DEMAND that is CANNOT DETERMINE, because Sony publishes no maximum continuous discharge for the NP-F pack and wiring/CABLES.md&#x27;s 1 A-per-moving-servo worst case is stated there as an assumption.</p><p class="verdict warn"><b>CANNOT DETERMINE</b> &mdash; The bare board is now priced, but at ONE distributor, not two: AdvancedPCB&#x27;s $33 Each Special covers it (0.326555 sq in inside the 60 sq in cap, 9.1868 drilled holes per square inch inside the 35 cap, 0.4000 mm track over the 0.006&quot; floor, 0.8000 mm hole over the 0.010&quot; floor, no slots, no internal routing), and OSH Park REFUSES it on a measured rule - the board is 4.6000 mm across its short axis and both OSH Park service pages publish a minimum board size of 0.25 in (6.35 mm) by 0.25 in, so it is short by 1.7500 mm. AdvancedPCB will not GUARANTEE the required ENIG either: its special states lead-free HAL and says it &#x27;May Also Use Other Lead-Free Finishes Such As ENIG Or Silver At No Additional Charge&#x27;, which is permission, not a specification. The spring contact itself has no part number at all. WHAT SETTLES IT: a quotation from a fab that will run a 4.6 mm board (or price the array) with ENIG named on the order - JLCPCB&#x27;s published minimum board size is 3 x 3 mm and it lists ENIG on this process, so its RFQ closes both halves - and a caliper across a physical NP-F550 pack to fix the contact pitch, which is derived from a 12.000 mm window divided into three cells and is measured nowhere.</p>
 <div class="tablewrap"><table class="data offers">
 <thead><tr><th>Distributor</th><th>Unit price at the vendor's own tiers</th><th>MOQ</th>
@@ -1846,15 +1861,15 @@ line so the next attempt starts where this one stopped &mdash; a browser session
 <li><b>B1</b> <a href="https://www.robotshop.com/products/robotis-dynamixel-xl330-m288-t-smart-servo-actuator">https://www.robotshop.com/products/robotis-dynamixel-xl330-m288-t-smart-servo-actuator</a> &mdash; HTTP 403 to the fetcher</li><li><b>B1</b> <a href="https://www.aliexpress.com/i/1005004403336577.html">https://www.aliexpress.com/i/1005004403336577.html</a> &mdash; page body blank to the fetcher</li><li><b>B3</b> <a href="https://www.okdo.com/p/okdo-rock-zero-3w-1gb-with-wi-fi-ble-without-gpio/">https://www.okdo.com/p/okdo-rock-zero-3w-1gb-with-wi-fi-ble-without-gpio/</a> &mdash; &#x27;Socket is closed&#x27; x5 (OKdo is Radxa&#x27;s EU/UK distributor)</li><li><b>B3</b> <a href="https://befr.rs-online.com/web/p/rock-sbc-boards/2564694">https://befr.rs-online.com/web/p/rock-sbc-boards/2564694</a> &mdash; hang / timeout</li><li><b>B4</b> <a href="https://www.bhphotovideo.com/c/product/1733125-REG/neewer_66600244_2_2600mah_f550.html">https://www.bhphotovideo.com/c/product/1733125-REG/neewer_66600244_2_2600mah_f550.html</a> &mdash; HTTP 403</li><li><b>B4</b> <a href="https://www.alibaba.com/product-detail/Beston-2600mAh-replacement-NP-F550-NP_60828272766.html">https://www.alibaba.com/product-detail/Beston-2600mAh-replacement-NP-F550-NP_60828272766.html</a> &mdash; page body blank to the fetcher</li><li><b>B4</b> <a href="https://eu.nkon.nl/rechargeable/li-ion/18650-size/samsung-icr18650-26j3.html">https://eu.nkon.nl/rechargeable/li-ion/18650-size/samsung-icr18650-26j3.html</a> &mdash; HTTP 403</li><li><b>B6</b> <a href="https://www.arducam.com/product/arducam-imx219-low-distortion-m12-mount-camera-module-drop-in-replacement-for-raspberry-pi-v2-camera/">https://www.arducam.com/product/arducam-imx219-low-distortion-m12-mount-camera-module-drop-in-re</a> &mdash; HTTP 403 on every arducam.com URL</li><li><b>B8</b> <a href="https://esp32s.com/product/radxa-camera-fpc-cable-for-radxa-camera-8m-219-and-rpi-camera-for-zero-3w-3e/">https://esp32s.com/product/radxa-camera-fpc-cable-for-radxa-camera-8m-219-and-rpi-camera-for-zer</a> &mdash; HTTP 403 (a search snippet claims $1.90 - NOT read, so not used)</li><li><b>B8</b> <a href="https://www.fabtolab.com/radxa-fpc-cable-zero-3-camera-8m-219-zero-3">https://www.fabtolab.com/radxa-fpc-cable-zero-3-camera-8m-219-zero-3</a> &mdash; Socket is closed</li><li><b>B8</b> <a href="https://docs.radxa.com/en/zero/zero3/accessories/camera">https://docs.radxa.com/en/zero/zero3/accessories/camera</a> &mdash; documentation, carries no price</li><li><b>B9</b> <a href="https://www.mouser.com/ProductDetail/STMicroelectronics/VL53L5CX-SATEL">https://www.mouser.com/ProductDetail/STMicroelectronics/VL53L5CX-SATEL</a> &mdash; timeout x3</li><li><b>B10</b> <a href="https://www.bocabearings.com/parts/10x15x3">https://www.bocabearings.com/parts/10x15x3</a> &mdash; HTTP 403</li><li><b>B10</b> <a href="https://vxb.com/search?q=16x22x4">https://vxb.com/search?q=16x22x4</a> &mdash; 0 bearing results</li><li><b>B10</b> <a href="https://bearingsdirect.com/search.php?search_query=16x22x4">https://bearingsdirect.com/search.php?search_query=16x22x4</a> &mdash; 0 results</li><li><b>B10</b> <a href="http://www.zotyindustrial.com/products/1622ZZ-16x22x4-thin-special-bearing-for-jumping-rope.html">http://www.zotyindustrial.com/products/1622ZZ-16x22x4-thin-special-bearing-for-jumping-rope.html</a> &mdash; HTTP 500 (tried 2026-09-02)</li><li><b>B11</b> <a href="https://www.123bearing.com/bearing-housing/deep-groove-bearing/single-row/6700">https://www.123bearing.com/bearing-housing/deep-groove-bearing/single-row/6700</a> &mdash; no price rendered</li><li><b>B12</b> <a href="https://www.amazon.com/CQRobot-Rectangle-Electronic-Application-Components/dp/B0CMQCQQV4">https://www.amazon.com/CQRobot-Rectangle-Electronic-Application-Components/dp/B0CMQCQQV4</a> &mdash; page body not served</li><li><b>B12</b> <a href="https://www.ebay.com/itm/277690727056">https://www.ebay.com/itm/277690727056</a> &mdash; timeout x6 across three eBay 3525 listings</li><li><b>B18a</b> <a href="https://www.accu.co.uk/socket-cap-screws/1077-SSCM2-6-A2">https://www.accu.co.uk/socket-cap-screws/1077-SSCM2-6-A2</a> &mdash; HTTP 403 (re-tried 2026-09-02)</li><li><b>B18a</b> <a href="https://www.boltdepot.com/Product-Details?product=15964">https://www.boltdepot.com/Product-Details?product=15964</a> &mdash; HTTP 403</li><li><b>B18a</b> <a href="https://www.mcmaster.com/91292A831/">https://www.mcmaster.com/91292A831/</a> &mdash; blank to the fetcher</li><li><b>B18a</b> <a href="https://us.misumi-ec.com/vona2/detail/221000348314/?HissuCode=SNSS-M2X6">https://us.misumi-ec.com/vona2/detail/221000348314/?HissuCode=SNSS-M2X6</a> &mdash; HTTP 403</li><li><b>B18a</b> <a href="https://www.albanycountyfasteners.com/Socket-Head-Cap-Screw-2MM-A2-Stainless-Steel-p/5020000.htm">https://www.albanycountyfasteners.com/Socket-Head-Cap-Screw-2MM-A2-Stainless-Steel-p/5020000.htm</a> &mdash; page served without a price</li><li><b>B18a</b> <a href="https://www.fastenal.com/product/details/MS2460006A20000">https://www.fastenal.com/product/details/MS2460006A20000</a> &mdash; HTTP 403 (tried 2026-09-02)</li><li><b>B18a</b> <a href="https://www.westfieldfasteners.co.uk/A2-ScrewBolt-SHCap-M2.html">https://www.westfieldfasteners.co.uk/A2-ScrewBolt-SHCap-M2.html</a> &mdash; page served with loading spinners where every price should be - prices are client-side only</li><li><b>B18b</b> <a href="https://www.accu.co.uk/hexagon-nuts/7884-HPN-M2-A2">https://www.accu.co.uk/hexagon-nuts/7884-HPN-M2-A2</a> &mdash; HTTP 403 (tried 2026-09-02)</li><li><b>B18b</b> <a href="https://www.rst-versand.de/Sechskantmutter-M2-A2-DIN934">https://www.rst-versand.de/Sechskantmutter-M2-A2-DIN934</a> &mdash; Socket is closed (tried 2026-09-02)</li><li><b>B18b</b> <a href="https://www.fastenal.com/product/details/MS2460006A20000">https://www.fastenal.com/product/details/MS2460006A20000</a> &mdash; HTTP 403 (tried 2026-09-02)</li><li><b>B18b</b> <a href="https://www.westfieldfasteners.co.uk/A2-ScrewBolt-SHCap-M2.html">https://www.westfieldfasteners.co.uk/A2-ScrewBolt-SHCap-M2.html</a> &mdash; prices render only in JavaScript; the served page carries loading spinners</li><li><b>B18c</b> <a href="https://www.amazon.com/Heat-Set-Threaded-Inserts-Insert-Tips/dp/B0D4L464XG">https://www.amazon.com/Heat-Set-Threaded-Inserts-Insert-Tips/dp/B0D4L464XG</a> &mdash; HTTP 500</li><li><b>B19a</b> <a href="https://us.store.bambulab.com/products/pla-basic-filament">https://us.store.bambulab.com/products/pla-basic-filament</a> &mdash; HTTP 402 Payment Required</li><li><b>B19a</b> <a href="https://www.matterhackers.com/store/l/bambu-lab-pla-basic-3d-printer-filament/sk/M2X0FQ9W">https://www.matterhackers.com/store/l/bambu-lab-pla-basic-3d-printer-filament/sk/M2X0FQ9W</a> &mdash; page served without a price</li><li><b>B19b</b> <a href="https://us.store.bambulab.com/products/tpu-85a-tpu-90a">https://us.store.bambulab.com/products/tpu-85a-tpu-90a</a> &mdash; HTTP 402 Payment Required</li><li><b>P1c</b> <a href="https://www.mouser.com/ProductDetail/Texas-Instruments/TLV320AIC3104IRHBR">https://www.mouser.com/ProductDetail/Texas-Instruments/TLV320AIC3104IRHBR</a> &mdash; timeout x3</li><li><b>P1c</b> <a href="https://www.ti.com/store/ti/en/p/product/?p=TLV320AIC3104IRHBR">https://www.ti.com/store/ti/en/p/product/?p=TLV320AIC3104IRHBR</a> &mdash; requires login / blocked</li><li><b>P2c</b> <a href="https://www.mouser.com/ProductDetail/STMicroelectronics/LSM6DSV16XTR">https://www.mouser.com/ProductDetail/STMicroelectronics/LSM6DSV16XTR</a> &mdash; product page access restricted; no price served</li><li><b>P1d</b> <a href="https://www.mouser.com/ProductDetail/Bosch-Sensortec/BMI088">https://www.mouser.com/ProductDetail/Bosch-Sensortec/BMI088</a> &mdash; &#x27;Access to this page has been denied&#x27;; no price served</li><li><b>R1</b> <a href="https://www.digikey.com/en/supplier-centers/etek-microelectronics">https://www.digikey.com/en/supplier-centers/etek-microelectronics</a> &mdash; supplier centre lists no ET7301 part number at all (read 2026-09-02)</li><li><b>R1</b> <a href="https://www.lcsc.com/">https://www.lcsc.com/</a> &mdash; site search returns no ET7301B result</li><li><b>P1</b> <a href="https://www.pcbway.com/orderonline.aspx">https://www.pcbway.com/orderonline.aspx</a> &mdash; instant-quote form is JavaScript; the fetched page text carries no price (tried 2026-09-03)</li><li><b>P1</b> <a href="https://www.seeedstudio.com/fusion_pcb.html">https://www.seeedstudio.com/fusion_pcb.html</a> &mdash; every cost field renders as &#x27;USD$0.00&#x27; until Gerbers are uploaded; no price in the page text (tried 2026-09-03)</li><li><b>P1</b> <a href="https://aisler.net/pricing">https://aisler.net/pricing</a> &mdash; HTTP 404 (tried 2026-09-03)</li><li><b>P1</b> <a href="https://aisler.net/en/products/boards">https://aisler.net/en/products/boards</a> &mdash; publishes only &#x27;Starting at just EUR 14.20&#x27; - no per-area rate, no quantity, no spec (tried 2026-09-03)</li><li><b>P1</b> <a href="https://aisler.net/help/general-information/pricing">https://aisler.net/help/general-information/pricing</a> &mdash; HTTP 301 to community.aisler.net (tried 2026-09-03)</li><li><b>P1</b> <a href="https://jlcpcb.com/quote">https://jlcpcb.com/quote</a> &mdash; the quote engine is JavaScript; no price is emitted in the fetched HTML (tried 2026-09-03)</li><li><b>P2</b> <a href="https://www.pcbway.com/orderonline.aspx">https://www.pcbway.com/orderonline.aspx</a> &mdash; instant-quote form is JavaScript; the fetched page text carries no price (tried 2026-09-03)</li><li><b>P2</b> <a href="https://www.seeedstudio.com/fusion_pcb.html">https://www.seeedstudio.com/fusion_pcb.html</a> &mdash; every cost field renders as &#x27;USD$0.00&#x27; until Gerbers are uploaded; no price in the page text (tried 2026-09-03)</li><li><b>P2</b> <a href="https://aisler.net/pricing">https://aisler.net/pricing</a> &mdash; HTTP 404 (tried 2026-09-03)</li><li><b>P2</b> <a href="https://aisler.net/en/products/boards">https://aisler.net/en/products/boards</a> &mdash; publishes only &#x27;Starting at just EUR 14.20&#x27; - no per-area rate, no quantity, no spec (tried 2026-09-03)</li><li><b>P2</b> <a href="https://aisler.net/help/general-information/pricing">https://aisler.net/help/general-information/pricing</a> &mdash; HTTP 301 to community.aisler.net (tried 2026-09-03)</li><li><b>P3</b> <a href="https://www.pcbway.com/orderonline.aspx">https://www.pcbway.com/orderonline.aspx</a> &mdash; instant-quote form is JavaScript; the fetched page text carries no price (tried 2026-09-03)</li><li><b>P3</b> <a href="https://www.seeedstudio.com/fusion_pcb.html">https://www.seeedstudio.com/fusion_pcb.html</a> &mdash; every cost field renders as &#x27;USD$0.00&#x27; until Gerbers are uploaded; no price in the page text (tried 2026-09-03)</li><li><b>P3</b> <a href="https://aisler.net/pricing">https://aisler.net/pricing</a> &mdash; HTTP 404 (tried 2026-09-03)</li><li><b>P3</b> <a href="https://aisler.net/en/products/boards">https://aisler.net/en/products/boards</a> &mdash; publishes only &#x27;Starting at just EUR 14.20&#x27; - no per-area rate, no quantity, no spec (tried 2026-09-03)</li><li><b>P3</b> <a href="https://aisler.net/help/general-information/pricing">https://aisler.net/help/general-information/pricing</a> &mdash; HTTP 301 to community.aisler.net (tried 2026-09-03)</li><li><b>P3</b> <a href="https://docs.oshpark.com/services/two-layer/">https://docs.oshpark.com/services/two-layer/</a> &mdash; read, and REFUSES this board: &#x27;Minimum board size 0.25in (6.35mm) by 0.25in (6.35mm)&#x27; against this board&#x27;s 4.6000 mm short axis - short by 1.7500 mm. The same minimum is published on docs.oshpark.com/services/two-layer-medium-run/ (both read 2026-09-03)</li>
 </ul>
 <p class="lab">What counts as a distributor</p>
-<p class="note">37 distinct distributors <b>gave a price</b>, counted as <b>registered
-domains</b>. They are entered in the data under 42 vendor name strings, because the
+<p class="note">35 distinct distributors <b>gave a price</b>, counted as <b>registered
+domains</b>. They are entered in the data under 40 vendor name strings, because the
 same shop is named differently where the packaging differs &mdash; DigiKey appears as <code>DigiKey</code>,
 <code>DigiKey (cut tape)</code> and <code>DigiKey (cut tape / Digi-Reel)</code>, and Neewer, ROBOTIS US,
 Pollen Robotics and UCTRONICS under two names each. Until 2026-09-03 this page counted the 41 names and
 called them 41 distributors. The priced domains, in full:</p>
-<p class="note"><code>adafruit.com, advancedpcb.com, allnetchina.cn, ameridroid.com, arace.tech, bearingsdirect.com, cnckitchen.store, digikey.com, evelta.com, generationrobots.com, gigaparts.com, lcsc.com, made-in-china.com, modelfixings.co.uk, neewer.com, nextbatteries.com, nzminiaturebearings.com, oshpark.com, pimoroni.com, pollen-robotics.com, pololu.com, prusa3d.com, reichelt.de, robotis.com, robotis.us, rst-versand.de, seeedstudio.com, shop3duniverse.com, sparkfun.com, theengineerstore.in, thepihut.com, thinkrobotics.com, tribotix.com, uctronics.com, vector3d.shop, vxb.com, welectron.com</code></p>
-<p class="note">A further 2 domain(s) were read and gave <b>no price for our
-part</b>, and are counted nowhere: <code>jlcpcb.com</code>, <code>pcbway.com</code>.
+<p class="note"><code>abra-electronics.com, adafruit.com, advancedpcb.com, allnetchina.cn, ameridroid.com, arace.tech, bearingsdirect.com, cnckitchen.store, digikey.com, evelta.com, generationrobots.com, gigaparts.com, lcsc.com, made-in-china.com, modelfixings.co.uk, neewer.com, nextbatteries.com, nzminiaturebearings.com, oshpark.com, pimoroni.com, pollen-robotics.com, prusa3d.com, robotis.com, robotis.us, rst-versand.de, shop3duniverse.com, sparkfun.com, theengineerstore.in, thepihut.com, thinkrobotics.com, tribotix.com, uctronics.com, vector3d.shop, vxb.com, welectron.com</code></p>
+<p class="note">A further 5 domain(s) were read and gave <b>no price for our
+part</b>, and are counted nowhere: <code>jlcpcb.com</code>, <code>pcbway.com</code>, <code>pololu.com</code>, <code>reichelt.de</code>, <code>seeedstudio.com</code>.
 The two-distributor bar counts priced domains only. It did not until 2026-09-03: the bar counted every
 domain read, and the price test beside it was an <code>any()</code> over the whole line, so one priced shop
 beside one price-less shop passed. The hole was measured by emptying <code>tiers</code> on one of B10's

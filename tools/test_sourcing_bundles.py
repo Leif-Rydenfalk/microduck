@@ -55,7 +55,7 @@ class BundleQuantities(unittest.TestCase):
         self.assertIn('1 / 10 / 100 packs', sourcing.rfq_line_table(supplier))
 
     def test_existing_guard(self):
-        self.assertEqual(sourcing.selfcheck(), 19)
+        self.assertEqual(sourcing.selfcheck(), 16)
 
 
 if __name__ == '__main__':
