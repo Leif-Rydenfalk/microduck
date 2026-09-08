@@ -276,6 +276,15 @@ HTML = f"""<!doctype html>
     4&ndash;6&nbsp;mm. A teardown photograph of a boss, or a caliper on one, settles it.
   </div>
   <div class="verdict warn">
+    <b>Original thread identity is CANNOT DETERMINE.</b> The 52 XL330 mounting runs
+    retain their nominal <code>threaded-m2</code> model, but a smooth 1.6 mm mesh pilot
+    does not establish ISO M2x0.4 or identify a ROBOTIS TAP screw. The other 12 printed-pilot
+    runs also lack an original hardware schedule. Positions and axes pass their geometry
+    check; table verdicts include the unresolved screw/thread identity. Modeled ISO part
+    identifiers are not confirmed purchase specifications.
+    See <a href="research/servo-thread-verification-2026-09-08/AUDIT.md">the thread audit</a>.
+  </div>
+  <div class="verdict warn">
     <b>Not one strength number exists.</b> Preload, tightening torque, the load at which an
     M2 screw strips the thread it formed in printed PLA, and how many re-insertions that thread
     survives are all <code>null</code>. They are one afternoon of coupon testing away and the

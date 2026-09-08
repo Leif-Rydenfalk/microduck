@@ -286,9 +286,9 @@ def fasteners():
                             ", ".join("%s x%s" % (k, v) for k, v in (cen.get("implied_by_size") or {}).items())),
          "breakdown_zh": "覆盖 %s 个带接口记录的零件" % cen.get("parts_with_interfaces"),
          "source": "out/fasteners/census.json (tools/fastener_census.py, reads ce-parts/*/current/cad/interfaces.json)",
-         "counts_what_en": ("features a part MEASURED off its own solid and recorded. It is lower "
-                            "than the community hole count because only %s of the 47 meshes have "
-                            "been rebuilt parametrically and can be measured at all."
+         "counts_what_en": ("features recorded by %s parts with interface records in this census. "
+                            "This part-folder count is not the same denominator as the 47 reference meshes; "
+                            "it does not establish complete joint or installed-hardware coverage."
                             % cen.get("parts_with_interfaces")),
          "counts_what_zh": "零件从自身实体上实测并记录的特征。低于社区孔数，因为仅部分零件已参数化重建、可供测量。",
          "may_a_buyer_order_against_it": "NO — it is a census of what we can measure, not of what the robot has"},
@@ -316,7 +316,7 @@ def fasteners():
                             "Pollen BOM."),
          "counts_what_zh": ("<b>采购件数</b>，包含孔数统计中没有的项：螺母、五种螺钉长度、M2.5 以及热熔螺母。"
                             "其依据字段自述为：由 47 个网格的孔位拟合推得，<b>并非</b> Pollen 的 BOM。"),
-         "may_a_buyer_order_against_it": "YES, as an upper bound with spares — it is the only piece count that exists"},
+         "may_a_buyer_order_against_it": "NO — provisional assortment; missing modeled sizes and unverified thread forms prevent a coverage claim"},
     ]
     order = [l for i, l in b18]
     return {
@@ -327,32 +327,36 @@ def fasteners():
         "why_they_differ_en": (
             "They count four different things: hole features (with counterbores double-counted), "
             "measurable interface features on the parts we have rebuilt, screws placed in the model "
-            "so far, and pieces on a buy list that also includes nuts and inserts. None of them is "
-            "wrong; quoting any one of them as 'the number of fasteners' is."),
+            "so far, and pieces on a buy list that also includes nuts and inserts. These different "
+            "units and incomplete coverage do not establish either a complete BOM or a procurement range."),
         "why_they_differ_zh": (
             "四者统计的对象不同：孔特征（沉孔被重复计数）、已重建零件上可测的接口特征、目前已装入模型的螺钉、"
-            "以及包含螺母与热熔螺母的采购件数。四者都不错，把其中任何一个当成“紧固件总数”才是错的。"),
+            "以及包含螺母与热熔螺母的采购件数。统计单位与覆盖范围不同，不能据此认定完整物料清单或采购数量区间。"),
         "what_a_buyer_orders_against_en": (
-            "Order against the buy list — B18a %s + B18b %s screws and nuts, B18c %s heat-set inserts "
-            "= %s pieces per robot — and treat it as an UPPER BOUND WITH SPARES, not a bill of "
-            "materials. Its basis is our own hole-fitting on Pollen's meshes, not a Pollen BOM, and "
-            "it has never been checked against a real unit."
+            "B18a %s + B18b %s screws and nuts, B18c %s inserts total %s provisional pieces. "
+            "Do not order this as a covering upper bound: the 2026-09-08 audit found no buy lines "
+            "for modeled M2x5, M2x10 and M2.5x8. Resolve these as quote questions, not automatic "
+            "purchases. ROBOTIS bundled PHS TAP screws are not established equivalents of ISO4762 "
+            "metric screws; actual thread forms and joint coverage remain unverified."
             % tuple([l.get("qty_per_robot") for l in order] + [sum((l.get("qty_per_robot") or 0) for l in order)])
-            if len(order) == 3 else "the buy list, as an upper bound"),
+            if len(order) == 3 else "No reconciled buy list is available."),
         "what_a_buyer_orders_against_zh": (
-            "按采购清单下单（B18a + B18b 螺钉与螺母、B18c 热熔螺母，合计每台 %s 件），并视其为<b>含余量的上限</b>，"
-            "而非正式物料清单。其依据是我方在 Pollen 网格上的孔位拟合，并非 Pollen 的 BOM，且从未与实物核对。"
+            "B18a、B18b、B18c 共计每台 %s 件，仅为暂定采购组合，不能视为覆盖全部需求的含余量上限。"
+            "2026-09-08 核对发现模型中的 M2x5、M2x10、M2.5x8 没有对应采购行，应先询价核实，不能直接追加采购。"
+            "ROBOTIS 随附 PHS TAP 螺钉不能自动抵扣 ISO4762 公制螺钉；实际牙型与连接覆盖尚未确认。"
             % sum((l.get("qty_per_robot") or 0) for l in order)),
+        "line_audit": "research/fastener-reconciliation-2026-09-08/reconciliation.json",
         "spread_at_1000_robots": {
             "low": min(c["n"] for c in counts if c["n"]) * 1000,
             "high": max(c["n"] for c in counts if c["n"]) * 1000,
-            "note": "the spread between the smallest and largest count, times 1000 robots — "
-                    "which is why the pack states all four instead of one",
+            "is_procurement_range": False,
+            "note": "Arithmetic spread of unlike counts multiplied by 1000; NOT a procurement range "
+                    "or evidence that the high number covers the actual required identities.",
         },
         "what_closes_it": (
-            "Two things, in this order. (1) Finish the per-hole schedule: every hole in the model "
-            "gets its screw, its length and its connection, so the placed count becomes a real "
-            "bill. That is agent work and it is IN FLIGHT (WF-FASTENERS). (2) Count the screws in "
+            "Two things, in this order. (1) Verify thread/head identity and finish the per-joint schedule: "
+            "each fastening joint gets supported hardware, length and connection, so the placed count becomes a real "
+            "bill. The source audit is in research/fastener-reconciliation-2026-09-08/; physical thread identity remains unresolved. (2) Count the screws in "
             "a real unit during the teardown (parcel M-2) and compare. Until (2), every count here "
             "is derived from Pollen's simulation meshes and none has been checked against hardware."),
     }
