@@ -131,7 +131,9 @@ def reparent_ankle_servos(M, P):
                 R1, t1 = M.zero[new]
                 M.tris[i] = ((W - t1) @ R1).reshape(-1, 3, 3)
                 M.body_of[i] = new
+                closed = M.closed[M.label[i]]
                 M.label[i] = "%s/xl330(reparented from %s)" % (new, old)
+                M.closed[M.label[i]] = closed          # the closed-mesh table is keyed by label
                 moved.append({"row": i, "from": old, "to": new, "label": M.label[i]})
                 P("reparented row %d xl330 %s -> %s (world pose unchanged)" % (i, old, new))
     assert len(moved) == 2, moved
@@ -196,6 +198,7 @@ def main():
     P("%d cross-body pairs of %d (%s)" % (len(cross), M.n * (M.n - 1) // 2,
                                            "fasteners included" if opts["screws"] else "structure rows only"))
     worst = {}          # (i,j) -> record
+    tested = {}         # (i,j) -> frames at which the pair's AABBs overlapped and it was tested
     per_frame = []
     tests = 0
 
@@ -240,11 +243,11 @@ def main():
         for (i, j) in cross:
             if not (np.all(hi[i] >= lo[j]) and np.all(hi[j] >= lo[i])):
                 continue
+            tested[(i, j)] = tested.get((i, j), 0) + 1
             dep = test(f, angles, W, i, j)
             if dep is None and (i, j) not in worst:
                 continue
             nint += 1
-            worst[(i, j)]["frames_tested"] += 1
             if dep is not None and dep > 0.3:
                 above += 1
         per_frame.append({"frame": int(f), "time_s": round(float(z["time"][f]), 3), "pass": 1,
@@ -265,9 +268,9 @@ def main():
             lo, hi = pf.boxes(W)
             above = 0
             for (i, j) in graded:
-                worst[(i, j)]["frames_tested"] += 1
                 if not (np.all(hi[i] >= lo[j]) and np.all(hi[j] >= lo[i])):
                     continue
+                tested[(i, j)] = tested.get((i, j), 0) + 1
                 dep = test(f, angles, W, i, j)
                 if dep is not None and dep > 0.3:
                     above += 1
@@ -276,6 +279,8 @@ def main():
             if f % 50 == 0:
                 P("  pass 2 frame %3d: %d graded pairs above 0.3 mm; %d tests, %.1f s" % (f, above, tests, time.time() - t0))
         per_frame.sort(key=lambda r: r["frame"])
+    for k, h in worst.items():
+        h["frames_tested"] = tested.get(k, 0)      # frames whose AABBs overlapped (pass 1 samples + pass 2)
     hits = sorted(worst.values(), key=lambda h: -(h["depth_mm"] if h["depth_mm"] is not None else -1))
     struct = [h for h in hits if h["class"] == "structure x structure"]
     for h in struct:
