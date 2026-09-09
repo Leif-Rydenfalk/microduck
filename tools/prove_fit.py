@@ -407,7 +407,15 @@ def main_sweep(M, step_deg=5.0, bisect_deg=0.5):
                                     c1 = mid
                                 else:
                                     c0 = mid
-                            first_hit[(a, b)] = {
+                            # keyed by pair AND side: the first version keyed
+                            # by pair alone, so the "-" pass silently overwrote
+                            # every "+" onset for a pair that hits both ways.
+                            # That reported the ankle bracket x shin servo on
+                            # the "-" side only for BOTH ankles and read as a
+                            # left/right asymmetry (out/fit/ankle-mirror.json,
+                            # 2026-09-09: the onset is +-0.3 deg, both sides,
+                            # symmetric to 4 decimals).
+                            first_hit[(a, b, side)] = {
                                 "a": M.label[a], "b": M.label[b],
                                 "class": pair_class(M, a, b),
                                 "side": side, "begins_deg": round(c1, 2),
