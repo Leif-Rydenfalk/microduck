@@ -6,16 +6,21 @@ Ming's feedback (via Leif, 2026-09-09): the STP files come one by one; he wants
 an export-all for 3D printing and options for SolidWorks, Fusion, other CAD and
 print software. This writes, from the issued review he already has:
 
-  Microduck - whole robot.3mf        all 70 placed pieces, one file (CAD + slicers)
-  Microduck - assembly.step          positioned solids for the parts with real CAD
-  Print all - PLA.3mf, - TPU.3mf     every printable part, quantities included
-  Print all - STL.zip                the same STLs, one zip, by material
-  CAD - STEP.zip                     verified single-part STEPs + servo reference
-  READ ME - open in your software.html / .txt   what to open in which program
+  STEP 1 - whole robot assembled, all 70 pieces.stp     what Ming asked for: one STP with every part
+  STEP 2 - all 30 printed parts side by side.stp        every printed part, one file, laid out flat
+  STEP 3 - real solid CAD parts only, assembled.stp     the 10 parts that have true CAD, positioned
+  STEP 4 - one file per printed part.zip                 30 single-part STPs + servo and HAT references
+  3MF 1 - whole robot assembled.3mf                      same robot for slicers and mesh-capable CAD
+  3MF 2 - print all PLA parts.3mf, 3MF 3 - ... TPU       every printable part with quantities
+  STL - all 30 printed parts.zip                         plain STLs by material
+  READ ME - which file for what.html / .txt              bilingual guide
 
-STEP is written only where a solid CAD source exists and matches the STL in the
-package (FreeCAD check). Vendor reference meshes stay meshes; no solid is
-fabricated from a mesh. Nothing here sends anything.
+Leif, 2026-09-09: "make different versions so he can grab whatever he needs
+with clear labeling". Real solid CAD is used where it exists and matches the
+STL (FreeCAD check); the manufacturer servo solid is placed with the proven
+frame; bearings are simplified rings; every other part is a faceted body made
+from the very mesh Ming has, and is labelled "(mesh body)". Nothing here sends
+anything.
 """
 import argparse, csv, hashlib, html, io, json, math, os, re, shutil, struct, subprocess, sys, tempfile, zipfile
 from pathlib import Path
@@ -44,6 +49,9 @@ REFERENCE_STEPS = {  # bought parts: manufacturer / board files, shipped as-is
 }
 COLORS = {'print': '#7fb3d5', 'bought': '#8d8d8d', 'tpu': '#f0b27a'}
 FOLDER = '00 Open in your own software'
+BEARINGS = {'bearing-22x16x4': (22, 16, 4), 'bearing-15x10x3': (15, 10, 3)}
+SERVO_STEP = 'ce-parts/xl330-m288-t/iterations/v0.0.1/geometry/robotis-xl-xc-330.stp'
+NAMES = {'step_all': 'STEP 1 - whole robot assembled, all 70 pieces.stp', 'step_flat': 'STEP 2 - all 30 printed parts side by side.stp', 'step_solids': 'STEP 3 - real solid CAD parts only, assembled.stp', 'step_zip': 'STEP 4 - one file per printed part.zip', 'mf_all': '3MF 1 - whole robot assembled.3mf', 'mf_PLA': '3MF 2 - print all PLA parts.3mf', 'mf_TPU': '3MF 3 - print all TPU parts.3mf', 'stl_zip': 'STL - all 30 printed parts.zip', 'readme': 'READ ME - which file for what'}
 
 
 def sha(p): return hashlib.sha256(Path(p).read_bytes()).hexdigest()
@@ -114,21 +122,20 @@ def build(review, out, project=ROOT):
     printable = [r for r in parts if r['slug'] in manifest]
     report = {'review': str(review), 'review_version': json.loads((review/'VERSION.json').read_text()), 'files': {}}
 
-    # 1. Whole robot: the published 70-piece mesh, placed, one object per piece.
-    robot = json.loads((review/'01 See the robot/Published assembly mesh.json').read_text())
+    # 1. Whole robot 3MF: the published 70-piece mesh, placed, one object per piece.
+    mesh_json = review/'01 See the robot/Published assembly mesh.json'
+    robot = json.loads(mesh_json.read_text())
     materials = [('Printed part (PLA)', COLORS['print']), ('Bought component', COLORS['bought']), ('Printed part (TPU)', COLORS['tpu'])]
-    objects, items, pieces = [], [], []
+    objects, items = [], []
     for i, p in enumerate(robot['parts'], 1):
         slug = p['name'].split('/')[1].split('#')[0]
         mi = 0 if slug in manifest and manifest[slug]['material'] == 'PLA' else 2 if slug in manifest else 1
         objects.append((i, p['name'], indexed_mesh_xml(p['positions'], p['indices']), mi)); items.append((i, None))
-        lo, hi = bounds([tuple(p['positions'][3*k:3*k+3]) for k in range(len(p['positions'])//3)])
-        pieces.append({'name': p['name'], 'bbox_min': list(lo), 'bbox_max': list(hi)})
-    f = dest/'Microduck - whole robot.3mf'
+    f = dest/NAMES['mf_all']
     report['files'][f.name] = write_3mf(f, objects, items, 'Microduck - whole robot, 70 placed pieces, review geometry', materials)
 
     # 2. Print-all 3MF per material and the STL zip, from the STLs already in the review.
-    stlzip = dest/'Print all - STL.zip'; rows = []
+    stlzip = dest/NAMES['stl_zip']; rows = []; printed = {}
     with zipfile.ZipFile(stlzip, 'w', zipfile.ZIP_DEFLATED) as z:
         for mat in ('PLA', 'TPU'):
             sel = [r for r in printable if manifest[r['slug']]['material'] == mat]
@@ -142,52 +149,51 @@ def build(review, out, project=ROOT):
                 rows.append({'number': r['number'], 'part': r['part'], 'slug': r['slug'], 'quantity': qty, 'material': mat, 'stl_in_zip': mat+'/'+name,
                              'bbox_mm': [round(hi[k]-lo[k], 1) for k in range(3)], 'orientation_note': manifest[r['slug']].get('orientation_rule', ''), 'source': r['source_kind']})
                 geo.append((r, tris, lo, hi, qty))
+                printed[r['slug']] = {'stl': str(src), 'label': '%02d %s' % (int(r['number']), r['part']), 'out_name': '%02d %s' % (int(r['number']), r['part']), 'stl_min': list(lo), 'stl_max': list(hi)}
             geo.sort(key=lambda g: -(g[3][0]-g[2][0])*(g[3][1]-g[2][1]))
-            cells = []
-            for r, tris, lo, hi, qty in geo:
-                for _ in range(qty): cells.append((hi[0]-lo[0], hi[1]-lo[1]))
+            cells = [(hi[0]-lo[0], hi[1]-lo[1]) for r, tris, lo, hi, qty in geo for _ in range(qty)]
             pos = grid_layout(cells); k = 0
             for oid, (r, tris, lo, hi, qty) in enumerate(geo, 1):
                 objs.append((oid, r['part'], mesh_xml(list(tri_verts(tris))), 0 if mat == 'PLA' else 2))
                 for c in range(qty):
                     x, y = pos[k]; k += 1
                     its.append((oid, [1, 0, 0, 0, 1, 0, 0, 0, 1, x-lo[0], y-lo[1], -lo[2]]))
-            f = dest/('Print all - %s.3mf' % mat)
+            f = dest/NAMES['mf_'+mat]
             report['files'][f.name] = write_3mf(f, objs, its, 'Microduck - all %s parts with quantities' % mat, materials)
     report['files'][stlzip.name] = {'bytes': stlzip.stat().st_size, 'files': len(rows)}
+    # side-by-side cells for STEP 2: one of each printed part, largest footprint first
+    order = sorted(printed, key=lambda s: -(printed[s]['stl_max'][0]-printed[s]['stl_min'][0])*(printed[s]['stl_max'][1]-printed[s]['stl_min'][1]))
+    for s, cell in zip(order, grid_layout([(printed[s]['stl_max'][0]-printed[s]['stl_min'][0], printed[s]['stl_max'][1]-printed[s]['stl_min'][1]) for s in order], width=320.0, gap=10.0)):
+        printed[s]['cell'] = list(cell)
 
-    # 3. STEP: verify each solid source against the review STL, then place the verified ones.
-    tmp = Path(tempfile.mkdtemp(prefix='bundles-')); step_dir = tmp/'step'; step_dir.mkdir()
-    cands = {}
-    for r in printable:
-        src = STEP_SOURCES.get(r['slug'])
-        if src and (project/src).is_file():
-            cands[r['slug']] = {'step': str(project/src), 'stl': str(review/r['stl']), 'out_name': '%02d %s.step' % (int(r['number']), r['part'])}
-    job = {'candidates': cands, 'scene': json.loads((project/'out/web/scene.json').read_text()), 'pieces': pieces,
-           'step_dir': str(step_dir), 'assembly_step': str(dest/'Microduck - assembly.step'), 'result': str(tmp/'result.json')}
+    # 3. STEP variants via FreeCAD.
+    tmp = Path(tempfile.mkdtemp(prefix='bundles-')); part_dir = tmp/'parts'; part_dir.mkdir()
+    cands = {slug: {'step': str(project/src)} for slug, src in STEP_SOURCES.items() if slug in printed and (project/src).is_file()}
+    job = {'candidates': cands, 'printed': printed, 'bearings': BEARINGS, 'servo_step': str(project/SERVO_STEP) if (project/SERVO_STEP).is_file() else None,
+           'scene': json.loads((project/'out/web/scene.json').read_text()), 'mesh_json': str(mesh_json), 'part_dir': str(part_dir),
+           'step_all': str(dest/NAMES['step_all']), 'step_flat': str(dest/NAMES['step_flat']), 'step_solids': str(dest/NAMES['step_solids']),
+           'result': str(tmp/'result.json'), 'log': str(out/'EXPORT LOG.txt')}
     (tmp/'job.json').write_text(json.dumps(job))
-    proc = subprocess.run([FREECADCMD, str(ROOT/'tools/export_assembly_step.py'), str(tmp/'job.json')], capture_output=True, text=True, timeout=1800)
+    proc = subprocess.run([FREECADCMD, str(ROOT/'tools/export_assembly_step.py'), str(tmp/'job.json')], capture_output=True, text=True, timeout=7200)
     if not (tmp/'result.json').is_file():
         raise RuntimeError('FreeCAD export failed:\n'+proc.stdout[-3000:]+proc.stderr[-3000:])
     fc = json.loads((tmp/'result.json').read_text())
-    stepzip = dest/'CAD - STEP.zip'; verified = []
+    stepzip = dest/NAMES['step_zip']
     with zipfile.ZipFile(stepzip, 'w', zipfile.ZIP_DEFLATED) as z:
         for slug, rec in fc['parts'].items():
-            if rec.get('verified'):
-                z.write(rec['written'], 'Printed parts (solid CAD)/'+Path(rec['written']).name); verified.append(slug)
+            z.write(rec['file'], 'Printed parts/'+Path(rec['file']).name)
         for name, src in REFERENCE_STEPS.items():
             if (project/src).is_file(): z.write(project/src, 'Bought parts (reference)/'+name)
-        z.writestr('WHICH PARTS HAVE STEP.txt', which_parts_text(rows, fc))
-    report['files'][stepzip.name] = {'bytes': stepzip.stat().st_size, 'verified_parts': verified}
-    report['step_verification'] = fc['parts']; report['assembly'] = fc['assembly']
-    if fc['assembly'] and fc['assembly'].get('file'):
-        report['files']['Microduck - assembly.step'] = {'bytes': fc['assembly']['bytes'], 'placed_pieces': len(fc['assembly']['placed']), 'readback_solids': fc['assembly']['readback_solids']}
-    for r in rows: r['step'] = 'yes' if r['slug'] in verified else 'no solid CAD source' if r['slug'] not in cands else 'CAD source did not match the STL; withheld'
+        z.writestr('WHICH PARTS ARE REAL CAD.txt', which_parts_text(rows, fc))
+    report['files'][stepzip.name] = {'bytes': stepzip.stat().st_size, 'files': len(fc['parts'])+len(REFERENCE_STEPS)+1}
+    for key in ('step_all', 'step_flat', 'step_solids'):
+        report['files'][NAMES[key]] = {k: v for k, v in fc['files'][key].items() if k != 'file'}
+    report['step_parts'] = fc['parts']; report['assembled_pieces'] = fc['pieces']; report['servo'] = fc.get('servo'); report['freecad_seconds'] = fc.get('seconds')
+    for r in rows: r['cad'] = fc['parts'][r['slug']]['kind']
     shutil.rmtree(tmp)
 
     # 4. Instructions and index.
     write_readme(dest, rows, report)
-    (dest/'PARTS - formats.csv').open('w', newline='', encoding='utf-8-sig')
     with (dest/'PARTS - formats.csv').open('w', newline='', encoding='utf-8-sig') as fh:
         w = csv.DictWriter(fh, fieldnames=list(rows[0])); w.writeheader(); w.writerows([{k: (json.dumps(v) if isinstance(v, list) else v) for k, v in r.items()} for r in rows])
     files = sorted(p for p in out.rglob('*') if p.is_file())
@@ -197,47 +203,61 @@ def build(review, out, project=ROOT):
 
 
 def which_parts_text(rows, fc):
-    lines = ['Which printed parts have a real STEP solid, and why not otherwise', '哪些打印件有真实STEP实体，没有的原因', '']
+    lines = ['Which printed parts are real solid CAD and which are faceted mesh bodies', '哪些打印件是真实实体 CAD，哪些是网格面体', '',
+             'A "mesh body" is the STL you already have, converted face by face so it opens in a STEP file. It measures correctly but has no editable features.',
+             '"网格面体" 是你已有的 STL 逐面转换而成，可在 STEP 中打开，尺寸正确，但没有可编辑特征。', '']
     for r in rows:
-        rec = fc['parts'].get(r['slug'])
-        state = 'STEP verified against the STL' if rec and rec.get('verified') else (rec.get('reason') if rec else 'vendor reference mesh only; no solid CAD source exists, so no STEP is fabricated from it')
-        lines.append('%02d %s (%s): %s' % (int(r['number']), r['part'], r['material'], state))
+        lines.append('%02d %s (%s): %s' % (int(r['number']), r['part'], r['material'], fc['parts'][r['slug']]['kind']))
     return '\n'.join(lines)+'\n'
 
 
 def write_readme(dest, rows, report):
-    n_step = sum(r['step'] == 'yes' for r in rows); n = len(rows)
-    asm = report.get('assembly') or {}
-    placed = len(asm.get('placed') or [])
-    soft = [
-        ('SolidWorks', 'Open “Microduck - assembly.step” (File › Open, type STEP) for the %d positioned solid parts. For the complete robot with every shell, open “Microduck - whole robot.3mf” (SolidWorks 2023 or newer imports 3MF as mesh bodies) or open the STL files from “Print all - STL.zip” with “Open as Solid Body / Graphics Body”. Single parts: “CAD - STEP.zip”.' % placed,
-         '打开 “Microduck - assembly.step”（文件 › 打开，STEP）查看 %d 个已定位实体零件。要看含外壳的整机，打开 “Microduck - whole robot.3mf”（SolidWorks 2023 以上可导入 3MF 网格体），或从 “Print all - STL.zip” 打开 STL（作为实体/图形体）。单个零件见 “CAD - STEP.zip”。' % placed),
-        ('Fusion 360', 'File › Upload “Microduck - assembly.step” for solids, or “Microduck - whole robot.3mf” for everything. Insert › Insert Mesh takes any STL. Mesh bodies can be converted (Mesh › Convert Mesh) if you want to edit a shell.',
-         '文件 › 上传 “Microduck - assembly.step”（实体）或 “Microduck - whole robot.3mf”（全部）。插入 › 插入网格可打开任意 STL；需要编辑外壳时用 网格 › 转换网格。'),
-        ('FreeCAD, Onshape, Inventor, Creo, NX, Rhino', 'STEP files open directly. The 3MF and STL files import as meshes.',
-         'STEP 可直接打开；3MF 与 STL 作为网格导入。'),
-        ('Bambu Studio, OrcaSlicer, PrusaSlicer, Cura', 'Open “Print all - PLA.3mf” and “Print all - TPU.3mf”: every printable part is already there with the right quantity. Use the slicer’s Arrange and Orient for your printer; the layout here is a flat grid, not a validated plate. Or drag STLs from “Print all - STL.zip”.',
-         '打开 “Print all - PLA.3mf” 和 “Print all - TPU.3mf”：所有打印件已按数量放好。请用切片软件的自动排列和自动朝向；此处只是平铺，不是验证过的打印盘。也可从 “Print all - STL.zip” 拖入 STL。'),
-        ('Just looking (Windows 3D Viewer, macOS Preview, phone)', 'Open “Microduck - whole robot.3mf” or the STL files.',
-         '直接打开 “Microduck - whole robot.3mf” 或 STL 文件即可。'),
+    n_solid = sum(r['cad'].startswith('solid') for r in rows); n = len(rows)
+    F = report['files']
+    def mb(name): return '%.0f MB' % (F[name]['bytes']/1e6) if F[name]['bytes'] >= 1e6 else '%.0f KB' % (F[name]['bytes']/1e3)
+    variants = [
+        (NAMES['step_all'], 'One STP with every part of the robot in its place: %d pieces. This is the "STP with all the parts". Real CAD where it exists, manufacturer servo solids, simplified bearing rings, and faceted mesh bodies for the rest (labelled "mesh body"). Large file: SolidWorks and Fusion take minutes to import it.' % F[NAMES['step_all']]['pieces'],
+         '一个 STP 包含整机全部 %d 个零件并已定位，即"包含所有零件的 STP"。有真实 CAD 的用真实 CAD，舵机用厂商实体，轴承用简化圆环，其余为网格面体（标注 "mesh body"）。文件较大，SolidWorks/Fusion 导入需几分钟。' % F[NAMES['step_all']]['pieces']),
+        (NAMES['step_flat'], 'One STP with each of the %d printed parts once, laid out side by side, not assembled. For checking parts one at a time without opening files one by one.' % n,
+         '一个 STP 包含 %d 个打印件各一个，平铺摆放，未装配。适合逐个检查零件而不必逐个打开文件。' % n),
+        (NAMES['step_solids'], 'Only the %d parts that exist as true solid CAD (%d pieces), assembled. Small and clean; editable features. No shells, no bought parts.' % (n_solid, F[NAMES['step_solids']]['pieces']),
+         '仅包含 %d 个有真实实体 CAD 的零件（%d 件），已装配。文件小而干净，可编辑。不含外壳和外购件。' % (n_solid, F[NAMES['step_solids']]['pieces'])),
+        (NAMES['step_zip'], 'Every printed part as its own STP (%d files), plus the manufacturer servo STEP and our HAT board. Mesh bodies are marked in the file name.' % n,
+         '每个打印件一个 STP（%d 个），另附厂商舵机 STEP 和我们的 HAT 板。网格面体在文件名中标明。' % n),
+        (NAMES['mf_all'], 'The same whole robot as a 3MF mesh. Opens in Bambu Studio, OrcaSlicer, PrusaSlicer, Cura, Windows 3D Viewer, Fusion 360 and SolidWorks 2023+. Fast to open.',
+         '同样的整机，3MF 网格格式。可在 Bambu Studio、OrcaSlicer、PrusaSlicer、Cura、Windows 3D 查看器、Fusion 360、SolidWorks 2023+ 中打开，打开速度快。'),
+        (NAMES['mf_PLA'], 'Every PLA part with its quantity already placed for a slicer. Use Arrange and Orient for your printer; this is a flat grid, not a validated plate.',
+         '全部 PLA 打印件按数量放好，供切片软件使用。请用自动排列和自动朝向；这只是平铺，不是验证过的打印盘。'),
+        (NAMES['mf_TPU'], 'Every TPU (soft) part, same idea.', '全部 TPU 软件零件，同上。'),
+        (NAMES['stl_zip'], 'Plain STL files, one zip, PLA and TPU folders, quantity in each file name.', '普通 STL 文件一个压缩包，分 PLA/TPU 文件夹，文件名含数量。'),
     ]
-    table = ''.join('<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>' % (html.escape('%02d' % int(r['number'])), html.escape(r['part']), r['quantity'], r['material'], html.escape(r['step']), html.escape(r['orientation_note'] or '')) for r in rows)
-    files = ''.join('<li><b>%s</b> — %s</li>' % (html.escape(k), html.escape(json.dumps(v))) for k, v in report['files'].items())
-    body = ('<h1>Open Microduck in your own software / 用你自己的软件打开</h1>'
-            '<p>Everything in one place: one file for the whole robot, one file per material for printing, one zip of every STL, one zip of every real STEP, and the positioned assembly as STEP. Units are millimetres. Review geometry, not manufacturing approval.</p>'
-            '<p>所有文件集中在此：整机一个文件、每种材料一个打印文件、全部 STL 一个压缩包、全部真实 STEP 一个压缩包，以及已定位的装配 STEP。单位毫米。仅供评审，不是生产批准。</p>'
-            '<h2>Which program / 用哪个软件</h2><table><tr><th>Software / 软件</th><th>What to open / 打开什么</th></tr>'
-            + ''.join('<tr><td>%s</td><td>%s<br><small>%s</small></td></tr>' % (html.escape(a), html.escape(b), html.escape(c)) for a, b, c in soft) + '</table>'
-            '<h2>Honest note about STEP / 关于 STEP 的说明</h2><p>%d of the %d printed parts exist as real solid CAD and are in the STEP files; the rest are vendor reference meshes with no solid source, so they are supplied as STL/3MF only. No solid was fabricated from a mesh. Bought parts (servos, bearings, boards) are simplified envelopes in the 3MF; the manufacturer servo STEP is in “CAD - STEP.zip”.</p>'
-            '<p>%d 个打印件中有 %d 个有真实实体 CAD，已提供 STEP；其余为供应商参考网格，没有实体来源，因此只提供 STL/3MF，未从网格伪造实体。外购件（舵机、轴承、板卡）在 3MF 中为简化外形；舵机厂商 STEP 在 “CAD - STEP.zip” 中。</p>'
-            '<h2>Parts / 零件</h2><table><tr><th>#</th><th>Part</th><th>Qty</th><th>Material</th><th>STEP</th><th>Print orientation note</th></tr>%s</table>'
-            '<h2>Files / 文件</h2><ul>%s</ul>') % (n_step, n, n, n_step, table, files)
+    soft = [
+        ('SolidWorks', 'File › Open, file type STEP. STP and STEP are the same format. Whole robot: STEP 1. Quick and clean: STEP 3. Individual parts: STEP 4. 3MF opens in SolidWorks 2023 or newer as mesh bodies.',
+         '文件 › 打开，类型 STEP。STP 与 STEP 是同一格式。整机：STEP 1；小而干净：STEP 3；单个零件：STEP 4。SolidWorks 2023 以上可打开 3MF 网格体。'),
+        ('Fusion 360', 'File › Upload any STP, or Insert › Insert Mesh for 3MF/STL. Mesh bodies can be converted with Mesh › Convert Mesh if you want to edit a shell.',
+         '文件 › 上传任意 STP，或 插入 › 插入网格 打开 3MF/STL。需要编辑外壳时用 网格 › 转换网格。'),
+        ('FreeCAD, Onshape, Inventor, Creo, NX, Rhino', 'STP files open directly; 3MF and STL import as meshes.', 'STP 直接打开；3MF 与 STL 作为网格导入。'),
+        ('Bambu Studio, OrcaSlicer, PrusaSlicer, Cura', 'Open 3MF 2 and 3MF 3 to print, or drag STLs from the STL zip.', '打开 3MF 2 和 3MF 3 进行打印，或从 STL 压缩包拖入。'),
+        ('Just looking (Windows 3D Viewer, macOS Preview, phone)', 'Open 3MF 1 or any STL.', '打开 3MF 1 或任意 STL。'),
+    ]
+    vt = ''.join('<tr><td><b>%s</b><br><small>%s</small></td><td>%s<br><small>%s</small></td></tr>' % (html.escape(f), mb(f), html.escape(a), html.escape(b)) for f, a, b in variants)
+    st = ''.join('<tr><td>%s</td><td>%s<br><small>%s</small></td></tr>' % (html.escape(a), html.escape(b), html.escape(c)) for a, b, c in soft)
+    pt = ''.join('<tr><td>%02d</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>' % (int(r['number']), html.escape(r['part']), r['quantity'], r['material'], html.escape(r['cad'])) for r in rows)
+    body = ('<h1>Microduck: which file for what / 哪个文件做什么</h1>'
+            '<p>Pick the one you need. All files describe the same geometry, in millimetres, from review v0003. Engineering review, not manufacturing approval.</p>'
+            '<p>按需选择。所有文件描述同一几何，单位毫米，来自评审包 v0003。仅供工程评审，不是生产批准。</p>'
+            '<h2>The files / 文件</h2><table><tr><th>File / 文件</th><th>What it is for / 用途</th></tr>'+vt+'</table>'
+            '<h2>By program / 按软件</h2><table><tr><th>Software / 软件</th><th>What to open / 打开什么</th></tr>'+st+'</table>'
+            '<h2>Real CAD or mesh body? / 真实 CAD 还是网格面体？</h2><p>%d of the %d printed parts exist as true solid CAD and are verified against the STL. The other %d are vendor reference meshes with no solid source; in the STP files they are faceted mesh bodies (correct dimensions, no editable features), labelled "mesh body". Bought parts: servos are the manufacturer solid placed with the proven frame, bearings are catalogue-size rings, boards and battery are envelopes.</p>'
+            '<p>%d 个打印件中 %d 个有真实实体 CAD 并已与 STL 校验；其余 %d 个为供应商参考网格，没有实体来源，在 STP 中为网格面体（尺寸正确，无可编辑特征），标注 "mesh body"。外购件：舵机为厂商实体并按验证过的坐标系放置，轴承为标准尺寸圆环，板卡和电池为外形包络。</p>'
+            '<h2>Parts / 零件</h2><table><tr><th>#</th><th>Part</th><th>Qty</th><th>Material</th><th>CAD kind</th></tr>'+pt+'</table>') % (n_solid, n, n-n_solid, n, n_solid, n-n_solid)
     css = 'body{font:16px/1.5 system-ui;max-width:1000px;margin:32px auto;padding:0 16px;color:#163447}table{border-collapse:collapse;width:100%}td,th{border-bottom:1px solid #d2e0e5;padding:8px;text-align:left;vertical-align:top}small{color:#506874}'
-    (dest/'READ ME - open in your software.html').write_text('<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Open Microduck in your software</title><style>'+css+'</style>'+body+'</html>')
-    txt = ['OPEN MICRODUCK IN YOUR OWN SOFTWARE / 用你自己的软件打开', '', 'Units: mm. Review geometry, not manufacturing approval.', '']
+    (dest/(NAMES['readme']+'.html')).write_text('<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Microduck: which file for what</title><style>'+css+'</style>'+body+'</html>')
+    txt = ['MICRODUCK: WHICH FILE FOR WHAT / 哪个文件做什么', '', 'Units mm. Review geometry, not manufacturing approval. STP and STEP are the same format.', '']
+    for f, a, b in variants: txt += [f+'  ('+mb(f)+')', '  '+a, '  '+b, '']
+    txt += ['BY PROGRAM / 按软件', '']
     for a, b, c in soft: txt += [a+':', '  '+b, '  '+c, '']
-    txt += ['STEP exists for %d of %d printed parts (see CAD - STEP.zip / WHICH PARTS HAVE STEP.txt).' % (n_step, n), '']
-    (dest/'READ ME - open in your software.txt').write_text('\n'.join(txt))
+    (dest/(NAMES['readme']+'.txt')).write_text('\n'.join(txt))
 
 
 if __name__ == '__main__':
