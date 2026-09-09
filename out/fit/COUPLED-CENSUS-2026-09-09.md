@@ -19,7 +19,8 @@ reported. Everything was measured on the current
 | sit/stand trajectory posed jointly | `ce-cad/bin/cad tools/fit_coupled.py sitstand every=4 servo=vendor` | `out/fit/coupled-sitstand-vendor.json`, `.log` | 0 (5920 s) |
 | walking trajectory posed jointly | `ce-cad/bin/cad tools/fit_coupled.py walk every=8 servo=vendor` | `out/fit/coupled-walk-vendor.json`, `.log` | 0 (6779 s) |
 | sit/stand with the ankle servos in the ankle bodies | `ce-cad/bin/cad tools/fit_coupled.py sitstand every=8 servo=vendor reparent=1` | `out/fit/coupled-sitstand-vendor-reparented.json` | 0 (4312 s; a first launch exited 1 on a relabel bug, fixed) |
-| walking, reparented; sit/stand and walking with Pollen's mesh | `… walk every=8 servo=vendor reparent=1`, `… sitstand/walk every=8 servo=pollen` | `coupled-walk-vendor-reparented.json`, `coupled-*-pollen.json` | queued 23:19 CST; appended when done |
+| walking, reparented | `… walk every=8 servo=vendor reparent=1` | `coupled-walk-vendor-reparented.json` | 0 (3663 s) |
+| sit/stand and walking with Pollen's mesh | `… sitstand/walk every=8 servo=pollen` | `coupled-*-pollen.json` | running at commit time (00:20 CST 2026-09-10) |
 | corrected single-joint sweep | `ce-cad/bin/cad tools/prove_fit.py sweep` then `tools/fit_sweep_depth.py` | `out/fit/sweep.json`, `sweep-depth.json` | 0 (4862 s), 0 (65 s) |
 
 Three verdicts throughout: a depth is a measured penetration (the deepest
@@ -231,11 +232,19 @@ reparented ankle servo at 0.05 mm in the same frames. The ankle bracket ×
 ankle servo rows of §2.2 (3.27 / 3.20 mm) are gone: with the servo in the
 body that holds it they cannot move relative to each other.
 
-The walking trajectory with the same reparenting
-(`coupled-walk-vendor-reparented.json`) and the two Pollen-mesh coupled runs
-are queued behind this one (chain in `out/fit/_coupled_chain5.sh`); their
-lines are appended below when they land. The walk cannot reach the
-knee-servo × ankle-servo pose (knee within −20..22°).
+**Walking with the same reparenting** — `coupled-walk-vendor-reparented.json`
+(every 8th frame, 51 samples; pass 2 on 5 pairs; 5952 tests; 3663 s; exit 0):
+shin × ankle servo 1.25 mm on both sides in every frame (the horn seat),
+yaw_roll bearing × speaker 0.78, bearing × bottom shell 0.11, the same
+fourteen contacts; nothing else. The knee-servo × ankle-servo pair cannot
+occur in the gait (knee within −20..22°) and does not. 0 CANNOT DETERMINE.
+
+The two Pollen-mesh coupled runs (`coupled-sitstand-pollen.json`,
+`coupled-walk-pollen.json`, started 00:20 CST 2026-09-10 by
+`out/fit/_coupled_chain5.sh`) were still running when this report was
+committed; they change only the servo geometry, for which §3.2 already gives
+the Pollen-vs-vendor onset table (Pollen reads 0.09 mm deeper at ±5°, 0.6 mm
+shallower at ±30°). Their JSONs land beside the others when done.
 
 ## 3 · The right-ankle "asymmetry": there is none, and what the finding actually is
 
