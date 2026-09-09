@@ -49,3 +49,13 @@ short human message (`LEIF-MESSAGE.txt`), lets Ming answer the list, and the fir
 
 Joey and Tade: one human line each (`LEIF-MESSAGE.txt`), no more robot content until there is
 something physical to show.
+
+## 2026-09-09 update (Leif in session)
+
+The Microduck is Leif's own design and build. Leif sent Ming the review
+package of it himself (latest issued version v0003). Ming downloaded it and gave feedback: the STP files come
+one by one, which is annoying; he wants an "export all" for 3D printing and
+options for the different CAD software (SolidWorks, Fusion, etc.) and print
+software so he can look at it in his own tools. Work item: `tools/export_bundles.py`
+and review v0004. Delivery record: `../../reviews/DELIVERY-LOG.md`. Cross-project
+state: `~/dev/ecosystem/SITUATION.md`. Freeze unchanged: Leif sends, agents prepare.
