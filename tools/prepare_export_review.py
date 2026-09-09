@@ -23,8 +23,8 @@ def main(built, version, previous, out):
     r = json.loads((built/'EXPORT REPORT.json').read_text()); F = r['files']
     def mb(n): return '%.0f MB' % (F[n]['bytes']/1e6)
     cad = [('00 Open in your own software/READ ME - which file for what.html', 'Which file for what / 哪个文件做什么'),
-           ('00 Open in your own software/STEP 1 - whole robot assembled, all 70 pieces.stp', 'One STP with every part in place (%s) / 包含所有零件的 STP' % mb('STEP 1 - whole robot assembled, all 70 pieces.stp')),
-           ('00 Open in your own software/STEP 2 - all 30 printed parts side by side.stp', 'All 30 printed parts side by side (%s) / 30 个打印件平铺' % mb('STEP 2 - all 30 printed parts side by side.stp')),
+           ('00 Open in your own software/STEP 1 - whole robot assembled, all 70 pieces.stp.zip', 'One STP with every part in place, zipped, unzip first (%s) / 包含所有零件的 STP，先解压' % mb('STEP 1 - whole robot assembled, all 70 pieces.stp.zip')),
+           ('00 Open in your own software/STEP 2 - all 30 printed parts side by side.stp.zip', 'All 30 printed parts side by side, zipped, unzip first (%s) / 30 个打印件平铺，先解压' % mb('STEP 2 - all 30 printed parts side by side.stp.zip')),
            ('00 Open in your own software/STEP 3 - real solid CAD parts only, assembled.stp', 'Real solid CAD parts only (%s) / 仅真实实体 CAD' % mb('STEP 3 - real solid CAD parts only, assembled.stp')),
            ('00 Open in your own software/STEP 4 - one file per printed part.zip', 'One STP per printed part (%s) / 每件一个 STP' % mb('STEP 4 - one file per printed part.zip')),
            ('00 Open in your own software/3MF 1 - whole robot assembled.3mf', 'Whole robot as 3MF, fast to open / 整机 3MF'),

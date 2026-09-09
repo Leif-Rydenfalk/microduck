@@ -51,7 +51,7 @@ COLORS = {'print': '#7fb3d5', 'bought': '#8d8d8d', 'tpu': '#f0b27a'}
 FOLDER = '00 Open in your own software'
 BEARINGS = {'bearing-22x16x4': (22, 16, 4), 'bearing-15x10x3': (15, 10, 3)}
 SERVO_STEP = 'ce-parts/xl330-m288-t/iterations/v0.0.1/geometry/robotis-xl-xc-330.stp'
-NAMES = {'step_all': 'STEP 1 - whole robot assembled, all 70 pieces.stp', 'step_flat': 'STEP 2 - all 30 printed parts side by side.stp', 'step_solids': 'STEP 3 - real solid CAD parts only, assembled.stp', 'step_zip': 'STEP 4 - one file per printed part.zip', 'mf_all': '3MF 1 - whole robot assembled.3mf', 'mf_PLA': '3MF 2 - print all PLA parts.3mf', 'mf_TPU': '3MF 3 - print all TPU parts.3mf', 'stl_zip': 'STL - all 30 printed parts.zip', 'readme': 'READ ME - which file for what'}
+NAMES = {'step_all': 'STEP 1 - whole robot assembled, all 70 pieces.stp.zip', 'step_flat': 'STEP 2 - all 30 printed parts side by side.stp.zip', 'step_solids': 'STEP 3 - real solid CAD parts only, assembled.stp', 'step_zip': 'STEP 4 - one file per printed part.zip', 'mf_all': '3MF 1 - whole robot assembled.3mf', 'mf_PLA': '3MF 2 - print all PLA parts.3mf', 'mf_TPU': '3MF 3 - print all TPU parts.3mf', 'stl_zip': 'STL - all 30 printed parts.zip', 'readme': 'READ ME - which file for what'}
 
 
 def sha(p): return hashlib.sha256(Path(p).read_bytes()).hexdigest()
@@ -171,7 +171,7 @@ def build(review, out, project=ROOT):
     cands = {slug: {'step': str(project/src)} for slug, src in STEP_SOURCES.items() if slug in printed and (project/src).is_file()}
     job = {'candidates': cands, 'printed': printed, 'bearings': BEARINGS, 'servo_step': str(project/SERVO_STEP) if (project/SERVO_STEP).is_file() else None,
            'scene': json.loads((project/'out/web/scene.json').read_text()), 'mesh_json': str(mesh_json), 'part_dir': str(part_dir),
-           'step_all': str(dest/NAMES['step_all']), 'step_flat': str(dest/NAMES['step_flat']), 'step_solids': str(dest/NAMES['step_solids']),
+           'step_all': str(tmp/NAMES['step_all'][:-4]), 'step_flat': str(tmp/NAMES['step_flat'][:-4]), 'step_solids': str(dest/NAMES['step_solids']),
            'result': str(tmp/'result.json'), 'log': str(out/'EXPORT LOG.txt')}
     (tmp/'job.json').write_text(json.dumps(job))
     proc = subprocess.run([FREECADCMD, str(ROOT/'tools/export_assembly_step.py'), str(tmp/'job.json')], capture_output=True, text=True, timeout=7200)
@@ -188,6 +188,11 @@ def build(review, out, project=ROOT):
     report['files'][stepzip.name] = {'bytes': stepzip.stat().st_size, 'files': len(fc['parts'])+len(REFERENCE_STEPS)+1}
     for key in ('step_all', 'step_flat', 'step_solids'):
         report['files'][NAMES[key]] = {k: v for k, v in fc['files'][key].items() if k != 'file'}
+    # The two big STEPs travel zipped: a repo hook caps files at 95 MB and STEP text compresses about 4x.
+    for key in ('step_all', 'step_flat'):
+        raw = Path(fc['files'][key]['file']); z = dest/NAMES[key]
+        with zipfile.ZipFile(z, 'w', zipfile.ZIP_DEFLATED, compresslevel=9) as zf: zf.write(raw, raw.name)
+        report['files'][NAMES[key]].update(stp_bytes=raw.stat().st_size, bytes=z.stat().st_size, zipped='unzip first')
     report['step_parts'] = fc['parts']; report['assembled_pieces'] = fc['pieces']; report['servo'] = fc.get('servo'); report['freecad_seconds'] = fc.get('seconds')
     for r in rows: r['cad'] = fc['parts'][r['slug']]['kind']
     shutil.rmtree(tmp)
@@ -216,10 +221,10 @@ def write_readme(dest, rows, report):
     F = report['files']
     def mb(name): return '%.0f MB' % (F[name]['bytes']/1e6) if F[name]['bytes'] >= 1e6 else '%.0f KB' % (F[name]['bytes']/1e3)
     variants = [
-        (NAMES['step_all'], 'One STP with every part of the robot in its place: %d pieces. This is the "STP with all the parts". Real CAD where it exists, manufacturer servo solids, simplified bearing rings, and faceted mesh bodies for the rest (labelled "mesh body"). Large file: SolidWorks and Fusion take minutes to import it.' % F[NAMES['step_all']]['pieces'],
-         '一个 STP 包含整机全部 %d 个零件并已定位，即"包含所有零件的 STP"。有真实 CAD 的用真实 CAD，舵机用厂商实体，轴承用简化圆环，其余为网格面体（标注 "mesh body"）。文件较大，SolidWorks/Fusion 导入需几分钟。' % F[NAMES['step_all']]['pieces']),
-        (NAMES['step_flat'], 'One STP with each of the %d printed parts once, laid out side by side, not assembled. For checking parts one at a time without opening files one by one.' % n,
-         '一个 STP 包含 %d 个打印件各一个，平铺摆放，未装配。适合逐个检查零件而不必逐个打开文件。' % n),
+        (NAMES['step_all'], 'One STP with every part of the robot in its place: %d pieces. This is the "STP with all the parts". Real CAD where it exists, manufacturer servo solids, simplified bearing rings, and faceted mesh bodies for the rest (labelled "mesh body"). ZIPPED because of size: unzip first, the .stp inside is %.0f MB. SolidWorks and Fusion take minutes to import it.' % (F[NAMES['step_all']]['pieces'], F[NAMES['step_all']]['stp_bytes']/1e6),
+         '一个 STP 包含整机全部 %d 个零件并已定位，即"包含所有零件的 STP"。有真实 CAD 的用真实 CAD，舵机用厂商实体，轴承用简化圆环，其余为网格面体（标注 "mesh body"）。因体积大已压缩：先解压，里面的 .stp 为 %.0f MB。SolidWorks/Fusion 导入需几分钟。' % (F[NAMES['step_all']]['pieces'], F[NAMES['step_all']]['stp_bytes']/1e6)),
+        (NAMES['step_flat'], 'One STP with each of the %d printed parts once, laid out side by side, not assembled. For checking parts one at a time without opening files one by one. ZIPPED: unzip first (%.0f MB inside).' % (n, F[NAMES['step_flat']]['stp_bytes']/1e6),
+         '一个 STP 包含 %d 个打印件各一个，平铺摆放，未装配。适合逐个检查零件而不必逐个打开文件。已压缩：先解压（内含 %.0f MB）。' % (n, F[NAMES['step_flat']]['stp_bytes']/1e6)),
         (NAMES['step_solids'], 'Only the %d parts that exist as true solid CAD (%d pieces), assembled. Small and clean; editable features. No shells, no bought parts.' % (n_solid, F[NAMES['step_solids']]['pieces']),
          '仅包含 %d 个有真实实体 CAD 的零件（%d 件），已装配。文件小而干净，可编辑。不含外壳和外购件。' % (n_solid, F[NAMES['step_solids']]['pieces'])),
         (NAMES['step_zip'], 'Every printed part as its own STP (%d files), plus the manufacturer servo STEP and our HAT board. Mesh bodies are marked in the file name.' % n,
