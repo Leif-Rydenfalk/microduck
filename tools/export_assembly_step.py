@@ -121,7 +121,7 @@ servo = None
 if job.get('servo_step'):
     vs = Part.read(job['servo_step']); servo = Part.makeCompound(vs.Solids)
     # local(X,Y,Z) = (vendorZ + 8, vendorX, vendorY): bake the proven frame into the geometry once
-    servo.transformShape(FreeCAD.Matrix(0, 0, 1, 8.0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1))
+    servo = servo.transformGeometry(FreeCAD.Matrix(0, 0, 1, 8.0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1))  # bake: transformShape only sets Location, which Placement= would overwrite
     bb = tight(servo); result['servo'] = {'solids': len(vs.Solids), 'open_shells_dropped': len(vs.Shells)-sum(len(s.Shells) for s in vs.Solids), 'local_bbox': box6(bb)}
     log('SERVO', result['servo'])
 
