@@ -46,6 +46,7 @@ def main():
                      "beak. 15x XL330 servos, ~38 distinct parts, 70 "
                      "placements. Placed from the MJCF zero-pose transforms."),
         tags=["assembly", "microduck", "robot", "pollen"],
+        versioned=True,        # retain the previous reviewable catalog snapshot
         components=True,        # publish every unique part as its own card too
     )
     print("PUBLISHED assembly id:", entry.get("id"))
